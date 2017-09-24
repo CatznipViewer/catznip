@@ -3964,6 +3964,7 @@ Please check http://status.secondlifegrid.net to see if there is a known problem
   <string name="DeleteItems">Delete selected items?</string>
   <string name="DeleteItem">Delete selected item?</string>
 
+  <string name="EmptyCategoryText">There are no items in this folder</string>
   <string name="EmptyOutfitText">There are no items in this outfit</string>
   <string name="SaveOutfit">Save</string>
   <string name="SaveOutfitAs">Save As...</string>

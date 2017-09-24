@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ layout="topleft"
+ visible="false"
+ name="QuickPrefs Wearing Sort Menu">
+    <menu_item_check
+     label="Sort by Complexity"
+     layout="topleft"
+     name="sort_complexity">
+        <on_click
+         function="Inventory.Sort"
+         parameter="complexity" />
+        <on_check
+         function="Inventory.CheckSort"
+         parameter="complexity" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Appearance"
+     layout="topleft"
+     name="sort_appearance">
+        <on_click
+         function="Inventory.Sort"
+         parameter="appearance" />
+        <on_check
+         function="Inventory.CheckSort"
+         parameter="appearance" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Name"
+     layout="topleft"
+     name="sort_name">
+        <on_click
+         function="Inventory.Sort"
+         parameter="name" />
+        <on_check
+         function="Inventory.CheckSort"
+         parameter="name" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Most Recent"
+     layout="topleft"
+     name="sort_recent">
+        <on_click
+         function="Inventory.Sort"
+         parameter="date" />
+        <on_check
+         function="Inventory.CheckSort"
+         parameter="date" />         
+    </menu_item_check>
+</toggleable_menu>

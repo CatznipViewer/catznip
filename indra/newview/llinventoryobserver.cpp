@@ -640,13 +640,25 @@ void LLInventoryCategoriesObserver::changed(U32 mask)
 		// computed, or (b) a name has changed.
 		if (!cat_data.mIsNameHashInitialized || (mask & LLInventoryObserver::LABEL))
 		{
-			LLMD5 item_name_hash = gInventory.hashDirectDescendentNames(cat_id);
-			if (cat_data.mItemNameHash != item_name_hash)
+// [SL:KB] - Patch: Inventory-Observer | Checked: Catznip-5.2
+			if (mCompareNameHash)
 			{
-				cat_data.mIsNameHashInitialized = true;
-				cat_data.mItemNameHash = item_name_hash;
+// [/SL:KB]
+				LLMD5 item_name_hash = gInventory.hashDirectDescendentNames(cat_id);
+				if (cat_data.mItemNameHash != item_name_hash)
+				{
+					cat_data.mIsNameHashInitialized = true;
+					cat_data.mItemNameHash = item_name_hash;
+					cat_changed = true;
+				}
+// [SL:KB] - Patch: Inventory-Observer | Checked: Catznip-5.2
+			}
+			else
+			{
+				// The "(worn)" suffix piggybacks on the label change so this is a low-cost way of still firing the callback
 				cat_changed = true;
 			}
+// [/SL:KB]
 		}
 
 		// If anything has changed above, fire the callback.
