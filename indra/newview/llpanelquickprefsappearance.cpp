@@ -341,6 +341,9 @@ static LLPanelInjector<LLQuickPrefsWearingPanel> t_quickprefs_wearing("quickpref
 LLQuickPrefsWearingPanel::LLQuickPrefsWearingPanel()
 	: LLQuickPrefsPanel()
 {
+	mCommitCallbackRegistrar.add("Inventory.Sort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderChanged, this, _2));
+	mEnableCallbackRegistrar.add("Inventory.CheckSort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderCheck, this, _2));
+
 	m_pCofObserver = new LLInventoryCategoriesObserver();
 }
 
@@ -359,9 +362,41 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 		m_idCOF = gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
 
 	m_pWornItemsList = getChild<LLWornItemsList>("cof_items_list");
-	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
+	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("QuickPrefsWearingSort"));
 
 	return LLQuickPrefsPanel::postBuild();
+}
+
+void LLQuickPrefsWearingPanel::onSortOrderChanged(const LLSD& sdParam)
+{
+	LLWearableItemsList::ESortOrder eSortOrder = LLWearableItemsList::E_SORT_BY_APPEARANCE;
+
+	const std::string strParam = sdParam.asString();
+	if ("complexity" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_COMPLEXITY;
+	else if ("appearance" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_APPEARANCE;
+	else if ("name" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_NAME;
+	else if ("date" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_MOST_RECENT;
+
+	m_pWornItemsList->setSortOrder(eSortOrder);
+	gSavedSettings.setU32("QuickPrefsWearingSort", (int)eSortOrder);
+}
+
+bool LLQuickPrefsWearingPanel::onSortOrderCheck(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("complexity" == strParam)
+		return LLWearableItemsList::E_SORT_BY_COMPLEXITY == m_pWornItemsList->getSortOrder();
+	else if ("appearance" == strParam)
+		return LLWearableItemsList::E_SORT_BY_APPEARANCE == m_pWornItemsList->getSortOrder();
+	else if ("name" == strParam)
+		return LLWearableItemsList::E_SORT_BY_NAME == m_pWornItemsList->getSortOrder();
+	else if ("date" == strParam)
+		return LLWearableItemsList::E_SORT_BY_MOST_RECENT == m_pWornItemsList->getSortOrder();
+	return false;
 }
 
 // virtual

@@ -140,6 +140,8 @@ public:
 	 */
 public:
 	BOOL postBuild() override;
+	void onSortOrderChanged(const LLSD& sdParam);
+	bool onSortOrderCheck(const LLSD& sdParam);
 	void onVisibilityChange(BOOL fVisible) override;
 
 	/*

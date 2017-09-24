@@ -8159,6 +8159,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>QuickPrefsWearingSort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent; appearance: 10; complexity: 11)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
     <key>QuietSnapshotsToDisk</key>
     <map>
       <key>Comment</key>

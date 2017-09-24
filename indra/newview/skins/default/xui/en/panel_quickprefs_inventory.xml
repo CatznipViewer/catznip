@@ -17,7 +17,7 @@
 	 layout="topleft"
 	 left="1"
 	 menu_filename="menu_category_list_sort.xml"
-	 menu_position="topleft"
+	 menu_position="bottomleft"
 	 name="options_sort_btn"
 	 tool_tip="Show sorting options"
 	 top="0"
