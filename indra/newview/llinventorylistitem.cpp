@@ -39,6 +39,9 @@
 // newview
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: Catznip-5.2
+#include "llviewerfoldertype.h"
+// [/SL:KB]
 #include "llviewerinventory.h"
 
 static LLWidgetNameRegistry::StaticRegistrar sRegisterPanelInventoryListItemBaseParams(&typeid(LLPanelInventoryListItemBase::Params), "inventory_list_item");
@@ -163,8 +166,11 @@ BOOL LLPanelInventoryListItemBase::postBuild()
 	LLViewerInventoryItem* inv_item = getItem();
 	if (inv_item)
 	{
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
-		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: Catznip-2.6
+		if (LLAssetType::AT_CATEGORY != inv_item->getType())
+			mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+		else
+			mIconImage = LLUI::getUIImage(LLViewerFolderType::lookupIconName(inv_item->getLinkedCategory()->getPreferredType(), true));
 // [/SL:KB]
 //		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags(), FALSE);
 		updateItem(inv_item->getName());
