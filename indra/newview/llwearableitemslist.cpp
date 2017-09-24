@@ -1102,6 +1102,13 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 	bool can_remove_folder = false;
 // [/SL:KB]
 
+// [RLVa:KB] - Checked: RLVa-1.2.1
+	// We'll enable a menu option if at least one item in the selection is wearable/removable
+	bool rlvCanWearReplace = !RlvActions::isRlvEnabled();
+	bool rlvCanWearAdd = !RlvActions::isRlvEnabled();
+	bool rlvCanRemove = !RlvActions::isRlvEnabled();
+// [/RLVa:KB]
+
 	for (uuid_vec_t::const_iterator it = ids.begin(); it != ids.end(); ++it)
 	{
 		LLUUID id = *it;
@@ -1143,6 +1150,11 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 		{
 			++n_already_worn;
 		}
+
+		if (can_be_worn)
+		{
+			can_be_worn = get_can_item_be_worn(item->getLinkedUUID());
+		}
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
 		if (!can_remove_folder)
 		{
@@ -1150,10 +1162,28 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 		}
 // [/SL:KB]
 
-		if (can_be_worn)
+// [RLVa:KB] - Checked: RLVa-1.2.1
+		if (RlvActions::isRlvEnabled())
 		{
-			can_be_worn = get_can_item_be_worn(item->getLinkedUUID());
+			ERlvWearMask eWearMask = RLV_WEAR_LOCKED;
+			switch (item->getType())
+			{
+				case LLAssetType::AT_BODYPART:
+				case LLAssetType::AT_CLOTHING:
+					eWearMask = gRlvWearableLocks.canWear(item);
+					rlvCanRemove |= (is_worn) ? gRlvWearableLocks.canRemove(item) : false;
+					break;
+				case LLAssetType::AT_OBJECT:
+					eWearMask = gRlvAttachmentLocks.canAttach(item);
+					rlvCanRemove |= (is_worn) ? gRlvAttachmentLocks.canDetach(item) : false;
+					break;
+				default:
+					break;
+			}
+			rlvCanWearReplace |= ((eWearMask & RLV_WEAR_REPLACE) == RLV_WEAR_REPLACE);
+			rlvCanWearAdd |= ((eWearMask & RLV_WEAR_ADD) == RLV_WEAR_ADD);
 		}
+// [/RLVa:KB]
 	} // for
 
 	bool standalone = mParent ? mParent->isStandalone() : false;
@@ -1162,12 +1192,17 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 	// *TODO: eliminate multiple traversals over the menu items
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
 	setMenuItemVisible(menu, "wear_wear", 			mask & (MASK_BODYPART | MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
-	setMenuItemEnabled(menu, "wear_wear", 			true);
+//	setMenuItemEnabled(menu, "wear_wear", 			true);
 	setMenuItemVisible(menu, "wear_add",			mask & (MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
-	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
+//	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
 	setMenuItemVisible(menu, "wear_replace",		mask & (MASK_BODYPART | MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
-	setMenuItemEnabled(menu, "wear_replace",		true);
+//	setMenuItemEnabled(menu, "wear_replace",		true);
 // [/SL:KB]
+// [RLVa:KB] - Checked: RLVa-1.2.1
+	setMenuItemEnabled(menu, "wear_wear", 			rlvCanWearReplace);
+	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids) && rlvCanWearAdd);
+	setMenuItemEnabled(menu, "wear_replace",		rlvCanWearReplace);
+// [/RLVa:KB]
 //	setMenuItemVisible(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0 && can_be_worn);
 //	setMenuItemEnabled(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0);
 //	setMenuItemVisible(menu, "wear_add",			wear_add_visible);
@@ -1184,11 +1219,16 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 	bool showTakeOff = (mask & MASK_CLOTHING) && (n_worn == n_items);
 	bool showDetach  = (mask & MASK_ATTACHMENT) && (n_worn == n_items);
 	setMenuItemVisible(menu, "take_off",			showTakeOff && !showDetach);
-	setMenuItemEnabled(menu, "take_off",			true);
+//	setMenuItemEnabled(menu, "take_off",			true);
 	setMenuItemVisible(menu, "detach",				!showTakeOff && showDetach);
-	setMenuItemEnabled(menu, "detach",				true);
+//	setMenuItemEnabled(menu, "detach",				true);
 	setMenuItemVisible(menu, "take_off_or_detach",	showTakeOff && showDetach);
-	setMenuItemEnabled(menu, "take_off_or_detach",	true);
+//	setMenuItemEnabled(menu, "take_off_or_detach",	true);
+// [RLVa:KB] - Checked: RLVa-1.2.1
+	setMenuItemEnabled(menu, "take_off",			rlvCanRemove);
+	setMenuItemEnabled(menu, "detach",				rlvCanRemove);
+	setMenuItemEnabled(menu, "take_off_or_detach",	rlvCanRemove);
+// [/RLVa:KB]
 
 	setMenuItemVisible(menu, "take_off_folder",		showTakeOff);
 	setMenuItemEnabled(menu, "take_off_folder",		can_remove_folder);
