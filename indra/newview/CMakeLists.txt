@@ -134,6 +134,7 @@ set(viewer_SOURCE_FILES
     llbrowsernotification.cpp
     llbuycurrencyhtml.cpp
     llcallingcard.cpp
+    llcategoryitemslist.cpp
     llchannelmanager.cpp
     llchatbar.cpp
     llchathistory.cpp
@@ -757,6 +758,7 @@ set(viewer_HEADER_FILES
     llbreadcrumbview.h
     llbuycurrencyhtml.h
     llcallingcard.h
+    llcategoryitemslist.h
     llcapabilityprovider.h
     llchannelmanager.h
     llchatbar.h

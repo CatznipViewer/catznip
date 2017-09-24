@@ -994,11 +994,11 @@ void LLWearableItemsList::setSortOrder(ESortOrder sort_order, bool sort_now)
 //////////////////////////////////////////////////////////////////////////
 
 LLWearableItemsList::ContextMenu::ContextMenu()
-:	mParent(NULL)
+//:	mParent(NULL)
 {
 }
 
-void LLWearableItemsList::ContextMenu::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
+void LLWearableItemsList::ContextMenuBase::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
 {
 	mParent = dynamic_cast<LLWearableItemsList*>(spawning_view);
 	LLListContextMenu::show(spawning_view, uuids, x, y);
@@ -1006,7 +1006,7 @@ void LLWearableItemsList::ContextMenu::show(LLView* spawning_view, const uuid_ve
 }
 
 // virtual
-LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
+LLContextMenu* LLWearableItemsList::ContextMenuBase::createMenu()
 {
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	const uuid_vec_t& ids = mUUIDs;		// selected items IDs
@@ -1020,6 +1020,10 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id));
 	registrar.add("Wearable.TakeOffDetach", 
 				  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), ids));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+	functor_t take_off_folder = boost::bind(&LLAppearanceMgr::removeFolderFromAvatar, LLAppearanceMgr::getInstance(), _1);
+	registrar.add("Wearing.TakeOffFolder", boost::bind(&handlePerFolder, take_off_folder, mUUIDs));
+// [/SL:KB]
 
 	// Register handlers for clothing.
 	registrar.add("Clothing.TakeOff", 
@@ -1034,7 +1038,10 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Object.Attach", boost::bind(LLViewerAttachMenu::attachObjects, ids, _2));
 
 	// Create the menu.
-	LLContextMenu* menu = createFromFile("menu_wearable_list_item.xml");
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	LLContextMenu* menu = createFromFile(getMenuName());
+// [/SL:KB]
+//	LLContextMenu* menu = createFromFile("menu_wearable_list_item.xml");
 
 	// Determine which items should be visible/enabled.
 	updateItemsVisibility(menu);
@@ -1044,7 +1051,7 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	return menu;
 }
 
-void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu)
+void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* menu)
 {
 	if (!menu)
 	{
@@ -1160,7 +1167,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	}
 }
 
-void LLWearableItemsList::ContextMenu::updateItemsLabels(LLContextMenu* menu)
+void LLWearableItemsList::ContextMenuBase::updateItemsLabels(LLContextMenu* menu)
 {
 	llassert(menu);
 	if (!menu) return;
@@ -1180,19 +1187,19 @@ void LLWearableItemsList::ContextMenu::updateItemsLabels(LLContextMenu* menu)
 // Otherwise code relying on a BOOL value being TRUE may fail
 // (I experienced a weird assert in LLView::drawChildren() because of that.
 // static
-void LLWearableItemsList::ContextMenu::setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val)
+void LLWearableItemsList::ContextMenuBase::setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val)
 {
 	menu->setItemVisible(name, val);
 }
 
 // static
-void LLWearableItemsList::ContextMenu::setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val)
+void LLWearableItemsList::ContextMenuBase::setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val)
 {
 	menu->setItemEnabled(name, val);
 }
 
 // static
-void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType at)
+void LLWearableItemsList::ContextMenuBase::updateMask(U32& mask, LLAssetType::EType at)
 {
 	if (at == LLAssetType::AT_CLOTHING)
 	{
@@ -1217,7 +1224,7 @@ void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType 
 }
 
 // static
-void LLWearableItemsList::ContextMenu::createNewWearable(const LLUUID& item_id)
+void LLWearableItemsList::ContextMenuBase::createNewWearable(const LLUUID& item_id)
 {
 	LLViewerInventoryItem* item = gInventory.getLinkedItem(item_id);
 	if (!item || !item->isWearableType()) return;

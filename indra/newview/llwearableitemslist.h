@@ -91,9 +91,6 @@ protected:
 
 private:
 	bool	mWornIndicationEnabled;
-// [SL:KB] - Patch: Appearance-Wearing| Checked: Catznip-2.6
-	bool	mWornTargetIndicationEnabled;
-// [/SL:KB]
 };
 
 class LLPanelDeletableWearableListItem : public LLPanelWearableListItem
@@ -461,10 +458,17 @@ public:
 	 * (e.g. for items selected across multiple wearable lists),
 	 * so making it a singleton.
 	 */
-	class ContextMenu : public LLListContextMenu, public LLSingleton<ContextMenu>
+
+//	class ContextMenu : public LLListContextMenu, public LLSingleton<ContextMenu>
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	class ContextMenuBase : public LLListContextMenu
+// [/SL:KB]
 	{
-		LLSINGLETON(ContextMenu);
+//		LLSINGLETON(ContextMenu);
 	public:
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+		ContextMenuBase() : mParent(nullptr) {}
+// [/SL:KB]
 		/*virtual*/ void show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y);
 
 	protected:
@@ -477,6 +481,9 @@ public:
 		};
 
 		/* virtual */ LLContextMenu* createMenu();
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+		virtual const std::string getMenuName() const = 0;
+// [/SL:KB]
 		void updateItemsVisibility(LLContextMenu* menu);
 		void updateItemsLabels(LLContextMenu* menu);
 		static void setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val);
@@ -486,6 +493,16 @@ public:
 
 		LLWearableItemsList*	mParent;
 	};
+
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	class ContextMenu : public ContextMenuBase, public LLSingleton<ContextMenu>
+	{
+		LLSINGLETON(ContextMenu);
+
+	protected:
+		virtual const std::string getMenuName() const { return "menu_wearable_list_item.xml"; }
+	};
+// [/SL:KB]
 
 	struct Params : public LLInitParam::Block<Params, LLInventoryItemsList::Params>
 	{
