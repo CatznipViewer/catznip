@@ -107,6 +107,7 @@ protected:
 	void		onBtnCancel(const LLSD& userdata);
 // [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	void		onShowPanel(const LLSD& sdParam);
+	void		onResetUIScale() const;
 // [/SL:KB]
 
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup

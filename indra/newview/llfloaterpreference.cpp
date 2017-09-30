@@ -349,6 +349,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this, _2));
 // [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6)
 	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
+	mCommitCallbackRegistrar.add("Pref.ResetUIScale",		boost::bind(&LLFloaterPreference::onResetUIScale, this));
 // [/SL:KB]
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
@@ -604,6 +605,12 @@ void LLFloaterPreference::showPanel(const std::string& strPanel)
 void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
 {
 	showPanel(sdParam.asString());
+}
+
+void LLFloaterPreference::onResetUIScale() const
+{
+	gSavedSettings.setF32("UIScaleFactor", 1.0);
+	gViewerWindow->requestResolutionUpdate();
 }
 // [/SL:KB]
 
