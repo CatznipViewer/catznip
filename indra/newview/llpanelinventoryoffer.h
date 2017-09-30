@@ -65,6 +65,8 @@ protected:
 	void onUpdateSelection();
 	void refreshControls();
 	void refreshFolders();
+	void clearObjectFolder();
+	void showObjectFolder(const LLUUID& idObjectFolder);
 
 	/*
 	 * Member variables
@@ -76,7 +78,7 @@ protected:
 	LLButton*       m_pBrowseBtn = nullptr;
 
 	LLUUID          m_idObject;
-	bool            m_fShowObjectFolder = true;
+	bool            m_fShowObjectFolder = false;
 	LLUUID          m_idObjectFolder;
 	LLObjectSelectionHandle m_ObjectSelectionHandle;
 	boost::signals2::connection m_SelectionUpdateConnection;
