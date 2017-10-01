@@ -330,6 +330,10 @@ protected:
 	LLFlatListView(const LLFlatListView::Params& p);
 
 	/** Manage selection on mouse events */
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	virtual void onItemMouseDoubleClick(item_pair_t* item_pair, MASK mask);
+// [/SL:KB]
+
 	void onItemMouseClick(item_pair_t* item_pair, MASK mask);
 
 	void onItemRightMouseClick(item_pair_t* item_pair, MASK mask);

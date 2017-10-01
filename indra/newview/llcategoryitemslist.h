@@ -79,6 +79,8 @@ public:
 public:
 	BOOL          postBuild() override;
 	LLPanel*      createNewItem(LLViewerInventoryItem* pItem) override;
+protected:
+	void          onItemMouseDoubleClick(item_pair_t* pItemPair, MASK mask) override;
 
 	/*
 	 * Member functions
