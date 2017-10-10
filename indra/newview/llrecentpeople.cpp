@@ -106,8 +106,7 @@ LLSD LLRecentPeoplePersistentItem::toLLSD() const
 // [/SL:KB]
 
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
-static const char* RECENT_PEOPLE_FILENAME        = "recent_people.xml";
-static const char* RECENT_PEOPLE_FILENAME_LEGACY = "recent_people.txt";
+static const char* RECENT_PEOPLE_FILENAME = "recent_people.xml";
 
 const std::string LLRecentPeople::s_itTypeNames[] = 
 {
@@ -136,8 +135,22 @@ LLRecentPeople::EInteractionType LLRecentPeople::getTypeFromTypeName(const std::
 
 LLRecentPeople::LLRecentPeople()
 {
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
+	mSaveTimer = new LLRecentPeopleSaveTimer();
+// [/SL:KB]
+
 	load();
 }
+
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
+LLRecentPeople::~LLRecentPeople()
+{
+	delete mSaveTimer;
+	mSaveTimer = nullptr;
+
+	save();
+}
+// [/SL:KB]
 
 void LLRecentPeople::load()
 {
@@ -167,55 +180,14 @@ void LLRecentPeople::load()
 			}
 		}
 	}
-	else
-	{
-		loadLegacy();
-	}
-}
-
-void LLRecentPeople::loadLegacy()
-{
-	const std::string strPath = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME_LEGACY);
-	if (gDirUtilp->fileExists(strPath))
-	{
-		llifstream fileRecentPeople(strPath);
-		if (!fileRecentPeople.is_open())
-		{
-			LL_WARNS() << "Can't open recent people persistent file \"" << RECENT_PEOPLE_FILENAME_LEGACY << "\" for reading" << LL_ENDL;
-			return;
-		}
-
-		mPeople.clear();
-
-		// The parser's destructor is protected so we cannot create in the stack.
-		LLPointer<LLSDParser> sdParser = new LLSDNotationParser();
-
-		std::string strLine; LLSD sdItem;
-		while (std::getline(fileRecentPeople, strLine))
-		{
-			std::istringstream iss(strLine);
-			if (sdParser->parse(iss, sdItem, strLine.length()) == LLSDParser::PARSE_FAILURE)
-			{
-				LL_INFOS() << "Parsing recent people failed" << LL_ENDL;
-				break;
-			}
-
-			LLRecentPeoplePersistentItem persistentItem(sdItem);
-			if (!persistentItem.isDefault())
-			{
-				mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
-			}
-		}
-		fileRecentPeople.close();
-
-		// Remove the legacy file and save in the new format
-		LLFile::remove(strPath);
-		save();
-	}
 }
 
 void LLRecentPeople::save() const
 {
+	if (!mNeedsSave)
+		return;
+	mNeedsSave = false;
+
 	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME));
 	if (!fileRecentPeople.is_open())
 	{
@@ -228,24 +200,7 @@ void LLRecentPeople::save() const
 	{
 		sdRecentPeople.append(itPerson->second.toLLSD());
 	}
-	LLSDSerialize::toPrettyXML(sdRecentPeople, fileRecentPeople);
-
-	fileRecentPeople.close();
-}
-
-void LLRecentPeople::saveLegacy() const
-{
-	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME_LEGACY));
-	if (!fileRecentPeople.is_open())
-	{
-		LL_WARNS() << "Can't open people history file \"" << RECENT_PEOPLE_FILENAME_LEGACY << "\" for writing" << LL_ENDL;
-		return;
-	}
-
-	for (recent_people_t::const_iterator itItem = mPeople.begin(); itItem != mPeople.end(); ++itItem)
-	{
-		fileRecentPeople << LLSDOStreamer<LLSDNotationFormatter>(itItem->second.toLLSD()) << std::endl;
-	}
+	LLSDSerialize::toXML(sdRecentPeople, fileRecentPeople);
 
 	fileRecentPeople.close();
 }
@@ -299,7 +254,7 @@ bool LLRecentPeople::add(const LLUUID& id, EInteractionType interaction, const L
 			mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(id, LLRecentPeoplePersistentItem(id, interaction, userdata)));
 		}
 
-		save();
+		mNeedsSave = true;
 // [/SL:KB]
 
 		mChangedSignal();
