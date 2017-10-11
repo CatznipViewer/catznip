@@ -2123,20 +2123,35 @@ F32 LLFloater::getCurrentTransparency()
 
 void LLFloater::updateTransparency(LLView* view, ETypeTransparency transparency_type)
 {
-	if (!view) return;
-	child_list_t children = *view->getChildList();
-	child_list_t::iterator it = children.begin();
-
-	LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(view);
-	if (ctrl)
+// [SL:KB] - Patch: Control-Floater | Checked: Catznip-5.2
+	if (view)
 	{
-		ctrl->setTransparencyType(transparency_type);
-	}
+		if (view->isCtrl())
+		{
+			static_cast<LLUICtrl*>(view)->setTransparencyType(transparency_type);
+		}
 
-	for(; it != children.end(); ++it)
-	{
-		updateTransparency(*it, transparency_type);
+		for (LLView* pChild : *view->getChildList())
+		{
+			if ( (pChild->getChildCount()) || (pChild->isCtrl()) )
+				updateTransparency(pChild, transparency_type);
+		}
 	}
+// [/SL:KB]
+//	if (!view) return;
+//	child_list_t children = *view->getChildList();
+//	child_list_t::iterator it = children.begin();
+//
+//	LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(view);
+//	if (ctrl)
+//	{
+//		ctrl->setTransparencyType(transparency_type);
+//	}
+//
+//	for(; it != children.end(); ++it)
+//	{
+//		updateTransparency(*it, transparency_type);
+//	}
 }
 
 void LLFloater::updateTransparency(ETypeTransparency transparency_type)
