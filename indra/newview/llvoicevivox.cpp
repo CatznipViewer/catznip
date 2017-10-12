@@ -5506,7 +5506,11 @@ void LLVivoxVoiceClient::deleteAllSessions()
 
     while (!mSessionsByHandle.empty())
 	{
-        deleteSession(mSessionsByHandle.begin()->second);
+// [SL:KB] Patch: Viewer-Crash | Checked: Catznip-5.2
+		const sessionStatePtr_t session = mSessionsByHandle.begin()->second;
+		deleteSession(session);
+// [/SL:KB]
+//        deleteSession(mSessionsByHandle.begin()->second);
 	}
 	
 }
