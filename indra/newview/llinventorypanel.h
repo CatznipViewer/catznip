@@ -240,6 +240,9 @@ public:
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
 	
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	void showItem(const LLUUID& idItem);
+// [/SL:KB]
 //	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel = FALSE);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);

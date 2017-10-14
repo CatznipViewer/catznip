@@ -1024,40 +1024,7 @@ void show_item(const LLUUID& idItem)
 
 	if (pActiveInvPanel)
 	{
-		// Make sure the floater is visible
-		LLFloater* pInvFloater = pActiveInvPanel->getParentByType<LLFloater>();
-		if (pInvFloater)
-		{
-			if (pInvFloater->isMinimized())
-				pInvFloater->setMinimized(FALSE);
-			else if (!pInvFloater->isShown())
-				pInvFloater->openFloater(pInvFloater->getKey());
-
-			if  (!pInvFloater->isFrontmost())
-				pInvFloater->setVisibleAndFrontmost(true, pInvFloater->getKey());
-		}
-
-		// Make sure the inventory panels are visible
-		LLSidepanelInventory* pInvSidepanel = pActiveInvPanel->getParentByType<LLSidepanelInventory>();
-		if (pInvSidepanel)
-		{
-			pInvSidepanel->showInventoryPanel();
-			pInvSidepanel->getMainInventoryPanel()->selectPanel(pActiveInvPanel);
-		}
-
-		// Select the item
-		LLFolderViewItem* pFVItem = pActiveInvPanel->getItemByID(idItem);
-		if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
-		{
-			if (pFVItem)
-				pFVItem->setOpen();
-			pActiveInvPanel->setSelectionByID(idItem, TAKE_FOCUS_YES);
-		}
-		else
-		{
-			pInvSidepanel->openInbox();
-			pInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_YES);
-		}
+		pActiveInvPanel->showItem(idItem);
 	}
 }
 // [/SL:KB]

@@ -1576,6 +1576,49 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 //	return res;
 }
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+void LLInventoryPanel::showItem(const LLUUID& idItem)
+{
+	// Make sure the floater is visible
+	LLFloater* pInvFloater = getParentByType<LLFloater>();
+	if (pInvFloater)
+	{
+		if (pInvFloater->isMinimized())
+			pInvFloater->setMinimized(FALSE);
+		else if (!pInvFloater->isShown())
+			pInvFloater->openFloater(pInvFloater->getKey());
+
+		if  (!pInvFloater->isFrontmost())
+			pInvFloater->setVisibleAndFrontmost(true, pInvFloater->getKey());
+	}
+
+	// Make sure the inventory panels are visible
+	LLSidepanelInventory* pInvSidepanel = getParentByType<LLSidepanelInventory>();
+	if (pInvSidepanel)
+	{
+		pInvSidepanel->showInventoryPanel();
+		pInvSidepanel->getMainInventoryPanel()->selectPanel(this);
+	}
+
+	const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false);
+	bool fInInbox = (idInbox.notNull()) && (gInventory.isObjectDescendentOf(idItem, idInbox));
+
+	// Select the item
+	LLFolderViewItem* pFVItem = getItemByID(idItem);
+	if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
+	{
+		if (pFVItem)
+			pFVItem->setOpen();
+		setSelectionByID(idItem, TAKE_FOCUS_YES);
+	}
+	else
+	{
+		pInvSidepanel->openInbox();
+		pInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_YES);
+	}
+}
+// [/SL:KB]
+
 //static
 //void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel)
 //{

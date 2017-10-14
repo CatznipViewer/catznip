@@ -1793,7 +1793,17 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 	}
 	else if ("show_in_main_panel" == action)
 	{
-		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.2
+		if (LLInventoryPanel* pInvPanel = mInventoryPanel.get())
+		{
+			if (LLSidepanelInventory* pInvSidepanel = pInvPanel->getParentByType<LLSidepanelInventory>())
+			{
+				pInvSidepanel->selectAllItemsPanel();
+				pInvSidepanel->getActivePanel()->showItem(mUUID);
+			}
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
 		return;
 	}
 	else if ("cut" == action)
@@ -3506,7 +3516,17 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 	}
 	else if ("show_in_main_panel" == action)
 	{
-		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.2
+		if (LLInventoryPanel* pInvPanel = mInventoryPanel.get())
+		{
+			if (LLSidepanelInventory* pInvSidepanel = pInvPanel->getParentByType<LLSidepanelInventory>())
+			{
+				pInvSidepanel->selectAllItemsPanel();
+				pInvSidepanel->getActivePanel()->showItem(mUUID);
+			}
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
 		return;
 	}
 	else if ("cut" == action)
