@@ -71,6 +71,9 @@ public:
 	virtual const std::string& getName() const { return mName; }
 	virtual const std::string& getDisplayName() const { return mName; }
 	virtual const std::string& getSearchableName() const { return mName; }
+	virtual std::string getSearchableDescription() const { return LLStringUtil::null; }
+	virtual std::string getSearchableCreatorName() const { return LLStringUtil::null; }
+	virtual std::string getSearchableUUIDString() const {return LLStringUtil::null;}
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	const std::string& getDescription(void) const override { return LLStringUtil::null; }
 	bool getIncludedInFilter() const override { return false; }

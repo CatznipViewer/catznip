@@ -100,6 +100,10 @@ public:
 	        void setIncludedInFilter(bool include) override {};
 // [/SL:KB]
 
+	std::string getSearchableDescription() const;
+	std::string getSearchableCreatorName() const;
+	std::string getSearchableUUIDString() const;
+
 	virtual PermissionMask getPermissionMask() const;
 	virtual LLFolderType::EType getPreferredType() const;
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
