@@ -205,13 +205,18 @@ void LLFloaterInventoryFinder::refreshControls()
 		time_t timeCurrent;
 		time(&timeCurrent);
 
-		U32 nSecondsStart = (U32)llmax(timeCurrent - m_pFilter->getMinDate(), (time_t)0);
-		U32 nSecondsEnd = (U32)llmax(timeCurrent - m_pFilter->getMaxDate(), (time_t)0);
+		U32 nSecondsStart = (U32)llmax(timeCurrent - m_pFilter->getMinDate(), (time_t)0) + 30 * 60;
+		U32 nSecondsEnd = (U32)llmax(timeCurrent - m_pFilter->getMaxDate(), (time_t)0) + 30 * 60;
 
 		U32 nHoursStart = llmin(nSecondsStart, nSecondsEnd) / (60 * 60);
 		U32 nHoursEnd = llmax(nSecondsStart, nSecondsEnd) / (60 * 60);
 
-		if ( (0 == nHoursStart % 24) && (0 == nHoursEnd % 24) )
+		if ( (0 == nHoursStart) && (0 == nHoursEnd) )
+		{
+			m_pFilterAgeRangeStart->setValue(0);
+			m_pFilterAgeRangeEnd->setValue(0);
+		}
+		else if ( (0 == nHoursStart % 24) && (0 == nHoursEnd % 24) )
 		{
 			m_pFilterAgeRangeStart->setValue((S32)(nHoursStart / 24));
 			m_pFilterAgeRangeEnd->setValue((S32)(nHoursEnd / 24));
