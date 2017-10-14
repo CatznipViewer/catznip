@@ -35,7 +35,7 @@
 
 #include "llfolderview.h"
 
-class LLComboBox;
+//class LLComboBox;
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLSaveFolderState;
@@ -149,8 +149,8 @@ protected:
 	void updateItemcountText();
 
 	void onFocusReceived();
-	void onSelectSearchType();
-	void updateSearchTypeCombo();
+//	void onSelectSearchType();
+//	void updateSearchTypeCombo();
 
 private:
 //	LLFloaterInventoryFinder* getFinder();
@@ -174,7 +174,7 @@ private:
 // [/SL:KB]
 	S32							mItemCount;
 	std::string 				mItemCountString;
-	LLComboBox*					mSearchTypeCombo;
+//	LLComboBox*					mSearchTypeCombo;
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	std::string					mFloaterTitle;
 // [/SL:KB]

@@ -194,8 +194,8 @@ public:
 	void setFilterLinks(LLInventoryFilter::EFilterLink filter_links);
 // [/SL:KB]
 //	void setFilterLinks(U64 filter_links);
-	void setSearchType(LLInventoryFilter::ESearchType type);
-	LLInventoryFilter::ESearchType getSearchType();
+//	void setSearchType(LLInventoryFilter::ESearchType type);
+//	LLInventoryFilter::ESearchType getSearchType();
 
 	void setShowFolderState(LLInventoryFilter::EFolderShow show);
 	LLInventoryFilter::EFolderShow getShowFolderState();

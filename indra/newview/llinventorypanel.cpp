@@ -501,15 +501,15 @@ void LLInventoryPanel::setFilterLinks(LLInventoryFilter::EFilterLink filter_link
 	getFilter().setFilterLinks(filter_links);
 }
 
-void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
-{
-	getFilter().setSearchType(type);
-}
+//void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
+//{
+//	getFilter().setSearchType(type);
+//}
 
-LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
-{
-	return getFilter().getSearchType();
-}
+//LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
+//{
+//	return getFilter().getSearchType();
+//}
 
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {

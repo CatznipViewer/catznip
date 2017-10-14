@@ -104,6 +104,7 @@
       border="false"
       bevel_style="none"
       scroll.reserve_scroll_corner="false">
+  </inventory_panel>
     <panel
      follows="all"
      height="310"
@@ -111,7 +112,6 @@
      layout="topleft"
      name="New Inv Panel"
      width="322" />
-  </inventory_panel>
   </tab_container>
   <layout_stack
    animate="false"
