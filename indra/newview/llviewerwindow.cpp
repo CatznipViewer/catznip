@@ -4831,10 +4831,10 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 		base_name += "_%c";
 // [/SL:KB]
 
-	if(LLViewerWindow::sSnapshotDir.empty())
-	{
-		return FALSE;
-	}
+//	if(LLViewerWindow::sSnapshotDir.empty())
+//	{
+//		return FALSE;
+//	}
 
 // Check if there is enough free space to save snapshot
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.3

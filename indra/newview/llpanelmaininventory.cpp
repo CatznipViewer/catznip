@@ -211,7 +211,10 @@ BOOL LLPanelMainInventory::postBuild()
 		mWornItemsPanel->setFilterTypes(filter_types);
 		mWornItemsPanel->setFilterWorn();
 		mWornItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS, true);
+// [/SL:KB]
+//		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
 		mWornItemsPanel->getFilter().markDefault();
 		mWornItemsPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, mWornItemsPanel, _1, _2));
 	}

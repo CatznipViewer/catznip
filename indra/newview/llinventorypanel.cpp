@@ -380,7 +380,10 @@ void LLInventoryPanel::setFilterTypes(U64 types, LLInventoryFilter::EFilterType 
 
 void LLInventoryPanel::setFilterWorn()
 {
-    getFilter().setFilterWorn();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	getFilter().setFilterWorn(true);
+// [/SL:KB]
+//    getFilter().setFilterWorn();
 }
 
 U32 LLInventoryPanel::getFilterObjectTypes() const 
@@ -1574,9 +1577,14 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 }
 
 //static
-//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
+//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel)
 //{
-//	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
+//	LLInventoryPanel *active_panel;
+//	if (main_panel)
+//	{
+//		LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory")->selectAllItemsPanel();
+//	}
+//	active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
 //
 //	if (active_panel)
 //	{

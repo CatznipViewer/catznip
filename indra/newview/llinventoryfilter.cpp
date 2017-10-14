@@ -293,6 +293,9 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 	
 	if(filterTypes & FILTERTYPE_WORN)
 	{
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
+		const LLUUID& object_id = listener->getUUID();
+// [/SL:KB]
 		if (!get_is_item_worn(object_id))
 		{
 			return FALSE;
@@ -704,10 +707,10 @@ void LLInventoryFilter::setFilterEmptySystemFolders()
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
 }
 
-void LLInventoryFilter::setFilterWorn()
-{
-    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
-}
+//void LLInventoryFilter::setFilterWorn()
+//{
+//    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+//}
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 void LLInventoryFilter::setFilterWorn(bool filter)
