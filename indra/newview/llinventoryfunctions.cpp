@@ -1062,40 +1062,7 @@ void show_item(const LLUUID& idItem)
 
 	if (pActiveInvPanel)
 	{
-		// Make sure the floater is visible
-		LLFloater* pInvFloater = pActiveInvPanel->getParentByType<LLFloater>();
-		if (pInvFloater)
-		{
-			if (pInvFloater->isMinimized())
-				pInvFloater->setMinimized(FALSE);
-			else if (!pInvFloater->isShown())
-				pInvFloater->openFloater(pInvFloater->getKey());
-
-			if  (!pInvFloater->isFrontmost())
-				pInvFloater->setVisibleAndFrontmost(true, pInvFloater->getKey());
-		}
-
-		// Make sure the inventory panels are visible
-		LLSidepanelInventory* pInvSidepanel = pActiveInvPanel->getParentByType<LLSidepanelInventory>();
-		if (pInvSidepanel)
-		{
-			pInvSidepanel->showInventoryPanel();
-			pInvSidepanel->getMainInventoryPanel()->selectPanel(pActiveInvPanel);
-		}
-
-		// Select the item
-		LLFolderViewItem* pFVItem = pActiveInvPanel->getItemByID(idItem);
-		if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
-		{
-			if (pFVItem)
-				pFVItem->setOpen();
-			pActiveInvPanel->setSelectionByID(idItem, TAKE_FOCUS_YES);
-		}
-		else
-		{
-			pInvSidepanel->openInbox();
-			pInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_YES);
-		}
+		pActiveInvPanel->showItem(idItem);
 	}
 }
 // [/SL:KB]
@@ -2775,7 +2742,8 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 	if ("delete" == action)
 	{
 //		static bool sDisplayedAtSession = false;
-		
+		const LLUUID &marketplacelistings_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
+		bool marketplacelistings_item = false;
 		LLAllDescendentsPassedFilter f;
 		for (std::set<LLFolderViewItem*>::iterator it = selected_items.begin(); (it != selected_items.end()) && (f.allDescendentsPassedFilter()); ++it)
 		{
@@ -2783,9 +2751,15 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 			{
 				folder->applyFunctorRecursively(f);
 			}
+			LLFolderViewModelItemInventory * viewModel = dynamic_cast<LLFolderViewModelItemInventory *>((*it)->getViewModelItem());
+			if (viewModel && gInventory.isObjectDescendentOf(viewModel->getUUID(), marketplacelistings_id))
+			{
+				marketplacelistings_item = true;
+				break;
+			}
 		}
 		// Fall through to the generic confirmation if the user choose to ignore the specialized one
-		if ( (!f.allDescendentsPassedFilter()) && (!LLNotifications::instance().getIgnored("DeleteFilteredItems")) )
+		if ( (!f.allDescendentsPassedFilter()) && !marketplacelistings_item && (!LLNotifications::instance().getIgnored("DeleteFilteredItems")) )
 		{
 			LLNotificationsUtil::add("DeleteFilteredItems", LLSD(), LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
 		}

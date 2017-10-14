@@ -160,6 +160,10 @@ public:
 	virtual void setIncludedInFilter(bool include) = 0;
 // [/SL:KB]
 
+//	virtual std::string getSearchableDescription() const = 0;
+//	virtual std::string getSearchableCreatorName()const = 0;
+//	virtual std::string getSearchableUUIDString() const = 0;
+
 	virtual LLPointer<LLUIImage> getIcon() const = 0;
 	virtual LLPointer<LLUIImage> getIconOpen() const { return getIcon(); }
 	virtual LLPointer<LLUIImage> getIconOverlay() const { return NULL; }
