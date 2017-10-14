@@ -238,7 +238,7 @@ BOOL LLFloaterRegionInfo::postBuild()
 		return TRUE;
 	}
 
-	if(!gAgent.getRegion()->getCapability("RegionExperiences").empty())
+	if(!gAgent.getRegionCapability("RegionExperiences").empty())
 	{
 		panel = new LLPanelRegionExperiences;
 		mInfoPanels.push_back(panel);
@@ -879,10 +879,7 @@ bool LLPanelRegionGeneralInfo::onMessageCommit(const LLSD& notification, const L
 
 void LLFloaterRegionInfo::requestMeshRezInfo()
 {
-//	std::string sim_console_url = gAgent.getRegion()->getCapability("SimConsoleAsync");
-// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
-	const std::string sim_console_url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SimConsoleAsync") : LLStringUtil::null;
-// [/SL:KB]
+	std::string sim_console_url = gAgent.getRegionCapability("SimConsoleAsync");
 
 	if (!sim_console_url.empty())
 	{
@@ -910,7 +907,7 @@ BOOL LLPanelRegionGeneralInfo::sendUpdate()
 
 	// First try using a Cap.  If that fails use the old method.
 	LLSD body;
-	std::string url = gAgent.getRegion()->getCapability("DispatchRegionInfo");
+	std::string url = gAgent.getRegionCapability("DispatchRegionInfo");
 	if (!url.empty())
 	{
 		body["block_terraform"] = getChild<LLUICtrl>("block_terraform_check")->getValue();

@@ -182,6 +182,7 @@ public:
 	LLInventoryFilter& getFilter();
 	const LLInventoryFilter& getFilter() const;
 	void setFilterTypes(U64 filter, LLInventoryFilter::EFilterType = LLInventoryFilter::FILTERTYPE_OBJECT);
+	void setFilterWorn();
 	U32 getFilterObjectTypes() const;
 	void setFilterPermMask(PermissionMask filter_perm_mask);
 	U32 getFilterPermMask() const;
@@ -199,6 +200,8 @@ public:
 // [/SL:KB]
 //	void setFilterLinks(U64 filter_links, bool substring_reset);
 // [/SL:KB]
+	void setSearchType(LLInventoryFilter::ESearchType type);
+	LLInventoryFilter::ESearchType getSearchType();
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void setFilterWorn(bool filter);
 // [/SL:KB]
@@ -237,7 +240,7 @@ public:
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
 	
-//	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id);
+//	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel = FALSE);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);
 	void removeItemID(const LLUUID& id);

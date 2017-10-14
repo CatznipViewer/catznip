@@ -265,7 +265,7 @@ public:
     /*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
     void setDefaultImage();
-    void setImageAssetId(LLUUID asset_id);
+    bool setImageAssetId(LLUUID asset_id);
     LLUUID getImageAssetId();
     void setOutfitName(std::string name);
     void setOutfitWorn(bool value);
@@ -288,6 +288,7 @@ private:
     bool     mSelected;
     bool     mWorn;
     bool     mDefaultImage;
+    bool     mImageUpdatePending;
     bool	 mHidden;
     std::string mOutfitName;
 };

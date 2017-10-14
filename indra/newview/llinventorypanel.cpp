@@ -378,6 +378,11 @@ void LLInventoryPanel::setFilterTypes(U64 types, LLInventoryFilter::EFilterType 
 		getFilter().setFilterCategoryTypes(types);
 }
 
+void LLInventoryPanel::setFilterWorn()
+{
+    getFilter().setFilterWorn();
+}
+
 U32 LLInventoryPanel::getFilterObjectTypes() const 
 { 
 	return getFilter().getFilterObjectTypes();
@@ -499,6 +504,16 @@ void LLInventoryPanel::setFilterWorn(bool filter)
 	getFilter().setFilterWorn(filter);
 }
 // [/SL:KB]
+
+void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
+{
+	getFilter().setSearchType(type);
+}
+
+LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
+{
+	return getFilter().getSearchType();
+}
 
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {

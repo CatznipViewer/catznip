@@ -58,12 +58,8 @@ public:
         FILTERTYPE_MARKETPLACE_INACTIVE = 0x1 << 7,		// pass if folder is a marketplace inactive folder
         FILTERTYPE_MARKETPLACE_UNASSOCIATED = 0x1 << 8,	// pass if folder is a marketplace non associated (no market ID) folder
         FILTERTYPE_MARKETPLACE_LISTING_FOLDER = 0x1 << 9,	// pass iff folder is a listing folder
-//        FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10         // pass iff folder is not under the marketplace
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-		FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10,		// pass iff folder is not under the marketplace
-		FILTERTYPE_WORN = 0x1 << 11		// filter by worn status
-// [/SL:KB]
-
+        FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10,         // pass iff folder is not under the marketplace
+        FILTERTYPE_WORN = 0x1 << 11,     // pass if item is worn
 	};
 
 	enum EFilterDateDirection
@@ -86,6 +82,21 @@ public:
 		SO_FOLDERS_BY_NAME = 0x1 << 1,		// Force folder sort by name
 		SO_SYSTEM_FOLDERS_TO_TOP = 0x1 << 2,// Force system folders to be on top
 		SO_FOLDERS_BY_WEIGHT = 0x1 << 3,    // Force folder sort by weight, usually, amount of some elements in their descendents
+	};
+
+	enum ESearchType
+	{
+		SEARCHTYPE_NAME,
+		SEARCHTYPE_DESCRIPTION,
+		SEARCHTYPE_CREATOR,
+		SEARCHTYPE_UUID
+	};
+
+	enum EFilterCreatorType
+	{
+		FILTERCREATOR_ALL,
+		FILTERCREATOR_SELF,
+		FILTERCREATOR_OTHERS
 	};
 
 	struct FilterOps
@@ -192,6 +203,7 @@ public:
 	void 				setFilterUUID(const LLUUID &object_id);
 	void				setFilterWearableTypes(U64 types);
 	void				setFilterEmptySystemFolders();
+//	void				setFilterWorn();
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void				setFilterWorn(bool filter);
 // [/SL:KB]
@@ -201,6 +213,10 @@ public:
     void                setFilterMarketplaceListingFolders(bool select_only_listing_folders);
     void                setFilterNoMarketplaceFolder();
 	void				updateFilterTypes(U64 types, U64& current_types);
+	void 				setSearchType(ESearchType type);
+	ESearchType			getSearchType() { return mSearchType; }
+	void 				setFilterCreator(EFilterCreatorType type);
+	EFilterCreatorType		getFilterCreator() { return mFilterCreatorType; }
 
 	void 				setFilterSubString(const std::string& string);
 	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
@@ -303,6 +319,7 @@ private:
 	bool 				checkAgainstPermissions(const class LLFolderViewModelItemInventory* listener) const;
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
+	bool 				checkAgainstCreator(const class LLFolderViewModelItemInventory* listener) const;
 //	bool				checkAgainstClipboard(const LLUUID& object_id) const;
 
 	FilterOps				mFilterOps;
@@ -311,6 +328,7 @@ private:
 
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+	std::string				mUsername;
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
 	bool					mFilterSubStringResetFilterLinks;		// True if a change to the sub string should reset filter links
 // [/SL:KB]
@@ -328,6 +346,9 @@ private:
     
 	std::string 			mFilterText;
 	std::string 			mEmptyLookupMessage;
+
+	ESearchType 			mSearchType;
+	EFilterCreatorType		mFilterCreatorType;
 };
 
 #endif
