@@ -30,6 +30,7 @@
 #include "llinventoryfilter.h"
 
 // viewer includes
+#include "llagent.h"
 #include "llfolderviewmodel.h"
 #include "llfolderviewitem.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -95,10 +96,14 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 // [/SL:KB]
 	mCurrentGeneration(0),
 	mFirstRequiredGeneration(0),
-	mFirstSuccessGeneration(0)
+	mFirstSuccessGeneration(0),
+	mSearchType(SEARCHTYPE_NAME),
+	mFilterCreatorType(FILTERCREATOR_ALL)
 {
 	// copy mFilterOps into mDefaultFilterOps
 	markDefault();
+	mUsername = gAgentUsername;
+	LLStringUtil::toUpper(mUsername);
 }
 
 //bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
@@ -130,9 +135,30 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringma
 	bool passed = (mFilterSubStringOrig.size()) ? checkAgainstName(listener->getSearchableName(), &match_offsets) : true;
 	passed = passed && (mFilterDescriptionSubString.size() ? boost::algorithm::icontains(listener->getDescription(), mFilterDescriptionSubString) : true);
 // [/SL:KB]
+
+	std::string desc = listener->getSearchableCreatorName();
+	switch(mSearchType)
+	{
+		case SEARCHTYPE_CREATOR:
+			desc = listener->getSearchableCreatorName();
+			break;
+		case SEARCHTYPE_DESCRIPTION:
+			desc = listener->getSearchableDescription();
+			break;
+		case SEARCHTYPE_UUID:
+			desc = listener->getSearchableUUIDString();
+			break;
+		case SEARCHTYPE_NAME:
+		default:
+			desc = listener->getSearchableName();
+			break;
+	}
+
+	bool passed = (mFilterSubString.size() ? desc.find(mFilterSubString) != std::string::npos : true);
 	passed = passed && checkAgainstFilterType(listener);
 	passed = passed && checkAgainstPermissions(listener);
 	passed = passed && checkAgainstFilterLinks(listener);
+	passed = passed && checkAgainstCreator(listener);
 
 	return passed;
 }
@@ -345,6 +371,17 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		}
 	}
 	
+	if(filterTypes & FILTERTYPE_WORN)
+	{
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
+		const LLUUID& object_id = listener->getUUID();
+// [/SL:KB]
+		if (!get_is_item_worn(object_id))
+		{
+			return FALSE;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// FILTERTYPE_UUID
 	// Pass if this item is the target UUID or if it links to the target UUID
@@ -632,6 +669,24 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	return TRUE;
 }
 
+bool LLInventoryFilter::checkAgainstCreator(const LLFolderViewModelItemInventory* listener) const
+{
+	if (!listener) return TRUE;
+	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+	switch(mFilterCreatorType)
+	{
+		case FILTERCREATOR_SELF:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() == mUsername);
+		case FILTERCREATOR_OTHERS:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() != mUsername);
+		case FILTERCREATOR_ALL:
+		default:
+			return TRUE;
+	}
+}
+
 //const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 //{
 //	return mFilterSubString;
@@ -639,7 +694,14 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 
 //std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
 //{
-//	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+//	if (mSearchType == SEARCHTYPE_NAME)
+//	{
+//		return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+//	}
+//	else
+//	{
+//		return std::string::npos;
+//	}
 //}
 
 bool LLInventoryFilter::isDefault() const
@@ -724,6 +786,24 @@ void LLInventoryFilter::updateFilterTypes(U64 types, U64& current_types)
 	}
 }
 
+void LLInventoryFilter::setSearchType(ESearchType type)
+{
+	if(mSearchType != type)
+	{
+		mSearchType = type;
+		setModified();
+	}
+}
+
+void LLInventoryFilter::setFilterCreator(EFilterCreatorType type)
+{
+	if(mFilterCreatorType != type)
+	{
+		mFilterCreatorType = type;
+		setModified();
+	}
+}
+
 void LLInventoryFilter::setFilterObjectTypes(U64 types)
 {
 	updateFilterTypes(types, mFilterOps.mFilterObjectTypes);
@@ -746,6 +826,11 @@ void LLInventoryFilter::setFilterEmptySystemFolders()
 {
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
 }
+
+//void LLInventoryFilter::setFilterWorn()
+//{
+//    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+//}
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 void LLInventoryFilter::setFilterWorn(bool filter)

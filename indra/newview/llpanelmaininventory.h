@@ -35,6 +35,7 @@
 
 #include "llfolderview.h"
 
+class LLComboBox;
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLSaveFolderState;
@@ -77,6 +78,8 @@ public:
 
 	LLInventoryPanel* getPanel() { return mActivePanel; }
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
+	LLInventoryPanel* getAllItemsPanel();
+	void selectAllItemsPanel();
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
@@ -159,6 +162,8 @@ protected:
 	void updateItemcountText();
 
 	void onFocusReceived();
+	void onSelectSearchType();
+	void updateSearchTypeCombo();
 
 private:
 //	LLFloaterInventoryFinder* getFinder();
@@ -168,6 +173,7 @@ private:
     LLUICtrl*                   mCounterCtrl;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+	LLInventoryPanel*			mWornItemsPanel;
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	S32							mActivePanelIndex;
 // [/SL:KB]
@@ -181,6 +187,7 @@ private:
 // [/SL:KB]
 	S32							mItemCount;
 	std::string 				mItemCountString;
+	LLComboBox*					mSearchTypeCombo;
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	std::string					mFloaterTitle;
 // [/SL:KB]
