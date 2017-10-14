@@ -34,6 +34,7 @@
 
 #include "llfolderview.h"
 
+class LLComboBox;
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLSaveFolderState;
@@ -76,6 +77,8 @@ public:
 
 	LLInventoryPanel* getPanel() { return mActivePanel; }
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
+	LLInventoryPanel* getAllItemsPanel();
+	void selectAllItemsPanel();
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
@@ -133,6 +136,8 @@ protected:
 	void updateItemcountText();
 
 	void onFocusReceived();
+	void onSelectSearchType();
+	void updateSearchTypeCombo();
 
 private:
 	LLFloaterInventoryFinder* getFinder();
@@ -142,12 +147,14 @@ private:
     LLUICtrl*                   mCounterCtrl;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+	LLInventoryPanel*			mWornItemsPanel;
 	bool						mResortActivePanel;
 	LLSaveFolderState*			mSavedFolderState;
 	std::string					mFilterText;
 	std::string					mFilterSubString;
 	S32							mItemCount;
 	std::string 				mItemCountString;
+	LLComboBox*					mSearchTypeCombo;
 
 
 	//////////////////////////////////////////////////////////////////////////////////
