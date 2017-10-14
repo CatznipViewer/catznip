@@ -378,6 +378,14 @@ void LLInventoryPanel::setFilterTypes(U64 types, LLInventoryFilter::EFilterType 
 		getFilter().setFilterCategoryTypes(types);
 }
 
+void LLInventoryPanel::setFilterWorn()
+{
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	getFilter().setFilterWorn(true);
+// [/SL:KB]
+//    getFilter().setFilterWorn();
+}
+
 U32 LLInventoryPanel::getFilterObjectTypes() const 
 { 
 	return getFilter().getFilterObjectTypes();
@@ -499,6 +507,16 @@ void LLInventoryPanel::setFilterWorn(bool filter)
 	getFilter().setFilterWorn(filter);
 }
 // [/SL:KB]
+
+void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
+{
+	getFilter().setSearchType(type);
+}
+
+LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
+{
+	return getFilter().getSearchType();
+}
 
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {
@@ -1561,10 +1579,58 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 //	return res;
 }
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+void LLInventoryPanel::showItem(const LLUUID& idItem)
+{
+	// Make sure the floater is visible
+	LLFloater* pInvFloater = getParentByType<LLFloater>();
+	if (pInvFloater)
+	{
+		if (pInvFloater->isMinimized())
+			pInvFloater->setMinimized(FALSE);
+		else if (!pInvFloater->isShown())
+			pInvFloater->openFloater(pInvFloater->getKey());
+
+		if  (!pInvFloater->isFrontmost())
+			pInvFloater->setVisibleAndFrontmost(true, pInvFloater->getKey());
+	}
+
+	// Make sure the inventory panels are visible
+	LLSidepanelInventory* pInvSidepanel = getParentByType<LLSidepanelInventory>();
+	if (pInvSidepanel)
+	{
+		pInvSidepanel->showInventoryPanel();
+		pInvSidepanel->getMainInventoryPanel()->selectPanel(this);
+	}
+
+	const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false);
+	bool fInInbox = (idInbox.notNull()) && (gInventory.isObjectDescendentOf(idItem, idInbox));
+
+	// Select the item
+	LLFolderViewItem* pFVItem = getItemByID(idItem);
+	if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
+	{
+		if (pFVItem)
+			pFVItem->setOpen();
+		setSelectionByID(idItem, TAKE_FOCUS_YES);
+	}
+	else
+	{
+		pInvSidepanel->openInbox();
+		pInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_YES);
+	}
+}
+// [/SL:KB]
+
 //static
-//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
+//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel)
 //{
-//	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
+//	LLInventoryPanel *active_panel;
+//	if (main_panel)
+//	{
+//		LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory")->selectAllItemsPanel();
+//	}
+//	active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
 //
 //	if (active_panel)
 //	{
