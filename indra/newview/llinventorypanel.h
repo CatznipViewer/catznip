@@ -212,8 +212,8 @@ public:
 // [/SL:KB]
 //	void setFilterLinks(U64 filter_links, bool substring_reset);
 // [/SL:KB]
-	void setSearchType(LLInventoryFilter::ESearchType type);
-	LLInventoryFilter::ESearchType getSearchType();
+//	void setSearchType(LLInventoryFilter::ESearchType type);
+//	LLInventoryFilter::ESearchType getSearchType();
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void setFilterWorn(bool filter);
 // [/SL:KB]

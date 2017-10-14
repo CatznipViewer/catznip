@@ -91,20 +91,20 @@ public:
 		SO_FOLDERS_BY_WEIGHT = 0x1 << 3,    // Force folder sort by weight, usually, amount of some elements in their descendents
 	};
 
-	enum ESearchType
-	{
-		SEARCHTYPE_NAME,
-		SEARCHTYPE_DESCRIPTION,
-		SEARCHTYPE_CREATOR,
-		SEARCHTYPE_UUID
-	};
+//	enum ESearchType
+//	{
+//		SEARCHTYPE_NAME,
+//		SEARCHTYPE_DESCRIPTION,
+//		SEARCHTYPE_CREATOR,
+//		SEARCHTYPE_UUID
+//	};
 
-	enum EFilterCreatorType
-	{
-		FILTERCREATOR_ALL,
-		FILTERCREATOR_SELF,
-		FILTERCREATOR_OTHERS
-	};
+//	enum EFilterCreatorType
+//	{
+//		FILTERCREATOR_ALL,
+//		FILTERCREATOR_SELF,
+//		FILTERCREATOR_OTHERS
+//	};
 
 	struct FilterOps
 	{
@@ -244,10 +244,10 @@ public:
     void                setFilterMarketplaceListingFolders(bool select_only_listing_folders);
     void                setFilterNoMarketplaceFolder();
 	void				updateFilterTypes(U64 types, U64& current_types);
-	void 				setSearchType(ESearchType type);
-	ESearchType			getSearchType() { return mSearchType; }
-	void 				setFilterCreator(EFilterCreatorType type);
-	EFilterCreatorType		getFilterCreator() { return mFilterCreatorType; }
+//	void 				setSearchType(ESearchType type);
+//	ESearchType			getSearchType() { return mSearchType; }
+//	void 				setFilterCreator(EFilterCreatorType type);
+//	EFilterCreatorType		getFilterCreator() { return mFilterCreatorType; }
 
 	void 				setFilterSubString(const std::string& string);
 //	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
@@ -380,7 +380,7 @@ private:
 	bool 				checkAgainstPermissions(const class LLFolderViewModelItemInventory* listener) const;
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
-	bool 				checkAgainstCreator(const class LLFolderViewModelItemInventory* listener) const;
+//	bool 				checkAgainstCreator(const class LLFolderViewModelItemInventory* listener) const;
 //	bool				checkAgainstClipboard(const LLUUID& object_id) const;
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	bool 				checkAgainstFolderIncludes(const class LLInventoryObject* pInvObj) const;
@@ -398,7 +398,7 @@ private:
 	boost::regex			mFilterSubStringRegEx;
 // [/SL:KB]
 	std::string				mFilterSubStringOrig;
-	std::string				mUsername;
+//	std::string				mUsername;
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	std::string				mFilterDescriptionSubString;
 // [/SL:KB]
@@ -423,8 +423,8 @@ private:
 	std::string 			mFilterText;
 	std::string 			mEmptyLookupMessage;
 
-	ESearchType 			mSearchType;
-	EFilterCreatorType		mFilterCreatorType;
+//	ESearchType 			mSearchType;
+//	EFilterCreatorType		mFilterCreatorType;
 };
 
 #endif

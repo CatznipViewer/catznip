@@ -31,8 +31,8 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llavataractions.h"
-#include "llcheckboxctrl.h"
-#include "llcombobox.h"
+//#include "llcheckboxctrl.h"
+//#include "llcombobox.h"
 #include "lldndbutton.h"
 #include "lleconomy.h"
 #include "llfilepicker.h"
@@ -231,11 +231,11 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 // [/SL:KB]
 
-	mSearchTypeCombo  = getChild<LLComboBox>("search_type");
-	if(mSearchTypeCombo)
-	{
-		mSearchTypeCombo->setCommitCallback(boost::bind(&LLPanelMainInventory::onSelectSearchType, this));
-	}
+//	mSearchTypeCombo  = getChild<LLComboBox>("search_type");
+//	if(mSearchTypeCombo)
+//	{
+//		mSearchTypeCombo->setCommitCallback(boost::bind(&LLPanelMainInventory::onSelectSearchType, this));
+//	}
 	// Now load the stored settings from disk, if available.
 	std::string filterSaveName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILTERS_FILENAME));
 	LL_INFOS() << "LLPanelMainInventory::init: reading from " << filterSaveName << LL_ENDL;
@@ -656,47 +656,47 @@ void LLPanelMainInventory::shareWithAvatars()
 }
 // [/SL:KB]
 
-void LLPanelMainInventory::onSelectSearchType()
-{
-	std::string new_type = mSearchTypeCombo->getValue();
-	if (new_type == "search_by_name")
-	{
-		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_NAME);
-	}
-	if (new_type == "search_by_creator")
-	{
-		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_CREATOR);
-	}
-	if (new_type == "search_by_description")
-	{
-		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_DESCRIPTION);
-	}
-	if (new_type == "search_by_UUID")
-	{
-		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_UUID);
-	}
-}
+//void LLPanelMainInventory::onSelectSearchType()
+//{
+//	std::string new_type = mSearchTypeCombo->getValue();
+//	if (new_type == "search_by_name")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_NAME);
+//	}
+//	if (new_type == "search_by_creator")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_CREATOR);
+//	}
+//	if (new_type == "search_by_description")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_DESCRIPTION);
+//	}
+//	if (new_type == "search_by_UUID")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_UUID);
+//	}
+//}
 
-void LLPanelMainInventory::updateSearchTypeCombo()
-{
-	LLInventoryFilter::ESearchType search_type = getActivePanel()->getSearchType();
-	switch(search_type)
-	{
-		case LLInventoryFilter::SEARCHTYPE_CREATOR:
-			mSearchTypeCombo->setValue("search_by_creator");
-			break;
-		case LLInventoryFilter::SEARCHTYPE_DESCRIPTION:
-			mSearchTypeCombo->setValue("search_by_description");
-			break;
-		case LLInventoryFilter::SEARCHTYPE_UUID:
-			mSearchTypeCombo->setValue("search_by_UUID");
-			break;
-		case LLInventoryFilter::SEARCHTYPE_NAME:
-		default:
-			mSearchTypeCombo->setValue("search_by_name");
-			break;
-	}
-}
+//void LLPanelMainInventory::updateSearchTypeCombo()
+//{
+//	LLInventoryFilter::ESearchType search_type = getActivePanel()->getSearchType();
+//	switch(search_type)
+//	{
+//		case LLInventoryFilter::SEARCHTYPE_CREATOR:
+//			mSearchTypeCombo->setValue("search_by_creator");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_DESCRIPTION:
+//			mSearchTypeCombo->setValue("search_by_description");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_UUID:
+//			mSearchTypeCombo->setValue("search_by_UUID");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_NAME:
+//		default:
+//			mSearchTypeCombo->setValue("search_by_name");
+//			break;
+//	}
+//}
 
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
@@ -904,7 +904,7 @@ void LLPanelMainInventory::onFilterSelected()
 	{
 		mActivePanel->openAllFolders();
 	}
-	updateSearchTypeCombo();
+//	updateSearchTypeCombo();
 //	setFilterSubString(mFilterSubString);
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);

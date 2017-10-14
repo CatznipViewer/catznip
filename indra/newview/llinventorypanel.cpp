@@ -535,15 +535,15 @@ void LLInventoryPanel::setFilterWorn(bool filter)
 }
 // [/SL:KB]
 
-void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
-{
-	getFilter().setSearchType(type);
-}
+//void LLInventoryPanel::setSearchType(LLInventoryFilter::ESearchType type)
+//{
+//	getFilter().setSearchType(type);
+//}
 
-LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
-{
-	return getFilter().getSearchType();
-}
+//LLInventoryFilter::ESearchType LLInventoryPanel::getSearchType()
+//{
+//	return getFilter().getSearchType();
+//}
 
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {

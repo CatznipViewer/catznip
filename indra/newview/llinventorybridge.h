@@ -100,9 +100,9 @@ public:
 	        void setIncludedInFilter(bool include) override {};
 // [/SL:KB]
 
-	std::string getSearchableDescription() const;
-	std::string getSearchableCreatorName() const;
-	std::string getSearchableUUIDString() const;
+//	std::string getSearchableDescription() const;
+//	std::string getSearchableCreatorName() const;
+//	std::string getSearchableUUIDString() const;
 
 	virtual PermissionMask getPermissionMask() const;
 	virtual LLFolderType::EType getPreferredType() const;
