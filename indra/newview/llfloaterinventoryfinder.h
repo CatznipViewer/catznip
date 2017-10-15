@@ -54,7 +54,7 @@ public:
 	 */
 public:
 	void        refreshControls();
-	void        refreshFilter();
+	void        refreshFilter(const LLUICtrl* pCtrl = nullptr);
 	void        selectAllTypes();
 	void        selectNoTypes();
 	void        setFilterFromPanel();
