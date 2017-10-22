@@ -42,7 +42,6 @@ public:
 	 * LLPanel overrides
 	 */
 public:
-	bool notifyChildren(const LLSD& sdData) override;
 	void onOpen(const LLSD& sdKey) override;
 	void onVisibilityChange(BOOL new_visibility) override;
 	BOOL postBuild() override;

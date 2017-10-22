@@ -146,17 +146,6 @@ void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
 	}
 }
 
-// virtual
-bool LLPanelInventoryOfferFolder::notifyChildren(const LLSD& sdData)
-{
-	if (sdData["action"] == "response_values")
-	{
-		notifyParent(LLSD().with("response_values", LLSD().with("accept_in", m_pAcceptInCheck->get()).with("accept_in_folder", m_pAcceptInList->getValue().asUUID())));
-		return true;
-	}
-	return LLPanel::notifyChildren(sdData);
-}
-
 void LLPanelInventoryOfferFolder::refreshControls()
 {
 	bool fAcceptIn = m_pAcceptInCheck->get();
@@ -339,10 +328,13 @@ void LLPanelInventoryOfferFolder::showObjectFolder(const LLUUID& idObjectFolder)
 	if (m_idObject.notNull())
 	{
 		m_idObjectFolder = idObjectFolder;
-		m_fShowObjectFolder = true;
-		m_pAcceptInList->clearControlName();
-		refreshFolders();
-		m_pAcceptInList->setValue( (m_idObjectFolder.notNull()) ? LLSD(m_idObjectFolder) : LLSD(s_strUnknownFolder) );
+		m_fShowObjectFolder = gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptInObjectFolder");
+		if (m_fShowObjectFolder)
+		{
+			m_pAcceptInList->clearControlName();
+			refreshFolders();
+			m_pAcceptInList->setValue( (m_idObjectFolder.notNull()) ? LLSD(m_idObjectFolder) : LLSD(s_strUnknownFolder) );
+		}
 	}
 }
 
