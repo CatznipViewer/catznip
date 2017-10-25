@@ -193,7 +193,12 @@ LLSD LLCrashLock::getProcessList()
 //static
 bool LLCrashLock::fileExists(std::string filename)
 {
-	return boost::filesystem::exists(filename.c_str());
+#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
+	boost::filesystem::path file_path(utf8str_to_utf16str(filename));
+#else
+	boost::filesystem::path file_path(filename);
+#endif
+	return boost::filesystem::exists(file_path);
 }
 
 //void LLCrashLock::cleanupProcess(std::string proc_dir)

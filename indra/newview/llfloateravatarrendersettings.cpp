@@ -27,12 +27,15 @@
 
 #include "llfloateravatarrendersettings.h"
 
+#include "llagent.h"
 #include "llavatarnamecache.h"
 #include "llfloateravatarpicker.h"
 #include "llfiltereditor.h"
 #include "llfloaterreg.h"
 #include "llnamelistctrl.h"
+#include "llnotificationsutil.h"
 #include "llmenugl.h"
+#include "lltrans.h"
 #include "llviewerobjectlist.h"
 #include "llvoavatar.h"
 
@@ -144,6 +147,8 @@ void LLFloaterAvatarRenderSettings::updateList()
             item_params.columns.add().value(av_name.getCompleteName()).column("name");
             std::string setting = getString(iter->second == 1 ? "av_never_render" : "av_always_render");
             item_params.columns.add().value(setting).column("setting");
+            std::string timestamp = createTimestamp(LLRenderMuteList::getInstance()->getVisualMuteDate(iter->first));
+            item_params.columns.add().value(timestamp).column("timestamp");
             mAvatarSettingsList->addNameItemRow(item_params);
         }
     }
@@ -205,15 +210,7 @@ void LLFloaterAvatarRenderSettings::onCustomAction (const LLSD& userdata, const 
         new_setting = S32(LLVOAvatar::AV_ALWAYS_RENDER);
     }
 
-    LLVOAvatar *avatarp = find_avatar(av_id);
-    if (avatarp)
-    {
-        avatarp->setVisualMuteSettings(LLVOAvatar::VisualMuteSettings(new_setting));
-    }
-    else
-    {
-        LLRenderMuteList::getInstance()->saveVisualMuteSetting(av_id, new_setting);
-    }
+    setAvatarRenderSetting(av_id, new_setting);
 }
 
 
@@ -273,14 +270,49 @@ void LLFloaterAvatarRenderSettings::onClickAdd(const LLSD& userdata)
 void LLFloaterAvatarRenderSettings::callbackAvatarPicked(const uuid_vec_t& ids, S32 visual_setting)
 {
     if (ids.empty()) return;
+    if(ids[0] == gAgentID)
+    {
+        LLNotificationsUtil::add("AddSelfRenderExceptions");
+        return;
+    }
+    setAvatarRenderSetting(ids[0], visual_setting);
+}
 
-    LLVOAvatar *avatarp = find_avatar(ids[0]);
+void LLFloaterAvatarRenderSettings::setAvatarRenderSetting(const LLUUID& av_id, S32 new_setting)
+{
+    LLVOAvatar *avatarp = find_avatar(av_id);
     if (avatarp)
     {
-        avatarp->setVisualMuteSettings(LLVOAvatar::VisualMuteSettings(visual_setting));
+        avatarp->setVisualMuteSettings(LLVOAvatar::VisualMuteSettings(new_setting));
     }
     else
     {
-        LLRenderMuteList::getInstance()->saveVisualMuteSetting(ids[0], visual_setting);
+        LLRenderMuteList::getInstance()->saveVisualMuteSetting(av_id, new_setting);
     }
+}
+
+BOOL LLFloaterAvatarRenderSettings::handleKeyHere(KEY key, MASK mask )
+{
+    BOOL handled = FALSE;
+
+    if (KEY_DELETE == key)
+    {
+        setAvatarRenderSetting(mAvatarSettingsList->getCurrentID(), (S32)LLVOAvatar::AV_RENDER_NORMALLY);
+        handled = TRUE;
+    }
+    return handled;
+}
+
+std::string LLFloaterAvatarRenderSettings::createTimestamp(S32 datetime)
+{
+    std::string timeStr;
+    LLSD substitution;
+    substitution["datetime"] = datetime;
+
+    timeStr = "["+LLTrans::getString ("TimeMonth")+"]/["
+                 +LLTrans::getString ("TimeDay")+"]/["
+                 +LLTrans::getString ("TimeYear")+"]";
+
+    LLStringUtil::format (timeStr, substitution);
+    return timeStr;
 }

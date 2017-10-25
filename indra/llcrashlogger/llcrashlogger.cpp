@@ -243,9 +243,9 @@ bool getSLLog(const std::string& strLogPath, std::string& strLogFile)
 
 bool LLCrashLogger::readFromXML(LLSD& dest, const std::string& filename )
 {
-    std::string db_file_name = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,filename);
-    std::ifstream log_file(db_file_name.c_str());
-    
+	std::string db_file_name = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,filename);
+	llifstream log_file(db_file_name.c_str());
+
 	// Look for it in the given file
 	if (log_file.is_open())
 	{
@@ -470,7 +470,7 @@ void LLCrashLogger::gatherFiles()
             if ( ( iter->length() > 30 ) && (iter->rfind(".dmp") == (iter->length()-4) ) )
             {
                 std::string fullname = pathname + *iter;
-                std::ifstream fdat( fullname.c_str(), std::ifstream::binary);
+                llifstream fdat(fullname.c_str(), std::ifstream::binary);
                 if (fdat)
                 {
                     char buf[5];
@@ -780,7 +780,7 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
     
 	updateApplication("Sending reports...");
 
-	std::ofstream out_file(report_file.c_str());
+	llofstream out_file(report_file.c_str());
 	LLSDSerialize::toPrettyXML(post_data, out_file);
     out_file.flush();
 	out_file.close();
