@@ -155,6 +155,14 @@
          parameter="rename" />
     </menu_item_call>
 -->
+    <menu_item_call
+     label="New Folder"
+     layout="topleft"
+     name="New Folder">
+        <menu_item_call.on_click
+         function="Inventory.DoCreate"
+         parameter="category" />
+    </menu_item_call>
     <menu
      label="New Items"
      layout="topleft"
@@ -297,14 +305,6 @@
              parameter="eyes" />
         </menu_item_call>
     </menu>
-    <menu_item_call
-     label="New Folder"
-     layout="topleft"
-     name="New Folder">
-        <menu_item_call.on_click
-         function="Inventory.DoCreate"
-         parameter="category" />
-    </menu_item_call>
     <menu_item_call
      label="New Script"
      layout="topleft"
