@@ -641,8 +641,11 @@ void LLMaterialMgr::processGetQueue()
 		{
 			material_queue_t::iterator itMaterial = loopMaterial++;
 			materialsData.append((*itMaterial).asLLSD());
-			materials.erase(itMaterial);
+//			materials.erase(itMaterial);
 			markGetPending(region_id, *itMaterial);
+// [SL:KB] Patch: Viewer-Crash | Checked: Catznip-5.2
+			materials.erase(itMaterial);
+// [/SL:KB]
 		}
 		if (materials.empty())
 		{

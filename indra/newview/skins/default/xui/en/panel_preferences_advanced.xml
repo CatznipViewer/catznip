@@ -173,7 +173,7 @@
    left="80"
    name="UI Size:"
    top_pad="10"
-   width="150">
+   width="100">
     UI size:
   </text>
   <slider
@@ -189,7 +189,16 @@
    min_val="0.75"
    name="ui_scale_slider"
    top_pad="-14"
-   width="250" />
+   width="240" />
+  <button
+   commit_callback.function="Pref.ResetUIScale"
+   follows="left|top"
+   height="23"
+   label="Reset"
+   layout="topleft"
+   left_pad="3"
+   name="ui_scale_reset"
+   width="50" />
     <check_box
      control_name="ShowScriptErrors"
      follows="left|top"
