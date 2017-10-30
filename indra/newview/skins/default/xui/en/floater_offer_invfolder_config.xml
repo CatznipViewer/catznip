@@ -3,7 +3,7 @@
  can_close="true"
  can_minimize="false"
  can_resize="false"
- height="375"
+ height="395"
  name="offer_invfolder_configure"
  layout="topleft"
  positioning="centered"
@@ -61,7 +61,16 @@
      right="-10"
      top_pad="5"
      width="75" />
-    
+    <check_box
+     control_name="InventoryOfferAcceptInObjectFolder"
+     height="16"
+     label="Automatically select the inventory folder the offering object was rezzed from"
+     layout="topleft"
+     left="10"
+     name="check_select_objectfolder"
+     top="151"
+     width="130" />
+
     <view_border
      bevel_style="none"
      border_thickness="1"
@@ -71,8 +80,8 @@
      mouse_opaque="false"
      name="divisor1"
      right="-10"
-     top="155" />
-	   
+     top="172" />
+
     <text
      follows="top|left"
      height="16"

@@ -2538,8 +2538,8 @@ LLFloaterView::LLFloaterView (const Params& p)
 	mFocusCycleMode(FALSE),
 	mMinimizePositionVOffset(0),
 	mSnapOffsetBottom(0),
-	mSnapOffsetRight(0),
-	mFrontChild(NULL)
+	mSnapOffsetRight(0)
+//	mFrontChild(NULL)
 {
 	mSnapView = getHandle();
 }
@@ -2695,7 +2695,10 @@ void LLFloaterView::bringToFront(LLFloater* child, BOOL give_focus, BOOL restore
 	if (!child)
 		return;
 
-	if (mFrontChild == child)
+//	if (mFrontChild == child)
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: Catznip-5.2
+	if (mFrontChildHandle.get() == child)
+// [/SL:KB]
 	{
 		if (give_focus && !gFocusMgr.childHasKeyboardFocus(child))
 		{
@@ -2704,7 +2707,10 @@ void LLFloaterView::bringToFront(LLFloater* child, BOOL give_focus, BOOL restore
 		return;
 	}
 
-	mFrontChild = child;
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: Catznip-5.2
+	mFrontChildHandle = child->getHandle();
+// [/SL:KB]
+//	mFrontChild = child;
 
 	// *TODO: make this respect floater's mAutoFocus value, instead of
 	// using parameter
@@ -3266,12 +3272,13 @@ void LLFloaterView::syncFloaterTabOrder()
 			{
 // [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
 				// NOTE: this is hacky, but hopefully won't result in any measurable slowdown
-				if (mFrontChild != floaterp)
+				const LLFloater* pFrontChild = mFrontChildHandle.get();
+				if (pFrontChild != floaterp)
 				{
 					std::list<LLView*> listTop;
 
 					// Grab a list of top floaters that want to stay on top of the focused floater
-					if ( (mFrontChild) && (!mFrontChild->canFocusStealFrontmost()) )
+					if ( (pFrontChild) && (!pFrontChild->canFocusStealFrontmost()) )
 					{
 						for (child_list_const_iter_t itChild = getChildList()->begin(); itChild != getChildList()->end(); ++itChild)
 						{
