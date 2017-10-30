@@ -92,6 +92,9 @@ bool LLFlatListView::addItem(LLPanel * item, const LLSD& value /*= LLUUID::null*
 	
 	//_4 is for MASK
 	item->setMouseDownCallback(boost::bind(&LLFlatListView::onItemMouseClick, this, new_pair, _4));
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	item->setDoubleClickCallback(boost::bind(&LLFlatListView::onItemMouseDoubleClick, this, new_pair, _4));
+// [/SL:KB]
 	item->setRightMouseDownCallback(boost::bind(&LLFlatListView::onItemRightMouseClick, this, new_pair, _4));
 
 	// Children don't accept the focus
@@ -143,6 +146,9 @@ bool LLFlatListView::addItemPairs(pairs_list_t panel_list, bool rearrange /*= tr
 
             //_4 is for MASK
             panel->setMouseDownCallback(boost::bind(&LLFlatListView::onItemMouseClick, this, new_pair, _4));
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+			panel->setDoubleClickCallback(boost::bind(&LLFlatListView::onItemMouseDoubleClick, this, new_pair, _4));
+// [/SL:KB]
             panel->setRightMouseDownCallback(boost::bind(&LLFlatListView::onItemRightMouseClick, this, new_pair, _4));
             // Children don't accept the focus
             panel->setTabStop(false);
@@ -166,6 +172,9 @@ bool LLFlatListView::addItemPairs(pairs_list_t panel_list, bool rearrange /*= tr
 
             //_4 is for MASK
             panel->setMouseDownCallback(boost::bind(&LLFlatListView::onItemMouseClick, this, item_pair, _4));
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+			panel->setDoubleClickCallback(boost::bind(&LLFlatListView::onItemMouseDoubleClick, this, item_pair, _4));
+// [/SL:KB]
             panel->setRightMouseDownCallback(boost::bind(&LLFlatListView::onItemRightMouseClick, this, item_pair, _4));
             // Children don't accept the focus
             panel->setTabStop(false);
@@ -218,6 +227,9 @@ bool LLFlatListView::insertItemAfter(LLPanel* after_item, LLPanel* item_to_add, 
 
 	//_4 is for MASK
 	item_to_add->setMouseDownCallback(boost::bind(&LLFlatListView::onItemMouseClick, this, new_pair, _4));
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	item_to_add->setDoubleClickCallback(boost::bind(&LLFlatListView::onItemMouseDoubleClick, this, new_pair, _4));
+// [/SL:KB]
 	item_to_add->setRightMouseDownCallback(boost::bind(&LLFlatListView::onItemRightMouseClick, this, new_pair, _4));
 
 	rearrangeItems();
@@ -694,6 +706,12 @@ void LLFlatListView::onItemMouseClick(item_pair_t* item_pair, MASK mask)
 	else
 		selectItemPair(item_pair, true);
 }
+
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+void LLFlatListView::onItemMouseDoubleClick(item_pair_t* item_pair, MASK mask)
+{
+}
+// [/SL:KB]
 
 void LLFlatListView::onItemRightMouseClick(item_pair_t* item_pair, MASK mask)
 {

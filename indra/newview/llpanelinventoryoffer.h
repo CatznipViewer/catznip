@@ -42,7 +42,6 @@ public:
 	 * LLPanel overrides
 	 */
 public:
-	bool notifyChildren(const LLSD& sdData) override;
 	void onOpen(const LLSD& sdKey) override;
 	void onVisibilityChange(BOOL new_visibility) override;
 	BOOL postBuild() override;
@@ -65,6 +64,8 @@ protected:
 	void onUpdateSelection();
 	void refreshControls();
 	void refreshFolders();
+	void clearObjectFolder();
+	void showObjectFolder(const LLUUID& idObjectFolder);
 
 	/*
 	 * Member variables
@@ -76,7 +77,7 @@ protected:
 	LLButton*       m_pBrowseBtn = nullptr;
 
 	LLUUID          m_idObject;
-	bool            m_fShowObjectFolder = true;
+	bool            m_fShowObjectFolder = false;
 	LLUUID          m_idObjectFolder;
 	LLObjectSelectionHandle m_ObjectSelectionHandle;
 	boost::signals2::connection m_SelectionUpdateConnection;

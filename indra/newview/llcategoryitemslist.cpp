@@ -16,10 +16,12 @@
 
 #include "llviewerprecompiledheaders.h"
 
+#include "llappearancemgr.h"
 #include "llcategoryitemslist.h"
 #include "llinventoryfunctions.h"
 #include "llinventoryobserver.h"
 #include "lltransutil.h"
+#include "llviewercontrol.h"
 #include "llwearableitemslist.h"
 
 // ============================================================================
@@ -183,6 +185,50 @@ LLPanel* LLCategoryItemsList::createNewItem(LLViewerInventoryItem* pItem)
 		return nullptr;
 	}
 	return LLPanelCategoryInventoryItem::create(pItem, m_nIndicatorMask);
+}
+
+// virtual
+void LLCategoryItemsList::onItemMouseDoubleClick(item_pair_t* pItemPair, MASK mask)
+{
+	LLInventoryItemsList::onItemMouseDoubleClick(pItemPair, mask);
+
+	bool fCtrlDown = (MASK_CONTROL == mask), fOpenAdd = gSavedSettings.getBOOL("DoubleClickAttachmentAdd");
+	const LLPanelCategoryInventoryItem* pPanelItem = dynamic_cast<const LLPanelCategoryInventoryItem*>(pItemPair->first);
+
+	if (LLViewerInventoryItem* pItem = pPanelItem->getItem())
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_LINK:
+			case LLAssetType::AT_LINK_FOLDER:
+				// Broken links
+				break;
+			case LLAssetType::AT_CATEGORY:
+				{
+					const LLViewerInventoryCategory* pFolder = pItem->getLinkedCategory(); bool isOutfit = pFolder->getPreferredType() == LLFolderType::FT_OUTFIT;
+
+					const std::string pstrAction = LLAppearanceMgr::getCanRemoveFromCOF(pFolder->getUUID()) ? "detach" : ((fCtrlDown ^ fOpenAdd) ? "wear_add" : "wear_replace");
+					if (pstrAction == "detach")
+						LLAppearanceMgr::instance().takeOffOutfit(pFolder->getUUID());
+					else if ( (pstrAction == "wear_add") && (LLAppearanceMgr::instance().getCanAddToCOF(pFolder->getUUID())) )
+						LLAppearanceMgr::instance().addCategoryToCurrentOutfit(pFolder->getUUID());
+					else if ( (pstrAction == "wear_replace") && ((isOutfit && LLAppearanceMgr::instance().getCanReplaceCOF(pFolder->getUUID())) || (!isOutfit && !gAgentWearables.isCOFChangeInProgress())) )
+						LLAppearanceMgr::instance().replaceCurrentOutfit(pFolder->getUUID());
+				}
+				break;
+			default:
+				{
+					const std::string pstrAction = get_is_item_worn(pItem->getUUID()) ? "detach" : ((fCtrlDown ^ fOpenAdd) ? "wear_add" : "wear_replace");
+					if (pstrAction == "detach")
+						LLAppearanceMgr::instance().removeItemFromAvatar(pItem->getUUID());
+					else if (pstrAction == "wear_add")
+						LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getUUID(), true, false);
+					else if (pstrAction == "wear_replace")
+						LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getUUID(), true, true);
+				}
+			break;
+		}
+	}
 }
 
 void LLCategoryItemsList::setFolderId(const LLUUID& idFolder)

@@ -93,7 +93,8 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 
 	refreshFolders();
 	// Select the item (LLComboBox::postBuild has already been called at this point)
-	m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
+	if (m_pAcceptInList->getControlVariable())
+		m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
 
 	refreshControls();
 	return TRUE;
@@ -121,42 +122,28 @@ void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
 		{
 			const LLSD& sdPayload = notification->getPayload();
 
-			if ((sdPayload.has("accept_in")) && (sdPayload["accept_in"].isBoolean()))
+			if ( (sdPayload.has("accept_in")) && (sdPayload["accept_in"].isBoolean()) )
 			{
 				m_pAcceptInCheck->clearControlName();
 				m_pAcceptInCheck->set(sdPayload["accept_in"].asBoolean());
 			}
 
-			if ((sdPayload.has("accept_in_folder")) && (sdPayload["accept_in_folder"].isUUID()))
+			if ( (sdPayload.has("accept_in_folder")) && (sdPayload["accept_in_folder"].isUUID()) )
 			{
 				m_pAcceptInList->clearControlName();
 				m_pAcceptInList->setValue(sdPayload["accept_in_folder"]);
 			}
 
-			if ((sdPayload.has("from_object_id")) && (sdPayload["from_object_id"]).isUUID())
+			if ( (sdPayload.has("from_object_id")) && (sdPayload["from_object_id"].isUUID()) )
 			{
 				m_idObject = sdPayload["from_object_id"].asUUID();
-				m_idObjectFolder = sdPayload["from_object_folder_id"].asUUID();
-				refreshFolders();
-
-				m_pAcceptInList->clearControlName();
-				m_pAcceptInList->setValue( (m_idObjectFolder.notNull()) ? LLSD(m_idObjectFolder ) : LLSD(s_strUnknownFolder) );
+				if (sdPayload["from_id"].asUUID() == gAgentID)
+					showObjectFolder(sdPayload["from_object_folder_id"].asUUID());
 			}
 
 			refreshControls();
 		}
 	}
-}
-
-// virtual
-bool LLPanelInventoryOfferFolder::notifyChildren(const LLSD& sdData)
-{
-	if (sdData["action"] == "response_values")
-	{
-		notifyParent(LLSD().with("response_values", LLSD().with("accept_in", m_pAcceptInCheck->get()).with("accept_in_folder", m_pAcceptInList->getValue().asUUID())));
-		return true;
-	}
-	return LLPanel::notifyChildren(sdData);
 }
 
 void LLPanelInventoryOfferFolder::refreshControls()
@@ -191,7 +178,7 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false), ADD_TOP);
 
 	// Add the originating folder (if it exists)
-	if ( (m_idObject.notNull()) && (m_fShowObjectFolder) )
+	if (m_fShowObjectFolder)
 	{
 		if (m_idObjectFolder.notNull())
 		{
@@ -317,10 +304,37 @@ void LLPanelInventoryOfferFolder::setObjectId(const LLUUID& idObject)
 			pObj = pObj->getRootEdit();
 		m_idObject = (pObj) ? pObj->getID() : idObject;
 
-		m_idObjectFolder = getFolderFromObject(gObjectList.findObject(idObject), LLStringUtil::null, &m_fShowObjectFolder);
-		m_fShowObjectFolder &= (bool)m_idObjectFolder.notNull();
+		bool fFound = false; const LLUUID idObjectFolder = getFolderFromObject(pObj, LLStringUtil::null, &fFound);
+		if ( (!fFound) || (idObjectFolder.notNull()) )
+			showObjectFolder(idObjectFolder);
+		else
+			clearObjectFolder();
+	}
+}
 
+void LLPanelInventoryOfferFolder::clearObjectFolder()
+{
+	if (m_idObject.notNull())
+	{
+		m_idObjectFolder.setNull();
+		m_fShowObjectFolder = false;
 		refreshFolders();
+		m_pAcceptInList->setControlVariable(gSavedPerAccountSettings.getControl("InventoryOfferAcceptInFolder"));
+	}
+}
+
+void LLPanelInventoryOfferFolder::showObjectFolder(const LLUUID& idObjectFolder)
+{
+	if (m_idObject.notNull())
+	{
+		m_idObjectFolder = idObjectFolder;
+		m_fShowObjectFolder = gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptInObjectFolder");
+		if (m_fShowObjectFolder)
+		{
+			m_pAcceptInList->clearControlName();
+			refreshFolders();
+			m_pAcceptInList->setValue( (m_idObjectFolder.notNull()) ? LLSD(m_idObjectFolder) : LLSD(s_strUnknownFolder) );
+		}
 	}
 }
 
@@ -355,10 +369,11 @@ void LLPanelInventoryOfferFolder::onUpdateSelection()
 	LLSelectNode* pSelNode = m_ObjectSelectionHandle->getFirstRootNode();
 	if ( (!pSelNode) || (!pSelNode->mValid) || (pSelNode->getObject()->getID() != m_idObject) )
 		return;
-
-	m_idObjectFolder = pSelNode->mFolderID;
-	m_fShowObjectFolder = m_idObjectFolder.notNull();
-	refreshFolders();
+	if (pSelNode->mFolderID.notNull())
+		showObjectFolder(pSelNode->mFolderID);
+	else
+		clearObjectFolder();
+	m_SelectionUpdateConnection.disconnect();
 }
 
 // ============================================================================

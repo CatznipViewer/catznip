@@ -284,18 +284,21 @@ void LLFloaterBuyContents::onClickBuy()
 	}
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-	if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+	if (const LLPanelInventoryOfferFolder* pFolderPanel = findChild<const LLPanelInventoryOfferFolder>("panel_offer_invfolder", true))
 	{
-		const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
-		if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+		if (pFolderPanel->getAcceptIn())
 		{
-			// Prevent the user from clicking buy a second time while we wait for the folder to be created
-			getChild<LLUICtrl>("buy_btn")->setEnabled(false);
+			const LLUUID idDestFolder = pFolderPanel->getSelectedFolder();
+			if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+			{
+				// Prevent the user from clicking buy a second time while we wait for the folder to be created
+				getChild<LLUICtrl>("buy_btn")->setEnabled(false);
 
-			// Create the destination folder (note: might fire instantly if the folder already exists)
-			new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterBuyContents::onClickBuyCb, getHandle(), _1));
+				// Create the destination folder (note: might fire instantly if the folder already exists)
+				new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterBuyContents::onClickBuyCb, getHandle(), _1));
 
-			return;
+				return;
+			}
 		}
 	}
 
