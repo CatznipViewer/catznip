@@ -173,7 +173,7 @@
    left="80"
    name="UI Size:"
    top_pad="10"
-   width="150">
+   width="100">
     UI size:
   </text>
   <slider

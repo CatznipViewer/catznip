@@ -17,6 +17,7 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llfloaterquickprefs.h"
+#include "llviewercontrol.h"
 
 // ====================================================================================
 // LLFloaterQuickPrefs class
@@ -54,8 +55,11 @@ BOOL LLFloaterQuickPrefs::postBuild()
 		llassert(m_pPanels[idxPanel]);
 	}
 
-	// Show default panel
-	onShowPanel(PANEL_APPEARANCE);
+	// Show the last panel
+	EPanelType ePanel = (EPanelType)gSavedSettings.getU32("QuickPrefsTab");
+	if (ePanel >= PANEL_COUNT)
+		ePanel = PANEL_APPEARANCE;
+	onShowPanel(ePanel);
 
 	return TRUE;
 }
@@ -74,6 +78,7 @@ void LLFloaterQuickPrefs::onShowPanel(LLFloaterQuickPrefs::EPanelType eNewPanel)
 	m_pPanels[eNewPanel]->setVisible(true);
 
 	m_eCurrentPanel = eNewPanel;
+	gSavedSettings.setU32("QuickPrefsTab", m_eCurrentPanel);
 }
 
 // ====================================================================================
