@@ -48,6 +48,7 @@
 #include "llavataractions.h"
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 #include "llcheckboxctrl.h"
+#include "llpanelinventoryoffer.h"
 // [/SL:KB]
 
 //const S32 BOTTOM_PAD = VPAD * 3;
@@ -266,10 +267,10 @@ void LLToastNotifyPanel::onClickButton(void* data)
 	}
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-	self->mControlPanel->notifyChildren(LLSD().with("action", "response_values"));
-	for (LLSD::map_const_iterator itMap = self->mResponseValues.beginMap(); itMap != self->mResponseValues.endMap(); ++itMap)
+	if (const LLPanelInventoryOfferFolder* pFolderPanel = self->mControlPanel->findChild<const LLPanelInventoryOfferFolder>("panel_offer_invfolder", true))
 	{
-		response[itMap->first] = itMap->second;
+		response["accept_in"] = pFolderPanel->getAcceptIn();
+		response["accept_in_folder"] = pFolderPanel->getSelectedFolder();
 	}
 // [/SL:KB]
 
@@ -554,18 +555,6 @@ void LLIMToastNotifyPanel::snapToMessageHeight()
 }
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
-S32 LLToastNotifyPanel::notifyParent(const LLSD& sdInfo)
-{
-	if ( (sdInfo.has("response_values")) && (sdInfo["response_values"].isMap()) )
-	{
-		const LLSD& sdValues = sdInfo["response_values"];
-		for (LLSD::map_const_iterator itMap = sdValues.beginMap(); itMap != sdValues.endMap(); ++itMap)
-			mResponseValues[itMap->first] = itMap->second;
-		return 1;
-	}
-	return LLToastPanel::notifyParent(sdInfo);
-}
-
 LLCheckBoxCtrl* LLToastNotifyPanel::createCheckBox(const LLSD& form_element)
 {
 	LLControlVariable* pControl = gSavedSettings.getControl(form_element["control"].asString());

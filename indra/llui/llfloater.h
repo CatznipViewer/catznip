@@ -697,7 +697,10 @@ private:
 	S32				mMinimizePositionVOffset;
 	typedef std::vector<std::pair<LLHandle<LLFloater>, boost::signals2::connection> > hidden_floaters_t;
 	hidden_floaters_t mHiddenFloaters;
-	LLFloater *		mFrontChild;
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: Catznip-5.2
+	LLHandle<LLFloater> mFrontChildHandle;
+// [/SL:KB]
+//	LLFloater *		mFrontChild;
 };
 
 //

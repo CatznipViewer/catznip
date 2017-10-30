@@ -462,6 +462,11 @@ void LLViewerObject::markDead()
 		}
 
 		sNumZombieObjects++;
+
+// [SL:KB] Patch: Viewer-Crash | Checked: Catznip-5.2
+		// We can't assume the region will still be around beyond this point
+		mRegionp = nullptr;
+// [/SL:KB]
 	}
 }
 
