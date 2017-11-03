@@ -353,12 +353,15 @@ std::string LLTextEditor::getSelectionString() const
 
 //void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
-void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up, BOOL keep_selection)
 // [/SL:KB]
 {
 	if (search_text_in.empty())
 	{
-		return;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		return false;
+// [/SL:KB]
+//		return;
 	}
 
 	LLWString text = getWText();
@@ -409,10 +412,19 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	// If still -1, then search_text just isn't found.
     if (-1 == loc)
 	{
-		mIsSelecting = FALSE;
-		mSelectionEnd = 0;
-		mSelectionStart = 0;
-		return;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		if (!keep_selection)
+		{
+			mIsSelecting = FALSE;
+			mSelectionEnd = 0;
+			mSelectionStart = 0;
+		}
+		return false;
+// [/SL:KB]
+//		mIsSelecting = FALSE;
+//		mSelectionEnd = 0;
+//		mSelectionStart = 0;
+//		return;
 	}
 
 	setCursorPos(loc);
@@ -426,6 +438,9 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	mIsSelecting = TRUE;
 	mSelectionEnd = mCursorPos;
 	mSelectionStart = llmin((S32)getLength(), (S32)(mCursorPos + search_text.size()));
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	return true;
+// [/SL:KB]
 }
 
 //BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
