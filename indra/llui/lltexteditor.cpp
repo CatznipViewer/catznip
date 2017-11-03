@@ -379,12 +379,12 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 			if (search_up)
 			{
 				// We already have this word selected, we are searching for the previous.
-				setCursorPos(llmax(0, mCursorPos - 1));
+				setCursorPos(llmax(0, llmin(mSelectionStart, mSelectionEnd) - 1));
 			}
 			else
 			{
 				// We already have this word selected, we are searching for the next.
-				setCursorPos(mCursorPos + search_text.size());
+				setCursorPos(llmax(mSelectionStart, mSelectionEnd) + 1);
 			}
 // [/SL:KB]
 //			// We already have this word selected, we are searching for the next.
