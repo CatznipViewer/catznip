@@ -10,15 +10,23 @@
  name="preview_conversation"
  save_rect="true"
  title="CONVERSATION:"
- width="400">
-    <floater.string
+ width="550">
+    <string
      name="Title">
         CONVERSATION: [NAME]
-    </floater.string>
-    <floater.string
+    </string>
+    <string
      name="DefaultFilter">
         (No filter)
-    </floater.string>
+    </string>
+    <string
+     name="NotFoundStart">
+        Reached the start of the chat log without finding another occurence.
+    </string>
+    <string
+     name="NotFoundEnd">
+        Reached the end of the chat log without finding another occurence.
+    </string>
     <chat_history
      font="SansSerifSmall"
      follows="all"
@@ -66,8 +74,26 @@
      layout="topleft"
      name="search_editor"
      left_pad="5"
-     width="90"
+     width="105"
      top_delta="-3" />
+    <button
+     follows="bottom|right"
+     height="23"
+     image_overlay="BackArrow_Off"
+     layout="topleft"
+     left_pad="3"
+     name="search_prev_btn"
+     top_delta="0"
+     width="23" />
+    <button
+     follows="bottom|right"
+     height="23"
+     image_overlay="ForwardArrow_Off"
+     layout="topleft"
+     left_pad="1"
+     name="search_next_btn"
+     top_delta="0"
+     width="23" />
     <text
      follows="bottom|right"
      font="SansSerif"
@@ -98,7 +124,7 @@
      layout="topleft"
      name="page_num_label"
      left_pad="5"
-     top_delta="4"
+     top_delta="3"
      value="/ 1234"
      width="40">
     </text>

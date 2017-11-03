@@ -452,6 +452,9 @@ public:
 
 	// cursor manipulation
 	bool					setCursor(S32 row, S32 column);
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-2.1
+	S32						getCursorPos() const { return mCursorPos; }
+// [/SL:KB
 	bool					setCursorPos(S32 cursor_pos, bool keep_cursor_offset = false);
 	void					startOfLine();
 	void					endOfLine();
@@ -462,6 +465,9 @@ public:
 
 	bool					scrolledToStart();
 	bool					scrolledToEnd();
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.2
+	void					setTrackEnd(bool track_end) { mTrackEnd = track_end; }
+// [/SL:KB
 
 	const LLFontGL*			getFont() const					{ return mFont; }
 
@@ -583,6 +589,9 @@ protected:
 	const LLStyle::Params&			getStyleParams();
 
 	//  manage lines
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.2
+public:
+// [/SL:KB
 	S32								getLineStart( S32 line ) const;
 	S32								getLineEnd( S32 line ) const;
 	S32								getLineNumFromDocIndex( S32 doc_index, bool include_wordwrap = true) const;
@@ -590,6 +599,9 @@ protected:
 	S32								getFirstVisibleLine() const;
 	std::pair<S32, S32>				getVisibleLines(bool fully_visible = false);
 	S32								getLeftOffset(S32 width);
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.2
+protected:
+// [/SL:KB
 	void							reflow();
 
 	// cursor

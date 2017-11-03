@@ -333,8 +333,8 @@ void LLTextEditor::setText(const LLStringExplicit &utf8str, const LLStyle::Param
 }
 
 //void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
-// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
-bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up, BOOL keep_selection)
 // [/SL:KB]
 {
 	if (search_text_in.empty())
