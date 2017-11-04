@@ -519,7 +519,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	// Zero expiry time is set only once to allow initial update.
 	mRefreshTimer->setTimerExpirySec(0);
 	mRefreshTimer->start();
-	initBtns();
+//	initBtns();
 
 //	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
 // [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
@@ -1529,6 +1529,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [/SL:KB]
 		LLRect add_btn_rect = mAddBtn->getRect();
 		LLRect call_btn_rect = mVoiceButton->getRect();
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+		LLRect extended_toolbar_rect = (mExtendedButtonPanel) ? mExtendedButtonPanel->getRect() : LLRect();
+// [/SL:KB]
 		S32 gap_width = call_btn_rect.mLeft - add_btn_rect.mRight;
 		S32 right_shift = gear_btn_rect.getWidth() + gap_width;
 		if(mGearBtn->getVisible())
@@ -1542,6 +1545,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [/SL:KB]
 			add_btn_rect.translate(right_shift,0);
 			call_btn_rect.translate(right_shift,0);
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+			extended_toolbar_rect.translate(right_shift,0);
+// [/SL:KB]
 		}
 		else
 		{
@@ -1553,6 +1559,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [/SL:KB]
 			add_btn_rect.translate(-right_shift,0);
 			call_btn_rect.translate(-right_shift,0);
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+			extended_toolbar_rect.translate(-right_shift,0);
+// [/SL:KB]
 		}
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 		mViewBtn->setRect(view_btn_rect);
@@ -1562,6 +1571,10 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [/SL:KB]
 		mAddBtn->setRect(add_btn_rect);
 		mVoiceButton->setRect(call_btn_rect);
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+		if (mExtendedButtonPanel)
+			mExtendedButtonPanel->setRect(extended_toolbar_rect);
+// [/SL:KB]
 	}
 }
 

@@ -308,6 +308,10 @@ bool LLGroupList::onContextMenuItemClick(const LLSD& userdata)
 	{
 		LLFloaterReg::showInstance("group_create_notice", LLSD().with("group", selected_group));
 	}
+	else if (action == "view_chat_history")
+	{
+		LLGroupActions::viewChatHistory(selected_group);
+	}
 	else if (action == "view_notices")
 	{
 		LLGroupActions::showNotices(selected_group);
@@ -346,8 +350,14 @@ bool LLGroupList::onContextMenuItemEnable(const LLSD& userdata)
 	  return real_group_selected && LLVoiceClient::getInstance()->voiceEnabled() && LLVoiceClient::getInstance()->isVoiceWorking();
 
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
-	if (userdata.asString() == "create_notice")
+	if (userdata.asStringRef() == "create_notice")
+	{
 		return real_group_selected && LLGroupActions::hasPowerInGroup(selected_group_id, GP_NOTICES_SEND);
+	}
+	else if (userdata.asStringRef() == "view_chat_history")
+	{
+		return LLGroupActions::hasChatHistory(selected_group_id);
+	}
 // [/SL:KB]
 
 	return real_group_selected;

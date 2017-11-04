@@ -502,6 +502,29 @@ void LLFloaterIMSession::initIMFloater()
 //virtual
 BOOL LLFloaterIMSession::postBuild()
 {
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	if (mIsP2PChat)
+	{
+		mExtendedButtonPanel = getChild<LLPanel>("p2p_toolbar");
+		mExtendedButtonPanel->setVisible(true);
+
+		mExtendedButtonPanel->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "view_profile"));
+		mExtendedButtonPanel->getChild<LLUICtrl>("teleport_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::onTeleportClicked, this, _1));
+		mExtendedButtonPanel->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "chat_history"));
+		mExtendedButtonPanel->getChild<LLUICtrl>("pay_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "pay"));
+	}
+	else if ( (mSession) && (mSession->isGroupSessionType()) )
+	{
+		mExtendedButtonPanel = getChild<LLPanel>("group_toolbar");
+		mExtendedButtonPanel->setVisible(true);
+
+		mExtendedButtonPanel->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_profile"));
+		mExtendedButtonPanel->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "chat_history"));
+		mExtendedButtonPanel->getChild<LLUICtrl>("view_notices_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_notices"));
+		mExtendedButtonPanel->getChild<LLUICtrl>("snooze_groupt_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::onSnoozeGroupClicked, this, _1));
+	}
+// [/SL:KB]
+
 	BOOL result = LLFloaterIMSessionTab::postBuild();
 
 //	mInputEditor->setMaxTextLength(1023);
@@ -530,29 +553,6 @@ BOOL LLFloaterIMSession::postBuild()
 	//see LLFloaterIMPanel for how it is done (IB)
 
 	initIMFloater();
-
-// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
-	if (mIsP2PChat)
-	{
-		LLPanel* pToolbar = getChild<LLPanel>("p2p_toolbar");
-		pToolbar->setVisible(true);
-
-		pToolbar->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "view_profile"));
-		pToolbar->getChild<LLUICtrl>("teleport_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::onTeleportClicked, this, _1));
-		pToolbar->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "chat_history"));
-		pToolbar->getChild<LLUICtrl>("pay_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "pay"));
-	}
-	else if ( (mSession) && (mSession->isGroupSessionType()) )
-	{
-		LLPanel* pToolbar = getChild<LLPanel>("group_toolbar");
-		pToolbar->setVisible(true);
-
-		pToolbar->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_profile"));
-		pToolbar->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "chat_history"));
-		pToolbar->getChild<LLUICtrl>("view_notices_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_notices"));
-		pToolbar->getChild<LLUICtrl>("snooze_groupt_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::onSnoozeGroupClicked, this, _1));
-	}
-// [/SL:KB]
 
 	return result;
 }

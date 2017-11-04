@@ -256,6 +256,7 @@ protected:
     LLButton* mVoiceButton;
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
 	LLButton* mSearchBtn;
+	LLPanel* mExtendedButtonPanel = nullptr;
 // [/SL:KB]
 //    LLUICtrl* mTranslationCheckBox;
 

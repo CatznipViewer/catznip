@@ -38,6 +38,7 @@ extern const std::string LL_FCP_CONVERSATION_PATH;  //"conversation_path"
 
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
 class LLComboBox;
+class LLLineEditor;
 // [/SL:KB]
 class LLSpinCtrl;
 
@@ -57,8 +58,9 @@ public:
 
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
 protected:
+	enum class ESearchDirection { DOWN, UP };
 	void onMonthFilterChanged();
-	void onSearch(const std::string& strNeedle, bool fSearchUp);
+	void onSearch(ESearchDirection eDirection);
 	void refreshMonthFilter();
 // [/SL:KB]
 private:
@@ -70,6 +72,7 @@ private:
 	LLChatHistory*	mChatHistory;
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
 	LLComboBox*		mFilterCombo = nullptr;
+	LLLineEditor*   mSearchEditor = nullptr;
 // [/SL:KB]
 	LLUUID			mSessionID;
 	int				mCurrentPage;
