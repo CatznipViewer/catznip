@@ -139,12 +139,14 @@ bool LLControlVariable::llsd_compare(const LLSD& a, const LLSD & b)
 //	  mPersist(persist),
 //	  mHideFromSettingsEditor(hidefromsettingseditor)
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
-LLControlVariable::LLControlVariable(const std::string& name, eControlType type, LLSD initial, const std::string& comment, ePersist persist, bool hidefromsettingseditor, const std::string& tooltip, U32 tooltipflags)
+LLControlVariable::LLControlVariable(const std::string& name, eControlType type, LLSD initial, const std::string& comment, ePersist persist, bool hidefromsettingseditor, bool exlcude_from_preset,
+                                     const std::string& tooltip, U32 tooltipflags)
 	: mName(name),
 	  mComment(comment),
 	  mType(type),
 	  mPersist(persist),
 	  mHideFromSettingsEditor(hidefromsettingseditor),
+	  mExcludeFromPreset(exlcude_from_preset),
 	  mToolTip(tooltip),
 	  mToolTipFlags(tooltipflags)
 // [/SL:KB]
@@ -415,8 +417,8 @@ std::string LLControlGroup::typeEnumToString(eControlType typeenum)
 
 //LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor)
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
-LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor,
-                                                  const std::string& tooltip, U32 tooltipflags)
+LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist,
+                                                  BOOL hidefromsettingseditor, BOOL exclude_from_preset, const std::string& tooltip, U32 tooltipflags)
 // [/SL:KB]
 {
 	LLControlVariable* existing_control = getControl(name);
@@ -442,7 +444,7 @@ LLControlVariable* LLControlGroup::declareControl(const std::string& name, eCont
 	// if not, create the control and add it to the name table
 //	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor);
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
-	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor, tooltip, tooltipflags);
+	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor, exclude_from_preset, tooltip, tooltipflags);
 // [/SL:KB]
 	mNameTable[name] = control;	
 	return control;
@@ -895,7 +897,10 @@ U32 LLControlGroup::saveToFile(const std::string& filename, BOOL nondefault_only
 	return num_saved;
 }
 
-U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values)
+//U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values)
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values, bool is_preset)
+// [/SL:KB]
 {
 	LLSD settings;
 	llifstream infile;
@@ -915,6 +920,9 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 
 	U32	validitems = 0;
 	bool hidefromsettingseditor = false;
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+	bool exclude_from_preset = false;
+// [/SL:KB]
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 	U32 tooltipflags = 0;
 // [/SL:KB]
@@ -942,6 +950,10 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 		{
 			hidefromsettingseditor = false;
 		}
+
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+		exclude_from_preset = (control_map.has("ExcludeFromPreset")) ? control_map["ExcludeFromPreset"].asBoolean() : false;
+// [/SL:KB]
 	
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 		// If a control doesn't specify its own tooltop but is driven by a control variable then the control can
@@ -964,7 +976,10 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 
 		// If the control exists just set the value from the input file.
 		LLControlVariable* existing_control = getControl(name);
-		if(existing_control)
+//		if(existing_control)
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+		if ( (existing_control) && ((!is_preset) || (!existing_control->isExcludedFromPreset())) )
+// [/SL:KB]
 		{
 			// set_default_values is true when we're loading the initial,
 			// immutable files from app_settings, e.g. settings.xml.
@@ -978,6 +993,9 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 					existing_control->setDefaultValue(control_map["Value"]);
 					existing_control->setPersist(persist);
 					existing_control->setHiddenFromSettingsEditor(hidefromsettingseditor);
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+					existing_control->setExcludedFromPreset(exclude_from_preset);
+// [/SL:KB]
 					existing_control->setComment(control_map["Comment"].asString());
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 					if (control_map.has("ToolTip"))
@@ -1002,7 +1020,10 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 			// *NOTE: If not persisted and not setting defaults, 
 			// the value should not get loaded.
 		}
-		else
+//		else
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+		else if ( (!existing_control) && (!is_preset) )
+// [/SL:KB]
 		{
 			// We've never seen this control before. Either we're loading up
 			// the initial set of default settings files (set_default_values)
@@ -1044,6 +1065,7 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 						   persist,
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 						   hidefromsettingseditor,
+						   exclude_from_preset,
 						   control_map.has("ToolTip") ? control_map["ToolTip"].asString() : LLStringUtil::null,
 						   tooltipflags
 // [/SL:KB]
