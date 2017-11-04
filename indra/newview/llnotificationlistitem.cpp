@@ -412,14 +412,24 @@ BOOL LLGroupNoticeNotificationListItem::postBuild()
     mTitleBoxExp->setValue(mParams.subject);
     mNoticeTextExp->setValue(mParams.message);
 
-    mTimeBox->setValue(buildNotificationDate(mParams.time_stamp, UTC));
-    mTimeBoxExp->setValue(buildNotificationDate(mParams.time_stamp, UTC));
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.2
+    mTimeBox->setValue(buildNotificationDate(mParams.time_stamp));
+    mTimeBoxExp->setValue(buildNotificationDate(mParams.time_stamp));
     //Workaround: in case server timestamp is 0 - we use the time when notification was actually received
     if (mParams.time_stamp.isNull())
     {
-        mTimeBox->setValue(buildNotificationDate(mParams.received_time, UTC));
-        mTimeBoxExp->setValue(buildNotificationDate(mParams.received_time, UTC));
+        mTimeBox->setValue(buildNotificationDate(mParams.received_time));
+        mTimeBoxExp->setValue(buildNotificationDate(mParams.received_time));
     }
+// [/SL:KB]
+//	mTimeBox->setValue(buildNotificationDate(mParams.time_stamp, UTC));
+//    mTimeBoxExp->setValue(buildNotificationDate(mParams.time_stamp, UTC));
+//    //Workaround: in case server timestamp is 0 - we use the time when notification was actually received
+//    if (mParams.time_stamp.isNull())
+//    {
+//        mTimeBox->setValue(buildNotificationDate(mParams.received_time, UTC));
+//        mTimeBoxExp->setValue(buildNotificationDate(mParams.received_time, UTC));
+//    }
     setSender(mParams.sender);
 
     if (mInventoryOffer != NULL)
