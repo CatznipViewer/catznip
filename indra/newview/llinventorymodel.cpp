@@ -222,6 +222,14 @@ BOOL LLInventoryModel::isObjectDescendentOf(const LLUUID& obj_id,
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+BOOL LLInventoryModel::isInTrash(const LLUUID& obj_id) /*const*/
+{
+	const LLUUID idTrash = findCategoryUUIDForType(LLFolderType::FT_TRASH);
+	return isObjectDescendentOf(obj_id, idTrash);
+}
+// [/SL:KB]
+
 const LLViewerInventoryCategory *LLInventoryModel::getFirstNondefaultParent(const LLUUID& obj_id) const
 {
 	const LLInventoryObject* obj = getObject(obj_id);
