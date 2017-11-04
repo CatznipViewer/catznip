@@ -14,10 +14,10 @@
     <floater.string name="no_one_near">No one near</floater.string>
     <floater.string name="no_results">No results</floater.string>
     <floater.string name="searching">Searching...</floater.string>
+    <floater.string
      name="not_found_text">
         Resident wasn't found.
     </floater.string>
-    <floater.string
     <!-- For multiple person selection, use "Select" and "Close" 
       instead of "OK" and "Cancel" because "Cancel" still keeps the ones 
       you have already selected.  The code will show the appropriate

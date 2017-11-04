@@ -65,6 +65,11 @@ public:
 	 * Show group information panel.
 	 */
 	static void showNotices(const LLUUID& group_id);
+
+	/**
+	 * Show the group's chat history.
+	 */
+	static void viewChatHistory(const LLUUID& group_id);
 // [/SL:KB]
 
 	/**
@@ -113,8 +118,11 @@ public:
 	static bool isInGroup(const LLUUID& group_id);
 
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
-	/// Returns true if the current user has the specified power in the group
+	// Returns true if the current user has the specified power in the group
 	static bool hasPowerInGroup(const LLUUID& group_id, U64 power);
+
+	// Returns true if there is a chat transcript for the specified group
+	static bool hasChatHistory(const LLUUID& group_id);
 // [/SL:KB]
 
 	/**

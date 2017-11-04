@@ -488,6 +488,12 @@ void LLGroupActions::showNotices(const LLUUID& group_id)
 	}
 // [/SL:KB]
 }
+
+// static
+void LLGroupActions::viewChatHistory(const LLUUID& group_id)
+{
+	LLFloaterReg::showInstance("preview_conversation", group_id, true);
+}
 // [/SL:KB]
 
 //void LLGroupActions::refresh_notices()
@@ -716,6 +722,12 @@ bool LLGroupActions::isInGroup(const LLUUID& group_id)
 bool LLGroupActions::hasPowerInGroup(const LLUUID& group_id, U64 power)
 {
 	return gAgent.hasPowerInGroup(group_id, power);
+}
+
+// static
+bool LLGroupActions::hasChatHistory(const LLUUID& group_id)
+{
+	return LLLogChat::isTranscriptExist(group_id, true);
 }
 // [/SL:KB]
 
