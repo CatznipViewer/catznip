@@ -167,6 +167,8 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 		for (LLSD::array_const_iterator itFolder = sdOptionsList.beginArray(), endFolder = sdOptionsList.endArray(); itFolder != endFolder; ++itFolder)
 		{
 			const LLAcceptInFolder folderInfo(*itFolder);
+			if (gInventory.isInTrash(folderInfo.getId()))
+				continue;
 			if (const LLInventoryCategory* pFolder = gInventory.getCategory(folderInfo.getId()))
 				m_pAcceptInList->add(folderInfo.getName(), pFolder->getUUID());
 		}
@@ -182,8 +184,15 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	{
 		if (m_idObjectFolder.notNull())
 		{
-			if (LLViewerInventoryCategory* pFolder = gInventory.getCategory(m_idObjectFolder))
-				m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), pFolder->getName().c_str()), pFolder->getUUID(), ADD_TOP);
+			if (!gInventory.isInTrash(m_idObjectFolder))
+			{
+				if (LLViewerInventoryCategory* pFolder = gInventory.getCategory(m_idObjectFolder))
+					m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), pFolder->getName().c_str()), pFolder->getUUID(), ADD_TOP);
+			}
+			else
+			{
+				sdSelValue = LLUUID(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+			}
 		}
 		else if (LLViewerObject* pObj = gObjectList.findObject(m_idObject))
 		{
@@ -213,7 +222,8 @@ bool LLPanelInventoryOfferFolder::getAcceptIn() const
 
 const LLUUID LLPanelInventoryOfferFolder::getSelectedFolder() const
 {
-	return (m_pAcceptInCheck->get()) ? m_pAcceptInList->getValue().asUUID() : LLUUID::null;
+	const LLUUID idFolder = (m_pAcceptInCheck->get()) ? m_pAcceptInList->getValue().asUUID() : LLUUID::null;
+	return ( (idFolder.notNull()) && (!gInventory.isInTrash(idFolder)) ) ? idFolder : LLUUID::null;
 }
 
 void LLPanelInventoryOfferFolder::onBrowseFolder()

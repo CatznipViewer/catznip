@@ -262,6 +262,11 @@ public:
 	// Check if one object has a parent chain up to the category specified by UUID.
 	BOOL isObjectDescendentOf(const LLUUID& obj_id, const LLUUID& cat_id) const;
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	// Check if the inventory object is in the trash
+	BOOL isInTrash(const LLUUID& obj_id) /*const*/;
+// [/SL:KB]
+
 	// Follow parent chain to the top.
 	bool getObjectTopmostAncestor(const LLUUID& object_id, LLUUID& result) const;
 
