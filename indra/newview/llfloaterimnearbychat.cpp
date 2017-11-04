@@ -125,6 +125,16 @@ LLFloaterIMNearbyChat* LLFloaterIMNearbyChat::buildFloater(const LLSD& key)
 //virtual
 BOOL LLFloaterIMNearbyChat::postBuild()
 {
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+	if (mIsNearbyChat)
+	{
+		mExtendedButtonPanel = getChild<LLPanel>("nearby_toolbar");
+		mExtendedButtonPanel->setVisible(true);
+
+		mExtendedButtonPanel->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterReg::showInstance, "preview_conversation", LLUUID::null, true));
+	}
+// [/SL:KB]
+
     setIsSingleInstance(TRUE);
     BOOL result = LLFloaterIMSessionTab::postBuild();
 
