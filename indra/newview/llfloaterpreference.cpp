@@ -985,7 +985,10 @@ void LLFloaterPreference::getControlNames(std::vector<std::string>& names)
 			if (ctrl)
 			{
 				LLControlVariable* control = ctrl->getControlVariable();
-				if (control)
+//				if (control)
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+				if ( (control) && (!control->isExcludedFromPreset()) )
+// [/SL:KB]
 				{
 					std::string control_name = control->getName();
 					if (std::find(names.begin(), names.end(), control_name) == names.end())
