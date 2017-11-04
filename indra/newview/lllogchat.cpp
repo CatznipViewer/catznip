@@ -891,9 +891,21 @@ std::string LLLogChat::getTranscriptName(const LLUUID& avatar_id, bool is_group)
 {
 	std::string strFileName;
 	if (!is_group)
+	{
 		buildIMP2PLogFilename(avatar_id, LLStringUtil::null, strFileName);
+	}
 	else
-		gCacheName->getGroupName(avatar_id, strFileName);
+	{
+		bool fFound = gCacheName->getGroupName(avatar_id, strFileName);
+		if (!fFound)
+		{
+			LLGroupData groupData;
+			if (gAgent.getGroupData(avatar_id, groupData))
+			{
+				strFileName = groupData.mName;
+			}
+		}
+	}
 	return strFileName;
 }
 // [/SL:KB]
