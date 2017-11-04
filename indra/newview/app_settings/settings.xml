@@ -12357,6 +12357,8 @@
       <string>Amount of memory to use for textures in MB (0 = autodetect)</string>
       <key>Persist</key>
       <integer>1</integer>
+      <key>ExcludeFromPreset</key>
+      <boolean>1</boolean>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
@@ -12368,6 +12370,8 @@
       <string>Specifies the amount of total video memory that will be use for textures by the viewer.)</string>
       <key>Persist</key>
       <integer>1</integer>
+      <key>ExcludeFromPreset</key>
+      <boolean>1</boolean>
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
