@@ -6798,7 +6798,7 @@ The string [STRING_NAME] is missing from strings.xml
   <notification
    icon="notifytip.tga"
    name="ChatSystemMessageTip"
-   log_to_chat="true"
+   can_logto="chat"
    type="notifytip">
 [MESSAGE]
   </notification>
