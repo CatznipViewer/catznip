@@ -4775,6 +4775,7 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags,   menuentry_vec_t&
 					disabled_items.push_back(std::string("Remove From Outfit"));
 			}
 		}
+//		if (!LLAppearanceMgr::instance().getCanReplaceCOF(mUUID))
 // [SL:KB] - Patch: Appearance-Misc | Checked: 2010-11-24 (Catznip-2.4)
 		if ( ((is_outfit) && (!LLAppearanceMgr::instance().getCanReplaceCOF(mUUID))) || 
 			 ((!is_outfit) && (gAgentWearables.isCOFChangeInProgress())) )
