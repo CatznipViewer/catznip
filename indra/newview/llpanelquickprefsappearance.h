@@ -23,6 +23,7 @@
 //
 
 class LLCategoryItemsList;
+class LLFilterEditor;
 class LLInventoryCategoriesObserver;
 class LLSliderCtrl;
 class LLTextBox;
@@ -111,6 +112,7 @@ public:
 	*/
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
+	void onFilterEdit(std::string strFilter);
 	void onFolderChanged();
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
@@ -120,6 +122,7 @@ public:
 	*/
 protected:
 	LLButton*            m_pFolderBrowseBtn = nullptr;
+	LLFilterEditor*      m_pFilterEditor = nullptr;
 	LLHandle<LLFloater>  m_BrowseFloaterHandle;
 	LLCategoryItemsList* m_pItemsList = nullptr;
 };
@@ -140,6 +143,7 @@ public:
 	 */
 public:
 	BOOL postBuild() override;
+	void onFilterEdit(std::string strFilter);
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
 	void onVisibilityChange(BOOL fVisible) override;
@@ -155,6 +159,7 @@ protected:
 	 */
 protected:
 	LLUUID                         m_idCOF;
+	LLFilterEditor*                m_pFilterEditor = nullptr;
 	LLInventoryCategoriesObserver* m_pCofObserver = nullptr;
 	LLWornItemsList*               m_pWornItemsList = nullptr;
 };
