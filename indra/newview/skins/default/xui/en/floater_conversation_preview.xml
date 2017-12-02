@@ -5,8 +5,8 @@
  help_topic="conversation_preview"
  height="391"
  layout="topleft"
- min_height="243"
- min_width="234"
+ min_height="250"
+ min_width="550"
  name="preview_conversation"
  save_rect="true"
  title="CONVERSATION:"
@@ -74,7 +74,7 @@
      layout="topleft"
      name="search_editor"
      left_pad="5"
-     width="105"
+     width="80"
      top_delta="-3" />
     <button
      follows="bottom|right"
@@ -100,7 +100,7 @@
      height="22"
      layout="topleft"
      name="page_label"
-     right="-105"
+     right="-135"
      top_delta="3"
      value="Page:"
      width="45">
@@ -128,4 +128,14 @@
      value="/ 1234"
      width="40">
     </text>
+    <button
+     follows="right"
+     height="23"
+     image_overlay="Document"
+     layout="topleft"
+     left_pad="5"
+     name="open_editor_btn"
+     tool_tip="Open chat log in text editor"
+     top_delta="-3"
+     width="23" />
 </floater>
