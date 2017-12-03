@@ -38,6 +38,7 @@
 #include "llviewercontrol.h"
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+#include "llwindow.h"
 #include <boost/lexical_cast.hpp>
 // [/SL:KB]
 
@@ -83,6 +84,7 @@ BOOL LLFloaterConversationPreview::postBuild()
 	mSearchEditor->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::DOWN));
 	findChild<LLButton>("search_prev_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::UP));
 	findChild<LLButton>("search_next_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::DOWN));
+	findChild<LLButton>("open_editor_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onOpenEditor, this));
 // [/SL:KB]
 
 	const LLConversation* conv = LLConversationLog::instance().getConversation(mSessionID);
@@ -183,6 +185,19 @@ void LLFloaterConversationPreview::onMonthFilterChanged()
 
 	getChild<LLTextBox>("page_num_label")->setValue(llformat("/ %d", (int)mPageSpinner->getMaxValue()));
 	mShowHistory = true;
+}
+
+void LLFloaterConversationPreview::onOpenEditor()
+{
+	std::string strFilePath = LLLogChat::makeLogFileName(mChatHistoryFileName);
+	if ( (!strFilePath.empty()) && (!LLFile::isfile(strFilePath)) )
+	{
+		strFilePath = LLLogChat::oldLogFileName(mChatHistoryFileName);
+		if ( (!strFilePath.empty()) && (!LLFile::isfile(strFilePath)) )
+			return;
+	}
+
+	LLView::getWindow()->openFile(strFilePath);
 }
 
 void LLFloaterConversationPreview::onSearch(ESearchDirection eDirection)

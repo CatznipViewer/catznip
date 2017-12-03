@@ -4141,5 +4141,16 @@ std::vector<std::string> LLWindowWin32::getDynamicFallbackFontList()
 	return std::vector<std::string>();
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.3
+void LLWindowWin32::openFile(const std::string& filename)
+{
+	SHELLEXECUTEINFO shellExecuteInfo = { sizeof(SHELLEXECUTEINFO) };
+	shellExecuteInfo.nShow = SW_SHOWNORMAL;
+	shellExecuteInfo.lpVerb = L"open";
+	llutf16string wstrFilename = utf8str_to_utf16str(filename);
+	shellExecuteInfo.lpFile = wstrFilename.c_str();
+	ShellExecuteEx(&shellExecuteInfo);
+}
+// [/SL:KB]
 
 #endif // LL_WINDOWS

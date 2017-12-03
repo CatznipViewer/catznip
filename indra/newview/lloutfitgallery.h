@@ -133,6 +133,7 @@ protected:
 private:
     void loadPhotos();
     void uploadPhoto(LLUUID outfit_id);
+    void updateSnapshotFolderObserver();
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
 	void uploadPhotoCallback(const LLUUID& outfit_id, const std::string& filename);
 // [/SL:KB]
@@ -174,6 +175,7 @@ private:
     LLPanel* mLastRowPanel;
     LLUUID mOutfitLinkPending;
     LLUUID mOutfitRenamePending;
+    LLUUID mSnapshotFolderID;
     LLTextBox* mMessageTextBox;
     bool mGalleryCreated;
     int mRowCount;

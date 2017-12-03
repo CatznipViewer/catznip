@@ -880,7 +880,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 				LLPanelLogin::selectUser(gUserCredential, gRememberPassword);
@@ -3030,6 +3030,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
