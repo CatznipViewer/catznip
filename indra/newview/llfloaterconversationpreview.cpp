@@ -38,6 +38,7 @@
 #include "llviewercontrol.h"
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+#include "llwindow.h"
 #include <boost/lexical_cast.hpp>
 // [/SL:KB]
 
