@@ -10077,6 +10077,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedCheckXUINames(), "Advanced.CheckXUINames");
 	view_listener_t::addMenu(new LLAdvancedSendTestIms(), "Advanced.SendTestIMs");
 	commit.add("Advanced.FlushNameCaches", boost::bind(&handle_flush_name_caches));
+// [SL:KB] - Patch UI-Floaters | Checked: Catznip-5.2
+	commit.add("Advanced.CycleAllFloaters", boost::bind(&LLFloaterReg::cycleFloaters, LLStringUtil::null));
+// [/SL:KB]
 
 	// Advanced > Character > Grab Baked Texture
 	view_listener_t::addMenu(new LLAdvancedGrabBakedTexture(), "Advanced.GrabBakedTexture");
