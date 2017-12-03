@@ -151,6 +151,10 @@ public:
 	static void blockShowFloaters(bool value) { sBlockShowFloaters = value;}
 	
 	static U32 getVisibleFloaterInstanceCount();
+
+// [SL:KB] - Patch UI-Floaters | Checked: Catznip-5.2
+	static void cycleFloaters(const std::string& floater_name);
+// [/SL:KB]
 };
 
 #endif

@@ -29,7 +29,9 @@
 
 #include "llfloaterreg.h"
 #include "llviewerfloaterreg.h"
-
+// [SL:KB] - Patch UI-Floaters | Checked: Catznip-5.2
+#include "llcallbacklist.h"
+// [/SL:KB]
 #include "llcommandhandler.h"
 #include "llcompilequeue.h"
 #include "llfasttimerview.h"
@@ -383,3 +385,63 @@ void LLViewerFloaterReg::registerFloaters()
 	
 	LLFloaterReg::registerControlVariables(); // Make sure visibility and rect controls get preserved when saving
 }
+
+// [SL:KB] - Patch UI-Floaters | Checked: Catznip-5.2
+// static
+void LLFloaterReg::cycleFloaters(const std::string& floater_name)
+{
+	static std::map<std::string, LLSD> s_FloaterParams = {
+		{ "delete_pref_preset", LLSD("graphic") },
+		{ "env_delete_preset", LLSD("day_cycle") },
+		{ "env_edit_sky", LLSD("edit") },
+		{ "env_edit_water", LLSD("edit") },
+		{ "env_edit_day_cycle", LLSD("edit") },
+		{ "impanel", LLSD().with("show", false) },
+		{ "im_container", LLSD().with("show", false) },
+		{ "incoming_call", LLSD().with("notify_box_type", "VoiceInviteGroup") },
+		{ "load_pref_preset", LLSD("graphic") },
+		{ "save_pref_preset", LLSD("graphic") }
+	};
+
+	build_map_t::const_iterator itFloater = sBuildMap.begin();
+	if (!floater_name.empty())
+	{
+		itFloater = sBuildMap.find(floater_name);
+		if (sBuildMap.end() != itFloater)
+			itFloater++;
+	}
+
+	while (sBuildMap.end() != itFloater)
+	{
+		LLSD sdParam;
+		auto itFloaterParam = s_FloaterParams.find(itFloater->first);
+		if (s_FloaterParams.end() != itFloaterParam)
+			sdParam = itFloaterParam->second;
+		if ( (sdParam.has("show")) && ((!sdParam["show"].asBoolean())) )
+		{
+			itFloater++;
+			continue;
+		}
+
+		// Clean up the old floater
+		if (LLFloater* pFloater = LLFloaterReg::findInstance(floater_name, sdParam))
+		{
+			pFloater->closeHostedFloater();
+		}
+		else
+		{
+			for (LLFloater* pFloater : LLFloaterReg::getFloaterList(floater_name))
+				if (pFloater)
+					pFloater->closeHostedFloater();
+		}
+
+
+		// Open the new floater
+		LLFloaterReg::showInstance(itFloater->first, sdParam, true);
+
+		// Schedule a call back for the next one
+		doAfterInterval(boost::bind(LLFloaterReg::cycleFloaters, itFloater->first), 5.f);
+		break;
+	}
+}
+// [/SL:KB]

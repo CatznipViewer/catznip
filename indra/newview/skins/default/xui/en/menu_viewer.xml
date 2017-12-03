@@ -3363,6 +3363,12 @@
             <menu_item_call.on_click
              function="Advanced.FlushNameCaches" />
           </menu_item_call>
+          <menu_item_call
+           label="Cycle All Floaters"
+           name="Cycle All Floaters">
+            <menu_item_call.on_click
+             function="Advanced.CycleAllFloaters" />
+          </menu_item_call>
         </menu>
         <menu
          create_jump_keys="true"
