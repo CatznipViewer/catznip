@@ -113,6 +113,8 @@ public:
 
 //	static void newWindow();
 
+	void toggleFindOptions();
+
 protected:
 	//
 	// Misc functions
@@ -124,7 +126,6 @@ protected:
 	LLFloaterInventoryFinder* getFinder();
 	void showFindOptions(bool fShow);
 // [/SL:KB]
-	void toggleFindOptions();
 	void onSelectionChange(LLInventoryPanel *panel, const std::deque<LLFolderViewItem*>& items, BOOL user_action);
 
 	static BOOL filtersVisible(void* user_data);
@@ -143,7 +144,7 @@ protected:
 	void setFilterSubStringFromFilter();
 // [/SL:KB]
 	void setFilterSubString(const std::string& string);
-	
+
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();

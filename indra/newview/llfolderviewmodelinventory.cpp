@@ -243,11 +243,12 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 		return true;
 	}
      */
-    
-//	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+
+//	bool is_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY);
 // [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
-	const bool passed_filter_folder = ((getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink())) ? filter.checkFolder(this) : true;
+	bool is_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink());
 // [/SL:KB]
+	const bool passed_filter_folder = is_folder ? filter.checkFolder(this) : true;
 	setPassedFolderFilter(passed_filter_folder, filter_generation);
 
 	bool continue_filtering = true;
@@ -276,7 +277,7 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 		std::vector<std::pair<int, int>> match_offsets;
 		const bool passed_filter = filter.check(this, match_offsets);
 // [/SL:KB]
-		if (passed_filter && mChildren.empty()) // Update the latest filter generation for empty folders
+		if (passed_filter && mChildren.empty() && is_folder) // Update the latest filter generation for empty folders
 		{
 			LLFolderViewModelItemInventory* view_model = this;
 			while (view_model && view_model->mMostFilteredDescendantGeneration < filter_generation)

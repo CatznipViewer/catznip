@@ -85,7 +85,8 @@ public:
 		if (mAvatarId.notNull())
 			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
 		mAvatarId = mProfileView->getAvatarId();
-		LLAvatarPropertiesProcessor::instance().addObserver(mAvatarId, this);
+		if (mAvatarId.notNull())
+			LLAvatarPropertiesProcessor::instance().addObserver(mAvatarId, this);
 // [/SL:KB]
 //		LLAvatarPropertiesProcessor::instance().addObserver(mProfileView->getAvatarId(), this);
 	}

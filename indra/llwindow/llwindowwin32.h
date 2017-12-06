@@ -121,6 +121,9 @@ public:
 	/*virtual*/ void spawnWebBrowser(const std::string& escaped_url, bool async);
 
 	/*virtual*/ F32 getSystemUISize();
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.3
+	            void openFile(const std::string& filename) override;
+// [/SL:KB]
 
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
 	LLWindowCallbacks::DragNDropResult completeDragNDropRequest(const LLCoordGL gl_coord, const MASK mask, LLWindowCallbacks::DragNDropAction action, 

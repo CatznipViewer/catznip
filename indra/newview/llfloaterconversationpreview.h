@@ -60,6 +60,7 @@ public:
 protected:
 	enum class ESearchDirection { DOWN, UP };
 	void onMonthFilterChanged();
+	void onOpenEditor();
 	void onSearch(ESearchDirection eDirection);
 	void refreshMonthFilter();
 // [/SL:KB]
