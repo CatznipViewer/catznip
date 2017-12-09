@@ -69,7 +69,13 @@ public:
 	static void clickAction(std::string url, bool trusted_content);
 
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.5)
-	/// perform the specified copy to clipboard action on a Url 
+	/// add the specified agent to the user's block list
+	static void muteAgent(std::string url);
+
+	/// remove the specified agent from the user's block list
+	static void unmuteAgent(std::string url);
+
+	/// perform the specified copy to clipboard action on a Url
 	static void copyToClipboard(std::string strURL, const LLSD& sdAction);
 // [/SL:KB]
 

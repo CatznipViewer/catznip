@@ -1834,6 +1834,8 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 			registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, strUrl));
 			registrar.add("Url.AddFriend", boost::bind(&LLUrlAction::addFriend, strUrl));
 			registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, strUrl));
+			registrar.add("Url.BlockAgent", boost::bind(&LLUrlAction::muteAgent, strUrl));
+			registrar.add("Url.UnblockAgent", boost::bind(&LLUrlAction::unmuteAgent, strUrl));
 			registrar.add("Url.Execute", boost::bind(&LLUrlAction::clickAction, strUrl, true));
 			registrar.add("Url.Copy", boost::bind(&LLUrlAction::copyToClipboard, strUrl, _2));
 			registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, strUrl));
