@@ -3595,7 +3595,10 @@ std::string LLAppViewer::getShortViewerInfoString() const
 	support << "\n" << "Draw distance: " << info["DRAW_DISTANCE"].asString();
 	support << "\n" << "Bandwidth: " << info["NET_BANDWITH"].asString() << "kbit/s";
 	support << "\n" << "LOD factor: " << info["LOD_FACTOR"].asString();
-	support << "\n" << "Render quality: " << info["RENDER_QUALITY"].asString() << " / 7";
+// [SL:KB] - Patch: Settings-Misc | Checked: Catznip: 5.2
+	support << "\n" << "Render quality: " << info["RENDER_QUALITY"].asString() << " / 6";
+// [/SL:KB]
+// 	support << "\n" << "Render quality: " << info["RENDER_QUALITY"].asString() << " / 7";
 	support << "\n" << "ALM: " << info["GPU_SHADERS"].asString();
 	support << "\n" << "Texture memory: " << info["TEXTURE_MEMORY"].asString() << "MB";
 	support << "\n" << "VFS (cache) creation time: " << info["VFS_TIME"].asString();
