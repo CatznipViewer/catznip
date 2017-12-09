@@ -146,6 +146,9 @@ public:
 			if (! LLAvatarActions::isBlocked(avatar_id))
 			{
 				LLAvatarActions::toggleBlock(avatar_id);
+// [SL:KB] - World-Mute | Checked: Catznip-3.6
+				LLFloaterBlocked::showMuteAndSelect(avatar_id);
+// [/SL:KB]
 			}
 			return true;
 		}
