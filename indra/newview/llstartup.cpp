@@ -910,7 +910,7 @@ bool idle_startup()
 		// Only include the agent name if the user consented
 		if (gCrashSettings.getBOOL("CrashSubmitName"))
 		{
-			gDebugInfo["LoginName"] = userid;                                                                              
+			gDebugInfo["UserInfo"]["LoginName"] = userid;                                                                              
 		}
 // [/SL:KB]
 //		gDebugInfo["LoginName"] = userid;                                                                              
@@ -3241,7 +3241,7 @@ bool process_login_success_response()
 	// Only include the agent UUID if the user consented
 	if (gCrashSettings.getBOOL("CrashSubmitName"))
 	{
-		gDebugInfo["AgentID"] = text;
+		gDebugInfo["UserInfo"]["AgentID"] = text;
 	}
 // [/SL:KB]
 //	gDebugInfo["AgentID"] = text;
@@ -3296,6 +3296,15 @@ bool process_login_success_response()
 		    gAgentUsername = gAgentUsername + " " + last_name;
 		}
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if ( (!gAgentUsername.empty()) && (gCrashSettings.getBOOL("CrashSubmitName")) )
+	{
+		std::string userName = gAgentUsername;
+		LLStringUtil::replaceChar(userName, ' ', '.');
+		LLStringUtil::toLower(userName);
+		gDebugInfo["UserInfo"]["UserName"] = userName;
+	}
+// [/SL:KB]
 
 	if(gDisplayName.empty())
 	{
@@ -3322,6 +3331,13 @@ bool process_login_success_response()
 	{
 		gDisplayName.assign(gUserCredential->asString());
 	}
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if (gCrashSettings.getBOOL("CrashSubmitName"))
+	{
+		gDebugInfo["UserInfo"]["DisplayName"] = gDisplayName;
+	}
+// [/SL:KB]
 
 	// this is their actual ability to access content
 	text = response["agent_access_max"].asString();
