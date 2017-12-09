@@ -3785,6 +3785,11 @@ public:
 					sdData["method"] = "decline invitation";
 					sdData["session-id"] = session_id;
 
+					if (!is_muted)
+					{
+						LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
+					}
+
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
 				}
 				return;
@@ -3809,11 +3814,6 @@ public:
 					sdData["session-id"] = session_id;
 
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
-				}
-
-				if (!is_muted)
-				{
-					LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
 				}
 
 				return;
