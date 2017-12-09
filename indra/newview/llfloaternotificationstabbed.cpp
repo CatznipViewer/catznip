@@ -496,6 +496,9 @@ void LLFloaterNotifications::onStoreToast(LLPanel* info_panel, LLUUID id)
     p.subject = payload["subject"].asString();
     p.message = payload["message"].asString();
     p.sender = payload["sender_name"].asString();
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+	p.sender_id = payload["sender_id"].asUUID();
+// [/SL:KB]
     p.time_stamp = notify->getDate();
     p.received_time = payload["received_time"].asDate();
     p.paid_from_id = payload["from_id"];
