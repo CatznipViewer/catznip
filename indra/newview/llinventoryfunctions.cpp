@@ -264,7 +264,9 @@ void update_marketplace_category(const LLUUID& cur_uuid, bool perform_consistenc
     // is limited to 4.
     // We also take care of degenerated cases so we don't update all folders in the inventory by mistake.
 
-    if (cur_uuid.isNull())
+    if (cur_uuid.isNull()
+        || gInventory.getCategory(cur_uuid) == NULL
+        || gInventory.getCategory(cur_uuid)->getVersion() == LLViewerInventoryCategory::VERSION_UNKNOWN)
     {
         return;
     }
@@ -275,9 +277,13 @@ void update_marketplace_category(const LLUUID& cur_uuid, bool perform_consistenc
     {
         // Retrieve the listing uuid this object is in
         LLUUID listing_uuid = nested_parent_id(cur_uuid, depth);
+        LLViewerInventoryCategory* listing_cat = gInventory.getCategory(listing_uuid);
+        bool listing_cat_loaded = listing_cat != NULL && listing_cat->getVersion() != LLViewerInventoryCategory::VERSION_UNKNOWN;
     
         // Verify marketplace data consistency for this listing
-        if (perform_consistency_enforcement && LLMarketplaceData::instance().isListed(listing_uuid))
+        if (perform_consistency_enforcement
+            && listing_cat_loaded
+            && LLMarketplaceData::instance().isListed(listing_uuid))
         {
             LLUUID version_folder_uuid = LLMarketplaceData::instance().getVersionFolder(listing_uuid);
             S32 version_depth = depth_nesting_in_marketplace(version_folder_uuid);
@@ -299,7 +305,9 @@ void update_marketplace_category(const LLUUID& cur_uuid, bool perform_consistenc
         }
     
         // Check if the count on hand needs to be updated on SLM
-        if (perform_consistency_enforcement && (compute_stock_count(listing_uuid) != LLMarketplaceData::instance().getCountOnHand(listing_uuid)))
+        if (perform_consistency_enforcement
+            && listing_cat_loaded
+            && (compute_stock_count(listing_uuid) != LLMarketplaceData::instance().getCountOnHand(listing_uuid)))
         {
             LLMarketplaceData::instance().updateCountOnHand(listing_uuid,1);
         }
@@ -2295,9 +2303,40 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
     
 	if ("delete" == action)
 	{
-		LLSD args;
-		args["QUESTION"] = LLTrans::getString(root->getSelectedCount() > 1 ? "DeleteItems" :  "DeleteItem");
-		LLNotificationsUtil::add("DeleteItems", args, LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+		static bool sDisplayedAtSession = false;
+		const LLUUID &marketplacelistings_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
+		bool marketplacelistings_item = false;
+		LLAllDescendentsPassedFilter f;
+		for (std::set<LLFolderViewItem*>::iterator it = selected_items.begin(); (it != selected_items.end()) && (f.allDescendentsPassedFilter()); ++it)
+		{
+			if (LLFolderViewFolder* folder = dynamic_cast<LLFolderViewFolder*>(*it))
+			{
+				folder->applyFunctorRecursively(f);
+			}
+			LLFolderViewModelItemInventory * viewModel = dynamic_cast<LLFolderViewModelItemInventory *>((*it)->getViewModelItem());
+			if (viewModel && gInventory.isObjectDescendentOf(viewModel->getUUID(), marketplacelistings_id))
+			{
+				marketplacelistings_item = true;
+				break;
+			}
+		}
+		// Fall through to the generic confirmation if the user choose to ignore the specialized one
+		if ( (!f.allDescendentsPassedFilter()) && !marketplacelistings_item && (!LLNotifications::instance().getIgnored("DeleteFilteredItems")) )
+		{
+			LLNotificationsUtil::add("DeleteFilteredItems", LLSD(), LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+		}
+		else
+		{
+			if (!sDisplayedAtSession) // ask for the confirmation at least once per session
+			{
+				LLNotifications::instance().setIgnored("DeleteItems", false);
+				sDisplayedAtSession = true;
+			}
+
+			LLSD args;
+			args["QUESTION"] = LLTrans::getString(root->getSelectedCount() > 1 ? "DeleteItems" :  "DeleteItem");
+			LLNotificationsUtil::add("DeleteItems", args, LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+		}
         // Note: marketplace listings will be updated in the callback if delete confirmed
 		return;
 	}
@@ -2305,6 +2344,26 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 	{	
 		// Clear the clipboard before we start adding things on it
 		LLClipboard::instance().reset();
+	}
+	if ("replace_links" == action)
+	{
+		LLSD params;
+		if (root->getSelectedCount() == 1)
+		{
+			LLFolderViewItem* folder_item = root->getSelectedItems().front();
+			LLInvFVBridge* bridge = (LLInvFVBridge*)folder_item->getViewModelItem();
+
+			if (bridge)
+			{
+				LLInventoryObject* obj = bridge->getInventoryObject();
+				if (obj && obj->getType() != LLAssetType::AT_CATEGORY && obj->getActualType() != LLAssetType::AT_LINK_FOLDER)
+				{
+					params = LLSD(obj->getUUID());
+				}
+			}
+		}
+		LLFloaterReg::showInstance("linkreplace", params);
+		return;
 	}
 
 	static const std::string change_folder_string = "change_folder_type_";
