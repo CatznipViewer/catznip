@@ -171,6 +171,24 @@ void LLUrlAction::copyToClipboard(std::string strURL, const LLSD& sdAction)
 		}
 	}
 }
+
+void LLUrlAction::muteAgent(std::string url)
+{
+	std::string id_str = getUserID(url);
+	if (LLUUID::validate(id_str))
+	{
+		executeSLURL("secondlife:///app/agent/" + id_str + "/mute");
+	}
+}
+
+void LLUrlAction::unmuteAgent(std::string url)
+{
+	std::string id_str = getUserID(url);
+	if (LLUUID::validate(id_str))
+	{
+		executeSLURL("secondlife:///app/agent/" + id_str + "/unmute");
+	}
+}
 // [/SL:KB]
 
 void LLUrlAction::showProfile(std::string url)
