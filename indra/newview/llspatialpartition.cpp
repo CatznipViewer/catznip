@@ -451,16 +451,32 @@ void LLSpatialPartition::rebuildGeom(LLSpatialGroup* group)
 				(group->mBufferUsage != group->mVertexBuffer->getUsage() && LLVertexBuffer::sEnableVBOs))
 			{
 				group->mVertexBuffer = createVertexBuffer(mVertexDataMask, group->mBufferUsage);
-				group->mVertexBuffer->allocateBuffer(vertex_count, index_count, true);
+				if (!group->mVertexBuffer->allocateBuffer(vertex_count, index_count, true))
+				{
+					LL_WARNS() << "Failed to allocate Vertex Buffer on rebuild to "
+						<< vertex_count << " vertices and "
+						<< index_count << " indices" << LL_ENDL;
+					group->mVertexBuffer = NULL;
+					group->mBufferMap.clear();
+				}
 				stop_glerror();
 			}
 			else
 			{
-				group->mVertexBuffer->resizeBuffer(vertex_count, index_count);
+				if (!group->mVertexBuffer->resizeBuffer(vertex_count, index_count))
+				{
+					// Is likely to cause a crash. If this gets triggered find a way to avoid it (don't forget to reset face)
+					LL_WARNS() << "Failed to resize Vertex Buffer on rebuild to "
+						<< vertex_count << " vertices and "
+						<< index_count << " indices" << LL_ENDL;
+					group->mVertexBuffer = NULL;
+					group->mBufferMap.clear();
+				}
 				stop_glerror();
 			}
 		}
 
+		if (group->mVertexBuffer)
 		{
 			LL_RECORD_BLOCK_TIME(FTM_GET_GEOMETRY);
 			getGeometry(group);
@@ -3213,6 +3229,11 @@ void renderAvatarCollisionVolumes(LLVOAvatar* avatar)
 	avatar->renderCollisionVolumes();
 }
 
+void renderAvatarBones(LLVOAvatar* avatar)
+{
+	avatar->renderBones();
+}
+
 void renderAgentTarget(LLVOAvatar* avatar)
 {
 	// render these for self only (why, i don't know)
@@ -3369,6 +3390,11 @@ public:
 			if (avatar && gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_AVATAR_VOLUME))
 			{
 				renderAvatarCollisionVolumes(avatar);
+			}
+
+			if (avatar && gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_AVATAR_JOINTS))
+			{
+				renderAvatarBones(avatar);
 			}
 
 			if (avatar && gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_AGENT_TARGET))
@@ -3661,6 +3687,7 @@ void LLSpatialPartition::renderDebug()
 									  LLPipeline::RENDER_DEBUG_TEXTURE_ANIM |
 									  LLPipeline::RENDER_DEBUG_RAYCAST |
 									  LLPipeline::RENDER_DEBUG_AVATAR_VOLUME |
+									  LLPipeline::RENDER_DEBUG_AVATAR_JOINTS |
 									  LLPipeline::RENDER_DEBUG_AGENT_TARGET |
 									  //LLPipeline::RENDER_DEBUG_BUILD_QUEUE |
 									  LLPipeline::RENDER_DEBUG_SHADOW_FRUSTA |

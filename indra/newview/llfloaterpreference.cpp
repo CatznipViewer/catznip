@@ -366,6 +366,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+	mCommitCallbackRegistrar.add("Pref.RenderExceptions",       boost::bind(&LLFloaterPreference::onClickRenderExceptions, this));
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.AvatarImpostorsEnable",	boost::bind(&LLFloaterPreference::onAvatarImpostorsEnable, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",	boost::bind(&LLFloaterPreference::updateMaxComplexity, this));
@@ -391,7 +392,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	gSavedSettings.getControl("NameTagShowUsernames")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("NameTagShowFriends")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("UseDisplayNames")->getCommitSignal()->connect(boost::bind(&handleDisplayNamesOptionChanged,  _2));
-	
+
 	gSavedSettings.getControl("AppearanceCameraMovement")->getCommitSignal()->connect(boost::bind(&handleAppearanceCameraMovementChanged,  _2));
 
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
@@ -473,6 +474,11 @@ BOOL LLFloaterPreference::postBuild()
 
 	gSavedSettings.getControl("PreferredMaturity")->getSignal()->connect(boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 
+	gSavedPerAccountSettings.getControl("ModelUploadFolder")->getSignal()->connect(boost::bind(&LLFloaterPreference::onChangeModelFolder, this));
+	gSavedPerAccountSettings.getControl("TextureUploadFolder")->getSignal()->connect(boost::bind(&LLFloaterPreference::onChangeTextureFolder, this));
+	gSavedPerAccountSettings.getControl("SoundUploadFolder")->getSignal()->connect(boost::bind(&LLFloaterPreference::onChangeSoundFolder, this));
+	gSavedPerAccountSettings.getControl("AnimationUploadFolder")->getSignal()->connect(boost::bind(&LLFloaterPreference::onChangeAnimationFolder, this));
+
 	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
 	if (!tabcontainer->selectTab(gSavedSettings.getS32("LastPrefTab")))
 		tabcontainer->selectFirstTab();
@@ -506,6 +512,7 @@ BOOL LLFloaterPreference::postBuild()
 	LLSliderCtrl* fov_slider = getChild<LLSliderCtrl>("camera_fov");
 	fov_slider->setMinValue(LLViewerCamera::getInstance()->getMinView());
 	fov_slider->setMaxValue(LLViewerCamera::getInstance()->getMaxView());
+
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-11 (Catznip-2.6)
 #ifndef LL_SEND_CRASH_REPORTS
@@ -761,7 +768,12 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 
 	// Display selected maturity icons.
 	onChangeMaturity();
-	
+
+	onChangeModelFolder();
+	onChangeTextureFolder();
+	onChangeSoundFolder();
+	onChangeAnimationFolder();
+
 	// Load (double-)click to walk/teleport settings.
 	updateClickActionControls();
 	
@@ -794,10 +806,12 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	LLButton* load_btn = findChild<LLButton>("PrefLoadButton");
 	LLButton* save_btn = findChild<LLButton>("PrefSaveButton");
 	LLButton* delete_btn = findChild<LLButton>("PrefDeleteButton");
+	LLButton* exceptions_btn = findChild<LLButton>("RenderExceptionsButton");
 
 	load_btn->setEnabled(started);
 	save_btn->setEnabled(started);
 	delete_btn->setEnabled(started);
+	exceptions_btn->setEnabled(started);
 }
 
 void LLFloaterPreference::onVertexShaderEnable()
@@ -1025,12 +1039,12 @@ void LLFloaterPreference::onBtnCancel(const LLSD& userdata)
 }
 
 // static 
-void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance)
 	{
-		instance->setPersonalInfo(visibility, im_via_email);	
+        instance->setPersonalInfo(visibility, im_via_email, is_verified_email);
 	}
 }
 
@@ -1255,6 +1269,9 @@ void LLFloaterPreference::refreshEnabledState()
 						(ctrl_wind_light->get()) ? TRUE : FALSE;
 
 	ctrl_deferred->setEnabled(enabled);
+
+	// Cannot have floater active until caps have been received
+	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
@@ -1273,7 +1290,7 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	LLCheckBoxCtrl* bumpshiny_ctrl = getChild<LLCheckBoxCtrl>("BumpShiny");
 	bool bumpshiny = gGLManager.mHasCubeMap && LLCubeMap::sUseCubeMaps && LLFeatureManager::getInstance()->isFeatureAvailable("RenderObjectBump");
 	bumpshiny_ctrl->setEnabled(bumpshiny ? TRUE : FALSE);
-	
+    
 	// Avatar Mode
 	// Enable Avatar Shaders
 	LLCheckBoxCtrl* ctrl_avatar_vp = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
@@ -1392,9 +1409,6 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	disableUnavailableSettings();
 
 	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
-
-	// Cannot have floater active until caps have been received
-	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
 }
 
 // static
@@ -1434,7 +1448,7 @@ void LLAvatarComplexityControls::setIndirectMaxArc()
 	else
 	{
 		// This is the inverse of the calculation in updateMaxComplexity
-		indirect_max_arc = (U32)((log(max_arc) - MIN_ARC_LOG) / ARC_LIMIT_MAP_SCALE) + MIN_INDIRECT_ARC_LIMIT;
+		indirect_max_arc = (U32)ll_round(((log(F32(max_arc)) - MIN_ARC_LOG) / ARC_LIMIT_MAP_SCALE)) + MIN_INDIRECT_ARC_LIMIT;
 	}
 	gSavedSettings.setU32("IndirectMaxComplexity", indirect_max_arc);
 }
@@ -1839,7 +1853,7 @@ bool LLFloaterPreference::moveTranscriptsAndLog()
 	return true;
 }
 
-void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	mGotPersonalInfo = true;
 	mOriginalIMViaEmail = im_via_email;
@@ -1864,8 +1878,16 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChildView("friends_online_notify_checkbox")->setEnabled(TRUE);
 	getChild<LLUICtrl>("online_visibility")->setValue(mOriginalHideOnlineStatus); 	 
 	getChild<LLUICtrl>("online_visibility")->setLabelArg("[DIR_VIS]", mDirectoryVisibility);
-	getChildView("send_im_to_email")->setEnabled(TRUE);
-	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
+	getChildView("send_im_to_email")->setEnabled(is_verified_email);
+
+    std::string tooltip;
+    if (!is_verified_email)
+        tooltip = getString("email_unverified_tooltip");
+
+    getChildView("send_im_to_email")->setToolTip(tooltip);
+
+    // *TODO: Show or hide verify email text here based on is_verified_email
+    getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
 	getChildView("chat_font_size")->setEnabled(TRUE);
@@ -1953,7 +1975,7 @@ void LLAvatarComplexityControls::updateMax(LLSliderCtrl* slider, LLTextBox* valu
 	{
 		// if this is changed, the inverse calculation in setIndirectMaxArc
 		// must be changed to match
-		max_arc = (U32)exp(MIN_ARC_LOG + (ARC_LIMIT_MAP_SCALE * (indirect_value - MIN_INDIRECT_ARC_LIMIT)));
+		max_arc = (U32)ll_round(exp(MIN_ARC_LOG + (ARC_LIMIT_MAP_SCALE * (indirect_value - MIN_INDIRECT_ARC_LIMIT))));
 	}
 
 	gSavedSettings.setU32("RenderAvatarMaxComplexity", (U32)max_arc);
@@ -2002,6 +2024,63 @@ void LLFloaterPreference::onChangeMaturity()
 	getChild<LLIconCtrl>("rating_icon_adult")->setVisible(sim_access == SIM_ACCESS_ADULT);
 }
 
+std::string get_category_path(LLUUID cat_id)
+{
+    LLViewerInventoryCategory* cat = gInventory.getCategory(cat_id);
+    std::string localized_cat_name;
+    if (!LLTrans::findString(localized_cat_name, "InvFolder " + cat->getName()))
+    {
+        localized_cat_name = cat->getName();
+    }
+
+    if (cat->getParentUUID().notNull())
+    {
+        return get_category_path(cat->getParentUUID()) + " > " + localized_cat_name;
+    }
+    else
+    {
+        return localized_cat_name;
+    }
+}
+
+std::string get_category_path(LLFolderType::EType cat_type)
+{
+    LLUUID cat_id = gInventory.findUserDefinedCategoryUUIDForType(cat_type);
+    return get_category_path(cat_id);
+}
+
+void LLFloaterPreference::onChangeModelFolder()
+{
+    if (gInventory.isInventoryUsable())
+    {
+        getChild<LLTextBox>("upload_models")->setText(get_category_path(LLFolderType::FT_OBJECT));
+    }
+}
+
+void LLFloaterPreference::onChangeTextureFolder()
+{
+    if (gInventory.isInventoryUsable())
+    {
+        getChild<LLTextBox>("upload_textures")->setText(get_category_path(LLFolderType::FT_TEXTURE));
+    }
+}
+
+void LLFloaterPreference::onChangeSoundFolder()
+{
+    if (gInventory.isInventoryUsable())
+    {
+        getChild<LLTextBox>("upload_sounds")->setText(get_category_path(LLFolderType::FT_SOUND));
+    }
+}
+
+void LLFloaterPreference::onChangeAnimationFolder()
+{
+    if (gInventory.isInventoryUsable())
+    {
+        getChild<LLTextBox>("upload_animation")->setText(get_category_path(LLFolderType::FT_ANIMATION));
+    }
+}
+
 // FIXME: this will stop you from spawning the sidetray from preferences dialog on login screen
 // but the UI for this will still be enabled
 void LLFloaterPreference::onClickBlockList()
@@ -2027,7 +2106,12 @@ void LLFloaterPreference::onClickAutoReplace()
 
 void LLFloaterPreference::onClickSpellChecker()
 {
-		LLFloaterReg::showInstance("prefs_spellchecker");
+    LLFloaterReg::showInstance("prefs_spellchecker");
+}
+
+void LLFloaterPreference::onClickRenderExceptions()
+{
+    LLFloaterReg::showInstance("avatar_render_settings");
 }
 
 void LLFloaterPreference::onClickAdvanced()

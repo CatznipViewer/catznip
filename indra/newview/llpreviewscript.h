@@ -90,6 +90,7 @@ public:
 	bool			canLoadOrSaveToFile( void* userdata );
 
 	void            setScriptText(const std::string& text, BOOL is_valid);
+	void			makeEditorPristine();
 	bool			loadScriptText(const std::string& filename);
 	bool			writeToFile(const std::string& filename);
 	void			sync();
@@ -118,6 +119,8 @@ public:
 	void            setAssociatedExperience( const LLUUID& experience_id );
 
 	void 			setScriptName(const std::string& name){mScriptName = name;};
+
+	void 			setItemRemoved(bool script_removed){mScriptRemoved = script_removed;};
 
 private:
 	void		onBtnHelp();
@@ -163,6 +166,8 @@ private:
 	BOOL			mHasScriptData;
 	LLLiveLSLFile*	mLiveFile;
 	LLUUID			mAssociatedExperience;
+	BOOL			mScriptRemoved;
+	BOOL			mSaveDialogShown;
 
 	LLScriptEdContainer* mContainer; // parent view
 
@@ -198,6 +203,7 @@ public:
 	/*virtual*/ BOOL postBuild();
 
 protected:
+	virtual void draw();
 	virtual BOOL canClose();
 	void closeIfNeeded();
 

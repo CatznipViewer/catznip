@@ -29,6 +29,7 @@
 #include "llinventoryfilter.h"
 
 // viewer includes
+#include "llagent.h"
 #include "llfolderviewmodel.h"
 #include "llfolderviewitem.h"
 #include "llinventorymodel.h"
@@ -40,6 +41,7 @@
 #include "llinventorybridge.h"
 #include "llviewerfoldertype.h"
 #include "llradiogroup.h"
+#include "llstartup.h"
 
 // linden library includes
 #include "llclipboard.h"
@@ -75,30 +77,50 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 	mFilterSubString(p.substring),
 	mCurrentGeneration(0),
 	mFirstRequiredGeneration(0),
-	mFirstSuccessGeneration(0)
+	mFirstSuccessGeneration(0),
+	mSearchType(SEARCHTYPE_NAME),
+	mFilterCreatorType(FILTERCREATOR_ALL)
 {
 	// copy mFilterOps into mDefaultFilterOps
 	markDefault();
+	mUsername = gAgentUsername;
+	LLStringUtil::toUpper(mUsername);
 }
 
 bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
 {
 	const LLFolderViewModelItemInventory* listener = dynamic_cast<const LLFolderViewModelItemInventory*>(item);
-	// Clipboard cut items are *always* filtered so we need this value upfront
-	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
 
 	// If it's a folder and we're showing all folders, return automatically.
 	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
 	{
-		return passed_clipboard;
+		return true;
 	}
 
-	bool passed = (mFilterSubString.size() ? listener->getSearchableName().find(mFilterSubString) != std::string::npos : true);
+	std::string desc = listener->getSearchableCreatorName();
+	switch(mSearchType)
+	{
+		case SEARCHTYPE_CREATOR:
+			desc = listener->getSearchableCreatorName();
+			break;
+		case SEARCHTYPE_DESCRIPTION:
+			desc = listener->getSearchableDescription();
+			break;
+		case SEARCHTYPE_UUID:
+			desc = listener->getSearchableUUIDString();
+			break;
+		case SEARCHTYPE_NAME:
+		default:
+			desc = listener->getSearchableName();
+			break;
+	}
+
+	bool passed = (mFilterSubString.size() ? desc.find(mFilterSubString) != std::string::npos : true);
 	passed = passed && checkAgainstFilterType(listener);
 	passed = passed && checkAgainstPermissions(listener);
 	passed = passed && checkAgainstFilterLinks(listener);
-	passed = passed && passed_clipboard;
+	passed = passed && checkAgainstCreator(listener);
 
 	return passed;
 }
@@ -108,9 +130,8 @@ bool LLInventoryFilter::check(const LLInventoryItem* item)
 	const bool passed_string = (mFilterSubString.size() ? item->getName().find(mFilterSubString) != std::string::npos : true);
 	const bool passed_filtertype = checkAgainstFilterType(item);
 	const bool passed_permissions = checkAgainstPermissions(item);
-	const bool passed_clipboard = checkAgainstClipboard(item->getUUID());
 
-	return passed_filtertype && passed_permissions && passed_clipboard && passed_string;
+	return passed_filtertype && passed_permissions && passed_string;
 }
 
 bool LLInventoryFilter::checkFolder(const LLFolderViewModelItem* item) const
@@ -129,18 +150,17 @@ bool LLInventoryFilter::checkFolder(const LLFolderViewModelItem* item) const
 
 bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 {
-	// Always check against the clipboard
-	const BOOL passed_clipboard = checkAgainstClipboard(folder_id);
-	
 	// we're showing all folders, overriding filter
 	if (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS)
 	{
-		return passed_clipboard;
+		return true;
 	}
 
 	// when applying a filter, matching folders get their contents downloaded first
+	// but make sure we are not interfering with pre-download
 	if (isNotDefault()
-		&& !gInventory.isCategoryComplete(folder_id))
+		&& !gInventory.isCategoryComplete(folder_id)
+		&& LLStartUp::getStartupState() > STATE_WEARABLES_WAIT)
 	{
 		LLInventoryModelBackgroundFetch::instance().start(folder_id);
 	}
@@ -201,7 +221,7 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 	LLViewerInventoryItem* item = gInventory.getItem(folder_id);
 	if (item && item->getActualType() == LLAssetType::AT_LINK_FOLDER)
 	{
-		return passed_clipboard;
+		return true;
 	}
 
 	if (mFilterOps.mFilterTypes & FILTERTYPE_CATEGORY)
@@ -216,7 +236,7 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 			return false;
 	}
 
-	return passed_clipboard;
+	return true;
 }
 
 bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInventory* listener) const
@@ -249,6 +269,14 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		}
 	}
 	
+	if(filterTypes & FILTERTYPE_WORN)
+	{
+		if (!get_is_item_worn(object_id))
+		{
+			return FALSE;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// FILTERTYPE_UUID
 	// Pass if this item is the target UUID or if it links to the target UUID
@@ -314,7 +342,11 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 			if (is_hidden_if_empty)
 			{
 				// Force the fetching of those folders so they are hidden if they really are empty...
-				gInventory.fetchDescendentsOf(object_id);
+				// But don't interfere with startup download
+				if (LLStartUp::getStartupState() > STATE_WEARABLES_WAIT)
+				{
+					gInventory.fetchDescendentsOf(object_id);
+				}
 
 				LLInventoryModel::cat_array_t* cat_array = NULL;
 				LLInventoryModel::item_array_t* item_array = NULL;
@@ -453,6 +485,24 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	return TRUE;
 }
 
+bool LLInventoryFilter::checkAgainstCreator(const LLFolderViewModelItemInventory* listener) const
+{
+	if (!listener) return TRUE;
+	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+	switch(mFilterCreatorType)
+	{
+		case FILTERCREATOR_SELF:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() == mUsername);
+		case FILTERCREATOR_OTHERS:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() != mUsername);
+		case FILTERCREATOR_ALL:
+		default:
+			return TRUE;
+	}
+}
+
 const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 {
 	return mFilterSubString;
@@ -460,7 +510,14 @@ const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 
 std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
 {
-	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+	if (mSearchType == SEARCHTYPE_NAME)
+	{
+		return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+	}
+	else
+	{
+		return std::string::npos;
+	}
 }
 
 bool LLInventoryFilter::isDefault() const
@@ -533,6 +590,24 @@ void LLInventoryFilter::updateFilterTypes(U64 types, U64& current_types)
 	}
 }
 
+void LLInventoryFilter::setSearchType(ESearchType type)
+{
+	if(mSearchType != type)
+	{
+		mSearchType = type;
+		setModified();
+	}
+}
+
+void LLInventoryFilter::setFilterCreator(EFilterCreatorType type)
+{
+	if(mFilterCreatorType != type)
+	{
+		mFilterCreatorType = type;
+		setModified();
+	}
+}
+
 void LLInventoryFilter::setFilterObjectTypes(U64 types)
 {
 	updateFilterTypes(types, mFilterOps.mFilterObjectTypes);
@@ -554,6 +629,11 @@ void LLInventoryFilter::setFilterWearableTypes(U64 types)
 void LLInventoryFilter::setFilterEmptySystemFolders()
 {
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
+}
+
+void LLInventoryFilter::setFilterWorn()
+{
+    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
 }
 
 void LLInventoryFilter::setFilterMarketplaceActiveFolders()

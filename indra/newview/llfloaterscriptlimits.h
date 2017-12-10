@@ -38,6 +38,7 @@
 
 class LLPanelScriptLimitsInfo;
 class LLTabContainer;
+class LLAvatarName;
 
 class LLPanelScriptLimitsRegionMemory;
 
@@ -113,8 +114,11 @@ public:
 	void showBeacon();
 	void returnObjectsFromParcel(S32 local_id);
 	void returnObjects();
+	void checkButtonsEnabled();
 
 private:
+	void onAvatarNameCache(const LLUUID& id,
+						 const LLAvatarName& av_name);
 	void onNameCache(const LLUUID& id,
 						 const std::string& name);
 

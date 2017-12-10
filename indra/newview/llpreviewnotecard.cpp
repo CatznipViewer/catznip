@@ -153,11 +153,24 @@ BOOL LLPreviewNotecard::canClose()
 	}
 	else
 	{
-		// Bring up view-modal dialog: Save changes? Yes, No, Cancel
-		LLNotificationsUtil::add("SaveChanges", LLSD(), LLSD(), boost::bind(&LLPreviewNotecard::handleSaveChangesDialog,this, _1, _2));
-								  
+		if(!mSaveDialogShown)
+		{
+			mSaveDialogShown = TRUE;
+			// Bring up view-modal dialog: Save changes? Yes, No, Cancel
+			LLNotificationsUtil::add("SaveChanges", LLSD(), LLSD(), boost::bind(&LLPreviewNotecard::handleSaveChangesDialog,this, _1, _2));
+		}
 		return FALSE;
 	}
+}
+
+/* virtual */
+void LLPreviewNotecard::setObjectID(const LLUUID& object_id)
+{
+	LLPreview::setObjectID(object_id);
+
+	LLViewerTextEditor* editor = getChild<LLViewerTextEditor>("Notecard Editor");
+	editor->setNotecardObjectID(mObjectUUID);
+	editor->makePristine();
 }
 
 const LLInventoryItem* LLPreviewNotecard::getDragItem()
@@ -437,6 +450,23 @@ void LLPreviewNotecard::finishInventoryUpload(LLUUID itemId, LLUUID newAssetId, 
     }
 }
 
+void LLPreviewNotecard::finishTaskUpload(LLUUID itemId, LLUUID newAssetId, LLUUID taskId)
+{
+
+    LLSD floater_key;
+    floater_key["taskid"] = taskId;
+    floater_key["itemid"] = itemId;
+    LLPreviewNotecard* nc = LLFloaterReg::findTypedInstance<LLPreviewNotecard>("preview_notecard", floater_key);
+    if (nc)
+    {
+        if (nc->hasEmbeddedInventory())
+        {
+            gVFS->removeFile(newAssetId, LLAssetType::AT_NOTECARD);
+        }
+        nc->setAssetId(newAssetId);
+        nc->refreshFromInventory();
+    }
+}
 
 bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
 {
@@ -485,7 +515,7 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
                 else if (!mObjectUUID.isNull() && !task_url.empty())
                 {
                     uploadInfo = LLResourceUploadInfo::ptr_t(new LLBufferedAssetUploadInfo(mObjectUUID, mItemUUID, LLAssetType::AT_NOTECARD, buffer, 
-                        boost::bind(&LLPreviewNotecard::finishInventoryUpload, _1, _3, LLUUID::null)));
+                        boost::bind(&LLPreviewNotecard::finishTaskUpload, _1, _3, mObjectUUID)));
                     url = task_url;
                 }
 
@@ -622,6 +652,7 @@ void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid, void* user_data
 
 bool LLPreviewNotecard::handleSaveChangesDialog(const LLSD& notification, const LLSD& response)
 {
+	mSaveDialogShown = FALSE;
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	switch(option)
 	{

@@ -172,11 +172,13 @@ public:
 	void			setOnActiveList(BOOL on_active)		{ mOnActiveList = on_active; }
 
 	virtual BOOL	isAttachment() const { return FALSE; }
-	const std::string& getAttachmentItemName();
+	const std::string& getAttachmentItemName() const;
 
 	virtual LLVOAvatar* getAvatar() const;  //get the avatar this object is attached to, or NULL if object is not an attachment
 	virtual BOOL	isHUDAttachment() const { return FALSE; }
 	virtual BOOL	isTempAttachment() const;
+
+	virtual BOOL isHiglightedOrBeacon() const;
 
 	virtual void 	updateRadius() {};
 	virtual F32 	getVObjRadius() const; // default implemenation is mDrawable->getRadius()
@@ -388,7 +390,7 @@ public:
 
 	 // Create if necessary
 	LLAudioSource *getAudioSource(const LLUUID& owner_id);
-	bool isAudioSource() {return mAudioSourcep != NULL;}
+	BOOL isAudioSource() const {return mAudioSourcep != NULL;}
 
 	U8 getMediaType() const;
 	void setMediaType(U8 media_type);
@@ -437,7 +439,7 @@ public:
 	// viewer object has the inventory stored locally.
 	void registerInventoryListener(LLVOInventoryListener* listener, void* user_data);
 	void removeInventoryListener(LLVOInventoryListener* listener);
-	BOOL isInventoryPending() { return mInventoryPending; }
+	BOOL isInventoryPending();
 	void clearInventoryListeners();
 	bool hasInventoryListeners();
 	void requestInventory();
@@ -573,7 +575,7 @@ public:
 
 public:
 	//counter-translation
-	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE) ;
+	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE,  BOOL skip_avatar_child = FALSE) ;
 	//counter-rotation
 	void resetChildrenRotationAndPosition(const std::vector<LLQuaternion>& rotations, 
 											const std::vector<LLVector3>& positions) ;
@@ -720,6 +722,7 @@ private:
 	void deleteTEImages(); // correctly deletes list of images
 	
 protected:
+
 	typedef std::map<char *, LLNameValue *> name_value_map_t;
 	name_value_map_t mNameValuePairs;	// Any name-value pairs stored by script
 
@@ -756,9 +759,17 @@ protected:
 	callback_list_t mInventoryCallbacks;
 	S16 mInventorySerialNum;
 
+	enum EInventoryRequestState
+	{
+		INVENTORY_REQUEST_STOPPED,
+		INVENTORY_REQUEST_PENDING,
+		INVENTORY_XFER
+	};
+	EInventoryRequestState	mInvRequestState;
+	U64						mInvRequestXFerId;
+	BOOL					mInventoryDirty;
+
 	LLViewerRegion	*mRegionp;					// Region that this object belongs to.
-	BOOL			mInventoryPending;
-	BOOL			mInventoryDirty;
 	BOOL			mDead;
 	BOOL			mOrphaned;					// This is an orphaned child
 	BOOL			mUserSelected;				// Cached user select information

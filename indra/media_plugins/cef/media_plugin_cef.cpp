@@ -440,6 +440,7 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 			}
 			else if (message_name == "cleanup")
 			{
+				mVolumeCatcher.setVolume(0);
 				mLLCEFLib->requestExit();
 			}
 			else if (message_name == "shm_added")
@@ -501,6 +502,7 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 				LLCEFLib::LLCEFLibSettings settings;
 				settings.initial_width = 1024;
 				settings.initial_height = 1024;
+				settings.page_zoom_factor = message_in.getValueReal("factor");
 				settings.plugins_enabled = mPluginsEnabled;
 				settings.media_stream_enabled = false; // MAINT-6060 - WebRTC media removed until we can add granualrity/query UI
 				settings.javascript_enabled = mJavascriptEnabled;

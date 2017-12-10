@@ -234,6 +234,8 @@ int APIENTRY WINMAIN(HINSTANCE hInstance,
 	DWORD heap_enable_lfh_error[MAX_HEAPS];
 	S32 num_heaps = 0;
 	
+	LLWindowWin32::setDPIAwareness();
+
 #if WINDOWS_CRT_MEM_CHECKS && !INCLUDE_VLD
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF ); // dump memory leaks on exit
 #elif 0
@@ -576,7 +578,7 @@ bool LLAppViewerWin32::initHardwareTest()
 	// Do driver verification and initialization based on DirectX
 	// hardware polling and driver versions
 	//
-	if (FALSE == gSavedSettings.getBOOL("NoHardwareProbe"))
+	if (TRUE == gSavedSettings.getBOOL("ProbeHardwareOnStartup") && FALSE == gSavedSettings.getBOOL("NoHardwareProbe"))
 	{
 		// per DEV-11631 - disable hardware probing for everything
 		// but vram.
@@ -701,10 +703,10 @@ void LLAppViewerWin32::initCrashReporting(bool reportFreeze)
 	PROCESS_INFORMATION processInfo;
 
 	std::wstring exe_wstr;
-	exe_wstr=wstringize(exe_path);
+	exe_wstr = utf8str_to_utf16str(exe_path);
 
 	std::wstring arg_wstr;
-	arg_wstr=wstringize(arg_str);
+	arg_wstr = utf8str_to_utf16str(arg_str);
 
 	LL_INFOS("CrashReport") << "Creating crash reporter process " << exe_path << " with params: " << arg_str << LL_ENDL;
     if(CreateProcess(exe_wstr.c_str(),     

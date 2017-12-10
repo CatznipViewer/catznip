@@ -45,6 +45,7 @@
 #include "llhttpsdhandler.h"
 #include "httpcommon.h"
 #include "httpresponse.h"
+#include "llcleanup.h"
 
 #include <curl/curl.h>
 #include <openssl/crypto.h>
@@ -242,9 +243,9 @@ bool getSLLog(const std::string& strLogPath, std::string& strLogFile)
 
 bool LLCrashLogger::readFromXML(LLSD& dest, const std::string& filename )
 {
-    std::string db_file_name = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,filename);
-    std::ifstream log_file(db_file_name.c_str());
-    
+	std::string db_file_name = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,filename);
+	llifstream log_file(db_file_name.c_str());
+
 	// Look for it in the given file
 	if (log_file.is_open())
 	{
@@ -404,7 +405,7 @@ void LLCrashLogger::gatherFiles()
 //        if (!file.empty())
 //        {
 //            LL_DEBUGS("CRASHREPORT") << "trying to read " << itr->first << ": " << file << LL_ENDL;
-//            std::ifstream f(file.c_str());
+//            llifstream f(file.c_str());
 //            if(f.is_open())
 //            {
 //                std::stringstream s;
@@ -469,7 +470,7 @@ void LLCrashLogger::gatherFiles()
             if ( ( iter->length() > 30 ) && (iter->rfind(".dmp") == (iter->length()-4) ) )
             {
                 std::string fullname = pathname + *iter;
-                std::ifstream fdat( fullname.c_str(), std::ifstream::binary);
+                llifstream fdat(fullname.c_str(), std::ifstream::binary);
                 if (fdat)
                 {
                     char buf[5];
@@ -779,7 +780,7 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
     
 	updateApplication("Sending reports...");
 
-	std::ofstream out_file(report_file.c_str());
+	llofstream out_file(report_file.c_str());
 	LLSDSerialize::toPrettyXML(post_data, out_file);
     out_file.flush();
 	out_file.close();
@@ -1006,12 +1007,18 @@ bool LLCrashLogger::init()
     LLCore::LLHttp::initialize();
 
 	// We assume that all the logs we're looking for reside on the current drive
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 
 	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 
 	// Default to the product name "Second Life" (this is overridden by the -name argument)
-	mProductName = "Second Life";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+	mProductName = "Catznip";
+// [/SL:KB]
+//	mProductName = "Second Life";
 
 	// Rename current log file to ".old"
 	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "crashreport.log.old");
@@ -1092,7 +1099,7 @@ void LLCrashLogger::commonCleanup()
 {
     term_curl();
 	LLError::logToFile("");   //close crashreport.log
-	LLProxy::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLProxy);
 }
 
 void LLCrashLogger::init_curl()

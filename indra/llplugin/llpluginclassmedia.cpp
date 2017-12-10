@@ -73,6 +73,7 @@ bool LLPluginClassMedia::init(const std::string &launcher_filename, const std::s
 	// Queue up the media init message -- it will be sent after all the currently queued messages.
 	LLPluginMessage message(LLPLUGIN_MESSAGE_CLASS_MEDIA, "init");
 	message.setValue("target", mTarget);
+	message.setValueReal("factor", mZoomFactor);
 	sendMessage(message);
 
 	mPlugin->init(launcher_filename, plugin_dir, plugin_filename, debug);
@@ -223,7 +224,14 @@ void LLPluginClassMedia::idle(void)
 				void *addr = mPlugin->getSharedMemoryAddress(mTextureSharedMemoryName);
 
 				// clear texture memory to avoid random screen visual fuzz from uninitialized texture data
-				memset( addr, 0x00, newsize );
+				if (addr)
+				{
+					memset( addr, 0x00, newsize );
+				}
+				else
+				{
+					LL_WARNS("Plugin") << "Failed to get previously created shared memory address: " << mTextureSharedMemoryName << " size: " << mTextureSharedMemorySize << LL_ENDL;
+				}
 
 				// We could do this to force an update, but textureValid() will still be returning false until the first roundtrip to the plugin,
 				// so it may not be worthwhile.
@@ -1259,7 +1267,7 @@ void LLPluginClassMedia::focus(bool focused)
 	sendMessage(message);
 }
 
-void LLPluginClassMedia::set_page_zoom_factor( double factor )
+void LLPluginClassMedia::set_page_zoom_factor( F64 factor )
 {
 	LLPluginMessage message(LLPLUGIN_MESSAGE_CLASS_MEDIA_BROWSER, "set_page_zoom_factor");
 
