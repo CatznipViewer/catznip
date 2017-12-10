@@ -44,10 +44,9 @@ void LLMinidumpInfo::clear()
 LLSD LLMinidumpInfo::asLLSD() const
 {
 	LLSD sdInfo;
-	sdInfo["crash_module_name"] = getModuleName();
-	sdInfo["crash_module_version"] = llformat("%I64d", getModuleVersion());
-	sdInfo["crash_module_versionstring"] = getModuleVersionString();
-	sdInfo["crash_module_displacement"] = llformat("%I64d", getModuleDisplacement());
+	sdInfo["Name"] = getModuleName();
+	sdInfo["Version"] = getModuleVersionString();
+	sdInfo["Offset"] = llformat("%I64d", getModuleDisplacement());
 	return sdInfo;
 }
 
