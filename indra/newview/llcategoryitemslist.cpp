@@ -249,7 +249,7 @@ void LLCategoryItemsList::setFolderId(const LLUUID& idFolder)
 		m_pFolderObserver->addCategory(m_idFolder, boost::bind(&LLCategoryItemsList::updateList, this));
 	}
 
-	setForceShowingUnmatchedItems(true);
+//	setForceShowingUnmatchedItems(true);
 	setForceRefresh(true);
 
 	updateList();
