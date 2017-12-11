@@ -56,6 +56,9 @@ public:
         std::string     subject;
         std::string     message;
         std::string     sender;
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+		LLUUID          sender_id;
+// [/SL:KB]
         S32             fee;
         LLDate          time_stamp;
         LLDate          received_time;
@@ -166,7 +169,10 @@ private:
     LLGroupNotificationListItem(const LLGroupNotificationListItem &);
     LLGroupNotificationListItem & operator=(LLGroupNotificationListItem &);
 
-    void setGroupName(std::string name);
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+	void setGroupName(const LLUUID& id, const std::string& name);
+// [/SL:KB]
+//    void setGroupName(std::string name);
     bool updateFromCache();
 };
 
@@ -212,7 +218,10 @@ private:
     LLGroupNoticeNotificationListItem(const LLGroupNoticeNotificationListItem &);
     LLGroupNoticeNotificationListItem & operator=(LLGroupNoticeNotificationListItem &);
 
-    void setSender(std::string sender);
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+	void setSender(const LLUUID& sender_id, const std::string& sender);
+// [/SL:KB]
+//    void setSender(std::string sender);
     void onClickAttachment();
     /*virtual*/ void close();
 

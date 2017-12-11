@@ -139,6 +139,13 @@ public:
 			LLGroupActions::startIM(group_id);
 			return true;
 		}
+		if (tokens[1].asString() == "notices")
+		{
+			if ( (group_id.isNull()) || (!LLGroupActions::isInGroup(group_id)) )
+				return true;
+			LLGroupActions::showNotices(group_id);
+			return true;
+		}
 // [/SL:KB]
 		return false;
 	}
