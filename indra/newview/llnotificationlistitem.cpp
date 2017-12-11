@@ -430,7 +430,10 @@ BOOL LLGroupNoticeNotificationListItem::postBuild()
 //        mTimeBox->setValue(buildNotificationDate(mParams.received_time, UTC));
 //        mTimeBoxExp->setValue(buildNotificationDate(mParams.received_time, UTC));
 //    }
-    setSender(mParams.sender);
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+	setSender(mParams.sender_id, mParams.sender);
+// [/SL:KB]
+//    setSender(mParams.sender);
 
     if (mInventoryOffer != NULL)
     {
@@ -492,7 +495,10 @@ bool LLGroupNotificationListItem::updateFromCache()
 {
     LLGroupMgrGroupData* group_data = LLGroupMgr::getInstance()->getGroupData(mGroupId);
     if (!group_data) return false;
-    setGroupName(group_data->mName);
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+	setGroupName(group_data->mID, group_data->mName);
+// [/SL:KB]
+//    setGroupName(group_data->mName);
     return true;
 }
 
@@ -515,12 +521,18 @@ void LLGroupNotificationListItem::setGroupId(const LLUUID& value)
     }
 }
 
-void LLGroupNotificationListItem::setGroupName(std::string name)
+//void LLGroupNotificationListItem::setGroupName(std::string name)
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+void LLGroupNotificationListItem::setGroupName(const LLUUID& id, const std::string& name)
+// [/SL:KB]
 {
     if (!name.empty())
     {
         LLStringUtil::format_map_t string_args;
-        string_args["[GROUP_NAME]"] = llformat("%s", name.c_str());
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+		string_args["[GROUP_NAME]"] = (id.isNull()) ? llformat("\"%s\"", name.c_str()) : llformat("secondlife:///app/group/%s/notices", id.asString().c_str());
+// [/SL:KB]
+//        string_args["[GROUP_NAME]"] = llformat("%s", name.c_str());
         std::string group_box_str = getString("group_name_text", string_args);
         mGroupNameBoxExp->setValue(group_box_str);
         mGroupNameBoxExp->setVisible(TRUE);
@@ -532,12 +544,18 @@ void LLGroupNotificationListItem::setGroupName(std::string name)
     }
 }
 
-void LLGroupNoticeNotificationListItem::setSender(std::string sender)
+//void LLGroupNoticeNotificationListItem::setSender(std::string sender)
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+void LLGroupNoticeNotificationListItem::setSender(const LLUUID& sender_id, const std::string& sender)
+// [/SL:KB]
 {
     if (!sender.empty())
     {
         LLStringUtil::format_map_t string_args;
-        string_args["[SENDER_RESIDENT]"] = llformat("%s", sender.c_str());
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+		string_args["[SENDER_RESIDENT]"] = (sender_id.isNull()) ? llformat("\"%s\"", sender.c_str()) : llformat("secondlife:///app/agent/%s/about", sender_id.asString().c_str());
+// [/SL:KB]
+//        string_args["[SENDER_RESIDENT]"] = llformat("%s", sender.c_str());
         std::string sender_text = getString("sender_resident_text", string_args);
         mSenderOrFeeBox->setValue(sender_text);
         mSenderOrFeeBoxExp->setValue(sender_text);

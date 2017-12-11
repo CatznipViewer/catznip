@@ -16,11 +16,11 @@
   <!-- bg_alpha_color="PanelNotificationListItem"> -->
   <panel.string
     name="sender_resident_text">
-    Sender: "[SENDER_RESIDENT]"
+    Sender: [SENDER_RESIDENT]
   </panel.string>
   <panel.string
     name="group_name_text">
-    Group: "[GROUP_NAME]"
+    Group: [GROUP_NAME]
   </panel.string>
   <panel.string
     name="group_fee_text">
@@ -56,7 +56,7 @@
                   <icon top="1" left="242" width="21" height="21" image_name="Icon_Attachment_Small" follows="right" mouse_opaque="true" name="attachment_icon" tool_tip="Attachment" visible="false"/>
                 </panel>
                 <panel border="false" top="23" left="0" width="260" height="15" bevel_style="none" follows="left|top|right|bottom" layout="topleft" name="sender_time_panel">
-                  <text allow_scroll="false" font="SansSerifSmall" top="0" left="0" width="170" height="13" layout="topleft" follows="right|left"
+                  <text allow_scroll="false" font="SansSerifSmall" top="0" left="0" width="170" height="13" layout="topleft" follows="right|left" plain_text="true"
                     use_ellipses="true" word_wrap="false" mouse_opaque="false" name="sender_or_fee_box" visible="false">
                     Sender: "Resident R e s i d e n t R e s i d e n t"
                   </text>
@@ -90,13 +90,13 @@
                         use_ellipses="true" word_wrap="false" mouse_opaque="false" name="notification_title_exp">
                         Notice Title Notice Title N o t i c e T i t l e N o t i c e T i t l e
                       </text>
-                      <text allow_scroll="false" font="SansSerif" left="0" width="233" height="10" layout="topleft" follows="right|left" text_color="White"
-                        use_ellipses="true" word_wrap="false" mouse_opaque="false" name="group_name_exp" parse_urls="false" visible="false">
+                      <text allow_scroll="false" font="SansSerif" left="0" width="233" height="10" layout="topleft" follows="right|left" text_color="White" plain_text="true"
+                        use_ellipses="true" word_wrap="false" mouse_opaque="false" name="group_name_exp" visible="false">
                         Group Name Group Name Group Na m e e
                       </text>
                     </panel>
                     <panel border="false" left="0" width="230" height="15" bevel_style="none" follows="left|top|right" layout="topleft" name="sender_time_panel_exp">
-                      <text allow_scroll="false" font="SansSerifSmall" top="0" left="0" width="145" height="13" layout="topleft" follows="right|left"
+                      <text allow_scroll="false" font="SansSerifSmall" top="0" left="0" width="145" height="13" layout="topleft" follows="right|left" plain_text="true"
                         use_ellipses="true" word_wrap="false" mouse_opaque="false" name="sender_or_fee_box_exp" visible="false">
                         Sender: "Resident R e s i d e n t R e s i d e n t"
                       </text>
