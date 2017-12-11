@@ -4399,6 +4399,8 @@ bool LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_ima
 	else
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
+	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
+
 	// Get a base file location if needed.
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 	/*
@@ -4512,6 +4514,11 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 	if (std::string::npos == base_name.find("%c"))
 		base_name += "_%c";
 // [/SL:KB]
+
+//	if(LLViewerWindow::sSnapshotDir.empty())
+//	{
+//		return FALSE;
+//	}
 
 // Check if there is enough free space to save snapshot
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.3

@@ -3991,7 +3991,8 @@ http://secondlife.com/download.
   <notification
    icon="alertmodal.tga"
    name="UpdaterServiceNotRunning"
-   type="alertmodal">
+   type="alertmodal"
+   force_urls_external="true">
 There is a required update for your Second Life Installation.
 
 You may download this update from http://www.secondlife.com/downloads
@@ -6585,6 +6586,13 @@ Topic: [SUBJECT], Message: [MESSAGE]
    type="notifytip">
     <tag>friendship</tag>
 Although you&apos;re very nice, you can&apos;t add yourself as a friend.
+  </notification>
+
+  <notification
+   icon="notifytip.tga"
+   name="AddSelfRenderExceptions"
+   type="notifytip">
+You can&apos;t add yourself to the rendering exceptions list.
   </notification>
 
   <notification

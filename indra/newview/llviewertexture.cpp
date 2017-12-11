@@ -1399,8 +1399,7 @@ void LLViewerFetchedTexture::addToCreateTexture()
 
 						{
 							//make a duplicate in case somebody else is using this raw image
-							mRawImage = mRawImage->duplicate(); 
-							mRawImage->scale(w >> i, h >> i) ;					
+							mRawImage = mRawImage->scaled(w >> i, h >> i);
 						}
 					}
 				}
@@ -2916,8 +2915,7 @@ void LLViewerFetchedTexture::setCachedRawImage()
 			
 			{
 				//make a duplicate in case somebody else is using this raw image
-				mRawImage = mRawImage->duplicate(); 
-				mRawImage->scale(w >> i, h >> i) ;
+				mRawImage = mRawImage->scaled(w >> i, h >> i);
 			}
 		}
 		mCachedRawImage = mRawImage;
@@ -3969,7 +3967,7 @@ void LLTexturePipelineTester::updateStablizingTime()
 }
 
 //virtual 
-void LLTexturePipelineTester::compareTestSessions(std::ofstream* os) 
+void LLTexturePipelineTester::compareTestSessions(llofstream* os) 
 {	
 	LLTexturePipelineTester::LLTextureTestSession* base_sessionp = dynamic_cast<LLTexturePipelineTester::LLTextureTestSession*>(mBaseSessionp);
 	LLTexturePipelineTester::LLTextureTestSession* current_sessionp = dynamic_cast<LLTexturePipelineTester::LLTextureTestSession*>(mCurrentSessionp);
