@@ -2099,6 +2099,8 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 // [/SL:KB]
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+	registrar.add("Url.BlockAgent", boost::bind(&LLUrlAction::muteAgent, url));
+	registrar.add("Url.UnblockAgent", boost::bind(&LLUrlAction::unmuteAgent, url));
 	registrar.add("Url.Copy", boost::bind(&LLUrlAction::copyToClipboard, url, _2));
 // [/SL:KB]
 	registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, url));
@@ -2146,8 +2148,12 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
         if (mIsObjectBlockedSignal)
         {
             bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
-            LLView* blockButton = menu->getChild<LLView>("block_object");
-            LLView* unblockButton = menu->getChild<LLView>("unblock_object");
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+            LLView* blockButton = menu->findChild<LLView>("block_object");
+            LLView* unblockButton = menu->findChild<LLView>("unblock_object");
+// [/SL:KB]
+//            LLView* blockButton = menu->getChild<LLView>("block_object");
+//            LLView* unblockButton = menu->getChild<LLView>("unblock_object");
 
             if (blockButton && unblockButton)
             {
