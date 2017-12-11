@@ -3372,7 +3372,6 @@ Elles vont être bloquées pendant quelques secondes pour votre sécurité.
 	<notification name="SnapshotToComputerFailed">
 		Échec d’enregistrement de la photo dans [PATH] : Le disque est plein. [NEED_MEMORY]KB est nécessaire mais l&apos;espace libre est de seulement [FREE_MEMORY]KB.
 	</notification>
-	</notification>
 	<notification name="AppearanceToXMLFailed">
 		Échec d&apos;enregistrement de l&apos;apparence en XML.
     icon=&quot;notifytip.tga&quot;

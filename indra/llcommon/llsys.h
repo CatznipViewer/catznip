@@ -55,6 +55,9 @@ public:
 	S32 mMajorVer;
 	S32 mMinorVer;
 	S32 mBuild;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	std::string mPlatform = "Unknown";
+// [/SL:KB]
 
 #ifndef LL_WINDOWS
 	static S32 getMaxOpenFiles();

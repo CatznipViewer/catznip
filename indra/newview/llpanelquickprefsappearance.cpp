@@ -36,6 +36,7 @@
 #endif // CATZNIP
 
 // Wearing panel
+#include "llfiltereditor.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
@@ -247,6 +248,9 @@ LLQuickPrefsInventoryPanel::~LLQuickPrefsInventoryPanel()
 // virtual
 BOOL LLQuickPrefsInventoryPanel::postBuild()
 {
+	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
+	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFilterEdit, this, _2));
+
 	m_pItemsList = findChild<LLCategoryItemsList>("items_list");
 	m_pItemsList->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFolderChanged, this));
 
@@ -290,6 +294,17 @@ void LLQuickPrefsInventoryPanel::onBrowseFolder()
 void LLQuickPrefsInventoryPanel::onBrowseFolderCb(const LLSD& sdData)
 {
 	m_pItemsList->setFolderId(sdData["uuid"].asUUID());
+}
+
+void LLQuickPrefsInventoryPanel::onFilterEdit(std::string strFilter)
+{
+	LLStringUtil::toUpper(strFilter);
+	LLStringUtil::trimHead(strFilter);
+
+	if (strFilter != m_pItemsList->getFilterSubString())
+	{
+		m_pItemsList->setFilterSubString(strFilter);
+	}
 }
 
 void LLQuickPrefsInventoryPanel::onFolderChanged()
@@ -361,10 +376,24 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 	if (m_idCOF.isNull())
 		m_idCOF = gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
 
+	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
+	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onFilterEdit, this, _2));
+
 	m_pWornItemsList = getChild<LLWornItemsList>("cof_items_list");
 	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("QuickPrefsWearingSort"));
 
 	return LLQuickPrefsPanel::postBuild();
+}
+
+void LLQuickPrefsWearingPanel::onFilterEdit(std::string strFilter)
+{
+	LLStringUtil::toUpper(strFilter);
+	LLStringUtil::trimHead(strFilter);
+
+	if (strFilter != m_pWornItemsList->getFilterSubString())
+	{
+		m_pWornItemsList->setFilterSubString(strFilter);
+	}
 }
 
 void LLQuickPrefsWearingPanel::onSortOrderChanged(const LLSD& sdParam)

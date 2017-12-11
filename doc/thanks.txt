@@ -21,9 +21,13 @@ Chloe Constantine
 	RLVa
 Cinder Roxley
 	General Mac OS X and installer issues 
+CrystalPurity Resident
+	Feedback
 Ebonaku Dragova
 	Bugs
 	Feedback
+Esmara Draconia
+	Bugs
 Faith Noonan
 	Beta tester
 	Feedback
@@ -36,10 +40,21 @@ Innula Zenovka
 	Feedback
 Hitomi Tiponi
 	Starlight Art
+Israel Schnute
+	Bugs
+MissStrawberryWhine
+	Bugs
+	Feedback
 Lilly Noodle
 	Beta tester
 	Feedback
 Liss (lissomeprey)
+	Feedback
+	Bugs
+Lexia Metaller
+	Bugs
+	Feedback
+Lone Dubratt
 	Bugs
 Loom Kish
 	Mac OS X issues
@@ -60,8 +75,10 @@ Sean Brady
 	Beta tester
 	Bugs
 Trip Hastings
+	Feedback
 	Bugs
 Tristizia Demonista
+	Feedback
 	Bugs
 Trix Braveheart
 	Bugs
@@ -70,6 +87,8 @@ Vanilla Meili
 	Beta tester
 	Bugs
 	Feedback
+Voo Oompa
+	Bugs
 Whirly Fizzle
 	Bugs
 	Feedback

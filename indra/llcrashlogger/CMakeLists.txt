@@ -9,6 +9,7 @@ include(LLMath)
 include(LLMessage)
 include(LLVFS)
 include(LLXML)
+include(JsonCpp)
 
 include_directories(
     ${LLCOREHTTP_INCLUDE_DIRS}
@@ -17,6 +18,7 @@ include_directories(
     ${LLMESSAGE_INCLUDE_DIRS}
     ${LLVFS_INCLUDE_DIRS}
     ${LLXML_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIR}
     )
 include_directories(SYSTEM
     ${LLCOMMON_SYSTEM_INCLUDE_DIRS}
