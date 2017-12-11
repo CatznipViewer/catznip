@@ -3397,6 +3397,9 @@ void LLIMMgr::inviteToSession(
 
 	BOOL voice_invite = FALSE;
 	bool is_linden = LLMuteList::getInstance()->isLinden(caller_name);
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+	bool is_adhoc = false;
+// [/SL:KB]
 
 
 	if(type == IM_SESSION_P2P_INVITE)
@@ -3418,10 +3421,16 @@ void LLIMMgr::inviteToSession(
 		//and a voice ad-hoc
 		notify_box_type = "VoiceInviteAdHoc";
 		voice_invite = TRUE;
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		is_adhoc = true;
+// [/SL:KB]
 	}
 	else if ( inv_type == INVITATION_TYPE_IMMEDIATE )
 	{
 		notify_box_type = "InviteAdHoc";
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		is_adhoc = true;
+// [/SL:KB]
 	}
 
 	LLSD payload;
@@ -3452,7 +3461,7 @@ void LLIMMgr::inviteToSession(
 			return;
 		}
  // [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
-		else if ( (gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == nullptr) )
+		else if ( (is_adhoc) && (gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == nullptr) )
 		{
 			if (voice_invite)
 				LLIncomingCallDialog::processCallResponse(1, payload);
@@ -4145,6 +4154,11 @@ public:
 					sdData["method"] = "decline invitation";
 					sdData["session-id"] = session_id;
 
+					if (!is_muted)
+					{
+						LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
+					}
+
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
 				}
 				return;
@@ -4169,11 +4183,6 @@ public:
 					sdData["session-id"] = session_id;
 
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
-				}
-
-				if (!is_muted)
-				{
-					LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
 				}
 
 				return;
