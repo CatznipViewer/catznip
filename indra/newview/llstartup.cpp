@@ -273,7 +273,7 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 void fetch_viewer_data();
 // [/SL:KB]
 
@@ -436,7 +436,7 @@ bool idle_startup()
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 		fetch_viewer_data();
 // [/SL:KB]
 
@@ -3406,7 +3406,7 @@ bool process_login_success_response()
 		gAgent.setHomePosRegion(region_handle, position);
 	}
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 	if (gAgent.mMOTD.empty())
 	{
 		gAgent.mMOTD.assign("Second Life: ").append(response["message"]);
@@ -3631,7 +3631,7 @@ void fetch_viewer_data_cb(const LLSD& sdData)
 				const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
 				if (idGroup.notNull())
 				{
-					gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
+					gAgent.mGroupPreludes.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
 				}
 			}
 		}

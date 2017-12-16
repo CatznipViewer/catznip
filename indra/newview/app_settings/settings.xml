@@ -13802,7 +13802,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+      <string>https://api.catznip.com/v1.0/viewer/config/[CHANNEL]/[VERSION]/[PLATFORM]</string>
     </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
