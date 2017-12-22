@@ -186,9 +186,10 @@ std::string LLUpdateChecker::Implementation::buildUrl(std::string const & urlBas
 	path.append(channel);
 	path.append(version);
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.2
+	path.append(platform);
+
 	LLSD query;
-	query["userPlatform"] = platform;
-	query["platformVersion"] = platform_version;
+	query["osVersion"] = platform_version;
 	query["checkBeta"] = willing_to_test;
 	return LLURI::buildHTTP(urlBase, path, query).asString();
 // [/SL:KB]
