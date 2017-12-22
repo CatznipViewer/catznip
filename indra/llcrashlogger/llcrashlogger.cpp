@@ -389,8 +389,7 @@ void LLCrashLogger::gatherFiles()
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
 	else
 	{
-		mCrashHost = "http://192.168.0.106:51232/api/v1.0/crashreport";
-//		mCrashHost = "https://data.catznip.com/api/v1.0/crashreport";
+		mCrashHost = "https://api.catznip.com/v1.0/crashreport";
 	}
 // [/SL:KB]
 
