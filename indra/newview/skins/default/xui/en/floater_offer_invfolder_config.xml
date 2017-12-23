@@ -9,6 +9,7 @@
  positioning="centered"
  title="ACCEPT IN DESTINATION FOLDERS"
  width="550">
+    <string name="MissingFolder">You need to select an inventory folder before you can save a destination.</string>
     <text
      follows="top|left"
      height="16"
