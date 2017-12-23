@@ -158,7 +158,7 @@ void LLFloaterInventoryOfferFolderConfig::clearControls()
 // virtual
 BOOL LLFloaterInventoryOfferFolderConfig::isDirty() const
 {
-	return (m_pEditFolderItem != nullptr) && (m_idEditFolder.notNull()) && ((m_pEditFolderName->isDirty()) || (m_pEditFolderPath->isDirty()) || (m_pEditFolderSubfolder->isDirty()));
+	return (m_pEditFolderItem != nullptr) && ((m_pEditFolderName->isDirty()) || (m_pEditFolderPath->isDirty()) || (m_pEditFolderSubfolder->isDirty()));
 }
 
 void LLFloaterInventoryOfferFolderConfig::refreshControls()
@@ -230,7 +230,8 @@ void LLFloaterInventoryOfferFolderConfig::onSelectFolderCb(const LLSD& sdNotific
 	switch (idxOption)
 	{
 		case 0: // Yes (Save)
-			onSaveFolder();
+			if (!onSaveFolder())
+				return;
 			m_pFolderList->selectByValue(sdSelValue);
 			break;
 		case 1: // No (Don't Save)
@@ -294,8 +295,16 @@ void LLFloaterInventoryOfferFolderConfig::onBrowseFolderCb(const LLSD& sdData)
 	refreshControls();
 }
 
-void LLFloaterInventoryOfferFolderConfig::onSaveFolder()
+bool LLFloaterInventoryOfferFolderConfig::onSaveFolder()
 {
+	if (m_idEditFolder.isNull())
+	{
+		LLSD args;
+		args["MESSAGE"] = getString("MissingFolder");
+		LLNotificationsUtil::add("GenericAlert", args);
+		return false;
+	}
+
 	const LLAcceptInFolder folderInfo(m_idEditFolder, m_pEditFolderName->getText(), m_pEditFolderSubfolder->getText());
 	if ( (m_pEditFolderItem) && (m_pEditFolderItem->isUndefined()) )
 	{
@@ -315,6 +324,7 @@ void LLFloaterInventoryOfferFolderConfig::onSaveFolder()
 
 	refreshItems();
 	refreshControls();
+	return true;
 }
 
 void LLFloaterInventoryOfferFolderConfig::onOk()
@@ -342,7 +352,8 @@ void LLFloaterInventoryOfferFolderConfig::onOkCb(const LLSD& sdNotification, con
 	switch (idxOption)
 	{
 		case 0: // Save
-			onSaveFolder();
+			if (!onSaveFolder())
+				return;
 			break;
 		case 1: // Don't save
 			break;
@@ -367,7 +378,8 @@ void LLFloaterInventoryOfferFolderConfig::onSaveChangesCb(const LLSD& sdNotifica
 	switch (idxOption)
 	{
 		case 0: // Persist the current entry changes and then update the setting
-			onSaveFolder();
+			if (!onSaveFolder())
+				return;
 			onCommit();
 			break;
 		case 1: // Don't save anything
