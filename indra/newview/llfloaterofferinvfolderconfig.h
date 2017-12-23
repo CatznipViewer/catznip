@@ -82,7 +82,7 @@ protected:
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
 	void onSaveChangesCb(const LLSD& sdNotification, const LLSD& sdResponse);
-	void onSaveFolder();
+	bool onSaveFolder();
 	void onOk();
 	void onOkCb(const LLSD& sdNotification, const LLSD& sdResponse);
 	void onCancel();
