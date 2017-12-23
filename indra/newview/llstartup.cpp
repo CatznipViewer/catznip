@@ -3611,7 +3611,7 @@ void transition_back_to_login_panel(const std::string& emsg)
 }
 
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
-void fetch_viewer_data_cb(const LLSD& sdData)
+void fetch_viewer_data_cb(LLSD sdData)
 {
 	// Message of the day
 	if (sdData.has("motd"))
@@ -3645,6 +3645,12 @@ void fetch_viewer_data_cb(const LLSD& sdData)
 		{
 			gAgent.mFeedbackInfo = sdFeedbackInfo;
 		}
+	}
+
+	// Login page
+	if (sdData.has("login_url"))
+	{
+		gSavedSettings.setString("ViewerLoginURL", sdData["login_url"]);
 	}
 }
 

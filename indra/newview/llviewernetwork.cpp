@@ -127,18 +127,31 @@ void LLGridManager::initialize(const std::string& grid_file)
 	mGridFile = grid_file;
 	// as we don't want an attacker to override our grid list
 	// to point the default grid to an invalid grid
-  	addSystemGrid(LLTrans::getString("AgniGridLabel"),
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
+	std::string strLoginPage = gSavedSettings.getString("ViewerLoginURL");
+	if (strLoginPage.empty())
+	{
+		strLoginPage = DEFAULT_LOGIN_PAGE;
+	}
+// [/SL:KB]
+ 	addSystemGrid(LLTrans::getString("AgniGridLabel"),
 				  MAINGRID,
 				  MAIN_GRID_LOGIN_URI,
 				  "https://secondlife.com/helpers/",
-				  DEFAULT_LOGIN_PAGE,
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
+				  strLoginPage,
+// [/SL:KB]
+///				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Agni");
 	addSystemGrid(LLTrans::getString("AditiGridLabel"),
 				  "util.aditi.lindenlab.com",
 				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
 				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
-				  DEFAULT_LOGIN_PAGE,
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
+				  strLoginPage,
+// [/SL:KB]
+//				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Aditi");
 
