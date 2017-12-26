@@ -45,6 +45,7 @@
 #include "llfloaterimcontainer.h"
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 #include "llfloaterupdate.h"
+#include "llupdaterservice.h"
 // [/SL:KB]
 #include "llwindow.h"
 #include "llviewerstats.h"
@@ -96,7 +97,6 @@
 #include "llvocache.h"
 #include "llvopartgroup.h"
 #include "llweb.h"
-#include "llupdaterservice.h"
 #include "llfloatertexturefetchdebugger.h"
 #include "llspellcheck.h"
 #include "llscenemonitor.h"
@@ -471,8 +471,6 @@ struct SettingsFiles : public LLInitParam::Block<SettingsFiles>
 
 static std::string gWindowTitle;
 
-LLAppViewer::LLUpdaterInfo *LLAppViewer::sUpdaterInfo = NULL ;
-
 //----------------------------------------------------------------------------
 // Metrics logging control constants
 //----------------------------------------------------------------------------
@@ -729,7 +727,6 @@ LLAppViewer::LLAppViewer()
 	// OK to write stuff to logs now, we've now crash reported if necessary
 	//
 	
-	LLLoginInstance::instance().setUpdaterService(mUpdater.get());
 	LLLoginInstance::instance().setPlatformInfo(gPlatform, LLOSInfo::instance().getOSVersionString(), LLOSInfo::instance().getOSStringSimple());
 }
 
@@ -1114,6 +1111,19 @@ bool LLAppViewer::init()
 
 		}
 	}
+
+//	char* PARENT = getenv("PARENT");
+//	if (! (PARENT && std::string(PARENT) == "SL_Launcher"))
+//	{
+//		// Don't directly run this executable. Please run the launcher, which
+//		// will run the viewer itself.
+//		// Naturally we do not consider this bulletproof. The point is to
+//		// gently remind a user who *inadvertently* finds him/herself in this
+//		// situation to do things the Right Way. Anyone who intentionally
+//		// bypasses this mechanism needs no reminder that s/he's shooting
+//		// him/herself in the foot.
+//		LLNotificationsUtil::add("RunLauncher");
+//	}
 
 #if LL_WINDOWS
 	if (gGLManager.mGLVersion < LLFeatureManager::getInstance()->getExpectedGLVersion())
@@ -5960,142 +5970,6 @@ void LLAppViewer::handleLoginComplete()
 	// we logged in successfully, so save settings on logout
 	LL_INFOS() << "Login successful, per account settings will be saved on log out." << LL_ENDL;
 	mSavePerAccountSettings=true;
-}
-
-void LLAppViewer::launchUpdater()
-{
-		LLSD query_map = LLSD::emptyMap();
-	query_map["os"] = gPlatform;
-
-	// *TODO change userserver to be grid on both viewer and sim, since
-	// userserver no longer exists.
-	query_map["userserver"] = LLGridManager::getInstance()->getGridId();
-	query_map["channel"] = LLVersionInfo::getChannel();
-	// *TODO constantize this guy
-	// *NOTE: This URL is also used in win_setup/lldownloader.cpp
-	LLURI update_url = LLURI::buildHTTP("secondlife.com", 80, "update.php", query_map);
-	
-	if(LLAppViewer::sUpdaterInfo)
-	{
-		delete LLAppViewer::sUpdaterInfo;
-	}
-	LLAppViewer::sUpdaterInfo = new LLAppViewer::LLUpdaterInfo() ;
-
-	// if a sim name was passed in via command line parameter (typically through a SLURL)
-	if ( LLStartUp::getStartSLURL().getType() == LLSLURL::LOCATION )
-	{
-		// record the location to start at next time
-		gSavedSettings.setString( "NextLoginLocation", LLStartUp::getStartSLURL().getSLURLString()); 
-	};
-
-#if LL_WINDOWS
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = gDirUtilp->getTempFilename();
-	if (LLAppViewer::sUpdaterInfo->mUpdateExePath.empty())
-	{
-		delete LLAppViewer::sUpdaterInfo ;
-		LLAppViewer::sUpdaterInfo = NULL ;
-
-		// We're hosed, bail
-		LL_WARNS("AppInit") << "LLDir::getTempFilename() failed" << LL_ENDL;
-		return;
-	}
-
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += ".exe";
-
-	std::string updater_source = gDirUtilp->getAppRODataDir();
-	updater_source += gDirUtilp->getDirDelimiter();
-	updater_source += "updater.exe";
-
-	LL_DEBUGS("AppInit") << "Calling CopyFile source: " << updater_source
-			<< " dest: " << LLAppViewer::sUpdaterInfo->mUpdateExePath
-			<< LL_ENDL;
-
-
-	if (!CopyFileA(updater_source.c_str(), LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str(), FALSE))
-	{
-		delete LLAppViewer::sUpdaterInfo ;
-		LLAppViewer::sUpdaterInfo = NULL ;
-
-		LL_WARNS("AppInit") << "Unable to copy the updater!" << LL_ENDL;
-
-		return;
-	}
-
-	LLAppViewer::sUpdaterInfo->mParams << "-url \"" << update_url.asString() << "\"";
-
-	LL_DEBUGS("AppInit") << "Calling updater: " << LLAppViewer::sUpdaterInfo->mUpdateExePath << " " << LLAppViewer::sUpdaterInfo->mParams.str() << LL_ENDL;
-
-	//Explicitly remove the marker file, otherwise we pass the lock onto the child process and things get weird.
-	LLAppViewer::instance()->removeMarkerFiles(); // In case updater fails
-
-	// *NOTE:Mani The updater is spawned as the last thing before the WinMain exit.
-	// see LLAppViewerWin32.cpp
-	
-#elif LL_DARWIN
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = "'";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += gDirUtilp->getAppRODataDir();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "/mac-updater.app/Contents/MacOS/mac-updater' -url \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += update_url.asString();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" -name \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += LLAppViewer::instance()->getSecondLifeTitle();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" -bundleid \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += LL_VERSION_BUNDLE_ID;
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" &";
-
-	LL_DEBUGS("AppInit") << "Calling updater: " << LLAppViewer::sUpdaterInfo->mUpdateExePath << LL_ENDL;
-
-	// Run the auto-updater.
-	system(LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str()); /* Flawfinder: ignore */
-
-#elif (LL_LINUX || LL_SOLARIS) && LL_GTK
-	// we tell the updater where to find the xml containing string
-	// translations which it can use for its own UI
-	std::string xml_strings_file = "strings.xml";
-	std::vector<std::string> xui_path_vec =
-		gDirUtilp->findSkinnedFilenames(LLDir::XUI, xml_strings_file);
-	std::string xml_search_paths;
-	const char* delim = "";
-	// build comma-delimited list of xml paths to pass to updater
-	BOOST_FOREACH(std::string this_skin_path, xui_path_vec)
-	{
-		// Although we already have the full set of paths with the filename
-		// appended, the linux-updater.bin command-line switches require us to
-		// snip the filename OFF and pass it as a separate switch argument. :-P
-		LL_INFOS() << "Got a XUI path: " << this_skin_path << LL_ENDL;
-		xml_search_paths.append(delim);
-		xml_search_paths.append(gDirUtilp->getDirName(this_skin_path));
-		delim = ",";
-	}
-	// build the overall command-line to run the updater correctly
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = 
-		gDirUtilp->getExecutableDir() + "/" + "linux-updater.bin" + 
-		" --url \"" + update_url.asString() + "\"" +
-		" --name \"" + LLAppViewer::instance()->getSecondLifeTitle() + "\"" +
-		" --dest \"" + gDirUtilp->getAppRODataDir() + "\"" +
-		" --stringsdir \"" + xml_search_paths + "\"" +
-		" --stringsfile \"" + xml_strings_file + "\"";
-
-	LL_INFOS("AppInit") << "Calling updater: " 
-			    << LLAppViewer::sUpdaterInfo->mUpdateExePath << LL_ENDL;
-
-	// *TODO: we could use the gdk equivalent to ensure the updater
-	// gets started on the same screen.
-	GError *error = NULL;
-	if (!g_spawn_command_line_async(LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str(), &error))
-	{
-		LL_ERRS() << "Failed to launch updater: "
-		       << error->message
-		       << LL_ENDL;
-	}
-	if (error) {
-		g_error_free(error);
-	}
-#else
-	OSMessageBox(LLTrans::getString("MBNoAutoUpdate"), LLStringUtil::null, OSMB_OK);
-#endif
-
-	// *REMOVE:Mani - Saving for reference...
-	// LLAppViewer::instance()->forceQuit();
 }
 
 //virtual

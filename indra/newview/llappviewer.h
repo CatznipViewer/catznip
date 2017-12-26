@@ -316,21 +316,7 @@ private:
         bool mIsFirstRun;
 	U64 mMinMicroSecPerFrame; // frame throttling
 
-	//---------------------------------------------
-	//*NOTE: Mani - legacy updater stuff
-	// Still useable?
-public:
 
-	//some information for updater
-	typedef struct
-	{
-		std::string mUpdateExePath;
-		std::ostringstream mParams;
-	}LLUpdaterInfo ;
-	static LLUpdaterInfo *sUpdaterInfo ;
-
-	void launchUpdater();
-	//---------------------------------------------
 };
 
 // consts from viewer.h
