@@ -271,7 +271,6 @@ static LLAppViewerListener sAppViewerListener(LLAppViewer::instance);
 // viewer.cpp - these are only used in viewer, should be easily moved.
 
 #if LL_DARWIN
-const char * const LL_VERSION_BUNDLE_ID = "com.secondlife.indra.viewer";
 extern void init_apple_menu(const char* product);
 #endif // LL_DARWIN
 
@@ -297,9 +296,7 @@ S32 gLastExecDuration = -1; // (<0 indicates unknown)
 #   define LL_PLATFORM_KEY "mac"
 #elif LL_LINUX
 #   define LL_PLATFORM_KEY "lnx"
-#elif LL_SOLARIS
-#   define LL_PLATFORM_KEY "sol"
-#else
+else
 #   error "Unknown Platform"
 #endif
 const char* gPlatform = LL_PLATFORM_KEY;
@@ -316,8 +313,6 @@ F32SecondsImplicit gFrameIntervalSeconds = 0.f;
 F32 gFPSClamped = 10.f;						// Pretend we start at target rate.
 F32 gFrameDTClamped = 0.f;					// Time between adjacent checks to network for packets
 U64MicrosecondsImplicit	gStartTime = 0; // gStartTime is "private", used only to calculate gFrameTimeSeconds
-U32 gFrameStalls = 0;
-const F64 FRAME_STALL_THRESHOLD = 1.0;
 
 LLTimer gRenderStartTime;
 LLFrameTimer gForegroundTime;
@@ -642,7 +637,7 @@ public:
 
 	void run()
 	{
-		std::ofstream os(mFile.c_str());
+		llofstream os(mFile.c_str());
 		
 		while (!LLAppViewer::instance()->isQuitting())
 		{
@@ -696,7 +691,6 @@ LLAppViewer::LLAppViewer()
 	mSavePerAccountSettings(false),		// don't save settings on logout unless login succeeded.
 	mQuitRequested(false),
 	mLogoutRequestSent(false),
-	mYieldTime(-1),
 	mLastAgentControlFlags(0),
 	mLastAgentForceUpdate(0),
 	mMainloopTimeout(NULL),
@@ -706,7 +700,8 @@ LLAppViewer::LLAppViewer()
 	mFastTimerLogThread(NULL),
 	mUpdater(new LLUpdaterService()),
 	mSettingsLocationList(NULL),
-	mIsFirstRun(false)
+	mIsFirstRun(false),
+	mMinMicroSecPerFrame(0.f)
 {
 	if(NULL != sInstance)
 	{
@@ -735,7 +730,7 @@ LLAppViewer::LLAppViewer()
 	//
 	
 	LLLoginInstance::instance().setUpdaterService(mUpdater.get());
-	LLLoginInstance::instance().setPlatformInfo(gPlatform, getOSInfo().getOSVersionString());
+	LLLoginInstance::instance().setPlatformInfo(gPlatform, LLOSInfo::instance().getOSVersionString(), LLOSInfo::instance().getOSStringSimple());
 }
 
 LLAppViewer::~LLAppViewer()
@@ -842,12 +837,6 @@ bool LLAppViewer::init()
     LLMachineID::init();
 	
 	{
-		// Viewer metrics initialization
-		//static LLCachedControl<bool> metrics_submode(gSavedSettings,
-		//											 "QAModeMetrics",
-		//											 false,
-		//											 "Enables QA features (logging, faster cycling) for metrics collector");
-
 		if (gSavedSettings.getBOOL("QAModeMetrics"))
 		{
 			app_metrics_qa_mode = true;
@@ -1253,6 +1242,9 @@ bool LLAppViewer::init()
 	joystick->setNeedsReset(true);
 	/*----------------------------------------------------------------------*/
 
+	gSavedSettings.getControl("FramePerSecondLimit")->getSignal()->connect(boost::bind(&LLAppViewer::onChangeFrameLimit, this, _2));
+	onChangeFrameLimit(gSavedSettings.getLLSD("FramePerSecondLimit"));
+
 	return true;
 }
 
@@ -1332,9 +1324,6 @@ bool LLAppViewer::frame()
 	LLEventPump& mainloop(LLEventPumps::instance().obtain("mainloop"));
 	LLSD newFrame;
 
-	LLTimer frameTimer,idleTimer;
-	LLTimer debugTime;
-
 	//LLPrivateMemoryPoolTester::getInstance()->run(false) ;
 	//LLPrivateMemoryPoolTester::getInstance()->run(true) ;
 	//LLPrivateMemoryPoolTester::destroy() ;
@@ -1375,14 +1364,6 @@ bool LLAppViewer::frame()
 			gViewerWindow->getWindow()->gatherInput();
 		}
 
-#if 1 && !LL_RELEASE_FOR_DOWNLOAD
-		// once per second debug info
-		if (debugTime.getElapsedTimeF32() > 1.f)
-		{
-			debugTime.reset();
-		}
-		
-#endif
 		//memory leaking simulation
 		LLFloaterMemLeak* mem_leak_instance =
 			LLFloaterReg::findTypedInstance<LLFloaterMemLeak>("mem_leaking");
@@ -1436,7 +1417,24 @@ bool LLAppViewer::frame()
 			{
 				pingMainloopTimeout("Main:Display");
 				gGLActive = TRUE;
+
+				static U64 last_call = 0;
+				if (!gTeleportDisplay)
+				{
+					// Frame/draw throttling
+					U64 elapsed_time = LLTimer::getTotalTime() - last_call;
+					if (elapsed_time < mMinMicroSecPerFrame)
+					{
+						LL_RECORD_BLOCK_TIME(FTM_SLEEP);
+						// llclamp for when time function gets funky
+						U64 sleep_time = llclamp(mMinMicroSecPerFrame - elapsed_time, (U64)1, (U64)1e6);
+						micro_sleep(sleep_time, 0);
+					}
+				}
+				last_call = LLTimer::getTotalTime();
+
 				display();
+
 				pingMainloopTimeout("Main:Snapshot");
 				LLFloaterSnapshot::update(); // take snapshots
 					LLFloaterOutfitSnapshot::update();
@@ -1453,10 +1451,11 @@ bool LLAppViewer::frame()
 			LL_RECORD_BLOCK_TIME(FTM_SLEEP);
 			
 			// yield some time to the os based on command line option
-			if(mYieldTime >= 0)
+			static LLCachedControl<S32> yield_time(gSavedSettings, "YieldTime", -1);
+			if(yield_time >= 0)
 			{
 				LL_RECORD_BLOCK_TIME(FTM_YIELD);
-				ms_sleep(mYieldTime);
+				ms_sleep(yield_time);
 			}
 
 			// yield cooperatively when not running as foreground window
@@ -1464,7 +1463,8 @@ bool LLAppViewer::frame()
 					|| !gFocusMgr.getAppHasFocus())
 			{
 				// Sleep if we're not rendering, or the window is minimized.
-				S32 milliseconds_to_sleep = llclamp(gSavedSettings.getS32("BackgroundYieldTime"), 0, 1000);
+				static LLCachedControl<S32> s_bacground_yeild_time(gSavedSettings, "BackgroundYieldTime", 40);
+				S32 milliseconds_to_sleep = llclamp((S32)s_bacground_yeild_time, 0, 1000);
 				// don't sleep when BackgroundYieldTime set to 0, since this will still yield to other threads
 				// of equal priority on Windows
 				if (milliseconds_to_sleep > 0)
@@ -1488,7 +1488,6 @@ bool LLAppViewer::frame()
 				ms_sleep(500);
 			}
 
-			idleTimer.reset();
 			S32 total_work_pending = 0;
 			S32 total_io_pending = 0;	
 			{
@@ -1540,13 +1539,6 @@ bool LLAppViewer::frame()
 					tex_fetch_debugger_instance->idle() ;				
 				}
 			}
-
-			if ((LLStartUp::getStartupState() >= STATE_CLEANUP) &&
-				(frameTimer.getElapsedTimeF64() > FRAME_STALL_THRESHOLD))
-			{
-				gFrameStalls++;
-			}
-			frameTimer.reset();
 
 			resumeMainloopTimeout();
 
@@ -2756,8 +2748,6 @@ bool LLAppViewer::initConfiguration()
 		}
 	}
 
-    mYieldTime = gSavedSettings.getS32("YieldTime");
-
 
 	// Display splash screen.  Must be after above check for previous
 	// crash as this dialog is always frontmost.
@@ -3343,10 +3333,13 @@ bool LLAppViewer::initWindow()
 		
     
 #ifdef LL_DARWIN
-    //Satisfy both MAINT-3135 (OSX 10.6 and earlier) MAINT-3288 (OSX 10.7 and later)
-   if (getOSInfo().mMajorVer == 10 && getOSInfo().mMinorVer < 7)
-		if ( getOSInfo().mMinorVer == 6 && getOSInfo().mBuild < 8 )
-       		gViewerWindow->getWindow()->setOldResize(true);
+	//Satisfy both MAINT-3135 (OSX 10.6 and earlier) MAINT-3288 (OSX 10.7 and later)
+	LLOSInfo& os_info = LLOSInfo::instance();
+	if (os_info.mMajorVer == 10 && os_info.mMinorVer < 7)
+	{
+		if ( os_info.mMinorVer == 6 && os_info.mBuild < 8 )
+			gViewerWindow->getWindow()->setOldResize(true);
+	}
 #endif
     
 	if (gSavedSettings.getBOOL("WindowMaximized"))
@@ -3489,15 +3482,24 @@ LLSD LLAppViewer::getViewerInfo() const
 	info["CPU"] = gSysCPU.getCPUString();
 	info["MEMORY_MB"] = LLSD::Integer(gSysMemory.getPhysicalMemoryKB().valueInUnits<LLUnits::Megabytes>());
 	// Moved hack adjustment to Windows memory size into llsys.cpp
-	info["OS_VERSION"] = LLAppViewer::instance()->getOSInfo().getOSString();
+	info["OS_VERSION"] = LLOSInfo::instance().getOSString();
 	info["GRAPHICS_CARD_VENDOR"] = (const char*)(glGetString(GL_VENDOR));
 	info["GRAPHICS_CARD"] = (const char*)(glGetString(GL_RENDERER));
 
 #if LL_WINDOWS
-	LLSD driver_info = gDXHardware.getDisplayInfo();
-	if (driver_info.has("DriverVersion"))
+	std::string drvinfo = gDXHardware.getDriverVersionWMI();
+	if (!drvinfo.empty())
 	{
-		info["GRAPHICS_DRIVER_VERSION"] = driver_info["DriverVersion"];
+		info["GRAPHICS_DRIVER_VERSION"] = drvinfo;
+	}
+	else
+	{
+		LL_WARNS("Driver version")<< "Cannot get driver version from getDriverVersionWMI" << LL_ENDL;
+		LLSD driver_info = gDXHardware.getDisplayInfo();
+		if (driver_info.has("DriverVersion"))
+		{
+			info["GRAPHICS_DRIVER_VERSION"] = driver_info["DriverVersion"];
+		}
 	}
 #endif
 
@@ -3525,7 +3527,7 @@ LLSD LLAppViewer::getViewerInfo() const
 
 	info["J2C_VERSION"] = LLImageJ2C::getEngineInfo();
 	bool want_fullname = true;
-	info["AUDIO_DRIVER_VERSION"] = gAudiop ? LLSD(gAudiop->getDriverName(want_fullname)) : LLSD();
+	info["AUDIO_DRIVER_VERSION"] = gAudiop ? LLSD(gAudiop->getDriverName(want_fullname)) : "Undefined";
 	if(LLVoiceClient::getInstance()->voiceEnabled())
 	{
 		LLVoiceVersionInfo version = LLVoiceClient::getInstance()->getVersion();
@@ -3675,6 +3677,70 @@ std::string LLAppViewer::getViewerInfoString() const
 	return support.str();
 }
 
+std::string LLAppViewer::getShortViewerInfoString() const
+{
+	std::ostringstream support;
+	LLSD info(getViewerInfo());
+
+	support << LLTrans::getString("APP_NAME") << " " << info["VIEWER_VERSION_STR"].asString();
+	support << " (" << info["CHANNEL"].asString() << ")";
+	if (info.has("BUILD_CONFIG"))
+	{
+		support << "\n" << "Build Configuration " << info["BUILD_CONFIG"].asString();
+	}
+	if (info.has("REGION"))
+	{
+		support << "\n\n" << "You are at " << ll_vector3_from_sd(info["POSITION_LOCAL"]) << " in " << info["REGION"].asString();
+		support << " located at " << info["HOSTNAME"].asString() << " (" << info["HOSTIP"].asString() << ")";
+		support << "\n" << "SLURL: " << info["SLURL"].asString();
+		support << "\n" << "(Global coordinates " << ll_vector3_from_sd(info["POSITION"]) << ")";
+		support << "\n" << info["SERVER_VERSION"].asString();
+	}
+
+	support << "\n\n" << "CPU: " << info["CPU"].asString();
+	support << "\n" << "Memory: " << info["MEMORY_MB"].asString() << " MB";
+	support << "\n" << "OS: " << info["OS_VERSION"].asString();
+	support << "\n" << "Graphics Card: " << info["GRAPHICS_CARD"].asString() << " (" <<  info["GRAPHICS_CARD_VENDOR"].asString() << ")";
+
+	if (info.has("GRAPHICS_DRIVER_VERSION"))
+	{
+		support << "\n" << "Windows Graphics Driver Version: " << info["GRAPHICS_DRIVER_VERSION"].asString();
+	}
+
+	support << "\n" << "OpenGL Version: " << info["OPENGL_VERSION"].asString();
+
+	support << "\n\n" << "Window size:" << info["WINDOW_WIDTH"].asString() << "x" << info["WINDOW_HEIGHT"].asString();
+	support << "\n" << "Language: " << LLUI::getLanguage();
+	support << "\n" << "Font Size Adjustment: " << info["FONT_SIZE_ADJUSTMENT"].asString() << "pt";
+	support << "\n" << "UI Scaling: " << info["UI_SCALE"].asString();
+	support << "\n" << "Draw distance: " << info["DRAW_DISTANCE"].asString();
+	support << "\n" << "Bandwidth: " << info["NET_BANDWITH"].asString() << "kbit/s";
+	support << "\n" << "LOD factor: " << info["LOD_FACTOR"].asString();
+	support << "\n" << "Render quality: " << info["RENDER_QUALITY"].asString() << " / 7";
+	support << "\n" << "ALM: " << info["GPU_SHADERS"].asString();
+	support << "\n" << "Texture memory: " << info["TEXTURE_MEMORY"].asString() << "MB";
+	support << "\n" << "VFS (cache) creation time: " << info["VFS_TIME"].asString();
+
+	support << "\n\n" << "J2C Decoder: " << info["J2C_VERSION"].asString();
+	support << "\n" << "Audio Driver: " << info["AUDIO_DRIVER_VERSION"].asString();
+	support << "\n" << "LLCEFLib/CEF: " << info["LLCEFLIB_VERSION"].asString();
+	support << "\n" << "LibVLC: " << info["LIBVLC_VERSION"].asString();
+	support << "\n" << "Voice Server: " << info["VOICE_VERSION"].asString();
+
+	if (info.has("PACKETS_IN"))
+	{
+		support << "\n" << "Packets Lost: " << info["PACKETS_LOST"].asInteger() << "/" << info["PACKETS_IN"].asInteger();
+		F32 packets_pct = info["PACKETS_PCT"].asReal();
+		support << " (" << ll_round(packets_pct, 0.001f) << "%)";
+	}
+
+	LLSD substitution;
+	substitution["datetime"] = (S32)time(NULL);
+	support << "\n" << LLTrans::getString("AboutTime", substitution);
+
+	return support.str();
+}
+
 void LLAppViewer::cleanupSavedSettings()
 {
 	gSavedSettings.setBOOL("MouseSun", FALSE);
@@ -3739,6 +3805,7 @@ void LLAppViewer::writeSystemInfo()
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
+	gDebugInfo["ClientInfo"]["AddressSize"] = LLVersionInfo::getAddressSize();
 
 	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 
@@ -3751,7 +3818,7 @@ void LLAppViewer::writeSystemInfo()
 	
 	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB().value());
 	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated.valueInUnits<LLUnits::Kilobytes>());
-	gDebugInfo["OSInfo"] = getOSInfo().getOSStringSimple();
+	gDebugInfo["OSInfo"] = LLOSInfo::instance().getOSStringSimple();
 
 	// The user is not logged on yet, but record the current grid choice login url
 	// which may have been the intended grid. 
@@ -3793,8 +3860,8 @@ void LLAppViewer::writeSystemInfo()
 	// query some system information
 	LL_INFOS("SystemInfo") << "CPU info:\n" << gSysCPU << LL_ENDL;
 	LL_INFOS("SystemInfo") << "Memory info:\n" << gSysMemory << LL_ENDL;
-	LL_INFOS("SystemInfo") << "OS: " << getOSInfo().getOSStringSimple() << LL_ENDL;
-	LL_INFOS("SystemInfo") << "OS info: " << getOSInfo() << LL_ENDL;
+	LL_INFOS("SystemInfo") << "OS: " << LLOSInfo::instance().getOSStringSimple() << LL_ENDL;
+	LL_INFOS("SystemInfo") << "OS info: " << LLOSInfo::instance() << LL_ENDL;
 
     gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
 	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
@@ -3826,7 +3893,7 @@ void getFileList()
 		if ( ( iter->length() > 30 ) && (iter->rfind(".dmp") == (iter->length()-4) ) )
 		{
 			std::string fullname = pathname + *iter;
-			std::ifstream fdat( fullname.c_str(), std::ifstream::binary);
+			llifstream fdat( fullname.c_str(), std::ifstream::binary);
 			if (fdat)
 			{
 				char buf[5];
@@ -4443,10 +4510,7 @@ void dumpVFSCaches()
 	S32 res = LLFile::mkdir("StaticVFSDump");
 	if (res == -1)
 	{
-		if (errno != EEXIST)
-		{
-			LL_WARNS() << "Couldn't create dir StaticVFSDump" << LL_ENDL;
-		}
+		LL_WARNS() << "Couldn't create dir StaticVFSDump" << LL_ENDL;
 	}
 	SetCurrentDirectory(utf8str_to_utf16str("StaticVFSDump").c_str());
 	gStaticVFS->dumpFiles();
@@ -4460,10 +4524,7 @@ void dumpVFSCaches()
 	res = LLFile::mkdir("VFSDump");
 	if (res == -1)
 	{
-		if (errno != EEXIST)
-		{
-			LL_WARNS() << "Couldn't create dir VFSDump" << LL_ENDL;
-		}
+		LL_WARNS() << "Couldn't create dir VFSDump" << LL_ENDL;
 	}
 	SetCurrentDirectory(utf8str_to_utf16str("VFSDump").c_str());
 	gVFS->dumpFiles();
@@ -4475,7 +4536,7 @@ void dumpVFSCaches()
 U32 LLAppViewer::getTextureCacheVersion() 
 {
 	//viewer texture cache version, change if the texture cache format changes.
-	const U32 TEXTURE_CACHE_VERSION = 7;
+	const U32 TEXTURE_CACHE_VERSION = 8;
 
 	return TEXTURE_CACHE_VERSION ;
 }
@@ -4485,7 +4546,7 @@ U32 LLAppViewer::getObjectCacheVersion()
 {
 	// Viewer object cache version, change if object update
 	// format changes. JC
-	const U32 INDRA_OBJECT_CACHE_VERSION = 14;
+	const U32 INDRA_OBJECT_CACHE_VERSION = 15;
 
 	return INDRA_OBJECT_CACHE_VERSION;
 }
@@ -4513,6 +4574,7 @@ bool LLAppViewer::initCache()
 		if (gSavedSettings.getBOOL("PurgeCacheOnStartup") ||
 			gSavedSettings.getBOOL("PurgeCacheOnNextStartup"))
 		{
+			LL_INFOS("AppCache") << "Startup cache purge requested: " << (gSavedSettings.getBOOL("PurgeCacheOnStartup") ? "ALWAYS" : "ONCE") << LL_ENDL;
 			gSavedSettings.setBOOL("PurgeCacheOnNextStartup", false);
 			mPurgeCache = true;
 			// STORM-1141 force purgeAllTextures to get called to prevent a crash here. -brad
@@ -4527,6 +4589,7 @@ bool LLAppViewer::initCache()
 		std::string new_cache_location = gSavedSettings.getString("NewCacheLocation");
 		if (new_cache_location != cache_location)
 		{
+			LL_INFOS("AppCache") << "Cache location changed, cache needs purging" << LL_ENDL;
 			gDirUtilp->setCacheDir(gSavedSettings.getString("CacheLocation"));
 			purgeCache(); // purge old cache
 			gSavedSettings.setString("CacheLocation", new_cache_location);
@@ -4552,23 +4615,15 @@ bool LLAppViewer::initCache()
 	// Init the texture cache
 	// Allocate 80% of the cache size for textures	
 	const S32 MB = 1024 * 1024;
-	const S64 MIN_CACHE_SIZE = 64 * MB;
+	const S64 MIN_CACHE_SIZE = 256 * MB;
 	const S64 MAX_CACHE_SIZE = 9984ll * MB;
 	const S64 MAX_VFS_SIZE = 1024 * MB; // 1 GB
 
 	S64 cache_size = (S64)(gSavedSettings.getU32("CacheSize")) * MB;
 	cache_size = llclamp(cache_size, MIN_CACHE_SIZE, MAX_CACHE_SIZE);
 
-	S64 texture_cache_size = ((cache_size * 8) / 10);
-	S64 vfs_size = cache_size - texture_cache_size;
-
-	if (vfs_size > MAX_VFS_SIZE)
-	{
-		// Give the texture cache more space, since the VFS can't be bigger than 1GB.
-		// This happens when the user's CacheSize setting is greater than 5GB.
-		vfs_size = MAX_VFS_SIZE;
-		texture_cache_size = cache_size - MAX_VFS_SIZE;
-	}
+	S64 vfs_size = llmin((S64)((cache_size * 2) / 10), MAX_VFS_SIZE);
+	S64 texture_cache_size = cache_size - vfs_size;
 
 	S64 extra = LLAppViewer::getTextureCache()->initCache(LL_PATH_CACHE, texture_cache_size, texture_cache_mismatch);
 	texture_cache_size -= extra;
@@ -5741,6 +5796,19 @@ void LLAppViewer::disconnectViewer()
 	LLUrlEntryParcel::setDisconnected(gDisconnected);
 }
 
+bool LLAppViewer::onChangeFrameLimit(LLSD const & evt)
+{
+	if (evt.asInteger() > 0)
+	{
+		mMinMicroSecPerFrame = 1000000 / evt.asInteger();
+	}
+	else
+	{
+		mMinMicroSecPerFrame = 0;
+	}
+	return false;
+}
+
 void LLAppViewer::forceErrorLLError()
 {
    	LL_ERRS() << "This is a deliberate llerror" << LL_ENDL;
@@ -6078,23 +6146,14 @@ void LLAppViewer::metricsSend(bool enable_reporting)
 		{
 			std::string	caps_url = regionp->getCapability("ViewerMetrics");
 
-            if (gSavedSettings.getBOOL("QAModeMetrics"))
-            {
-                dump_sequential_xml("metric_asset_stats",gViewerAssetStats->asLLSD(true));
-            }
-            
-			// Make a copy of the main stats to send into another thread.
-			// Receiving thread takes ownership.
-			LLViewerAssetStats * main_stats(new LLViewerAssetStats(*gViewerAssetStats));
-			main_stats->stop();
-			
+            LLSD sd = gViewerAssetStats->asLLSD(true);
+
 			// Send a report request into 'thread1' to get the rest of the data
 			// and provide some additional parameters while here.
 			LLAppViewer::sTextureFetch->commandSendMetrics(caps_url,
 														   gAgentSessionID,
 														   gAgentID,
-														   main_stats);
-			main_stats = 0;		// Ownership transferred
+														   sd);
 		}
 		else
 		{

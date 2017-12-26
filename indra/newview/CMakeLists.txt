@@ -16,6 +16,7 @@ include(GLOD)
 include(Hunspell)
 include(JsonCpp)
 include(LLAppearance)
+include(LLBase)
 include(LLAudio)
 include(LLCharacter)
 include(LLCommon)
@@ -42,10 +43,12 @@ include(OPENAL)
 include(OpenGL)
 include(OpenSSL)
 include(PNG)
+include(Requests)
 include(TemplateCheck)
 include(UI)
 include(UnixInstall)
 include(ViewerMiscLibs)
+include(ViewerManager)
 include(VisualLeakDetector)
 include(ZLIB)
 include(URIPARSER)
@@ -81,7 +84,6 @@ include_directories(
     ${LLWINDOW_INCLUDE_DIRS}
     ${LLXML_INCLUDE_DIRS}
     ${LLLOGIN_INCLUDE_DIRS}
-    ${UPDATER_INCLUDE_DIRS}
     ${LIBS_PREBUILT_DIR}/include/collada
     ${LIBS_PREBUILD_DIR}/include/hunspell
     ${OPENAL_LIB_INCLUDE_DIRS}
@@ -253,6 +255,7 @@ set(viewer_SOURCE_FILES
     llfloaterlagmeter.cpp
     llfloaterland.cpp
     llfloaterlandholdings.cpp
+    llfloaterlinkreplace.cpp
     llfloaterloadprefpreset.cpp
     llfloatermarketplacelistings.cpp
     llfloatermap.cpp
@@ -275,6 +278,7 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
+    llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterregiondebugconsole.cpp
     llfloaterregioninfo.cpp
@@ -875,6 +879,7 @@ set(viewer_HEADER_FILES
     llfloaterlagmeter.h
     llfloaterland.h
     llfloaterlandholdings.h
+    llfloaterlinkreplace.h
     llfloaterloadprefpreset.h
     llfloatermap.h
     llfloatermarketplacelistings.h
@@ -897,6 +902,7 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
+    llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterregiondebugconsole.h
     llfloaterregioninfo.h
@@ -1327,7 +1333,7 @@ set(viewer_HEADER_FILES
 
 source_group("CMake Rules" FILES ViewerInstall.cmake)
 
-#summary.json creation moved to viewer_manifest.py MAINT-6413
+#build_data.json creation moved to viewer_manifest.py MAINT-6413
 # the viewer_version.txt file created here is for passing to viewer_manifest and autobuild
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt"
            "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}\n")
@@ -1557,6 +1563,15 @@ if (WINDOWS)
     if (INTEL_MEMOPS_LIBRARY)
       list(APPEND viewer_LIBRARIES ${INTEL_MEMOPS_LIBRARY})
     endif (INTEL_MEMOPS_LIBRARY)
+
+    if (ADDRESS_SIZE EQUAL 64)
+        # We deliberately omit this from the 32bit build because it declares that
+        # the viewer is compatible with Windows 10; we need that to properly detect
+        # the Windows version, but doing so causes systems with certain HD video
+        # cards to fail because Windows 10 does not support them.  Leaving this out
+        # causes those systems to run in a Windows 8 compatibility mode, which works.
+        LIST(APPEND viewer_SOURCE_FILES windows.manifest)
+    endif (ADDRESS_SIZE EQUAL 64)
 endif (WINDOWS)
 
 # Add the xui files. This is handy for searching for xui elements
@@ -1908,7 +1923,6 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${PNG_PRELOAD_ARCHIVES}
     ${ZLIB_PRELOAD_ARCHIVES}
     ${URIPARSER_PRELOAD_ARCHIVES}
-    ${UPDATER_LIBRARIES}
     ${GOOGLE_PERFTOOLS_LIBRARIES}
     ${LLAUDIO_LIBRARIES}
     ${LLCHARACTER_LIBRARIES}
@@ -2029,6 +2043,8 @@ endif (LINUX)
 if (DARWIN)
   # These all get set with PROPERTIES
   set(product "Second Life")
+  # this is the setting for the Python wrapper, see SL-322 and WRAPPER line in Info-SecondLife.plist
+  set(MACOSX_WRAPPER_EXECUTABLE_NAME "SL_Launcher")
   set(MACOSX_BUNDLE_INFO_STRING "Second Life Viewer")
   set(MACOSX_BUNDLE_ICON_FILE "secondlife.icns")
   set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.secondlife.indra.viewer")
@@ -2068,6 +2084,7 @@ if (DARWIN)
       --grid=${GRID}
       "--channel=${VIEWER_CHANNEL}"
       --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+      --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS
       ${VIEWER_BINARY_NAME}
@@ -2204,6 +2221,7 @@ if (LL_TESTS)
     ${LLCOMMON_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     ${CURL_LIBRARIES}
+    ${NGHTTP2_LIBRARIES}
     )
 
   set_source_files_properties(

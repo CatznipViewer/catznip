@@ -209,6 +209,7 @@ fi
 
 # load autobuild provided shell functions and variables
 "$autobuild" --quiet source_environment > "$build_log_dir/source_environment"
+PYTHONPATH="$BUILDSCRIPTS_SHARED/packages/lib/python:$PYTHONPATH"
 begin_section "dump source environment commands"
 cat "$build_log_dir/source_environment"
 end_section "dump source environment commands"
@@ -272,6 +273,13 @@ do
                   end_section "Autobuild metadata"
               else
                   record_event "no autobuild metadata at '$build_dir/autobuild-package.xml'"
+              fi
+              if [ -r "$build_dir/newview/viewer_version.txt" ]
+              then
+                  begin_section "Viewer Version"
+                  python_cmd "$helpers/codeticket.py" addoutput "Viewer Version" "$(<"$build_dir/newview/viewer_version.txt")" --mimetype inline-text \
+                      || fatal "Upload of viewer version failed"
+                  end_section "Viewer Version"
               fi
               ;;
             Doxygen)

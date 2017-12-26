@@ -39,7 +39,6 @@
 #include "llslurl.h"
 #include "llvoiceclient.h"
 #include "lluictrlfactory.h"
-#include "llupdaterservice.h"
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 #include "llviewermenu.h"
 // [/SL:KB]
@@ -66,6 +65,7 @@
 #include "llsdutil_math.h"
 #include "lleventapi.h"
 #include "llcorehttputil.h"
+#include "lldir.h"
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -142,9 +142,9 @@ BOOL LLFloaterAbout::postBuild()
 
 	getChild<LLUICtrl>("copy_btn")->setCommitCallback(
 		boost::bind(&LLFloaterAbout::onClickCopyToClipboard, this));
-
-	getChild<LLUICtrl>("update_btn")->setCommitCallback(
-		boost::bind(&LLFloaterAbout::onClickUpdateCheck, this));
+    
+    getChild<LLUICtrl>("update_btn")->setCommitCallback(
+        boost::bind(&LLFloaterAbout::onClickUpdateCheck, this));
 
 	static const LLUIColor about_color = LLUIColorTable::instance().getColor("TextFgReadOnlyColor");
 
@@ -417,7 +417,6 @@ void LLFloaterAboutUtil::registerFloater()
 {
 	LLFloaterReg::add("sl_about", "floater_about.xml",
 		&LLFloaterReg::build<LLFloaterAbout>);
-
 }
 
 //void LLFloaterAboutUtil::checkUpdatesAndNotify()
