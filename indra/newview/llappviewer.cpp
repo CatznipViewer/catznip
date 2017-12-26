@@ -3251,7 +3251,7 @@ void LLAppViewer::initUpdater()
 #else
 						 gPlatform,
 #endif
-						 getOSInfo().getOSVersionString(),
+						 LLOSInfo::instance().getOSVersionString(),
 						 unique_id,
 						 willing_to_test
 						 );
