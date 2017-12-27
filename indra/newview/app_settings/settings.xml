@@ -13944,7 +13944,18 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+      <string>https://api.catznip.com/v1.0/viewer/config/[CHANNEL]/[VERSION]/[PLATFORM]</string>
+    </map>
+    <key>ViewerLoginURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer login page</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
     </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
