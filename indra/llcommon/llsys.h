@@ -37,13 +37,14 @@
 //
 
 #include "llsd.h"
+#include "llsingleton.h"
 #include <iosfwd>
 #include <string>
 
-class LL_COMMON_API LLOSInfo
+class LL_COMMON_API LLOSInfo : public LLSingleton<LLOSInfo>
 {
+	LLSINGLETON(LLOSInfo);
 public:
-	LLOSInfo();
 	void stream(std::ostream& s) const;
 
 	const std::string& getOSString() const;
@@ -54,6 +55,9 @@ public:
 	S32 mMajorVer;
 	S32 mMinorVer;
 	S32 mBuild;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	std::string mPlatform = "Unknown";
+// [/SL:KB]
 
 #ifndef LL_WINDOWS
 	static S32 getMaxOpenFiles();

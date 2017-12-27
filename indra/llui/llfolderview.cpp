@@ -102,6 +102,18 @@ void LLCloseAllFoldersFunctor::doFolder(LLFolderViewFolder* folder)
 void LLCloseAllFoldersFunctor::doItem(LLFolderViewItem* item)
 { }
 
+//---------------------------------------------------------------------------
+
+void LLAllDescendentsPassedFilter::doFolder(LLFolderViewFolder* folder)
+{
+	mAllDescendentsPassedFilter &= (folder) && (folder->passedFilter()) && (folder->descendantsPassedFilter());
+}
+
+void LLAllDescendentsPassedFilter::doItem(LLFolderViewItem* item)
+{
+	mAllDescendentsPassedFilter &= (item) && (item->passedFilter());
+}
+
 ///----------------------------------------------------------------------------
 /// Class LLFolderViewScrollContainer
 ///----------------------------------------------------------------------------
@@ -682,6 +694,13 @@ void LLFolderView::draw()
 			LLUI::pushMatrix();
 			LLUI::translate((F32)getRect().mLeft, (F32)getRect().mBottom);
 		}
+	}
+
+	if (mRenameItem && mRenamer && mRenamer->getVisible() && !getVisibleRect().overlaps(mRenamer->getRect()))
+	{
+		// renamer is not connected to the item we are renaming in any form so manage it manually
+		// TODO: consider stopping on any scroll action instead of when out of visible area
+		finishRenamingItem();
 	}
 
 	// skip over LLFolderViewFolder::draw since we don't want the folder icon, label, 

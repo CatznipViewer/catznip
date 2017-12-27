@@ -110,11 +110,29 @@ public:
 
     /// Sets the number of retries on an LLCore::HTTPRequest before the 
     /// request fails.
-	// Default:  8
+	// Default:  5
 	void				setRetries(unsigned int retries);
 	unsigned int		getRetries() const
 	{
 		return mRetries;
+	}
+
+	/// Sets minimal delay before request retries. In microseconds.
+	/// HttpPolicy will increase delay from min to max with each retry
+	// Default: 1 000 000 mcs
+	void				setMinBackoff(HttpTime delay);
+	HttpTime			getMinBackoff() const
+	{
+		return mMinRetryBackoff;
+	}
+
+	/// Sets maximum delay before request retries. In microseconds.
+	/// HttpPolicy will increase delay from min to max with each retry
+	// Default:  5 000 000 mcs
+	void				setMaxBackoff(HttpTime delay);
+	HttpTime			getMaxBackoff() const
+	{
+		return mMaxRetryBackoff;
 	}
 
 	// Default:  true
@@ -178,6 +196,8 @@ protected:
 	unsigned int		mTimeout;
 	unsigned int		mTransferTimeout;
 	unsigned int		mRetries;
+	HttpTime			mMinRetryBackoff;
+	HttpTime			mMaxRetryBackoff;
 	bool				mUseRetryAfter;
 	bool				mFollowRedirects;
 	bool				mVerifyPeer;

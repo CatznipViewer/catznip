@@ -41,6 +41,9 @@
 
 #include "message.h" // for getting the port
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 using namespace LLCore;
 
@@ -120,10 +123,34 @@ bool responseToLLSD(HttpResponse * response, bool log, LLSD & out_llsd)
 
     LLCore::BufferArrayStream bas(body);
     LLSD body_llsd;
-    S32 parse_status(LLSDSerialize::fromXML(body_llsd, bas, log));
-    if (LLSDParser::PARSE_FAILURE == parse_status){
-        return false;
-    }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	LLCore::HttpHeaders::ptr_t httpHeaders(response->getHeaders());
+	const std::string* pstrContentType = (httpHeaders) ? httpHeaders->find(HTTP_IN_HEADER_CONTENT_TYPE) : nullptr;
+	if ( (pstrContentType) && ((HTTP_CONTENT_JSON == *pstrContentType) || (boost::starts_with(*pstrContentType, HTTP_CONTENT_JSON + ";"))) )
+	{
+		Json::Value jsonRoot;
+		try
+		{
+			bas >> jsonRoot;
+		}
+		catch (std::runtime_error e)
+		{
+			return false;
+		}
+		body_llsd = LlsdFromJson(jsonRoot);
+	}
+	else
+	{
+// [/SL:KB]
+		S32 parse_status(LLSDSerialize::fromXML(body_llsd, bas, log));
+		if (LLSDParser::PARSE_FAILURE == parse_status){
+			return false;
+		}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	}
+// [/SL:KB]
+
     out_llsd = body_llsd;
     return true;
 }
@@ -642,7 +669,7 @@ HttpRequestPumper::HttpRequestPumper(const LLCore::HttpRequest::ptr_t &request) 
     mHttpRequest(request)
 {
     mBoundListener = LLEventPumps::instance().obtain("mainloop").
-        listen(LLEventPump::inventName(), boost::bind(&HttpRequestPumper::pollRequest, this, _1));
+        listen(LLEventPump::ANONYMOUS, boost::bind(&HttpRequestPumper::pollRequest, this, _1));
 }
 
 HttpRequestPumper::~HttpRequestPumper()
