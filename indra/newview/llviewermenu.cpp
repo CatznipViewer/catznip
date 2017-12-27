@@ -103,9 +103,6 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
-#include "llstartup.h"
-// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolbarview.h"
 #include "lltoolcomp.h"
@@ -627,6 +624,7 @@ class LLAdvancedDumpInfoToConsole : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
+		gDebugView->mDebugConsolep->setVisible(TRUE);
 		std::string info_type = userdata.asString();
 		if ("region" == info_type)
 		{
@@ -2131,22 +2129,6 @@ class LLAdvancedCheckShowObjectUpdates : public view_listener_t
 	}
 };
 
-
-
-///////////////////////
-// CHECK FOR UPDATES //
-///////////////////////
-
-
-
-//class LLAdvancedCheckViewerUpdates : public view_listener_t
-//{
-//	bool handleEvent(const LLSD& userdata)
-//	{
-//		LLFloaterAboutUtil::checkUpdatesAndNotify();
-//		return true;
-//	}
-//};
 
 
 ////////////////////
@@ -7303,12 +7285,12 @@ void handle_selected_material_info()
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 void handle_updater_check()
 {
 	LLUpdaterService updater_service;
 
-	// Make sure the update is actually running
+	// Make sure the updater is actually running
 	if (!updater_service.isChecking())
 		updater_service.startChecking();
 
@@ -8061,7 +8043,7 @@ void handle_report_bug(const LLSD& param)
 	LLUIString url(param.asString());
 	
 	LLStringUtil::format_map_t replace;
-	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getViewerInfoString());
+	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getShortViewerInfoString());
 	LLSLURL location_url;
 	LLAgentUI::buildSLURL(location_url);
 	replace["[LOCATION]"] = LLURI::escape(location_url.getSLURLString());
@@ -9073,7 +9055,6 @@ void initialize_menus()
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 	commit.add("Advanced.CheckViewerUpdates", boost::bind(&handle_updater_check));
 	// [/SL:KB]
-//	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");
 	view_listener_t::addMenu(new LLAdvancedEnableViewAdminOptions(), "Advanced.EnableViewAdminOptions");

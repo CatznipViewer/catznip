@@ -77,6 +77,9 @@ public:
 	/// reset the channel name used by the viewer.
 	static void resetChannel(const std::string& channel);
 
+    /// return the bit width of an address
+    static const S32 getAddressSize() { return ADDRESS_SIZE; }
+
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 	/// Return the platform the viewer was built for
 	static const std::string& getBuildPlatform();

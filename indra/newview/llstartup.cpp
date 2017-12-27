@@ -78,7 +78,7 @@
 #include "llsdutil_math.h"
 #include "llstring.h"
 #include "lluserrelations.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 #include "llupdaterservice.h"
 // [/SL:KB]
 #include "llversioninfo.h"
@@ -351,7 +351,7 @@ bool idle_startup()
 	const std::string delims (" ");
 	std::string system;
 	int begIdx, endIdx;
-	std::string osString = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	std::string osString = LLOSInfo::instance().getOSStringSimple();
 
 	begIdx = osString.find_first_not_of (delims);
 	endIdx = osString.find_first_of (delims, begIdx);
@@ -777,7 +777,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
@@ -830,7 +830,7 @@ bool idle_startup()
         display_startup();
         timeout.reset();
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 		if (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting"))
 		{
 			LLUpdaterService updaterService;
@@ -851,7 +851,8 @@ bool idle_startup()
 
 		// Don't do anything.  Wait for the login view to call the login_callback,
 		// which will push us to the next state.
-		display_startup();
+
+		// display() function will be the one to run display_startup()
 		// Sleep so we don't spin the CPU
 		ms_sleep(1);
 		return FALSE;
@@ -894,7 +895,7 @@ bool idle_startup()
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 		// Limit bandwidth for the updater download once the user passes the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
@@ -917,7 +918,7 @@ bool idle_startup()
 		// Only include the agent name if the user consented
 		if (gCrashSettings.getBOOL("CrashSubmitName"))
 		{
-			gDebugInfo["LoginName"] = userid;                                                                              
+			gDebugInfo["UserInfo"]["LoginName"] = userid;                                                                              
 		}
 // [/SL:KB]
 //		gDebugInfo["LoginName"] = userid;                                                                              
@@ -1085,7 +1086,6 @@ bool idle_startup()
 		login->setSerialNumber(LLAppViewer::instance()->getSerialNumber());
 		login->setLastExecEvent(gLastExecEvent);
 		login->setLastExecDuration(gLastExecDuration);
-		login->setUpdaterLauncher(boost::bind(&LLAppViewer::launchUpdater, LLAppViewer::instance()));
 
 		// This call to LLLoginInstance::connect() starts the 
 		// authentication process.
@@ -1518,6 +1518,7 @@ bool idle_startup()
 		LLGLState::checkStates();
 		LLGLState::checkTextureChannels();
 
+		LLEnvManagerNew::getInstance()->usePrefs(); // Load all presets and settings
 		gSky.init(initial_sun_direction);
 
 		LLGLState::checkStates();
@@ -2323,13 +2324,15 @@ void login_callback(S32 option, void *userdata)
 */
 void show_release_notes_if_required()
 {
-    if (LLVersionInfo::getChannelAndVersion() != gLastRunVersion
+    static bool release_notes_shown = false;
+    if (!release_notes_shown && (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
         && LLVersionInfo::getViewerMaturity() != LLVersionInfo::TEST_VIEWER // don't show Release Notes for the test builds
         && gSavedSettings.getBOOL("UpdaterShowReleaseNotes")
         && !gSavedSettings.getBOOL("FirstLoginThisInstall"))
     {
         LLSD info(LLAppViewer::instance()->getViewerInfo());
         LLWeb::loadURLInternal(info["VIEWER_RELEASE_NOTES_URL"]);
+        release_notes_shown = true;
     }
 }
 
@@ -2819,6 +2822,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
@@ -3262,7 +3266,7 @@ bool process_login_success_response()
 	// Only include the agent UUID if the user consented
 	if (gCrashSettings.getBOOL("CrashSubmitName"))
 	{
-		gDebugInfo["AgentID"] = text;
+		gDebugInfo["UserInfo"]["AgentID"] = text;
 	}
 // [/SL:KB]
 //	gDebugInfo["AgentID"] = text;
@@ -3317,6 +3321,15 @@ bool process_login_success_response()
 		    gAgentUsername = gAgentUsername + " " + last_name;
 		}
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if ( (!gAgentUsername.empty()) && (gCrashSettings.getBOOL("CrashSubmitName")) )
+	{
+		std::string userName = gAgentUsername;
+		LLStringUtil::replaceChar(userName, ' ', '.');
+		LLStringUtil::toLower(userName);
+		gDebugInfo["UserInfo"]["UserName"] = userName;
+	}
+// [/SL:KB]
 
 	if(gDisplayName.empty())
 	{
@@ -3343,6 +3356,13 @@ bool process_login_success_response()
 	{
 		gDisplayName.assign(gUserCredential->asString());
 	}
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if (gCrashSettings.getBOOL("CrashSubmitName"))
+	{
+		gDebugInfo["UserInfo"]["DisplayName"] = gDisplayName;
+	}
+// [/SL:KB]
 
 	// this is their actual ability to access content
 	text = response["agent_access_max"].asString();

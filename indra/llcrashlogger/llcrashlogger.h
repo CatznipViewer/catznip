@@ -80,8 +80,7 @@ public:
 //	bool readMinidump(std::string minidump_path);
 
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
-	std::string getCrashInformationLink() { return mCrashLink; }
-	void		setCrashInformationLink(const std::string& strCrashLink) { mCrashLink = strCrashLink; }
+	void setCrashReportResult(const LLSD& sdReportResult) { mCrashReportResult = sdReportResult; }
 // [/SL:KB]
 protected:
     static void init_curl();
@@ -98,7 +97,7 @@ protected:
 	LLSD mCrashInfo;
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
 	LLCrashLookup*	mCrashLookup;
-	std::string		mCrashLink;
+	LLSD mCrashReportResult;
 // [/SL:KB]
 	std::string mCrashHost;
 	std::string mAltCrashHost;

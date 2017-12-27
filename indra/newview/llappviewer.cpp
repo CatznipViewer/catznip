@@ -43,8 +43,9 @@
 #include "llagentui.h"
 #include "llagentwearables.h"
 #include "llfloaterimcontainer.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 #include "llfloaterupdate.h"
+#include "llupdaterservice.h"
 // [/SL:KB]
 #include "llwindow.h"
 #include "llviewerstats.h"
@@ -96,7 +97,6 @@
 #include "llvocache.h"
 #include "llvopartgroup.h"
 #include "llweb.h"
-#include "llupdaterservice.h"
 #include "llfloatertexturefetchdebugger.h"
 #include "llspellcheck.h"
 #include "llscenemonitor.h"
@@ -277,7 +277,6 @@ static LLAppViewerListener sAppViewerListener(LLAppViewer::instance);
 // viewer.cpp - these are only used in viewer, should be easily moved.
 
 #if LL_DARWIN
-const char * const LL_VERSION_BUNDLE_ID = "com.catznip.indra.viewer";
 extern void init_apple_menu(const char* product);
 #endif // LL_DARWIN
 
@@ -303,9 +302,7 @@ S32 gLastExecDuration = -1; // (<0 indicates unknown)
 #   define LL_PLATFORM_KEY "mac"
 #elif LL_LINUX
 #   define LL_PLATFORM_KEY "lnx"
-#elif LL_SOLARIS
-#   define LL_PLATFORM_KEY "sol"
-#else
+else
 #   error "Unknown Platform"
 #endif
 const char* gPlatform = LL_PLATFORM_KEY;
@@ -322,8 +319,6 @@ F32SecondsImplicit gFrameIntervalSeconds = 0.f;
 F32 gFPSClamped = 10.f;						// Pretend we start at target rate.
 F32 gFrameDTClamped = 0.f;					// Time between adjacent checks to network for packets
 U64MicrosecondsImplicit	gStartTime = 0; // gStartTime is "private", used only to calculate gFrameTimeSeconds
-U32 gFrameStalls = 0;
-const F64 FRAME_STALL_THRESHOLD = 1.0;
 
 LLTimer gRenderStartTime;
 LLFrameTimer gForegroundTime;
@@ -492,8 +487,6 @@ struct SettingsFiles : public LLInitParam::Block<SettingsFiles>
 
 static std::string gWindowTitle;
 
-LLAppViewer::LLUpdaterInfo *LLAppViewer::sUpdaterInfo = NULL ;
-
 //----------------------------------------------------------------------------
 // Metrics logging control constants
 //----------------------------------------------------------------------------
@@ -658,7 +651,7 @@ public:
 
 	void run()
 	{
-		std::ofstream os(mFile.c_str());
+		llofstream os(mFile.c_str());
 		
 		while (!LLAppViewer::instance()->isQuitting())
 		{
@@ -712,7 +705,6 @@ LLAppViewer::LLAppViewer()
 	mSavePerAccountSettings(false),		// don't save settings on logout unless login succeeded.
 	mQuitRequested(false),
 	mLogoutRequestSent(false),
-	mYieldTime(-1),
 	mLastAgentControlFlags(0),
 	mLastAgentForceUpdate(0),
 	mMainloopTimeout(NULL),
@@ -720,9 +712,12 @@ LLAppViewer::LLAppViewer()
 	mRandomizeFramerate(LLCachedControl<bool>(gSavedSettings,"Randomize Framerate", FALSE)),
 	mPeriodicSlowFrame(LLCachedControl<bool>(gSavedSettings,"Periodic Slow Frame", FALSE)),
 	mFastTimerLogThread(NULL),
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	mUpdater(new LLUpdaterService()),
+// [/SL:KB]
 	mSettingsLocationList(NULL),
-	mIsFirstRun(false)
+	mIsFirstRun(false),
+	mMinMicroSecPerFrame(0.f)
 {
 	if(NULL != sInstance)
 	{
@@ -753,8 +748,7 @@ LLAppViewer::LLAppViewer()
 	// OK to write stuff to logs now, we've now crash reported if necessary
 	//
 	
-	LLLoginInstance::instance().setUpdaterService(mUpdater.get());
-	LLLoginInstance::instance().setPlatformInfo(gPlatform, getOSInfo().getOSVersionString());
+	LLLoginInstance::instance().setPlatformInfo(gPlatform, LLOSInfo::instance().getOSVersionString(), LLOSInfo::instance().getOSStringSimple());
 }
 
 LLAppViewer::~LLAppViewer()
@@ -864,12 +858,6 @@ bool LLAppViewer::init()
     LLMachineID::init();
 	
 	{
-		// Viewer metrics initialization
-		//static LLCachedControl<bool> metrics_submode(gSavedSettings,
-		//											 "QAModeMetrics",
-		//											 false,
-		//											 "Enables QA features (logging, faster cycling) for metrics collector");
-
 		if (gSavedSettings.getBOOL("QAModeMetrics"))
 		{
 			app_metrics_qa_mode = true;
@@ -910,13 +898,15 @@ bool LLAppViewer::init()
 
     writeSystemInfo();
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	// Initialize updater service (now that we have an io pump)
 	initUpdater();
-	if(isQuitting())
+	if (isQuitting())
 	{
 		// Early out here because updater set the quitting flag.
 		return true;
 	}
+// [/SL:KB]
 
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
@@ -1148,6 +1138,19 @@ bool LLAppViewer::init()
 		}
 	}
 
+//	char* PARENT = getenv("PARENT");
+//	if (! (PARENT && std::string(PARENT) == "SL_Launcher"))
+//	{
+//		// Don't directly run this executable. Please run the launcher, which
+//		// will run the viewer itself.
+//		// Naturally we do not consider this bulletproof. The point is to
+//		// gently remind a user who *inadvertently* finds him/herself in this
+//		// situation to do things the Right Way. Anyone who intentionally
+//		// bypasses this mechanism needs no reminder that s/he's shooting
+//		// him/herself in the foot.
+//		LLNotificationsUtil::add("RunLauncher");
+//	}
+
 #if LL_WINDOWS
 	if (gGLManager.mGLVersion < LLFeatureManager::getInstance()->getExpectedGLVersion())
 	{
@@ -1278,6 +1281,9 @@ bool LLAppViewer::init()
 	joystick->setNeedsReset(true);
 	/*----------------------------------------------------------------------*/
 
+	gSavedSettings.getControl("FramePerSecondLimit")->getSignal()->connect(boost::bind(&LLAppViewer::onChangeFrameLimit, this, _2));
+	onChangeFrameLimit(gSavedSettings.getLLSD("FramePerSecondLimit"));
+
 	return true;
 }
 
@@ -1357,9 +1363,6 @@ bool LLAppViewer::frame()
 	LLEventPump& mainloop(LLEventPumps::instance().obtain("mainloop"));
 	LLSD newFrame;
 
-	LLTimer frameTimer,idleTimer;
-	LLTimer debugTime;
-
 	//LLPrivateMemoryPoolTester::getInstance()->run(false) ;
 	//LLPrivateMemoryPoolTester::getInstance()->run(true) ;
 	//LLPrivateMemoryPoolTester::destroy() ;
@@ -1400,14 +1403,6 @@ bool LLAppViewer::frame()
 			gViewerWindow->getWindow()->gatherInput();
 		}
 
-#if 1 && !LL_RELEASE_FOR_DOWNLOAD
-		// once per second debug info
-		if (debugTime.getElapsedTimeF32() > 1.f)
-		{
-			debugTime.reset();
-		}
-		
-#endif
 		//memory leaking simulation
 		LLFloaterMemLeak* mem_leak_instance =
 			LLFloaterReg::findTypedInstance<LLFloaterMemLeak>("mem_leaking");
@@ -1461,7 +1456,24 @@ bool LLAppViewer::frame()
 			{
 				pingMainloopTimeout("Main:Display");
 				gGLActive = TRUE;
+
+				static U64 last_call = 0;
+				if (!gTeleportDisplay)
+				{
+					// Frame/draw throttling
+					U64 elapsed_time = LLTimer::getTotalTime() - last_call;
+					if (elapsed_time < mMinMicroSecPerFrame)
+					{
+						LL_RECORD_BLOCK_TIME(FTM_SLEEP);
+						// llclamp for when time function gets funky
+						U64 sleep_time = llclamp(mMinMicroSecPerFrame - elapsed_time, (U64)1, (U64)1e6);
+						micro_sleep(sleep_time, 0);
+					}
+				}
+				last_call = LLTimer::getTotalTime();
+
 				display();
+
 				pingMainloopTimeout("Main:Snapshot");
 				LLFloaterSnapshot::update(); // take snapshots
 					LLFloaterOutfitSnapshot::update();
@@ -1478,10 +1490,11 @@ bool LLAppViewer::frame()
 			LL_RECORD_BLOCK_TIME(FTM_SLEEP);
 			
 			// yield some time to the os based on command line option
-			if(mYieldTime >= 0)
+			static LLCachedControl<S32> yield_time(gSavedSettings, "YieldTime", -1);
+			if(yield_time >= 0)
 			{
 				LL_RECORD_BLOCK_TIME(FTM_YIELD);
-				ms_sleep(mYieldTime);
+				ms_sleep(yield_time);
 			}
 
 			// yield cooperatively when not running as foreground window
@@ -1489,7 +1502,8 @@ bool LLAppViewer::frame()
 					|| !gFocusMgr.getAppHasFocus())
 			{
 				// Sleep if we're not rendering, or the window is minimized.
-				S32 milliseconds_to_sleep = llclamp(gSavedSettings.getS32("BackgroundYieldTime"), 0, 1000);
+				static LLCachedControl<S32> s_bacground_yeild_time(gSavedSettings, "BackgroundYieldTime", 40);
+				S32 milliseconds_to_sleep = llclamp((S32)s_bacground_yeild_time, 0, 1000);
 				// don't sleep when BackgroundYieldTime set to 0, since this will still yield to other threads
 				// of equal priority on Windows
 				if (milliseconds_to_sleep > 0)
@@ -1513,7 +1527,6 @@ bool LLAppViewer::frame()
 				ms_sleep(500);
 			}
 
-			idleTimer.reset();
 			S32 total_work_pending = 0;
 			S32 total_io_pending = 0;	
 			{
@@ -1565,13 +1578,6 @@ bool LLAppViewer::frame()
 					tex_fetch_debugger_instance->idle() ;				
 				}
 			}
-
-			if ((LLStartUp::getStartupState() >= STATE_CLEANUP) &&
-				(frameTimer.getElapsedTimeF64() > FRAME_STALL_THRESHOLD))
-			{
-				gFrameStalls++;
-			}
-			frameTimer.reset();
 
 			resumeMainloopTimeout();
 
@@ -2952,8 +2958,6 @@ bool LLAppViewer::initConfiguration()
 		}
 	}
 
-    mYieldTime = gSavedSettings.getS32("YieldTime");
-
 
 	// Display splash screen.  Must be after above check for previous
 	// crash as this dialog is always frontmost.
@@ -3114,32 +3118,31 @@ void LLAppViewer::initStrings()
 	}
 }
 
-namespace {
-    // *TODO - decide if there's a better place for these functions.
-	// do we need a file llupdaterui.cpp or something? -brad
-
-	void apply_update_callback(LLSD const & notification, LLSD const & response)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
+namespace
+{
+	void onUpdateInstallCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
-		LL_DEBUGS() << "LLUpdate user response: " << response << LL_ENDL;
-		if(response["OK_okcancelbuttons"].asBoolean())
+		LL_DEBUGS() << "LLUpdate user response: " << sdResponse << LL_ENDL;
+
+		if (sdResponse["OK_okcancelbuttons"].asBoolean())
 		{
 			LL_INFOS() << "LLUpdate restarting viewer" << LL_ENDL;
-			static const bool install_if_ready = true;
+
 			// *HACK - this lets us launch the installer immediately for now
-			LLUpdaterService().startChecking(install_if_ready);
+			LLUpdaterService().startChecking(true /*install_if_ready*/);
 		}
 	}
-	
-	void apply_update_ok_callback(LLSD const & notification, LLSD const & response)
+
+	void onUpdateInstallForceCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
 		LL_INFOS() << "LLUpdate restarting viewer" << LL_ENDL;
-		static const bool install_if_ready = true;
+
 		// *HACK - this lets us launch the installer immediately for now
-		LLUpdaterService().startChecking(install_if_ready);
+		LLUpdaterService().startChecking(true /*install_if_ready*/);
 	}
-	
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
-	void on_update_available_callback(const LLSD& sdData)
+
+	void onUpdateAvailableCallback(const LLSD& sdData)
 	{
 		LLUpdaterService updaterSerivce;
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
@@ -3156,10 +3159,10 @@ namespace {
 		}
 	}
 
-	void on_update_available(const LLSD& sdData)
+	void onUpdateAvailable(const LLSD& sdData)
 	{
 		// Don't do anything if it's an optional update and the user was already notified recently
-		if ( (!sdData["show_ui"].asBoolean()) && 
+		if ( (!sdData["show_ui"].asBoolean()) &&
 		     (!sdData["required"].asBoolean()) && (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 48 * 60 * 60) )
 		{
 			return;
@@ -3172,14 +3175,13 @@ namespace {
 		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["info_url"] = sdData["info_url"];
 
-		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
-		if (pFloater)
+		if (LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData))
 		{
-			pFloater->setCommitCallback(boost::bind(&on_update_available_callback, _2));
+			pFloater->setCommitCallback(boost::bind(&onUpdateAvailableCallback, _2));
 		}
 	}
 
-	void on_update_downloaded_prompt_callback(const LLSD& sdData)
+	void onUpdateDownloadedPromptCallback(const LLSD& sdData)
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Install"
 		{
@@ -3191,10 +3193,10 @@ namespace {
 		}
 	}
 
-	void on_update_downloaded_prompt(const LLSD& sdData)
+	void onUpdateDownloadedPrompt(const LLSD& sdData)
 	{
 		// Don't do anything if it's an optional update and the user was only recently notified
-		if ( (!sdData["required"].asBoolean()) && 
+		if ( (!sdData["required"].asBoolean()) &&
 		     (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 4 * 60 * 60) )
 		{
 			return;
@@ -3207,276 +3209,186 @@ namespace {
 		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["info_url"] = sdData["info_url"];
 
-		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
-		if (pFloater)
+		if (LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData))
 		{
-			pFloater->setCommitCallback(boost::bind(&on_update_downloaded_prompt_callback, _2));
+			pFloater->setCommitCallback(boost::bind(&onUpdateDownloadedPromptCallback, _2));
 		}
 	}
-// [/SL:KB]
 
-	void on_update_downloaded(LLSD const & data)
+	void onUpdateDownloaded(LLSD const & data)
 	{
-		std::string notification_name;
+		std::string strNotificationName;
 		void (*apply_callback)(LLSD const &, LLSD const &) = NULL;
 
-		/* Build up the notification name...
-		 * it can be any of these, which are included here for the sake of grep:
-		 *   RequiredUpdateDownloadedDialog
-		 *   RequiredUpdateDownloadedVerboseDialog
-		 *   OtherChannelRequiredUpdateDownloadedDialog
-		 *   OtherChannelRequiredUpdateDownloadedVerbose
-		 *   DownloadBackgroundTip
-		 *   DownloadBackgroundDialog
-		 *   OtherChannelDownloadBackgroundTip
-		 *   OtherChannelDownloadBackgroundDialog
+		/* Build up the notification name, it can be any of these:
+		 *   FailedUpdateInstall
+		 *   FailedRequiredUpdateInstall
+		 *   [OtherChannel]DownloadBackgroundTip
+		 *   [OtherChannel]DownloadBackgroundDialog
+		 *   [OtherChannel]RequiredUpdateDownloadedVerboseDialog
+		 *   [OtherChannel]RequiredUpdateDownloadedDialog
+		 *   UpdateViewerUpToDate
+		 *   UpdateCheckError
 		 */
+
+		if (data["channel"].asString() != LLVersionInfo::getChannel())
 		{
-			LL_DEBUGS("UpdaterService") << "data = ";
-			std::ostringstream data_dump;
-			LLSDSerialize::toNotation(data, data_dump);
-			LL_CONT << data_dump.str() << LL_ENDL;
+			strNotificationName.append("OtherChannel");
 		}
-		if(data["channel"].asString() != LLVersionInfo::getChannel())
-		{
-			notification_name.append("OtherChannel");
-		}
-		if(data["required"].asBoolean())
+
+		if (data["required"].asBoolean())
 		{
 			if(LLStartUp::getStartupState() <= STATE_LOGIN_WAIT)
 			{
 				// The user never saw the progress bar.
-				apply_callback = &apply_update_ok_callback;
-				notification_name += "RequiredUpdateDownloadedVerboseDialog";
+				apply_callback = &onUpdateInstallForceCb;
+				strNotificationName += "RequiredUpdateDownloadedVerboseDialog";
 			}
 			else if(LLStartUp::getStartupState() < STATE_WORLD_INIT)
 			{
 				// The user is logging in but blocked.
-				apply_callback = &apply_update_ok_callback;
-				notification_name += "RequiredUpdateDownloadedDialog";
+				apply_callback = &onUpdateInstallForceCb;
+				strNotificationName += "RequiredUpdateDownloadedDialog";
 			}
 			else
 			{
 				// The user is already logged in; treat like an optional update.
-				apply_callback = &apply_update_callback;
-				notification_name += "DownloadBackgroundTip";
+				apply_callback = &onUpdateInstallCb;
+				strNotificationName += "DownloadBackgroundTip";
 			}
 		}
 		else
 		{
-			apply_callback = &apply_update_callback;
+			apply_callback = &onUpdateInstallCb;
 			if(LLStartUp::getStartupState() < STATE_STARTED)
 			{
-				// CHOP-262 we need to use a different notification
-				// method prior to login.
-				notification_name += "DownloadBackgroundDialog";
+				// The user hasn't logged in yet
+				strNotificationName += "DownloadBackgroundDialog";
 			}
 			else
 			{
-				notification_name += "DownloadBackgroundTip";
+				// The user is already logged in
+				strNotificationName += "DownloadBackgroundTip";
 			}
 		}
 
-		LLSD substitutions;
-		substitutions["VERSION"] = data["version"];
-		std::string new_channel = data["channel"].asString();
-		substitutions["NEW_CHANNEL"] = new_channel;
-		std::string info_url    = data["info_url"].asString();
-		if ( !info_url.empty() )
-		{
-			substitutions["INFO_URL"] = info_url;
-		}
-		else
-		{
-			LL_WARNS("UpdaterService") << "no info url supplied - defaulting to hard coded release notes pattern" << LL_ENDL;
+		LLSD sdSubstitutions;
+		sdSubstitutions["VERSION"] = data["version"];
+		sdSubstitutions["NEW_CHANNEL"] = data["channel"].asString();
+		sdSubstitutions["INFO_URL"] = data["info_url"].asString();
 
-		// truncate version at the rightmost '.' 
-		std::string version_short(data["version"]);
-		size_t short_length = version_short.rfind('.');
-		if (short_length != std::string::npos)
-		{
-			version_short.resize(short_length);
-		}
-
-		LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
-		relnotes_url.setArg("[VERSION_SHORT]", version_short);
-
-		// *TODO thread the update service's response through to this point
-		std::string const & channel = LLVersionInfo::getChannel();
-		boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
-
-		relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
-		relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
-			substitutions["INFO_URL"] = relnotes_url.getString();
-		}
-
-		LLNotificationsUtil::add(notification_name, substitutions, LLSD(), apply_callback);
+		LLNotificationsUtil::add(strNotificationName, sdSubstitutions, LLSD(), apply_callback);
 	}
 
-	void install_error_callback(LLSD const & notification, LLSD const & response)
+	void onInstallErrorCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
 		LLAppViewer::instance()->forceQuit();
 	}
-	
-	bool notify_update(LLSD const & evt)
+
+	bool notifyUpdate(const LLSD& sdData)
 	{
-		std::string notification_name;
-		switch (evt["type"].asInteger())
+		switch (sdData["type"].asInteger())
 		{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 			case LLUpdaterService::CHECK_COMPLETE:
-				if (!evt["up_to_date"].asBoolean())
+				if (!sdData["up_to_date"].asBoolean())
 				{
 					// Update is available
-					if ( (evt["show_ui"].asBoolean()) || (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting")) )
-						on_update_available(evt);
+					if ( (sdData["show_ui"].asBoolean()) || (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting")) )
+						onUpdateAvailable(sdData);
 					else
-						on_update_available_callback(LLSD().with("accept", true));
+						onUpdateAvailableCallback(LLSD().with("accept", true));
 				}
 				else
 				{
 					// Viewer is up to date
-					if (evt["show_ui"].asBoolean())
+					if (sdData["show_ui"].asBoolean())
 						LLNotificationsUtil::add("UpdateViewerUpToDate");
 				}
 				break;
+
 			case LLUpdaterService::CHECK_ERROR:
-				if (evt["show_ui"].asBoolean())
+				if (sdData["show_ui"].asBoolean())
 				{
 					LLNotificationsUtil::add("UpdateCheckError");
 				}
 				break;
+
 			case LLUpdaterService::DOWNLOAD_RESUME:
-				{
-					LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (evt["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
-				}
+				LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (sdData["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
 				break;
+
 			case LLUpdaterService::PROGRESS:
+				if (LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress"))
 				{
-					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
-					if (pProgressFloater)
-						pProgressFloater->onDownloadProgress(evt);
+					pProgressFloater->onDownloadProgress(sdData);
 				}
 				break;
+
 			case LLUpdaterService::DOWNLOAD_COMPLETE:
+				if (LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress"))
 				{
-					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
-					if (pProgressFloater)
-					{
-						pProgressFloater->onDownloadCompleted();
-						pProgressFloater->setMinimized(FALSE);
-						pProgressFloater->setVisibleAndFrontmost(true);
-					}
+					pProgressFloater->onDownloadCompleted();
+					pProgressFloater->setMinimized(false);
+					pProgressFloater->setVisibleAndFrontmost(true);
+				}
+				else
+				{
+					if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
+						onUpdateDownloadedPrompt(sdData);
 					else
-					{
-						if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
-							on_update_downloaded_prompt(evt);
-						else
-							on_update_downloaded(evt);
-					}
+						onUpdateDownloaded(sdData);
 				}
 				break;
-// [/SL:KB]
-//			case LLUpdaterService::DOWNLOAD_COMPLETE:
-//				on_update_downloaded(evt);
-//				break;
+
 			case LLUpdaterService::INSTALL_ERROR:
-				if(evt["required"].asBoolean()) {
-					LLNotificationsUtil::add("FailedRequiredUpdateInstall", LLSD(), LLSD(), &install_error_callback);
-				} else {
+				if (sdData["required"].asBoolean())
+					LLNotificationsUtil::add("FailedRequiredUpdateInstall", LLSD(), LLSD(), &onInstallErrorCb);
+				else
 					LLNotificationsUtil::add("FailedUpdateInstall");
-				}
 				break;
+
 			default:
 				break;
 		}
 
-		// let others also handle this event by default
+		// Let others also handle this event by default
 		return false;
 	}
-	
-	bool on_bandwidth_throttle(LLUpdaterService * updater, LLSD const & evt)
+
+	bool onBandwidthLimitChanged(const LLSD& sdValue)
 	{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
 		// Only limit updater download bandwidth once the user has passed the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
-			updater->setBandwidthLimit(evt.asInteger() * (1024/8));
+			LLUpdaterService updaterService;
+			if (updaterService.isChecking())
+			{
+				updaterService.setBandwidthLimit(sdValue.asInteger() * (1024 / 8));
+			}
 		}
-// [/SL:KB]
-//		updater->setBandwidthLimit(evt.asInteger() * (1024/8));
-		return false; // Let others receive this event.
-	};
+		return false;
+	}
 };
 
 void LLAppViewer::initUpdater()
 {
-	// Initialize the updater service.
-	// Get Channel
-	// Get Version
-
-	/*****************************************************************
-	 * Previously, the url was derived from the settings 
-	 *    UpdaterServiceURL
-	 *    UpdaterServicePath
-	 * it is now obtained from the grid manager.  The settings above
-	 * are no longer used.
-	 *****************************************************************/
-	std::string channel = LLVersionInfo::getChannel();
-	std::string version = LLVersionInfo::getVersion();
-
-	U32 check_period = gSavedSettings.getU32("UpdaterServiceCheckPeriod");
-	bool willing_to_test;
-	LL_DEBUGS("UpdaterService") << "channel " << channel << LL_ENDL;
-
-	if (LLVersionInfo::TEST_VIEWER == LLVersionInfo::getViewerMaturity()) 
-	{
-		LL_INFOS("UpdaterService") << "Test build: overriding willing_to_test by sending testno" << LL_ENDL;
-		willing_to_test = false;
-	}
-	else
-	{
-		willing_to_test = gSavedSettings.getBOOL("UpdaterWillingToTest");
-	}
-    unsigned char unique_id[MD5HEX_STR_SIZE];
-	if ( ! llHashedUniqueID(unique_id) )
-	{
-		if ( willing_to_test )
-		{
-			LL_WARNS("UpdaterService") << "Unable to provide a unique id; overriding willing_to_test by sending testno" << LL_ENDL;
-		}
-		willing_to_test = false;
-	}
-
-//	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::forceQuit, this));
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-09-19 (Catznip-3.3)
 	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::requestQuit, this));
-// [/SL:KB]
-	mUpdater->initialize(channel, 
-						 version,
-// DRTVWR-418 transitional: query using "win64" until VMP is in place
-#if LL_WINDOWS && (ADDRESS_SIZE == 64)
-						 "win64",
+	mUpdater->initialize(LLVersionInfo::getChannel(),
+						 LLVersionInfo::getVersion(),
+#if ADDRESS_SIZE == 64
+						 llformat("%s64", gPlatform),
 #else
-						 gPlatform,
+						 llformat("%s32", gPlatform),
 #endif
-						 getOSInfo().getOSVersionString(),
-						 unique_id,
-						 willing_to_test
-						 );
- 	mUpdater->setCheckPeriod(check_period);
-//	mUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
-	gSavedSettings.getControl("UpdaterMaximumBandwidth")->getSignal()->
-		connect(boost::bind(&on_bandwidth_throttle, mUpdater.get(), _2));
-//	if(gSavedSettings.getU32("UpdaterServiceSetting"))
-//	{
-//		bool install_if_ready = true;
-//		mUpdater->startChecking(install_if_ready);
-//	}
+						 LLOSInfo::instance().getOSVersionString());
+	mUpdater->setCheckPeriod(gSavedSettings.getU32("UpdaterServiceCheckPeriod"));
 
-    LLEventPump & updater_pump = LLEventPumps::instance().obtain(LLUpdaterService::pumpName());
-    updater_pump.listen("notify_update", &notify_update);
+	gSavedSettings.getControl("UpdaterMaximumBandwidth")->getSignal()->connect(boost::bind(&onBandwidthLimitChanged, _2));
+
+    LLEventPump& updater_pump = LLEventPumps::instance().obtain(LLUpdaterService::pumpName());
+    updater_pump.listen("notify_update", &notifyUpdate);
 }
+// [/SL:KB]
 
 //
 // This function decides whether the client machine meets the minimum requirements to
@@ -3552,10 +3464,13 @@ bool LLAppViewer::initWindow()
 		
     
 #ifdef LL_DARWIN
-    //Satisfy both MAINT-3135 (OSX 10.6 and earlier) MAINT-3288 (OSX 10.7 and later)
-   if (getOSInfo().mMajorVer == 10 && getOSInfo().mMinorVer < 7)
-		if ( getOSInfo().mMinorVer == 6 && getOSInfo().mBuild < 8 )
-       		gViewerWindow->getWindow()->setOldResize(true);
+	//Satisfy both MAINT-3135 (OSX 10.6 and earlier) MAINT-3288 (OSX 10.7 and later)
+	LLOSInfo& os_info = LLOSInfo::instance();
+	if (os_info.mMajorVer == 10 && os_info.mMinorVer < 7)
+	{
+		if ( os_info.mMinorVer == 6 && os_info.mBuild < 8 )
+			gViewerWindow->getWindow()->setOldResize(true);
+	}
 #endif
     
 	if (gSavedSettings.getBOOL("WindowMaximized"))
@@ -3703,15 +3618,24 @@ LLSD LLAppViewer::getViewerInfo() const
 	info["CPU"] = gSysCPU.getCPUString();
 	info["MEMORY_MB"] = LLSD::Integer(gSysMemory.getPhysicalMemoryKB().valueInUnits<LLUnits::Megabytes>());
 	// Moved hack adjustment to Windows memory size into llsys.cpp
-	info["OS_VERSION"] = LLAppViewer::instance()->getOSInfo().getOSString();
+	info["OS_VERSION"] = LLOSInfo::instance().getOSString();
 	info["GRAPHICS_CARD_VENDOR"] = (const char*)(glGetString(GL_VENDOR));
 	info["GRAPHICS_CARD"] = (const char*)(glGetString(GL_RENDERER));
 
 #if LL_WINDOWS
-	LLSD driver_info = gDXHardware.getDisplayInfo();
-	if (driver_info.has("DriverVersion"))
+	std::string drvinfo = gDXHardware.getDriverVersionWMI();
+	if (!drvinfo.empty())
 	{
-		info["GRAPHICS_DRIVER_VERSION"] = driver_info["DriverVersion"];
+		info["GRAPHICS_DRIVER_VERSION"] = drvinfo;
+	}
+	else
+	{
+		LL_WARNS("Driver version")<< "Cannot get driver version from getDriverVersionWMI" << LL_ENDL;
+		LLSD driver_info = gDXHardware.getDisplayInfo();
+		if (driver_info.has("DriverVersion"))
+		{
+			info["GRAPHICS_DRIVER_VERSION"] = driver_info["DriverVersion"];
+		}
 	}
 #endif
 
@@ -3739,7 +3663,7 @@ LLSD LLAppViewer::getViewerInfo() const
 
 	info["J2C_VERSION"] = LLImageJ2C::getEngineInfo();
 	bool want_fullname = true;
-	info["AUDIO_DRIVER_VERSION"] = gAudiop ? LLSD(gAudiop->getDriverName(want_fullname)) : LLSD();
+	info["AUDIO_DRIVER_VERSION"] = gAudiop ? LLSD(gAudiop->getDriverName(want_fullname)) : "Undefined";
 	if(LLVoiceClient::getInstance()->voiceEnabled())
 	{
 		LLVoiceVersionInfo version = LLVoiceClient::getInstance()->getVersion();
@@ -3889,6 +3813,70 @@ std::string LLAppViewer::getViewerInfoString() const
 	return support.str();
 }
 
+std::string LLAppViewer::getShortViewerInfoString() const
+{
+	std::ostringstream support;
+	LLSD info(getViewerInfo());
+
+	support << LLTrans::getString("APP_NAME") << " " << info["VIEWER_VERSION_STR"].asString();
+	support << " (" << info["CHANNEL"].asString() << ")";
+	if (info.has("BUILD_CONFIG"))
+	{
+		support << "\n" << "Build Configuration " << info["BUILD_CONFIG"].asString();
+	}
+	if (info.has("REGION"))
+	{
+		support << "\n\n" << "You are at " << ll_vector3_from_sd(info["POSITION_LOCAL"]) << " in " << info["REGION"].asString();
+		support << " located at " << info["HOSTNAME"].asString() << " (" << info["HOSTIP"].asString() << ")";
+		support << "\n" << "SLURL: " << info["SLURL"].asString();
+		support << "\n" << "(Global coordinates " << ll_vector3_from_sd(info["POSITION"]) << ")";
+		support << "\n" << info["SERVER_VERSION"].asString();
+	}
+
+	support << "\n\n" << "CPU: " << info["CPU"].asString();
+	support << "\n" << "Memory: " << info["MEMORY_MB"].asString() << " MB";
+	support << "\n" << "OS: " << info["OS_VERSION"].asString();
+	support << "\n" << "Graphics Card: " << info["GRAPHICS_CARD"].asString() << " (" <<  info["GRAPHICS_CARD_VENDOR"].asString() << ")";
+
+	if (info.has("GRAPHICS_DRIVER_VERSION"))
+	{
+		support << "\n" << "Windows Graphics Driver Version: " << info["GRAPHICS_DRIVER_VERSION"].asString();
+	}
+
+	support << "\n" << "OpenGL Version: " << info["OPENGL_VERSION"].asString();
+
+	support << "\n\n" << "Window size:" << info["WINDOW_WIDTH"].asString() << "x" << info["WINDOW_HEIGHT"].asString();
+	support << "\n" << "Language: " << LLUI::getLanguage();
+	support << "\n" << "Font Size Adjustment: " << info["FONT_SIZE_ADJUSTMENT"].asString() << "pt";
+	support << "\n" << "UI Scaling: " << info["UI_SCALE"].asString();
+	support << "\n" << "Draw distance: " << info["DRAW_DISTANCE"].asString();
+	support << "\n" << "Bandwidth: " << info["NET_BANDWITH"].asString() << "kbit/s";
+	support << "\n" << "LOD factor: " << info["LOD_FACTOR"].asString();
+	support << "\n" << "Render quality: " << info["RENDER_QUALITY"].asString() << " / 7";
+	support << "\n" << "ALM: " << info["GPU_SHADERS"].asString();
+	support << "\n" << "Texture memory: " << info["TEXTURE_MEMORY"].asString() << "MB";
+	support << "\n" << "VFS (cache) creation time: " << info["VFS_TIME"].asString();
+
+	support << "\n\n" << "J2C Decoder: " << info["J2C_VERSION"].asString();
+	support << "\n" << "Audio Driver: " << info["AUDIO_DRIVER_VERSION"].asString();
+	support << "\n" << "LLCEFLib/CEF: " << info["LLCEFLIB_VERSION"].asString();
+	support << "\n" << "LibVLC: " << info["LIBVLC_VERSION"].asString();
+	support << "\n" << "Voice Server: " << info["VOICE_VERSION"].asString();
+
+	if (info.has("PACKETS_IN"))
+	{
+		support << "\n" << "Packets Lost: " << info["PACKETS_LOST"].asInteger() << "/" << info["PACKETS_IN"].asInteger();
+		F32 packets_pct = info["PACKETS_PCT"].asReal();
+		support << " (" << ll_round(packets_pct, 0.001f) << "%)";
+	}
+
+	LLSD substitution;
+	substitution["datetime"] = (S32)time(NULL);
+	support << "\n" << LLTrans::getString("AboutTime", substitution);
+
+	return support.str();
+}
+
 void LLAppViewer::cleanupSavedSettings()
 {
 	gSavedSettings.setBOOL("MouseSun", FALSE);
@@ -3964,6 +3952,7 @@ void LLAppViewer::writeSystemInfo()
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
+	gDebugInfo["ClientInfo"]["AddressSize"] = LLVersionInfo::getAddressSize();
 
 //	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 
@@ -3976,6 +3965,15 @@ void LLAppViewer::writeSystemInfo()
 	
 	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB().value());
 	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated.valueInUnits<LLUnits::Kilobytes>());
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	gDebugInfo["OSInfo"]["Name"] = LLOSInfo::instance().getOSStringSimple();
+	gDebugInfo["OSInfo"]["Version"] = LLOSInfo::instance().getOSVersionString();
+	gDebugInfo["OSInfo"]["Platform"] = LLOSInfo::instance().mPlatform;
+	gDebugInfo["OSInfo"]["MajorVersion"] = LLOSInfo::instance().mMajorVer;
+	gDebugInfo["OSInfo"]["MinorVersion"] = LLOSInfo::instance().mMinorVer;
+	gDebugInfo["OSInfo"]["BuildVersion"] = LLOSInfo::instance().mBuild;
+// [/SL:KB]
+//	gDebugInfo["OSInfo"] = LLOSInfo::instance().getOSStringSimple();
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
 #if LL_WINDOWS
@@ -3993,7 +3991,6 @@ void LLAppViewer::writeSystemInfo()
 // [/SL:KB]
 //	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
 //	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated>>10); // MB -> KB
-	gDebugInfo["OSInfo"] = getOSInfo().getOSStringSimple();
 
 	// The user is not logged on yet, but record the current grid choice login url
 	// which may have been the intended grid. 
@@ -4035,8 +4032,8 @@ void LLAppViewer::writeSystemInfo()
 	// query some system information
 	LL_INFOS("SystemInfo") << "CPU info:\n" << gSysCPU << LL_ENDL;
 	LL_INFOS("SystemInfo") << "Memory info:\n" << gSysMemory << LL_ENDL;
-	LL_INFOS("SystemInfo") << "OS: " << getOSInfo().getOSStringSimple() << LL_ENDL;
-	LL_INFOS("SystemInfo") << "OS info: " << getOSInfo() << LL_ENDL;
+	LL_INFOS("SystemInfo") << "OS: " << LLOSInfo::instance().getOSStringSimple() << LL_ENDL;
+	LL_INFOS("SystemInfo") << "OS info: " << LLOSInfo::instance() << LL_ENDL;
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4)
 	// Only include settings.xml if the user consented
@@ -4075,7 +4072,7 @@ void getFileList()
 		if ( ( iter->length() > 30 ) && (iter->rfind(".dmp") == (iter->length()-4) ) )
 		{
 			std::string fullname = pathname + *iter;
-			std::ifstream fdat( fullname.c_str(), std::ifstream::binary);
+			llifstream fdat( fullname.c_str(), std::ifstream::binary);
 			if (fdat)
 			{
 				char buf[5];
@@ -4707,10 +4704,7 @@ void dumpVFSCaches()
 	S32 res = LLFile::mkdir("StaticVFSDump");
 	if (res == -1)
 	{
-		if (errno != EEXIST)
-		{
-			LL_WARNS() << "Couldn't create dir StaticVFSDump" << LL_ENDL;
-		}
+		LL_WARNS() << "Couldn't create dir StaticVFSDump" << LL_ENDL;
 	}
 	SetCurrentDirectory(utf8str_to_utf16str("StaticVFSDump").c_str());
 	gStaticVFS->dumpFiles();
@@ -4724,10 +4718,7 @@ void dumpVFSCaches()
 	res = LLFile::mkdir("VFSDump");
 	if (res == -1)
 	{
-		if (errno != EEXIST)
-		{
-			LL_WARNS() << "Couldn't create dir VFSDump" << LL_ENDL;
-		}
+		LL_WARNS() << "Couldn't create dir VFSDump" << LL_ENDL;
 	}
 	SetCurrentDirectory(utf8str_to_utf16str("VFSDump").c_str());
 	gVFS->dumpFiles();
@@ -4739,7 +4730,7 @@ void dumpVFSCaches()
 U32 LLAppViewer::getTextureCacheVersion() 
 {
 	//viewer texture cache version, change if the texture cache format changes.
-	const U32 TEXTURE_CACHE_VERSION = 7;
+	const U32 TEXTURE_CACHE_VERSION = 8;
 
 	return TEXTURE_CACHE_VERSION ;
 }
@@ -4749,7 +4740,7 @@ U32 LLAppViewer::getObjectCacheVersion()
 {
 	// Viewer object cache version, change if object update
 	// format changes. JC
-	const U32 INDRA_OBJECT_CACHE_VERSION = 14;
+	const U32 INDRA_OBJECT_CACHE_VERSION = 15;
 
 	return INDRA_OBJECT_CACHE_VERSION;
 }
@@ -4777,6 +4768,7 @@ bool LLAppViewer::initCache()
 		if (gSavedSettings.getBOOL("PurgeCacheOnStartup") ||
 			gSavedSettings.getBOOL("PurgeCacheOnNextStartup"))
 		{
+			LL_INFOS("AppCache") << "Startup cache purge requested: " << (gSavedSettings.getBOOL("PurgeCacheOnStartup") ? "ALWAYS" : "ONCE") << LL_ENDL;
 			gSavedSettings.setBOOL("PurgeCacheOnNextStartup", false);
 			mPurgeCache = true;
 			// STORM-1141 force purgeAllTextures to get called to prevent a crash here. -brad
@@ -4791,6 +4783,7 @@ bool LLAppViewer::initCache()
 		std::string new_cache_location = gSavedSettings.getString("NewCacheLocation");
 		if (new_cache_location != cache_location)
 		{
+			LL_INFOS("AppCache") << "Cache location changed, cache needs purging" << LL_ENDL;
 			gDirUtilp->setCacheDir(gSavedSettings.getString("CacheLocation"));
 			purgeCache(); // purge old cache
 			gSavedSettings.setString("CacheLocation", new_cache_location);
@@ -4816,23 +4809,15 @@ bool LLAppViewer::initCache()
 	// Init the texture cache
 	// Allocate 80% of the cache size for textures	
 	const S32 MB = 1024 * 1024;
-	const S64 MIN_CACHE_SIZE = 64 * MB;
+	const S64 MIN_CACHE_SIZE = 256 * MB;
 	const S64 MAX_CACHE_SIZE = 9984ll * MB;
 	const S64 MAX_VFS_SIZE = 1024 * MB; // 1 GB
 
 	S64 cache_size = (S64)(gSavedSettings.getU32("CacheSize")) * MB;
 	cache_size = llclamp(cache_size, MIN_CACHE_SIZE, MAX_CACHE_SIZE);
 
-	S64 texture_cache_size = ((cache_size * 8) / 10);
-	S64 vfs_size = cache_size - texture_cache_size;
-
-	if (vfs_size > MAX_VFS_SIZE)
-	{
-		// Give the texture cache more space, since the VFS can't be bigger than 1GB.
-		// This happens when the user's CacheSize setting is greater than 5GB.
-		vfs_size = MAX_VFS_SIZE;
-		texture_cache_size = cache_size - MAX_VFS_SIZE;
-	}
+	S64 vfs_size = llmin((S64)((cache_size * 2) / 10), MAX_VFS_SIZE);
+	S64 texture_cache_size = cache_size - vfs_size;
 
 	S64 extra = LLAppViewer::getTextureCache()->initCache(LL_PATH_CACHE, texture_cache_size, texture_cache_mismatch);
 	texture_cache_size -= extra;
@@ -6005,6 +5990,19 @@ void LLAppViewer::disconnectViewer()
 	LLUrlEntryParcel::setDisconnected(gDisconnected);
 }
 
+bool LLAppViewer::onChangeFrameLimit(LLSD const & evt)
+{
+	if (evt.asInteger() > 0)
+	{
+		mMinMicroSecPerFrame = 1000000 / evt.asInteger();
+	}
+	else
+	{
+		mMinMicroSecPerFrame = 0;
+	}
+	return false;
+}
+
 void LLAppViewer::forceErrorLLError()
 {
    	LL_ERRS() << "This is a deliberate llerror" << LL_ENDL;
@@ -6190,142 +6188,6 @@ void LLAppViewer::handleLoginComplete()
 	mSavePerAccountSettings=true;
 }
 
-void LLAppViewer::launchUpdater()
-{
-		LLSD query_map = LLSD::emptyMap();
-	query_map["os"] = gPlatform;
-
-	// *TODO change userserver to be grid on both viewer and sim, since
-	// userserver no longer exists.
-	query_map["userserver"] = LLGridManager::getInstance()->getGridId();
-	query_map["channel"] = LLVersionInfo::getChannel();
-	// *TODO constantize this guy
-	// *NOTE: This URL is also used in win_setup/lldownloader.cpp
-	LLURI update_url = LLURI::buildHTTP("secondlife.com", 80, "update.php", query_map);
-	
-	if(LLAppViewer::sUpdaterInfo)
-	{
-		delete LLAppViewer::sUpdaterInfo;
-	}
-	LLAppViewer::sUpdaterInfo = new LLAppViewer::LLUpdaterInfo() ;
-
-	// if a sim name was passed in via command line parameter (typically through a SLURL)
-	if ( LLStartUp::getStartSLURL().getType() == LLSLURL::LOCATION )
-	{
-		// record the location to start at next time
-		gSavedSettings.setString( "NextLoginLocation", LLStartUp::getStartSLURL().getSLURLString()); 
-	};
-
-#if LL_WINDOWS
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = gDirUtilp->getTempFilename();
-	if (LLAppViewer::sUpdaterInfo->mUpdateExePath.empty())
-	{
-		delete LLAppViewer::sUpdaterInfo ;
-		LLAppViewer::sUpdaterInfo = NULL ;
-
-		// We're hosed, bail
-		LL_WARNS("AppInit") << "LLDir::getTempFilename() failed" << LL_ENDL;
-		return;
-	}
-
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += ".exe";
-
-	std::string updater_source = gDirUtilp->getAppRODataDir();
-	updater_source += gDirUtilp->getDirDelimiter();
-	updater_source += "updater.exe";
-
-	LL_DEBUGS("AppInit") << "Calling CopyFile source: " << updater_source
-			<< " dest: " << LLAppViewer::sUpdaterInfo->mUpdateExePath
-			<< LL_ENDL;
-
-
-	if (!CopyFileA(updater_source.c_str(), LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str(), FALSE))
-	{
-		delete LLAppViewer::sUpdaterInfo ;
-		LLAppViewer::sUpdaterInfo = NULL ;
-
-		LL_WARNS("AppInit") << "Unable to copy the updater!" << LL_ENDL;
-
-		return;
-	}
-
-	LLAppViewer::sUpdaterInfo->mParams << "-url \"" << update_url.asString() << "\"";
-
-	LL_DEBUGS("AppInit") << "Calling updater: " << LLAppViewer::sUpdaterInfo->mUpdateExePath << " " << LLAppViewer::sUpdaterInfo->mParams.str() << LL_ENDL;
-
-	//Explicitly remove the marker file, otherwise we pass the lock onto the child process and things get weird.
-	LLAppViewer::instance()->removeMarkerFiles(); // In case updater fails
-
-	// *NOTE:Mani The updater is spawned as the last thing before the WinMain exit.
-	// see LLAppViewerWin32.cpp
-	
-#elif LL_DARWIN
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = "'";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += gDirUtilp->getAppRODataDir();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "/mac-updater.app/Contents/MacOS/mac-updater' -url \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += update_url.asString();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" -name \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += LLAppViewer::instance()->getSecondLifeTitle();
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" -bundleid \"";
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += LL_VERSION_BUNDLE_ID;
-	LLAppViewer::sUpdaterInfo->mUpdateExePath += "\" &";
-
-	LL_DEBUGS("AppInit") << "Calling updater: " << LLAppViewer::sUpdaterInfo->mUpdateExePath << LL_ENDL;
-
-	// Run the auto-updater.
-	system(LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str()); /* Flawfinder: ignore */
-
-#elif (LL_LINUX || LL_SOLARIS) && LL_GTK
-	// we tell the updater where to find the xml containing string
-	// translations which it can use for its own UI
-	std::string xml_strings_file = "strings.xml";
-	std::vector<std::string> xui_path_vec =
-		gDirUtilp->findSkinnedFilenames(LLDir::XUI, xml_strings_file);
-	std::string xml_search_paths;
-	const char* delim = "";
-	// build comma-delimited list of xml paths to pass to updater
-	BOOST_FOREACH(std::string this_skin_path, xui_path_vec)
-	{
-		// Although we already have the full set of paths with the filename
-		// appended, the linux-updater.bin command-line switches require us to
-		// snip the filename OFF and pass it as a separate switch argument. :-P
-		LL_INFOS() << "Got a XUI path: " << this_skin_path << LL_ENDL;
-		xml_search_paths.append(delim);
-		xml_search_paths.append(gDirUtilp->getDirName(this_skin_path));
-		delim = ",";
-	}
-	// build the overall command-line to run the updater correctly
-	LLAppViewer::sUpdaterInfo->mUpdateExePath = 
-		gDirUtilp->getExecutableDir() + "/" + "linux-updater.bin" + 
-		" --url \"" + update_url.asString() + "\"" +
-		" --name \"" + LLAppViewer::instance()->getSecondLifeTitle() + "\"" +
-		" --dest \"" + gDirUtilp->getAppRODataDir() + "\"" +
-		" --stringsdir \"" + xml_search_paths + "\"" +
-		" --stringsfile \"" + xml_strings_file + "\"";
-
-	LL_INFOS("AppInit") << "Calling updater: " 
-			    << LLAppViewer::sUpdaterInfo->mUpdateExePath << LL_ENDL;
-
-	// *TODO: we could use the gdk equivalent to ensure the updater
-	// gets started on the same screen.
-	GError *error = NULL;
-	if (!g_spawn_command_line_async(LLAppViewer::sUpdaterInfo->mUpdateExePath.c_str(), &error))
-	{
-		LL_ERRS() << "Failed to launch updater: "
-		       << error->message
-		       << LL_ENDL;
-	}
-	if (error) {
-		g_error_free(error);
-	}
-#else
-	OSMessageBox(LLTrans::getString("MBNoAutoUpdate"), LLStringUtil::null, OSMB_OK);
-#endif
-
-	// *REMOVE:Mani - Saving for reference...
-	// LLAppViewer::instance()->forceQuit();
-}
-
 //virtual
 void LLAppViewer::setMasterSystemAudioMute(bool mute)
 {
@@ -6374,23 +6236,14 @@ void LLAppViewer::metricsSend(bool enable_reporting)
 		{
 			std::string	caps_url = regionp->getCapability("ViewerMetrics");
 
-            if (gSavedSettings.getBOOL("QAModeMetrics"))
-            {
-                dump_sequential_xml("metric_asset_stats",gViewerAssetStats->asLLSD(true));
-            }
-            
-			// Make a copy of the main stats to send into another thread.
-			// Receiving thread takes ownership.
-			LLViewerAssetStats * main_stats(new LLViewerAssetStats(*gViewerAssetStats));
-			main_stats->stop();
-			
+            LLSD sd = gViewerAssetStats->asLLSD(true);
+
 			// Send a report request into 'thread1' to get the rest of the data
 			// and provide some additional parameters while here.
 			LLAppViewer::sTextureFetch->commandSendMetrics(caps_url,
 														   gAgentSessionID,
 														   gAgentID,
-														   main_stats);
-			main_stats = 0;		// Ownership transferred
+														   sd);
 		}
 		else
 		{
