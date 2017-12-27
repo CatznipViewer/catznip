@@ -3894,7 +3894,15 @@ void LLAppViewer::writeSystemInfo()
 	
 	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB().value());
 	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated.valueInUnits<LLUnits::Kilobytes>());
-	gDebugInfo["OSInfo"] = LLOSInfo::instance().getOSStringSimple();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	gDebugInfo["OSInfo"]["Name"] = LLOSInfo::instance().getOSStringSimple();
+	gDebugInfo["OSInfo"]["Version"] = LLOSInfo::instance().getOSVersionString();
+	gDebugInfo["OSInfo"]["Platform"] = LLOSInfo::instance().mPlatform;
+	gDebugInfo["OSInfo"]["MajorVersion"] = LLOSInfo::instance().mMajorVer;
+	gDebugInfo["OSInfo"]["MinorVersion"] = LLOSInfo::instance().mMinorVer;
+	gDebugInfo["OSInfo"]["BuildVersion"] = LLOSInfo::instance().mBuild;
+// [/SL:KB]
+//	gDebugInfo["OSInfo"] = LLOSInfo::instance().getOSStringSimple();
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
 #if LL_WINDOWS

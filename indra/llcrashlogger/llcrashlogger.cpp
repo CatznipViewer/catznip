@@ -58,8 +58,11 @@
 // [/SL:KB]
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4)
+#include "writer.h" // JSON
+#include "llsdjson.h"
+
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>  
+#include <boost/filesystem.hpp>
 
 const std::ifstream::pos_type LOG_TRUNC_SIZE = 32768;
 // [/SL:KB]
@@ -107,20 +110,22 @@ void LLCrashLoggerHandler::onSuccess(LLCore::HttpResponse * response, const LLSD
 
 	LLSD sdCrash;
 	sdCrash["timestamp"] = LLDate::now();
-	sdCrash["crash_freeze"] = (content.has("crash_freeze")) ? content["crash_freeze"].asBoolean() : false;
-	sdCrash["crash_id"] = (content.has("crash_id")) ? content["crash_id"].asUUID() : LLUUID::null;
-	sdCrash["crash_link"] = (content.has("crash_link")) ? content["crash_link"].asString() : "";
-	sdCrash["crash_module"] = (content.has("crash_module_name")) ? content["crash_module_name"].asString() : "(Unknown)";
-	sdCrash["crash_offset"] = (content.has("crash_module_offset")) ? content["crash_module_offset"].asString() : "";
+	sdCrash["crash_id"] = (content.has("id")) ? content["id"].asUUID() : LLUUID::null;
+	sdCrash["crash_message"] = (content.has("message")) ? content["message"].asString() : "";
+	sdCrash["crash_link"] = (content.has("url")) ? content["url"].asString() : "";
+	sdCrash["crash_jira"] = (content.has("urlJira")) ? content["urlJira"].asString() : "";
+	sdCrash["crash_freeze"] = (content.has("lastExec")) ? content["lastExec"]["freeze"].asBoolean() : false;
+	sdCrash["crash_module"] = (content.has("crashModule")) ? content["crashModule"]["name"].asString() : "(Unknown)";
+	sdCrash["crash_offset"] = (content.has("crashModule")) ? content["crashModule"]["offset"].asString() : "";
 	sdCrashLog.append(sdCrash);
 
 	std::ofstream fileCrashLogOut(strCrashLog.c_str());
 	LLSDSerialize::toPrettyXML(sdCrashLog, fileCrashLogOut);
 	fileCrashLogOut.close();
 
-	if ((content.has("crash_link")) && (!content["crash_link"].asString().empty()))
+	if ( (content.has("message")) || (content.has("url")) || (content.has("urlJira")) )
 	{
-		((LLCrashLogger*)LLCrashLogger::instance())->setCrashInformationLink(content["crash_link"].asString());
+		((LLCrashLogger*)LLCrashLogger::instance())->setCrashReportResult(sdCrash);
 	}
 // [/SL:KB]
 
@@ -381,10 +386,10 @@ void LLCrashLogger::gatherFiles()
     {
         mCrashHost = mFileMap["CrashHostUrl"];
     }
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-18 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
 	else
 	{
-		mCrashHost = "http://viewer.catznip.com/crash/report/";
+		mCrashHost = "https://api.catznip.com/v1.0/crashreport";
 	}
 // [/SL:KB]
 
@@ -590,7 +595,6 @@ std::string getFormDataField(const std::string& strFieldName, const std::string&
 
 void addFormFile(std::iostream& body, const std::string strFileName, const char* pBuffer, unsigned int szBuffer)
 {
-	body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szBuffer), BOUNDARY);
 	body << "--" << BOUNDARY << "\r\n"
 	     <<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
 	     << "filename=\"" << strFileName << "\"\r\n"
@@ -610,6 +614,7 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
     LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
 
 	httpOpts->setTimeout(timeout);
+	httpOpts->setWantHeaders(true);
 
 	for(int i = 0; i < retries; ++i)
 	{
@@ -628,9 +633,9 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
 		 */
 		if (mDebugLog.has("ClientInfo"))
 		{
-			body << getFormDataField("viewer_channel", mDebugLog["ClientInfo"]["Name"], BOUNDARY);
-			body << getFormDataField("viewer_version", mDebugLog["ClientInfo"]["Version"], BOUNDARY);
-			body << getFormDataField("viewer_platform", mDebugLog["ClientInfo"]["Platform"], BOUNDARY);
+			body << getFormDataField("Viewer.Channel", mDebugLog["ClientInfo"]["Name"], BOUNDARY);
+			body << getFormDataField("Viewer.Version", mDebugLog["ClientInfo"]["Version"], BOUNDARY);
+			body << getFormDataField("Viewer.Platform", mDebugLog["ClientInfo"]["Platform"], BOUNDARY);
 		}
 
 		/*
@@ -659,10 +664,10 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
 				strLastExecEvent = "logout_crash";
 				break;
 		}
-		body << getFormDataField("last_exec_freeze", boost::lexical_cast<std::string>(mCrashInPreviousExec), BOUNDARY);
-		body << getFormDataField("last_exec_event", strLastExecEvent, BOUNDARY);
+		body << getFormDataField("LastExec.Freeze", (mCrashInPreviousExec) ? "true" : "false", BOUNDARY);
+		body << getFormDataField("LastExec.Event", strLastExecEvent, BOUNDARY);
 		if (!strLastExecMsg.empty())
-			body << getFormDataField("last_exec_message", strLastExecMsg, BOUNDARY);
+			body << getFormDataField("LastExec.Message", strLastExecMsg, BOUNDARY);
 
 		/*
 		 * Include crash analysis pony
@@ -670,7 +675,7 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
 		if ( (mCrashInfo.has("DumpInfo")) && (mCrashInfo["DumpInfo"].isMap()) )
 		{
 			for (LLSD::map_const_iterator itField = mCrashInfo["DumpInfo"].beginMap(), endField = mCrashInfo["DumpInfo"].endMap(); itField != endField; ++itField)
-				body << getFormDataField(itField->first, itField->second.asString(), BOUNDARY);
+				body << getFormDataField("CrashModule." + itField->first, itField->second.asString(), BOUNDARY);
 		}
 
 		/*
@@ -766,10 +771,10 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
     
 //    std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
 //                                                           "SecondLifeCrashReport");
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
-	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "CatznipCrashReport");
+//    std::string report_file = dump_path + ".log";
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	std::string report_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "CatznipCrashReport.json");
 // [/SL:KB]
-    std::string report_file = dump_path + ".log";
 
     LL_DEBUGS("CRASHREPORT") << "sending " << report_file << LL_ENDL;
 
@@ -781,7 +786,12 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
 	updateApplication("Sending reports...");
 
 	llofstream out_file(report_file.c_str());
-	LLSDSerialize::toPrettyXML(post_data, out_file);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	Json::Value root = LlsdToJson(post_data);
+	Json::StyledStreamWriter writer;
+	writer.write(out_file, root);
+// [/SL:KB]
+//	LLSDSerialize::toPrettyXML(post_data, out_file);
     out_file.flush();
 	out_file.close();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
@@ -819,16 +829,26 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
 	mSentCrashLogs = sent;
     
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
-	if (!mCrashLink.empty())
+	if ( (!mCrashReportResult.isUndefined()) && (mCrashReportResult.isMap()) )
 	{
 #if LL_WINDOWS && LL_SEND_CRASH_REPORTS
-		if (IDYES == MessageBox(NULL, L"Additional information is available about this crash. Display?", L"Crash Information", MB_YESNO))
+		std::string strMessage = mCrashReportResult["crash_message"].asString();
+		if (!strMessage.empty())
+			strMessage += "\r\n\r\n";
+		strMessage += "Additional information is available about this crash. Do you want to open the link?";
+
+		wchar_t wstrCrashMessage[1024];
+		mbstowcs_s(NULL, wstrCrashMessage, 1024, strMessage.c_str(), _TRUNCATE);
+
+		if (IDYES == MessageBox(NULL, wstrCrashMessage, L"Crash Information", MB_YESNO))
 		{
 			wchar_t wstrCrashLink[512];
-			mbstowcs_s(NULL, wstrCrashLink, 512, mCrashLink.c_str(), _TRUNCATE);
+			mbstowcs_s(NULL, wstrCrashLink, 512, (mCrashReportResult.has("crash_link")) ? mCrashReportResult["crash_link"].asString().c_str() : mCrashReportResult["crash_jira"].asString().c_str(), _TRUNCATE);
 
-			SHELLEXECUTEINFO sei = {0};
+			SHELLEXECUTEINFO sei;
+			ZeroMemory(&sei, sizeof(SHELLEXECUTEINFO));
 			sei.cbSize = sizeof(SHELLEXECUTEINFO);
+			sei.nShow = SW_SHOWNORMAL;
 			sei.fMask = SEE_MASK_NOASYNC;
 			sei.lpVerb = L"open";
 			sei.lpFile = wstrCrashLink;
