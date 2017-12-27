@@ -696,7 +696,9 @@ LLAppViewer::LLAppViewer()
 	mRandomizeFramerate(LLCachedControl<bool>(gSavedSettings,"Randomize Framerate", FALSE)),
 	mPeriodicSlowFrame(LLCachedControl<bool>(gSavedSettings,"Periodic Slow Frame", FALSE)),
 	mFastTimerLogThread(NULL),
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	mUpdater(new LLUpdaterService()),
+// [/SL:KB]
 	mSettingsLocationList(NULL),
 	mIsFirstRun(false),
 	mMinMicroSecPerFrame(0.f)
@@ -874,13 +876,15 @@ bool LLAppViewer::init()
 
     writeSystemInfo();
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	// Initialize updater service (now that we have an io pump)
 	initUpdater();
-	if(isQuitting())
+	if (isQuitting())
 	{
 		// Early out here because updater set the quitting flag.
 		return true;
 	}
+// [/SL:KB]
 
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
@@ -2915,32 +2919,31 @@ void LLAppViewer::initStrings()
 	}
 }
 
-namespace {
-    // *TODO - decide if there's a better place for these functions.
-	// do we need a file llupdaterui.cpp or something? -brad
-
-	void apply_update_callback(LLSD const & notification, LLSD const & response)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
+namespace
+{
+	void onUpdateInstallCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
-		LL_DEBUGS() << "LLUpdate user response: " << response << LL_ENDL;
-		if(response["OK_okcancelbuttons"].asBoolean())
+		LL_DEBUGS() << "LLUpdate user response: " << sdResponse << LL_ENDL;
+
+		if (sdResponse["OK_okcancelbuttons"].asBoolean())
 		{
 			LL_INFOS() << "LLUpdate restarting viewer" << LL_ENDL;
-			static const bool install_if_ready = true;
+
 			// *HACK - this lets us launch the installer immediately for now
-			LLUpdaterService().startChecking(install_if_ready);
+			LLUpdaterService().startChecking(true /*install_if_ready*/);
 		}
 	}
-	
-	void apply_update_ok_callback(LLSD const & notification, LLSD const & response)
+
+	void onUpdateInstallForceCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
 		LL_INFOS() << "LLUpdate restarting viewer" << LL_ENDL;
-		static const bool install_if_ready = true;
+
 		// *HACK - this lets us launch the installer immediately for now
-		LLUpdaterService().startChecking(install_if_ready);
+		LLUpdaterService().startChecking(true /*install_if_ready*/);
 	}
-	
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
-	void on_update_available_callback(const LLSD& sdData)
+
+	void onUpdateAvailableCallback(const LLSD& sdData)
 	{
 		LLUpdaterService updaterSerivce;
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
@@ -2957,10 +2960,10 @@ namespace {
 		}
 	}
 
-	void on_update_available(const LLSD& sdData)
+	void onUpdateAvailable(const LLSD& sdData)
 	{
 		// Don't do anything if it's an optional update and the user was already notified recently
-		if ( (!sdData["show_ui"].asBoolean()) && 
+		if ( (!sdData["show_ui"].asBoolean()) &&
 		     (!sdData["required"].asBoolean()) && (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 48 * 60 * 60) )
 		{
 			return;
@@ -2973,14 +2976,13 @@ namespace {
 		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["info_url"] = sdData["info_url"];
 
-		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
-		if (pFloater)
+		if (LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData))
 		{
-			pFloater->setCommitCallback(boost::bind(&on_update_available_callback, _2));
+			pFloater->setCommitCallback(boost::bind(&onUpdateAvailableCallback, _2));
 		}
 	}
 
-	void on_update_downloaded_prompt_callback(const LLSD& sdData)
+	void onUpdateDownloadedPromptCallback(const LLSD& sdData)
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Install"
 		{
@@ -2992,10 +2994,10 @@ namespace {
 		}
 	}
 
-	void on_update_downloaded_prompt(const LLSD& sdData)
+	void onUpdateDownloadedPrompt(const LLSD& sdData)
 	{
 		// Don't do anything if it's an optional update and the user was only recently notified
-		if ( (!sdData["required"].asBoolean()) && 
+		if ( (!sdData["required"].asBoolean()) &&
 		     (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 4 * 60 * 60) )
 		{
 			return;
@@ -3008,276 +3010,186 @@ namespace {
 		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["info_url"] = sdData["info_url"];
 
-		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
-		if (pFloater)
+		if (LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData))
 		{
-			pFloater->setCommitCallback(boost::bind(&on_update_downloaded_prompt_callback, _2));
+			pFloater->setCommitCallback(boost::bind(&onUpdateDownloadedPromptCallback, _2));
 		}
 	}
-// [/SL:KB]
 
-	void on_update_downloaded(LLSD const & data)
+	void onUpdateDownloaded(LLSD const & data)
 	{
-		std::string notification_name;
+		std::string strNotificationName;
 		void (*apply_callback)(LLSD const &, LLSD const &) = NULL;
 
-		/* Build up the notification name...
-		 * it can be any of these, which are included here for the sake of grep:
-		 *   RequiredUpdateDownloadedDialog
-		 *   RequiredUpdateDownloadedVerboseDialog
-		 *   OtherChannelRequiredUpdateDownloadedDialog
-		 *   OtherChannelRequiredUpdateDownloadedVerbose
-		 *   DownloadBackgroundTip
-		 *   DownloadBackgroundDialog
-		 *   OtherChannelDownloadBackgroundTip
-		 *   OtherChannelDownloadBackgroundDialog
+		/* Build up the notification name, it can be any of these:
+		 *   FailedUpdateInstall
+		 *   FailedRequiredUpdateInstall
+		 *   [OtherChannel]DownloadBackgroundTip
+		 *   [OtherChannel]DownloadBackgroundDialog
+		 *   [OtherChannel]RequiredUpdateDownloadedVerboseDialog
+		 *   [OtherChannel]RequiredUpdateDownloadedDialog
+		 *   UpdateViewerUpToDate
+		 *   UpdateCheckError
 		 */
+
+		if (data["channel"].asString() != LLVersionInfo::getChannel())
 		{
-			LL_DEBUGS("UpdaterService") << "data = ";
-			std::ostringstream data_dump;
-			LLSDSerialize::toNotation(data, data_dump);
-			LL_CONT << data_dump.str() << LL_ENDL;
+			strNotificationName.append("OtherChannel");
 		}
-		if(data["channel"].asString() != LLVersionInfo::getChannel())
-		{
-			notification_name.append("OtherChannel");
-		}
-		if(data["required"].asBoolean())
+
+		if (data["required"].asBoolean())
 		{
 			if(LLStartUp::getStartupState() <= STATE_LOGIN_WAIT)
 			{
 				// The user never saw the progress bar.
-				apply_callback = &apply_update_ok_callback;
-				notification_name += "RequiredUpdateDownloadedVerboseDialog";
+				apply_callback = &onUpdateInstallForceCb;
+				strNotificationName += "RequiredUpdateDownloadedVerboseDialog";
 			}
 			else if(LLStartUp::getStartupState() < STATE_WORLD_INIT)
 			{
 				// The user is logging in but blocked.
-				apply_callback = &apply_update_ok_callback;
-				notification_name += "RequiredUpdateDownloadedDialog";
+				apply_callback = &onUpdateInstallForceCb;
+				strNotificationName += "RequiredUpdateDownloadedDialog";
 			}
 			else
 			{
 				// The user is already logged in; treat like an optional update.
-				apply_callback = &apply_update_callback;
-				notification_name += "DownloadBackgroundTip";
+				apply_callback = &onUpdateInstallCb;
+				strNotificationName += "DownloadBackgroundTip";
 			}
 		}
 		else
 		{
-			apply_callback = &apply_update_callback;
+			apply_callback = &onUpdateInstallCb;
 			if(LLStartUp::getStartupState() < STATE_STARTED)
 			{
-				// CHOP-262 we need to use a different notification
-				// method prior to login.
-				notification_name += "DownloadBackgroundDialog";
+				// The user hasn't logged in yet
+				strNotificationName += "DownloadBackgroundDialog";
 			}
 			else
 			{
-				notification_name += "DownloadBackgroundTip";
+				// The user is already logged in
+				strNotificationName += "DownloadBackgroundTip";
 			}
 		}
 
-		LLSD substitutions;
-		substitutions["VERSION"] = data["version"];
-		std::string new_channel = data["channel"].asString();
-		substitutions["NEW_CHANNEL"] = new_channel;
-		std::string info_url    = data["info_url"].asString();
-		if ( !info_url.empty() )
-		{
-			substitutions["INFO_URL"] = info_url;
-		}
-		else
-		{
-			LL_WARNS("UpdaterService") << "no info url supplied - defaulting to hard coded release notes pattern" << LL_ENDL;
+		LLSD sdSubstitutions;
+		sdSubstitutions["VERSION"] = data["version"];
+		sdSubstitutions["NEW_CHANNEL"] = data["channel"].asString();
+		sdSubstitutions["INFO_URL"] = data["info_url"].asString();
 
-		// truncate version at the rightmost '.' 
-		std::string version_short(data["version"]);
-		size_t short_length = version_short.rfind('.');
-		if (short_length != std::string::npos)
-		{
-			version_short.resize(short_length);
-		}
-
-		LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
-		relnotes_url.setArg("[VERSION_SHORT]", version_short);
-
-		// *TODO thread the update service's response through to this point
-		std::string const & channel = LLVersionInfo::getChannel();
-		boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
-
-		relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
-		relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
-			substitutions["INFO_URL"] = relnotes_url.getString();
-		}
-
-		LLNotificationsUtil::add(notification_name, substitutions, LLSD(), apply_callback);
+		LLNotificationsUtil::add(strNotificationName, sdSubstitutions, LLSD(), apply_callback);
 	}
 
-	void install_error_callback(LLSD const & notification, LLSD const & response)
+	void onInstallErrorCb(const LLSD& sdNotification, const LLSD& sdResponse)
 	{
 		LLAppViewer::instance()->forceQuit();
 	}
-	
-	bool notify_update(LLSD const & evt)
+
+	bool notifyUpdate(const LLSD& sdData)
 	{
-		std::string notification_name;
-		switch (evt["type"].asInteger())
+		switch (sdData["type"].asInteger())
 		{
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 			case LLUpdaterService::CHECK_COMPLETE:
-				if (!evt["up_to_date"].asBoolean())
+				if (!sdData["up_to_date"].asBoolean())
 				{
 					// Update is available
-					if ( (evt["show_ui"].asBoolean()) || (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting")) )
-						on_update_available(evt);
+					if ( (sdData["show_ui"].asBoolean()) || (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting")) )
+						onUpdateAvailable(sdData);
 					else
-						on_update_available_callback(LLSD().with("accept", true));
+						onUpdateAvailableCallback(LLSD().with("accept", true));
 				}
 				else
 				{
 					// Viewer is up to date
-					if (evt["show_ui"].asBoolean())
+					if (sdData["show_ui"].asBoolean())
 						LLNotificationsUtil::add("UpdateViewerUpToDate");
 				}
 				break;
+
 			case LLUpdaterService::CHECK_ERROR:
-				if (evt["show_ui"].asBoolean())
+				if (sdData["show_ui"].asBoolean())
 				{
 					LLNotificationsUtil::add("UpdateCheckError");
 				}
 				break;
+
 			case LLUpdaterService::DOWNLOAD_RESUME:
-				{
-					LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (evt["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
-				}
+				LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (sdData["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
 				break;
+
 			case LLUpdaterService::PROGRESS:
+				if (LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress"))
 				{
-					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
-					if (pProgressFloater)
-						pProgressFloater->onDownloadProgress(evt);
+					pProgressFloater->onDownloadProgress(sdData);
 				}
 				break;
+
 			case LLUpdaterService::DOWNLOAD_COMPLETE:
+				if (LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress"))
 				{
-					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
-					if (pProgressFloater)
-					{
-						pProgressFloater->onDownloadCompleted();
-						pProgressFloater->setMinimized(FALSE);
-						pProgressFloater->setVisibleAndFrontmost(true);
-					}
+					pProgressFloater->onDownloadCompleted();
+					pProgressFloater->setMinimized(false);
+					pProgressFloater->setVisibleAndFrontmost(true);
+				}
+				else
+				{
+					if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
+						onUpdateDownloadedPrompt(sdData);
 					else
-					{
-						if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
-							on_update_downloaded_prompt(evt);
-						else
-							on_update_downloaded(evt);
-					}
+						onUpdateDownloaded(sdData);
 				}
 				break;
-// [/SL:KB]
-//			case LLUpdaterService::DOWNLOAD_COMPLETE:
-//				on_update_downloaded(evt);
-//				break;
+
 			case LLUpdaterService::INSTALL_ERROR:
-				if(evt["required"].asBoolean()) {
-					LLNotificationsUtil::add("FailedRequiredUpdateInstall", LLSD(), LLSD(), &install_error_callback);
-				} else {
+				if (sdData["required"].asBoolean())
+					LLNotificationsUtil::add("FailedRequiredUpdateInstall", LLSD(), LLSD(), &onInstallErrorCb);
+				else
 					LLNotificationsUtil::add("FailedUpdateInstall");
-				}
 				break;
+
 			default:
 				break;
 		}
 
-		// let others also handle this event by default
+		// Let others also handle this event by default
 		return false;
 	}
-	
-	bool on_bandwidth_throttle(LLUpdaterService * updater, LLSD const & evt)
+
+	bool onBandwidthLimitChanged(const LLSD& sdValue)
 	{
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 		// Only limit updater download bandwidth once the user has passed the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
-			updater->setBandwidthLimit(evt.asInteger() * (1024/8));
+			LLUpdaterService updaterService;
+			if (updaterService.isChecking())
+			{
+				updaterService.setBandwidthLimit(sdValue.asInteger() * (1024 / 8));
+			}
 		}
-// [/SL:KB]
-//		updater->setBandwidthLimit(evt.asInteger() * (1024/8));
-		return false; // Let others receive this event.
-	};
+		return false;
+	}
 };
 
 void LLAppViewer::initUpdater()
 {
-	// Initialize the updater service.
-	// Get Channel
-	// Get Version
-
-	/*****************************************************************
-	 * Previously, the url was derived from the settings 
-	 *    UpdaterServiceURL
-	 *    UpdaterServicePath
-	 * it is now obtained from the grid manager.  The settings above
-	 * are no longer used.
-	 *****************************************************************/
-	std::string channel = LLVersionInfo::getChannel();
-	std::string version = LLVersionInfo::getVersion();
-
-	U32 check_period = gSavedSettings.getU32("UpdaterServiceCheckPeriod");
-	bool willing_to_test;
-	LL_DEBUGS("UpdaterService") << "channel " << channel << LL_ENDL;
-
-	if (LLVersionInfo::TEST_VIEWER == LLVersionInfo::getViewerMaturity()) 
-	{
-		LL_INFOS("UpdaterService") << "Test build: overriding willing_to_test by sending testno" << LL_ENDL;
-		willing_to_test = false;
-	}
-	else
-	{
-		willing_to_test = gSavedSettings.getBOOL("UpdaterWillingToTest");
-	}
-    unsigned char unique_id[MD5HEX_STR_SIZE];
-	if ( ! llHashedUniqueID(unique_id) )
-	{
-		if ( willing_to_test )
-		{
-			LL_WARNS("UpdaterService") << "Unable to provide a unique id; overriding willing_to_test by sending testno" << LL_ENDL;
-		}
-		willing_to_test = false;
-	}
-
-//	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::forceQuit, this));
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
 	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::requestQuit, this));
-// [/SL:KB]
-	mUpdater->initialize(channel, 
-						 version,
-// DRTVWR-418 transitional: query using "win64" until VMP is in place
-#if LL_WINDOWS && (ADDRESS_SIZE == 64)
-						 "win64",
+	mUpdater->initialize(LLVersionInfo::getChannel(),
+						 LLVersionInfo::getVersion(),
+#if ADDRESS_SIZE == 64
+						 llformat("%s64", gPlatform),
 #else
-						 gPlatform,
+						 llformat("%s32", gPlatform),
 #endif
-						 LLOSInfo::instance().getOSVersionString(),
-						 unique_id,
-						 willing_to_test
-						 );
- 	mUpdater->setCheckPeriod(check_period);
-//	mUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
-	gSavedSettings.getControl("UpdaterMaximumBandwidth")->getSignal()->
-		connect(boost::bind(&on_bandwidth_throttle, mUpdater.get(), _2));
-//	if(gSavedSettings.getU32("UpdaterServiceSetting"))
-//	{
-//		bool install_if_ready = true;
-//		mUpdater->startChecking(install_if_ready);
-//	}
+						 LLOSInfo::instance().getOSVersionString());
+	mUpdater->setCheckPeriod(gSavedSettings.getU32("UpdaterServiceCheckPeriod"));
 
-    LLEventPump & updater_pump = LLEventPumps::instance().obtain(LLUpdaterService::pumpName());
-    updater_pump.listen("notify_update", &notify_update);
+	gSavedSettings.getControl("UpdaterMaximumBandwidth")->getSignal()->connect(boost::bind(&onBandwidthLimitChanged, _2));
+
+    LLEventPump& updater_pump = LLEventPumps::instance().obtain(LLUpdaterService::pumpName());
+    updater_pump.listen("notify_update", &notifyUpdate);
 }
+// [/SL:KB]
 
 //
 // This function decides whether the client machine meets the minimum requirements to

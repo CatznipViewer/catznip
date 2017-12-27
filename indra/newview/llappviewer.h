@@ -55,7 +55,9 @@ class LLTextureCache;
 class LLImageDecodeThread;
 class LLTextureFetch;
 class LLWatchdogTimeout;
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 class LLUpdaterService;
+// [/SL:KB]
 class LLViewerJoystick;
 
 extern LLTrace::BlockTimerStatHandle FTM_FRAME;
@@ -227,7 +229,9 @@ private:
 	bool initThreads(); // Initialize viewer threads, return false on failure.
 	bool initConfiguration(); // Initialize settings from the command line/config file.
 	void initStrings();       // Initialize LLTrans machinery
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	void initUpdater(); // Initialize the updater service.
+// [/SL:KB]
 	bool initCache(); // Initialize local client cache.
 	void checkMemory() ;
 
@@ -308,7 +312,9 @@ private:
 
 	LLFrameTimer mMemCheckTimer;
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	boost::scoped_ptr<LLUpdaterService> mUpdater;
+// [/SL:KB]
 
 	// llcorehttp library init/shutdown helper
 	LLAppCoreHttp mAppCoreHttp;

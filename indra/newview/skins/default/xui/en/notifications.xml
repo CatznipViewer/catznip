@@ -3852,129 +3852,11 @@ Please download from https://secondlife.com/support/downloads/
 
   <notification
    icon="alertmodal.tga"
-   name="DownloadWindows"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadWindowsReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinuxMandatory"
-   type="alertmodal">
-A new version of [APP_NAME] is available.
-[MESSAGE]
-You must download this update to use [APP_NAME].
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinux"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinuxReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMacMandatory"
-   type="alertmodal">
-A new version of [APP_NAME] is available.
-[MESSAGE]
-You must download this update to use [APP_NAME].
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMac"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMacReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
    name="FailedUpdateInstall"
    type="alertmodal">
 An error occurred installing the viewer update.
-Please download and install the latest viewer from
-http://secondlife.com/download.
+
+Please download and install the latest viewer from https://get.catznip.com .
     <usetemplate
      name="okbutton"
      yestext="OK"/>
@@ -3984,30 +3866,13 @@ http://secondlife.com/download.
    icon="alertmodal.tga"
    name="FailedRequiredUpdateInstall"
    type="alertmodal">
-We were unable to install a required update. 
-You will be unable to log in until [APP_NAME] has been updated.
+We were unable to install a required update.
 
-Please download and install the latest viewer from
-http://secondlife.com/download.
-  <tag>fail</tag>
+Please download and install the latest viewer from https://get.catznip.com .
+    <tag>fail</tag>
     <usetemplate
      name="okbutton"
      yestext="Quit"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="UpdaterServiceNotRunning"
-   type="alertmodal">
-There is a required update for your Second Life Installation.
-
-You may download this update from http://www.secondlife.com/downloads
-or you can install it now.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit Second Life"
-     yestext="Download and install now"/>
   </notification>
 
   <notification
@@ -4140,21 +4005,9 @@ We must restart [APP_NAME] to install the update.
   
   <notification
  icon="alertmodal.tga"
- name="UpdateDownloadInProgress"
+ name="UpdateViewerUpToDate"
  type="alertmodal">
-An update is available!
-It's downloading in the background and we will prompt you to restart your viewer to finish installing it as soon as it's ready.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-  
-  <notification
- icon="alertmodal.tga"
- name="UpdateDownloadComplete"
- type="alertmodal">
-An update was downloaded. It will be installed during restart.
+Your [APP_NAME] version is up to date.
     <tag>confirm</tag>
     <usetemplate
      name="okbutton"
@@ -4167,17 +4020,6 @@ An update was downloaded. It will be installed during restart.
  type="alertmodal">
 An error occurred while checking for update.
 Please try again later.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
- icon="alertmodal.tga"
- name="UpdateViewerUpToDate"
- type="alertmodal">
-Your [APP_NAME] version is up to date.
     <tag>confirm</tag>
     <usetemplate
      name="okbutton"

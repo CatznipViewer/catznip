@@ -108,13 +108,10 @@ class LLUpdaterServiceImpl :
 {
 	static const std::string sListenerName;
 	
-	std::string   mProtocolVersion;
 	std::string   mChannel;
 	std::string   mVersion;
 	std::string   mPlatform;
 	std::string   mPlatformVersion;
-	unsigned char mUniqueId[MD5HEX_STR_SIZE];
-	bool          mWillingToTest;
 	
 	unsigned int mCheckPeriod;
 	bool mIsChecking;
@@ -140,10 +137,7 @@ public:
 	void initialize(const std::string& 	channel,
 					const std::string& 	version,
 					const std::string&  platform,
-					const std::string&  platform_version,
-					const unsigned char uniqueid[MD5HEX_STR_SIZE],
-					const bool&         willing_to_test					
-					);
+					const std::string&  platform_version);
 	
 	void setCheckPeriod(unsigned int seconds);
 	void setBandwidthLimit(U64 bytesPerSecond);
@@ -219,9 +213,7 @@ LLUpdaterServiceImpl::~LLUpdaterServiceImpl()
 void LLUpdaterServiceImpl::initialize(const std::string&  channel,
 									  const std::string&  version,
 									  const std::string&  platform,
-									  const std::string&  platform_version,
-									  const unsigned char uniqueid[MD5HEX_STR_SIZE],
-									  const bool&         willing_to_test)
+									  const std::string&  platform_version)
 {
 	if(mIsChecking || mIsDownloading)
 	{
@@ -233,13 +225,9 @@ void LLUpdaterServiceImpl::initialize(const std::string&  channel,
 	mVersion = version;
 	mPlatform = platform;
 	mPlatformVersion = platform_version;
-	memcpy(mUniqueId, uniqueid, MD5HEX_STR_SIZE);
-	mWillingToTest = willing_to_test;
 	LL_DEBUGS("UpdaterService")
 		<< "\n  channel: " << mChannel
 		<< "\n  version: " << mVersion
-		<< "\n  uniqueid: " << mUniqueId
-		<< "\n  willing: " << ( mWillingToTest ? "testok" : "testno" )
 		<< LL_ENDL;
 }
 
@@ -845,8 +833,7 @@ bool LLUpdaterServiceImpl::onMainLoop(LLSD const & event)
 			if ( !query_url.empty() )
 			{
 				mUpdateChecker.checkVersion(query_url, mChannel, mVersion,
-											mPlatform, mPlatformVersion, mUniqueId,
-											mWillingToTest);
+											mPlatform, mPlatformVersion);
 				setState(LLUpdaterService::CHECKING_FOR_UPDATE);
 			}
 			else
@@ -907,12 +894,9 @@ LLUpdaterService::~LLUpdaterService()
 void LLUpdaterService::initialize(const std::string& channel,
 								  const std::string& version,
 								  const std::string& platform,
-								  const std::string& platform_version,
-								  const unsigned char uniqueid[MD5HEX_STR_SIZE],
-								  const bool&         willing_to_test
-)
+								  const std::string& platform_version)
 {
-	mImpl->initialize(channel, version, platform, platform_version, uniqueid, willing_to_test);
+	mImpl->initialize(channel, version, platform, platform_version);
 }
 
 void LLUpdaterService::setCheckPeriod(unsigned int seconds)

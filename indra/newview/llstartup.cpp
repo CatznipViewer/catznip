@@ -78,7 +78,7 @@
 #include "llsdutil_math.h"
 #include "llstring.h"
 #include "lluserrelations.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 #include "llupdaterservice.h"
 // [/SL:KB]
 #include "llversioninfo.h"
