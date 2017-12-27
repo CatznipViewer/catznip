@@ -108,13 +108,10 @@ class LLUpdaterServiceImpl :
 {
 	static const std::string sListenerName;
 	
-	std::string   mProtocolVersion;
 	std::string   mChannel;
 	std::string   mVersion;
 	std::string   mPlatform;
 	std::string   mPlatformVersion;
-	unsigned char mUniqueId[MD5HEX_STR_SIZE];
-	bool          mWillingToTest;
 	
 	unsigned int mCheckPeriod;
 	bool mIsChecking;
@@ -140,10 +137,7 @@ public:
 	void initialize(const std::string& 	channel,
 					const std::string& 	version,
 					const std::string&  platform,
-					const std::string&  platform_version,
-					const unsigned char uniqueid[MD5HEX_STR_SIZE],
-					const bool&         willing_to_test					
-					);
+					const std::string&  platform_version);
 	
 	void setCheckPeriod(unsigned int seconds);
 	void setBandwidthLimit(U64 bytesPerSecond);
@@ -174,7 +168,7 @@ public:
 	
 	// A successful response was received from the viewer version manager
 	virtual void response(LLSD const & content);
-
+	
 	// LLUpdateDownloader::Client
 	void downloadComplete(LLSD const & data);
 	void downloadError(std::string const & message);
@@ -219,9 +213,7 @@ LLUpdaterServiceImpl::~LLUpdaterServiceImpl()
 void LLUpdaterServiceImpl::initialize(const std::string&  channel,
 									  const std::string&  version,
 									  const std::string&  platform,
-									  const std::string&  platform_version,
-									  const unsigned char uniqueid[MD5HEX_STR_SIZE],
-									  const bool&         willing_to_test)
+									  const std::string&  platform_version)
 {
 	if(mIsChecking || mIsDownloading)
 	{
@@ -233,13 +225,9 @@ void LLUpdaterServiceImpl::initialize(const std::string&  channel,
 	mVersion = version;
 	mPlatform = platform;
 	mPlatformVersion = platform_version;
-	memcpy(mUniqueId, uniqueid, MD5HEX_STR_SIZE);
-	mWillingToTest = willing_to_test;
 	LL_DEBUGS("UpdaterService")
 		<< "\n  channel: " << mChannel
 		<< "\n  version: " << mVersion
-		<< "\n  uniqueid: " << mUniqueId
-		<< "\n  willing: " << ( mWillingToTest ? "testok" : "testno" )
 		<< LL_ENDL;
 }
 
@@ -630,16 +618,26 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 		}
 		mNewVersion = content["version"].asString();
 		mNewUpdateData = content;
+		if ( (mNewUpdateData.has("description") && (!mNewUpdateData.has("more_info")) ) )
+		{
+			mNewUpdateData["more_info"] = mNewUpdateData["description"];
+			mNewUpdateData.erase("description");
+		}
+		if ((mNewUpdateData.has("infoUrl") && (!mNewUpdateData.has("info_url"))))
+		{
+			mNewUpdateData["info_url"] = mNewUpdateData["infoUrl"];
+			mNewUpdateData.erase("infoUrl");
+		}
 
 		LLSD sdEventData;
 		sdEventData["pump"] = LLUpdaterService::pumpName();
-		sdEventData["payload"] = content;
+		sdEventData["payload"] = mNewUpdateData;
 
 		LLSD& sdPayload = sdEventData["payload"];
 		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
 		sdPayload["up_to_date"] = false;
 		sdPayload["show_ui"] = mShowUserFeedback;
-		sdPayload["required"] = content["required"].asBoolean();
+		sdPayload["required"] = mNewUpdateData["required"].asBoolean();
 		sdPayload["channel"] = mNewChannel;
 		sdPayload["version"] = mNewVersion;
 
@@ -835,8 +833,7 @@ bool LLUpdaterServiceImpl::onMainLoop(LLSD const & event)
 			if ( !query_url.empty() )
 			{
 				mUpdateChecker.checkVersion(query_url, mChannel, mVersion,
-											mPlatform, mPlatformVersion, mUniqueId,
-											mWillingToTest);
+											mPlatform, mPlatformVersion);
 				setState(LLUpdaterService::CHECKING_FOR_UPDATE);
 			}
 			else
@@ -897,12 +894,9 @@ LLUpdaterService::~LLUpdaterService()
 void LLUpdaterService::initialize(const std::string& channel,
 								  const std::string& version,
 								  const std::string& platform,
-								  const std::string& platform_version,
-								  const unsigned char uniqueid[MD5HEX_STR_SIZE],
-								  const bool&         willing_to_test
-)
+								  const std::string& platform_version)
 {
-	mImpl->initialize(channel, version, platform, platform_version, uniqueid, willing_to_test);
+	mImpl->initialize(channel, version, platform, platform_version);
 }
 
 void LLUpdaterService::setCheckPeriod(unsigned int seconds)

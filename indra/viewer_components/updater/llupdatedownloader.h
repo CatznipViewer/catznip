@@ -1,101 +1,98 @@
-/** 
- * @file llupdatedownloader.h
+/**
  *
- * $LicenseInfo:firstyear=2010&license=viewerlgpl$
- * Second Life Viewer Source Code
- * Copyright (C) 2010, Linden Research, Inc.
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * version 2.1 of the License only.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
- * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
- * $/LicenseInfo$
+ * Copyright (c) 2011-2017, Kitty Barnett
+ * Copyright (c) 2010, Linden Research, Inc.
+ *
+ * The source code in this file is provided to you under the terms of the
+ * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
+ * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
+ *
+ * By copying, modifying or distributing this software, you acknowledge that
+ * you have read and understood your obligations described above, and agree to
+ * abide by those obligations.
+ *
  */
 
-#ifndef LL_UPDATE_DOWNLOADER_H
-#define LL_UPDATE_DOWNLOADER_H
+#pragma once
 
+#include "httpcommon.h"
+#include "llthread.h"
+#include <curl/curl.h>
 
-#include <string>
-#include <boost/shared_ptr.hpp>
-#include "lluri.h"
-
-
+// ====================================================================================
+// LLUpdateDownloader - An asynchronous download service for fetching updates
 //
-// An asynchronous download service for fetching updates.
-//
-class LLUpdateDownloader
+
+class LLUpdateDownloader : public LLThread
 {
+	LOG_CLASS(LLUpdateDownloader);
 public:
-	class Client;
-	class Implementation;
-	
-	// Returns the path to the download marker file containing details of the
-	// latest download.
-	static std::string downloadMarkerPath(void);
-	
-	LLUpdateDownloader(Client & client);
-	
-	// Cancel any in progress download; a no op if none is in progress.  The
-	// client will not receive a complete or error callback.
+	class Client {
+	public:
+		// The download has completed successfully
+		virtual void downloadComplete(LLSD const & data) = 0;
+		// The download failed
+		virtual void downloadError(std::string const & message) = 0;
+	};
+
+	LLUpdateDownloader(Client& client);
+	~LLUpdateDownloader() override;
+
+	/*
+	 * LLThread overrides
+	 */
+protected:
+	void run() override;
+
+	/*
+	 * Member functions
+	 */
+public:
+	// Cancel any in progress download; a no op if none is in progress (The client will not receive a complete or error callback)
 	void cancel(void);
-	
-	// Start a new download.
-//	void download(LLURI const & uri,
-//				  std::string const & hash, 
-//				  std::string const & updateChannel,
-//				  std::string const & updateVersion,
-//				  std::string const & info_url,
-//				  bool required=false);
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
+	// Start a new download
 	void download(const LLSD& sdUpdateData);
-
-	const LLSD& getDownloadData() const;
-// [/SL:KB]
-	
-	// Returns true if a download is in progress.
-	bool isDownloading(void);
-	
-	// Resume a partial download.
+	const LLSD& getDownloadData() const { return mDownloadData; }
+	// Returns true if a download is in progress
+	bool isDownloading(void) const { return !isStopped(); }
+	// Resume a partial download
 	void resume(void);
-	
-	// Set a limit on the dowload rate.
+	// Set a limit on the dowload rate
 	void setBandwidthLimit(U64 bytesPerSecond);
-	
-private:
-	boost::shared_ptr<Implementation> mImplementation;
-};
 
+	// Returns the path to the download marker file containing details of the latest download
+	static std::string downloadMarkerPath();
+protected:
+	void initializeCurlGet(const std::string& strUrl, bool processHeader);
+	void startDownloading(const LLURI& updaterUri, const std::string& strUpdaterHash);
+	void resumeDownloading(size_t startByte);
+	void throwOnCurlError(CURLcode code);
+	bool validateDownload(const std::string& filePath);
+	bool validateOrRemove(const std::string& filePath);
 
-//
-// An interface to be implemented by clients initiating a update download.
-//
-class LLUpdateDownloader::Client {
+	/*
+	 * Event handlers
+	 */
 public:
-	
-	// The download has completed successfully.
-	// data is a map containing the following items:
-	// url - source (remote) location
-	// hash - the md5 sum that should match the installer file.
-	// path - destination (local) location
-	// required - boolean indicating if this is a required update.
-	// size - the size of the installer in bytes
-	virtual void downloadComplete(LLSD const & data) = 0;
-	
-	// The download failed.
-	virtual void downloadError(std::string const & message) = 0;
+	size_t onHeader(void* pData, size_t sizeData);
+	size_t onBody(void* pData, size_t sizeData);
+	int    onProgress(curl_off_t downloadSize, curl_off_t bytesDownloaded);
+
+	/*
+	 * Member variables
+	 */
+protected:
+	Client&       mClient;
+	bool          mCancelled;
+	curl_off_t    mBandwidthLimit;
+	LLCore::LLHttp::CURL_ptr mCurl;
+	curl_slist*   mHeaderList;
+	LLSD          mDownloadData;
+	std::string   mDownloadRecordPath;
+	llofstream    mDownloadStream;
+	unsigned char mDownloadPercent;
 };
 
-
-#endif
+// ====================================================================================
