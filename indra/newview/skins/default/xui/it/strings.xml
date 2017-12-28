@@ -205,7 +205,7 @@ Versione Server voice: [VOICE_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Il viewer utilizzato non è più in grado di accedere a Second Life. Visita la parina seguente per scaricare un nuovo viewer:
-http://catznip.com/downloads/.
+https://get.catznip.com.
 
 Per maggiori informazioni, consulta le domande frequenti alla pagina seguente:
 http://secondlife.com/viewer-access-faq

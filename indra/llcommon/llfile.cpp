@@ -331,7 +331,7 @@ bool LLFile::isfile(const std::string& filename)
 	return stat(filename, &st) == 0 && S_ISREG(st.st_mode);
 }
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.6
 time_t LLFile::getModifiedTime(const std::string& filename)
 {
 	llstat fileStat;

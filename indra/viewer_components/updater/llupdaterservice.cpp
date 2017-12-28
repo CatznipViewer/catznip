@@ -57,7 +57,7 @@ namespace
 	boost::weak_ptr<LLUpdaterServiceImpl> gUpdater;
 
 //	const std::string UPDATE_MARKER_FILENAME("SecondLifeUpdateReady.xml");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.7
 	const std::string UPDATE_MARKER_FILENAME("CatznipUpdateReady.xml");
 // [/SL:KB]
 	std::string update_marker_path()

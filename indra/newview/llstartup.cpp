@@ -941,7 +941,7 @@ bool idle_startup()
 		
 		// Overwrite default user settings with user settings								 
 		LLAppViewer::instance()->loadSettingsFromDirectory("Account");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznîp-3.3
 		if (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
 		{
 			// Temporary fix

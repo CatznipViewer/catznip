@@ -324,7 +324,7 @@ int LLCrashLoggerWindows::processingLoop() {
     LL_INFOS() << "session ending.." << LL_ENDL;
     
     std::string per_run_dir = options["dumpdir"].asString();
-// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+// [SL:KB] Patch: Viewer-Branding | Checked: Catznip-3.7
 	std::string per_run_file = per_run_dir + "\\Catznip.log";
 	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"Catznip.log");
 // [/SL:KB]

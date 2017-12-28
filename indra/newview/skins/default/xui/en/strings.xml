@@ -117,7 +117,7 @@ Voice Server Version: [VOICE_VERSION]
 	<string name="ViewerDownloadURL">http://secondlife.com/download</string>
 	<string name="LoginFailedViewerNotPermitted">
 The viewer you are using can no longer access Second Life. Please visit the following page to download a new viewer:
-http://catznip.com/downloads/
+https://get.catznip.com
 
 For more information, see our FAQ below:
 http://secondlife.com/viewer-access-faq</string>

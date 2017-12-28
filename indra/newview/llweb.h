@@ -49,7 +49,7 @@ public:
 
 	static void initClass();
 	
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.3
 	// We need a unique name because std::string implicitly casts to LLSD and confuses the compiler
 	static void openURL(const LLSD& sdData);
 	static void openURLExternal(const LLSD& sdData);

@@ -131,7 +131,7 @@ BOOL LLFloaterAbout::postBuild()
 	LLViewerTextEditor *support_widget = 
 		getChild<LLViewerTextEditor>("support_editor", true);
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 	LLViewerTextEditor *thanks_names_widget = 
 		getChild<LLViewerTextEditor>("catznip_thanks_names", true);
 // [/SL:KB]
@@ -169,7 +169,7 @@ BOOL LLFloaterAbout::postBuild()
 	support_widget->startOfDoc();
 
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 	// Get the names of people to thank, extracted from .../doc/thanks.txt by viewer_manifest.py at build time
 	std::string thanks_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "thanks.txt");
 	llifstream thank_file;

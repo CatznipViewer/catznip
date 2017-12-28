@@ -558,10 +558,8 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
 	if (timestamp != 0)
 	{
-		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
-		check_curl_easy_code(code, CURLOPT_TIMECONDITION);
-		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMEVALUE, (long)timestamp);
-		check_curl_easy_code(code, CURLOPT_TIMEVALUE);
+		check_curl_easy_setopt(mCurlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+		check_curl_easy_setopt(mCurlHandle, CURLOPT_TIMEVALUE, (long)timestamp);
 	}
 // [/SL:KB]
 

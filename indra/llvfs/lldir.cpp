@@ -409,8 +409,12 @@ std::string LLDir::buildSLOSCacheDir() const
 	}
 	else
 	{
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-03-17 (Catznip-3.4)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.4
+#if ADDRESS_SIZE == 64
+		res = add(getOSCacheDir(), "Catznip64");
+#else
 		res = add(getOSCacheDir(), "Catznip");
+#endif
 // [/SL:KB]
 //		res = add(getOSCacheDir(), "SecondLife");
 	}

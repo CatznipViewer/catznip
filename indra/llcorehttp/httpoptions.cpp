@@ -70,7 +70,6 @@ void HttpOptions::setIfModifiedSince(const time_t& timestamp)
 }
 // [/SL:KB]
 
-
 void HttpOptions::setTrace(long level)
 {
 	mTracing = int(level);

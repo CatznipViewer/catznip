@@ -1373,7 +1373,7 @@ if (DARWIN)
     catznip.icns
     macview.r
     Info-SecondLife.plist
-    SecondLife.xib/
+    Catznip.xib/
     # CMake doesn't seem to support Xcode language variants well just yet
     English.lproj/InfoPlist.strings
     English.lproj/language.txt
@@ -2059,12 +2059,12 @@ if (DARWIN)
   set(MACOSX_WRAPPER_EXECUTABLE_NAME "SL_Launcher")
   set(MACOSX_BUNDLE_INFO_STRING "Catznip Viewer")
   set(MACOSX_BUNDLE_ICON_FILE "catznip.icns")
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.secondlife.indra.viewer")
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.catznip.indra.viewer")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${VIEWER_CHANNEL} ${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_NAME "Catznip")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2013, portions by Kitty Barnett, portions by Linden Research, Inc")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2018, portions by Kitty Barnett, portions by Linden Research, Inc")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "Catznip.nib")
   set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
   

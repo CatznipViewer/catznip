@@ -370,7 +370,7 @@ BOOL gLogoutInProgress = FALSE;
 // Internal globals... that should be removed.
 static std::string gArgs;
 const int MAX_MARKER_LENGTH = 1024;
-// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+// [SL:KB] Patch: Viewer-Branding | Checked: Catznip-3.7
 const std::string MARKER_FILE_NAME("Catznip.exec_marker");
 const std::string START_MARKER_FILE_NAME("Catznip.start_marker");
 const std::string ERROR_MARKER_FILE_NAME("Catznip.error_marker");
@@ -728,7 +728,7 @@ LLAppViewer::LLAppViewer()
 
 	// Need to do this initialization before we do anything else, since anything
 	// that touches files should really go through the lldir API
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.4
 	gDirUtilp->initAppDirs("Catznip");
 // [/SL:KB]
 //	gDirUtilp->initAppDirs("SecondLife");
@@ -2352,7 +2352,7 @@ void LLAppViewer::initLoggingAndGetLastDuration()
 	//LLError::setTimeFunction(getRuntime);
 
 	// Remove the last ".old" log file.
-// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+// [SL:KB] Patch: Viewer-Branding | Checked: Catznip-3.7
 	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.old");
 // [/SL:KB]
 //	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
@@ -2360,7 +2360,7 @@ void LLAppViewer::initLoggingAndGetLastDuration()
 	LLFile::remove(old_log_file);
 
 	// Get name of the log file
-// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+// [SL:KB] Patch: Viewer-Branding | Checked: Catznip-3.7
 	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.log");
 // [/SL:KB]
 //	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
@@ -2583,7 +2583,7 @@ bool LLAppViewer::initConfiguration()
 	initStrings(); // setup paths for LLTrans based on settings files only
 	// - set procedural settings
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.6
 	std::string strSettingsFile = gSavedSettings.getString("ClientSettingsFileOverride");
 	if (strSettingsFile.empty())
 		strSettingsFile = getSettingsFilename("Default", "Global");
@@ -2694,14 +2694,14 @@ bool LLAppViewer::initConfiguration()
 	}
 	loadSettingsFromDirectory("UserSession");
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznîp-3.3
 	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
 	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
 	{
 		// setings.xml
 		{
 			const char* pstrSettings[] =
-				{ 
+				{
 					"MeshMaxConcurrentRequests"
 				};
 			for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
@@ -2717,7 +2717,7 @@ bool LLAppViewer::initConfiguration()
 		// settings_crash_behavior.xml
 		{
 			const char* pstrDbgSettings[] =
-				{ 
+				{
 					"CrashSubmitBehavior",
 					"CrashSubmitName",
 					"CrashSubmitSettings"
@@ -3569,7 +3569,7 @@ LLSD LLAppViewer::getViewerInfo() const
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;

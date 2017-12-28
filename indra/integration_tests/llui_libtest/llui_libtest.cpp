@@ -115,7 +115,7 @@ void init_llui()
 #else
 	const char* newview_path = "../../../newview";
 #endif
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-07-18 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.6
 	gDirUtilp->initAppDirs("Catznip", newview_path);
 // [/SL:KB]
 //	gDirUtilp->initAppDirs("SecondLife", newview_path);

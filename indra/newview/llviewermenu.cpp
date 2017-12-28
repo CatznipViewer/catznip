@@ -78,7 +78,7 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.1
 #include "llgroupactions.h"
 // [/SL:KB]
 #include "lltooltip.h"
@@ -6371,7 +6371,7 @@ class LLPromptShowURL : public view_listener_t
 			std::string alert = param.substr(0, offset);
 			std::string url = param.substr(offset+1);
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.3
 			LLWeb::openURL(LLSD().with("url", url).with("notification", alert));
 // [/SL:KB]
 //			if (LLWeb::useExternalBrowser(url))
@@ -6495,7 +6495,7 @@ class LLToggleAgentProfile : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.1
 void handle_show_support_group()
 {
 	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
@@ -9195,7 +9195,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
 	view_listener_t::addMenu(new LLToggleSpeak(), "ToggleSpeak");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.1
 	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
 // [/SL:KB]
 
