@@ -46,8 +46,8 @@
 
 // These need to be localized.
 static const char dialog_text[] =
-"Second Life appears to have crashed or frozen last time it ran.\n"
-"This crash reporter collects information about your computer's hardware, operating system, and some Second Life logs, all of which are used for debugging purposes only.\n"
+"Catznip appears to have crashed or frozen last time it ran.\n"
+"This crash reporter collects information about your computer's hardware, operating system, and some Catznip logs, all of which are used for debugging purposes only.\n"
 "\n"
 "Send crash report?";
 
