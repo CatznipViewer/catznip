@@ -89,7 +89,7 @@ const F32 SKEW_MAX	=  0.95f;
 const F32 SCULPT_MIN_AREA = 0.002f;
 const S32 SCULPT_MIN_AREA_DETAIL = 1;
 
-extern BOOL gDebugGL;
+BOOL gDebugGL = FALSE;
 
 BOOL check_same_clock_dir( const LLVector3& pt1, const LLVector3& pt2, const LLVector3& pt3, const LLVector3& norm)
 {    
@@ -2032,13 +2032,8 @@ void LLPathParams::copyParams(const LLPathParams &params)
 	setSkew(params.getSkew());
 }
 
-S32 profile_delete_lock = 1 ; 
 LLProfile::~LLProfile()
 {
-	if(profile_delete_lock)
-	{
-		LL_ERRS() << "LLProfile should not be deleted here!" << LL_ENDL ;
-	}
 }
 
 
@@ -2103,9 +2098,7 @@ LLVolume::~LLVolume()
 	sNumMeshPoints -= mMesh.size();
 	delete mPathp;
 
-	profile_delete_lock = 0 ;
 	delete mProfilep;
-	profile_delete_lock = 1 ;
 
 	mPathp = NULL;
 	mProfilep = NULL;
@@ -5311,19 +5304,31 @@ void LLVolumeFace::cacheOptimize()
 	S32 num_verts = mNumVertices;
 	S32 size = ((num_verts*sizeof(LLVector2)) + 0xF) & ~0xF;
 	LLVector4a* pos = (LLVector4a*) ll_aligned_malloc<64>(sizeof(LLVector4a)*2*num_verts+size);
+	if (pos == NULL)
+	{
+		LL_ERRS("LLVOLUME") << "Allocation of positions vector[" << sizeof(LLVector4a) * 2 * num_verts + size  << "] failed. " << LL_ENDL;
+	}
 	LLVector4a* norm = pos + num_verts;
 	LLVector2* tc = (LLVector2*) (norm + num_verts);
 
 	LLVector4a* wght = NULL;
 	if (mWeights)
 	{
-		wght = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		wght = (LLVector4a*)ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		if (wght == NULL)
+		{
+			LL_ERRS("LLVOLUME") << "Allocation of weights[" << sizeof(LLVector4a) * num_verts << "] failed" << LL_ENDL;
+		}
 	}
 
 	LLVector4a* binorm = NULL;
 	if (mTangents)
 	{
 		binorm = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		if (binorm == NULL)
+		{
+			LL_ERRS("LLVOLUME") << "Allocation of binormals[" << sizeof(LLVector4a)*num_verts << "] failed" << LL_ENDL;
+		}
 	}
 
 	//allocate mapping of old indices to new indices
