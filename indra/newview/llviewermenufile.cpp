@@ -47,6 +47,9 @@
 #include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
 #include "llfloaterperms.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+#include "llsnapshotlivepreview.h"
+// [/SL:KB]
 #include "llstatusbar.h"
 #include "llviewercontrol.h"	// gSavedSettings
 #include "llviewertexturelist.h"
@@ -702,7 +705,7 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 			gViewerWindow->saveImage(formatted, NULL, false);
 // [/SL:KB]
-//			gViewerWindow->saveImageNumbered(formatted);
+//			LLSnapshotLivePreview::saveLocal(formatted);
 		}
 		return true;
 	}
@@ -953,7 +956,7 @@ void upload_new_resource(
 //     uploadInfo->setTransactionId(tid);
 
 
-	std::string url = gAgent.getRegion()->getCapability("NewFileAgentInventory");
+	std::string url = gAgent.getRegionCapability("NewFileAgentInventory");
 
 	if ( !url.empty() )
 	{

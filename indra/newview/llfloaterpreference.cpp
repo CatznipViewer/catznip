@@ -424,6 +424,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this, _2));
 // [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6)
 	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
+	mCommitCallbackRegistrar.add("Pref.ResetUIScale",		boost::bind(&LLFloaterPreference::onResetUIScale, this));
 // [/SL:KB]
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
@@ -439,7 +440,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
 	mCommitCallbackRegistrar.add("Pref.RenderExceptions",       boost::bind(&LLFloaterPreference::onClickRenderExceptions, this));
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
@@ -704,6 +705,12 @@ void LLFloaterPreference::showPanel(const std::string& strPanel)
 void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
 {
 	showPanel(sdParam.asString());
+}
+
+void LLFloaterPreference::onResetUIScale() const
+{
+	gSavedSettings.setF32("UIScaleFactor", 1.0);
+	gViewerWindow->requestResolutionUpdate();
 }
 // [/SL:KB]
 
@@ -1080,7 +1087,10 @@ void LLFloaterPreference::getControlNames(std::vector<std::string>& names)
 			if (ctrl)
 			{
 				LLControlVariable* control = ctrl->getControlVariable();
-				if (control)
+//				if (control)
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+				if ( (control) && (!control->isExcludedFromPreset()) )
+// [/SL:KB]
 				{
 					std::string control_name = control->getName();
 					if (std::find(names.begin(), names.end(), control_name) == names.end())
@@ -1221,12 +1231,12 @@ void LLFloaterPreference::onBtnCancel(const LLSD& userdata)
 }
 
 // static 
-void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance)
 	{
-		instance->setPersonalInfo(visibility, im_via_email);	
+        instance->setPersonalInfo(visibility, im_via_email, is_verified_email);
 	}
 }
 
@@ -1583,7 +1593,10 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	// Hardware settings
 	F32 mem_multiplier = gSavedSettings.getF32("RenderTextureMemoryMultiple");
 	S32Megabytes min_tex_mem = LLViewerTextureList::getMinVideoRamSetting();
-	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(false, mem_multiplier);
+// [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.3
+	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(true, mem_multiplier);
+// [/SL:DP]
+//	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(false, mem_multiplier);
 	getChild<LLSliderCtrl>("GraphicsCardTextureMemory")->setMinValue(min_tex_mem.value());
 	getChild<LLSliderCtrl>("GraphicsCardTextureMemory")->setMaxValue(max_tex_mem.value());
 
@@ -2008,11 +2021,11 @@ void LLFloaterPreference::onClickLogPath()
 }
 }
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 void LLFloaterPreference::onClickSnapshotPath()
 {
-	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
-	
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));
+
 	LLDirPicker& picker = LLDirPicker::instance();
 	if (!picker.getDir(&proposed_name))
 	{
@@ -2088,7 +2101,7 @@ bool LLFloaterPreference::moveTranscriptsAndLog()
 	return true;
 }
 
-void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	mGotPersonalInfo = true;
 	mOriginalIMViaEmail = im_via_email;
@@ -2113,8 +2126,16 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChildView("friends_online_notify_checkbox")->setEnabled(TRUE);
 	getChild<LLUICtrl>("online_visibility")->setValue(mOriginalHideOnlineStatus); 	 
 	getChild<LLUICtrl>("online_visibility")->setLabelArg("[DIR_VIS]", mDirectoryVisibility);
-	getChildView("send_im_to_email")->setEnabled(TRUE);
-	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
+	getChildView("send_im_to_email")->setEnabled(is_verified_email);
+
+    std::string tooltip;
+    if (!is_verified_email)
+        tooltip = getString("email_unverified_tooltip");
+
+    getChildView("send_im_to_email")->setToolTip(tooltip);
+
+    // *TODO: Show or hide verify email text here based on is_verified_email
+    getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
 // [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)

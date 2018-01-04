@@ -156,8 +156,7 @@ support@secondlife.com.</string>
 	<string name="LoginFailedAcountSuspended">Your account is not accessible until
 [TIME] Pacific Time.</string>
 	<string name="LoginFailedAccountDisabled">We are unable to complete your request at this time.
-Please contact Second Life support for assistance at http://secondlife.com/support.
-If you are unable to change your password, please call (866) 476-9763.</string>
+Please contact Second Life support for assistance at http://support.secondlife.com.</string>
 	<string name="LoginFailedTransformError">Data inconsistency found during login.
 Please contact support@secondlife.com.</string>
 	<string name="LoginFailedAccountMaintenance">Your account is undergoing minor maintenance.
@@ -2307,6 +2306,7 @@ For AI Character: Get the closest navigable point to the point provided.
 
 	<!-- inventory -->
 	<string name="InventoryNoMatchingItems">Didn't find what you're looking for? Try [secondlife:///app/search/all/[SEARCH_TERM] Search].</string>
+	<string name="InventoryNoMatchingRecentItems">Didn't find what you're looking for? Try [secondlife:///app/inventory/filters Show filters].</string>
 	<string name="PlacesNoMatchingItems">Didn't find what you're looking for? Try [secondlife:///app/search/places/[SEARCH_TERM] Search].</string>
 	<string name="FavoritesNoMatchingItems">Drag a landmark here to add it to your favorites.</string>
 	<string name="MarketplaceNoMatchingItems">No items found. Check the spelling of your search string and try again.</string>
@@ -3965,6 +3965,7 @@ Please check http://status.secondlifegrid.net to see if there is a known problem
   <string name="DeleteItems">Delete selected items?</string>
   <string name="DeleteItem">Delete selected item?</string>
 
+  <string name="EmptyCategoryText">There are no items in this folder</string>
   <string name="EmptyOutfitText">There are no items in this outfit</string>
   <string name="SaveOutfit">Save</string>
   <string name="SaveOutfitAs">Save As...</string>

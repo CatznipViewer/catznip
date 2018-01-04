@@ -102,6 +102,10 @@ static LLChatTypeTrigger sChatTypeTriggers[] = {
 	{ "/shout"	, CHAT_TYPE_SHOUT}
 };
 
+bool cb_do_nothing()
+{
+	return false;
+}
 
 LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 :	LLFloaterIMSessionTab(LLSD(LLUUID::null)),
@@ -118,6 +122,12 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 // [SL:KB] - Patch: Chat-NearbyChat | Checked: 2014-02-02 (Catznip-3.6)
 	mVisibilityControl = "t";
 // [/SL:KB]
+
+	// Required by LLFloaterIMSessionTab::mGearBtn
+	// But nearby floater has no 'per agent' menu items, 
+	mEnableCallbackRegistrar.add("Avatar.EnableGearItem", boost::bind(&cb_do_nothing));
+	mCommitCallbackRegistrar.add("Avatar.GearDoToSelected", boost::bind(&cb_do_nothing));
+	mEnableCallbackRegistrar.add("Avatar.CheckGearItem", boost::bind(&cb_do_nothing));
 }
 
 // [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
@@ -137,6 +147,16 @@ LLFloaterIMNearbyChat* LLFloaterIMNearbyChat::buildFloater(const LLSD& key)
 //virtual
 BOOL LLFloaterIMNearbyChat::postBuild()
 {
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+	if (mIsNearbyChat)
+	{
+		mExtendedButtonPanel = getChild<LLPanel>("nearby_toolbar");
+		mExtendedButtonPanel->setVisible(true);
+
+		mExtendedButtonPanel->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterReg::showInstance, "preview_conversation", LLUUID::null, true));
+	}
+// [/SL:KB]
+
     setIsSingleInstance(TRUE);
     BOOL result = LLFloaterIMSessionTab::postBuild();
 
@@ -572,7 +592,10 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 
 	S32 length = raw_text.length();
 
-	if( (length > 0) && (raw_text[0] != '/') )  // forward slash is used for escape (eg. emote) sequences
+//	if( (length > 0) && (raw_text[0] != '/') )  // forward slash is used for escape (eg. emote) sequences
+// [RLVa:KB] - Checked: 2010-03-26 (RLVa-1.2.0b) | Modified: RLVa-1.0.0d
+	if ( (length > 0) && (raw_text[0] != '/') && (!RlvActions::hasBehaviour(RLV_BHVR_REDIRCHAT)) )
+// [/RLVa:KB]
 	{
 		gAgent.startTyping();
 	}
@@ -839,6 +862,15 @@ void LLFloaterIMNearbyChat::sendChatFromViewer(const LLWString &wtext, EChatType
 	{
 		utf8_text = utf8str_truncate(utf8_text, MAX_STRING - 1);
 	}
+
+// [RLVa:KB] - Checked: 2010-03-27 (RLVa-1.2.0b) | Modified: RLVa-1.2.0b
+	if ( (0 == channel) && (RlvActions::isRlvEnabled()) )
+	{
+		// Adjust the (public) chat "volume" on chat and gestures (also takes care of playing the proper animation)
+		type = RlvActions::checkChatVolume(type);
+		animate &= !RlvActions::hasBehaviour( (!RlvUtil::isEmote(utf8_text)) ? RLV_BHVR_REDIRCHAT : RLV_BHVR_REDIREMOTE );
+	}
+// [/RLVa:KB]
 
 	// Don't animate for chats people can't hear (chat to scripts)
 	if (animate && (channel == 0))

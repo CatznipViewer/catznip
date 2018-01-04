@@ -1087,6 +1087,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>FramePerSecondLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Controls upper limit of frames per second</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>120</integer>
+    </map>
     <key>AxisAtRootEnabled</key>
     <map>
       <key>Comment</key>
@@ -5131,7 +5142,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://search.secondlife.com/viewer/[CATEGORY]/?q=[QUERY]&amp;p=[AUTH_TOKEN]&amp;r=[MATURITY]&amp;lang=[LANGUAGE]&amp;g=[GODLIKE]&amp;sid=[SESSION_ID]&amp;rid=[REGION_ID]&amp;pid=[PARCEL_ID]&amp;channel=[CHANNEL]&amp;version=[VERSION]&amp;major=[VERSION_MAJOR]&amp;minor=[VERSION_MINOR]&amp;patch=[VERSION_PATCH]&amp;build=[VERSION_BUILD]</string>
+      <string>https://search.[GRID]/viewer/[CATEGORY]/?q=[QUERY]&amp;p=[AUTH_TOKEN]&amp;r=[MATURITY]&amp;lang=[LANGUAGE]&amp;g=[GODLIKE]&amp;sid=[SESSION_ID]&amp;rid=[REGION_ID]&amp;pid=[PARCEL_ID]&amp;channel=[CHANNEL]&amp;version=[VERSION]&amp;major=[VERSION_MAJOR]&amp;minor=[VERSION_MINOR]&amp;patch=[VERSION_PATCH]&amp;build=[VERSION_BUILD]</string>
     </map>
     <key>HighResSnapshot</key>
     <map>
@@ -6375,12 +6386,12 @@
     <key>Type</key>
     <string>F32</string>
     <key>Value</key>
-    <real>10.0</real>
+    <real>40.0</real>
   </map>
   <key>LoginSRVPump</key>
   <map>
     <key>Comment</key>
-    <string>Name of the message pump that handles SRV request</string>
+    <string>Name of the message pump that handles SRV request (deprecated)</string>
     <key>Persist</key>
     <integer>0</integer>
     <key>Type</key>
@@ -9064,6 +9075,50 @@
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>QuickPrefsInventoryFolder</key>
+    <map>
+      <key>Comment</key>
+      <string>Inventory folder to show when opening the quick preference inventory tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>QuickPrefsInventorySort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>QuickPrefsWearingSort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent; appearance: 10; complexity: 11)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
+    <key>QuickPrefsTab</key>
+    <map>
+      <key>Comment</key>
+      <string>Last selected quick preferences tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
       <key>Value</key>
       <integer>0</integer>
     </map>
@@ -13562,10 +13617,25 @@
       <string>Amount of memory to use for textures in MB (0 = autodetect)</string>
       <key>Persist</key>
       <integer>1</integer>
+      <key>ExcludeFromPreset</key>
+      <boolean>1</boolean>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>TextureMemoryRatio</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the amount of total video memory that will be use for textures by the viewer.)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>ExcludeFromPreset</key>
+      <boolean>1</boolean>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <integer>3</integer>
     </map>
     <key>TextureNewByteRange</key>
     <map>
@@ -13708,7 +13778,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>quickprefs</string>
+      <string>quickprefs,gridstatus</string>
     </map>
     <key>ToolboxAutoMove</key>
     <map>
@@ -15490,7 +15560,18 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+      <string>https://api.catznip.com/v1.0/viewer/config/[CHANNEL]/[VERSION]/[PLATFORM]</string>
+    </map>
+    <key>ViewerLoginURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer login page</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
     </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
@@ -15579,6 +15660,17 @@
       <string>U32</string>
       <key>Value</key>
       <integer>44125</integer>
+    </map>
+    <key>ConferencesFriendsOnly</key>
+    <map>
+      <key>Comment</key>
+      <string>Only accept conferences from residents on your friends list</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>VoiceCallsFriendsOnly</key>
     <map>
@@ -16273,6 +16365,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>AssetStorageLogFrequency</key>
+        <map>
+        <key>Comment</key>
+        <string>Seconds between display of AssetStorage info in log (0 for never)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>F32</string>
+        <key>Value</key>
+        <real>60.0</real>
+        </map>
     <key>LogWearableAssetSave</key>
     <map>
       <key>Comment</key>
@@ -16345,6 +16448,15 @@
             <string>U32</string>
         <key>Value</key>
             <real>1</real>
+        </map>
+    <key>PoolSizeAssetStorage</key>
+        <map>
+        <key>Comment</key>
+            <string>Coroutine Pool size for AssetStorage requests</string>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <real>12</real>
         </map>
 
     <!-- Settings below are for back compatibility only.
@@ -16456,6 +16568,17 @@
       <string>S32</string>
       <key>Value</key>
       <integer>180</integer>
+    </map>
+    <key>OutfitSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies sort key for inventory items (+0 = name, +1 = date)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>HeightUnits</key>
     <map>

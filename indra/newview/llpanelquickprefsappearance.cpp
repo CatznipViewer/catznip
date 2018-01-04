@@ -29,7 +29,14 @@
 #include "llnotificationtemplate.h"
 #include "llvoavatarself.h"
 
+// Inventory panel
+#include "llcategoryitemslist.h"
+#ifdef CATZNIP
+#include "llfloaterofferinvfolderbrowse.h"
+#endif // CATZNIP
+
 // Wearing panel
+#include "llfiltereditor.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
@@ -219,6 +226,128 @@ void LLQuickPrefsAppearancePanel::onShowNotificationsToggle()
 }
 
 // ====================================================================================
+// LLQuickPrefsInventoryPanel class
+//
+
+static LLPanelInjector<LLQuickPrefsInventoryPanel> t_quickprefs_inventory("quickprefs_inventory");
+
+LLQuickPrefsInventoryPanel::LLQuickPrefsInventoryPanel()
+	: LLQuickPrefsPanel()
+{
+	mCommitCallbackRegistrar.add("Inventory.Sort", boost::bind(&LLQuickPrefsInventoryPanel::onSortOrderChanged, this, _2));
+	mEnableCallbackRegistrar.add("Inventory.CheckSort", boost::bind(&LLQuickPrefsInventoryPanel::onSortOrderCheck, this, _2));
+}
+
+LLQuickPrefsInventoryPanel::~LLQuickPrefsInventoryPanel()
+{
+	if (LLFloater* pBrowseFloater = m_BrowseFloaterHandle.get())
+		pBrowseFloater->closeFloater();
+	m_BrowseFloaterHandle.markDead();
+}
+
+// virtual
+BOOL LLQuickPrefsInventoryPanel::postBuild()
+{
+	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
+	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFilterEdit, this, _2));
+
+	m_pItemsList = findChild<LLCategoryItemsList>("items_list");
+	m_pItemsList->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFolderChanged, this));
+
+	m_pFolderBrowseBtn = findChild<LLButton>("inv_folder_btn");
+	m_pFolderBrowseBtn->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onBrowseFolder, this));
+
+	return LLQuickPrefsPanel::postBuild();
+}
+
+// virtual
+void LLQuickPrefsInventoryPanel::onVisibilityChange(BOOL fVisible)
+{
+	if (fVisible)
+	{
+		if (!isInitialized())
+		{
+			m_pItemsList->setFolderId(LLUUID(gSavedSettings.getString("QuickPrefsInventoryFolder")));
+			onFolderChanged();
+
+			setInitialized();
+		}
+	}
+}
+
+void LLQuickPrefsInventoryPanel::onBrowseFolder()
+{
+#ifdef CATZNIP
+	if (!m_BrowseFloaterHandle.isDead())
+		return;
+
+	if (LLFloater* pBrowseFloater = new LLFloaterInventoryOfferFolderBrowse())
+	{
+		pBrowseFloater->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onBrowseFolderCb, this, _2));
+		pBrowseFloater->openFloater(LLSD().with("folder_id", m_pItemsList->getFolderId()));
+
+		m_BrowseFloaterHandle = pBrowseFloater->getHandle();
+	}
+#endif // CATZNIP
+}
+
+void LLQuickPrefsInventoryPanel::onBrowseFolderCb(const LLSD& sdData)
+{
+	m_pItemsList->setFolderId(sdData["uuid"].asUUID());
+}
+
+void LLQuickPrefsInventoryPanel::onFilterEdit(std::string strFilter)
+{
+	LLStringUtil::toUpper(strFilter);
+	LLStringUtil::trimHead(strFilter);
+
+	if (strFilter != m_pItemsList->getFilterSubString())
+	{
+		m_pItemsList->setFilterSubString(strFilter);
+	}
+}
+
+void LLQuickPrefsInventoryPanel::onFolderChanged()
+{
+	const LLUUID& idFolder = m_pItemsList->getFolderId();
+	if (LLViewerInventoryCategory* pFolder = gInventory.getCategory(idFolder))
+	{
+		LLStringUtil::format_map_t args;
+		args["[NAME]"] = pFolder->getName();
+		m_pFolderBrowseBtn->setLabel(getString("folder_selected_label", args));
+	}
+	else
+	{
+		m_pFolderBrowseBtn->setLabel(getString("folder_select_label"));
+	}
+	gSavedSettings.setString("QuickPrefsInventoryFolder", idFolder.asString());
+}
+
+void LLQuickPrefsInventoryPanel::onSortOrderChanged(const LLSD& sdParam)
+{
+	LLCategoryItemsList::ESortOrder eSortOrder = LLCategoryItemsList::ESortOrder::BY_NAME;
+
+	const std::string strParam = sdParam.asString();
+	if ("name" == strParam)
+		eSortOrder = LLCategoryItemsList::ESortOrder::BY_NAME;
+	else if ("date" == strParam)
+		eSortOrder = LLCategoryItemsList::ESortOrder::BY_MOST_RECENT;
+
+	m_pItemsList->setSortOrder(eSortOrder);
+	gSavedSettings.setU32("QuickPrefsInventorySort", (int)eSortOrder);
+}
+
+bool LLQuickPrefsInventoryPanel::onSortOrderCheck(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("name" == strParam)
+		return LLCategoryItemsList::ESortOrder::BY_NAME == m_pItemsList->getSortOrder();
+	else if ("date" == strParam)
+		return LLCategoryItemsList::ESortOrder::BY_MOST_RECENT == m_pItemsList->getSortOrder();
+	return false;
+}
+
+// ====================================================================================
 // LLQuickPrefsWearingPanel class
 //
 
@@ -227,6 +356,9 @@ static LLPanelInjector<LLQuickPrefsWearingPanel> t_quickprefs_wearing("quickpref
 LLQuickPrefsWearingPanel::LLQuickPrefsWearingPanel()
 	: LLQuickPrefsPanel()
 {
+	mCommitCallbackRegistrar.add("Inventory.Sort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderChanged, this, _2));
+	mEnableCallbackRegistrar.add("Inventory.CheckSort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderCheck, this, _2));
+
 	m_pCofObserver = new LLInventoryCategoriesObserver();
 }
 
@@ -244,10 +376,56 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 	if (m_idCOF.isNull())
 		m_idCOF = gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
 
+	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
+	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onFilterEdit, this, _2));
+
 	m_pWornItemsList = getChild<LLWornItemsList>("cof_items_list");
-	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
+	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("QuickPrefsWearingSort"));
 
 	return LLQuickPrefsPanel::postBuild();
+}
+
+void LLQuickPrefsWearingPanel::onFilterEdit(std::string strFilter)
+{
+	LLStringUtil::toUpper(strFilter);
+	LLStringUtil::trimHead(strFilter);
+
+	if (strFilter != m_pWornItemsList->getFilterSubString())
+	{
+		m_pWornItemsList->setFilterSubString(strFilter);
+	}
+}
+
+void LLQuickPrefsWearingPanel::onSortOrderChanged(const LLSD& sdParam)
+{
+	LLWearableItemsList::ESortOrder eSortOrder = LLWearableItemsList::E_SORT_BY_APPEARANCE;
+
+	const std::string strParam = sdParam.asString();
+	if ("complexity" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_COMPLEXITY;
+	else if ("appearance" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_APPEARANCE;
+	else if ("name" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_NAME;
+	else if ("date" == strParam)
+		eSortOrder = LLWearableItemsList::E_SORT_BY_MOST_RECENT;
+
+	m_pWornItemsList->setSortOrder(eSortOrder);
+	gSavedSettings.setU32("QuickPrefsWearingSort", (int)eSortOrder);
+}
+
+bool LLQuickPrefsWearingPanel::onSortOrderCheck(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("complexity" == strParam)
+		return LLWearableItemsList::E_SORT_BY_COMPLEXITY == m_pWornItemsList->getSortOrder();
+	else if ("appearance" == strParam)
+		return LLWearableItemsList::E_SORT_BY_APPEARANCE == m_pWornItemsList->getSortOrder();
+	else if ("name" == strParam)
+		return LLWearableItemsList::E_SORT_BY_NAME == m_pWornItemsList->getSortOrder();
+	else if ("date" == strParam)
+		return LLWearableItemsList::E_SORT_BY_MOST_RECENT == m_pWornItemsList->getSortOrder();
+	return false;
 }
 
 // virtual

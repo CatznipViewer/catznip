@@ -3706,6 +3706,20 @@ U32 LLVOVolume::getHighLODTriangleCount()
 	return ret;
 }
 
+// [FS:Beq] - Patch: Appearance-RebuildAttachments | Checked: Catznip-5.3
+void LLVOVolume::forceLOD(S32 lod)
+{
+// [SL:KB] - Patch: Appearance-RebuildAttachments | Checked: Catznip-5.3
+	if (mDrawable.isNull())
+		return;
+// [/SL:KB]
+
+	mLOD = lod;
+	gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_VOLUME, FALSE);
+	mLODChanged = true;
+}
+// [/FS]
+
 //static
 void LLVOVolume::preUpdateGeom()
 {
@@ -5684,18 +5698,25 @@ void LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFac
 		}
 
 		//create vertex buffer
-		LLVertexBuffer* buffer = NULL;
+		LLPointer<LLVertexBuffer> buffer;
 
 		{
 			LL_RECORD_BLOCK_TIME(FTM_GEN_DRAW_INFO_ALLOCATE);
 			buffer = createVertexBuffer(mask, buffer_usage);
-			buffer->allocateBuffer(geom_count, index_count, TRUE);
+			if(!buffer->allocateBuffer(geom_count, index_count, TRUE))
+			{
+				LL_WARNS() << "Failed to allocate group Vertex Buffer to "
+					<< geom_count << " vertices and "
+					<< index_count << " indices" << LL_ENDL;
+				buffer = NULL;
+			}
 		}
 
-		group->mGeometryBytes += buffer->getSize() + buffer->getIndicesSize();
-
-
-		buffer_map[mask][*face_iter].push_back(buffer);
+		if (buffer)
+		{
+			group->mGeometryBytes += buffer->getSize() + buffer->getIndicesSize();
+			buffer_map[mask][*face_iter].push_back(buffer);
+		}
 
 		//add face geometry
 
@@ -5703,8 +5724,17 @@ void LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFac
 		U16 index_offset = 0;
 
 		while (face_iter < i)
-		{ //update face indices for new buffer
+		{
+			//update face indices for new buffer
 			facep = *face_iter;
+			if (buffer.isNull())
+			{
+				// Bulk allocation failed
+				facep->setVertexBuffer(buffer);
+				facep->setSize(0, 0); // mark as no geometry
+				++face_iter;
+				continue;
+			}
 			facep->setIndicesIndex(indices_index);
 			facep->setGeomIndex(index_offset);
 			facep->setVertexBuffer(buffer);	
@@ -6029,7 +6059,10 @@ void LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFac
 			++face_iter;
 		}
 
-		buffer->flush();
+		if (buffer)
+		{
+			buffer->flush();
+		}
 	}
 
 	group->mBufferMap[mask].clear();

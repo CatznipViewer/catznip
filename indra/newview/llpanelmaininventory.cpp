@@ -31,6 +31,8 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llavataractions.h"
+//#include "llcheckboxctrl.h"
+//#include "llcombobox.h"
 #include "lldndbutton.h"
 #include "lleconomy.h"
 #include "llfilepicker.h"
@@ -88,6 +90,9 @@ void on_file_loaded_for_save(BOOL success,
 //	BOOL getCheckSinceLogoff();
 //	U32 getDateSearchDirection();
 //
+//	void onCreatorSelfFilterCommit();
+//	void onCreatorOtherFilterCommit();
+//
 //	static void onTimeAgo(LLUICtrl*, void *);
 //	static void onCloseBtn(void* user_data);
 //	static void selectAllTypes(void* user_data);
@@ -96,6 +101,8 @@ void on_file_loaded_for_save(BOOL success,
 //	LLPanelMainInventory*	mPanelMainInventory;
 //	LLSpinCtrl*			mSpinSinceDays;
 //	LLSpinCtrl*			mSpinSinceHours;
+//	LLCheckBoxCtrl*		mCreatorSelf;
+//	LLCheckBoxCtrl*		mCreatorOthers;
 //	LLInventoryFilter*	mFilter;
 //};
 
@@ -106,6 +113,7 @@ void on_file_loaded_for_save(BOOL success,
 LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	: LLPanel(p),
 	  mActivePanel(NULL),
+	  mWornItemsPanel(NULL),
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	  mActivePanelIndex(-1),
 	  mFilterSubStringPerTab(true),
@@ -192,8 +200,27 @@ BOOL LLPanelMainInventory::postBuild()
 		recent_items_panel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
 		LLInventoryFilter& recent_filter = recent_items_panel->getFilter();
 		recent_filter.setFilterObjectTypes(recent_filter.getFilterObjectTypes() & ~(0x1 << LLInventoryType::IT_CATEGORY));
+		recent_filter.setEmptyLookupMessage("InventoryNoMatchingRecentItems");
 		recent_filter.markDefault();
 		recent_items_panel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, recent_items_panel, _1, _2));
+	}
+
+	mWornItemsPanel = getChild<LLInventoryPanel>("Worn Items");
+	if (mWornItemsPanel)
+	{
+		U32 filter_types = 0x0;
+		filter_types |= 0x1 << LLInventoryType::IT_WEARABLE;
+		filter_types |= 0x1 << LLInventoryType::IT_ATTACHMENT;
+		filter_types |= 0x1 << LLInventoryType::IT_OBJECT;
+		mWornItemsPanel->setFilterTypes(filter_types);
+		mWornItemsPanel->setFilterWorn();
+		mWornItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS, true);
+// [/SL:KB]
+//		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
+		mWornItemsPanel->getFilter().markDefault();
+		mWornItemsPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, mWornItemsPanel, _1, _2));
 	}
 
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
@@ -205,6 +232,11 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 // [/SL:KB]
 
+//	mSearchTypeCombo  = getChild<LLComboBox>("search_type");
+//	if(mSearchTypeCombo)
+//	{
+//		mSearchTypeCombo->setCommitCallback(boost::bind(&LLPanelMainInventory::onSelectSearchType, this));
+//	}
 	// Now load the stored settings from disk, if available.
 	std::string filterSaveName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILTERS_FILENAME));
 	LL_INFOS() << "LLPanelMainInventory::init: reading from " << filterSaveName << LL_ENDL;
@@ -333,6 +365,16 @@ LLPanelMainInventory::~LLPanelMainInventory( void )
 		delete mSpareInvPanel;
 	}
 // [/SL:KB]
+}
+
+LLInventoryPanel* LLPanelMainInventory::getAllItemsPanel()
+{
+	return  getChild<LLInventoryPanel>("All Items");
+}
+
+void LLPanelMainInventory::selectAllItemsPanel()
+{
+	mFilterTabs->selectFirstTab();
 }
 
 void LLPanelMainInventory::startSearch()
@@ -615,6 +657,48 @@ void LLPanelMainInventory::shareWithAvatars()
 }
 // [/SL:KB]
 
+//void LLPanelMainInventory::onSelectSearchType()
+//{
+//	std::string new_type = mSearchTypeCombo->getValue();
+//	if (new_type == "search_by_name")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_NAME);
+//	}
+//	if (new_type == "search_by_creator")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_CREATOR);
+//	}
+//	if (new_type == "search_by_description")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_DESCRIPTION);
+//	}
+//	if (new_type == "search_by_UUID")
+//	{
+//		getActivePanel()->setSearchType(LLInventoryFilter::SEARCHTYPE_UUID);
+//	}
+//}
+
+//void LLPanelMainInventory::updateSearchTypeCombo()
+//{
+//	LLInventoryFilter::ESearchType search_type = getActivePanel()->getSearchType();
+//	switch(search_type)
+//	{
+//		case LLInventoryFilter::SEARCHTYPE_CREATOR:
+//			mSearchTypeCombo->setValue("search_by_creator");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_DESCRIPTION:
+//			mSearchTypeCombo->setValue("search_by_description");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_UUID:
+//			mSearchTypeCombo->setValue("search_by_UUID");
+//			break;
+//		case LLInventoryFilter::SEARCHTYPE_NAME:
+//		default:
+//			mSearchTypeCombo->setValue("search_by_name");
+//			break;
+//	}
+//}
+
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
 {
@@ -628,7 +712,7 @@ void LLPanelMainInventory::onClearSearch()
 {
 	BOOL initially_active = FALSE;
 	LLFloater *finder = getFinder();
-	if (mActivePanel)
+	if (mActivePanel && (getActivePanel() != mWornItemsPanel))
 	{
 		initially_active = mActivePanel->getFilter().isNotDefault();
 		mActivePanel->setFilterSubString(LLStringUtil::null);
@@ -817,6 +901,11 @@ void LLPanelMainInventory::onFilterSelected()
 		return;
 	}
 
+	if (getActivePanel() == mWornItemsPanel)
+	{
+		mActivePanel->openAllFolders();
+	}
+//	updateSearchTypeCombo();
 //	setFilterSubString(mFilterSubString);
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
@@ -890,7 +979,7 @@ BOOL LLPanelMainInventory::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 {
 //	// Check to see if we are auto scrolling from the last frame
 //	LLInventoryPanel* panel = (LLInventoryPanel*)this->getActivePanel();
-//	BOOL needsToScroll = panel->getScrollableContainer()->autoScroll(x, y);
+//	BOOL needsToScroll = panel->getScrollableContainer()->canAutoScroll(x, y);
 //	if(mFilterTabs)
 //	{
 //		if(needsToScroll)
@@ -1114,6 +1203,11 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //	mSpinSinceDays = getChild<LLSpinCtrl>("spin_days_ago");
 //	childSetCommitCallback("spin_days_ago", onTimeAgo, this);
 //
+//	mCreatorSelf = getChild<LLCheckBoxCtrl>("check_created_by_me");
+//	mCreatorOthers = getChild<LLCheckBoxCtrl>("check_created_by_others");
+//	mCreatorSelf->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onCreatorSelfFilterCommit, this));
+//	mCreatorOthers->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onCreatorOtherFilterCommit, this));
+//
 //	childSetAction("Close", onCloseBtn, this);
 //
 //	updateElementsFromFilter();
@@ -1153,7 +1247,7 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //		}
 //	}
 //}
-//
+
 //void LLFloaterInventoryFinder::changeFilter(LLInventoryFilter* filter)
 //{
 //	mFilter = filter;
@@ -1172,6 +1266,10 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //	U32 hours = mFilter->getHoursAgo();
 //	U32 date_search_direction = mFilter->getDateSearchDirection();
 //
+//	LLInventoryFilter::EFilterCreatorType filter_creator = mFilter->getFilterCreator();
+//	bool show_created_by_me = ((filter_creator == LLInventoryFilter::FILTERCREATOR_ALL) || (filter_creator == LLInventoryFilter::FILTERCREATOR_SELF));
+//	bool show_created_by_others = ((filter_creator == LLInventoryFilter::FILTERCREATOR_ALL) || (filter_creator == LLInventoryFilter::FILTERCREATOR_OTHERS));
+//
 //	// update the ui elements
 //	setTitle(mFilter->getName());
 //
@@ -1189,6 +1287,10 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //	getChild<LLUICtrl>("check_texture")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_TEXTURE));
 //	getChild<LLUICtrl>("check_snapshot")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_SNAPSHOT));
 //	getChild<LLUICtrl>("check_show_empty")->setValue(show_folders == LLInventoryFilter::SHOW_ALL_FOLDERS);
+//
+//	getChild<LLUICtrl>("check_created_by_me")->setValue(show_created_by_me);
+//	getChild<LLUICtrl>("check_created_by_others")->setValue(show_created_by_others);
+//
 //	getChild<LLUICtrl>("check_since_logoff")->setValue(mFilter->isSinceLogoff());
 //	mSpinSinceHours->set((F32)(hours % 24));
 //	mSpinSinceDays->set((F32)(hours / 24));
@@ -1286,6 +1388,7 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //	mPanelMainInventory->getPanel()->setShowFolderState(getCheckShowEmpty() ?
 //		LLInventoryFilter::SHOW_ALL_FOLDERS : LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
 //	mPanelMainInventory->getPanel()->setFilterTypes(filter);
+//
 //	if (getCheckSinceLogoff())
 //	{
 //		mSpinSinceDays->set(0);
@@ -1312,6 +1415,46 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //	mPanelMainInventory->getPanel()->setDateSearchDirection(getDateSearchDirection());
 //
 //	LLPanel::draw();
+//}
+
+//void LLFloaterInventoryFinder::onCreatorSelfFilterCommit()
+//{
+//	bool show_creator_self = mCreatorSelf->getValue();
+//	bool show_creator_other = mCreatorOthers->getValue();
+//
+//	if(show_creator_self && show_creator_other)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_ALL);
+//	}
+//	else if(show_creator_self)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_SELF);
+//	}
+//	else if(!show_creator_self || !show_creator_other)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_OTHERS);
+//		mCreatorOthers->set(TRUE);
+//	}
+//}
+
+//void LLFloaterInventoryFinder::onCreatorOtherFilterCommit()
+//{
+//	bool show_creator_self = mCreatorSelf->getValue();
+//	bool show_creator_other = mCreatorOthers->getValue();
+//
+//	if(show_creator_self && show_creator_other)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_ALL);
+//	}
+//	else if(show_creator_other)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_OTHERS);
+//	}
+//	else if(!show_creator_other || !show_creator_self)
+//	{
+//		mFilter->setFilterCreator(LLInventoryFilter::FILTERCREATOR_SELF);
+//		mCreatorSelf->set(TRUE);
+//	}
 //}
 
 //BOOL LLFloaterInventoryFinder::getCheckShowEmpty()
@@ -1541,6 +1684,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 //		const LLSD arg = "systemfolderstotop";
 //		setSortBy(arg);
 //	}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (command_name == "show_invfolder_configure")
+	{
+		LLFloaterReg::showInstance("offer_invfolder_configure");
+	}
+// [/SL:KB]
 	if (command_name == "show_filters")
 	{
 		toggleFindOptions();
@@ -1757,13 +1906,13 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 	{
 		const LLUUID &trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
 		LLInventoryModel::EHasChildren children = gInventory.categoryHasChildren(trash_id);
-		return children != LLInventoryModel::CHILDREN_NO;
+		return children != LLInventoryModel::CHILDREN_NO && gInventory.isCategoryComplete(trash_id);
 	}
 	if (command_name == "empty_lostnfound")
 	{
 		const LLUUID &trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND);
 		LLInventoryModel::EHasChildren children = gInventory.categoryHasChildren(trash_id);
-		return children != LLInventoryModel::CHILDREN_NO;
+		return children != LLInventoryModel::CHILDREN_NO && gInventory.isCategoryComplete(trash_id);
 	}
 
 	return TRUE;

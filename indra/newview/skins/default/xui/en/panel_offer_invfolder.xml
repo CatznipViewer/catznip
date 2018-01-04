@@ -8,6 +8,14 @@
      name="default_text">
         [Default]
     </panel.string>
+    <panel.string
+     name="originating_text">
+        Object
+    </panel.string>
+    <panel.string
+     name="originating_unknown_text">
+        (Unknown)
+    </panel.string>
     <check_box
      control_name="InventoryOfferAcceptIn"
      follows="top|left"

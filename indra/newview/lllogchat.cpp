@@ -315,7 +315,7 @@ bool LLLogChat::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& 
 	{
 		if (!fLegacyFilenames)
 		{
-			strFilename = avName.getUserName();
+			strFilename = LLCacheName::buildUsername(avName.getUserName());
 		}
 		else
 		{
@@ -327,19 +327,19 @@ bool LLLogChat::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& 
 	{
 		// Try and get it from the legacy cache if we can
 		std::string strLegacyName;
-		if (gCacheName->getFullName(idAgent, strLegacyName))
+		if (!gCacheName->getFullName(idAgent, strLegacyName))
 			strLegacyName = strName;
 
 		if (!fLegacyFilenames)
 		{
 			// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
-			strFilename = LLCacheName::buildUsername(strName);
+			strFilename = LLCacheName::buildUsername(strLegacyName);
 			return strName != strFilename;	// If the assumption above was wrong then the two will match which signals failure
 		}
 		else
 		{
 			// Strip any possible mention of a username
-			strFilename = LLCacheName::buildLegacyName(strName);
+			strFilename = LLCacheName::buildLegacyName(strLegacyName);
 			return (!strFilename.empty());	// Assume success as long as the filename isn't an empty string
 		}
 	}
@@ -938,9 +938,21 @@ std::string LLLogChat::getTranscriptName(const LLUUID& avatar_id, bool is_group)
 {
 	std::string strFileName;
 	if (!is_group)
+	{
 		buildIMP2PLogFilename(avatar_id, LLStringUtil::null, strFileName);
+	}
 	else
-		gCacheName->getGroupName(avatar_id, strFileName);
+	{
+		bool fFound = gCacheName->getGroupName(avatar_id, strFileName);
+		if (!fFound)
+		{
+			LLGroupData groupData;
+			if (gAgent.getGroupData(avatar_id, groupData))
+			{
+				strFileName = groupData.mName;
+			}
+		}
+	}
 	return strFileName;
 }
 // [/SL:KB]

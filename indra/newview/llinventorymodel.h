@@ -228,6 +228,9 @@ public:
 	void getDirectDescendentsOf(const LLUUID& cat_id,
 								cat_array_t*& categories,
 								item_array_t*& items) const;
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	void getDirectDescendentsOf(const LLUUID& cat_id, cat_array_t& categories, item_array_t& items, LLInventoryCollectFunctor& f);
+// [/SL:KB]
 
 	// Compute a hash of direct descendant names (for detecting child name changes)
 	LLMD5 hashDirectDescendentNames(const LLUUID& cat_id) const;
@@ -273,12 +276,14 @@ public:
 	// Check if one object has a parent chain up to the category specified by UUID.
 	BOOL isObjectDescendentOf(const LLUUID& obj_id, const LLUUID& cat_id) const;
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	// Check if the inventory object is in the trash
+	BOOL isInTrash(const LLUUID& obj_id) /*const*/;
+// [/SL:KB]
+
 	// Follow parent chain to the top.
 	bool getObjectTopmostAncestor(const LLUUID& object_id, LLUUID& result) const;
 
-private:
-	U32 getDescendentsCountRecursive(const LLUUID& id, U32 max_item_limit);
-	
 	//--------------------------------------------------------------------
 	// Find
 	//--------------------------------------------------------------------

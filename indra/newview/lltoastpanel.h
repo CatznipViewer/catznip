@@ -49,6 +49,9 @@ public:
 	virtual ~LLToastPanel() = 0;
 
 	virtual std::string getTitle();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	virtual const LLNotificationPtr getNotification() const { return mNotification; }
+// [/SL:KB]
 	virtual const std::string& getNotificationName();
 	virtual const LLUUID& getID();
 

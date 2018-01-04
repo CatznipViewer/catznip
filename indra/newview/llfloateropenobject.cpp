@@ -115,6 +115,9 @@ void LLFloaterOpenObject::refresh()
 		name = "";
 		enabled = FALSE;
 	}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	findChild<LLPanelInventoryOfferFolder>("panel_offer_invfolder")->setObjectId( ((node) && (node->getObject())) ? node->getObject()->getID() : LLUUID::null );
+// [/SL:KB]
 	
 	getChild<LLUICtrl>("object_name")->setTextArg("[DESC]", name);
 	getChildView("copy_to_inventory_button")->setEnabled(enabled);
@@ -157,23 +160,26 @@ void LLFloaterOpenObject::moveToInventory(bool wear, bool replace)
 	std::string name = node->mName;
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-	if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+	if (const LLPanelInventoryOfferFolder* pFolderPanel = findChild<const LLPanelInventoryOfferFolder>("panel_offer_invfolder", true))
 	{
-		const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
-		if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+		if (pFolderPanel->getAcceptIn())
 		{
-			// Prevent the user from trying to copy the inventory over multiple times while we wait for the folder to be created
-			for (LLView* pChild : *getChildList())
+			const LLUUID idDestFolder = pFolderPanel->getSelectedFolder();
+			if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 			{
-				if (!dynamic_cast<LLButton*>(pChild))
-					continue;
-				pChild->setEnabled(false);
+				// Prevent the user from trying to copy the inventory over multiple times while we wait for the folder to be created
+				for (LLView* pChild : *getChildList())
+				{
+					if (!dynamic_cast<LLButton*>(pChild))
+						continue;
+					pChild->setEnabled(false);
+				}
+
+				// Create the destination folder (note: might fire instantly if the folder already exists)
+				new LLCreateAcceptInFolder(idDestFolder, name, boost::bind(&LLFloaterOpenObject::callbackCreateInventoryCategory, _1, object_id, wear, replace));
+
+				return;
 			}
-
-			// Create the destination folder (note: might fire instantly if the folder already exists)
-			new LLCreateAcceptInFolder(idDestFolder, name, boost::bind(&LLFloaterOpenObject::callbackCreateInventoryCategory, _1, object_id, wear, replace));
-
-			return;
 		}
 	}
 // [/SL:KB]

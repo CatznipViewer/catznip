@@ -193,23 +193,22 @@ LLSD LLCrashLock::getProcessList()
 //static
 bool LLCrashLock::fileExists(std::string filename)
 {
-	return boost::filesystem::exists(filename.c_str());
+#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
+	boost::filesystem::path file_path(utf8str_to_utf16str(filename));
+#else
+	boost::filesystem::path file_path(filename);
+#endif
+	return boost::filesystem::exists(file_path);
 }
 
 //void LLCrashLock::cleanupProcess(std::string proc_dir)
 //{
-//// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
-//	try
-//	{
-//		boost::filesystem::remove_all(proc_dir);
-//	}
-//	catch (boost::filesystem::filesystem_error e)
-//	{
-//		llinfos << "Unable to remove all files from '" << proc_dir << "'" << llendl;
-//		llinfos << e.what() << llendl;
-//	}
-//// [/SL:KB]
-////    boost::filesystem::remove_all(proc_dir);
+//#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
+//	boost::filesystem::path dir_path(utf8str_to_utf16str(proc_dir));
+//#else
+//	boost::filesystem::path dir_path(proc_dir);
+//#endif
+//	boost::filesystem::remove_all(dir_path);
 //}
 
 bool LLCrashLock::putProcessList(const LLSD& proc_sd)

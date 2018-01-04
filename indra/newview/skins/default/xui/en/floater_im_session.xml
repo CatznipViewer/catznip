@@ -114,7 +114,7 @@
                  top="1"
                  left_pad="2"
                  name="gear_btn"
-                 visible="false"
+                 visible="true"
                  tool_tip="Actions on selected person"
                  width="31"/>
                 <menu_button
@@ -142,7 +142,7 @@
                  top="1"
                  left_pad="2"
                  name="text_search_btn"
-                 tool_tip="Search chat history"
+                 tool_tip="Search chat"
                  width="31" />
                 <button
                  enabled="false"
@@ -175,7 +175,32 @@
                 <panel
                  follows="top|left|right"
                  height="25"
+                 layout="topleft"
                  left_pad="10"
+                 right="-1"
+                 mouse_opaque="false"
+                 name="nearby_toolbar"
+                 top="0"
+                 visible="false">
+                  <button
+                   follows="top|left"
+                   height="25"
+                   image_hover_unselected="Toolbar_Middle_Over"
+                   image_overlay="Command_Chat_Icon"
+                   image_selected="Toolbar_Middle_Selected"
+                   image_unselected="Toolbar_Middle_Off"
+                   layout="topleft"
+                   left="0"
+                   name="chat_history_btn"
+                   tool_tip="Show chat history"
+                   top="1"
+                   width="31" />
+                </panel>
+                <panel
+                 follows="top|left|right"
+                 height="25"
+                 layout="topleft"
+                 left_delta="0"
                  right="-1"
                  mouse_opaque="false"
                  name="p2p_toolbar"
@@ -259,6 +284,7 @@
                 <panel
                  follows="top|left|right"
                  height="25"
+                 layout="topleft"
                  left_delta="0"
                  right="-1"
                  mouse_opaque="false"
@@ -304,6 +330,56 @@
                    tool_tip="View group notices"
                    top="1"
                    width="31" />
+                  <flyout_button
+                   arrow_button_width="18"
+                   follows="top|left"
+                   height="25"
+                   halign="left"
+                   label=""
+                   layout="topleft"
+                   left_pad="2"
+                   name="snooze_groupt_btn"
+                   tool_tip="Snooze group chat"
+                   top="1"
+                   width="44">
+                    <flyout_button.item
+                     label="Next message"
+                     value="0" />
+                    <flyout_button.item
+                     label="5 minutes"
+                     value="5" />
+                    <flyout_button.item
+                     label="15 minutes"
+                     value="15" />
+                    <flyout_button.item
+                     label="30 minutes"
+                     value="30" />
+                    <flyout_button.item
+                     label="45 minutes"
+                     value="45" />
+                    <flyout_button.item
+                     label="1 hour"
+                     value="60" />
+                    <flyout_button.item
+                     label="Next relog"
+                     value="-1" />
+                    <flyout_button.action_button
+                     image_hover_unselected="Toolbar_Middle_Over"
+                     image_overlay="Conv_toolbar_snooze"
+                     image_overlay_alignment="left"
+                     image_bottom_pad="1"
+                     imgoverlay_label_space="0"
+                     image_selected="Toolbar_Middle_Selected"
+                     image_unselected="transparent.j2c" />
+                    <flyout_button.drop_down_button
+                     image_hover_unselected="Toolbar_Middle_Over"
+                     image_overlay="Arrow_Small_Down"
+                     image_overlay_alignment="right"
+                     image_selected="Toolbar_Middle_Selected"
+                     image_unselected="Toolbar_Middle_Off"
+                     image_pressed="none"
+                     pad_right="-2" />
+                  </flyout_button>
                 </panel>
 
               <!--

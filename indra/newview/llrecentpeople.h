@@ -28,6 +28,9 @@
 #define LL_LLRECENTPEOPLE_H
 
 #include "llevent.h"
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+#include "lleventtimer.h"
+// [/SL:KB]
 #include "llsingleton.h"
 #include "lluuid.h"
 
@@ -59,6 +62,7 @@ class LLRecentPeople : public LLSingleton<LLRecentPeople>
 //	LLSINGLETON_EMPTY_CTOR(LLRecentPeople);
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	LLSINGLETON(LLRecentPeople);
+	~LLRecentPeople() override;
 // [/SL:KB]
 	LOG_CLASS(LLRecentPeople);
 
@@ -81,16 +85,6 @@ protected:
 public:
 	static const std::string& getTypeNameFromType(EInteractionType eInteraction);
 	static EInteractionType   getTypeFromTypeName(const std::string& strInteraction);
-// [/SL:KB]
-
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
-	void load();
-	void loadLegacy();
-	void save() const;
-	void saveLegacy() const;
-
-	void purgeItems();
-	void reloadItems();
 // [/SL:KB]
 	
 	/**
@@ -163,6 +157,15 @@ public:
 	 */
 //	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
+public:
+	void purgeItems();
+	void reloadItems();
+	void save() const;
+protected:
+	void load();
+// [/SL:KB]
+
 private:
 
 	const LLUUID& getIDByPhoneNumber(const LLSD& userdata);
@@ -170,6 +173,19 @@ private:
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 	typedef std::map<LLUUID, LLRecentPeoplePersistentItem> recent_people_t;
 	recent_people_t     mPeople;
+
+	class LLRecentPeopleSaveTimer : public LLEventTimer
+	{
+	public:
+		LLRecentPeopleSaveTimer() : LLEventTimer(5 * 60.f) {}
+
+		BOOL tick() override
+		{
+			LLRecentPeople::instance().save();
+			return FALSE;
+		}
+	} *mSaveTimer = nullptr;
+	mutable bool mNeedsSave = false;
 // [/SL:KB]
 //	typedef std::map<LLUUID, LLDate> recent_people_t;
 //	recent_people_t		mPeople;

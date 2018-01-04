@@ -65,13 +65,30 @@ static ScrollContainerRegistry::Register<LLScrollingPanelList> r1("scrolling_pan
 static ScrollContainerRegistry::Register<LLContainerView> r2("container_view");
 static ScrollContainerRegistry::Register<LLPanel> r3("panel", &LLPanel::fromXML);
 
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+namespace LLInitParam
+{
+	void TypeValues<EScrollbarVisibility>::declareValues()
+	{
+		declare("always", EScrollbarVisibility::ALWAYS);
+		declare("never",  EScrollbarVisibility::NEVER);
+		declare("auto",   EScrollbarVisibility::AUTO);
+	}
+}
+// [/SL:KB]
+
 LLScrollContainer::Params::Params()
 :	is_opaque("opaque"),
 	bg_color("color"),
 	border_visible("border_visible"),
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	show_horizontal_scrollbar("show_horizontal_scrollbar", EScrollbarVisibility::AUTO),
+	show_vertical_scrollbar("show_vertical_scrollbar", EScrollbarVisibility::AUTO),
+// [/SL:KB]
 	hide_scrollbar("hide_scrollbar"),
 	min_auto_scroll_rate("min_auto_scroll_rate", 100),
 	max_auto_scroll_rate("max_auto_scroll_rate", 1000),
+	max_auto_scroll_zone("max_auto_scroll_zone", 16),
 	reserve_scroll_corner("reserve_scroll_corner", false),
 	size("size", -1)
 {}
@@ -84,15 +101,20 @@ LLScrollContainer::LLScrollContainer(const LLScrollContainer::Params& p)
 	mAutoScrollRate( 0.f ),
 	mBackgroundColor(p.bg_color()),
 	mIsOpaque(p.is_opaque),
-	mHideScrollbar(p.hide_scrollbar),
+//	mHideScrollbar(p.hide_scrollbar),
 	mReserveScrollCorner(p.reserve_scroll_corner),
 	mMinAutoScrollRate(p.min_auto_scroll_rate),
 	mMaxAutoScrollRate(p.max_auto_scroll_rate),
+	mMaxAutoScrollZone(p.max_auto_scroll_zone),
 	mScrolledView(NULL),
 	mSize(p.size)
 {
 	static LLUICachedControl<S32> scrollbar_size_control ("UIScrollbarSize", 0);
 	S32 scrollbar_size = (mSize == -1 ? scrollbar_size_control : mSize);
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	mScrollbarVisibility[HORIZONTAL] = (!p.hide_scrollbar) ? p.show_horizontal_scrollbar : EScrollbarVisibility::NEVER;
+	mScrollbarVisibility[VERTICAL] = (!p.hide_scrollbar) ? p.show_vertical_scrollbar : EScrollbarVisibility::NEVER;
+// [/SL:KB]
 
 	LLRect border_rect( 0, getRect().getHeight(), getRect().getWidth(), 0 );
 	LLViewBorder::Params params;
@@ -193,10 +215,18 @@ void LLScrollContainer::reshape(S32 width, S32 height,
 		calcVisibleSize( &visible_width, &visible_height, &show_h_scrollbar, &show_v_scrollbar );
 
 		mScrollbar[VERTICAL]->setDocSize( scrolled_rect.getHeight() );
-		mScrollbar[VERTICAL]->setPageSize( visible_height );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+		mScrollbar[VERTICAL]->setPageSize( llmin(visible_height, scrolled_rect.getHeight()) );
+		mScrollbar[VERTICAL]->setEnabled(mScrollbar[VERTICAL]->getDocSize() != mScrollbar[VERTICAL]->getPageSize());
+// [/SL:KB]
+//		mScrollbar[VERTICAL]->setPageSize( visible_height );
 
 		mScrollbar[HORIZONTAL]->setDocSize( scrolled_rect.getWidth() );
-		mScrollbar[HORIZONTAL]->setPageSize( visible_width );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+		mScrollbar[HORIZONTAL]->setPageSize( llmin(visible_width, scrolled_rect.getWidth()) );
+		mScrollbar[HORIZONTAL]->setEnabled(mScrollbar[HORIZONTAL]->getDocSize() != mScrollbar[HORIZONTAL]->getPageSize());
+// [/SL:KB]
+//		mScrollbar[HORIZONTAL]->setPageSize( visible_width );
 		updateScroll();
 	}
 }
@@ -290,7 +320,21 @@ BOOL LLScrollContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,
 	return TRUE;
 }
 
+bool LLScrollContainer::canAutoScroll(S32 x, S32 y)
+{
+	if (mAutoScrolling)
+	{
+		return true; // already scrolling
+	}
+	return autoScroll(x, y, false);
+}
+
 bool LLScrollContainer::autoScroll(S32 x, S32 y)
+{
+	return autoScroll(x, y, true);
+}
+
+bool LLScrollContainer::autoScroll(S32 x, S32 y, bool do_scroll)
 {
 	static LLUICachedControl<S32> scrollbar_size_control ("UIScrollbarSize", 0);
 	S32 scrollbar_size = (mSize == -1 ? scrollbar_size_control : mSize);
@@ -302,6 +346,8 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 		screenRectToLocal(getRootView()->getLocalRect(), &screen_local_extents);
 
 		LLRect inner_rect_local( 0, mInnerRect.getHeight(), mInnerRect.getWidth(), 0 );
+		// Note: Will also include scrollers as scroll zones, so opposite
+		// scroll zones might have different size due to visible scrollers
 		if(	mScrollbar[HORIZONTAL]->getVisible() )
 		{
 			inner_rect_local.mBottom += scrollbar_size;
@@ -316,8 +362,8 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 
 		S32 auto_scroll_speed = ll_round(mAutoScrollRate * LLFrameTimer::getFrameDeltaTimeF32());
 		// autoscroll region should take up no more than one third of visible scroller area
-		S32 auto_scroll_region_width = llmin(inner_rect_local.getWidth() / 3, 10); 
-		S32 auto_scroll_region_height = llmin(inner_rect_local.getHeight() / 3, 10); 
+		S32 auto_scroll_region_width = llmin(inner_rect_local.getWidth() / 3, (S32)mMaxAutoScrollZone); 
+		S32 auto_scroll_region_height = llmin(inner_rect_local.getHeight() / 3, (S32)mMaxAutoScrollZone); 
 
 		if(	mScrollbar[HORIZONTAL]->getVisible() )
 		{
@@ -325,8 +371,11 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 			left_scroll_rect.mRight = inner_rect_local.mLeft + auto_scroll_region_width;
 			if( left_scroll_rect.pointInRect( x, y ) && (mScrollbar[HORIZONTAL]->getDocPos() > 0) )
 			{
-				mScrollbar[HORIZONTAL]->setDocPos( mScrollbar[HORIZONTAL]->getDocPos() - auto_scroll_speed );
-				mAutoScrolling = TRUE;
+				if (do_scroll)
+				{
+					mScrollbar[HORIZONTAL]->setDocPos(mScrollbar[HORIZONTAL]->getDocPos() - auto_scroll_speed);
+					mAutoScrolling = TRUE;
+				}
 				scrolling = true;
 			}
 
@@ -334,8 +383,11 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 			right_scroll_rect.mLeft = inner_rect_local.mRight - auto_scroll_region_width;
 			if( right_scroll_rect.pointInRect( x, y ) && (mScrollbar[HORIZONTAL]->getDocPos() < mScrollbar[HORIZONTAL]->getDocPosMax()) )
 			{
-				mScrollbar[HORIZONTAL]->setDocPos( mScrollbar[HORIZONTAL]->getDocPos() + auto_scroll_speed );
-				mAutoScrolling = TRUE;
+				if (do_scroll)
+				{
+					mScrollbar[HORIZONTAL]->setDocPos(mScrollbar[HORIZONTAL]->getDocPos() + auto_scroll_speed);
+					mAutoScrolling = TRUE;
+				}
 				scrolling = true;
 			}
 		}
@@ -345,8 +397,11 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 			bottom_scroll_rect.mTop = inner_rect_local.mBottom + auto_scroll_region_height;
 			if( bottom_scroll_rect.pointInRect( x, y ) && (mScrollbar[VERTICAL]->getDocPos() < mScrollbar[VERTICAL]->getDocPosMax()) )
 			{
-				mScrollbar[VERTICAL]->setDocPos( mScrollbar[VERTICAL]->getDocPos() + auto_scroll_speed );
-				mAutoScrolling = TRUE;
+				if (do_scroll)
+				{
+					mScrollbar[VERTICAL]->setDocPos(mScrollbar[VERTICAL]->getDocPos() + auto_scroll_speed);
+					mAutoScrolling = TRUE;
+				}
 				scrolling = true;
 			}
 
@@ -354,8 +409,11 @@ bool LLScrollContainer::autoScroll(S32 x, S32 y)
 			top_scroll_rect.mBottom = inner_rect_local.mTop - auto_scroll_region_height;
 			if( top_scroll_rect.pointInRect( x, y ) && (mScrollbar[VERTICAL]->getDocPos() > 0) )
 			{
-				mScrollbar[VERTICAL]->setDocPos( mScrollbar[VERTICAL]->getDocPos() - auto_scroll_speed );
-				mAutoScrolling = TRUE;
+				if (do_scroll)
+				{
+					mScrollbar[VERTICAL]->setDocPos(mScrollbar[VERTICAL]->getDocPos() - auto_scroll_speed);
+					mAutoScrolling = TRUE;
+				}
 				scrolling = true;
 			}
 		}
@@ -376,19 +434,19 @@ void LLScrollContainer::calcVisibleSize( S32 *visible_width, S32 *visible_height
 	*visible_width = getRect().getWidth() - 2 * border_width;
 	*visible_height = getRect().getHeight() - 2 * border_width;
 	
-	*show_v_scrollbar = FALSE;
-	*show_h_scrollbar = FALSE;
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	*show_v_scrollbar = (mScrollbarVisibility[VERTICAL] == EScrollbarVisibility::ALWAYS);
+	*show_h_scrollbar = (mScrollbarVisibility[HORIZONTAL] == EScrollbarVisibility::ALWAYS);
 
-	if (!mHideScrollbar)
 	{
 		// Note: 1 pixel change can happen on final animation and should not trigger 
 		// the display of sliders.
-		if ((doc_height - *visible_height) > 1)
+		if ( (mScrollbarVisibility[VERTICAL] == EScrollbarVisibility::AUTO) && ((doc_height - *visible_height) > 1) )
 		{
 			*show_v_scrollbar = TRUE;
 			*visible_width -= scrollbar_size;
 		}
-		if ((doc_width - *visible_width) > 1)
+		if ( (mScrollbarVisibility[HORIZONTAL] == EScrollbarVisibility::AUTO) && ((doc_width - *visible_width) > 1) )
 		{
 			*show_h_scrollbar = TRUE;
 			*visible_height -= scrollbar_size;
@@ -397,13 +455,42 @@ void LLScrollContainer::calcVisibleSize( S32 *visible_width, S32 *visible_height
 			// to container's full height to ensure the correct computation
 			// of *show_v_scrollbar after subtracting horizontal scrollbar_size.
 
-			if( !*show_v_scrollbar && ((doc_height - *visible_height) > 1) )
+			if ( (mScrollbarVisibility[VERTICAL] == EScrollbarVisibility::AUTO) && ( !*show_v_scrollbar && ((doc_height - *visible_height) > 1) ) )
 			{
 				*show_v_scrollbar = TRUE;
 				*visible_width -= scrollbar_size;
 			}
 		}
 	}
+// [/SL:KB]
+//	*show_v_scrollbar = FALSE;
+//	*show_h_scrollbar = FALSE;
+//
+//	if (!mHideScrollbar)
+//	{
+//		// Note: 1 pixel change can happen on final animation and should not trigger 
+//		// the display of sliders.
+//		if ((doc_height - *visible_height) > 1)
+//		{
+//			*show_v_scrollbar = TRUE;
+//			*visible_width -= scrollbar_size;
+//		}
+//		if ((doc_width - *visible_width) > 1)
+//		{
+//			*show_h_scrollbar = TRUE;
+//			*visible_height -= scrollbar_size;
+//			// Note: Do *not* recompute *show_v_scrollbar here because with
+//			// The view inside the scroll container should not be extended
+//			// to container's full height to ensure the correct computation
+//			// of *show_v_scrollbar after subtracting horizontal scrollbar_size.
+//
+//			if( !*show_v_scrollbar && ((doc_height - *visible_height) > 1) )
+//			{
+//				*show_v_scrollbar = TRUE;
+//				*visible_width -= scrollbar_size;
+//			}
+//		}
+//	}
 }
 	
 
@@ -597,10 +684,18 @@ void LLScrollContainer::updateScroll()
 	}
 
 	mScrollbar[HORIZONTAL]->setDocSize( doc_width );
-	mScrollbar[HORIZONTAL]->setPageSize( visible_width );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	mScrollbar[HORIZONTAL]->setPageSize( llmin(visible_width, doc_width) );
+	mScrollbar[HORIZONTAL]->setEnabled(mScrollbar[HORIZONTAL]->getDocSize() != mScrollbar[HORIZONTAL]->getPageSize());
+// [/SL:KB]
+//	mScrollbar[HORIZONTAL]->setPageSize( visible_width );
 
 	mScrollbar[VERTICAL]->setDocSize( doc_height );
-	mScrollbar[VERTICAL]->setPageSize( visible_height );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	mScrollbar[VERTICAL]->setPageSize( llmin(visible_height, doc_height) );
+	mScrollbar[VERTICAL]->setEnabled(mScrollbar[VERTICAL]->getDocSize() != mScrollbar[VERTICAL]->getPageSize());
+// [/SL:KB]
+//	mScrollbar[VERTICAL]->setPageSize( visible_height );
 } // end updateScroll
 
 void LLScrollContainer::setBorderVisible(BOOL b)
@@ -669,7 +764,11 @@ void LLScrollContainer::scrollToShowRect(const LLRect& rect, const LLRect& const
 					mScrollbar[VERTICAL]->getDocSize() - allowable_scroll_rect.mBottom); // max vertical scroll	
 
 	mScrollbar[VERTICAL]->setDocSize( scrolled_rect.getHeight() );
-	mScrollbar[VERTICAL]->setPageSize( content_window_rect.getHeight() );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	mScrollbar[VERTICAL]->setPageSize( llmin(content_window_rect.getHeight(), scrolled_rect.getHeight()) );
+	mScrollbar[VERTICAL]->setEnabled(mScrollbar[VERTICAL]->getDocSize() != mScrollbar[VERTICAL]->getPageSize());
+// [/SL:KB]
+//	mScrollbar[VERTICAL]->setPageSize( content_window_rect.getHeight() );
 	mScrollbar[VERTICAL]->setDocPos( vert_pos );
 
 	S32 horizontal_pos = llclamp(mScrollbar[HORIZONTAL]->getDocPos(), 
@@ -677,7 +776,11 @@ void LLScrollContainer::scrollToShowRect(const LLRect& rect, const LLRect& const
 								allowable_scroll_rect.mRight);
 
 	mScrollbar[HORIZONTAL]->setDocSize( scrolled_rect.getWidth() );
-	mScrollbar[HORIZONTAL]->setPageSize( content_window_rect.getWidth() );
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	mScrollbar[HORIZONTAL]->setPageSize( llmin(content_window_rect.getWidth(), scrolled_rect.getWidth()) );
+	mScrollbar[HORIZONTAL]->setEnabled(mScrollbar[HORIZONTAL]->getDocSize() != mScrollbar[HORIZONTAL]->getPageSize());
+// [/SL:KB]
+//	mScrollbar[HORIZONTAL]->setPageSize( content_window_rect.getWidth() );
 	mScrollbar[HORIZONTAL]->setDocPos( horizontal_pos );
 
 	// propagate scroll to document

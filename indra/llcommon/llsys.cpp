@@ -319,29 +319,29 @@ LLOSInfo::LLOSInfo() :
 				}
 				}
 
-				///get native system info if available..
-				typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO); ///function pointer for loading GetNativeSystemInfo
-				SYSTEM_INFO si; //System Info object file contains architecture info
-				PGNSI pGNSI; //pointer object
-				ZeroMemory(&si, sizeof(SYSTEM_INFO)); //zero out the memory in information
-				pGNSI = (PGNSI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")),  "GetNativeSystemInfo"); //load kernel32 get function
-				if(NULL != pGNSI) //check if it has failed
-					pGNSI(&si); //success
-				else 
-					GetSystemInfo(&si); //if it fails get regular system info 
-				//(Warning: If GetSystemInfo it may result in incorrect information in a WOW64 machine, if the kernel fails to load)
-
-				//msdn microsoft finds 32 bit and 64 bit flavors this way..
-				//http://msdn.microsoft.com/en-us/library/ms724429(VS.85).aspx (example code that contains quite a few more flavors
-				//of windows than this code does (in case it is needed for the future)
-				if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64 ) //check for 64 bit
-				{
-					mOSStringSimple += "64-bit ";
-				}
-				else if (si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_INTEL )
-				{
-					mOSStringSimple += "32-bit ";
-				}
+//				///get native system info if available..
+//				typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO); ///function pointer for loading GetNativeSystemInfo
+//				SYSTEM_INFO si; //System Info object file contains architecture info
+//				PGNSI pGNSI; //pointer object
+//				ZeroMemory(&si, sizeof(SYSTEM_INFO)); //zero out the memory in information
+//				pGNSI = (PGNSI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")),  "GetNativeSystemInfo"); //load kernel32 get function
+//				if(NULL != pGNSI) //check if it has failed
+//					pGNSI(&si); //success
+//				else 
+//					GetSystemInfo(&si); //if it fails get regular system info 
+//				//(Warning: If GetSystemInfo it may result in incorrect information in a WOW64 machine, if the kernel fails to load)
+//
+//				//msdn microsoft finds 32 bit and 64 bit flavors this way..
+//				//http://msdn.microsoft.com/en-us/library/ms724429(VS.85).aspx (example code that contains quite a few more flavors
+//				//of windows than this code does (in case it is needed for the future)
+//				if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64 ) //check for 64 bit
+//				{
+//					mOSStringSimple += "64-bit ";
+//				}
+//				else if (si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_INTEL )
+//				{
+//					mOSStringSimple += "32-bit ";
+//				}
 			}
 			else   // Use the registry on early versions of Windows NT.
 			{
@@ -388,6 +388,15 @@ LLOSInfo::LLOSInfo() :
 			}
 
 			mOSString = mOSStringSimple + tmpstr;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+#ifdef _WIN64
+			mPlatform = "Win64";
+#else
+			BOOL fIs64Bit = false;
+			IsWow64Process(GetCurrentProcess(), &fIs64Bit);
+			mPlatform = (fIs64Bit) ? "Win64" : "Win32";
+#endif // _WIN64
+// [/SL:KB]
 		}
 		break;
 

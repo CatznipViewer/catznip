@@ -27,7 +27,7 @@ class LLFloaterQuickPrefs : public LLFloater
 	LOG_CLASS(LLFloaterQuickPrefs);
 
 	friend class LLFloaterReg;
-	typedef enum { PANEL_APPEARANCE = 0, PANEL_WEARING, PANEL_INVENTORY, PANEL_WINDLIGHT, PANEL_COUNT, PANEL_NONE = -1 } EPanelType;
+	enum EPanelType { PANEL_APPEARANCE = 0, PANEL_WEARING, PANEL_INVENTORY, PANEL_WINDLIGHT, PANEL_COUNT, PANEL_NONE = -1 };
 	static const char* s_PanelNames[PANEL_COUNT];
 protected:
 	LLFloaterQuickPrefs(const LLSD& sdKey);

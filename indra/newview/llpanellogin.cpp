@@ -78,6 +78,7 @@
 
 LLPanelLogin *LLPanelLogin::sInstance = NULL;
 BOOL LLPanelLogin::sCapslockDidNotification = FALSE;
+BOOL LLPanelLogin::sCredentialSet = FALSE;
 
 class LLLoginLocationAutoHandler : public LLCommandHandler
 {
@@ -179,6 +180,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	setBackgroundOpaque(TRUE);
 
 	mPasswordModified = FALSE;
+
 	LLPanelLogin::sInstance = this;
 
 	LLView* login_holder = gViewerWindow->getLoginPanelHolder();
@@ -471,6 +473,7 @@ void LLPanelLogin::selectUser(LLPointer<LLCredential> cred, BOOL remember)
 		LL_WARNS() << "Attempted selectUser with no login view shown" << LL_ENDL;
 		return;
 	}
+	sCredentialSet = TRUE;
 	LL_INFOS("Credentials") << "Setting login fields to " << *cred << LL_ENDL;
 
 	LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
@@ -825,10 +828,8 @@ void LLPanelLogin::onUpdateStartSLURL(const LLSLURL& new_start_slurl)
 			}
 			if ( new_start_slurl.getLocationString().length() )
 			{
-				if (location_combo->getCurrentIndex() == -1)
-				{
-					location_combo->setLabel(new_start_slurl.getLocationString());
-				}
+					
+				location_combo->setLabel(new_start_slurl.getLocationString());
 				sInstance->mLocationLength = new_start_slurl.getLocationString().length();
 				sInstance->updateLoginButtons();
 			}
@@ -936,7 +937,7 @@ void LLPanelLogin::loadLoginPage()
 	params["grid"] = LLGridManager::getInstance()->getGridId();
 
 	// add OS info
-	params["os"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	params["os"] = LLOSInfo::instance().getOSStringSimple();
 
 	// sourceid
 	params["sourceid"] = gSavedSettings.getString("sourceid");
@@ -1010,6 +1011,7 @@ void LLPanelLogin::onClickConnect(void *)
 		}
 		else
 		{
+			sCredentialSet = FALSE;
 			LLPointer<LLCredential> cred;
 			BOOL remember;
 			getFields(cred, remember);

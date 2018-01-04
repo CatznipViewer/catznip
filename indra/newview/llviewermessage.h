@@ -248,6 +248,10 @@ public:
 	LLUUID mTransactionID;
 	LLUUID mFolderID;
 	LLUUID mObjectID;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	LLUUID mFromObjectID;
+	LLUUID mFromObjectFolderID;
+// [/SL:KB]
 	LLAssetType::EType mType;
 	std::string mFromName;
 	std::string mDesc;

@@ -35,6 +35,7 @@
 
 #include "llfolderview.h"
 
+//class LLComboBox;
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLSaveFolderState;
@@ -77,6 +78,8 @@ public:
 
 	LLInventoryPanel* getPanel() { return mActivePanel; }
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
+	LLInventoryPanel* getAllItemsPanel();
+	void selectAllItemsPanel();
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
@@ -110,6 +113,8 @@ public:
 
 //	static void newWindow();
 
+	void toggleFindOptions();
+
 protected:
 	//
 	// Misc functions
@@ -121,7 +126,6 @@ protected:
 	LLFloaterInventoryFinder* getFinder();
 	void showFindOptions(bool fShow);
 // [/SL:KB]
-	void toggleFindOptions();
 	void onSelectionChange(LLInventoryPanel *panel, const std::deque<LLFolderViewItem*>& items, BOOL user_action);
 
 	static BOOL filtersVisible(void* user_data);
@@ -140,7 +144,7 @@ protected:
 	void setFilterSubStringFromFilter();
 // [/SL:KB]
 	void setFilterSubString(const std::string& string);
-	
+
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();
@@ -159,6 +163,8 @@ protected:
 	void updateItemcountText();
 
 	void onFocusReceived();
+//	void onSelectSearchType();
+//	void updateSearchTypeCombo();
 
 private:
 //	LLFloaterInventoryFinder* getFinder();
@@ -168,6 +174,7 @@ private:
     LLUICtrl*                   mCounterCtrl;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+	LLInventoryPanel*			mWornItemsPanel;
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	S32							mActivePanelIndex;
 // [/SL:KB]
@@ -181,6 +188,7 @@ private:
 // [/SL:KB]
 	S32							mItemCount;
 	std::string 				mItemCountString;
+//	LLComboBox*					mSearchTypeCombo;
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	std::string					mFloaterTitle;
 // [/SL:KB]

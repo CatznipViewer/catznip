@@ -895,9 +895,9 @@ protected:
 	BOOL			isGroupMember() const 		{ return !mGroupID.isNull(); } 
 public:
 	std::vector<LLGroupData> mGroups;
-// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-3.6
 	typedef std::map<LLUUID, std::string> groupprelude_map_t;
-	groupprelude_map_t mGroupPrelude;
+	groupprelude_map_t mGroupPreludes;
 
 	LLSD mFeedbackInfo;
 // [/SL:KB]
@@ -948,8 +948,16 @@ public:
 	void			sendReliableMessage();
 	void 			sendAgentDataUpdateRequest();
 	void 			sendAgentUserInfoRequest();
-	// IM to Email and Online visibility
+
+// IM to Email and Online visibility
 	void			sendAgentUpdateUserInfo(bool im_to_email, const std::string& directory_visibility);
+
+private:
+    void            requestAgentUserInfoCoro(std::string capurl);
+    void            updateAgentUserInfoCoro(std::string capurl, bool im_via_email, std::string directory_visibility);
+    // DEPRECATED: may be removed when User Info cap propagates 
+    void 			sendAgentUserInfoRequestMessage();
+    void            sendAgentUpdateUserInfoMessage(bool im_via_email, const std::string& directory_visibility);
 
 	//--------------------------------------------------------------------
 	// Receive

@@ -243,11 +243,12 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 		return true;
 	}
      */
-    
-//	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+
+//	bool is_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY);
 // [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
-	const bool passed_filter_folder = ((getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink())) ? filter.checkFolder(this) : true;
+	bool is_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink());
 // [/SL:KB]
+	const bool passed_filter_folder = is_folder ? filter.checkFolder(this) : true;
 	setPassedFolderFilter(passed_filter_folder, filter_generation);
 
 	bool continue_filtering = true;
@@ -272,10 +273,20 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 	{
         // This is where filter check on the item done (CHUI-849)
 //		const bool passed_filter = filter.check(this);
-//		setPassedFilter(passed_filter, filter_generation, filter.getStringMatchOffset(this), filter.getFilterStringSize());
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
 		std::vector<std::pair<int, int>> match_offsets;
 		const bool passed_filter = filter.check(this, match_offsets);
+// [/SL:KB]
+		if (passed_filter && mChildren.empty() && is_folder) // Update the latest filter generation for empty folders
+		{
+			LLFolderViewModelItemInventory* view_model = this;
+			while (view_model && view_model->mMostFilteredDescendantGeneration < filter_generation)
+			{
+				view_model->mMostFilteredDescendantGeneration = filter_generation;
+				view_model = static_cast<LLFolderViewModelItemInventory*>(view_model->mParent);
+			}
+		}
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
 		setPassedFilter(passed_filter, filter_generation, match_offsets, filter.getFilterStringSize());
 		if ( ((passed_filter) || (descendantsPassedFilter(filter_generation))) && (mFolderViewItem->getRoot()) && (mFolderViewItem->getRoot()->needsAutoOpen()) )
 		{
@@ -286,6 +297,7 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 				pFolder->setOpenArrangeRecursively(TRUE, LLFolderViewFolder::RECURSE_UP);
 		}
 // [/SL:KB]
+//		setPassedFilter(passed_filter, filter_generation, filter.getStringMatchOffset(this), filter.getFilterStringSize());
         continue_filtering = !filter.isTimedOut();
 	}
     return continue_filtering;

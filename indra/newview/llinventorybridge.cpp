@@ -232,6 +232,58 @@ const std::string& LLInvFVBridge::getDisplayName() const
 	return mDisplayName;
 }
 
+//std::string LLInvFVBridge::getSearchableDescription() const
+//{
+//	const LLInventoryModel* model = getInventoryModel();
+//	if (model)
+//	{
+//		const LLInventoryItem *item = model->getItem(mUUID);
+//		if(item)
+//		{
+//			std::string desc = item->getDescription();
+//			LLStringUtil::toUpper(desc);
+//			return desc;
+//		}
+//	}
+//	return LLStringUtil::null;
+//}
+
+//std::string LLInvFVBridge::getSearchableCreatorName() const
+//{
+//	const LLInventoryModel* model = getInventoryModel();
+//	if (model)
+//	{
+//		const LLInventoryItem *item = model->getItem(mUUID);
+//		if(item)
+//		{
+//			LLAvatarName av_name;
+//			if (LLAvatarNameCache::get(item->getCreatorUUID(), &av_name))
+//			{
+//				std::string username = av_name.getUserName();
+//				LLStringUtil::toUpper(username);
+//				return username;
+//			}
+//		}
+//	}
+//	return LLStringUtil::null;
+//}
+
+//std::string LLInvFVBridge::getSearchableUUIDString() const
+//{
+//	const LLInventoryModel* model = getInventoryModel();
+//	if (model)
+//	{
+//		const LLViewerInventoryItem *item = model->getItem(mUUID);
+//		if(item && (item->getIsFullPerm() || gAgent.isGodlikeWithoutAdminMenuFakery()))
+//		{
+//			std::string uuid = item->getAssetUUID().asString();
+//			LLStringUtil::toUpper(uuid);
+//			return uuid;
+//		}
+//	}
+//	return LLStringUtil::null;
+//}
+
 // Folders have full perms
 PermissionMask LLInvFVBridge::getPermissionMask() const
 {
@@ -925,6 +977,12 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 //	{
 //		disabled_items.push_back(std::string("Properties"));
 //	}
+
+	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+	if (active_panel && (active_panel->getName() != "All Items"))
+	{
+		items.push_back(std::string("Show in Main Panel"));
+	}
 }
 
 void LLInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
@@ -961,7 +1019,7 @@ void LLInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			if ( (pItem) &&
 				 ( ((LLAssetType::AT_NOTECARD == pItem->getType()) && (gRlvHandler.hasBehaviour(RLV_BHVR_VIEWNOTE))) ||
 				   ((LLAssetType::AT_LSL_TEXT == pItem->getType()) && (gRlvHandler.hasBehaviour(RLV_BHVR_VIEWSCRIPT))) ||
-				   ((LLAssetType::AT_TEXTURE == pItem->getType()) && (gRlvHandler.hasBehaviour(RLV_BHVR_VIEWTEXTURE))) ) )
+				   ((LLAssetType::AT_TEXTURE == pItem->getType()) && (!RlvActions::canPreviewTextures()))))
 			{
 				disabled_items.push_back(std::string("Open"));
 			}
@@ -1750,6 +1808,21 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 		gViewerWindow->getWindow()->copyTextToClipboard(utf8str_to_wstring(buffer));
 		return;
 	}
+	else if ("show_in_main_panel" == action)
+	{
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.2
+		if (LLInventoryPanel* pInvPanel = mInventoryPanel.get())
+		{
+			if (LLSidepanelInventory* pInvSidepanel = pInvPanel->getParentByType<LLSidepanelInventory>())
+			{
+				pInvSidepanel->selectAllItemsPanel();
+				pInvSidepanel->getActivePanel()->showItem(mUUID);
+			}
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+		return;
+	}
 	else if ("cut" == action)
 	{
 		cutToClipboard();
@@ -2014,13 +2087,13 @@ void LLItemBridge::buildDisplayName() const
 	{
 		mDisplayName.assign(LLStringUtil::null);
 	}
-	
+
 	mSearchableName.assign(mDisplayName);
 	mSearchableName.append(getLabelSuffix());
 	LLStringUtil::toUpper(mSearchableName);
 	
-    //Name set, so trigger a sort
-    if(mParent)
+	//Name set, so trigger a sort
+	if(mParent)
 	{
 		mParent->requestSort();
 	}
@@ -3530,6 +3603,21 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		modifyOutfit(TRUE);
 		return;
 	}
+	else if ("show_in_main_panel" == action)
+	{
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.2
+		if (LLInventoryPanel* pInvPanel = mInventoryPanel.get())
+		{
+			if (LLSidepanelInventory* pInvSidepanel = pInvPanel->getParentByType<LLSidepanelInventory>())
+			{
+				pInvSidepanel->selectAllItemsPanel();
+				pInvSidepanel->getActivePanel()->showItem(mUUID);
+			}
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+		return;
+	}
 	else if ("cut" == action)
 	{
 		cutToClipboard();
@@ -4092,7 +4180,7 @@ void LLFolderBridge::perform_pasteFromClipboard()
                 }
 
 // [RLVa:KB] - Checked: RLVa-2.1.0
-				if ( ((item) && (!RlvActions::canPaste(item, dest_folder))) || ((cat) && (!RlvActions::canPaste(cat, dest_folder))) )
+				if ( ((item) && (!RlvActions::canPasteInventory(item, dest_folder))) || ((cat) && (!RlvActions::canPasteInventory(cat, dest_folder))) )
 				{
 					RlvActions::notifyBlocked(RLV_STRING_BLOCKED_INVFOLDER);
 					return;
@@ -4394,8 +4482,14 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		LLInventoryModel::cat_array_t* cat_array;
 		LLInventoryModel::item_array_t* item_array;
 		gInventory.getDirectDescendentsOf(mUUID, cat_array, item_array);
+		LLViewerInventoryCategory *trash = getCategory();
 		// Enable Empty menu item only when there is something to act upon.
-		if ((0 == cat_array->size() && 0 == item_array->size()) || is_recent_panel)
+		// Also don't enable menu if folder isn't fully fetched
+		if ((0 == cat_array->size() && 0 == item_array->size())
+			|| is_recent_panel
+			|| !trash
+			|| trash->getVersion() == LLViewerInventoryCategory::VERSION_UNKNOWN
+			|| trash->getDescendentCount() == LLViewerInventoryCategory::VERSION_UNKNOWN)
 		{
 			disabled_items.push_back(std::string("Empty Trash"));
 		}
@@ -4614,8 +4708,6 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags,   menuentry_vec_t&
 // [/SL:KB]
 //	const bool is_system_folder = LLFolderType::lookupIsProtectedType(type);
 	// BAP change once we're no longer treating regular categories as ensembles.
-	const bool is_ensemble = (type == LLFolderType::FT_NONE ||
-		LLFolderType::lookupIsEnsembleType(type));
 	const bool is_agent_inventory = isAgentInventory();
 // [SL:KB] - Patch: Appearance-Misc | Checked: 2010-11-24 (Catznip-2.4)
 	const bool is_outfit = (type == LLFolderType::FT_OUTFIT);
@@ -4667,46 +4759,43 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags,   menuentry_vec_t&
 			}
 
 			items.push_back(std::string("Replace Outfit"));
-
-			if (is_agent_inventory)
-			{
-				items.push_back(std::string("Folder Wearables Separator"));
-				if (is_ensemble)
-				{
-					items.push_back(std::string("Wear As Ensemble"));
-				}
-				items.push_back(std::string("Remove From Outfit"));
-				if (!LLAppearanceMgr::getCanRemoveFromCOF(mUUID))
-				{
-					disabled_items.push_back(std::string("Remove From Outfit"));
-				}
-			}
-// [SL:KB] - Patch: Appearance-Misc | Checked: 2010-11-24 (Catznip-2.4)
-			if ( ((is_outfit) && (!LLAppearanceMgr::instance().getCanReplaceCOF(mUUID))) || 
-				 ((!is_outfit) && (gAgentWearables.isCOFChangeInProgress())) )
-// [/SL:KB]
-			{
-				disabled_items.push_back(std::string("Replace Outfit"));
-			}
-// [RLVa:KB] - Checked: RLVa-2.0.3
-			// Block "Replace Current Outfit" if the user can't wear the new folder
-			if ( (RlvActions::isRlvEnabled()) && (RlvFolderLocks::instance().isLockedFolder(mUUID, RLV_LOCK_ADD)) )
-			{
-				disabled_items.push_back(std::string("Replace Outfit"));
-			}
-// [/RLVa:KB]
-			if (!LLAppearanceMgr::instance().getCanAddToCOF(mUUID))
-			{
-				disabled_items.push_back(std::string("Add To Outfit"));
-			}
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
-			if (LLFolderType::FT_OUTFIT == type)
-			{
-				items.push_back(std::string("Copy Outfit To Clipboard"));
-			}
-// [/SL:BK]
-			items.push_back(std::string("Outfit Separator"));
 		}
+		if (is_agent_inventory)
+		{
+			items.push_back(std::string("Folder Wearables Separator"));
+			items.push_back(std::string("Remove From Outfit"));
+			if (!LLAppearanceMgr::getCanRemoveFromCOF(mUUID))
+			{
+					disabled_items.push_back(std::string("Remove From Outfit"));
+			}
+		}
+//		if (!LLAppearanceMgr::instance().getCanReplaceCOF(mUUID))
+// [SL:KB] - Patch: Appearance-Misc | Checked: 2010-11-24 (Catznip-2.4)
+		if ( ((is_outfit) && (!LLAppearanceMgr::instance().getCanReplaceCOF(mUUID))) || 
+			 ((!is_outfit) && (gAgentWearables.isCOFChangeInProgress())) )
+// [/SL:KB]
+		{
+			disabled_items.push_back(std::string("Replace Outfit"));
+		}
+// [RLVa:KB] - Checked: RLVa-2.0.3
+		// Block "Replace Current Outfit" if the user can't wear the new folder
+		if ( (RlvActions::isRlvEnabled()) && (RlvFolderLocks::instance().isLockedFolder(mUUID, RLV_LOCK_ADD)) )
+		{
+			disabled_items.push_back(std::string("Replace Outfit"));
+		}
+// [/RLVa:KB]
+		if (!LLAppearanceMgr::instance().getCanAddToCOF(mUUID))
+		{
+			disabled_items.push_back(std::string("Add To Outfit"));
+		}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+		if (LLFolderType::FT_OUTFIT == type)
+		{
+			items.push_back(std::string("Copy Outfit To Clipboard"));
+		}
+// [/SL:BK]
+		items.push_back(std::string("Outfit Separator"));
+
 	}
 }
 
@@ -4971,6 +5060,14 @@ void LLFolderBridge::wearItems()
 		return;
 
 	callAfterCategoryFetch(pCat->getUUID(), boost::bind(&LLFolderBridge::wearItemsFinal, pCat->getUUID()));
+}
+
+// static
+void LLFolderBridge::wearItems(const LLInventoryModel* pModel, const LLUUID& idFolder)
+{
+	if ( (!pModel) || (pModel != &gInventory) || (!gInventory.getCategory(idFolder)) )
+		return;
+	callAfterCategoryFetch(idFolder, boost::bind(&LLFolderBridge::wearItemsFinal, idFolder));
 }
 
 // static
@@ -5920,6 +6017,13 @@ bool LLTextureBridge::canSaveTexture(void) const
 		return false;
 	}
 	
+// [RLVa:KB] - Checked: RLVa-2.2
+	if (!RlvActions::canPreviewTextures())
+	{
+		return false;
+	}
+// [/RLVa:KB]
+
 	const LLViewerInventoryItem *item = model->getItem(mUUID);
 	if (item)
 	{

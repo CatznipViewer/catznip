@@ -1329,6 +1329,11 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		const LLUUID& obj_id = (*obj_iter);
 		if(!highlight_offered_object(obj_id))
 		{
+			const LLViewerInventoryCategory *parent = gInventory.getFirstNondefaultParent(obj_id);
+			if (parent && (parent->getPreferredType() == LLFolderType::FT_TRASH))
+			{
+				gInventory.checkTrashOverflow();
+			}
 			continue;
 		}
 
@@ -1544,6 +1549,10 @@ LLOfferInfo::LLOfferInfo(const LLSD& sd)
 	mTransactionID = sd["transaction_id"].asUUID();
 	mFolderID = sd["folder_id"].asUUID();
 	mObjectID = sd["object_id"].asUUID();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	mFromObjectID = sd["from_object_id"].asUUID();
+	mFromObjectFolderID = sd["from_object_folder_id"].asUUID();
+// [/SL:KB]
 	mType = LLAssetType::lookup(sd["type"].asString().c_str());
 	mFromName = sd["from_name"].asString();
 	mDesc = sd["description"].asString();
@@ -1560,6 +1569,10 @@ LLOfferInfo::LLOfferInfo(const LLOfferInfo& info)
 	mTransactionID = info.mTransactionID;
 	mFolderID = info.mFolderID;
 	mObjectID = info.mObjectID;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	mFromObjectID = info.mFromObjectID;
+	mFromObjectFolderID = info.mFromObjectFolderID;
+// [/SL:KB]
 	mType = info.mType;
 	mFromName = info.mFromName;
 	mDesc = info.mDesc;
@@ -1578,6 +1591,10 @@ LLSD LLOfferInfo::asLLSD()
 	sd["transaction_id"] = mTransactionID;
 	sd["folder_id"] = mFolderID;
 	sd["object_id"] = mObjectID;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	sd["from_object_id"] = mFromObjectID;
+	sd["from_object_folder_id"] = mFromObjectFolderID;
+// [/SL:KB]
 	sd["type"] = LLAssetType::lookup(mType);
 	sd["from_name"] = mFromName;
 	sd["description"] = mDesc;
@@ -1727,9 +1744,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 				}
 // [/RLVa:KB]
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-				else if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				else if ( (response["accept_in"].asBoolean()) && (response.has("accept_in_folder")) )
 				{
-					const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+					const LLUUID idDestFolder(response["accept_in_folder"].asUUID());
 					if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 					{
 						LLAcceptInFolderAgentOffer* pOfferObserver = new LLAcceptInFolderAgentOffer(mObjectID, idDestFolder);
@@ -2001,9 +2019,9 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			}
 // [/RLVa:KB]
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-			else if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn")) )
+			else if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (response["accept_in"].asBoolean()) && (response.has("accept_in_folder")) )
 			{
-				const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+				const LLUUID idDestFolder(response["accept_in_folder"].asUUID());
 				if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 				{
 					mFolderID = idDestFolder;
@@ -2238,6 +2256,15 @@ void inventory_offer_handler(LLOfferInfo* info)
 // [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	payload["owner_id"] = info->mFromID;
 	payload["owner_is_group"] = info->mFromGroup;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	payload["from_object_id"] = info->mFromObjectID;
+	payload["from_object_folder_id"] = info->mFromObjectFolderID;
+	if ( (info->mType != LLAssetType::AT_OBJECT) && (info->mType != LLAssetType::AT_CATEGORY) )
+	{
+		payload["accept_in"] = false;
+		payload["accept_in_folder"] = LLUUID::null;
+	}
 // [/SL:KB]
 	// Flag indicating that this notification is faked for toast.
 	payload["give_inventory_notification"] = FALSE;
@@ -3145,6 +3172,30 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				}
 				info->mType = (LLAssetType::EType) binary_bucket[0];
 				info->mObjectID = LLUUID::null;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				if ( (from_id == gAgentID) && (region_id == gAgent.getRegion()->getRegionID()) )
+				{
+					std::list<LLViewerObject*> lObjects;
+					if (gObjectList.findOwnObjects(region_id, position, lObjects))
+					{
+						for (LLViewerObject* pObj : lObjects)
+						{
+							pObj = pObj->getRootEdit();
+							bool fFound = false;
+							const LLUUID idFolder = LLPanelInventoryOfferFolder::getFolderFromObject(pObj, name, &fFound);
+							if (fFound)
+							{
+								info->mFromObjectID = pObj->getID();
+								info->mFromObjectFolderID = idFolder;
+								break;
+							}
+						}
+
+						if (info->mFromObjectID.isNull())
+							info->mFromObjectID = lObjects.front()->getRootEdit()->getID();
+					}
+				}
+// [/SL:KB]
 				info->mFromObject = TRUE;
 			}
 
@@ -3200,11 +3251,16 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 	case IM_INVENTORY_ACCEPTED:
 	{
 //		args["NAME"] = LLSLURL("agent", from_id, "completename").getSLURLString();;
+//		args["ORIGINAL_NAME"] = original_name;
 // [RLVa:KB] - Checked: RLVa-1.2.2
 		// Only anonymize the name if the agent is nearby, there isn't an open IM session to them and their profile isn't open
 		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
 			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, from_id)) || (!RlvUtil::isNearbyAgent(from_id)) || (RlvUIEnabler::hasOpenProfile(from_id)) || (RlvUIEnabler::hasOpenIM(from_id));
-		args["NAME"] = LLSLURL("agent", from_id, (fRlvCanShowName) ? "completename" : "rlvanonym").getSLURLString();;
+		args["NAME"] = LLSLURL("agent", from_id, (fRlvCanShowName) ? "completename" : "rlvanonym").getSLURLString();
+		if (RlvActions::canShowName(RlvActions::SNC_DEFAULT, from_id))
+			args["ORIGINAL_NAME"] = original_name;
+		else
+			args["ORIGINAL_NAME"] = RlvStrings::getAnonym(original_name);
 // [/RLVa:KB]
 		LLSD payload;
 		payload["from_id"] = from_id;
@@ -3360,12 +3416,11 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 		break;
 
 	case IM_SESSION_SEND:		// ad-hoc or group IMs
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 		{
 			// Only show messages if we have a session open (which
 			// should happen after you get an "invitation"
-			if ( (!gIMMgr->hasSession(session_id)) &&
-				 ( (!gAgent.isInGroup(session_id)) || (!gIMMgr->checkSnoozeExpiration(session_id)) || (!gIMMgr->restoreSnoozedSession(session_id)) ) )
+			if ( (!gIMMgr->hasSession(session_id)) && ( (!gAgent.isInGroup(session_id)) || (!gIMMgr->checkSnoozeExpiration(session_id)) || (!gIMMgr->restoreSnoozedSession(session_id)) ) )
 			{
 				return;
 			}
@@ -4051,7 +4106,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		LLAvatarName av_name;
 		if (LLAvatarNameCache::get(from_id, &av_name))
 		{
-			chat.mFromName = av_name.getDisplayName();
+			chat.mFromName = av_name.getCompleteName();
 		}
 		else
 		{
@@ -6363,7 +6418,8 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		args["NAME"] = source_slurl;
 		is_name_group = is_source_group;
 		name_id = source_id;
-		if (!reason.empty())
+
+		if (!reason.empty() && !LLMuteList::getInstance()->isMuted(source_id))
 		{
 			message = LLTrans::getString("paid_you_ldollars" + gift_suffix, args);
 		}
@@ -7681,14 +7737,10 @@ void process_teleport_failed(LLMessageSystem *msg, void**)
 		// Get the message ID
 		msg->getStringFast(_PREHASH_AlertInfo, _PREHASH_Message, message_id);
 		big_reason = LLAgent::sTeleportErrorMessages[message_id];
-		if ( big_reason.size() > 0 )
-		{	// Substitute verbose reason from the local map
-			args["REASON"] = big_reason;
-		}
-		else
-		{	// Nothing found in the map - use what the server returned in the original message block
+		if ( big_reason.size() <= 0 )
+		{
+			// Nothing found in the map - use what the server returned in the original message block
 			msg->getStringFast(_PREHASH_Info, _PREHASH_Reason, big_reason);
-			args["REASON"] = big_reason;
 		}
 
 		LLSD llsd_block;
@@ -7703,6 +7755,16 @@ void process_teleport_failed(LLMessageSystem *msg, void**)
 			}
 			else
 			{
+				if(llsd_block.has("REGION_NAME"))
+				{
+					std::string region_name = llsd_block["REGION_NAME"].asString();
+					if(!region_name.empty())
+					{
+						LLStringUtil::format_map_t name_args;
+						name_args["[REGION_NAME]"] = region_name;
+						LLStringUtil::format(big_reason, name_args);
+					}
+				}
 				// change notification name in this special case
 				if (handle_teleport_access_blocked(llsd_block, message_id, args["REASON"]))
 				{
@@ -7714,7 +7776,7 @@ void process_teleport_failed(LLMessageSystem *msg, void**)
 				}
 			}
 		}
-
+		args["REASON"] = big_reason;
 	}
 	else
 	{	// Extra message payload not found - use what the simulator sent
@@ -8139,7 +8201,7 @@ void send_places_query(const LLUUID& query_id,
 	gAgent.sendReliableMessage();
 }
 
-
+// Deprecated in favor of cap "UserInfo"
 void process_user_info_reply(LLMessageSystem* msg, void**)
 {
 	LLUUID agent_id;
@@ -8157,7 +8219,8 @@ void process_user_info_reply(LLMessageSystem* msg, void**)
 	std::string dir_visibility;
 	msg->getString( "UserData", "DirectoryVisibility", dir_visibility);
 
-	LLFloaterPreference::updateUserInfo(dir_visibility, im_via_email);
+    // For Message based user info information the is_verified is assumed to be false.
+	LLFloaterPreference::updateUserInfo(dir_visibility, im_via_email, false);   
 	LLFloaterSnapshot::setAgentEmail(email);
 }
 

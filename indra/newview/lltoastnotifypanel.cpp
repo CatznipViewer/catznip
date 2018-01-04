@@ -48,6 +48,7 @@
 #include "llavataractions.h"
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 #include "llcheckboxctrl.h"
+#include "llpanelinventoryoffer.h"
 // [/SL:KB]
 
 //const S32 BOTTOM_PAD = VPAD * 3;
@@ -264,6 +265,14 @@ void LLToastNotifyPanel::onClickButton(void* data)
 	{
 		response[button_name] = true;
 	}
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (const LLPanelInventoryOfferFolder* pFolderPanel = self->mControlPanel->findChild<const LLPanelInventoryOfferFolder>("panel_offer_invfolder", true))
+	{
+		response["accept_in"] = pFolderPanel->getAcceptIn();
+		response["accept_in_folder"] = pFolderPanel->getSelectedFolder();
+	}
+// [/SL:KB]
 
 	// disable all buttons
 	self->mControlPanel->setEnabled(FALSE);
@@ -572,7 +581,9 @@ LLPanel* LLToastNotifyPanel::createPanel(const LLSD& form_element)
 	LLPanel* pPanel = LLRegisterPanelClass::instance().createPanelClass(form_element["class"].asString());
 	if (pPanel)
 	{
-		pPanel->buildFromFile(pPanel->getXMLFilename());
+		const std::string panel_file = pPanel->getXMLFilename();
+		pPanel->setXMLFilename(LLStringUtil::null); // Prevent double-creating all our controls
+		pPanel->buildFromFile(panel_file);
 		pPanel->reshape(mControlPanel->getRect().getWidth(), pPanel->getRect().getHeight());
 	}
 	return pPanel;

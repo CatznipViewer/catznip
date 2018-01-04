@@ -30,6 +30,7 @@
 #include "llinventoryfilter.h"
 
 // viewer includes
+//#include "llagent.h"
 #include "llfolderviewmodel.h"
 #include "llfolderviewitem.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -63,7 +64,11 @@ LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 	mHoursAgo(p.hours_ago),
 	mDateSearchDirection(p.date_search_direction),
 	mShowFolderState(p.show_folder_state),
-	mPermissions(p.permissions),
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	mPermissionsAllow(p.permissions_allow),
+	mPermissionsDeny(p.permissions_deny),
+// [/SL:KB]
+//	mPermissions(p.permissions),
 	mFilterTypes(p.types),
 	mFilterUUID(p.uuid),
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
@@ -92,9 +97,13 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 	mCurrentGeneration(0),
 	mFirstRequiredGeneration(0),
 	mFirstSuccessGeneration(0)
+//	mSearchType(SEARCHTYPE_NAME),
+//	mFilterCreatorType(FILTERCREATOR_ALL)
 {
 	// copy mFilterOps into mDefaultFilterOps
 	markDefault();
+//	mUsername = gAgentUsername;
+//	LLStringUtil::toUpper(mUsername);
 }
 
 //bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
@@ -121,7 +130,25 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringma
 		return true;
 	}
 
-//	bool passed = (mFilterSubString.size() ? listener->getSearchableName().find(mFilterSubString) != std::string::npos : true);
+//	std::string desc = listener->getSearchableCreatorName();
+//	switch(mSearchType)
+//	{
+//		case SEARCHTYPE_CREATOR:
+//			desc = listener->getSearchableCreatorName();
+//			break;
+//		case SEARCHTYPE_DESCRIPTION:
+//			desc = listener->getSearchableDescription();
+//			break;
+//		case SEARCHTYPE_UUID:
+//			desc = listener->getSearchableUUIDString();
+//			break;
+//		case SEARCHTYPE_NAME:
+//		default:
+//			desc = listener->getSearchableName();
+//			break;
+//	}
+
+//	bool passed = (mFilterSubString.size() ? desc.find(mFilterSubString) != std::string::npos : true);
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	bool passed = (mFilterSubStringOrig.size()) ? checkAgainstName(listener->getSearchableName(), &match_offsets) : true;
 	passed = passed && (mFilterDescriptionSubString.size() ? boost::algorithm::icontains(listener->getDescription(), mFilterDescriptionSubString) : true);
@@ -129,6 +156,7 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringma
 	passed = passed && checkAgainstFilterType(listener);
 	passed = passed && checkAgainstPermissions(listener);
 	passed = passed && checkAgainstFilterLinks(listener);
+//	passed = passed && checkAgainstCreator(listener);
 
 	return passed;
 }
@@ -341,6 +369,17 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		}
 	}
 	
+	if(filterTypes & FILTERTYPE_WORN)
+	{
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
+		const LLUUID& object_id = listener->getUUID();
+// [/SL:KB]
+		if (!get_is_item_worn(object_id))
+		{
+			return FALSE;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// FILTERTYPE_UUID
 	// Pass if this item is the target UUID or if it links to the target UUID
@@ -560,7 +599,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLInventoryItem* item) cons
 bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInventory* listener) const
 {
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
-	if (PERM_NONE == mFilterOps.mPermissions)
+	if ( (PERM_NONE == mFilterOps.mPermissionsAllow) && (PERM_NONE == mFilterOps.mPermissionsDeny) )
 		return TRUE;
 // [/SL:KB]
 
@@ -576,7 +615,9 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInven
 			perm = linked_item->getPermissionMask();
 	}
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
-	return (~perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
+	return
+		((perm & mFilterOps.mPermissionsAllow) == mFilterOps.mPermissionsAllow) &&
+		((~perm & mFilterOps.mPermissionsDeny) == mFilterOps.mPermissionsDeny);
 // [/SL:KB]
 //	return (perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
 }
@@ -584,7 +625,7 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInven
 bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) const
 {
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
-	if (PERM_NONE == mFilterOps.mPermissions)
+	if ( (PERM_NONE == mFilterOps.mPermissionsAllow) && (PERM_NONE == mFilterOps.mPermissionsDeny) )
 		return TRUE;
 // [/SL:KB]
 
@@ -594,7 +635,12 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) con
 	PermissionMask perm = new_item->getPermissionMask();
 	new_item = NULL;
 
-	return (perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	return
+		((perm & mFilterOps.mPermissionsAllow) == mFilterOps.mPermissionsAllow) &&
+		((~perm & mFilterOps.mPermissionsDeny) == mFilterOps.mPermissionsDeny);
+// [/SL:KB]
+//	return (perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
 }
 
 bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInventory* listener) const
@@ -621,6 +667,24 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	return TRUE;
 }
 
+//bool LLInventoryFilter::checkAgainstCreator(const LLFolderViewModelItemInventory* listener) const
+//{
+//	if (!listener) return TRUE;
+//	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+//	switch(mFilterCreatorType)
+//	{
+//		case FILTERCREATOR_SELF:
+//			if(is_folder) return FALSE;
+//			return (listener->getSearchableCreatorName() == mUsername);
+//		case FILTERCREATOR_OTHERS:
+//			if(is_folder) return FALSE;
+//			return (listener->getSearchableCreatorName() != mUsername);
+//		case FILTERCREATOR_ALL:
+//		default:
+//			return TRUE;
+//	}
+//}
+
 //const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 //{
 //	return mFilterSubString;
@@ -628,7 +692,14 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 
 //std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
 //{
-//	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+//	if (mSearchType == SEARCHTYPE_NAME)
+//	{
+//		return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+//	}
+//	else
+//	{
+//		return std::string::npos;
+//	}
 //}
 
 bool LLInventoryFilter::isDefault() const
@@ -650,8 +721,10 @@ bool LLInventoryFilter::isNotDefault() const
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	not_default |= (mFilterSubStringOrig.size());
 	not_default |= (mFilterDescriptionSubString.size());
+	not_default |= (mFilterOps.mPermissionsAllow != mDefaultFilterOps.mPermissionsAllow);
+	not_default |= (mFilterOps.mPermissionsDeny != mDefaultFilterOps.mPermissionsDeny);
 // [/SL:KB]
-	not_default |= (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions);
+//	not_default |= (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions);
 	not_default |= (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate);
 	not_default |= (mFilterOps.mMaxDate != mDefaultFilterOps.mMaxDate);
 	not_default |= (mFilterOps.mHoursAgo != mDefaultFilterOps.mHoursAgo);
@@ -670,8 +743,10 @@ bool LLInventoryFilter::isActive() const
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 		|| mFilterSubStringOrig.size()
 		|| mFilterDescriptionSubString.size()
+		|| mFilterOps.mPermissionsAllow != PERM_NONE
+		|| mFilterOps.mPermissionsDeny != PERM_NONE
 // [/SL:KB]
-		|| mFilterOps.mPermissions != PERM_NONE 
+//		|| mFilterOps.mPermissions != PERM_NONE 
 		|| mFilterOps.mMinDate != time_min()
 		|| mFilterOps.mMaxDate != time_max()
 		|| mFilterOps.mHoursAgo != 0;
@@ -709,6 +784,24 @@ void LLInventoryFilter::updateFilterTypes(U64 types, U64& current_types)
 	}
 }
 
+//void LLInventoryFilter::setSearchType(ESearchType type)
+//{
+//	if(mSearchType != type)
+//	{
+//		mSearchType = type;
+//		setModified();
+//	}
+//}
+
+//void LLInventoryFilter::setFilterCreator(EFilterCreatorType type)
+//{
+//	if(mFilterCreatorType != type)
+//	{
+//		mFilterCreatorType = type;
+//		setModified();
+//	}
+//}
+
 void LLInventoryFilter::setFilterObjectTypes(U64 types)
 {
 	updateFilterTypes(types, mFilterOps.mFilterObjectTypes);
@@ -731,6 +824,11 @@ void LLInventoryFilter::setFilterEmptySystemFolders()
 {
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
 }
+
+//void LLInventoryFilter::setFilterWorn()
+//{
+//    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+//}
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 void LLInventoryFilter::setFilterWorn(bool filter)
@@ -1006,16 +1104,15 @@ bool LLInventoryFilter::hasFilterDescriptionString() const
 {
 	return !mFilterDescriptionSubString.empty();
 }
-// [/SL:KB]
 
-void LLInventoryFilter::setFilterPermissions(PermissionMask perms)
+void LLInventoryFilter::setFilterPermissionsAllow(PermissionMask perms)
 {
-	if (mFilterOps.mPermissions != perms)
+	if (mFilterOps.mPermissionsAllow != perms)
 	{
 		// keep current items only if no perm bits getting turned off
-		BOOL fewer_bits_set = (mFilterOps.mPermissions & ~perms);
-		BOOL more_bits_set = (~mFilterOps.mPermissions & perms);
-		mFilterOps.mPermissions = perms;
+		BOOL fewer_bits_set = (mFilterOps.mPermissionsAllow & ~perms);
+		BOOL more_bits_set = (~mFilterOps.mPermissionsAllow & perms);
+		mFilterOps.mPermissionsAllow = perms;
 
 		if (more_bits_set && fewer_bits_set)
 		{
@@ -1032,6 +1129,56 @@ void LLInventoryFilter::setFilterPermissions(PermissionMask perms)
 		}
 	}
 }
+
+void LLInventoryFilter::setFilterPermissionsDeny(PermissionMask perms)
+{
+	if (mFilterOps.mPermissionsDeny != perms)
+	{
+		// keep current items only if no perm bits getting turned off
+		BOOL fewer_bits_set = (mFilterOps.mPermissionsDeny & ~perms);
+		BOOL more_bits_set = (~mFilterOps.mPermissionsDeny & perms);
+		mFilterOps.mPermissionsDeny = perms;
+
+		if (more_bits_set && fewer_bits_set)
+		{
+			setModified(FILTER_RESTART);
+		}
+		else if (more_bits_set)
+		{
+			// target must have all requested permission bits, so more bits == more restrictive
+			setModified(FILTER_MORE_RESTRICTIVE);
+		}
+		else if (fewer_bits_set)
+		{
+			setModified(FILTER_LESS_RESTRICTIVE);
+		}
+	}
+}
+// [/SL:KB]
+//void LLInventoryFilter::setFilterPermissions(PermissionMask perms)
+//{
+//	if (mFilterOps.mPermissions != perms)
+//	{
+//		// keep current items only if no perm bits getting turned off
+//		BOOL fewer_bits_set = (mFilterOps.mPermissions & ~perms);
+//		BOOL more_bits_set = (~mFilterOps.mPermissions & perms);
+//		mFilterOps.mPermissions = perms;
+//
+//		if (more_bits_set && fewer_bits_set)
+//		{
+//			setModified(FILTER_RESTART);
+//		}
+//		else if (more_bits_set)
+//		{
+//			// target must have all requested permission bits, so more bits == more restrictive
+//			setModified(FILTER_MORE_RESTRICTIVE);
+//		}
+//		else if (fewer_bits_set)
+//		{
+//			setModified(FILTER_LESS_RESTRICTIVE);
+//		}
+//	}
+//}
 
 void LLInventoryFilter::setDateRange(time_t min_date, time_t max_date)
 {
@@ -1181,7 +1328,7 @@ void LLInventoryFilter::setFilterCreatorUUID(const LLUUID& creator_id)
 	if (mFilterOps.mFilterCreatorUUID != creator_id)
 	{
 		if (mFilterOps.mFilterCreatorUUID.isNull())
-			setModified(FILTER_MORE_RESTRICTIVE);
+			setModified(FILTER_LESS_RESTRICTIVE);
 		else
 			setModified(FILTER_RESTART);
 
@@ -1511,8 +1658,10 @@ LLInventoryFilter& LLInventoryFilter::operator=( const  LLInventoryFilter&  othe
 	setHoursAgo(other.getHoursAgo());
 	setDateSearchDirection(other.getDateSearchDirection());
 	setShowFolderState(other.getShowFolderState());
-	setFilterPermissions(other.getFilterPermissions());
+//	setFilterPermissions(other.getFilterPermissions());
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.3
+	setFilterPermissionsAllow(other.getFilterPermissionsAllow());
+	setFilterPermissionsDeny(other.getFilterPermissionsDeny());
 	setFilterSubString(other.getFilterSubStringOrig());
 // [/SL:KB]
 //	setFilterSubString(other.getFilterSubString());
@@ -1541,8 +1690,10 @@ void LLInventoryFilter::toParams(Params& params) const
 		params.substring = getFilterSubStringOrig();
 	if (mFilterDescriptionSubString.size())
 		params.description_substring = getFilterDescriptionSubString();
-	if (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions)
-		params.filter_ops.permissions = getFilterPermissions();
+	if (mFilterOps.mPermissionsAllow != mDefaultFilterOps.mPermissionsAllow)
+		params.filter_ops.permissions_allow = getFilterPermissionsAllow();
+	if (mFilterOps.mPermissionsDeny != mDefaultFilterOps.mPermissionsDeny)
+		params.filter_ops.permissions_deny = getFilterPermissionsDeny();
 
 	if (isSinceLogoff())
 	{
@@ -1628,9 +1779,14 @@ void LLInventoryFilter::fromParams(const Params& params)
 		setFilterDescriptionSubString(params.description_substring);
 	}
 
-	if (params.filter_ops.permissions.isProvided())
+	if (params.filter_ops.permissions_allow.isProvided())
 	{
-		setFilterPermissions(params.filter_ops.permissions);
+		setFilterPermissionsAllow(params.filter_ops.permissions_allow);
+	}
+
+	if (params.filter_ops.permissions_deny.isProvided())
+	{
+		setFilterPermissionsDeny(params.filter_ops.permissions_deny);
 	}
 
 	if (params.since_logoff.isProvided())
@@ -1712,10 +1868,21 @@ std::string::size_type LLInventoryFilter::getFilterStringSize() const
 //	return mFilterSubString.size();
 }
 
-PermissionMask LLInventoryFilter::getFilterPermissions() const
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+PermissionMask LLInventoryFilter::getFilterPermissionsAllow() const
 {
-	return mFilterOps.mPermissions;
+	return mFilterOps.mPermissionsAllow;
 }
+
+PermissionMask LLInventoryFilter::getFilterPermissionsDeny() const
+{
+	return mFilterOps.mPermissionsDeny;
+}
+// [/SL:KB]
+//PermissionMask LLInventoryFilter::getFilterPermissions() const
+//{
+//	return mFilterOps.mPermissions;
+//}
 
 time_t LLInventoryFilter::getMinDate() const
 {

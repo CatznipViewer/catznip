@@ -1,11 +1,57 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- color="Transparent"
  follows="all"
  height="300"
  layout="topleft"
  name="panel_quickprefs_wearing"
  width="300">
+	<menu_button
+	 follows="top|left"
+	 height="25"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_overlay="Conv_toolbar_sort"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 layout="topleft"
+	 left="1"
+	 menu_filename="menu_quickprefs_wearing_sort.xml"
+	 menu_position="bottomleft"
+	 name="options_sort_btn"
+	 tool_tip="Show sorting options"
+	 top="0"
+	 width="31" />
+	<button
+	 enabled="false"
+	 follows="top|left"
+	 height="25"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 label="Current Outfit"
+	 layout="topleft"
+	 left_pad="1"
+	 name="inv_folder_btn"
+	 top="0"
+	 width="135" />
+	<icon
+	 follows="top|left|right"
+	 height="25"
+	 image_name="Toolbar_Right_Off"
+	 layout="topleft"
+	 left_pad="1"
+	 name="dummy_icon"
+	 right="-1" />
+	<filter_editor
+	 follows="top|left|right"
+	 height="23"
+	 label="Enter search text"
+	 layout="topleft"
+	 left_delta="1"
+	 name="filter_editor"
+	 right="-1"
+	 text_pad_left="10"
+	 top="1" />
+
 	<wearing_items_list
 	 bottom="-1"
 	 follows="all"
@@ -15,6 +61,6 @@
 	 name="cof_items_list"
 	 right="-1"
 	 standalone="true"
-	 top="1"
+	 top="27"
 	 worn_indication_enabled="false" />
 </panel>

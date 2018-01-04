@@ -663,6 +663,7 @@ class LLAdvancedDumpInfoToConsole : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
+		gDebugView->mDebugConsolep->setVisible(TRUE);
 		std::string info_type = userdata.asString();
 		if ("region" == info_type)
 		{
@@ -1994,6 +1995,8 @@ class LLAdvancedRebakeTextures : public view_listener_t
 // [SL:KB] - Patch: Appearance-PhantomAttach | Checked: Catznip-5.0
 void handle_refresh_attachments()
 {
+	if (isAgentAvatarValid())
+		gAgentAvatarp->rebuildAttachments();
 	LLAttachmentsMgr::instance().refreshAttachments();
 }
 // [/SL:KB]
@@ -4174,10 +4177,11 @@ class LLTogglePanelPeopleTab : public view_listener_t
 //			|| panel_name == "groups_panel"
 //			|| panel_name == "nearby_panel"
 //			|| panel_name == "blocked_panel")
-// [SL:KB] - Patch: World-Derender | Checked: 2013-07-08 (Catznip-3.5)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
 		if (   panel_name == "friends_panel"
 			|| panel_name == "groups_panel"
-			|| panel_name == "nearby_panel")
+			|| panel_name == "nearby_panel"
+			|| panel_name == "recent_panel")
 // [/SL:KB]
 		{
 			return togglePeoplePanel(panel_name, param);
@@ -4598,6 +4602,13 @@ void handle_reset_view()
 	gAgentCamera.switchCameraPreset(CAMERA_PRESET_REAR_VIEW);
 	reset_view_final( TRUE );
 	LLFloaterCamera::resetCameraMode();
+
+// [SL:KB] - Patch: Appearance-RefreshAttachments | Checked: Catznip-5.3
+	if (isAgentAvatarValid())
+	{
+		gAgentAvatarp->rebuildAttachments();
+	}
+// [/SL:KB]
 }
 
 class LLViewResetView : public view_listener_t
@@ -6733,6 +6744,9 @@ class LLAvatarResetSkeleton: public view_listener_t
 		if(avatar)
         {
             avatar->resetSkeleton(false);
+// [SL:KB] - Patch: Appearance-RefreshAttachments | Checked: Catznip-5.3
+			avatar->rebuildAttachments();
+// [/SL:KB]
         }
         return true;
     }
@@ -6746,6 +6760,9 @@ class LLAvatarResetSkeletonAndAnimations : public view_listener_t
 		if (avatar)
 		{
 			avatar->resetSkeleton(true);
+// [SL:KB] - Patch: Appearance-RefreshAttachments | Checked: Catznip-5.3
+			avatar->rebuildAttachments();
+// [/SL:KB]
 		}
 		return true;
 	}
@@ -9042,7 +9059,7 @@ void handle_report_bug(const LLSD& param)
 	LLUIString url(param.asString());
 	
 	LLStringUtil::format_map_t replace;
-	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getViewerInfoString());
+	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getShortViewerInfoString());
 	LLSLURL location_url;
 	LLAgentUI::buildSLURL(location_url);
 	replace["[LOCATION]"] = LLURI::escape(location_url.getSLURLString());
@@ -10060,6 +10077,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedCheckXUINames(), "Advanced.CheckXUINames");
 	view_listener_t::addMenu(new LLAdvancedSendTestIms(), "Advanced.SendTestIMs");
 	commit.add("Advanced.FlushNameCaches", boost::bind(&handle_flush_name_caches));
+// [SL:KB] - Patch UI-Floaters | Checked: Catznip-5.2
+	commit.add("Advanced.CycleAllFloaters", boost::bind(&LLFloaterReg::cycleFloaters, LLStringUtil::null));
+// [/SL:KB]
 
 	// Advanced > Character > Grab Baked Texture
 	view_listener_t::addMenu(new LLAdvancedGrabBakedTexture(), "Advanced.GrabBakedTexture");

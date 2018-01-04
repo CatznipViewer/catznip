@@ -300,7 +300,7 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 void fetch_viewer_data();
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-09-22 (Catznip-3.3)
@@ -436,7 +436,7 @@ bool idle_startup()
 	const std::string delims (" ");
 	std::string system;
 	int begIdx, endIdx;
-	std::string osString = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	std::string osString = LLOSInfo::instance().getOSStringSimple();
 
 	begIdx = osString.find_first_not_of (delims);
 	endIdx = osString.find_first_of (delims, begIdx);
@@ -538,7 +538,7 @@ bool idle_startup()
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 		fetch_viewer_data();
 // [/SL:KB]
 
@@ -880,7 +880,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 				LLPanelLogin::selectUser(gUserCredential, gRememberPassword);
@@ -957,7 +957,8 @@ bool idle_startup()
 
 		// Don't do anything.  Wait for the login view to call the login_callback,
 		// which will push us to the next state.
-		display_startup();
+
+		// display() function will be the one to run display_startup()
 		// Sleep so we don't spin the CPU
 		ms_sleep(1);
 		return FALSE;
@@ -1030,7 +1031,7 @@ bool idle_startup()
 		// Only include the agent name if the user consented
 		if (gCrashSettings.getBOOL("CrashSubmitName"))
 		{
-			gDebugInfo["LoginName"] = userid;                                                                              
+			gDebugInfo["UserInfo"]["LoginName"] = userid;                                                                              
 		}
 // [/SL:KB]
 //		gDebugInfo["LoginName"] = userid;                                                                              
@@ -2499,13 +2500,15 @@ void login_callback(S32 option, void *userdata)
 */
 void show_release_notes_if_required()
 {
-    if (LLVersionInfo::getChannelAndVersion() != gLastRunVersion
+    static bool release_notes_shown = false;
+    if (!release_notes_shown && (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
         && LLVersionInfo::getViewerMaturity() != LLVersionInfo::TEST_VIEWER // don't show Release Notes for the test builds
         && gSavedSettings.getBOOL("UpdaterShowReleaseNotes")
         && !gSavedSettings.getBOOL("FirstLoginThisInstall"))
     {
         LLSD info(LLAppViewer::instance()->getViewerInfo());
         LLWeb::loadURLInternal(info["VIEWER_RELEASE_NOTES_URL"]);
+        release_notes_shown = true;
     }
 }
 
@@ -3027,6 +3030,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
@@ -3473,7 +3477,7 @@ bool process_login_success_response()
 	// Only include the agent UUID if the user consented
 	if (gCrashSettings.getBOOL("CrashSubmitName"))
 	{
-		gDebugInfo["AgentID"] = text;
+		gDebugInfo["UserInfo"]["AgentID"] = text;
 	}
 // [/SL:KB]
 //	gDebugInfo["AgentID"] = text;
@@ -3528,6 +3532,15 @@ bool process_login_success_response()
 		    gAgentUsername = gAgentUsername + " " + last_name;
 		}
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if ( (!gAgentUsername.empty()) && (gCrashSettings.getBOOL("CrashSubmitName")) )
+	{
+		std::string userName = gAgentUsername;
+		LLStringUtil::replaceChar(userName, ' ', '.');
+		LLStringUtil::toLower(userName);
+		gDebugInfo["UserInfo"]["UserName"] = userName;
+	}
+// [/SL:KB]
 
 	if(gDisplayName.empty())
 	{
@@ -3554,6 +3567,13 @@ bool process_login_success_response()
 	{
 		gDisplayName.assign(gUserCredential->asString());
 	}
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+	if (gCrashSettings.getBOOL("CrashSubmitName"))
+	{
+		gDebugInfo["UserInfo"]["DisplayName"] = gDisplayName;
+	}
+// [/SL:KB]
 
 	// this is their actual ability to access content
 	text = response["agent_access_max"].asString();
@@ -3655,7 +3675,7 @@ bool process_login_success_response()
 		gAgent.setHomePosRegion(region_handle, position);
 	}
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-2.6
 	if (gAgent.mMOTD.empty())
 	{
 		gAgent.mMOTD.assign("Second Life: ").append(response["message"]);
@@ -3860,7 +3880,7 @@ void transition_back_to_login_panel(const std::string& emsg)
 }
 
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
-void fetch_viewer_data_cb(const LLSD& sdData)
+void fetch_viewer_data_cb(LLSD sdData)
 {
 	// Message of the day
 	if (sdData.has("motd"))
@@ -3880,7 +3900,7 @@ void fetch_viewer_data_cb(const LLSD& sdData)
 				const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
 				if (idGroup.notNull())
 				{
-					gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
+					gAgent.mGroupPreludes.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
 				}
 			}
 		}
@@ -3894,6 +3914,12 @@ void fetch_viewer_data_cb(const LLSD& sdData)
 		{
 			gAgent.mFeedbackInfo = sdFeedbackInfo;
 		}
+	}
+
+	// Login page
+	if (sdData.has("login_url"))
+	{
+		gSavedSettings.setString("ViewerLoginURL", sdData["login_url"]);
 	}
 }
 

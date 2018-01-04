@@ -440,22 +440,17 @@ public:
 	virtual void doItem(LLFolderViewItem* item);
 };
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
-class LLHasUnfilteredDescendents : public LLFolderViewFunctor
+class LLAllDescendentsPassedFilter : public LLFolderViewFunctor
 {
 public:
-	LLHasUnfilteredDescendents() {}
-	~LLHasUnfilteredDescendents() override {}
-
-	void doFolder(LLFolderViewFolder* pFolder) override;
-	void doItem(LLFolderViewItem* pItem) override;
-
-	bool hasUnfilteredDescendent() const { return m_fHasUnfilteredDescendent; }
-
+	LLAllDescendentsPassedFilter() : mAllDescendentsPassedFilter(true) {}
+	/*virtual*/ ~LLAllDescendentsPassedFilter() {}
+	/*virtual*/ void doFolder(LLFolderViewFolder* folder);
+	/*virtual*/ void doItem(LLFolderViewItem* item);
+	bool allDescendentsPassedFilter() const { return mAllDescendentsPassedFilter; }
 protected:
-	bool m_fHasUnfilteredDescendent = false;
+	bool mAllDescendentsPassedFilter;
 };
-// [/SL:KB]
 
 // Flags for buildContextMenu()
 const U32 SUPPRESS_OPEN_ITEM = 0x1;

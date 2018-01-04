@@ -38,6 +38,7 @@
 #include "llviewercontrol.h"
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+#include "llwindow.h"
 #include <boost/lexical_cast.hpp>
 // [/SL:KB]
 
@@ -75,8 +76,15 @@ BOOL LLFloaterConversationPreview::postBuild()
 {
 	mChatHistory = getChild<LLChatHistory>("chat_history");
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	mChatHistory->getEditor()->setTrackEnd(false);
 	mFilterCombo = findChild<LLComboBox>("filter_combo");
 	mFilterCombo->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onMonthFilterChanged, this));
+	mSearchEditor = findChild<LLLineEditor>("search_editor");
+	mSearchEditor->setCommitOnFocusLost(false);
+	mSearchEditor->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::DOWN));
+	findChild<LLButton>("search_prev_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::UP));
+	findChild<LLButton>("search_next_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onSearch, this, ESearchDirection::DOWN));
+	findChild<LLButton>("open_editor_btn")->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onOpenEditor, this));
 // [/SL:KB]
 
 	const LLConversation* conv = LLConversationLog::instance().getConversation(mSessionID);
@@ -179,30 +187,62 @@ void LLFloaterConversationPreview::onMonthFilterChanged()
 	mShowHistory = true;
 }
 
-void LLFloaterConversationPreview::onSearch(const std::string& strNeedle, bool fSearchUp)
+void LLFloaterConversationPreview::onOpenEditor()
 {
-	bool fFound = false;
-	do
+	std::string strFilePath = LLLogChat::makeLogFileName(mChatHistoryFileName);
+	if ( (!strFilePath.empty()) && (!LLFile::isfile(strFilePath)) )
 	{
-		fFound = mChatHistory->getEditor()->selectNext(strNeedle, true, false, fSearchUp);
-		if (!fFound)
+		strFilePath = LLLogChat::oldLogFileName(mChatHistoryFileName);
+		if ( (!strFilePath.empty()) && (!LLFile::isfile(strFilePath)) )
+			return;
+	}
+
+	LLView::getWindow()->openFile(strFilePath);
+}
+
+void LLFloaterConversationPreview::onSearch(ESearchDirection eDirection)
+{
+	if (mSearchEditor->getText().empty())
+	{
+		return;
+	}
+
+	if (LLTextEditor* pChatEditor = mChatHistory->getEditor())
+	{
+		// If the user manually scrolled the chat hisotry then start searching at the first visible line rather than the top
+		if ( (!pChatEditor->scrolledToStart()) && (pChatEditor->getCursorPos() == 0) )
 		{
-			int newPage = (!fSearchUp) ? mPageSpinner->get() + 1 : mPageSpinner->get() - 1;
-			if ( (newPage < mPageSpinner->getMinValue()) || (newPage > mPageSpinner->getMaxValue()) )
-				break;
-
-			mPageSpinner->forceSetValue(mPageSpinner->get() + 1);
-			mPageSpinner->onCommit();
-			showHistory();
-			mShowHistory = false;
-
-			if (!fSearchUp)
-				mChatHistory->getEditor()->startOfDoc();
-			else
-				mChatHistory->getEditor()->endOfDoc();
+			pChatEditor->setCursorPos(pChatEditor->getFirstVisibleLine());
 		}
 
-	} while (!fFound);
+		bool fContinue = true;
+		do
+		{
+			fContinue = !pChatEditor->selectNext(mSearchEditor->getText(), true, false, ESearchDirection::UP == eDirection, true);
+			if (fContinue)
+			{
+				int newPage = (ESearchDirection::DOWN == eDirection) ? mPageSpinner->get() + 1 : mPageSpinner->get() - 1;
+				if ( (newPage < mPageSpinner->getMinValue()) || (newPage > mPageSpinner->getMaxValue()) )
+				{
+					fContinue = false;
+					LLNotificationsUtil::add("GenericAlert", LLSD().with("MESSAGE", getString((newPage < mPageSpinner->getMinValue()) ? "NotFoundStart" : "NotFoundEnd")));
+					newPage = llclamp(newPage, (int)mPageSpinner->getMinValue(), (int)mPageSpinner->getMaxValue());
+					if (mPageSpinner->getValueF32() == newPage)
+						break;
+				}
+
+				mPageSpinner->forceSetValue(newPage);
+				mPageSpinner->onCommit();
+				showHistory();
+				mShowHistory = false;
+
+				if (ESearchDirection::DOWN == eDirection)
+					pChatEditor->startOfDoc();
+				else
+					pChatEditor->endOfDoc();
+			}
+		} while (fContinue);
+	}
 }
 
 void LLFloaterConversationPreview::refreshMonthFilter()
@@ -412,7 +452,10 @@ void LLFloaterConversationPreview::showHistory()
 
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
 	mChatHistory->getEditor()->deselect();
-	mChatHistory->getEditor()->startOfDoc();
+	if (mCurrentPage + 1 < mPageSpinner->getMaxValue())
+		mChatHistory->getEditor()->startOfDoc();
+	else
+		mChatHistory->getEditor()->endOfDoc();
 // [/SL:KB]
 }
 

@@ -234,7 +234,7 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
 		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
 // [/SL:KB]
-//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+//		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), LLUUID()));
 // [/SL:KB]
 //		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
 	}
@@ -244,7 +244,7 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
 		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
 // [/SL:KB]
-//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+//		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->geRawMessage(), from_id));
 // [/SL:KB]
 //		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 	}
@@ -350,6 +350,20 @@ std::string LLHandlerUtil::getSubstitutionName(const LLNotificationPtr& notifica
 		}
 	}
 	return res;
+}
+
+// static
+std::string LLHandlerUtil::getSubstitutionOriginalName(const LLNotificationPtr& notification)
+{
+	if(notification->getSubstitutions().has("ORIGINAL_NAME"))
+	{
+		std::string name = notification->getSubstitutions()["ORIGINAL_NAME"];
+		if(!name.empty())
+		{
+			return name;
+		}
+	}
+	return LLHandlerUtil::getSubstitutionName(notification);
 }
 
 // static

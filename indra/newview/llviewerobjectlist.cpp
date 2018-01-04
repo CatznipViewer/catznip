@@ -1303,9 +1303,11 @@ void LLViewerObjectList::clearDebugText()
 
 void LLViewerObjectList::cleanupReferences(LLViewerObject *objectp)
 {
+	bool new_dead_object = true;
 	if (mDeadObjects.find(objectp->mID) != mDeadObjects.end())
 	{
 		LL_INFOS() << "Object " << objectp->mID << " already on dead list!" << LL_ENDL;	
+		new_dead_object = false;
 	}
 	else
 	{
@@ -1342,7 +1344,10 @@ void LLViewerObjectList::cleanupReferences(LLViewerObject *objectp)
 	// Also, not cleaned up
 	removeDrawable(objectp->mDrawable);
 
-	mNumDeadObjects++;
+	if(new_dead_object)
+	{
+		mNumDeadObjects++;
+	}
 }
 
 static LLTrace::BlockTimerStatHandle FTM_REMOVE_DRAWABLE("Remove Drawable");
@@ -2275,6 +2280,27 @@ void LLViewerObjectList::findOrphans(LLViewerObject* objectp, U32 ip, U32 port)
 		}
 	}
 }
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+bool LLViewerObjectList::findOwnObjects(const LLUUID& region_id, const LLVector3& region_pos, std::list<LLViewerObject*>& object_list) const
+{
+	object_list.clear();
+	for (const auto& itObj : mObjects)
+	{
+		LLViewerObject* pObj = itObj.get();
+		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) )
+		{
+			if ( (dist_vec(pObj->getPositionRegion(), region_pos) < F_ALMOST_ZERO) ||
+				 ( (pObj->isAttachment()) && ( (!pObj->isDrawableState(LLDrawable::RIGGED)) || (!pObj->isRootEdit()) ) && (isAgentAvatarValid()) &&
+			       (dist_vec(gAgentAvatarp->getPositionRegion() - (pObj->getRootEdit()->getPositionRegion() - pObj->getPositionRegion()) * gAgentAvatarp->getRotationRegion(), region_pos) < F_ALMOST_ZERO) ) )
+			{
+				object_list.push_back(pObj);
+			}
+		}
+	}
+	return !object_list.empty();
+}
+// [/SL:KB]
 
 ////////////////////////////////////////////////////////////////////////////
 

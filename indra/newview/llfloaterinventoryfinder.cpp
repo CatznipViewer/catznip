@@ -48,7 +48,7 @@ LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* invento
 	: LLFloater(LLSD())
 	, m_pPanelMainInventory(inventory_view)
 {
-	mCommitCallbackRegistrar.add("Filter.Refresh", boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	mCommitCallbackRegistrar.add("Filter.Refresh", boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	mCommitCallbackRegistrar.add("Filter.Reset", boost::bind(&LLPanelMainInventory::resetFilters, inventory_view));
 	mCommitCallbackRegistrar.add("Filter.SelectNoTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, false));
 	mCommitCallbackRegistrar.add("Filter.SelectAllTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, true));
@@ -78,19 +78,19 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	// Filter by name/description/creator/permissions
 	//
 	m_pFilterName = findChild<LLFilterEditor>("filter_name");
-	m_pFilterName->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterName->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterNameMatchType = findChild<LLRadioGroup>("radio_name_match_type");
-	m_pFilterNameMatchType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterNameMatchType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterDescription = findChild<LLFilterEditor>("filter_description");
-	m_pFilterDescription->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterDescription->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterCreator = findChild<LLAvatarEditor>("filter_creator");
-	m_pFilterCreator->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterCreator->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterPermModify = findChild<LLCheckBoxCtrl>("check_perm_modify");
-	m_pFilterPermModify->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermModify->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterPermCopy = findChild<LLCheckBoxCtrl>("check_perm_copy");
-	m_pFilterPermCopy->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermCopy->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterPermTransfer = findChild<LLCheckBoxCtrl>("check_perm_transfer");
-	m_pFilterPermTransfer->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermTransfer->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 
 	//
 	// Filter by (inventory) type
@@ -110,7 +110,7 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	for (int idxType = 0; idxType < LLInventoryType::IT_COUNT; idxType++)
 	{
 		if (m_pFilterTypeCtrls[idxType])
-			m_pFilterTypeCtrls[idxType]->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+			m_pFilterTypeCtrls[idxType]->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	}
 
 	//
@@ -121,31 +121,31 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	m_pFilterMinAgeCheck = findChild<LLCheckBoxCtrl>("check_min_age");
 	m_pFilterMinAgeCheck->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onFilterByDate, this, _1, true));
 	m_pFilterMinAgeSpin = findChild<LLSpinCtrl>("spin_min_age");
-	m_pFilterMinAgeSpin->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterMinAgeSpin->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterMinAgeType = findChild<LLComboBox>("combo_min_age");
-	m_pFilterMinAgeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterMinAgeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterMaxAgeCheck = findChild<LLCheckBoxCtrl>("check_max_age");
 	m_pFilterMaxAgeCheck->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onFilterByDate, this, _1, true));
 	m_pFilterMaxAgeSpin = findChild<LLSpinCtrl>("spin_max_age");
-	m_pFilterMaxAgeSpin->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterMaxAgeSpin->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterMaxAgeType = findChild<LLComboBox>("combo_max_age");
-	m_pFilterMaxAgeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterMaxAgeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterAgeRangeCheck = findChild<LLCheckBoxCtrl>("check_range");
 	m_pFilterAgeRangeCheck->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onFilterByDate, this, _1, true));
 	m_pFilterAgeRangeStart = findChild<LLSpinCtrl>("spin_range_start");
-	m_pFilterAgeRangeStart->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterAgeRangeStart->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterAgeRangeEnd = findChild<LLSpinCtrl>("spin_range_end");
-	m_pFilterAgeRangeEnd->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterAgeRangeEnd->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterAgeRangeType = findChild<LLComboBox>("combo_range");
-	m_pFilterAgeRangeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterAgeRangeType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 
 	//
 	// General options
 	//
 	m_pFilterShowEmpty = findChild<LLCheckBoxCtrl>("check_show_empty");
-	m_pFilterShowEmpty->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterShowEmpty->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 	m_pFilterShowLinks = findChild<LLCheckBoxCtrl>("check_show_links");
-	m_pFilterShowLinks->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterShowLinks->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this, _1));
 
 	refreshControls();
 
@@ -169,9 +169,9 @@ void LLFloaterInventoryFinder::refreshControls()
 	setNameFilterValue( (m_pFilter->hasFilterString()) ? m_pFilter->getFilterSubStringOrig() : LLStringUtil::null );
 	m_pFilterDescription->setValue( (m_pFilter->hasFilterDescriptionString()) ? m_pFilter->getFilterDescriptionSubString() : LLStringUtil::null );
 	m_pFilterCreator->setValue( (m_pFilter->isFilterCreatorUUID()) ? m_pFilter->getFilterCreatorUUID() : LLUUID::null );
-	m_pFilterPermModify->set(m_pFilter->getFilterPermissions() & PERM_MODIFY);
-	m_pFilterPermCopy->set(m_pFilter->getFilterPermissions() & PERM_COPY);
-	m_pFilterPermTransfer->set(m_pFilter->getFilterPermissions() & PERM_TRANSFER);
+	m_pFilterPermModify->set(m_pFilter->getFilterPermissionsDeny() & PERM_MODIFY);
+	m_pFilterPermCopy->set(m_pFilter->getFilterPermissionsDeny() & PERM_COPY);
+	m_pFilterPermTransfer->set(m_pFilter->getFilterPermissionsDeny() & PERM_TRANSFER);
 
 	//
 	// Filter by (inventory) type
@@ -205,13 +205,18 @@ void LLFloaterInventoryFinder::refreshControls()
 		time_t timeCurrent;
 		time(&timeCurrent);
 
-		U32 nSecondsStart = (U32)llmax(timeCurrent - m_pFilter->getMinDate(), (time_t)0);
-		U32 nSecondsEnd = (U32)llmax(timeCurrent - m_pFilter->getMaxDate(), (time_t)0);
+		U32 nSecondsStart = (U32)llmax(timeCurrent - m_pFilter->getMinDate(), (time_t)0) + 30 * 60;
+		U32 nSecondsEnd = (U32)llmax(timeCurrent - m_pFilter->getMaxDate(), (time_t)0) + 30 * 60;
 
 		U32 nHoursStart = llmin(nSecondsStart, nSecondsEnd) / (60 * 60);
 		U32 nHoursEnd = llmax(nSecondsStart, nSecondsEnd) / (60 * 60);
 
-		if ( (0 == nHoursStart % 24) && (0 == nHoursEnd % 24) )
+		if ( (0 == nHoursStart) && (0 == nHoursEnd) )
+		{
+			m_pFilterAgeRangeStart->setValue(0);
+			m_pFilterAgeRangeEnd->setValue(0);
+		}
+		else if ( (0 == nHoursStart % 24) && (0 == nHoursEnd % 24) )
 		{
 			m_pFilterAgeRangeStart->setValue((S32)(nHoursStart / 24));
 			m_pFilterAgeRangeEnd->setValue((S32)(nHoursEnd / 24));
@@ -240,7 +245,7 @@ void LLFloaterInventoryFinder::refreshControls()
 	m_pFilterShowLinks->setValue(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS != m_pFilter->getFilterLinks());
 }
 
-void LLFloaterInventoryFinder::refreshFilter()
+void LLFloaterInventoryFinder::refreshFilter(const LLUICtrl* pCtrl /*=nullptr*/)
 {
 	LLInventoryPanel* pInvPanel = m_pPanelMainInventory->getPanel();
 	m_FilterRefreshing = true;
@@ -255,7 +260,7 @@ void LLFloaterInventoryFinder::refreshFilter()
 	//
 	// Filter by permissions
 	//
-	PermissionMask maskPerm = m_pFilter->getFilterPermissions();
+	PermissionMask maskPerm = m_pFilter->getFilterPermissionsDeny();
 	if (m_pFilterPermModify->get())
 		maskPerm |= PERM_MODIFY;
 	else
@@ -268,7 +273,7 @@ void LLFloaterInventoryFinder::refreshFilter()
 		maskPerm |= PERM_TRANSFER;
 	else
 		maskPerm &= ~PERM_TRANSFER;
-	m_pFilter->setFilterPermissions(maskPerm);
+	m_pFilter->setFilterPermissionsDeny(maskPerm);
 
 	//
 	// Filter by (inventory) type
@@ -318,12 +323,17 @@ void LLFloaterInventoryFinder::refreshFilter()
 	}
 	else if (m_pFilterAgeRangeCheck->get())
 	{
-		time_t timeStart = time_min(), timeEnd = time_max();
-		F32 nValueStart = m_pFilterAgeRangeStart->getValue().asReal(), nValueEnd = m_pFilterAgeRangeEnd->getValue().asReal();
+		F64 nValueStart = m_pFilterAgeRangeStart->getValue().asReal(),
+			nValueEnd = m_pFilterAgeRangeEnd->getValue().asReal();
+		if ( (pCtrl == m_pFilterAgeRangeStart) && (nValueStart > nValueEnd) )
+			nValueEnd = nValueStart;
+		else if ( (pCtrl == m_pFilterAgeRangeEnd) && (nValueEnd < nValueStart) )
+			nValueStart = nValueEnd;
 
 		time_t timeCurrent;
 		time(&timeCurrent);
 
+		time_t timeStart = time_min(), timeEnd = time_max();
 		if (m_pFilterAgeRangeType->getSelectedValue().asString() == "hours")
 		{
 			timeStart = timeCurrent - (llmax(nValueStart, nValueEnd) * 60 * 60);
@@ -518,7 +528,7 @@ void LLFloaterInventoryFinder::onFilterByDate(const LLUICtrl* pCheckCtrl, bool f
 	if (fRefreshFilter)
 	{
 		m_pFilter->resetDateLimits();
-		refreshFilter();
+		refreshFilter(pCheckCtrl);
 	}
 }
 

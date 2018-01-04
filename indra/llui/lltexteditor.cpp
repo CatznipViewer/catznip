@@ -372,7 +372,7 @@ std::string LLTextEditor::getSelectionString() const
 
 //void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
-bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up, BOOL keep_selection)
 // [/SL:KB]
 {
 	if (search_text_in.empty())
@@ -401,12 +401,12 @@ bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 			if (search_up)
 			{
 				// We already have this word selected, we are searching for the previous.
-				setCursorPos(llmax(0, mCursorPos - 1));
+				setCursorPos(llmax(0, llmin(mSelectionStart, mSelectionEnd) - 1));
 			}
 			else
 			{
 				// We already have this word selected, we are searching for the next.
-				setCursorPos(mCursorPos + search_text.size());
+				setCursorPos(llmax(mSelectionStart, mSelectionEnd) + 1);
 			}
 // [/SL:KB]
 //			// We already have this word selected, we are searching for the next.
@@ -431,12 +431,18 @@ bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	// If still -1, then search_text just isn't found.
     if (-1 == loc)
 	{
-		mIsSelecting = FALSE;
-		mSelectionEnd = 0;
-		mSelectionStart = 0;
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		if (!keep_selection)
+		{
+			mIsSelecting = FALSE;
+			mSelectionEnd = 0;
+			mSelectionStart = 0;
+		}
 		return false;
 // [/SL:KB]
+//		mIsSelecting = FALSE;
+//		mSelectionEnd = 0;
+//		mSelectionStart = 0;
 //		return;
 	}
 

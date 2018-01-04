@@ -631,10 +631,6 @@ LLIMModel::LLIMSession::LLIMSession(const LLUUID& session_id, const std::string&
 	mName(name),
 	mType(type),
 	mHasOfflineMessage(has_offline_msg),
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
-	mCloseAction(CLOSE_DEFAULT),
-	mParticipantLastMessageTime(LLDate::now()),
-// [/SL:KB]
 	mParticipantUnreadMessageCount(0),
 	mNumUnread(0),
 	mOtherParticipantID(other_participant_id),
@@ -1551,7 +1547,7 @@ LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, 
 			|| INTERACTIVE_SYSTEM_FROM == from)
 	{
 		++(session->mParticipantUnreadMessageCount);
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 		session->mParticipantLastMessageTime = LLDate::now();
 // [/SL:K]
 	}
@@ -3302,12 +3298,12 @@ LLUUID LLIMMgr::addSession(
 	{
 		noteMutedUsers(session_id, ids);
 	}
-// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-3.6
 	else if (dialog == IM_SESSION_GROUP_START)
 	{
 		// Check if we have a prelude for this group and show it to the user if so
-		LLAgent::groupprelude_map_t::const_iterator itGroupPrelude = gAgent.mGroupPrelude.find(session_id);
-		if (gAgent.mGroupPrelude.end() != itGroupPrelude)
+		LLAgent::groupprelude_map_t::const_iterator itGroupPrelude = gAgent.mGroupPreludes.find(session_id);
+		if (gAgent.mGroupPreludes.end() != itGroupPrelude)
 		{
 			LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, itGroupPrelude->second, LLLogChat::timestamp(false), false, false);
 		}
@@ -3324,15 +3320,38 @@ bool LLIMMgr::leaveSession(const LLUUID& session_id)
 	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(session_id);
 	if (!im_session) return false;
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 	// Only group sessions can be snoozed
-	if ( (im_session->isGroupSessionType()) && (LLIMModel::LLIMSession::CLOSE_SNOOZE == im_session->mCloseAction) )
+	if (im_session->isGroupSessionType())
 	{
-		snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
-		if (mSnoozedSessions.end() != itSession)
-			itSession->second = im_session->mParticipantLastMessageTime.secondsSinceEpoch();
+		LLIMModel::LLIMSession::SCloseAction eCloseAction = im_session->mCloseAction;
+		int nSnoozeDuration = im_session->mSnoozeDuration;
+
+		if (LLIMModel::LLIMSession::SCloseAction::CLOSE_DEFAULT == eCloseAction)
+		{
+			if (LLGroupOptions* pOptions = LLGroupOptionsMgr::instance().getOptions(session_id))
+			{
+				eCloseAction = (pOptions->mSnoozeOnClose) ? LLIMModel::LLIMSession::SCloseAction::CLOSE_SNOOZE : LLIMModel::LLIMSession::SCloseAction::CLOSE_LEAVE;
+				nSnoozeDuration = pOptions->mSnoozeDuration * 60;
+			}
+		}
+
+		if (LLIMModel::LLIMSession::SCloseAction::CLOSE_SNOOZE == eCloseAction)
+		{
+			static LLCachedControl<S32> s_nSnoozeTime(gSavedSettings, "GroupSnoozeTime", 900);
+			if (-1 == nSnoozeDuration)
+				nSnoozeDuration = s_nSnoozeTime;
+
+			snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
+			if (mSnoozedSessions.end() != itSession)
+				itSession->second = im_session->mParticipantLastMessageTime.secondsSinceEpoch() + nSnoozeDuration;
+			else
+				mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, im_session->mParticipantLastMessageTime.secondsSinceEpoch() + nSnoozeDuration));
+		}
 		else
-			mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, im_session->mParticipantLastMessageTime.secondsSinceEpoch()));
+		{
+			LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
+		}
 	}
 	else
 	{
@@ -3378,6 +3397,9 @@ void LLIMMgr::inviteToSession(
 
 	BOOL voice_invite = FALSE;
 	bool is_linden = LLMuteList::getInstance()->isLinden(caller_name);
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+	bool is_adhoc = false;
+// [/SL:KB]
 
 
 	if(type == IM_SESSION_P2P_INVITE)
@@ -3399,10 +3421,16 @@ void LLIMMgr::inviteToSession(
 		//and a voice ad-hoc
 		notify_box_type = "VoiceInviteAdHoc";
 		voice_invite = TRUE;
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		is_adhoc = true;
+// [/SL:KB]
 	}
 	else if ( inv_type == INVITATION_TYPE_IMMEDIATE )
 	{
 		notify_box_type = "InviteAdHoc";
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		is_adhoc = true;
+// [/SL:KB]
 	}
 
 	LLSD payload;
@@ -3432,6 +3460,15 @@ void LLIMMgr::inviteToSession(
 			LL_INFOS() << "Rejecting session invite from initiating muted resident " << caller_name << LL_ENDL;
 			return;
 		}
+ // [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		else if ( (is_adhoc) && (gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == nullptr) )
+		{
+			if (voice_invite)
+				LLIncomingCallDialog::processCallResponse(1, payload);
+			LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", caller_id, "about").getSLURLString())));
+			return;
+		}
+// [/SL:KB]
 	}
 
 	LLVoiceChannel* channelp = LLVoiceChannel::getChannelByID(session_id);
@@ -3528,13 +3565,11 @@ BOOL LLIMMgr::hasSession(const LLUUID& session_id)
 	return LLIMModel::getInstance()->findIMSession(session_id) != NULL;
 }
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 bool LLIMMgr::checkSnoozeExpiration(const LLUUID& session_id) const
 {
-	static LLCachedControl<S32> s_nSnoozeTime(gSavedSettings, "GroupSnoozeTime", 900);
-
-	snoozed_sessions_t::const_iterator itSession = mSnoozedSessions.find(session_id);
-	return (mSnoozedSessions.end() != itSession) && (itSession->second + s_nSnoozeTime < LLTimer::getTotalSeconds());
+ 	snoozed_sessions_t::const_iterator itSession = mSnoozedSessions.find(session_id);
+	return (mSnoozedSessions.end() != itSession) && (itSession->second < LLTimer::getTotalSeconds());
 }
 
 bool LLIMMgr::isSnoozedSession(const LLUUID& session_id) const
@@ -4107,8 +4142,10 @@ public:
 			}
 // [/RLVa:KB]
 
-			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends and groups can IM me" is checked
-			if ( (!is_group) && ( (is_muted) || ((gSavedSettings.getBOOL("VoiceCallsFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id))) ) )
+			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends/groups can IM me" or "Only friends can conference me" is checked
+			if ( (!is_group) && 
+				 ( (is_muted) ||
+			       ( (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
 			{
 				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
 				if (!strUrl.empty())
@@ -4116,6 +4153,11 @@ public:
 					LLSD sdData;
 					sdData["method"] = "decline invitation";
 					sdData["session-id"] = session_id;
+
+					if (!is_muted)
+					{
+						LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
+					}
 
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
 				}
@@ -4142,6 +4184,7 @@ public:
 
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
 				}
+
 				return;
 			}
 // [/SL:KB]
@@ -4182,8 +4225,7 @@ public:
 			}
 
 			//K now we want to accept the invitation
-			std::string url = gAgent.getRegion()->getCapability(
-				"ChatSessionRequest");
+			std::string url = gAgent.getRegionCapability("ChatSessionRequest");
 
 			if ( url != "" )
 			{

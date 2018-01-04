@@ -210,6 +210,13 @@ BOOL LLCheckBoxCtrl::setLabelArg( const std::string& key, const LLStringExplicit
 	return res;
 }
 
+// [SL:KB] - Patch: Control-Base | Checked: Catznip-5.2
+void LLCheckBoxCtrl::clearControlName()
+{
+	mButton->clearControlName();
+}
+// [/SL:KB]
+
 // virtual
 void LLCheckBoxCtrl::setControlName(const std::string& control_name, LLView* context)
 {

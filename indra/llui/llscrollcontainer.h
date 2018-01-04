@@ -52,6 +52,19 @@ struct ScrollContainerRegistry : public LLChildRegistry<ScrollContainerRegistry>
 	LLSINGLETON_EMPTY_CTOR(ScrollContainerRegistry);
 };
 
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+enum class EScrollbarVisibility { ALWAYS, NEVER, AUTO };
+
+namespace LLInitParam
+{
+	template<>
+	struct TypeValues<EScrollbarVisibility> : public TypeValuesHelper<EScrollbarVisibility>
+	{
+		static void declareValues();
+	};
+}
+// [/SL:KB]
+
 class LLScrollContainer : public LLUICtrl
 {
 public:
@@ -66,9 +79,15 @@ public:
 							hide_scrollbar;
 		Optional<F32>		min_auto_scroll_rate,
 							max_auto_scroll_rate;
+		Optional<U32>		max_auto_scroll_zone;
 		Optional<LLUIColor>	bg_color;
 		Optional<LLScrollbar::callback_t> scroll_callback;
 		Optional<S32>		size;
+
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+		Optional<EScrollbarVisibility> show_horizontal_scrollbar,
+		                               show_vertical_scrollbar;
+// [/SL:KB]
 		
 		Params();
 	};
@@ -100,6 +119,9 @@ public:
 	bool			isAtTop() { return mScrollbar[VERTICAL]->isAtBeginning(); }
 	bool			isAtBottom() { return mScrollbar[VERTICAL]->isAtEnd(); }
 	S32				getBorderWidth() const;
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	EScrollbarVisibility getScrollbarVisibility(EOrientation orientation) const { return mScrollbarVisibility[orientation];  }
+// [/SL:KB]
 
 	// LLView functionality
 	virtual void	reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
@@ -114,7 +136,8 @@ public:
 
 	virtual void	draw();
 	virtual bool	addChild(LLView* view, S32 tab_group = 0);
-	
+
+	bool canAutoScroll(S32 x, S32 y);
 	bool autoScroll(S32 x, S32 y);
 
 	S32 getSize() const { return mSize; }
@@ -128,6 +151,7 @@ private:
 	virtual void scrollHorizontal( S32 new_pos );
 	virtual void scrollVertical( S32 new_pos );
 	void updateScroll();
+	bool autoScroll(S32 x, S32 y, bool do_scroll);
 	void calcVisibleSize( S32 *visible_width, S32 *visible_height, BOOL* show_h_scrollbar, BOOL* show_v_scrollbar ) const;
 
 	LLScrollbar* mScrollbar[ORIENTATION_COUNT];
@@ -141,7 +165,11 @@ private:
 	F32			mAutoScrollRate;
 	F32			mMinAutoScrollRate;
 	F32			mMaxAutoScrollRate;
-	bool		mHideScrollbar;
+	U32			mMaxAutoScrollZone;
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	EScrollbarVisibility mScrollbarVisibility[ORIENTATION_COUNT];
+// [/SL:KB]
+//	bool		mHideScrollbar;
 };
 
 
