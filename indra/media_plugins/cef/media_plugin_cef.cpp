@@ -389,7 +389,7 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 			else if (message_name == "cleanup")
 			{
 				mVolumeCatcher.setVolume(0);
-				mLLCEFLib->requestExit();
+				mCEFLib->requestExit();
 			}
 			else if (message_name == "shm_added")
 			{

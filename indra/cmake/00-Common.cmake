@@ -26,7 +26,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{LL_BUILD}")
 # applied to the viewer only, or should/must it be applied to all 3p libraries
 # as well?
 
-
 # Portable compilation flags.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DADDRESS_SIZE=${ADDRESS_SIZE}")
 
@@ -113,6 +112,7 @@ if (LINUX)
   set(CMAKE_SKIP_RPATH TRUE)
 
   add_definitions(-D_FORTIFY_SOURCE=2)
+
   set(CMAKE_CXX_FLAGS "-Wno-deprecated -Wno-unused-but-set-variable -Wno-unused-variable ${CMAKE_CXX_FLAGS}")
 
   # gcc 4.3 and above don't like the LL boost and also
