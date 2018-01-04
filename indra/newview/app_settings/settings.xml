@@ -5109,7 +5109,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.3.4.0/[TOPIC][DEBUG_MODE]</string>
+      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/5.1.0.0/[TOPIC][DEBUG_MODE]</string>
     </map>
     <key>HowToHelpURL</key>
     <map>
@@ -17833,6 +17833,18 @@
       <integer>0</integer>
       <key>Type</key>
       <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>SkipBenchmark</key>
+    <map>
+      <key>Comment</key>
+      <string>if true, disables running the GPU benchmark at startup
+      (default to class 1)</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
     </map>

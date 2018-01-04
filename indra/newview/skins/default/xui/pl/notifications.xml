@@ -1311,66 +1311,6 @@ Wybierz obiekt na sprzedaż i spróbuj jeszcze raz.
 		Plik surowego terenu pobrany do:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		Nowa wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Musisz zainstalować nową wersję żeby używać [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Wyłącz" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadWindows">
-		Uaktualniona wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Aktualizacja nie jest wymagana, ale jest zalecana w celu poprawy wydajności i stabilności.
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		Uaktualniona wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Aktualizacja nie jest wymagana, ale jest zalecana w celu poprawy wydajności i stabilności.
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		Nowa wersja [APP_NAME] jest dostępna.
-[MESSAGE]
-Musisz pobrać aktualizację aby korzystać z [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Wyłącz" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadLinux">
-		Aktualizacja [APP_NAME] jest dostępna.
-[MESSAGE]
-Ta aktualizacja nie jest wymagana, ale zaleca się jej instalację w celu poprawienia wydajności i stabilności.
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		Uaktualniona wersja [APP_NAME]została opublikowana.
-[MESSAGE]
-Aktualizacja nie jest wymagana, ale jest zalecana w celu poprawy wydajności i stabilności.
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadMacMandatory">
-		Nowa wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Musisz zainstalować nową wersję żeby używać [APP_NAME].
-
-Pobrać i zapisać w folderze Aplikacje?
-		<usetemplate name="okcancelbuttons" notext="Wyłącz" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadMac">
-		Uaktualniona wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Aktualizacja nie jest wymagana, ale jest zalecana w celu poprawy wydajności i stabilności.
-
-Pobrać i zapisać w folderze Aplikacje?
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		Uaktualniona wersja [APP_NAME] została opublikowana.
-[MESSAGE]
-Aktualizacja nie jest wymagana, ale jest zalecana w celu poprawy wydajności i stabilności.
-
-Pobrać i zapisać w folderze Aplikacje?
-		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Pobierz" />
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Podczas aktualizacji pojawił się błąd.
 Proszę pobrać i zainstalować najnowszego klienta z

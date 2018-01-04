@@ -1580,70 +1580,10 @@
 		Завершена загрузка файла ландшафта:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		Появилась новая версия [APP_NAME].
-[MESSAGE]
-Это обновление необходимо загрузить для использования [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Выйти" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadWindows">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		Появилась новая версия [APP_NAME].
-[MESSAGE]
-Это обновление необходимо загрузить для использования [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Выйти" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadLinux">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		Появилась новая версия [APP_NAME].
-[MESSAGE]
-Это обновление необходимо загрузить для использования [APP_NAME].
-
-Загрузить его в папку приложений?
-		<usetemplate name="okcancelbuttons" notext="Выйти" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadMac">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-
-Загрузить его в папку приложений?
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		Появилось обновление для [APP_NAME].
-[MESSAGE]
-Устанавливать это обновление не обязательно, но рекомендуется для повышения производительности и стабильности.
-
-Загрузить его в папку приложений?
-		<usetemplate name="okcancelbuttons" notext="Продолжить" yestext="Загрузить"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Произошла ошибка при установке обновления.
 Загрузите новую версию программы на сайте
-http://catznip.com/downloads/.
+https://get.catznip.com
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1651,13 +1591,13 @@ http://catznip.com/downloads/.
 Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
 
 Загрузите новую версию программы на сайте
-http://catznip.com/downloads/.
+https://get.catznip.com
 		<usetemplate name="okbutton" yestext="Выйти"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Появились обязательные обновления для вашей версии Second Life.
 
-Загрузите это обновление на сайте http://catznip.com/downloads/
+Загрузите это обновление на сайте https://get.catznip.com
 или установите его сейчас.
 		<usetemplate name="okcancelbuttons" notext="Выйти из Second Life" yestext="Загрузить и установить сейчас"/>
 	</notification>
@@ -3370,6 +3310,7 @@ http://catznip.com/downloads/.
 	</notification>
 	<notification name="SnapshotToComputerFailed">
 		Не удалось сохранить моментальный снимок на [PATH]: Диск переполнен. Необходимо [NEED_MEMORY] Кбайт, но доступно только  [FREE_MEMORY] Кбайт.
+	</notification>
 	</notification>
 	</notification>
 	<notification name="AppearanceToXMLFailed">

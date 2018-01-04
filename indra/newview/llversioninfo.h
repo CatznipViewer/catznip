@@ -56,7 +56,7 @@ public:
 	/// return the full viewer version as a string like "2.0.0.200030"
 	static const std::string &getVersion();
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 	/// return the release viewer version as a string like "R7" or "R7.1"
 	static const std::string &getReleaseVersion();
 // [/SL:KB]
@@ -76,6 +76,9 @@ public:
 
 	/// reset the channel name used by the viewer.
 	static void resetChannel(const std::string& channel);
+
+    /// return the bit width of an address
+    static const S32 getAddressSize() { return ADDRESS_SIZE; }
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 	/// Return the platform the viewer was built for

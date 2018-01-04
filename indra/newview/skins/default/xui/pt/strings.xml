@@ -198,7 +198,7 @@ Versão do servidor de voz: [VOICE_VERSION]
 		http://secondlife.com/download
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
-		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: http://catznip.com/downloads/
+		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: https://get.catznip.com
 
 Para saber mais, visite as perguntas frequentes abaixo: http://secondlife.com/viewer-access-faq
 	</string>

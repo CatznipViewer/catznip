@@ -81,7 +81,7 @@
 #include "llurlentry.h"
 // [/SL:KB]
 #include "lluserrelations.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 #include "llupdaterservice.h"
 // [/SL:KB]
 #include "llversioninfo.h"
@@ -1068,7 +1068,7 @@ bool idle_startup()
 		
 		// Overwrite default user settings with user settings								 
 		LLAppViewer::instance()->loadSettingsFromDirectory("Account");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznîp-3.3
 		if (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
 		{
 			// Temporary fix
@@ -1228,7 +1228,6 @@ bool idle_startup()
 		login->setSerialNumber(LLAppViewer::instance()->getSerialNumber());
 		login->setLastExecEvent(gLastExecEvent);
 		login->setLastExecDuration(gLastExecDuration);
-		login->setUpdaterLauncher(boost::bind(&LLAppViewer::launchUpdater, LLAppViewer::instance()));
 
 		// This call to LLLoginInstance::connect() starts the 
 		// authentication process.

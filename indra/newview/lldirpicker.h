@@ -48,11 +48,11 @@
 class LLFilePicker;
 
 //class LLDirPicker
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-09-28 (Catznip-3.6)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.6
 class LLDirPicker : public LLSingleton<LLDirPicker>
 // [/SL:KB]
 {
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-09-28 (Catznip-3.6)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.6
 	LLSINGLETON(LLDirPicker);
 // [/SL:KB]
 public:

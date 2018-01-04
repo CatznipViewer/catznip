@@ -85,7 +85,7 @@ const std::string &LLVersionInfo::getVersion()
 	return version;
 }
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 const std::string &LLVersionInfo::getReleaseVersion()
 {
 	static std::string version("");
