@@ -2138,6 +2138,9 @@ bool LLAppViewer::initThreads()
 	static const bool enable_threads = true;
 
 	LLImage::initClass(gSavedSettings.getBOOL("TextureNewByteRange"),gSavedSettings.getS32("TextureReverseByteRange"));
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+	LLImageJ2CImpl::setNumDecodeThreads(gSavedSettings.getS32("TextureDecodeThreadCount"));
+// [/SL:KB]
 
 	LLVFSThread::initClass(enable_threads && false);
 	LLLFSThread::initClass(enable_threads && false);

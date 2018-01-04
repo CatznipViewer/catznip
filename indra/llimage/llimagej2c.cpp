@@ -38,6 +38,9 @@
 // library which has the implementation for this function should ever be
 // linked.
 LLImageJ2CImpl* fallbackCreateLLImageJ2CImpl();
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+int LLImageJ2CImpl::s_numDecodeThreads = -1;
+// [/SL:KB]
 
 // Test data gathering handle
 LLImageCompressionTester* LLImageJ2C::sTesterp = NULL ;

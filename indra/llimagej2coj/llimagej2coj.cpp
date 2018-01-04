@@ -292,6 +292,10 @@ bool LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 	/* setup the decoder decoding parameters using user parameters */
 // [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
 	opj_setup_decoder(opj_decoder_p, &parameters);
+	if ( (opj_has_thread_support()) && (s_numDecodeThreads > 1) )
+	{
+		opj_codec_set_threads(opj_decoder_p, s_numDecodeThreads);
+	}
 // [/SL:KB]
 //	opj_setup_decoder(dinfo, &parameters);
 
