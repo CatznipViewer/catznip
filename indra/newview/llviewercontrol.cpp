@@ -84,7 +84,9 @@
 #include "llspellcheck.h"
 #include "llslurl.h"
 #include "llstartup.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 #include "llupdaterservice.h"
+// [/SL:KB]
 // [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-11-28 (Catznip-3.6)
 #include "llchatentry.h"
 #include "llfloaterimsession.h"
@@ -681,21 +683,21 @@ bool toggle_show_object_render_cost(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 void toggle_updater_service_active(const LLSD& new_value)
 {
-//    if(new_value.asInteger())
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-22 (Catznip-3.6)
 	if (LLUpdaterService::UPDATER_DISABLED != new_value.asInteger())
-// [/SL:KB]
     {
 		LLUpdaterService update_service;
-		if(!update_service.isChecking()) update_service.startChecking();
+		if (!update_service.isChecking())
+			update_service.startChecking();
     }
     else
     {
         LLUpdaterService().stopChecking();
     }
 }
+// [/SL:KB]
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -861,7 +863,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("ShowNavbarNavigationPanel")->getSignal()->connect(boost::bind(&toggle_show_navigation_panel, _2));
 	gSavedSettings.getControl("ShowMiniLocationPanel")->getSignal()->connect(boost::bind(&toggle_show_mini_location_panel, _2));
 	gSavedSettings.getControl("ShowObjectRenderingCost")->getSignal()->connect(boost::bind(&toggle_show_object_render_cost, _2));
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.3
 	gSavedSettings.getControl("UpdaterServiceSetting")->getSignal()->connect(boost::bind(&toggle_updater_service_active, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("ForceShowGrid")->getSignal()->connect(boost::bind(&handleForceShowGrid, _2));
 	gSavedSettings.getControl("RenderTransparentWater")->getSignal()->connect(boost::bind(&handleRenderTransparentWaterChanged, _2));
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));

@@ -69,6 +69,7 @@ public:
 
 	// perms is a permissions mask like 0777 or 0700.  In most cases it will
 	// be overridden by the user's umask.  It is ignored on Windows.
+	// mkdir() considers "directory already exists" to be SUCCESS.
 	static	int		mkdir(const std::string& filename, int perms = 0700);
 
 	static	int		rmdir(const std::string& filename);
@@ -82,7 +83,7 @@ public:
 	static	LLFILE *	_Fiopen(const std::string& filename, 
 			std::ios::openmode mode);
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.6
 	static time_t	getModifiedTime(const std::string& filename);
 // [/SL:KB]
 

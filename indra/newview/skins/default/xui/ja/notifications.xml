@@ -1610,82 +1610,22 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 		未加工の地形ファイルをダウンロードしました：
 [DOWNLOAD_PATH]
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadWindows">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinux">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMac">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		ビューワのアップデートをインストール中にエラーが発生しました。
-http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
+https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		必要なアップデートをインストールできませんでした。 
 [APP_NAME] がアップデートされるまでログインできません。
 
-http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
+https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、http://catznip.com/downloads/ からダウンロードして、今すぐインストールできます。
+このアップデートは、https://get.catznip.com からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -3450,6 +3390,11 @@ M キーを押して変更します。
 	<notification name="MeshUploadErrorDetails">
 		[LABEL] をアップロードできませんでした： [MESSAGE] 
 [DETAILS]詳しくは、SecondLife.log をご覧ください。
+	</notification>
+	<notification name="MeshUploadError">
+		[LABEL] をアップロードできませんでした： [MESSAGE] 
+
+詳しくは、SecondLife.log をご覧ください
 	</notification>
 	<notification name="MeshUploadError">
 		[LABEL] をアップロードできませんでした： [MESSAGE] 

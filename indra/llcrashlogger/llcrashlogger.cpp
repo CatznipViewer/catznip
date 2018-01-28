@@ -1027,7 +1027,7 @@ bool LLCrashLogger::init()
     LLCore::LLHttp::initialize();
 
 	// We assume that all the logs we're looking for reside on the current drive
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.4
 	gDirUtilp->initAppDirs("Catznip");
 // [/SL:KB]
 //	gDirUtilp->initAppDirs("SecondLife");
@@ -1035,7 +1035,7 @@ bool LLCrashLogger::init()
 	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 
 	// Default to the product name "Second Life" (this is overridden by the -name argument)
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.7
 	mProductName = "Catznip";
 // [/SL:KB]
 //	mProductName = "Second Life";

@@ -1581,70 +1581,10 @@ Imposta l&apos;oggetto per la vendita e riprova.
 		Hai terminato di scaricare il file del terreno nella cartella:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadWindows">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadLinux">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadMac">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Si è verificato un errore durante l&apos;aggiornamento del viewer.
 Scarica e installa la versione più recente del viewer da
-http://catznip.com/downloads/.
+https://get.catznip.com
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1652,13 +1592,13 @@ http://catznip.com/downloads/.
 Non potrai accedere fino a quando non verrà aggiornato [APP_NAME].
 
 Scarica e installa la versione più recente del viewer da
-http://catznip.com/downloads/.
+https://get.catznip.com
 		<usetemplate name="okbutton" yestext="Esci"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		È disponibile un aggiornamento obbligatorio per l&apos;installazione di Second Life.
 
-Puoi scaricare questo aggiornamento da http://catznip.com/downloads/
+Puoi scaricare questo aggiornamento da https://get.catznip.com
 oppure puoi installarlo adesso.
 		<usetemplate name="okcancelbuttons" notext="Esci da Second Life" yestext="Scarica e aggiorna adesso"/>
 	</notification>
@@ -3374,6 +3314,7 @@ Per sicurezza, verranno bloccati per alcuni secondi.
 	</notification>
 	<notification name="SnapshotToComputerFailed">
 		Salvataggio istantanea in [PATH] non riuscito: Il disco è pieno. Sono necessari [NEED_MEMORY] KB ma sono disponibili solo [FREE_MEMORY] KB .
+	</notification>
 	</notification>
 	</notification>
 	<notification name="AppearanceToXMLFailed">
