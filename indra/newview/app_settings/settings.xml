@@ -13468,6 +13468,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>TextureDecodeThreadCount</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the number of threads used to decode a single J2C image</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>2</integer>
+    </map>
     <key>TextureDisable</key>
     <map>
       <key>Comment</key>

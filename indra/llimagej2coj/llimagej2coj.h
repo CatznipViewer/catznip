@@ -34,6 +34,11 @@ class LLImageJ2COJ : public LLImageJ2CImpl
 public:
 	LLImageJ2COJ();
 	virtual ~LLImageJ2COJ();
+
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+	static int  getNumDecodeThreads() { return s_numDecodeThreads; }
+	static void setNumDecodeThreads(int numDecodeThreads) { s_numDecodeThreads = numDecodeThreads; }
+// [/SL:KB]
 protected:
 	virtual bool getMetadata(LLImageJ2C &base);
 	virtual bool decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decode_time, S32 first_channel, S32 max_channel_count);
