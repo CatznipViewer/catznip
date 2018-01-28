@@ -814,7 +814,7 @@ class WindowsManifest(ViewerManifest):
         !define INSTEXE  "%(final_exe)s"
         !define PUBLISHER "<TODO>"
         !define URL_ABOUT "http://catznip.com/"
-        !define URL_DOWNLOAD "https://get.catznip.com 
+        !define URL_DOWNLOAD "https://get.catznip.com"
         !define VERSION "%(version_short)s"
         !define VERSION_LONG "%(version)s"
         !define VERSION_DASHES "%(version_dashes)s"
