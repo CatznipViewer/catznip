@@ -563,16 +563,6 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 	}
 // [/SL:KB]
 
-// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
-	if (timestamp != 0)
-	{
-		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
-		check_curl_easy_code(code, CURLOPT_TIMECONDITION);
-		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMEVALUE, (long)timestamp);
-		check_curl_easy_code(code, CURLOPT_TIMEVALUE);
-	}
-// [/SL:KB]
-
 	// The Linksys WRT54G V5 router has an issue with frequent
 	// DNS lookups from LAN machines.  If they happen too often,
 	// like for every HTTP request, the router gets annoyed after
