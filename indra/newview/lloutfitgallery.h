@@ -130,6 +130,7 @@ protected:
 private:
     void loadPhotos();
     void uploadPhoto(LLUUID outfit_id);
+    void updateSnapshotFolderObserver();
     LLUUID getPhotoAssetId(const LLUUID& outfit_id);
     LLUUID getDefaultPhoto();
     void linkPhotoToOutfit(LLUUID outfit_id, LLUUID photo_id);
@@ -168,6 +169,7 @@ private:
     LLPanel* mLastRowPanel;
     LLUUID mOutfitLinkPending;
     LLUUID mOutfitRenamePending;
+    LLUUID mSnapshotFolderID;
     LLTextBox* mMessageTextBox;
     bool mGalleryCreated;
     int mRowCount;
@@ -259,7 +261,7 @@ public:
     /*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
     void setDefaultImage();
-    void setImageAssetId(LLUUID asset_id);
+    bool setImageAssetId(LLUUID asset_id);
     LLUUID getImageAssetId();
     void setOutfitName(std::string name);
     void setOutfitWorn(bool value);
@@ -282,6 +284,7 @@ private:
     bool     mSelected;
     bool     mWorn;
     bool     mDefaultImage;
+    bool     mImageUpdatePending;
     bool	 mHidden;
     std::string mOutfitName;
 };

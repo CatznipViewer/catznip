@@ -56,6 +56,7 @@ public:
 	virtual ~LLPreviewNotecard();
 	
 	bool saveItem();
+	void setObjectID(const LLUUID& object_id);
 
 	// llview
 	virtual void draw();
