@@ -348,7 +348,7 @@ bool idle_startup()
 	const std::string delims (" ");
 	std::string system;
 	int begIdx, endIdx;
-	std::string osString = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	std::string osString = LLOSInfo::instance().getOSStringSimple();
 
 	begIdx = osString.find_first_not_of (delims);
 	endIdx = osString.find_first_of (delims, begIdx);
@@ -769,7 +769,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
@@ -833,7 +833,8 @@ bool idle_startup()
 
 		// Don't do anything.  Wait for the login view to call the login_callback,
 		// which will push us to the next state.
-		display_startup();
+
+		// display() function will be the one to run display_startup()
 		// Sleep so we don't spin the CPU
 		ms_sleep(1);
 		return FALSE;
@@ -1032,7 +1033,6 @@ bool idle_startup()
 		login->setSerialNumber(LLAppViewer::instance()->getSerialNumber());
 		login->setLastExecEvent(gLastExecEvent);
 		login->setLastExecDuration(gLastExecDuration);
-		login->setUpdaterLauncher(boost::bind(&LLAppViewer::launchUpdater, LLAppViewer::instance()));
 
 		// This call to LLLoginInstance::connect() starts the 
 		// authentication process.
@@ -2773,6 +2773,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
