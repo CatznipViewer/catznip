@@ -338,7 +338,7 @@ bool LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 	// The image decode failed if the return was NULL or the component
 	// count was zero.  The latter is just a sanity check before we
 	// dereference the array.
-	if(!image || !image->numcomps)
+//	if(!image || !image->numcomps)
 // [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
 	if ( (!fSuccess) || (!image) || (!image->numcomps) )
 // [/SL:KB]
@@ -352,17 +352,18 @@ bool LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 		return true; // done
 	}
 
-	// sometimes we get bad data out of the cache - check to see if the decode succeeded
-	for (S32 i = 0; i < image->numcomps; i++)
-	{
-		if (image->comps[i].factor != base.getRawDiscardLevel())
-		{
-			// if we didn't get the discard level we're expecting, fail
-			opj_image_destroy(image);
-			base.mDecoding = false;
-			return true;
-		}
-	}
+//	// sometimes we get bad data out of the cache - check to see if the decode succeeded
+//	for (S32 i = 0; i < image->numcomps; i++)
+//	{
+//		//llassert(5 - image->comps[i].resno_decoded == base.getRawDiscardLevel());
+//		if (image->comps[i].factor != base.getRawDiscardLevel())
+//		{
+//			// if we didn't get the discard level we're expecting, fail
+//			opj_image_destroy(image);
+//			base.mDecoding = false;
+//			return true;
+//		}
+//	}
 	
 	if(image->numcomps <= first_channel)
 	{
