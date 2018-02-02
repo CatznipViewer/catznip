@@ -2807,9 +2807,9 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 //					&& !(key == KEY_DOWN && mask == MASK_CONTROL)
 //					&& !(key == KEY_UP && mask == MASK_ALT)
 //					&& !(key == KEY_DOWN && mask == MASK_ALT))
-// [SL:KB] - Patch: Chat-Misc | Checked: 2016-02-14 (Catznip-4.0)
-				// Let all modified keys through
-				if (MASK_NONE == mask)
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-4.0
+				// Let movement keys through (as well as shift combinations to allow strafing)
+				if ( (MASK_NONE == mask) || (MASK_SHIFT == mask) )
 // [/SL:KB]
 				{
 					switch(key)
