@@ -12126,10 +12126,12 @@
       <string>Specifies the number of threads used to decode a single J2C image</string>
       <key>Persist</key>
       <integer>1</integer>
+      <key>HideFromEditor</key>
+      <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>2</integer>
+      <integer>1</integer>
     </map>
     <key>TextureDisable</key>
     <map>
