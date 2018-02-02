@@ -107,6 +107,11 @@ class LLImageJ2CImpl
 {
 public:
 	virtual ~LLImageJ2CImpl();
+
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+	static int  getNumDecodeThreads() { return s_numDecodeThreads; }
+	static void setNumDecodeThreads(int numDecodeThreads) { s_numDecodeThreads = numDecodeThreads; }
+// [/SL:KB]
 protected:
 	// Find out the image size and number of channels.
 	// Return value:
@@ -127,6 +132,9 @@ protected:
 
 	virtual std::string getEngineInfo() const = 0;
 
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+	static int s_numDecodeThreads;
+// [/SL:KB]
 	friend class LLImageJ2C;
 };
 
