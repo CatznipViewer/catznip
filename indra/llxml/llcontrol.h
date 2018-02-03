@@ -119,6 +119,9 @@ private:
 	eControlType	mType;
 	ePersist		mPersist;
 	bool			mHideFromSettingsEditor;
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+	bool            mExcludeFromPreset = false;
+// [/SL:KB]
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 	std::string		mToolTip;
 	U32				mToolTipFlags;
@@ -132,7 +135,7 @@ public:
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 	LLControlVariable(const std::string& name, eControlType type,
 					  LLSD initial, const std::string& comment,
-					  ePersist persist = PERSIST_NONDFT, bool hidefromsettingseditor = false,
+					  ePersist persist = PERSIST_NONDFT, bool hidefromsettingseditor = false, bool exclude_from_preset = false,
 					  const std::string& tooltip = LLStringUtil::null, U32 tooltipflags = TOOLTIP_NONE);
 // [/SL:KB]
 //	LLControlVariable(const std::string& name, eControlType type,
@@ -161,6 +164,9 @@ public:
 	bool isDefault() { return (mValues.size() == 1); }
 	bool shouldSave(bool nondefault_only);
 	bool isPersisted() { return mPersist != PERSIST_NO; }
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+	bool isExcludedFromPreset() const { return mExcludeFromPreset; }
+// [/SL:KB]
 	bool isHiddenFromSettingsEditor() { return mHideFromSettingsEditor; }
 	LLSD get()			const	{ return getValue(); }
 	LLSD getValue()		const	{ return mValues.back(); }
@@ -171,6 +177,9 @@ public:
 	void setValue(const LLSD& value, bool saved_value = TRUE);
 	void setDefaultValue(const LLSD& value);	void setPersist(ePersist);
 	void setHiddenFromSettingsEditor(bool hide);
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+	void setExcludedFromPreset(bool excluded_from_preset) { mExcludeFromPreset = excluded_from_preset; }
+// [/SL:KB]
 	void setComment(const std::string& comment);
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 	void setToolTip(const std::string& tooltip);
@@ -241,7 +250,8 @@ public:
 
 //	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor = FALSE);
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
-	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor = FALSE, const std::string& tooltip = LLStringUtil::null, U32 tooltipflags = LLControlVariable::TOOLTIP_NONE);
+	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist,
+	                                  BOOL hidefromsettingseditor = FALSE, BOOL exclude_from_preset = FALSE, const std::string& tooltip = LLStringUtil::null, U32 tooltipflags = LLControlVariable::TOOLTIP_NONE);
 // [/SL:KB]
 	LLControlVariable* declareU32(const std::string& name, U32 initial_val, const std::string& comment, LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT);
 	LLControlVariable* declareS32(const std::string& name, S32 initial_val, const std::string& comment, LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT);
@@ -329,7 +339,10 @@ public:
 	// as the given type.
 	U32	loadFromFileLegacy(const std::string& filename, BOOL require_declaration = TRUE, eControlType declare_as = TYPE_STRING);
  	U32 saveToFile(const std::string& filename, BOOL nondefault_only);
- 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true);
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+ 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true, bool is_preset = false);
+// [/SL:KB]
+// 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true);
 	void	resetToDefaults();
 };
 

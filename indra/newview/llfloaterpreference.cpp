@@ -400,6 +400,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this, _2));
 // [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6)
 	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
+	mCommitCallbackRegistrar.add("Pref.ResetUIScale",		boost::bind(&LLFloaterPreference::onResetUIScale, this));
 // [/SL:KB]
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
@@ -655,6 +656,12 @@ void LLFloaterPreference::showPanel(const std::string& strPanel)
 void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
 {
 	showPanel(sdParam.asString());
+}
+
+void LLFloaterPreference::onResetUIScale() const
+{
+	gSavedSettings.setF32("UIScaleFactor", 1.0);
+	gViewerWindow->requestResolutionUpdate();
 }
 // [/SL:KB]
 
@@ -1029,7 +1036,10 @@ void LLFloaterPreference::getControlNames(std::vector<std::string>& names)
 			if (ctrl)
 			{
 				LLControlVariable* control = ctrl->getControlVariable();
-				if (control)
+//				if (control)
+// [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
+				if ( (control) && (!control->isExcludedFromPreset()) )
+// [/SL:KB]
 				{
 					std::string control_name = control->getName();
 					if (std::find(names.begin(), names.end(), control_name) == names.end())
@@ -1166,12 +1176,12 @@ void LLFloaterPreference::onBtnCancel(const LLSD& userdata)
 }
 
 // static 
-void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance)
 	{
-		instance->setPersonalInfo(visibility, im_via_email);	
+        instance->setPersonalInfo(visibility, im_via_email, is_verified_email);
 	}
 }
 
@@ -1980,7 +1990,7 @@ bool LLFloaterPreference::moveTranscriptsAndLog()
 	return true;
 }
 
-void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	mGotPersonalInfo = true;
 	mOriginalIMViaEmail = im_via_email;
@@ -2005,8 +2015,16 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChildView("friends_online_notify_checkbox")->setEnabled(TRUE);
 	getChild<LLUICtrl>("online_visibility")->setValue(mOriginalHideOnlineStatus); 	 
 	getChild<LLUICtrl>("online_visibility")->setLabelArg("[DIR_VIS]", mDirectoryVisibility);
-	getChildView("send_im_to_email")->setEnabled(TRUE);
-	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
+	getChildView("send_im_to_email")->setEnabled(is_verified_email);
+
+    std::string tooltip;
+    if (!is_verified_email)
+        tooltip = getString("email_unverified_tooltip");
+
+    getChildView("send_im_to_email")->setToolTip(tooltip);
+
+    // *TODO: Show or hide verify email text here based on is_verified_email
+    getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
 	getChildView("chat_font_size")->setEnabled(TRUE);

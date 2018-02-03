@@ -75,7 +75,7 @@ public:
 	/*virtual*/ void changed(const LLUUID& session_id, U32 mask) {};
 
 	// static data update, called from message handler
-	static void updateUserInfo(const std::string& visibility, bool im_via_email);
+	static void updateUserInfo(const std::string& visibility, bool im_via_email, bool is_verified_email);
 
 	// refresh all the graphics preferences menus
 	static void refreshEnabledGraphics();
@@ -107,6 +107,7 @@ protected:
 	void		onBtnCancel(const LLSD& userdata);
 // [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	void		onShowPanel(const LLSD& sdParam);
+	void		onResetUIScale() const;
 // [/SL:KB]
 
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup
@@ -158,7 +159,7 @@ public:
 	void onClickLogPath();
 	bool moveTranscriptsAndLog();
 	void enableHistory();
-	void setPersonalInfo(const std::string& visibility, bool im_via_email);
+	void setPersonalInfo(const std::string& visibility, bool im_via_email, bool is_verified_email);
 	void refreshEnabledState();
 	void onCommitWindowedMode();
 	void refresh();	// Refresh enable/disable
