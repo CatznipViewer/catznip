@@ -103,6 +103,8 @@ public:
 
 	static void newWindow();
 
+	void toggleFindOptions();
+
 protected:
 	//
 	// Misc functions
@@ -114,7 +116,6 @@ protected:
 	LLFloaterInventoryFinder* getFinder();
 	void showFindOptions(bool fShow);
 // [/SL:KB]
-	void toggleFindOptions();
 	void onSelectionChange(LLInventoryPanel *panel, const std::deque<LLFolderViewItem*>& items, BOOL user_action);
 
 	static BOOL filtersVisible(void* user_data);
@@ -133,7 +134,7 @@ protected:
 	void setFilterSubStringFromFilter();
 // [/SL:KB]
 	void setFilterSubString(const std::string& string);
-	
+
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();
@@ -175,6 +176,7 @@ private:
 	S32							mItemCount;
 	std::string 				mItemCountString;
 //	LLComboBox*					mSearchTypeCombo;
+
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	std::string					mFloaterTitle;
 // [/SL:KB]
