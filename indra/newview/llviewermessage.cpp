@@ -4994,6 +4994,11 @@ void process_sim_stats(LLMessageSystem *msg, void **user_data)
 
 void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 {
+// [SL:KB] - Patch: Settings-PlayAnimations | Checked: Catznip-5.3
+	static LLCachedControl<bool> sPlayPrejumpAnim(gSavedSettings, "PlayPrejumpAnim", true);
+	static LLCachedControl<bool> sPlayLandingAnim(gSavedSettings, "PlayLandingAnim", true);
+// [/SL:KB]
+
 	LLUUID	animation_id;
 	LLUUID	uuid;
 	S32		anim_sequence_id;
@@ -5026,6 +5031,16 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 			mesgsys->getS32Fast(_PREHASH_AnimationList, _PREHASH_AnimSequenceID, anim_sequence_id, i);
 
 			LL_DEBUGS("Messaging") << "Anim sequence ID: " << anim_sequence_id << LL_ENDL;
+
+// [SL:KB] - Patch: Settings-PlayAnimations | Checked: Catznip-5.3
+			if ( ((!sPlayPrejumpAnim) && (animation_id == ANIM_AGENT_PRE_JUMP)) ||
+				 ((!sPlayLandingAnim) && ((animation_id == ANIM_AGENT_STANDUP) || (animation_id == ANIM_AGENT_LAND) || (animation_id == ANIM_AGENT_MEDIUM_LAND))) )
+			{
+				gAgent.setControlFlags(AGENT_CONTROL_FINISH_ANIM);
+				send_agent_update(TRUE, TRUE);
+				continue;
+			}
+// [/SL:KB]
 
 			avatarp->mSignaledAnimations[animation_id] = anim_sequence_id;
 

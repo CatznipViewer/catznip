@@ -671,6 +671,13 @@ void LLAgent::moveUp(S32 direction)
 		setControlFlags(AGENT_CONTROL_UP_NEG | AGENT_CONTROL_FAST_UP);
 	}
 
+// [SL:KB] - Patch: Settings-PlayAnimations | Checked: Catznip-5.3
+	if (!gSavedSettings.getBOOL("PlayPrejumpAnim"))
+	{
+		setControlFlags(AGENT_CONTROL_FINISH_ANIM);
+	}
+// [/SL:KB]
+
 	gAgentCamera.resetView();
 }
 
