@@ -871,6 +871,32 @@
        <button.commit_callback
         function="BuildTool.UnlinkObjects"/>
     </button>
+    <button
+     follows="left|top"
+     height="20"
+     hover_glow_amount="0.15"
+     image_overlay="BackArrow_Off"
+     layout="topleft"
+     left_pad="2"
+     name="prev_link_btn"
+		 tool_tip="Select the previous part (or face)&#xA;(Hold down shift to add to the current selection)"
+     width="20">
+       <button.commit_callback
+        function="BuildTool.SelectPrevLink" />
+    </button>
+    <button
+     follows="left|top"
+     height="20"
+     hover_glow_amount="0.15"
+     image_overlay="ForwardArrow_Off"
+     layout="topleft"
+     left_pad="2"
+     name="next_link_btn"
+		 tool_tip="Select the next part (or face)&#xA;(Hold down shift to add to the current selection)"
+     width="20">
+       <button.commit_callback
+        function="BuildTool.SelectNextLink" />
+    </button>
 	<text
 	 text_color="LtGray_50"
 	 type="string"
