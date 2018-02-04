@@ -137,6 +137,12 @@ void LLCrashLoggerHandler::onFailure(LLCore::HttpResponse * response, LLCore::Ht
 {
     LL_WARNS("CRASHREPORT") << "Request to " << response->getRequestURL()
                             << " failed: " << status.toString() << LL_ENDL;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.3
+	if ( (status.getStatus() >= 400) && (status.getStatus() <= 499) )
+	{
+		gSent = true;
+	}
+// [/SL:KB]
     gBreak = true;
 }
 
