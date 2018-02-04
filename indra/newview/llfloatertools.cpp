@@ -120,6 +120,9 @@ void commit_radio_group_move(LLUICtrl* ctrl);
 void commit_radio_group_edit(LLUICtrl* ctrl);
 void commit_radio_group_land(LLUICtrl* ctrl);
 void commit_slider_zoom(LLUICtrl *ctrl);
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+void commit_select_next_part(bool select_next);
+// [/SL:KB]
 
 /**
  * Class LLLandImpactsObserver
@@ -245,6 +248,10 @@ BOOL	LLFloaterTools::postBuild()
 	mTitleMedia			= getChild<LLMediaCtrl>("title_media");
 	mBtnLink			= getChild<LLButton>("link_btn");
 	mBtnUnlink			= getChild<LLButton>("unlink_btn");
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	mBtnSelectPrevLink	= getChild<LLButton>("prev_link_btn");
+	mBtnSelectNextLink	= getChild<LLButton>("next_link_btn");
+// [/SL:KB]
 	
 	mCheckSelectIndividual	= getChild<LLCheckBoxCtrl>("checkbox edit linked parts");	
 	getChild<LLUICtrl>("checkbox edit linked parts")->setValue((BOOL)gSavedSettings.getBOOL("EditLinkedParts"));
@@ -425,6 +432,10 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCommitCallbackRegistrar.add("BuildTool.LinkObjects",		boost::bind(&LLSelectMgr::linkObjects, LLSelectMgr::getInstance()));
 	mCommitCallbackRegistrar.add("BuildTool.UnlinkObjects",		boost::bind(&LLSelectMgr::unlinkObjects, LLSelectMgr::getInstance()));
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	mCommitCallbackRegistrar.add("BuildTool.SelectPrevLink",	boost::bind(&commit_select_next_part, false));
+	mCommitCallbackRegistrar.add("BuildTool.SelectNextLink",	boost::bind(&commit_select_next_part, true));
+// [/SL:KB]
 
 	mLandImpactsObserver = new LLLandImpactsObserver();
 	LLViewerParcelMgr::getInstance()->addObserver(mLandImpactsObserver);
@@ -696,9 +707,18 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	mBtnLink->setVisible(edit_visible);
 	mBtnUnlink->setVisible(edit_visible);
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	mBtnSelectPrevLink->setVisible(edit_visible);
+	mBtnSelectNextLink->setVisible(edit_visible);
+// [/SL:KB]
 
 	mBtnLink->setEnabled(LLSelectMgr::instance().enableLinkObjects());
 	mBtnUnlink->setEnabled(LLSelectMgr::instance().enableUnlinkObjects());
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	bool fEnablePrevNextLink = enable_tools_select_next_part();
+	mBtnSelectPrevLink->setEnabled(fEnablePrevNextLink);
+	mBtnSelectNextLink->setEnabled(fEnablePrevNextLink);
+// [/SL:KB]
 
 	if (mCheckSelectIndividual)
 	{
@@ -1103,6 +1123,31 @@ void commit_select_component(void *data)
 		LLSelectMgr::getInstance()->promoteSelectionToRoot();
 	}
 }
+
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+void commit_select_next_part(bool select_next)
+{
+	LLSD sdParam;
+
+	MASK mask = gKeyboard->currentMask(false);
+	if (select_next)
+	{
+		if (MASK_NONE == (mask & MASK_SHIFT))
+			sdParam = "next";
+		else
+			sdParam = "includenext";
+	}
+	else
+	{
+		if (MASK_NONE == (mask & MASK_SHIFT))
+			sdParam = "previous";
+		else
+			sdParam = "includeprevious";
+	}
+
+	handle_tools_select_next_part_face(sdParam);
+}
+// [/SL:KB]
 
 // static 
 void LLFloaterTools::setObjectType( LLPCode pcode )

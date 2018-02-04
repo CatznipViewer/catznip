@@ -65,6 +65,10 @@ void handle_deselect(void*);
 void handle_delete_object();
 void handle_duplicate(void*);
 void handle_duplicate_in_place(void*);
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+bool enable_tools_select_next_part();
+bool handle_tools_select_next_part_face(const LLSD& userdata);
+// [/SL:KB]
 BOOL enable_not_have_card(void *userdata);
 void process_grant_godlike_powers(LLMessageSystem* msg, void**);
 

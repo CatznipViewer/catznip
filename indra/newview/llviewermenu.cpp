@@ -5731,23 +5731,29 @@ class LLToolsSnapObjectXY : public view_listener_t
 };
 
 // Determine if the option to cycle between linked prims is shown
-class LLToolsEnableSelectNextPart : public view_listener_t
-{
-	bool handleEvent(const LLSD& userdata)
+//class LLToolsEnableSelectNextPart : public view_listener_t
+//{
+//	bool handleEvent(const LLSD& userdata)
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	bool enable_tools_select_next_part()
+// [/SL:KB]
 	{
         bool new_value = (!LLSelectMgr::getInstance()->getSelection()->isEmpty()
                           && (gSavedSettings.getBOOL("EditLinkedParts")
                               || LLToolFace::getInstance() == LLToolMgr::getInstance()->getCurrentTool()));
 		return new_value;
 	}
-};
+//};
 
 // Cycle selection through linked children or/and faces in selected object.
 // FIXME: Order of children list is not always the same as sim's idea of link order. This may confuse
 // resis. Need link position added to sim messages to address this.
-class LLToolsSelectNextPartFace : public view_listener_t
-{
-    bool handleEvent(const LLSD& userdata)
+//class LLToolsSelectNextPartFace : public view_listener_t
+//{
+//    bool handleEvent(const LLSD& userdata)
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	bool handle_tools_select_next_part_face(const LLSD& userdata)
+// [/SL:KB]
     {
         bool cycle_faces = LLToolFace::getInstance() == LLToolMgr::getInstance()->getCurrentTool();
         bool cycle_linked = gSavedSettings.getBOOL("EditLinkedParts");
@@ -5897,7 +5903,7 @@ class LLToolsSelectNextPartFace : public view_listener_t
         }
 		return true;
 	}
-};
+//};
 
 class LLToolsStopAllAnimations : public view_listener_t
 {
@@ -9934,7 +9940,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLToolsEditLinkedParts(), "Tools.EditLinkedParts");
 	view_listener_t::addMenu(new LLToolsSnapObjectXY(), "Tools.SnapObjectXY");
 	view_listener_t::addMenu(new LLToolsUseSelectionForGrid(), "Tools.UseSelectionForGrid");
-	view_listener_t::addMenu(new LLToolsSelectNextPartFace(), "Tools.SelectNextPart");
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	commit.add("Tools.SelectNextPart", boost::bind(&handle_tools_select_next_part_face, _2));
+// [/SL:KB]
+//	view_listener_t::addMenu(new LLToolsSelectNextPartFace(), "Tools.SelectNextPart");
 	commit.add("Tools.Link", boost::bind(&LLSelectMgr::linkObjects, LLSelectMgr::getInstance()));
 	commit.add("Tools.Unlink", boost::bind(&LLSelectMgr::unlinkObjects, LLSelectMgr::getInstance()));
 	view_listener_t::addMenu(new LLToolsStopAllAnimations(), "Tools.StopAllAnimations");
@@ -9947,7 +9956,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLToolsSelectedScriptAction(), "Tools.SelectedScriptAction");
 
 	view_listener_t::addMenu(new LLToolsEnableToolNotPie(), "Tools.EnableToolNotPie");
-	view_listener_t::addMenu(new LLToolsEnableSelectNextPart(), "Tools.EnableSelectNextPart");
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	enable.add("Tools.EnableSelectNextPart", boost::bind(&enable_tools_select_next_part));
+// [/SL:KB]
+//	view_listener_t::addMenu(new LLToolsEnableSelectNextPart(), "Tools.EnableSelectNextPart");
 	enable.add("Tools.EnableLink", boost::bind(&LLSelectMgr::enableLinkObjects, LLSelectMgr::getInstance()));
 	enable.add("Tools.EnableUnlink", boost::bind(&LLSelectMgr::enableUnlinkObjects, LLSelectMgr::getInstance()));
 	view_listener_t::addMenu(new LLToolsEnableBuyOrTake(), "Tools.EnableBuyOrTake");
