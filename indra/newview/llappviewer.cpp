@@ -4119,7 +4119,12 @@ void LLAppViewer::writeSystemInfo()
 	// Only include the log if the user consented
 	if (gCrashSettings.getBOOL("CrashSubmitLog"))
 	{
-		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, LLError::logFileName());
+#if LL_WINDOWS
+		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_DUMP, "Catznip.log");
+#else
+		//Not ideal but sufficient for good reporting.
+		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.old");
+#endif
 	}
 // [/SL:KB]
 //#if LL_WINDOWS
