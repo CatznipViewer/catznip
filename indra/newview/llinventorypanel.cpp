@@ -1581,7 +1581,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 
 //	if (res)
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
-	if (active_inv_floaterp)
+	if ( (auto_open) && (active_inv_floaterp) )
 // [/SL:KB]
 	{
 		// Make sure the floater is not minimized (STORM-438).

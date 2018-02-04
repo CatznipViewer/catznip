@@ -553,12 +553,15 @@ void LLGroupNoticeNotificationListItem::setSender(const LLUUID& sender_id, const
     {
         LLStringUtil::format_map_t string_args;
 // [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-5.2
+		string_args["[SENDER_RESIDENT]"] = (sender_id.isNull()) ? llformat("\"%s\"", sender.c_str()) : llformat("secondlife:///app/agent/%s/displayname", sender_id.asString().c_str());
+        mSenderOrFeeBox->setValue(getString("sender_resident_text", string_args));
 		string_args["[SENDER_RESIDENT]"] = (sender_id.isNull()) ? llformat("\"%s\"", sender.c_str()) : llformat("secondlife:///app/agent/%s/about", sender_id.asString().c_str());
+        mSenderOrFeeBoxExp->setValue(getString("sender_resident_text", string_args));
 // [/SL:KB]
 //        string_args["[SENDER_RESIDENT]"] = llformat("%s", sender.c_str());
-        std::string sender_text = getString("sender_resident_text", string_args);
-        mSenderOrFeeBox->setValue(sender_text);
-        mSenderOrFeeBoxExp->setValue(sender_text);
+//        std::string sender_text = getString("sender_resident_text", string_args);
+//        mSenderOrFeeBox->setValue(sender_text);
+//        mSenderOrFeeBoxExp->setValue(sender_text);
         mSenderOrFeeBox->setVisible(TRUE);
         mSenderOrFeeBoxExp->setVisible(TRUE);
     } else {

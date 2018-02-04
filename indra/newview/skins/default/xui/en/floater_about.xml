@@ -108,8 +108,6 @@ RestrainedLove API: [RLV_VERSION]
        top="5"
        right="-5"
        word_wrap="true" />
-      <button
-        follows="left|top"
     </panel>
     <panel
       border="true"

@@ -1363,6 +1363,7 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 			//recommend 1/3rd of total video memory for textures
 			max_texmem /= gSavedSettings.getF32("TextureMemoryRatio");
 		}
+		max_texmem = llmin(max_texmem, (S32Megabytes)2048);
 // [/SL:DP]
 //		// Treat any card with < 32 MB (shudder) as having 32 MB
 //		//  - it's going to be swapping constantly regardless

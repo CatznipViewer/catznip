@@ -8410,6 +8410,28 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>PlayLandingAnim</key>
+    <map>
+      <key>Comment</key>
+      <string>Your avatar plays the pre-jump animation when you jump</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>PlayPrejumpAnim</key>
+    <map>
+      <key>Comment</key>
+      <string>Your avatar plays the landing animation when you fall and hit the ground</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>PlayTypingAnim</key>
     <map>
       <key>Comment</key>

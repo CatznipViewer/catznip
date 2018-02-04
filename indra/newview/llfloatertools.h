@@ -148,6 +148,10 @@ public:
 	LLCheckBoxCtrl	*mCheckSelectIndividual;
 	LLButton*		mBtnLink;
 	LLButton*		mBtnUnlink;
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: Catznip-5.3
+	LLButton*		mBtnSelectPrevLink = nullptr;
+	LLButton*		mBtnSelectNextLink = nullptr;
+// [/SL:KB]
 
 // [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
 	LLTextBox*		mTextSelection;
