@@ -349,13 +349,15 @@ bool LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 			opj_image_destroy(image);
 		}
 
+// [SL:KB] - Patch: Viewer-OpenJPEG2 | Checked: Catznip-5.3
+		base.decodeFailed();
+// [SL:KB]
 		return true; // done
 	}
 
 //	// sometimes we get bad data out of the cache - check to see if the decode succeeded
 //	for (S32 i = 0; i < image->numcomps; i++)
 //	{
-//		//llassert(5 - image->comps[i].resno_decoded == base.getRawDiscardLevel());
 //		if (image->comps[i].factor != base.getRawDiscardLevel())
 //		{
 //			// if we didn't get the discard level we're expecting, fail
