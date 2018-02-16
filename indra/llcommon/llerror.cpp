@@ -52,6 +52,82 @@
 #include "lltimer.h"
 
 namespace {
+	class LogLock
+	{
+	public:
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		LogLock(bool require_lock = false);
+// [/SL:KB]
+//		LogLock();
+		~LogLock();
+		bool ok() const { return mOK; }
+	private:
+		bool mLocked;
+		bool mOK;
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		bool mRequireLock;
+// [/SL:KB]
+	};
+	
+//	LogLock::LogLock()
+//		: mLocked(false), mOK(false)
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+	LogLock::LogLock(bool require_lock)
+		: mLocked(false), mOK(false), mRequireLock(require_lock)
+// [/SL:KB]
+	{
+		if (!gLogMutexp)
+		{
+			mOK = true;
+			return;
+		}
+		
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		if (!mRequireLock)
+		{
+// [/SL:KB]
+			const int MAX_RETRIES = 5;
+			for (int attempts = 0; attempts < MAX_RETRIES; ++attempts)
+			{
+				apr_status_t s = apr_thread_mutex_trylock(gLogMutexp);
+				if (!APR_STATUS_IS_EBUSY(s))
+				{
+					mLocked = true;
+					mOK = true;
+					return;
+				}
+
+				ms_sleep(1);
+				//apr_thread_yield();
+					// Just yielding won't necessarily work, I had problems with
+					// this on Linux - doug 12/02/04
+			}
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		}
+		else
+		{
+			apr_thread_mutex_lock(gLogMutexp);
+			mLocked = true;
+			mOK = true;
+			return;
+		}
+// [/SL:KB]
+
+		// We're hosed, we can't get the mutex.  Blah.
+		std::cerr << "LogLock::LogLock: failed to get mutex for log"
+					<< std::endl;
+	}
+	
+	LogLock::~LogLock()
+	{
+		if (mLocked)
+		{
+			apr_thread_mutex_unlock(gLogMutexp);
+		}
+	}
+}
+
+namespace {
 #if LL_WINDOWS
 	void debugger_print(const std::string& s)
 	{
@@ -851,6 +927,9 @@ namespace LLError
 
 	void addRecorder(RecorderPtr recorder)
 	{
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		LogLock lock(true);
+// [/SL:KB]
 		if (!recorder)
 		{
 			return;
@@ -861,6 +940,9 @@ namespace LLError
 
 	void removeRecorder(RecorderPtr recorder)
 	{
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+		LogLock lock(true);
+// [/SL:KB]
 		if (!recorder)
 		{
 			return;
@@ -1007,55 +1089,55 @@ namespace {
 		return found_level;
 	}
 	
-	class LogLock
-	{
-	public:
-		LogLock();
-		~LogLock();
-		bool ok() const { return mOK; }
-	private:
-		bool mLocked;
-		bool mOK;
-	};
-	
-	LogLock::LogLock()
-		: mLocked(false), mOK(false)
-	{
-		if (!gLogMutexp)
-		{
-			mOK = true;
-			return;
-		}
-		
-		const int MAX_RETRIES = 5;
-		for (int attempts = 0; attempts < MAX_RETRIES; ++attempts)
-		{
-			apr_status_t s = apr_thread_mutex_trylock(gLogMutexp);
-			if (!APR_STATUS_IS_EBUSY(s))
-			{
-				mLocked = true;
-				mOK = true;
-				return;
-			}
-
-			ms_sleep(1);
-			//apr_thread_yield();
-				// Just yielding won't necessarily work, I had problems with
-				// this on Linux - doug 12/02/04
-		}
-
-		// We're hosed, we can't get the mutex.  Blah.
-		std::cerr << "LogLock::LogLock: failed to get mutex for log"
-					<< std::endl;
-	}
-	
-	LogLock::~LogLock()
-	{
-		if (mLocked)
-		{
-			apr_thread_mutex_unlock(gLogMutexp);
-		}
-	}
+//	class LogLock
+//	{
+//	public:
+//		LogLock();
+//		~LogLock();
+//		bool ok() const { return mOK; }
+//	private:
+//		bool mLocked;
+//		bool mOK;
+//	};
+//	
+//	LogLock::LogLock()
+//		: mLocked(false), mOK(false)
+//	{
+//		if (!gLogMutexp)
+//		{
+//			mOK = true;
+//			return;
+//		}
+//		
+//		const int MAX_RETRIES = 5;
+//		for (int attempts = 0; attempts < MAX_RETRIES; ++attempts)
+//		{
+//			apr_status_t s = apr_thread_mutex_trylock(gLogMutexp);
+//			if (!APR_STATUS_IS_EBUSY(s))
+//			{
+//				mLocked = true;
+//				mOK = true;
+//				return;
+//			}
+//
+//			ms_sleep(1);
+//			//apr_thread_yield();
+//				// Just yielding won't necessarily work, I had problems with
+//				// this on Linux - doug 12/02/04
+//		}
+//
+//		// We're hosed, we can't get the mutex.  Blah.
+//		std::cerr << "LogLock::LogLock: failed to get mutex for log"
+//					<< std::endl;
+//	}
+//	
+//	LogLock::~LogLock()
+//	{
+//		if (mLocked)
+//		{
+//			apr_thread_mutex_unlock(gLogMutexp);
+//		}
+//	}
 }
 
 namespace LLError
