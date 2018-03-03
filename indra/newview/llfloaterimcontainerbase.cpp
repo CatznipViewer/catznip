@@ -19,6 +19,10 @@
 
 #include "llagent.h"
 #include "llavatariconctrl.h"
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+#include "llchiclet.h"
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "lldonotdisturbnotificationstorage.h"
 #include "llgroupiconctrl.h"
 #include "llfloaterimsession.h"

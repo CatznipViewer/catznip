@@ -17,6 +17,11 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+#include "llchiclet.h"
+#include "llchicletbar.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llfloaterimcontainertab.h"
 #include "llfloaterimsession.h"
 #include "llfloaterreg.h"
@@ -42,6 +47,14 @@ BOOL LLFloaterIMContainerTab::postBuild()
 
 	mTabContainer->setRightMouseDownCallback(boost::bind(&LLFloaterIMContainerTab::onTabContainerRightMouseDown, this, _2, _3));
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("RearrangeIMTabs"))
+	{
+		mTabContainer->setAllowRearrange(true);
+		mTabContainer->setRearrangeCallback(boost::bind(&LLFloaterIMContainerTab::onIMTabRearrange, this, _1, _2));
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -52,6 +65,40 @@ void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_
 	{
 		return;
 	}
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
+	const LLUUID idSession = floaterp->getKey();
+
+	// NOTE: this will only do work on legacy IM-tabs but shouldn't actually harm CHUI's hidden tabs
+	if ( (LLChicletBar::instanceExists()) && (floaterp->isTornOff()) && (LLTabContainer::END == insertion_point) )
+	{
+		// If we're redocking a torn off IM floater, return it back to its previous place
+		LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+
+		LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(idSession);
+		S32 idxChiclet = pChicletPanel->getChicletIndex(pChiclet);
+		if ( (idxChiclet > 0) && (idxChiclet < pChicletPanel->getChicletCount() - 1) )
+		{
+			// Look for the first IM session to the left of this one
+			while (--idxChiclet >= 0)
+			{
+				if (pChiclet = dynamic_cast<LLIMChiclet*>(pChicletPanel->getChiclet(idxChiclet)))
+				{
+					const LLFloaterIMSession* pFloater = LLFloaterIMSession::findInstance(pChiclet->getSessionId());
+					if (pFloater)
+					{
+						insertion_point = (LLTabContainer::eInsertionPoint)(mTabContainer->getIndexForPanel(pFloater) + 1);
+						break;
+					}
+				}
+			}
+		}
+		else 
+		{
+			insertion_point = (0 == idxChiclet) ? LLTabContainer::START : LLTabContainer::END;
+		}
+	}
+// [/SL:KB]
 
 	LLFloaterIMContainerBase::addFloater(floaterp, select_added_floater, insertion_point);
 }
@@ -204,5 +251,40 @@ void LLFloaterIMContainerTab::onTabContainerRightMouseDown(S32 x, S32 y)
 		}
 	}
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-23 (Catznip-3.3)
+void LLFloaterIMContainerTab::onIMTabRearrange(S32 tab_index, LLPanel* tab_panel)
+{
+	LLFloaterIMSession* pFloater = dynamic_cast<LLFloaterIMSession*>(tab_panel);
+	if (!pFloater)
+		return;
+
+	if (LLChicletBar::instanceExists())
+	{
+		LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+		LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(pFloater->getKey());
+		if (!pChiclet)
+			return;
+
+		if ( (tab_index > mTabContainer->getNumLockedTabs()) && (tab_index < mTabContainer->getTabCount() - 1) )
+		{
+			// Look for the first IM session to the left of this one
+			while (--tab_index >= mTabContainer->getNumLockedTabs())
+			{
+				LLFloaterIMSession* pPrevFloater = dynamic_cast<LLFloaterIMSession*>(mTabContainer->getPanelByIndex(tab_index));
+				if (pPrevFloater)
+				{
+					pChicletPanel->setChicletIndex(pChiclet, LLChicletPanel::RIGHT_OF_SESSION, pPrevFloater->getKey().asUUID());
+					break;
+				}
+			}
+		}
+		else
+		{
+			pChicletPanel->setChicletIndex(pChiclet, (tab_index <= mTabContainer->getNumLockedTabs()) ? LLChicletPanel::START : LLChicletPanel::END);
+		}
+	}
+}
+// [/SL:KB]
 
 // EOF
