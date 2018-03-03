@@ -9,7 +9,6 @@
  name="floater_im_box"
  help_topic="floater_im_box"
  save_rect="true"
- save_visibility="true"
  single_instance="true"
  reuse_instance="true"
  title="CONVERSATIONS"
@@ -84,6 +83,7 @@
                      tool_tip="Start a new conversation"
                      width="31"/>
                     <button
+                     enabled="false"
                      follows="top|left"
                      height="25"
                      image_hover_unselected="Toolbar_Middle_Over"

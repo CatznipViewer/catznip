@@ -1,0 +1,25 @@
+[Chat/Base]
+- added   : "IMUseTabbedContainer" and "IMUseVerticalTabs" to switch between CHUI and horizontal/vertical tabs
+    -> requires restart
+- added   : restoration of IM/P2P/group chiclets and IM syswell chiclet
+    -> partial backout of CHUI-573 (changeset 5f644b9779c9)
+- added   : "Conversations" button to the toolbar commands
+    -> "Nearby Chat" will highlight when the nearby char floater is visible (whether docked or undocked) and toggle it when pressed
+    -> "Conversations" will highlight when the conversations floater is visible and toggle it when pressed
+- changed : rearranged the tear off/participant expand/close buttons on the IM session floater
+    -> additionally, show the default tear off and close buttons rather than the CHUI toolbar buttons
+- changed : visibility of the gear button in the P2P IM floater to always be visible regardless of torn-off state
+- changed : swapped the gear and view options buttons in the IM conversation toolbar
+    -> more consistent with the way the gear and view/sort buttons are layed out on other floaters
+- changed : don't use the bizarre inventory view-model for the participant list when using a legacy tab container
+- fixed   : LLFloaterIMContainerView::updateSpeakBtnState() is called per-frame
+- fixed   : don't show and set focus to the conversation floater when clicking a chiclet for a torn-off IM session
+    -> show and set focus to the torn-off session instead (and clear the unread/lit state)
+- fixed : normalized the behaviour of the nearby chat floater for both CHUI and tabbed container
+    -> when picking Communicate / Nearby Chat we'd like the following behaviour:
+        * if torn off the nearby chat floater should toggle between visible and invisible
+        * if docked the nearby chat floater should be shown or the next conversation should be shown
+    -> when closing the Nearby Chat floater we'd like the following behaviour:
+        * if torn off the nearby chat floater should go invisible
+        * if docked the next conversation should be shown (ideally the nearby chat floater should not have a close button while docked)
+- internal : imported FloaterTearOffSignal from Chat-NearbyChat patch branch

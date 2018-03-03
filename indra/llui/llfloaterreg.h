@@ -119,6 +119,9 @@ public:
 	// return true if instance is visible:
 	static bool toggleInstance(const std::string& name, const LLSD& key = LLSD());
 	static bool instanceVisible(const std::string& name, const LLSD& key = LLSD());
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+	static bool instanceInVisibleChain(const std::string& name, const LLSD& key = LLSD());
+// [/SL:KB]
 
 	static void showInitialVisibleInstances();
 	static void hideVisibleInstances(const std::set<std::string>& exceptions = std::set<std::string>());

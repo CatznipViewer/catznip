@@ -35,6 +35,9 @@
 #include "llsdutil.h"
 #include "llconversationmodel.h"
 #include "llimview.h" //For LLIMModel
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "llmutelist.h"
+// [/SL:KB]
 #include "lltrans.h"
 
 #include <boost/foreach.hpp>
