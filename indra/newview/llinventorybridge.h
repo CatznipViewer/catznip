@@ -279,7 +279,8 @@ public:
 	:	LLInvFVBridge(inventory, root, uuid),
 		mCallingCards(FALSE),
 		mWearables(FALSE),
-		mIsLoading(false)
+		mIsLoading(false),
+		mShowDescendantsCount(false)
 	{}
 		
 	BOOL dragItemIntoFolder(LLInventoryItem* inv_item, BOOL drop, std::string& tooltip_msg, BOOL user_confirm = TRUE);
@@ -303,6 +304,8 @@ public:
 	static LLUIImagePtr getIcon(LLFolderType::EType preferred_type);
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
+
+	void setShowDescendantsCount(bool show_count) {mShowDescendantsCount = show_count;}
 
 	virtual BOOL renameItem(const std::string& new_name);
 
@@ -384,6 +387,7 @@ protected:
 	bool							mCallingCards;
 	bool							mWearables;
 	bool							mIsLoading;
+	bool							mShowDescendantsCount;
 	LLTimer							mTimeSinceRequestStart;
     std::string                     mMessage;
 	LLRootHandle<LLFolderBridge> mHandle;
