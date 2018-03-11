@@ -13,27 +13,28 @@
   </panel.string>
   <panel.string
    name="ItemcountFetching">
-    (Fetched [ITEM_COUNT] Items)[FILTER]
+    (Fetched [ITEM_COUNT] items / [CATEGORY_COUNT] folders) [FILTER]
   </panel.string>
   <panel.string
    name="ItemcountCompleted">
-    ([ITEM_COUNT] Items)[FILTER]
+    ([ITEM_COUNT] items / [CATEGORY_COUNT] folders) [FILTER]
   </panel.string>
   <panel.string
    name="ItemcountUnknown">
-    Fetched [ITEM_COUNT] Items [FILTER]
+    (Fetched [ITEM_COUNT] items / [CATEGORY_COUNT] folders) [FILTER]
   </panel.string>
 <!--
   <text
 		     type="string"
 		     length="1"
-		     follows="left|top"
+		     follows="left|top|right"
 		     height="13"
 		     layout="topleft"
     		 left="12"
 		     name="ItemcountText"
 		     font="SansSerifMedium"
 		     text_color="EmphasisColor"
+		     use_ellipses="true"
 		     top_pad="0"
 		     width="300">
     Items:
