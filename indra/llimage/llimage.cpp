@@ -748,7 +748,11 @@ U8* LLImageBase::allocateData(S32 size)
 	{
 		size = 0;
 		mWidth = mHeight = 0;
-		mData = NULL;
+		if (mData)
+		{
+			deleteData(); // virtual
+			mData = NULL;
+		}
 	}
 	mDataSize = size;
 	claimMem(mDataSize);
@@ -775,6 +779,7 @@ U8* LLImageBase::reallocateData(S32 size)
 	disclaimMem(mDataSize);
 	mDataSize = size;
 	claimMem(mDataSize);
+	mBadBufferAllocation = false;
 	return mData;
 }
 
@@ -1227,9 +1232,10 @@ void LLImageRaw::fill( const LLColor4U& color )
 	if( 4 == getComponents() )
 	{
 		U32* data = (U32*) getData();
+		U32 rgbaColor = color.asRGBA();
 		for( S32 i = 0; i < pixels; i++ )
 		{
-			data[i] = color.mAll;
+			data[ i ] = rgbaColor;
 		}
 	}
 	else
@@ -1535,7 +1541,7 @@ LLPointer<LLImageRaw> LLImageRaw::scaled(S32 new_width, S32 new_height)
     if ((old_width == new_width) && (old_height == new_height))
     {
         result = new LLImageRaw(old_width, old_height, components);
-        if (!result)
+        if (!result || result->isBufferInvalid())
         {
             LL_WARNS() << "Failed to allocate new image" << LL_ENDL;
             return result;
@@ -1549,7 +1555,7 @@ LLPointer<LLImageRaw> LLImageRaw::scaled(S32 new_width, S32 new_height)
         if (new_data_size > 0)
         {
             result = new LLImageRaw(new_width, new_height, components);
-            if (!result)
+            if (!result || result->isBufferInvalid())
             {
                 LL_WARNS() << "Failed to allocate new image" << LL_ENDL;
                 return result;

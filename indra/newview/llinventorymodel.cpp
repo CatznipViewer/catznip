@@ -617,6 +617,11 @@ LLUUID LLInventoryModel::createNewCategory(const LLUUID& parent_id,
 		return LLUUID::null;
 	}
 
+	if (!gMessageSystem)
+	{
+		return LLUUID::null;
+	}
+
 	// Add the category to the internal representation
 	LLPointer<LLViewerInventoryCategory> cat =
 		new LLViewerInventoryCategory(id, parent_id, preferred_type, name, gAgent.getID());
@@ -2058,11 +2063,6 @@ bool LLInventoryModel::loadSkeleton(
 					// correct contents the next time the viewer opens the folder.
 					tcat->setVersion(NO_VERSION);
 				}
-                else if (tcat->getPreferredType() == LLFolderType::FT_MARKETPLACE_STOCK)
-                {
-                    // Do not trust stock folders being updated
-                    tcat->setVersion(NO_VERSION);
-                }
 				else
 				{
 					cached_ids.insert(tcat->getUUID());

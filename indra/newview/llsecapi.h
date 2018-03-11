@@ -350,24 +350,21 @@ std::ostream& operator <<(std::ostream& s, const LLCredential& cred);
 class LLCertException: public LLException
 {
 public:
-	LLCertException(LLPointer<LLCertificate> cert, const std::string& msg):
-		LLException(msg)
+	LLCertException(const LLSD& cert_data, const std::string& msg): LLException(msg),
+        mCertData(cert_data)
 	{
-
-		mCert = cert;
-
 		LL_WARNS("SECAPI") << "Certificate Error: " << msg << LL_ENDL;
 	}
 	virtual ~LLCertException() throw() {}
-	LLPointer<LLCertificate> getCert() const { return mCert; }
+	LLSD getCertData() const { return mCertData; }
 protected:
-	LLPointer<LLCertificate> mCert;
+	LLSD mCertData;
 };
 
 class LLInvalidCertificate : public LLCertException
 {
 public:
-	LLInvalidCertificate(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalid")
+	LLInvalidCertificate(const LLSD& cert_data) : LLCertException(cert_data, "CertInvalid")
 	{
 	}
 	virtual ~LLInvalidCertificate() throw() {}
@@ -377,7 +374,7 @@ protected:
 class LLCertValidationTrustException : public LLCertException
 {
 public:
-	LLCertValidationTrustException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertUntrusted")
+	LLCertValidationTrustException(const LLSD& cert_data) : LLCertException(cert_data, "CertUntrusted")
 	{
 	}
 	virtual ~LLCertValidationTrustException() throw() {}
@@ -388,7 +385,7 @@ class LLCertValidationHostnameException : public LLCertException
 {
 public:
 	LLCertValidationHostnameException(std::string hostname,
-									  LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalidHostname")
+									  const LLSD& cert_data) : LLCertException(cert_data, "CertInvalidHostname")
 	{
 		mHostname = hostname;
 	}
@@ -401,8 +398,8 @@ protected:
 class LLCertValidationExpirationException : public LLCertException
 {
 public:
-	LLCertValidationExpirationException(LLPointer<LLCertificate> cert,
-										LLDate current_time) : LLCertException(cert, "CertExpired")
+	LLCertValidationExpirationException(const LLSD& cert_data,
+										LLDate current_time) : LLCertException(cert_data, "CertExpired")
 	{
 		mTime = current_time;
 	}
@@ -415,7 +412,7 @@ protected:
 class LLCertKeyUsageValidationException : public LLCertException
 {
 public:
-	LLCertKeyUsageValidationException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertKeyUsage")
+	LLCertKeyUsageValidationException(const LLSD& cert_data) : LLCertException(cert_data, "CertKeyUsage")
 	{
 	}
 	virtual ~LLCertKeyUsageValidationException() throw() {}
@@ -425,7 +422,7 @@ protected:
 class LLCertBasicConstraintsValidationException : public LLCertException
 {
 public:
-	LLCertBasicConstraintsValidationException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertBasicConstraints")
+	LLCertBasicConstraintsValidationException(const LLSD& cert_data) : LLCertException(cert_data, "CertBasicConstraints")
 	{
 	}
 	virtual ~LLCertBasicConstraintsValidationException() throw() {}
@@ -435,7 +432,7 @@ protected:
 class LLCertValidationInvalidSignatureException : public LLCertException
 {
 public:
-	LLCertValidationInvalidSignatureException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalidSignature")
+	LLCertValidationInvalidSignatureException(const LLSD& cert_data) : LLCertException(cert_data, "CertInvalidSignature")
 	{
 	}
 	virtual ~LLCertValidationInvalidSignatureException() throw() {}
