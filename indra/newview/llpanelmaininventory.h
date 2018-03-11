@@ -171,7 +171,7 @@ private:
 
 	LLFilterEditor*				mFilterEditor;
 	LLTabContainer*				mFilterTabs;
-    LLUICtrl*                   mCounterCtrl;
+	LLUICtrl*					mCounterCtrl;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
 	LLInventoryPanel*			mWornItemsPanel;
@@ -187,7 +187,9 @@ private:
 	std::vector<std::string>	mFilterSubStrings;
 // [/SL:KB]
 	S32							mItemCount;
-	std::string 				mItemCountString;
+	std::string					mItemCountString;
+	S32							mCategoryCount;
+	std::string					mCategoryCountString;
 //	LLComboBox*					mSearchTypeCombo;
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	std::string					mFloaterTitle;
@@ -195,6 +197,7 @@ private:
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
 	LLInventoryPanel*			mSpareInvPanel;
 // [/SL:KB]
+
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// List Commands                                                                //

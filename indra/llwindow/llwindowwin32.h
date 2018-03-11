@@ -235,6 +235,8 @@ protected:
 	WINDOWPLACEMENT mRestoredPlacement;				// Only valid when the window is "fullscreen" sized [see setFullscreenWindow()]
 // [/SL:KB];
 
+	BOOL			mMouseVanish;
+
 	friend class LLWindowManager;
 };
 

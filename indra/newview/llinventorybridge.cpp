@@ -44,6 +44,7 @@
 #include "llfloatermarketplacelistings.h"
 //#include "llfloateroutfitphotopreview.h"
 #include "llfloatersidepanelcontainer.h"
+#include "llsidepanelinventory.h"
 #include "llfloaterworldmap.h"
 #include "llfolderview.h"
 #include "llfriendcard.h"
@@ -2468,12 +2469,28 @@ std::string LLFolderBridge::getLabelSuffix() const
     {
         return llformat(" ( %s ) ", LLTrans::getString("LoadingData").c_str());
     }
-    
+    std::string suffix = "";
+    if(mShowDescendantsCount)
+    {
+        LLInventoryModel::cat_array_t cat_array;
+        LLInventoryModel::item_array_t item_array;
+        gInventory.collectDescendents(getUUID(), cat_array, item_array, TRUE);
+        S32 count = item_array.size();
+        if(count > 0)
+        {
+            std::ostringstream oss;
+            oss << count;
+            LLStringUtil::format_map_t args;
+            args["[ITEMS_COUNT]"] = oss.str();
+            suffix = " " + LLTrans::getString("InventoryItemsCount", args);
+        }
+    }
+
 // [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
  	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
 		return LLInvFVBridge::getLabelSuffix() + LLTrans::getString("worn");
 // [/SL:KB]
-   return LLInvFVBridge::getLabelSuffix();
+    return LLInvFVBridge::getLabelSuffix() + suffix;
 }
 
 LLFontGL::StyleFlags LLFolderBridge::getLabelStyle() const

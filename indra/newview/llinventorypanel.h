@@ -244,6 +244,8 @@ public:
 // [/SL:KB]
 	static void idle(void* user_data);
 
+	void updateFolderLabel(const LLUUID& folder_id);
+
 	// DEBUG ONLY:
 	static void dumpSelectionInformation(void* user_data);
 
@@ -255,11 +257,15 @@ public:
 	// Find whichever inventory panel is active / on top.
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
-	
+
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
 	void showItem(const LLUUID& idItem);
 // [/SL:KB]
-//	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel = FALSE);
+//	static void openInventoryPanelAndSetSelection(BOOL auto_open,
+//													const LLUUID& obj_id,
+//													BOOL main_panel = FALSE,
+//													BOOL take_keyboard_focus = TAKE_FOCUS_YES,
+//													BOOL reset_filter = FALSE);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);
 	void removeItemID(const LLUUID& id);
@@ -294,6 +300,8 @@ protected:
 
 	LLHandle<LLFolderView>      mFolderRoot;
 	LLScrollContainer*			mScroller;
+
+	LLUUID						mPreviousSelectedFolder;
 
 	LLFolderViewModelInventory	mInventoryViewModel;
     LLPointer<LLFolderViewGroupedItemBridge> mGroupedItemBridge;

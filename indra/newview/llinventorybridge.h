@@ -310,7 +310,8 @@ public:
 	:	LLInvFVBridge(inventory, root, uuid),
 		mCallingCards(FALSE),
 		mWearables(FALSE),
-		mIsLoading(false)
+		mIsLoading(false),
+		mShowDescendantsCount(false)
 	{}
 		
 	BOOL dragItemIntoFolder(LLInventoryItem* inv_item, BOOL drop, std::string& tooltip_msg, BOOL user_confirm = TRUE);
@@ -338,6 +339,8 @@ public:
 	        bool getIncludedInFilter() const override;
 			void setIncludedInFilter(bool include) override;
 // [/SL:KB]
+
+	void setShowDescendantsCount(bool show_count) {mShowDescendantsCount = show_count;}
 
 	virtual BOOL renameItem(const std::string& new_name);
 
@@ -430,6 +433,7 @@ protected:
 	bool							mCallingCards;
 	bool							mWearables;
 	bool							mIsLoading;
+	bool							mShowDescendantsCount;
 	LLTimer							mTimeSinceRequestStart;
     std::string                     mMessage;
 	LLRootHandle<LLFolderBridge> mHandle;
