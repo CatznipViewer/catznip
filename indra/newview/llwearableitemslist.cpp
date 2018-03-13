@@ -798,7 +798,10 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Wearable.Add", boost::bind(wear_multiple, ids, false));
 	registrar.add("Wearable.Edit", boost::bind(handleMultiple, LLAgentWearables::editWearable, ids));
 	registrar.add("Wearable.CreateNew", boost::bind(createNewWearable, selected_id));
-	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id));
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id, EShowItemOptions::TAKE_FOCUS_YES, nullptr));
+// [/SL:KB]
+//	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id));
 	registrar.add("Wearable.TakeOffDetach", 
 				  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), ids));
 

@@ -81,7 +81,7 @@ public:
 		return panel;
 	}
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
 	static LLPanel* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName);
 
 	template <typename T>
@@ -97,15 +97,20 @@ public:
 // [/Sl:KB]
 };
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
 class LLFloaterSidePanelInventoryContainer : public LLFloaterSidePanelContainer
 {
 public:
 	LLFloaterSidePanelInventoryContainer(const LLSD& key, const Params& params = getDefaultParams())
-		: LLFloaterSidePanelContainer(key, params) {}
-	/*virtual*/ ~LLFloaterSidePanelInventoryContainer() {}
+		: LLFloaterSidePanelContainer(key, params)
+	{
+	}
 
-	/*virtual*/ void onClose(bool app_quitting);
+	~LLFloaterSidePanelInventoryContainer() override
+	{
+	}
+
+	void onClose(bool app_quitting) override;
 };
 // [/SL:KB]
 

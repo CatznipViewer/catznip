@@ -1691,7 +1691,18 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 	}
 	else if ("show_in_main_panel" == action)
 	{
-		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+ // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+		if (LLPanelMainInventory* pPanelMainInventory = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : nullptr)
+		{
+			pPanelMainInventory->selectPanel(EInventoryPanelType::ALL);
+			show_item(mUUID, EShowItemOptions::TAKE_FOCUS_YES | EShowItemOptions::RESET_FILTER_YES, pPanelMainInventory->getActivePanel());
+		}
+		else
+		{
+			show_item(mUUID, EShowItemOptions::TAKE_FOCUS_YES | EShowItemOptions::RESET_FILTER_YES);
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
 		return;
 	}
 	else if ("cut" == action)
@@ -1861,34 +1872,51 @@ void LLItemBridge::restoreToWorld()
 	}
 }
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.3
 void LLItemBridge::gotoItem()
 {
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	const LLUUID& idTarget = gInventory.getLinkedItemID(mUUID);
+
 	// Prefer the current inventory panel if possible
 	if (!mInventoryPanel.isDead())
 	{
-		const LLUUID& idTarget = gInventory.getLinkedItemID(mUUID);
-
 		LLInventoryPanel* inv_panel = mInventoryPanel.get();
 		LLFolderViewItem* view_item = inv_panel->getItemByID(idTarget);
 		if ( (view_item) && (view_item->passedFilter()) )
 		{
-			inv_panel->setSelection(idTarget, TAKE_FOCUS_NO);
+			inv_panel->setSelection(idTarget, TAKE_FOCUS_YES);
 			return;
 		}
 	}
-	show_item_original(mUUID);
+
+	show_item(idTarget, EShowItemOptions::TAKE_FOCUS_YES);
+}
 // [/SL:KB]
+//void LLItemBridge::gotoItem()
+//{
 //	LLInventoryObject *obj = getInventoryObject();
 //	if (obj && obj->getIsLinkType())
 //	{
-//		LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
-//		if (active_panel)
+//		const LLUUID inbox_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX);
+//		if (gInventory.isObjectDescendentOf(obj->getLinkedUUID(), inbox_id))
 //		{
-//			active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+//			LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//			if (sidepanel_inventory && sidepanel_inventory->getInboxPanel())
+//			{
+//				sidepanel_inventory->getInboxPanel()->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+//			}
 //		}
+//		else
+//		{
+//			LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
+//			if (active_panel)
+//			{
+//				active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+//			}
+//		}
+//
 //	}
-}
+//}
 
 LLUIImagePtr LLItemBridge::getIcon() const
 {
@@ -3241,7 +3269,18 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 	}
 	else if ("show_in_main_panel" == action)
 	{
-		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
+ // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+		if (LLPanelMainInventory* pPanelMainInventory = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : nullptr)
+		{
+			pPanelMainInventory->selectPanel(EInventoryPanelType::ALL);
+			show_item(mUUID, EShowItemOptions::TAKE_FOCUS_YES | EShowItemOptions::RESET_FILTER_YES, pPanelMainInventory->getActivePanel());
+		}
+		else
+		{
+			show_item(mUUID, EShowItemOptions::TAKE_FOCUS_YES | EShowItemOptions::RESET_FILTER_YES);
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, mUUID, TRUE);
 		return;
 	}
 	else if ("cut" == action)

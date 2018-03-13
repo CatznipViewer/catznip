@@ -40,6 +40,9 @@
 #include "llagent.h"
 #include "llfloaterreg.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llinventorypanel.h"
 #include "llsdutil.h"
 #include "llviewerassetupload.h"
@@ -764,15 +767,18 @@ void LLViewerAssetUpload::AssetInventoryUploadCoproc(LLCoreHttpUtil::HttpCorouti
 
             // Show the preview panel for textures and sounds to let
             // user know that the image (or snapshot) arrived intact.
-            LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-            if (panel)
-            {
-                panel->setSelection(serverInventoryItem, TAKE_FOCUS_NO);
-            }
-            else
-            {
-                LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, serverInventoryItem, TRUE, TAKE_FOCUS_NO, TRUE);
-            }
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+			show_item(serverInventoryItem, EShowItemOptions::TAKE_FOCUS_NO);
+// [/SL:KB]
+//            LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//            if (panel)
+//            {
+//                panel->setSelection(serverInventoryItem, TAKE_FOCUS_NO);
+//            }
+//            else
+//            {
+//                LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, serverInventoryItem, TRUE, TAKE_FOCUS_NO, TRUE);
+//            }
 
             // restore keyboard focus
             gFocusMgr.setKeyboardFocus(focus);

@@ -900,14 +900,14 @@ void LLAvatarActions::buildResidentsString(const uuid_vec_t& avatar_uuids, std::
 
 //static
 //std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
-// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: Catznip-3.3
 std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs(LLInventoryPanel* inv_panel)
 // [/SL:KB]
 {
 	std::set<LLFolderViewItem*> inventory_selected;
 
 //	LLInventoryPanel* active_panel = action_give_inventory::get_active_inventory_panel();
-// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: Catznip-3.3
 	LLInventoryPanel* active_panel = inv_panel;
 // [/SL:KB]
 	if (active_panel)
@@ -918,8 +918,8 @@ std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs(LLInventoryPanel* in
 	if (inventory_selected.empty())
 	{
 //		LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
-		LLSidepanelInventory *sidepanel_inventory = (active_panel) ? active_panel->getParentByType<LLSidepanelInventory>() : NULL;
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
+		LLSidepanelInventory *sidepanel_inventory = (active_panel) ? active_panel->getParentByType<LLSidepanelInventory>() : nullptr;
 // [/SL:KB]
 		if (sidepanel_inventory)
 		{
