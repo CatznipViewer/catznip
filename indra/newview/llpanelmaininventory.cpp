@@ -48,6 +48,7 @@
 #include "llfloaterreg.h"
 #include "llmenubutton.h"
 #include "lloutfitobserver.h"
+#include "llpanelmarketplaceinbox.h"
 #include "llpreviewtexture.h"
 #include "llresmgr.h"
 #include "llscrollcontainer.h"
@@ -219,7 +220,9 @@ BOOL LLPanelMainInventory::postBuild()
 		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS, true);
 // [/SL:KB]
 //		mWornItemsPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
-		mWornItemsPanel->getFilter().markDefault();
+		LLInventoryFilter& worn_filter = mWornItemsPanel->getFilter();
+		worn_filter.setFilterCategoryTypes(worn_filter.getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		worn_filter.markDefault();
 		mWornItemsPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, mWornItemsPanel, _1, _2));
 	}
 
@@ -715,7 +718,7 @@ void LLPanelMainInventory::onClearSearch()
 	if (mActivePanel && (getActivePanel() != mWornItemsPanel))
 	{
 		initially_active = mActivePanel->getFilter().isNotDefault();
-		mActivePanel->setFilterSubString(LLStringUtil::null);
+		setFilterSubString(LLStringUtil::null);
 		mActivePanel->setFilterTypes(0xffffffffffffffffULL);
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
 		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS, true);
@@ -754,6 +757,16 @@ void LLPanelMainInventory::onClearSearch()
 	strFilterSubString.clear();
 // [/SL:KB]
 //	mFilterSubString = "";
+
+	LLSidepanelInventory * sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+	if (sidepanel_inventory)
+	{
+		LLPanelMarketplaceInbox* inbox_panel = sidepanel_inventory->getChild<LLPanelMarketplaceInbox>("marketplace_inbox");
+		if (inbox_panel)
+		{
+			inbox_panel->onClearSearch();
+		}
+	}
 }
 
 void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
@@ -792,6 +805,16 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 	setFilterSubString(search_string);
 // [/SL:KB]
 //	setFilterSubString(mFilterSubString);
+
+	LLSidepanelInventory * sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+	if (sidepanel_inventory)
+	{
+		LLPanelMarketplaceInbox* inbox_panel = sidepanel_inventory->getChild<LLPanelMarketplaceInbox>("marketplace_inbox");
+		if (inbox_panel)
+		{
+			inbox_panel->onFilterEdit(search_string);
+		}
+	}
 }
 
 
@@ -1046,8 +1069,17 @@ void LLPanelMainInventory::updateItemcountText()
 		LLResMgr::getInstance()->getIntegerString(mItemCountString, mItemCount);
 	}
 
+	if(mCategoryCount != gInventory.getCategoryCount())
+	{
+		mCategoryCount = gInventory.getCategoryCount();
+		mCategoryCountString = "";
+		LLLocale locale(LLLocale::USER_LOCALE);
+		LLResMgr::getInstance()->getIntegerString(mCategoryCountString, mCategoryCount);
+	}
+
 	LLStringUtil::format_map_t string_args;
 	string_args["[ITEM_COUNT]"] = mItemCountString;
+	string_args["[CATEGORY_COUNT]"] = mCategoryCountString;
 	string_args["[FILTER]"] = getFilterText();
 
 	std::string text = "";
@@ -1077,6 +1109,7 @@ void LLPanelMainInventory::updateItemcountText()
 	else
 	{
 		mCounterCtrl->setValue(text);
+    mCounterCtrl->setToolTip(text);
 	}
 // [/SL:KB]
 //    mCounterCtrl->setValue(text);
@@ -1261,7 +1294,6 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 //
 //	// Get data needed for filter display
 //	U32 filter_types = mFilter->getFilterObjectTypes();
-//	std::string filter_string = mFilter->getFilterSubString();
 //	LLInventoryFilter::EFolderShow show_folders = mFilter->getShowFolderState();
 //	U32 hours = mFilter->getHoursAgo();
 //	U32 date_search_direction = mFilter->getDateSearchDirection();
