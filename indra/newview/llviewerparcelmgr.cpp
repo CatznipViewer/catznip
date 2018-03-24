@@ -1830,7 +1830,10 @@ void LLViewerParcelMgr::optionally_start_music(const std::string& music_url)
 			LL_INFOS() << "Starting parcel music " << music_url << LL_ENDL;
 			LLViewerAudio::getInstance()->startInternetStreamWithAutoFade(music_url);
 		}
-		else
+//		else
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+		else if ( (!gAudiop) || (gAudiop->getInternetStreamURL() != music_url) )
+// [/SL:KB]
 		{
 			LLViewerAudio::getInstance()->startInternetStreamWithAutoFade(LLStringUtil::null);
 		}

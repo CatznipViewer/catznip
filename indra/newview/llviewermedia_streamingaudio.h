@@ -48,7 +48,10 @@ class LLStreamingAudio_MediaPlugins : public LLStreamingAudioInterface
 	/*virtual*/ int isPlaying();
 	/*virtual*/ void setGain(F32 vol);
 	/*virtual*/ F32 getGain();
-	/*virtual*/ std::string getURL();
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+	      const std::string& getURL() const override;
+// [/SL:KB]
+//	/*virtual*/ std::string getURL();
 
 private:
 	LLPluginClassMedia* initializeMedia(const std::string& media_type);
