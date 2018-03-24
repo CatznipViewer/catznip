@@ -602,8 +602,8 @@
              label_width="195"
              layout="topleft"
              left="10"
-             min_val="-100"
-             max_val="100"
+             min_val="-2048"
+             max_val="2048"
              name="TexScaleU"
              top_pad="5"
              width="255" />
@@ -625,8 +625,8 @@
              label_width="195"
              layout="topleft"
              left="10"
-             min_val="-100"
-             max_val="100"
+             min_val="-2048"
+             max_val="2048"
              name="TexScaleV"
              top_pad="0"
              width="255" />
@@ -649,8 +649,8 @@
              layout="topleft"
 			 label_width="195"
              left="10"
-             max_val="100"
-             min_val="0.1"
+             max_val="4096"
+             min_val="-4096"
              name="rptctrl"
              top_pad="0"
              width="255" />
