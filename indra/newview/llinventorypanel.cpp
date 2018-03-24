@@ -1736,11 +1736,13 @@ void LLInventoryPanel::showItem(const LLUUID& idItem)
 }
 // [/SL:KB]
 
-//static
-//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel)
+////static
+//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id, BOOL main_panel, BOOL take_keyboard_focus, BOOL reset_filter)
 //{
-	LLInventoryPanel *active_panel;
-//	if (main_panel)
+//	LLInventoryPanel *active_panel;
+//	bool in_inbox = (gInventory.isObjectDescendentOf(obj_id, gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX)));
+//
+//	if (main_panel && !in_inbox)
 //	{
 //		LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory")->selectAllItemsPanel();
 //	}
@@ -1749,42 +1751,22 @@ void LLInventoryPanel::showItem(const LLUUID& idItem)
 //	if (active_panel)
 //	{
 //		LL_DEBUGS("Messaging") << "Highlighting" << obj_id  << LL_ENDL;
-//		
-//		LLViewerInventoryItem * item = gInventory.getItem(obj_id);
-//		LLViewerInventoryCategory * cat = gInventory.getCategory(obj_id);
-//		
-//		bool in_inbox = false;
-//		
-//		LLViewerInventoryCategory * parent_cat = NULL;
-//		
-//		if (item)
+//
+//		if (reset_filter)
 //		{
-//			parent_cat = gInventory.getCategory(item->getParentUUID());
+//			reset_inventory_filter();
 //		}
-//		else if (cat)
-//		{
-//			parent_cat = gInventory.getCategory(cat->getParentUUID());
-//		}
-//		
-//		if (parent_cat)
-//		{
-//			in_inbox = (LLFolderType::FT_INBOX == parent_cat->getPreferredType());
-//		}
-//		
+//
 //		if (in_inbox)
 //		{
 //			LLSidepanelInventory * sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
 //			LLInventoryPanel * inventory_panel = NULL;
-//			
-//			if (in_inbox)
-//			{
-//				sidepanel_inventory->openInbox();
-//				inventory_panel = sidepanel_inventory->getInboxPanel();
-//			}
+//			sidepanel_inventory->openInbox();
+//			inventory_panel = sidepanel_inventory->getInboxPanel();
 //
 //			if (inventory_panel)
 //			{
-//				inventory_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//				inventory_panel->setSelection(obj_id, take_keyboard_focus);
 //			}
 //		}
 //		else
@@ -1794,7 +1776,7 @@ void LLInventoryPanel::showItem(const LLUUID& idItem)
 //			{
 //				floater_inventory->setFocus(TRUE);
 //			}
-//			active_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//			active_panel->setSelection(obj_id, take_keyboard_focus);
 //		}
 //	}
 //}

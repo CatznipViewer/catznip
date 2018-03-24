@@ -3370,7 +3370,7 @@ void LLInventoryModel::processBulkUpdateInventory(LLMessageSystem* msg, void**)
 	if (LLInventoryState::sShowNewInventory)
 	{
 		if (!folders.empty())
-			show_item(folders.front()->getUUID());
+			show_item(folders.front()->getUUID(), EShowItemOptions::TAKE_FOCUS_NO);
 		LLInventoryState::sShowNewInventory = false;
 	}
 // [/SL:KB]

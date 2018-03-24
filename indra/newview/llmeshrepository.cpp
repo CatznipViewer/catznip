@@ -63,6 +63,9 @@
 #include "llworld.h"
 #include "material_codes.h"
 #include "pipeline.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llinventorymodel.h"
 #include "llfoldertype.h"
 #include "llviewerparcelmgr.h"
@@ -4872,18 +4875,21 @@ void on_new_single_inventory_upload_complete(
 
         // Show the preview panel for textures and sounds to let
         // user know that the image (or snapshot) arrived intact.
-        LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-        if (panel)
-        {
-
-            panel->setSelection(
-                server_response["new_inventory_item"].asUUID(),
-                TAKE_FOCUS_NO);
-        }
-        else
-        {
-            LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, server_response["new_inventory_item"].asUUID(), TRUE, TAKE_FOCUS_NO, TRUE);
-        }
+ // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+		show_item(server_response["new_inventory_item"].asUUID(), EShowItemOptions::TAKE_FOCUS_NO);
+// [/SL:KB]
+//        LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//        if (panel)
+//        {
+//
+//            panel->setSelection(
+//                server_response["new_inventory_item"].asUUID(),
+//                TAKE_FOCUS_NO);
+//        }
+//        else
+//        {
+//            LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, server_response["new_inventory_item"].asUUID(), TRUE, TAKE_FOCUS_NO, TRUE);
+//        }
 
         // restore keyboard focus
         gFocusMgr.setKeyboardFocus(focus);

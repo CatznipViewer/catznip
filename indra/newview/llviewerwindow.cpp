@@ -4911,8 +4911,11 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 		err = LLFile::stat( filepath, &stat_info );
 		i++;
 	}
-	while( -1 != err  // Search until the file is not found (i.e., stat() gives an error).
-			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.2
+	while( -1 != err );  // search until the file is not found (i.e., stat() gives an error).
+// [/SL:KB]
+//	while( -1 != err  // Search until the file is not found (i.e., stat() gives an error).
+//			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
 
 	LL_INFOS() << "Saving snapshot to " << filepath << LL_ENDL;
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
