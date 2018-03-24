@@ -47,6 +47,10 @@ class LLMenuGL;
 class LLToggleableMenu;
 class LLFloater;
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
+enum class EInventoryPanelType { ALL, RECENT, UNKNOWN };
+// [/SL:KB]
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLPanelMainInventory
 //
@@ -81,14 +85,13 @@ public:
 	LLInventoryPanel* getAllItemsPanel();
 	void selectAllItemsPanel();
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
-	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
-	EPanelType        getActivePanelType() const;
-	LLInventoryPanel* getPanel(EPanelType eType) const;
-	LLInventoryPanel* selectPanel(EPanelType eType);
-	void              selectPanel(LLInventoryPanel* pInvPanel);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
+	EInventoryPanelType getActivePanelType() const;
+	LLInventoryPanel*   getPanel(EInventoryPanelType eType) const;
+	LLInventoryPanel*   selectPanel(EInventoryPanelType eType);
+	void                selectPanel(LLInventoryPanel* pInvPanel);
 
-	static LLFloater* newWindow();
+	static LLFloater*   newWindow();
 	void resetFilters();
 // [/SL:KB]
 

@@ -29,6 +29,9 @@
 #ifndef LL_LLINVENTORYFUNCTIONS_H
 #define LL_LLINVENTORYFUNCTIONS_H
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+#include "llenumflags.h"
+// [/SL:KB]
 #include "llinventorymodel.h"
 #include "llinventory.h"
 #include "llhandle.h"
@@ -92,10 +95,21 @@ void copy_folder_to_clipboard(const LLUUID& idFolder);
 void show_item_profile(const LLUUID& item_uuid);
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
-void show_item(const LLUUID& idItem);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.3
+enum class EShowItemOptions
+{
+	TAKE_FOCUS_YES   = 0x01,
+	TAKE_FOCUS_NO    = 0x00,
+	RESET_FILTER_YES = 0x02,
+	RESET_FILTER_NO  = 0x00
+};
+template<> struct EnableEnumFlags<EShowItemOptions> : std::true_type {};
+
+bool get_item_passed_filter(/*const*/ LLInventoryPanel* pInvPanel, const LLUUID& idItem);
+void show_item(const LLUUID& idItem, EShowItemOptions showItemFlags, LLInventoryPanel* pActiveInvPanel = nullptr);
+void show_item_original(const LLUUID& idItem, EShowItemOptions showItemFlags, LLInventoryPanel* pActiveInvPanel = nullptr);
 // [/SL:KB]
-void show_item_original(const LLUUID& item_uuid);
+//void show_item_original(const LLUUID& item_uuid);
 //void reset_inventory_filter();
 
 // [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)

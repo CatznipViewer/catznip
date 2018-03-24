@@ -472,7 +472,10 @@ protected:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 
 //		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
-		registrar.add("Wearing.ShowOriginal", boost::bind(show_item_original, mUUIDs.front()));
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
+		registrar.add("Wearing.ShowOriginal", boost::bind(show_item_original, mUUIDs.front(), EShowItemOptions::TAKE_FOCUS_YES, nullptr));
+// [/SL:KB]
+//		registrar.add("Wearing.ShowOriginal", boost::bind(show_item_original, mUUIDs.front()));
 		registrar.add("Wearing.TakeOff",
 					  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), mUUIDs));
 		registrar.add("Wearing.Detach", 
@@ -599,7 +602,7 @@ protected:
 	{
 		if (!mUUIDs.empty())
 		{
-			show_item_original(mUUIDs.front());
+			show_item_original(mUUIDs.front(), EShowItemOptions::TAKE_FOCUS_YES);
 		}
 	}
 
