@@ -1305,7 +1305,9 @@ static void confirmDragNDropUpload(const LLSD& sdNotification, const LLSD& sdRes
 			std::vector<std::string> files;
 			for (LLSD::array_const_iterator itFile = sdPayload.beginArray(), endFile = sdPayload.endArray(); itFile != endFile; ++itFile)
 				files.push_back(*itFile);
-//			upload_bulk(files);
+#ifdef CATZNIP
+			upload_bulk(files);
+#endif // CATZNIP
 		}
 	}
 }
