@@ -4690,9 +4690,15 @@ std::string LLVOAvatar::bakedTextureOriginInfo()
 	return result;
 }
 
-S32Bytes LLVOAvatar::totalTextureMemForUUIDS(std::set<LLUUID>& ids)
+//S32Bytes LLVOAvatar::totalTextureMemForUUIDS(std::set<LLUUID>& ids)
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+S64Bytes LLVOAvatar::totalTextureMemForUUIDS(std::set<LLUUID>& ids)
+// [/SL:KB]
 {
-	S32Bytes result(0);
+//	S32Bytes result(0);
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes result(0);
+// [/SL:KB]
 	for (std::set<LLUUID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
 	{
 		LLViewerFetchedTexture *imagep = gTextureList.findImage(*it, TEX_LIST_STANDARD);
@@ -4757,12 +4763,18 @@ void LLVOAvatar::collectTextureUUIDs(std::set<LLUUID>& ids)
 
 void LLVOAvatar::releaseOldTextures()
 {
-	S32Bytes current_texture_mem;
+//	S32Bytes current_texture_mem;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes current_texture_mem;
+// [/SL:KB]
 	
 	// Any textures that we used to be using but are no longer using should no longer be flagged as "NO_DELETE"
 	std::set<LLUUID> baked_texture_ids;
 	collectBakedTextureUUIDs(baked_texture_ids);
-	S32Bytes new_baked_mem = totalTextureMemForUUIDS(baked_texture_ids);
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes new_baked_mem = totalTextureMemForUUIDS(baked_texture_ids);
+// [/SL:KB]
+//	S32Bytes new_baked_mem = totalTextureMemForUUIDS(baked_texture_ids);
 
 	std::set<LLUUID> local_texture_ids;
 	collectLocalTextureUUIDs(local_texture_ids);
@@ -4771,7 +4783,10 @@ void LLVOAvatar::releaseOldTextures()
 	std::set<LLUUID> new_texture_ids;
 	new_texture_ids.insert(baked_texture_ids.begin(),baked_texture_ids.end());
 	new_texture_ids.insert(local_texture_ids.begin(),local_texture_ids.end());
-	S32Bytes new_total_mem = totalTextureMemForUUIDS(new_texture_ids);
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes new_total_mem = totalTextureMemForUUIDS(new_texture_ids);
+// [/SL:KB]
+//	S32Bytes new_total_mem = totalTextureMemForUUIDS(new_texture_ids);
 
 	//S32 old_total_mem = totalTextureMemForUUIDS(mTextureIDs);
 	//LL_DEBUGS("Avatar") << getFullname() << " old_total_mem: " << old_total_mem << " new_total_mem (L/B): " << new_total_mem << " (" << new_local_mem <<", " << new_baked_mem << ")" << LL_ENDL;  
