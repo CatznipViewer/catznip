@@ -5,6 +5,10 @@
  layout="topleft"
  name="panel_quickprefs_appearance"
  width="300">
+	<string
+	 name="visibility_text"
+	 value="Visible to [VISIBLE] out of [TOTAL] nearby" />
+
 	<text
 	 follows="top|left"
 	 font.style="BOLD"
@@ -16,20 +20,29 @@
 	 width="100">
 		You
 	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left_pad="5"
+	 name="appearance_visibility_value"
+	 width="175">
+		Visible to 10 out of 40 nearby
+	</text>
 
-  <slider
-   can_edit_text="true"
-   decimal_digits="3"
-   follows="top|left"
-   height="16"
-   increment="0.001"
-   initial_value="0.0"
-   label="Hover height:"
-	 label_width="100"
+	<slider
+	 can_edit_text="true"
+	 decimal_digits="3"
+	 follows="top|left"
+	 height="16"
+	 increment="0.001"
+	 initial_value="0.0"
+	 label="Hover height:"
+	 label_width="80"
 	 left="25"
-   layout="topleft"
-   name="appearance_hover_value"
-	 top_pad="1"
+	 layout="topleft"
+	 name="appearance_hover_value"
+	 top_pad="2"
 	 right="-30" />
 
 	<text
@@ -38,8 +51,8 @@
 	 layout="topleft"
 	 left="25"
 	 name="appearance_complexity_text"
-	 top_pad="2"
-	 width="100">
+	 top_pad="3"
+	 width="85">
 		Complexity:
 	</text>
 	<text
@@ -53,32 +66,13 @@
 		123,456,789
 	</text>
 
-	<text
-	 follows="left|top"
-	 height="15"
-	 layout="topleft"
-	 left="25"
-	 name="appearance_visibility_text"
-	 top_pad="2"
-	 width="100">
-		Visible:
-	</text>
-	<text
-	 follows="left|top"
-	 height="15"
-	 layout="topleft"
-	 left_pad="5"
-	 name="appearance_visibility_value"
-	 width="150">
-		10 / 40
-	</text>
 	<check_box
 	 height="16"
 	 label="Show complexity notifications"
 	 layout="topleft"
-	 left="25"
+	 left="23"
 	 name="appearance_notifications_check"
-	 top_pad="2"
+	 top_pad="3"
 	 width="130" />
 
 	<view_border
@@ -110,7 +104,7 @@
 	 increment="1"
 	 tool_tip="Controls at what point a visually complex avatar is drawn as a jelly doll"
 	 label="Complexity limit:"
-	 label_width="100"
+	 label_width="94"
 	 layout="topleft"
 	 left="25"
 	 min_val="1"
@@ -140,7 +134,7 @@
 	 increment="1"
 	 initial_value="12"
 	 label="# Non-impostors:"
-	 label_width="100"
+	 label_width="94"
 	 layout="topleft"
 	 left="25"
 	 min_val="1"
@@ -167,24 +161,60 @@
 	 height="15"
 	 layout="topleft"
 	 left="25"
-	 name="appearance_show_text"
-	 top_pad="3"
+	 name="appearance_renderas_text"
+	 top_pad="4"
 	 width="90">
-		Always render:
+		Render:
+	</text>
+	<combo_box
+	 control_name="RenderOthersAs"
+	 follows="left|top"
+	 height="18"
+	 layout="topleft"
+	 left_pad="9"
+	 name="appearance_renderas_type"
+	 right="-10"
+	 top_delta="-3">
+		<combo_box.item
+		 label="Only myself"
+		 name="appearance_renderas_type_item0"
+		 value="3" />
+		<combo_box.item
+		 label="Myself and exceptions"
+		 name="appearance_renderas_type_item1"
+		 value="2" />
+		<combo_box.item
+		 label="Everyone as imposters"
+		 name="appearance_renderas_type_item2"
+		 value="1" />
+		<combo_box.item
+		 label="Everyone normally"
+		 name="appearance_renderas_type_item3"
+		 value="0" />
+	</combo_box>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_show_text"
+	 top_pad="5"
+	 width="90">
+		Exceptions:
 	</text>
 	<check_box
 	 control_name="RenderFriendsFull"
 	 height="16"
 	 label="Friends"
 	 layout="topleft"
-	 left_pad="2"
+	 left_pad="9"
 	 name="appearance_showfriends_check"
 	 top_delta="0"
 	 width="70" />
 	<button
 	 follows="top|right"
 	 height="18"
-	 label="Exceptions"
+	 label="Others..."
 	 layout="topleft"
 	 right="-10"
 	 name="appearance_exceptions_btn"
@@ -199,7 +229,7 @@
 	 height="16"
 	 label="Nearby avatars (20m)"
 	 layout="topleft"
-	 left="117"
+	 left="124"
 	 name="appearance_shownearby_check"
 	 top_pad="3"
 	 width="130" />
@@ -213,7 +243,7 @@
 	 name="appearance_border_2"
 	 top_pad="3"
 	 right="-5"/>
-	 
+
 	<text
 	 follows="left|top"
 	 font.style="BOLD"
@@ -225,41 +255,52 @@
 	 width="100">
 		Miscellaneous
 	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_attached_text"
+	 top_pad="4"
+	 width="100">
+		Render attached:
+	</text>
 	<check_box
 	 control_name="RenderAttachedLights"
 	 height="16"
-	 label="Render attached lights"
+	 label="Lights"
 	 layout="topleft"
-	 left="35"
+	 left_pad="0"
 	 name="appearance_attachedlights_check"
-	 right="-10"
-	 top_pad="2" />
+	 width="80"
+	 top_delta="0" />
 	<check_box
 	 control_name="RenderAttachedParticles"
 	 height="16"
-	 label="Render attached particles"
+	 label="Particles"
 	 layout="topleft"
-	 left_delta="0"
+	 left_pad="0"
 	 name="appearance_attachedparticles_check"
-	 right="-10"
-	 top_pad="2" />
+	 width="80"
+	 top_delta="0" />
+
 	<check_box
 	 control_name="RenderNameShowComplexity"
 	 enabled_control="AvatarNameTagMode"
 	 height="16"
 	 label="Show complexity in name tags"
 	 layout="topleft"
-	 left="35"
+	 left="23"
 	 name="appearance_name_complexity_check"
 	 right="-10"
-	 top_pad="2" />
+	 top_pad="3" />
 	<check_box
 	 control_name="RenderNameShowComplexitySelf"
 	 enabled_control="RenderNameShowComplexity"
 	 height="16"
 	 label="Show my complexity"
 	 layout="topleft"
-	 left="55"
+	 left="41"
 	 name="appearance_name_complexity_self_check"
 	 right="-10"
 	 top_pad="2" />
@@ -269,7 +310,7 @@
 	 height="16"
 	 label="Show only when too complex"
 	 layout="topleft"
-	 left="55"
+	 left="41"
 	 name="appearance_name_complexity_atlimit_check"
 	 right="-10"
 	 top_pad="2" />
