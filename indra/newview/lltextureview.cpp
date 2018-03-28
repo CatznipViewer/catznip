@@ -500,10 +500,16 @@ private:
 
 void LLGLTexMemBar::draw()
 {
-	S32Megabytes bound_mem = LLViewerTexture::sBoundTextureMemory;
- 	S32Megabytes max_bound_mem = LLViewerTexture::sMaxBoundTextureMemory;
-	S32Megabytes total_mem = LLViewerTexture::sTotalTextureMemory;
-	S32Megabytes max_total_mem = LLViewerTexture::sMaxTotalTextureMem;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Megabytes bound_mem = LLViewerTexture::sBoundTextureMemory;
+ 	S64Megabytes max_bound_mem = LLViewerTexture::sMaxBoundTextureMemory;
+	S64Megabytes total_mem = LLViewerTexture::sTotalTextureMemory;
+	S64Megabytes max_total_mem = LLViewerTexture::sMaxTotalTextureMem;
+// [/SL:KB]
+//	S32Megabytes bound_mem = LLViewerTexture::sBoundTextureMemory;
+// 	S32Megabytes max_bound_mem = LLViewerTexture::sMaxBoundTextureMemory;
+//	S32Megabytes total_mem = LLViewerTexture::sTotalTextureMemory;
+//	S32Megabytes max_total_mem = LLViewerTexture::sMaxTotalTextureMem;
 	F32 discard_bias = LLViewerTexture::sDesiredDiscardBias;
 	F32 cache_usage = LLAppViewer::getTextureCache()->getUsage().valueInUnits<LLUnits::Megabytes>();
 	F32 cache_max_usage = LLAppViewer::getTextureCache()->getMaxUsage().valueInUnits<LLUnits::Megabytes>();
@@ -797,7 +803,10 @@ void LLTextureView::draw()
 			
 			if (mPrintList)
 			{
-				S32 tex_mem = imagep->hasGLTexture() ? imagep->getTextureMemory().value() : 0 ;
+//				S32 tex_mem = imagep->hasGLTexture() ? imagep->getTextureMemory().value() : 0 ;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+				S64 tex_mem = imagep->hasGLTexture() ? imagep->getTextureMemory().value() : 0 ;
+// [/SL:KB]
 				LL_INFOS() << imagep->getID()
 						<< "\t" << tex_mem
 						<< "\t" << imagep->getBoostLevel()
