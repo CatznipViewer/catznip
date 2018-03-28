@@ -1321,35 +1321,43 @@ static void confirmDragNDropUpload(const LLSD& sdNotification, const LLSD& sdRes
 			std::vector<std::string> files;
 			for (LLSD::array_const_iterator itFile = sdPayload.beginArray(), endFile = sdPayload.endArray(); itFile != endFile; ++itFile)
 				files.push_back(*itFile);
-//			upload_bulk(files);
+#ifdef CATZNIP
+			upload_bulk(files);
+#endif // CATZNIP
 		}
 	}
 }
 
+// This really should be standardized somewhere instead of having extensions duplicated all over the code
+typedef std::tuple<const char*, LLAssetType::EType, LLFilePicker::ELoadFilter> dragdrop_type_lookup_t;
+static dragdrop_type_lookup_t s_DragDropTypesLookup[] = {
+	std::make_tuple("bmp", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
+	std::make_tuple("jpg", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
+	std::make_tuple("jpeg", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
+	std::make_tuple("png", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
+	std::make_tuple("tga", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE)
+};
+
 static LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
 {
-	static struct ExtLookup
-	{
-		const char*        pstrExtension;
-		LLAssetType::EType eAssetType;
-	}
-	// This really should be standardized somewhere instead of having extensions duplicated all over the code
-	s_ExtLookup[] =
-		{
-			{ "tga", LLAssetType::AT_TEXTURE },
-			{ "bmp", LLAssetType::AT_TEXTURE },
-			{ "jpg", LLAssetType::AT_TEXTURE },
-			{ "jpeg", LLAssetType::AT_TEXTURE },
-			{ "png", LLAssetType::AT_TEXTURE }
-		};
-
 	const std::string& strExt = gDirUtilp->getExtension(strFilename);
-	for (int idxExt = 0, cntExt = sizeof(s_ExtLookup) / sizeof(ExtLookup); idxExt < cntExt; idxExt++)
+	for (int idxLookup = 0, cntLookup = sizeof(s_DragDropTypesLookup) / sizeof(dragdrop_type_lookup_t); idxLookup < cntLookup; idxLookup++)
 	{
-		if (strExt == s_ExtLookup[idxExt].pstrExtension)
-			return s_ExtLookup[idxExt].eAssetType;
+		if (strExt == std::get<0>(s_DragDropTypesLookup[idxLookup]))
+			return std::get<1>(s_DragDropTypesLookup[idxLookup]);
 	}
 	return LLAssetType::AT_NONE;
+}
+
+static LLFilePicker::ELoadFilter getLoadFilterFromFilename(const std::string strFilename)
+{
+	const std::string& strExt = gDirUtilp->getExtension(strFilename);
+	for (int idxLookup = 0, cntLookup = sizeof(s_DragDropTypesLookup) / sizeof(dragdrop_type_lookup_t); idxLookup < cntLookup; idxLookup++)
+	{
+		if (strExt == std::get<0>(s_DragDropTypesLookup[idxLookup]))
+			return std::get<2>(s_DragDropTypesLookup[idxLookup]);
+	}
+	return LLFilePicker::FFLOAD_ALL;
 }
 
 LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action,
@@ -1403,19 +1411,32 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 					{
 						if (fDrop)
 						{
-							// getPriceUpload() returns -1 if no data available yet.
-							S32 nUploadCost = LLGlobalEconomy::getInstance()->getPriceUpload();
-							std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
-
-							std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
-							for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
+							if (mDragItems.size() == 1)
 							{
-								strUploadList += itItem->first->getName();
-								strUploadList += "\n";
-								sdFiles.append(itItem->second);
-							}
+ 								if (gAgentCamera.cameraMouselook())
+								{
+									gAgentCamera.changeCameraToDefault();
+								}
 
-							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("UPLOAD_LIST", strUploadList), sdFiles, boost::bind(confirmDragNDropUpload, _1, _2));
+								const std::string& strFile = mDragItems.front().second;
+								upload_pick_callback(getLoadFilterFromFilename(strFile), strFile);
+							}
+							else
+							{
+								// getPriceUpload() returns -1 if no data available yet.
+								S32 nUploadCost = LLGlobalEconomy::getInstance()->getPriceUpload();
+								std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
+
+								std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
+								for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
+								{
+									strUploadList += itItem->first->getName();
+									strUploadList += "\n";
+									sdFiles.append(itItem->second);
+								}
+
+								LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("UPLOAD_LIST", strUploadList), sdFiles, boost::bind(confirmDragNDropUpload, _1, _2));
+							}
 						}
 						result = DND_COPY;
 					}
