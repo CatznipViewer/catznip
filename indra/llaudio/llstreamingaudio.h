@@ -44,7 +44,10 @@ class LLStreamingAudioInterface
 	// use a value from 0.0 to 1.0, inclusive
 	virtual void setGain(F32 vol) = 0;
 	virtual F32 getGain() = 0;
-	virtual std::string getURL() = 0;
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+	virtual const std::string& getURL() const = 0;
+// [/SL:KB]
+//	virtual std::string getURL() = 0;
 	virtual bool supportsAdjustableBufferSizes(){return false;}
 	virtual void setBufferSizes(U32 streambuffertime, U32 decodebuffertime){};
 };
