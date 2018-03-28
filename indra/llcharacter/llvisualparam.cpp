@@ -79,7 +79,7 @@ BOOL LLVisualParamInfo::parseXml(LLXmlTreeNode *node)
 		mDefaultWeight = llclamp( default_weight, mMinWeight, mMaxWeight );
 		if( default_weight != mDefaultWeight )
 		{
-			llwarns << "value_default attribute is out of range in node " << mName << " " << default_weight << llendl;
+			LL_WARNS() << "value_default attribute is out of range in node " << mName << " " << default_weight << LL_ENDL;
 		}
 	}
 	
@@ -101,7 +101,7 @@ BOOL LLVisualParamInfo::parseXml(LLXmlTreeNode *node)
 	}
 	else
 	{
-		llwarns << "Avatar file: <param> has invalid sex attribute: " << sex << llendl;
+		LL_WARNS() << "Avatar file: <param> has invalid sex attribute: " << sex << LL_ENDL;
 		return FALSE;
 	}
 	
@@ -109,7 +109,7 @@ BOOL LLVisualParamInfo::parseXml(LLXmlTreeNode *node)
 	static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 	if( !node->getFastAttributeString( name_string, mName ) )
 	{
-		llwarns << "Avatar file: <param> is missing name attribute" << llendl;
+		LL_WARNS() << "Avatar file: <param> is missing name attribute" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -159,17 +159,32 @@ void LLVisualParamInfo::toStream(std::ostream &out)
 //-----------------------------------------------------------------------------
 // LLVisualParam()
 //-----------------------------------------------------------------------------
-LLVisualParam::LLVisualParam()	
-	:
-	mCurWeight( 0.f ),
+LLVisualParam::LLVisualParam()
+	: mCurWeight( 0.f ),
 	mLastWeight( 0.f ),
 	mNext( NULL ),
 	mTargetWeight( 0.f ),
 	mIsAnimating( FALSE ),
+	mIsDummy(FALSE),
 	mID( -1 ),
 	mInfo( 0 ),
-	mIsDummy(FALSE),
 	mParamLocation(LOC_UNKNOWN)
+{
+}
+
+//-----------------------------------------------------------------------------
+// LLVisualParam()
+//-----------------------------------------------------------------------------
+LLVisualParam::LLVisualParam(const LLVisualParam& pOther)
+	: mCurWeight(pOther.mCurWeight),
+	mLastWeight(pOther.mLastWeight),
+	mNext(pOther.mNext),
+	mTargetWeight(pOther.mTargetWeight),
+	mIsAnimating(pOther.mIsAnimating),
+	mIsDummy(pOther.mIsDummy),
+	mID(pOther.mID),
+	mInfo(pOther.mInfo),
+	mParamLocation(pOther.mParamLocation)
 {
 }
 
@@ -179,6 +194,7 @@ LLVisualParam::LLVisualParam()
 LLVisualParam::~LLVisualParam()
 {
 	delete mNext;
+	mNext = NULL;
 }
 
 /*
@@ -220,7 +236,7 @@ BOOL LLVisualParam::parseData(LLXmlTreeNode *node)
 //-----------------------------------------------------------------------------
 // setWeight()
 //-----------------------------------------------------------------------------
-void LLVisualParam::setWeight(F32 weight, BOOL upload_bake)
+void LLVisualParam::setWeight(F32 weight)
 {
 	if (mIsAnimating)
 	{
@@ -238,19 +254,19 @@ void LLVisualParam::setWeight(F32 weight, BOOL upload_bake)
 	
 	if (mNext)
 	{
-		mNext->setWeight(weight, upload_bake);
+		mNext->setWeight(weight);
 	}
 }
 
 //-----------------------------------------------------------------------------
 // setAnimationTarget()
 //-----------------------------------------------------------------------------
-void LLVisualParam::setAnimationTarget(F32 target_value, BOOL upload_bake)
+void LLVisualParam::setAnimationTarget(F32 target_value)
 {
 	// don't animate dummy parameters
 	if (mIsDummy)
 	{
-		setWeight(target_value, upload_bake);
+		setWeight(target_value);
 		mTargetWeight = mCurWeight;
 		return;
 	}
@@ -270,7 +286,7 @@ void LLVisualParam::setAnimationTarget(F32 target_value, BOOL upload_bake)
 
 	if (mNext)
 	{
-		mNext->setAnimationTarget(target_value, upload_bake);
+		mNext->setAnimationTarget(target_value);
 	}
 }
 
@@ -285,26 +301,34 @@ void LLVisualParam::setNextParam( LLVisualParam *next )
 }
 
 //-----------------------------------------------------------------------------
+// clearNextParam()
+//-----------------------------------------------------------------------------
+void LLVisualParam::clearNextParam()
+{
+	mNext = NULL;
+}
+
+//-----------------------------------------------------------------------------
 // animate()
 //-----------------------------------------------------------------------------
-void LLVisualParam::animate( F32 delta, BOOL upload_bake )
+void LLVisualParam::animate( F32 delta)
 {
 	if (mIsAnimating)
 	{
 		F32 new_weight = ((mTargetWeight - mCurWeight) * delta) + mCurWeight;
-		setWeight(new_weight, upload_bake);
+		setWeight(new_weight);
 	}
 }
 
 //-----------------------------------------------------------------------------
 // stopAnimating()
 //-----------------------------------------------------------------------------
-void LLVisualParam::stopAnimating(BOOL upload_bake)
+void LLVisualParam::stopAnimating()
 { 
 	if (mIsAnimating && isTweakable())
 	{
 		mIsAnimating = FALSE; 
-		setWeight(mTargetWeight, upload_bake);
+		setWeight(mTargetWeight);
 	}
 }
 
@@ -346,7 +370,7 @@ void LLVisualParam::setParamLocation(EParamLocation loc)
 	}
 	else
 	{
-		lldebugs << "param location is already " << mParamLocation << ", not slamming to " << loc << llendl;
+		LL_DEBUGS() << "param location is already " << mParamLocation << ", not slamming to " << loc << LL_ENDL;
 	}
 }
 

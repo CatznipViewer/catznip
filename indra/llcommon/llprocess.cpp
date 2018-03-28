@@ -34,6 +34,7 @@
 #include "llapr.h"
 #include "apr_signal.h"
 #include "llevents.h"
+#include "llexception.h"
 
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
@@ -472,9 +473,9 @@ private:
 *****************************************************************************/
 /// Need an exception to avoid constructing an invalid LLProcess object, but
 /// internal use only
-struct LLProcessError: public std::runtime_error
+struct LLProcessError: public LLException
 {
-	LLProcessError(const std::string& msg): std::runtime_error(msg) {}
+	LLProcessError(const std::string& msg): LLException(msg) {}
 };
 
 LLProcessPtr LLProcess::create(const LLSDOrParams& params)
@@ -516,6 +517,10 @@ LLProcessPtr LLProcess::create(const LLSDOrParams& params)
 
 LLProcess::LLProcess(const LLSDOrParams& params):
 	mAutokill(params.autokill),
+	// Because 'autokill' originally meant both 'autokill' and 'attached', to
+	// preserve existing semantics, we promise that mAttached defaults to the
+	// same setting as mAutokill.
+	mAttached(params.attached.isProvided()? params.attached : params.autokill),
 	mPipes(NSLOTS)
 {
 	// Hmm, when you construct a ptr_vector with a size, it merely reserves
@@ -530,8 +535,8 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 
 	if (! params.validateBlock(true))
 	{
-		throw LLProcessError(STRINGIZE("not launched: failed parameter validation\n"
-									   << LLSDNotationStreamer(params)));
+		LLTHROW(LLProcessError(STRINGIZE("not launched: failed parameter validation\n"
+										 << LLSDNotationStreamer(params))));
 	}
 
 	mPostend = params.postend;
@@ -596,10 +601,10 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 		}
 		else
 		{
-			throw LLProcessError(STRINGIZE("For " << params.executable()
-										   << ": unsupported FileParam for " << which
-										   << ": type='" << fparam.type()
-										   << "', name='" << fparam.name() << "'"));
+			LLTHROW(LLProcessError(STRINGIZE("For " << params.executable()
+											 << ": unsupported FileParam for " << which
+											 << ": type='" << fparam.type()
+											 << "', name='" << fparam.name() << "'")));
 		}
 	}
 	// By default, pass APR_NO_PIPE for unspecified slots.
@@ -624,9 +629,9 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 	// std handles and the like, and that's a bit more detachment than we
 	// want. autokill=false just means not to implicitly kill the child when
 	// the parent terminates!
-//	chkapr(apr_procattr_detach_set(procattr, params.autokill? 0 : 1));
+//	chkapr(apr_procattr_detach_set(procattr, mAutokill? 0 : 1));
 
-	if (params.autokill)
+	if (mAutokill)
 	{
 #if ! defined(APR_HAS_PROCATTR_AUTOKILL_SET)
 		// Our special preprocessor symbol isn't even defined -- wrong APR
@@ -678,7 +683,7 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 	if (ll_apr_warn_status(apr_proc_create(&mProcess, argv[0], &argv[0], NULL, procattr,
 										   gAPRPoolp)))
 	{
-		throw LLProcessError(STRINGIZE(params << " failed"));
+		LLTHROW(LLProcessError(STRINGIZE(params << " failed")));
 	}
 
 	// arrange to call status_callback()
@@ -695,7 +700,7 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 	// take steps to terminate the child. This is all suspenders-and-belt: in
 	// theory our destructor should kill an autokill child, but in practice
 	// that doesn't always work (e.g. VWR-21538).
-	if (params.autokill)
+	if (mAutokill)
 	{
 /*==========================================================================*|
 		// NO: There may be an APR bug, not sure -- but at least on Mac, when
@@ -710,7 +715,7 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 
 		// Tie the lifespan of this child process to the lifespan of our APR
 		// pool: on destruction of the pool, forcibly kill the process. Tell
-		// APR to try SIGTERM and wait 3 seconds. If that didn't work, use
+		// APR to try SIGTERM and suspend 3 seconds. If that didn't work, use
 		// SIGKILL.
 		apr_pool_note_subprocess(gAPRPoolp, &mProcess, APR_KILL_AFTER_TIMEOUT);
 |*==========================================================================*/
@@ -738,8 +743,11 @@ LLProcess::LLProcess(const LLSDOrParams& params):
 		{
 			mPipes.replace(i, new ReadPipeImpl(desc, pipe, FILESLOT(i)));
 		}
-		LL_DEBUGS("LLProcess") << "Instantiating " << typeid(mPipes[i]).name()
-							   << "('" << desc << "')" << LL_ENDL;
+		// Removed temporaily for Xcode 7 build tests: error was:
+		// "error: expression with side effects will be evaluated despite 
+		// being used as an operand to 'typeid' [-Werror,-Wpotentially-evaluated-expression]""
+		//LL_DEBUGS("LLProcess") << "Instantiating " << typeid(mPipes[i]).name()
+		//					   << "('" << desc << "')" << LL_ENDL;
 	}
 }
 
@@ -795,7 +803,7 @@ LLProcess::~LLProcess()
 		sProcessListener.dropPoll(*this);
 	}
 
-	if (mAutokill)
+	if (mAttached)
 	{
 		kill("destructor");
 	}
@@ -986,9 +994,9 @@ void LLProcess::handle_status(int reason, int status)
 //	wi->rv = apr_proc_wait(wi->child, &wi->rc, &wi->why, APR_NOWAIT);
 	// It's just wrong to call apr_proc_wait() here. The only way APR knows to
 	// call us with APR_OC_REASON_DEATH is that it's already reaped this child
-	// process, so calling wait() will only produce "huh?" from the OS. We
+	// process, so calling suspend() will only produce "huh?" from the OS. We
 	// must rely on the status param passed in, which unfortunately comes
-	// straight from the OS wait() call, which means we have to decode it by
+	// straight from the OS suspend() call, which means we have to decode it by
 	// hand.
 	mStatus = interpret_status(status);
 	LL_INFOS("LLProcess") << getStatusString() << LL_ENDL;
@@ -1060,7 +1068,7 @@ PIPETYPE& LLProcess::getPipe(FILESLOT slot)
 	PIPETYPE* wp = getPipePtr<PIPETYPE>(error, slot);
 	if (! wp)
 	{
-		throw NoPipe(error);
+		LLTHROW(NoPipe(error));
 	}
 	return *wp;
 }

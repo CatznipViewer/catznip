@@ -27,6 +27,7 @@
 #include "linden_common.h"
 #include "llwearabletype.h"
 #include "llinventorytype.h"
+#include "llinventorydefines.h"
 
 static LLTranslationBridge* sTrans = NULL;
 
@@ -70,8 +71,7 @@ struct WearableEntry : public LLDictionaryEntry
 class LLWearableDictionary : public LLSingleton<LLWearableDictionary>,
 							 public LLDictionary<LLWearableType::EType, WearableEntry>
 {
-public:
-	LLWearableDictionary();
+	LLSINGLETON(LLWearableDictionary);
 };
 
 LLWearableDictionary::LLWearableDictionary()
@@ -160,12 +160,18 @@ BOOL LLWearableType::getDisableCameraSwitch(LLWearableType::EType type)
 	return entry->mDisableCameraSwitch;
 }
 
-// static 
+// static
 BOOL LLWearableType::getAllowMultiwear(LLWearableType::EType type)
 {
 	const LLWearableDictionary *dict = LLWearableDictionary::getInstance();
 	const WearableEntry *entry = dict->lookup(type);
 	if (!entry) return FALSE;
 	return entry->mAllowMultiwear;
+}
+
+// static
+LLWearableType::EType LLWearableType::inventoryFlagsToWearableType(U32 flags)
+{
+    return  (LLWearableType::EType)(flags & LLInventoryItemFlags::II_FLAGS_WEARABLES_MASK);
 }
 

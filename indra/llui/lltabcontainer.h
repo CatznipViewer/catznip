@@ -62,15 +62,12 @@ public:
 		Optional<LLUIImage*>				tab_top_image_unselected,
 											tab_top_image_selected,
 											tab_top_image_flash,
-											tab_top_image_hovered,
 											tab_bottom_image_unselected,
 											tab_bottom_image_selected,
 											tab_bottom_image_flash,
-											tab_bottom_image_hovered,
 											tab_left_image_unselected,
 											tab_left_image_selected,
-											tab_left_image_flash,
-											tab_left_image_hovered;
+											tab_left_image_flash;		
 		TabParams();
 	};
 
@@ -86,6 +83,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
+		Optional<bool>						hide_scroll_arrows;
 		Optional<S32>						tab_padding_right;
 
 		Optional<TabParams>					first_tab,
@@ -116,11 +114,6 @@ public:
 		 *  Paddings for LLIconCtrl in case of LLCustomButtonIconCtrl usage(use_custom_icon_ctrl = true)
 		 */
 		Optional<S32>						tab_icon_ctrl_pad;
-
-		/**
-		 *  This variable is used to found out should we highlight tab button on hover
-		*/
-		Optional<bool>						use_highlighting_on_hover;
 
 		Params();
 	};
@@ -190,7 +183,8 @@ public:
 	LLPanel*	getPanelByIndex(S32 index);
 	S32			getIndexForPanel(LLPanel* panel);
 	S32			getPanelIndexByTitle(const std::string& title);
-	LLPanel*	getPanelByName(const std::string& name);
+    LLPanel*	getPanelByName(const std::string& name);
+    S32         getTotalTabWidth() const;
 	void		setCurrentTabName(const std::string& name);
 
 	void		selectFirstTab();
@@ -269,6 +263,7 @@ private:
 	
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
+	BOOL							mHideScrollArrows;
 
 	BOOL							mScrolled;
 	LLFrameTimer					mScrollTimer;
@@ -295,7 +290,7 @@ private:
 
 	S32								mMaxTabWidth;
 	S32								mTotalTabWidth;
-	S32								mTabHeight;
+    S32								mTabHeight;
 
 	// Padding under the text labels of tab buttons
 	S32								mLabelPadBottom;
@@ -315,7 +310,6 @@ private:
 	bool							mOpenTabsOnDragAndDrop;
 	S32								mTabIconCtrlPad;
 	bool							mUseTabEllipses;
-	bool                            mUseHighlightingOnHover;
 };
 
 #endif  // LL_TABCONTAINER_H

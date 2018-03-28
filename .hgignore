@@ -1,6 +1,5 @@
 syntax: glob
 
-
 # WinMerge temp files
 *.bak
 # Compiled python bytecode
@@ -17,6 +16,9 @@ build-linux-*
 build-darwin-*
 build-vc80/
 build-vc100/
+build-vc120/
+build-vc120-32/
+build-vc120-64/
 indra/build-vc[0-9]*
 indra/CMakeFiles
 indra/lib/mono/1.0/*.dll
@@ -75,4 +77,6 @@ glob:indra/newview/filters.xml
 glob:indra/newview/avatar_icons_cache.txt
 glob:indra/newview/avatar_lad.log
 glob:*.diff
-#*.rej
+indra/newview/pilot.txt
+indra/newview/pilot.xml
+*.rej

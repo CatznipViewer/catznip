@@ -33,7 +33,6 @@
 #ifndef LL_LLTRACKER_H
 #define LL_LLTRACKER_H
 
-#include "lldarray.h"
 #include "llpointer.h"
 #include "llstring.h"
 #include "lluuid.h"
@@ -75,8 +74,8 @@ public:
 	// these are static so that they can be used a callbacks
 	static ETrackingStatus getTrackingStatus() { return instance()->mTrackingStatus; }
 	static ETrackingLocationType getTrackedLocationType() { return instance()->mTrackingLocationType; }
-	static BOOL isTracking(void*) { return instance()->mTrackingStatus != TRACKING_NOTHING; }
-	static void stopTracking(void*);
+	static bool isTracking(void*) { return instance()->mTrackingStatus != TRACKING_NOTHING; }
+	static void stopTracking(bool);
 	static void clearFocus();
 	
 	static const LLUUID& getTrackedLandmarkAssetID() { return instance()->mTrackedLandmarkAssetID; }
@@ -108,15 +107,17 @@ protected:
 	LLTracker();
 	~LLTracker();
 
+	static void drawBeacon(LLVector3 pos_agent, std::string direction, LLColor4 fogged_color, F32 dist);
 	static void renderBeacon( LLVector3d pos_global, 
 							 const LLColor4& color, 
+							 const LLColor4& color_under,
 							 LLHUDText* hud_textp, 
 							 const std::string& label );
 
-	void stopTrackingAll(BOOL clear_ui = FALSE);
-	void stopTrackingAvatar(BOOL clear_ui = FALSE);
-	void stopTrackingLocation(BOOL clear_ui = FALSE);
-	void stopTrackingLandmark(BOOL clear_ui = FALSE);
+	void stopTrackingAll(bool clear_ui = false);
+	void stopTrackingAvatar(bool clear_ui = false);
+	void stopTrackingLocation(bool clear_ui = false, bool dest_reached = false);
+	void stopTrackingLandmark(bool clear_ui = false);
 
 	void drawMarker(const LLVector3d& pos_global, const LLColor4& color);
 	void setLandmarkVisited();
@@ -138,8 +139,8 @@ protected:
 	std::string				mTrackedLandmarkName;
 	LLUUID					mTrackedLandmarkAssetID;
 	LLUUID					mTrackedLandmarkItemID;
-	LLDynamicArray<LLUUID>	mLandmarkAssetIDList;
-	LLDynamicArray<LLUUID>	mLandmarkItemIDList;
+	std::vector<LLUUID>	mLandmarkAssetIDList;
+	std::vector<LLUUID>	mLandmarkItemIDList;
 	BOOL					mHasReachedLandmark;
 	BOOL 					mHasLandmarkPosition;
 	BOOL					mLandmarkHasBeenVisited;

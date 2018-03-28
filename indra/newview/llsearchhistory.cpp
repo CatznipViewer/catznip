@@ -43,7 +43,7 @@ bool LLSearchHistory::load()
 {
 	// build filename for each user
 	std::string resolved_filename = getHistoryFilePath();
-	llifstream file(resolved_filename);
+	llifstream file(resolved_filename.c_str());
 	if (!file.is_open())
 	{
 		return false;
@@ -76,7 +76,7 @@ bool LLSearchHistory::save()
 	// build filename for each user
 	std::string resolved_filename = getHistoryFilePath();
 	// open a file for writing
-	llofstream file (resolved_filename);
+	llofstream file(resolved_filename.c_str());
 	if (!file.is_open())
 	{
 		return false;
@@ -116,26 +116,26 @@ void LLSearchHistory::addEntry(const std::string& search_query)
 	mSearchHistory.push_front(item);
 }
 
-bool LLSearchHistory::LLSearchHistoryItem::operator < (const LLSearchHistory::LLSearchHistoryItem& right)
+bool LLSearchHistory::LLSearchHistoryItem::operator < (const LLSearchHistory::LLSearchHistoryItem& right) const
 {
 	S32 result = LLStringUtil::compareInsensitive(search_query, right.search_query);
 
 	return result < 0;
 }
 
-bool LLSearchHistory::LLSearchHistoryItem::operator > (const LLSearchHistory::LLSearchHistoryItem& right)
+bool LLSearchHistory::LLSearchHistoryItem::operator > (const LLSearchHistory::LLSearchHistoryItem& right) const
 {
 	S32 result = LLStringUtil::compareInsensitive(search_query, right.search_query);
 
 	return result > 0;
 }
 
-bool LLSearchHistory::LLSearchHistoryItem::operator==(const LLSearchHistory::LLSearchHistoryItem& right)
+bool LLSearchHistory::LLSearchHistoryItem::operator==(const LLSearchHistory::LLSearchHistoryItem& right) const
 {
 	return 0 == LLStringUtil::compareInsensitive(search_query, right.search_query);
 }
 
-bool LLSearchHistory::LLSearchHistoryItem::operator==(const std::string& right)
+bool LLSearchHistory::LLSearchHistoryItem::operator==(const std::string& right) const
 {
 	return 0 == LLStringUtil::compareInsensitive(search_query, right);
 }

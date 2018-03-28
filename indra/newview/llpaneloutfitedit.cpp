@@ -51,7 +51,6 @@
 #include "llbutton.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
-#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -74,7 +73,7 @@
 #include "llwearabletype.h"
 #include "llweb.h"
 
-static LLRegisterPanelClassWrapper<LLPanelOutfitEdit> t_outfit_edit("panel_outfit_edit");
+static LLPanelInjector<LLPanelOutfitEdit> t_outfit_edit("panel_outfit_edit");
 
 const U64 WEARABLE_MASK = (1LL << LLInventoryType::IT_WEARABLE);
 const U64 ATTACHMENT_MASK = (1LL << LLInventoryType::IT_ATTACHMENT) | (1LL << LLInventoryType::IT_OBJECT);
@@ -159,6 +158,7 @@ public:
 
 		registrar.add("Wearable.Create", boost::bind(onCreate, _2));
 
+		llassert(LLMenuGL::sMenuContainer != NULL);
 		LLToggleableMenu* menu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
 			"menu_cof_gear.xml", LLMenuGL::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(menu);
@@ -169,14 +169,14 @@ public:
 
 		return menu;
 	}
-	
+
 private:
 	static void onCreate(const LLSD& param)
 	{
 		LLWearableType::EType type = LLWearableType::typeNameToType(param.asString());
 		if (type == LLWearableType::WT_NONE)
 		{
-			llwarns << "Invalid wearable type" << llendl;
+			LL_WARNS() << "Invalid wearable type" << LL_ENDL;
 			return;
 		}
 
@@ -228,6 +228,7 @@ public:
 		enable_registrar.add("AddWearable.Gear.Check", boost::bind(onCheck, flat_list_handle, inventory_panel_handle, _2));
 		enable_registrar.add("AddWearable.Gear.Visible", boost::bind(onVisible, inventory_panel_handle, _2));
 
+		llassert(LLMenuGL::sMenuContainer != NULL);
 		LLToggleableMenu* menu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
 			"menu_add_wearable_gear.xml",
 			LLMenuGL::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
@@ -263,7 +264,7 @@ private:
 		}
 		else
 		{
-			llwarns << "Unrecognized sort order action" << llendl;
+			LL_WARNS() << "Unrecognized sort order action" << LL_ENDL;
 			return;
 		}
 
@@ -306,7 +307,7 @@ private:
 				// If inventory panel is not sorted by date then it is sorted by name.
 				return LLWearableItemsList::E_SORT_BY_MOST_RECENT & ~sort_order;
 			}
-			llwarns << "Unrecognized inventory panel sort order" << llendl;
+			LL_WARNS() << "Unrecognized inventory panel sort order" << LL_ENDL;
 		}
 		else
 		{
@@ -324,7 +325,7 @@ private:
 			{
 				return LLWearableItemsList::E_SORT_BY_TYPE_NAME == sort_order;
 			}
-			llwarns << "Unrecognized wearable list sort order" << llendl;
+			LL_WARNS() << "Unrecognized wearable list sort order" << LL_ENDL;
 		}
 		return false;
 	}
@@ -481,7 +482,7 @@ BOOL LLPanelOutfitEdit::postBuild()
 	childSetCommitCallback("shop_btn_1", boost::bind(&LLPanelOutfitEdit::onShopButtonClicked, this), NULL);
 	childSetCommitCallback("shop_btn_2", boost::bind(&LLPanelOutfitEdit::onShopButtonClicked, this), NULL);
 
-	setVisibleCallback(boost::bind(&LLPanelOutfitEdit::onVisibilityChange, this, _2));
+	setVisibleCallback(boost::bind(&LLPanelOutfitEdit::onVisibilityChanged, this, _2));
 
 	mWearablesGearMenuBtn = getChild<LLMenuButton>("wearables_gear_menu_btn");
 	mGearMenuBtn = getChild<LLMenuButton>("gear_menu_btn");
@@ -577,7 +578,6 @@ void LLPanelOutfitEdit::onOpen(const LLSD& key)
 		// *TODO: this method is called even panel is not visible to user because its parent layout panel is hidden.
 		// So, we can defer initializing a bit.
 		mWearableListManager = new LLFilteredWearableListManager(mWearableItemsList, mListViewItemTypes[LVIT_ALL]->collector);
-		mWearableListManager->populateList();
 		displayCurrentOutfit();
 		mInitialized = true;
 	}
@@ -631,6 +631,10 @@ void LLPanelOutfitEdit::showAddWearablesPanel(bool show_add_wearables)
 		// Reset mWearableItemsList position to top. See EXT-8180.
 		mWearableItemsList->goToTop();
 	}
+	else
+	{
+		mWearableListManager->populateIfNeeded();
+	}
 
 	//switching button bars
 	getChildView("no_add_wearables_button_bar")->setVisible( !show_add_wearables);
@@ -660,6 +664,7 @@ void LLPanelOutfitEdit::showWearablesListView()
 	{
 		updateWearablesPanelVerbButtons();
 		updateFiltersVisibility();
+		mWearableListManager->populateIfNeeded();
 	}
 	mListViewBtn->setToggleState(TRUE);
 }
@@ -767,7 +772,7 @@ void LLPanelOutfitEdit::onPlusBtnClicked(void)
 	}
 }
 
-void LLPanelOutfitEdit::onVisibilityChange(const LLSD &in_visible_chain)
+void LLPanelOutfitEdit::onVisibilityChanged(const LLSD &in_visible_chain)
 {
 	showAddWearablesPanel(false);
 	mWearableItemsList->resetSelection();
@@ -776,6 +781,10 @@ void LLPanelOutfitEdit::onVisibilityChange(const LLSD &in_visible_chain)
 	if (in_visible_chain.asBoolean())
 	{
 		update();
+	}
+	else
+	{
+		mWearableListManager->holdProgress(); //list population restarts with visibility
 	}
 }
 
@@ -842,13 +851,13 @@ void LLPanelOutfitEdit::onShopButtonClicked()
 	}
 	else
 	{
-		llwarns << "Agent avatar is invalid" << llendl;
+		LL_WARNS() << "Agent avatar is invalid" << LL_ENDL;
 
 		// the second argument is not important in this case: generic market place will be opened
 		url = url_resolver.resolveURL(LLWearableType::WT_NONE, SEX_FEMALE);
 	}
 
-	LLWeb::loadURLExternal(url);
+	LLWeb::loadURL(url);
 }
 
 LLWearableType::EType LLPanelOutfitEdit::getCOFWearablesSelectionType() const
@@ -1154,7 +1163,7 @@ BOOL LLPanelOutfitEdit::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 {
 	if (cargo_data == NULL)
 	{
-		llwarns << "cargo_data is NULL" << llendl;
+		LL_WARNS() << "cargo_data is NULL" << LL_ENDL;
 		return TRUE;
 	}
 
@@ -1184,12 +1193,12 @@ BOOL LLPanelOutfitEdit::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 			 * second argument is used to delay the appearance update until all dragged items
 			 * are added to optimize user experience.
 			 */
-			LLAppearanceMgr::instance().addCOFItemLink(item->getLinkedUUID(), false);
+			LLAppearanceMgr::instance().addCOFItemLink(item->getLinkedUUID());
 		}
 		else
 		{
 			// if asset id is not available for the item we must wear it immediately (attachments only)
-			LLAppearanceMgr::instance().addCOFItemLink(item->getLinkedUUID(), true);
+			LLAppearanceMgr::instance().addCOFItemLink(item->getLinkedUUID(), new LLUpdateAppearanceAndEditWearableOnDestroy(item->getUUID()));
 		}
 	}
 
@@ -1260,7 +1269,7 @@ void LLPanelOutfitEdit::resetAccordionState()
 	}
 	else
 	{
-		llwarns << "mCOFWearables is NULL" << llendl;
+		LL_WARNS() << "mCOFWearables is NULL" << LL_ENDL;
 	}
 }
 
@@ -1276,7 +1285,7 @@ void LLPanelOutfitEdit::showFilteredWearablesListView(LLWearableType::EType type
 	showWearablesListView();
 
 	//e_list_view_item_type implicitly contains LLWearableType::EType starting from LVIT_SHAPE
-	applyListViewFilter((EListViewItemType) (LVIT_SHAPE + type));
+	applyListViewFilter(static_cast<EListViewItemType>(LVIT_SHAPE + type));
 }
 
 static void update_status_widget_rect(LLView * widget, S32 right_border)
@@ -1296,8 +1305,10 @@ void LLPanelOutfitEdit::onOutfitChanging(bool started)
 	S32 delta = started ? indicator_delta : 0;
 	S32 right_border = status_panel->getRect().getWidth() - delta;
 
-	update_status_widget_rect(mCurrentOutfitName, right_border);
-	update_status_widget_rect(mStatus, right_border);
+	if (mCurrentOutfitName)
+		update_status_widget_rect(mCurrentOutfitName, right_border);
+	if (mStatus)
+		update_status_widget_rect(mStatus, right_border);
 
 	indicator->setVisible(started);
 }

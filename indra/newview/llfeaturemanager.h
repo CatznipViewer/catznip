@@ -32,6 +32,8 @@
 #include "llsingleton.h"
 #include "llstring.h"
 #include <map>
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 typedef enum EGPUClass
 {
@@ -95,20 +97,10 @@ protected:
 
 class LLFeatureManager : public LLFeatureList, public LLSingleton<LLFeatureManager>
 {
-public:
-	LLFeatureManager()
-	:	LLFeatureList("default"),
-
-		mInited(FALSE),
-		mTableVersion(0),
-		mSafe(FALSE),
-		mGPUClass(GPU_CLASS_UNKNOWN),
-		mExpectedGLVersion(0.f),
-		mGPUSupported(FALSE)		
-	{
-	}
+	LLSINGLETON(LLFeatureManager);
 	~LLFeatureManager() {cleanupFeatureTables();}
 
+public:
 	// initialize this by loading feature table and gpu table
 	void init();
 
@@ -155,18 +147,18 @@ public:
 
 	// load the dynamic GPU/feature table from a website
 	void fetchHTTPTables();
-	
+
+	LLSD getRecommendedSettingsMap();
+
 protected:
 	bool loadGPUClass();
 
 	bool parseFeatureTable(std::string filename);
 	///< @returns TRUE is file parsed correctly, FALSE if not
 
-	bool parseGPUTable(std::string filename);
-	///< @returns true if file parsed correctly, false if not - does not reflect whether or not the gpu was recognized
-
 	void initBaseMask();
 
+    void fetchFeatureTableCoro(std::string name);
 
 	std::map<std::string, LLFeatureList *> mMaskList;
 	std::set<std::string> mSkippedFeatures;
@@ -179,5 +171,17 @@ protected:
 	BOOL		mGPUSupported;
 };
 
+inline
+LLFeatureManager::LLFeatureManager()
+:	LLFeatureList("default"),
+
+	mInited(FALSE),
+	mTableVersion(0),
+	mSafe(FALSE),
+	mGPUClass(GPU_CLASS_UNKNOWN),
+	mExpectedGLVersion(0.f),
+	mGPUSupported(FALSE)
+{
+}
 
 #endif // LL_LLFEATUREMANAGER_H

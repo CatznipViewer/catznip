@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2014, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,11 +38,33 @@
 
 #include "lltimer.h"
 #include "llthread.h"
+#include "llexception.h"
+#include "llmemory.h"
+
+namespace
+{
+
+static const char * const LOG_CORE("CoreHttp");
+
+} // end anonymous namespace
 
 
 namespace LLCore
 {
 
+const HttpService::OptionDescriptor HttpService::sOptionDesc[] =
+{ //    isLong     isDynamic  isGlobal    isClass
+	{	true,		true,		true,		true,		false	},		// PO_CONNECTION_LIMIT
+	{	true,		true,		false,		true,		false	},		// PO_PER_HOST_CONNECTION_LIMIT
+	{	false,		false,		true,		false,		false	},		// PO_CA_PATH
+	{	false,		false,		true,		false,		false	},		// PO_CA_FILE
+	{	false,		true,		true,		false,		false	},		// PO_HTTP_PROXY
+	{	true,		true,		true,		false,		false	},		// PO_LLPROXY
+	{	true,		true,		true,		false,		false	},		// PO_TRACE
+	{	true,		true,		false,		true,		false	},		// PO_ENABLE_PIPELINING
+	{	true,		true,		false,		true,		false	},		// PO_THROTTLE_RATE
+	{   false,		false,		true,		false,		true	}		// PO_SSL_VERIFY_CALLBACK
+};
 HttpService * HttpService::sInstance(NULL);
 volatile HttpService::EState HttpService::sState(NOT_INITIALIZED);
 
@@ -51,15 +73,9 @@ HttpService::HttpService()
 	  mExitRequested(0U),
 	  mThread(NULL),
 	  mPolicy(NULL),
-	  mTransport(NULL)
-{
-	// Create the default policy class
-	HttpPolicyClass pol_class;
-	pol_class.set(HttpRequest::CP_CONNECTION_LIMIT, HTTP_CONNECTION_LIMIT_DEFAULT);
-	pol_class.set(HttpRequest::CP_PER_HOST_CONNECTION_LIMIT, HTTP_CONNECTION_LIMIT_DEFAULT);
-	pol_class.set(HttpRequest::CP_ENABLE_PIPELINING, 0L);
-	mPolicyClasses.push_back(pol_class);
-}
+	  mTransport(NULL),
+	  mLastPolicy(0)
+{}
 
 
 HttpService::~HttpService()
@@ -81,8 +97,8 @@ HttpService::~HttpService()
 				// Failed to join, expect problems ahead so do a hard termination.
 				mThread->cancel();
 
-				LL_WARNS("CoreHttp") << "Destroying HttpService with running thread.  Expect problems."
-									 << LL_ENDL;
+				LL_WARNS(LOG_CORE) << "Destroying HttpService with running thread.  Expect problems."
+								   << LL_ENDL;
 			}
 		}
 	}
@@ -149,13 +165,8 @@ void HttpService::term()
 
 HttpRequest::policy_t HttpService::createPolicyClass()
 {
-	const HttpRequest::policy_t policy_class(mPolicyClasses.size());
-	if (policy_class >= HTTP_POLICY_CLASS_LIMIT)
-	{
-		return 0;
-	}
-	mPolicyClasses.push_back(HttpPolicyClass());
-	return policy_class;
+	mLastPolicy = mPolicy->createPolicyClass();
+	return mLastPolicy;
 }
 
 
@@ -188,8 +199,8 @@ void HttpService::startThread()
 	}
 
 	// Push current policy definitions, enable policy & transport components
-	mPolicy->start(mPolicyGlobal, mPolicyClasses);
-	mTransport->start(mPolicyClasses.size());
+	mPolicy->start();
+	mTransport->start(mLastPolicy + 1);
 
 	mThread = new LLCoreInt::HttpThread(boost::bind(&HttpService::threadRun, this, _1));
 	sState = RUNNING;
@@ -253,14 +264,13 @@ void HttpService::shutdown()
 	// Cancel requests already on the request queue
 	HttpRequestQueue::OpContainer ops;
 	mRequestQueue->fetchAll(false, ops);
-	while (! ops.empty())
-	{
-		HttpOperation * op(ops.front());
-		ops.erase(ops.begin());
 
-		op->cancel();
-		op->release();
-	}
+    for (HttpRequestQueue::OpContainer::iterator it = ops.begin();
+        it != ops.end(); ++it)
+    {
+        (*it)->cancel();
+    }
+    ops.clear();
 
 	// Shutdown transport canceling requests, freeing resources
 	mTransport->shutdown();
@@ -284,22 +294,42 @@ void HttpService::threadRun(LLCoreInt::HttpThread * thread)
 	ELoopSpeed loop(REQUEST_SLEEP);
 	while (! mExitRequested)
 	{
-		loop = processRequestQueue(loop);
+        try
+        {
+		    loop = processRequestQueue(loop);
 
-		// Process ready queue issuing new requests as needed
-		ELoopSpeed new_loop = mPolicy->processReadyQueue();
-		loop = (std::min)(loop, new_loop);
+		    // Process ready queue issuing new requests as needed
+		    ELoopSpeed new_loop = mPolicy->processReadyQueue();
+		    loop = (std::min)(loop, new_loop);
 		
-		// Give libcurl some cycles
-		new_loop = mTransport->processTransport();
-		loop = (std::min)(loop, new_loop);
+		    // Give libcurl some cycles
+		    new_loop = mTransport->processTransport();
+		    loop = (std::min)(loop, new_loop);
 		
-		// Determine whether to spin, sleep briefly or sleep for next request
-		if (REQUEST_SLEEP != loop)
-		{
-			ms_sleep(HTTP_SERVICE_LOOP_SLEEP_NORMAL_MS);
-		}
-	}
+		    // Determine whether to spin, sleep briefly or sleep for next request
+		    if (REQUEST_SLEEP != loop)
+		    {
+			    ms_sleep(HTTP_SERVICE_LOOP_SLEEP_NORMAL_MS);
+		    }
+        }
+        catch (const LLContinueError&)
+        {
+            LOG_UNHANDLED_EXCEPTION("");
+        }
+        catch (std::bad_alloc)
+        {
+            LLMemory::logMemoryInfo(TRUE);
+
+            //output possible call stacks to log file.
+            LLError::LLCallStacks::print();
+
+            LL_ERRS() << "Bad memory allocation in HttpService::threadRun()!" << LL_ENDL;
+        }
+        catch (...)
+        {
+            CRASH_ON_UNHANDLED_EXCEPTION("");
+        }
+    }
 
 	shutdown();
 	sState = STOPPED;
@@ -314,7 +344,7 @@ HttpService::ELoopSpeed HttpService::processRequestQueue(ELoopSpeed loop)
 	mRequestQueue->fetchAll(wait_for_req, ops);
 	while (! ops.empty())
 	{
-		HttpOperation * op(ops.front());
+		HttpOperation::ptr_t op(ops.front());
 		ops.erase(ops.begin());
 
 		// Process operation
@@ -322,14 +352,14 @@ HttpService::ELoopSpeed HttpService::processRequestQueue(ELoopSpeed loop)
 		{
 			// Setup for subsequent tracing
 			long tracing(HTTP_TRACE_OFF);
-			mPolicy->getGlobalOptions().get(HttpRequest::GP_TRACE, &tracing);
+			mPolicy->getGlobalOptions().get(HttpRequest::PO_TRACE, &tracing);
 			op->mTracing = (std::max)(op->mTracing, int(tracing));
 
 			if (op->mTracing > HTTP_TRACE_OFF)
 			{
-				LL_INFOS("CoreHttp") << "TRACE, FromRequestQueue, Handle:  "
-									 << static_cast<HttpHandle>(op)
-									 << LL_ENDL;
+				LL_INFOS(LOG_CORE) << "TRACE, FromRequestQueue, Handle:  "
+								   << op->getHandle()
+								   << LL_ENDL;
 			}
 
 			// Stage
@@ -337,11 +367,207 @@ HttpService::ELoopSpeed HttpService::processRequestQueue(ELoopSpeed loop)
 		}
 				
 		// Done with operation
-		op->release();
+        op.reset();
 	}
 
 	// Queue emptied, allow polling loop to sleep
 	return REQUEST_SLEEP;
+}
+
+
+HttpStatus HttpService::getPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+										long * ret_value)
+{
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (! sOptionDesc[opt].mIsLong)													// datatype is long
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsClass))	// class setting permitted
+																						// can always get, no dynamic check
+	{
+		return HttpStatus(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+	}
+
+	HttpStatus status;
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+		
+		status = opts.get(opt, ret_value);
+	}
+	else
+	{
+		HttpPolicyClass & opts(mPolicy->getClassOptions(pclass));
+
+		status = opts.get(opt, ret_value);
+	}
+
+	return status;
+}
+
+
+HttpStatus HttpService::getPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+										std::string * ret_value)
+{
+	HttpStatus status(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (sOptionDesc[opt].mIsLong)													// datatype is string
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsClass))	// class setting permitted
+																						// can always get, no dynamic check
+	{
+		return status;
+	}
+
+	// Only global has string values
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+
+		status = opts.get(opt, ret_value);
+	}
+
+	return status;
+}
+
+HttpStatus HttpService::getPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+	HttpRequest::policyCallback_t * ret_value)
+{
+	HttpStatus status(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (sOptionDesc[opt].mIsLong)													// datatype is string
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && !sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && !sOptionDesc[opt].mIsClass))	// class setting permitted
+		// can always get, no dynamic check
+	{
+		return status;
+	}
+
+	// Only global has callback values
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+
+		status = opts.get(opt, ret_value);
+	}
+
+	return status;
+}
+
+
+
+HttpStatus HttpService::setPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+										long value, long * ret_value)
+{
+	HttpStatus status(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+	
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (! sOptionDesc[opt].mIsLong)													// datatype is long
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsClass)		// class setting permitted
+		|| (RUNNING == sState && ! sOptionDesc[opt].mIsDynamic))						// dynamic setting permitted
+	{
+		return status;
+	}
+
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+		
+		status = opts.set(opt, value);
+		if (status && ret_value)
+		{
+			status = opts.get(opt, ret_value);
+		}
+	}
+	else
+	{
+		HttpPolicyClass & opts(mPolicy->getClassOptions(pclass));
+
+		status = opts.set(opt, value);
+		if (status)
+		{
+			mTransport->policyUpdated(pclass);
+			if (ret_value)
+			{
+				status = opts.get(opt, ret_value);
+			}
+		}
+	}
+
+	return status;
+}
+
+
+HttpStatus HttpService::setPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+										const std::string & value, std::string * ret_value)
+{
+	HttpStatus status(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+	
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (sOptionDesc[opt].mIsLong)													// datatype is string
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && ! sOptionDesc[opt].mIsClass)		// class setting permitted
+		|| (RUNNING == sState && ! sOptionDesc[opt].mIsDynamic))						// dynamic setting permitted
+	{
+		return status;
+	}
+
+	// String values are always global (at this time).
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+		
+		status = opts.set(opt, value);
+		if (status && ret_value)
+		{
+			status = opts.get(opt, ret_value);
+		}
+	}
+
+	return status;
+}
+
+HttpStatus HttpService::setPolicyOption(HttpRequest::EPolicyOption opt, HttpRequest::policy_t pclass,
+	HttpRequest::policyCallback_t value, HttpRequest::policyCallback_t * ret_value)
+{
+	HttpStatus status(HttpStatus::LLCORE, LLCore::HE_INVALID_ARG);
+
+	if (opt < HttpRequest::PO_CONNECTION_LIMIT											// option must be in range
+		|| opt >= HttpRequest::PO_LAST													// ditto
+		|| (sOptionDesc[opt].mIsLong)													// datatype is string
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && pclass > mLastPolicy)			// pclass in valid range
+		|| (pclass == HttpRequest::GLOBAL_POLICY_ID && !sOptionDesc[opt].mIsGlobal)	// global setting permitted
+		|| (pclass != HttpRequest::GLOBAL_POLICY_ID && !sOptionDesc[opt].mIsClass)		// class setting permitted
+		|| (RUNNING == sState && !sOptionDesc[opt].mIsDynamic))						// dynamic setting permitted
+	{
+		return status;
+	}
+
+	// Callbacks values are always global (at this time).
+	if (pclass == HttpRequest::GLOBAL_POLICY_ID)
+	{
+		HttpPolicyGlobal & opts(mPolicy->getGlobalOptions());
+
+		status = opts.set(opt, value);
+		if (status && ret_value)
+		{
+			status = opts.get(opt, ret_value);
+		}
+	}
+
+	return status;
 }
 
 

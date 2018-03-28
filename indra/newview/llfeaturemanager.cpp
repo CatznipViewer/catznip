@@ -37,10 +37,9 @@
 
 #include "llsys.h"
 #include "llgl.h"
-#include "llsecondlifeurls.h"
 
 #include "llappviewer.h"
-#include "llhttpclient.h"
+#include "llbufferstream.h"
 #include "llnotificationsutil.h"
 #include "llviewercontrol.h"
 #include "llworld.h"
@@ -55,12 +54,11 @@
 #include "llviewershadermgr.h"
 #include "llstring.h"
 #include "stringize.h"
+#include "llcorehttputil.h"
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
 #endif
-
-#define LL_EXPORT_GPU_TABLE 0
 
 #if LL_DARWIN
 const char FEATURE_TABLE_FILENAME[] = "featuretable_mac.txt";
@@ -68,17 +66,13 @@ const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_mac.%s.txt";
 #elif LL_LINUX
 const char FEATURE_TABLE_FILENAME[] = "featuretable_linux.txt";
 const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_linux.%s.txt";
-#elif LL_SOLARIS
-const char FEATURE_TABLE_FILENAME[] = "featuretable_solaris.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_solaris.%s.txt";
 #else
-const char FEATURE_TABLE_FILENAME[] = "featuretable%s.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable%s.%s.txt";
+const char FEATURE_TABLE_FILENAME[] = "featuretable.txt";
+const char FEATURE_TABLE_VER_FILENAME[] = "featuretable.%s.txt";
 #endif
 
-const char GPU_TABLE_FILENAME[] = "gpu_table.txt";
-const char GPU_TABLE_VER_FILENAME[] = "gpu_table.%s.txt";
-
+#if 0                               // consuming code in #if 0 below
+#endif
 LLFeatureInfo::LLFeatureInfo(const std::string& name, const BOOL available, const F32 level)
 	: mValid(TRUE), mName(name), mAvailable(available), mRecommendedLevel(level)
 {
@@ -101,6 +95,10 @@ void LLFeatureList::addFeature(const std::string& name, const BOOL available, co
 	}
 
 	LLFeatureInfo fi(name, available, level);
+    LL_DEBUGS_ONCE("RenderInit") << "Feature '" << name << "' "
+                                 << (available ? "" : "not " ) << "available"
+                                 << " at " << level
+                                 << LL_ENDL;
 	mFeatures[name] = fi;
 }
 
@@ -122,6 +120,7 @@ F32 LLFeatureList::getRecommendedValue(const std::string& name)
 {
 	if (mFeatures.count(name) && isFeatureAvailable(name))
 	{
+        LL_DEBUGS_ONCE("RenderInit") << "Setting '" << name << "' to recommended value " <<  mFeatures[name].mRecommendedLevel << LL_ENDL;
 		return mFeatures[name].mRecommendedLevel;
 	}
 
@@ -131,7 +130,7 @@ F32 LLFeatureList::getRecommendedValue(const std::string& name)
 
 BOOL LLFeatureList::maskList(LLFeatureList &mask)
 {
-	//llinfos << "Masking with " << mask.mName << llendl;
+	LL_DEBUGS_ONCE() << "Masking with " << mask.mName << LL_ENDL;
 	//
 	// Lookup the specified feature mask, and overlay it on top of the
 	// current feature mask.
@@ -178,16 +177,14 @@ BOOL LLFeatureList::maskList(LLFeatureList &mask)
 void LLFeatureList::dump()
 {
 	LL_DEBUGS("RenderInit") << "Feature list: " << mName << LL_ENDL;
-	LL_DEBUGS("RenderInit") << "--------------" << LL_ENDL;
 
 	LLFeatureInfo fi;
 	feature_map_t::iterator feature_it;
 	for (feature_it = mFeatures.begin(); feature_it != mFeatures.end(); ++feature_it)
 	{
 		fi = feature_it->second;
-		LL_DEBUGS("RenderInit") << fi.mName << "\t\t" << fi.mAvailable << ":" << fi.mRecommendedLevel << LL_ENDL;
+		LL_DEBUGS("RenderInit") << "With " << mName << " feature " << fi.mName << " " << fi.mAvailable << ":" << fi.mRecommendedLevel << LL_ENDL;
 	}
-	LL_DEBUGS("RenderInit") << LL_ENDL;
 }
 
 static const std::vector<std::string> sGraphicsLevelNames = boost::assign::list_of
@@ -277,27 +274,12 @@ bool LLFeatureManager::loadFeatureTables()
 
 	std::string filename;
 	std::string http_filename; 
-#if LL_WINDOWS
-	std::string os_string = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
-	if (os_string.find("Microsoft Windows XP") == 0)
-	{
-		filename = llformat(FEATURE_TABLE_FILENAME, "_xp");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "_xp", LLVersionInfo::getVersion().c_str());
-	}
-	else
-	{
-		filename = llformat(FEATURE_TABLE_FILENAME, "");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "", LLVersionInfo::getVersion().c_str());
-	}
-#else
 	filename = FEATURE_TABLE_FILENAME;
 	http_filename = llformat(FEATURE_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
-#endif
 
 	app_path += filename;
 
-	
-	// second table is downloaded with HTTP
+	// second table is downloaded with HTTP - note that this will only be used on the run _after_ it is downloaded
 	std::string http_path = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, http_filename);
 
 	// use HTTP table if it exists
@@ -332,7 +314,7 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 	U32		version;
 	
 	cleanupFeatureTables(); // in case an earlier attempt left partial results
-	file.open(filename); 	 /*Flawfinder: ignore*/
+	file.open(filename.c_str()); 	 /*Flawfinder: ignore*/
 
 	if (!file)
 	{
@@ -342,18 +324,19 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 
 	// Check file version
 	file >> name;
-	file >> version;
 	if (name != "version")
 	{
 		LL_WARNS("RenderInit") << filename << " does not appear to be a valid feature table!" << LL_ENDL;
 		return false;
 	}
+	file >> version;
 
 	mTableVersion = version;
+	LL_INFOS("RenderInit") << "Found feature table version " << version << LL_ENDL;
 
 	LLFeatureList *flp = NULL;
 	bool parse_ok = true;
-	while (file >> name && parse_ok)
+	while (parse_ok && file >> name )
 	{
 		char buffer[MAX_STRING];		 /*Flawfinder: ignore*/
 		
@@ -363,7 +346,7 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 			file.getline(buffer, MAX_STRING);
 			continue;
 		}
-
+        
 		if (name == "list")
 		{
 			LL_DEBUGS("RenderInit") << "Before new list" << std::endl;
@@ -381,12 +364,12 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 			file >> name;
 			if (!mMaskList.count(name))
 			{
-			flp = new LLFeatureList(name);
-			mMaskList[name] = flp;
-		}
-		else
-		{
-				LL_WARNS("RenderInit") << "Overriding mask " << name << ", this is invalid!" << LL_ENDL;
+                flp = new LLFeatureList(name);
+                mMaskList[name] = flp;
+            }
+            else
+            {
+				LL_WARNS("RenderInit") << "Overriding mask '" << name << "'; this is invalid!" << LL_ENDL;
 				parse_ok = false;
 			}
 		}
@@ -394,11 +377,11 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 		{
 			if (flp)
 			{
-			S32 available;
-			F32 recommended;
-			file >> available >> recommended;
-			flp->addFeature(name, available, recommended);
-		}
+                S32 available;
+                F32 recommended;
+                file >> available >> recommended;
+                flp->addFeature(name, available, recommended);
+            }
 			else
 			{
 				LL_WARNS("RenderInit") << "Specified parameter before <list> keyword!" << LL_ENDL;
@@ -417,287 +400,155 @@ bool LLFeatureManager::parseFeatureTable(std::string filename)
 	return parse_ok;
 }
 
+F32 gpu_benchmark();
+
 bool LLFeatureManager::loadGPUClass()
 {
-	// defaults
-	mGPUClass = GPU_CLASS_UNKNOWN;
-	mGPUString = gGLManager.getRawGLString();
-	mGPUSupported = FALSE;
-
-	// first table is in the app dir
-	std::string app_path = gDirUtilp->getAppRODataDir();
-	app_path += gDirUtilp->getDirDelimiter();
-	app_path += GPU_TABLE_FILENAME;
+	if (!gSavedSettings.getBOOL("SkipBenchmark"))
+	{
+		//get memory bandwidth from benchmark
+		F32 gbps = gpu_benchmark();
 	
-	// second table is downloaded with HTTP
-	std::string http_filename = llformat(GPU_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
-	std::string http_path = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, http_filename);
-
-	// use HTTP table if it exists
-	std::string path;
-	bool parse_ok = false;
-	if (gDirUtilp->fileExists(http_path))
-	{
-		parse_ok = parseGPUTable(http_path);
-		if (!parse_ok)
-		{
-			// the HTTP table failed to parse, so delete it
-			LLFile::remove(http_path);
-			LL_WARNS("RenderInit") << "Removed invalid gpu table '" << http_path << "'" << LL_ENDL;
-	}
-	}
-
-	if (!parse_ok)
-	{
-		parse_ok = parseGPUTable(app_path);
-	}
-
-	return parse_ok; // indicates that the file parsed correctly, not that the gpu was recognized
-}
-
-	
-bool LLFeatureManager::parseGPUTable(std::string filename)
-{
-	llifstream file;
-		
-	LL_INFOS("RenderInit") << "Attempting to parse GPU table from " << filename << LL_ENDL;
-	file.open(filename);
-
-	if (file)
-	{
-		const char recognizer[] = "//GPU_TABLE";
-		char first_line[MAX_STRING];
-		file.getline(first_line, MAX_STRING);
-		if (0 != strncmp(first_line, recognizer, strlen(recognizer)))
-		{
-			LL_WARNS("RenderInit") << "Invalid GPU table: " << filename << "!" << LL_ENDL;
-			return false;
-		}
-	}
-	else
-	{
-		LL_WARNS("RenderInit") << "Unable to open GPU table: " << filename << "!" << LL_ENDL;
-		return false;
-	}
-
-	std::string rawRenderer = gGLManager.getRawGLString();
-	std::string renderer = rawRenderer;
-	for (std::string::iterator i = renderer.begin(); i != renderer.end(); ++i)
-	{
-		*i = tolower(*i);
-	}
-
-#if LL_EXPORT_GPU_TABLE
-	llofstream json;
-	json.open("gpu_table.json");
-
-	json << "var gpu_table = [" << std::endl;
-#endif
-
-	bool gpuFound;
-	U32 lineNumber;
-	for (gpuFound = false, lineNumber = 0; !gpuFound && !file.eof(); lineNumber++)
-	{
-		char buffer[MAX_STRING];		 /*Flawfinder: ignore*/
-		buffer[0] = 0;
-
-		file.getline(buffer, MAX_STRING);
-		
-		if (strlen(buffer) >= 2 && 	 /*Flawfinder: ignore*/
-			buffer[0] == '/' && 
-			buffer[1] == '/')
-		{
-			// This is a comment.
-			continue;
-		}
-
-		if (strlen(buffer) == 0)	 /*Flawfinder: ignore*/
-		{
-			// This is a blank line
-			continue;
-		}
-
-		// setup the tokenizer
-		std::string buf(buffer);
-		std::string cls, label, expr, supported, stats_based, expected_gl_version;
-		boost_tokenizer tokens(buf, boost::char_separator<char>("\t\n"));
-		boost_tokenizer::iterator token_iter = tokens.begin();
-
-		// grab the label, pseudo regular expression, and class
-		if(token_iter != tokens.end())
-		{
-			label = *token_iter++;
-		}
-		if(token_iter != tokens.end())
-		{
-			expr = *token_iter++;
-		}
-		if(token_iter != tokens.end())
-		{
-			cls = *token_iter++;
-		}
-		if(token_iter != tokens.end())
-		{
-			supported = *token_iter++;
-		}
-		if (token_iter != tokens.end())
-		{
-			stats_based = *token_iter++;
-		}
-		if (token_iter != tokens.end())
-		{
-			expected_gl_version = *token_iter++;
-		}
-
-		if (label.empty() || expr.empty() || cls.empty() || supported.empty())
-		{
-			LL_WARNS("RenderInit") << "invald gpu_table.txt:" << lineNumber << ": '" << buffer << "'" << LL_ENDL;
-			continue;
-		}
-#if LL_EXPORT_GPU_TABLE
-		json << "{'label' : '" << label << "',\n" << 
-			"'regexp' : '" << expr << "',\n" <<
-			"'class' : '" << cls << "',\n" <<
-			"'supported' : '" << supported << "',\n" <<
-			"'stats_based' : " << stats_based <<  ",\n" <<
-			"'gl_version' : " << expected_gl_version << "\n},\n";
-#endif
-
-		for (U32 i = 0; i < expr.length(); i++)	 /*Flawfinder: ignore*/
-		{
-			expr[i] = tolower(expr[i]);
-		}
-
-		// run the regular expression against the renderer
-		boost::regex re(expr.c_str());
-		if(boost::regex_search(renderer, re))
-		{
-			// if we found it, stop!
-#if !LL_EXPORT_GPU_TABLE
-			gpuFound = true;
-#endif
-			mGPUString = label;
-			mGPUClass = (EGPUClass) strtol(cls.c_str(), NULL, 10);
-			mGPUSupported = (BOOL) strtol(supported.c_str(), NULL, 10);
-			sscanf(expected_gl_version.c_str(), "%f", &mExpectedGLVersion);
-		}
-	}
-#if LL_EXPORT_GPU_TABLE
-	json << "];\n\n";
-	json.close();
-#endif
-	file.close();
-
-	if ( gpuFound )
-	{
-		LL_INFOS("RenderInit") << "GPU '" << rawRenderer << "' recognized as '" << mGPUString << "'" << LL_ENDL;
-		if (!mGPUSupported)
-		{
-			LL_INFOS("RenderInit") << "GPU '" << mGPUString << "' is not supported." << LL_ENDL;
-		}
-	}
-	else
-	{
-		LL_WARNS("RenderInit") << "GPU '" << rawRenderer << "' not recognized" << LL_ENDL;
-	}
-
-#if LL_DARWIN // never go over "Mid" settings by default on OS X
-	mGPUClass = llmin(mGPUClass, GPU_CLASS_2);
-#endif
-	return true;
-}
-
-// responder saves table into file
-class LLHTTPFeatureTableResponder : public LLHTTPClient::Responder
-{
-public:
-
-	LLHTTPFeatureTableResponder(std::string filename) :
-		mFilename(filename)
-	{
-	}
-
-	
-	virtual void completedRaw(U32 status, const std::string& reason,
-							  const LLChannelDescriptors& channels,
-							  const LLIOPipe::buffer_ptr_t& buffer)
-	{
-		if (isGoodStatus(status))
-		{
-			// write to file
-
-			llinfos << "writing feature table to " << mFilename << llendl;
-			
-			S32 file_size = buffer->countAfter(channels.in(), NULL);
-			if (file_size > 0)
+		if (gbps < 0.f)
+		{ //couldn't bench, use GLVersion
+	#if LL_DARWIN
+		//GLVersion is misleading on OSX, just default to class 3 if we can't bench
+		LL_WARNS("RenderInit") << "Unable to get an accurate benchmark; defaulting to class 3" << LL_ENDL;
+		mGPUClass = GPU_CLASS_3;
+	#else
+			if (gGLManager.mGLVersion < 2.f)
 			{
-				// read from buffer
-				U8* copy_buffer = new U8[file_size];
-				buffer->readAfter(channels.in(), NULL, copy_buffer, file_size);
-
-				// write to file
-				LLAPRFile out(mFilename, LL_APR_WB);
-				out.write(copy_buffer, file_size);
-				out.close();
+				mGPUClass = GPU_CLASS_0;
 			}
+			else if (gGLManager.mGLVersion < 3.f)
+			{
+				mGPUClass = GPU_CLASS_1;
+			}
+			else if (gGLManager.mGLVersion < 3.3f)
+			{
+				mGPUClass = GPU_CLASS_2;
+			}
+			else if (gGLManager.mGLVersion < 4.f)
+			{
+				mGPUClass = GPU_CLASS_3;
+			}
+			else 
+			{
+				mGPUClass = GPU_CLASS_4;
+			}
+	#endif
 		}
-		
+		else if (gGLManager.mGLVersion <= 2.f)
+		{
+			mGPUClass = GPU_CLASS_0;
+		}
+		else if (gGLManager.mGLVersion <= 3.f)
+		{
+			mGPUClass = GPU_CLASS_1;
+		}
+		else if (gbps <= 5.f)
+		{
+			mGPUClass = GPU_CLASS_0;
+		}
+		else if (gbps <= 8.f)
+		{
+			mGPUClass = GPU_CLASS_1;
+		}
+		else if (gbps <= 16.f)
+		{
+			mGPUClass = GPU_CLASS_2;
+		}
+		else if (gbps <= 40.f)
+		{
+			mGPUClass = GPU_CLASS_3;
+		}
+		else if (gbps <= 80.f)
+		{
+			mGPUClass = GPU_CLASS_4;
+		}
+		else 
+		{
+			mGPUClass = GPU_CLASS_5;
+		}
+	} //end if benchmark
+	else
+	{
+		//setting says don't benchmark MAINT-7558
+        LL_WARNS("RenderInit") << "Setting 'SkipBenchmark' is true; defaulting to class 1 (may be required for some GPUs)" << LL_ENDL;
+        
+		mGPUClass = GPU_CLASS_1;
 	}
-	
-private:
-	std::string mFilename;
-};
 
-void fetch_feature_table(std::string table)
+	// defaults
+	mGPUString = gGLManager.getRawGLString();
+	mGPUSupported = TRUE;
+
+	return true; // indicates that a gpu value was established
+}
+
+void LLFeatureManager::fetchFeatureTableCoro(std::string tableName)
 {
-	const std::string base       = gSavedSettings.getString("FeatureManagerHTTPTable");
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("FeatureManagerHTTPTable", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+
+    const std::string base = gSavedSettings.getString("FeatureManagerHTTPTable");
+
 
 #if LL_WINDOWS
-	std::string os_string = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
-	std::string filename;
-	if (os_string.find("Microsoft Windows XP") == 0)
-	{
-		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
-	}
-	else
-	{
-		filename = llformat(table.c_str(), "", LLVersionInfo::getVersion().c_str());
-	}
+    std::string os_string = LLOSInfo::instance().getOSStringSimple();
+    std::string filename;
+
+    if (os_string.find("Microsoft Windows XP") == 0)
+    {
+        filename = llformat(tableName.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
+    }
+    else
+    {
+        filename = llformat(tableName.c_str(), "", LLVersionInfo::getVersion().c_str());
+    }
 #else
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
+    const std::string filename   = llformat(tableName.c_str(), LLVersionInfo::getVersion().c_str());
 #endif
 
-	const std::string url        = base + "/" + filename;
+    std::string url        = base + "/" + filename;
+    // testing url below
+    //url = "http://viewer-settings.secondlife.com/featuretable.2.1.1.208406.txt";
+    const std::string path       = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, filename);
 
-	const std::string path       = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, filename);
 
-	llinfos << "LLFeatureManager fetching " << url << " into " << path << llendl;
-	
-	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
-}
+    LL_INFOS() << "LLFeatureManager fetching " << url << " into " << path << LL_ENDL;
 
-void fetch_gpu_table(std::string table)
-{
-	const std::string base       = gSavedSettings.getString("FeatureManagerHTTPTable");
+    LLSD result = httpAdapter->getRawAndSuspend(httpRequest, url);
 
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
 
-	const std::string url        = base + "/" + filename;
+    if (status)
+    {   // There was a newer feature table on the server. We've grabbed it and now should write it.
+        // write to file
+        const LLSD::Binary &raw = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_RAW].asBinary();
 
-	const std::string path       = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, filename);
+        LL_INFOS() << "writing feature table to " << path << LL_ENDL;
 
-	llinfos << "LLFeatureManager fetching " << url << " into " << path << llendl;
-	
-	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+        S32 size = raw.size();
+        if (size > 0)
+        {
+            // write to file
+            LLAPRFile out(path, LL_APR_WB);
+            out.write(raw.data(), size);
+            out.close();
+        }
+    }
 }
 
 // fetch table(s) from a website (S3)
 void LLFeatureManager::fetchHTTPTables()
 {
-	fetch_feature_table(FEATURE_TABLE_VER_FILENAME);
-	fetch_gpu_table(GPU_TABLE_VER_FILENAME);
+    LLCoros::instance().launch("LLFeatureManager::fetchFeatureTableCoro",
+        boost::bind(&LLFeatureManager::fetchFeatureTableCoro, this, FEATURE_TABLE_VER_FILENAME));
 }
-
 
 void LLFeatureManager::cleanupFeatureTables()
 {
@@ -719,11 +570,12 @@ void LLFeatureManager::init()
 
 void LLFeatureManager::applyRecommendedSettings()
 {
+	loadGPUClass();
 	// apply saved settings
 	// cap the level at 2 (high)
 	U32 level = llmax(GPU_CLASS_0, llmin(mGPUClass, GPU_CLASS_5));
 
-	llinfos << "Applying Recommended Features" << llendl;
+	LL_INFOS("RenderInit") << "Applying Recommended Features for level " << level << LL_ENDL;
 
 	setGraphicsLevel(level, false);
 	gSavedSettings.setU32("RenderQualityPerformance", level);
@@ -769,7 +621,7 @@ void LLFeatureManager::applyFeatures(bool skipFeatures)
 		LLControlVariable* ctrl = gSavedSettings.getControl(mIt->first);
 		if(ctrl == NULL)
 		{
-			llwarns << "AHHH! Control setting " << mIt->first << " does not exist!" << llendl;
+			LL_WARNS("RenderInit") << "AHHH! Control setting " << mIt->first << " does not exist!" << LL_ENDL;
 			continue;
 		}
 
@@ -792,7 +644,7 @@ void LLFeatureManager::applyFeatures(bool skipFeatures)
 		}
 		else
 		{
-			llwarns << "AHHH! Control variable is not a numeric type!" << llendl;
+			LL_WARNS("RenderInit") << "AHHH! Control variable is not a numeric type!" << LL_ENDL;
 		}
 	}
 }
@@ -925,6 +777,14 @@ void LLFeatureManager::applyBaseMasks()
 		maskFeatures("VRAMGT512");
 	}
 
+#if LL_DARWIN
+	const LLOSInfo& osInfo = LLOSInfo::instance();
+	if (osInfo.mMajorVer == 10 && osInfo.mMinorVer < 7)
+	{
+		maskFeatures("OSX_10_6_8");
+	}
+#endif
+
 	// now mask by gpu string
 	// Replaces ' ' with '_' in mGPUString to deal with inability for parser to handle spaces
 	std::string gpustr = mGPUString;
@@ -936,11 +796,11 @@ void LLFeatureManager::applyBaseMasks()
 		}
 	}
 
-	//llinfos << "Masking features from gpu table match: " << gpustr << llendl;
+	//LL_INFOS() << "Masking features from gpu table match: " << gpustr << LL_ENDL;
 	maskFeatures(gpustr);
 
 	// now mask cpu type ones
-	if (gSysMemory.getPhysicalMemoryClamped() <= 256*1024*1024)
+	if (gSysMemory.getPhysicalMemoryKB() <= U32Megabytes(256))
 	{
 		maskFeatures("RAM256MB");
 	}
@@ -959,4 +819,63 @@ void LLFeatureManager::applyBaseMasks()
 	{
 		maskFeatures("safe");
 	}
+}
+
+LLSD LLFeatureManager::getRecommendedSettingsMap()
+{
+	// Create the map and fill it with the hardware recommended settings.
+	// It's needed to create an initial Default graphics preset (MAINT-6435).
+	// The process is similar to the one LLFeatureManager::applyRecommendedSettings() does.
+
+	LLSD map(LLSD::emptyMap());
+
+	loadGPUClass();
+	U32 level = llmax(GPU_CLASS_0, llmin(mGPUClass, GPU_CLASS_5));
+	LL_INFOS("RenderInit") << "Getting the map of recommended settings for level " << level << LL_ENDL;
+
+	applyBaseMasks();
+	std::string features(isValidGraphicsLevel(level) ? getNameForGraphicsLevel(level) : "Low");
+
+	maskFeatures(features);
+
+	LLControlVariable* ctrl = gSavedSettings.getControl("RenderQualityPerformance"); // include the quality value for correct preset loading   
+	map["RenderQualityPerformance"]["Value"] = (LLSD::Integer)level;
+	map["RenderQualityPerformance"]["Comment"] = ctrl->getComment();;
+	map["RenderQualityPerformance"]["Persist"] = 1;
+	map["RenderQualityPerformance"]["Type"] = LLControlGroup::typeEnumToString(ctrl->type());
+
+
+
+	for (feature_map_t::iterator mIt = mFeatures.begin(); mIt != mFeatures.end(); ++mIt)
+	{
+		LLControlVariable* ctrl = gSavedSettings.getControl(mIt->first);
+		if (ctrl == NULL)
+		{
+			LL_WARNS("RenderInit") << "AHHH! Control setting " << mIt->first << " does not exist!" << LL_ENDL;
+			continue;
+		}
+
+		if (ctrl->isType(TYPE_BOOLEAN))
+		{
+			map[mIt->first]["Value"] = (LLSD::Boolean)getRecommendedValue(mIt->first);
+		}
+		else if (ctrl->isType(TYPE_S32) || ctrl->isType(TYPE_U32))
+		{
+			map[mIt->first]["Value"] = (LLSD::Integer)getRecommendedValue(mIt->first);
+		}
+		else if (ctrl->isType(TYPE_F32))
+		{
+			map[mIt->first]["Value"] = (LLSD::Real)getRecommendedValue(mIt->first);
+		}
+		else
+		{
+			LL_WARNS("RenderInit") << "AHHH! Control variable is not a numeric type!" << LL_ENDL;
+			continue;
+		}
+		map[mIt->first]["Comment"] = ctrl->getComment();;
+		map[mIt->first]["Persist"] = 1;
+		map[mIt->first]["Type"] = LLControlGroup::typeEnumToString(ctrl->type());
+	}
+	
+	return map;
 }

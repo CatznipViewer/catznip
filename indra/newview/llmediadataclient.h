@@ -27,12 +27,15 @@
 #ifndef LL_LLMEDIADATACLIENT_H
 #define LL_LLMEDIADATACLIENT_H
 
-#include "llhttpclient.h"
 #include <set>
 #include "llrefcount.h"
 #include "llpointer.h"
 #include "lleventtimer.h"
-
+#include "llhttpsdhandler.h"
+#include "httpcommon.h"
+#include "httprequest.h"
+#include "httpoptions.h"
+#include "httpheaders.h"
 
 // Link seam for LLVOVolume
 class LLMediaDataClientObject : public LLRefCount
@@ -74,8 +77,11 @@ public:
 // Abstracts the Cap URL, the request, and the responder
 class LLMediaDataClient : public LLRefCount
 {
-public:
+    friend class PredicateMatchRequest;
+
+protected:
     LOG_CLASS(LLMediaDataClient);
+public:
     
     const static F32 QUEUE_TIMER_DELAY;// = 1.0; // seconds(s)
 	const static F32 UNAVAILABLE_RETRY_TIMER_DELAY;// = 5.0; // secs
@@ -108,26 +114,30 @@ protected:
 	// Destructor
 	virtual ~LLMediaDataClient(); // use unref
     
-	class Responder;
-	
 	// Request (pure virtual base class for requests in the queue)
-	class Request : public LLRefCount
-	{
-	public:
-		// Subclasses must implement this to build a payload for their request type.
-		virtual LLSD getPayload() const = 0;
-		// and must create the correct type of responder.
-		virtual Responder *createResponder() = 0;
+    class Request: 
+        public boost::enable_shared_from_this<Request>
+    {
+    public:
+        typedef boost::shared_ptr<Request> ptr_t;
 
-		virtual std::string getURL() { return ""; }
+        // Subclasses must implement this to build a payload for their request type.
+        virtual LLSD getPayload() const = 0;
+        // and must create the correct type of responder.
+        virtual LLCore::HttpHandler::ptr_t createHandler() = 0;
+
+        virtual std::string getURL() { return ""; }
 
         enum Type {
             GET,
             UPDATE,
             NAVIGATE,
-			ANY
+            ANY
         };
-        
+
+        virtual ~Request()
+        { }
+
 	protected:
 		// The only way to create one of these is through a subclass.
 		Request(Type in_type, LLMediaDataClientObject *obj, LLMediaDataClient *mdc, S32 face = -1);
@@ -165,7 +175,7 @@ protected:
 		const LLUUID &getID() const { return mObjectID; }
 		S32 getFace() const { return mFace; }
 		
-		bool isMatch (const Request* other, Type match_type = ANY) const 
+		bool isMatch (const Request::ptr_t &other, Type match_type = ANY) const 
 		{ 
 			return ((match_type == ANY) || (mType == other->mType)) && 
 					(mFace == other->mFace) && 
@@ -187,59 +197,62 @@ protected:
 		// Back pointer to the MDC...not a ref!
 		LLMediaDataClient *mMDC;
 	};
-	typedef LLPointer<Request> request_ptr_t;
+	//typedef LLPointer<Request> request_ptr_t;
 
-	// Responder
-	class Responder : public LLHTTPClient::Responder
-	{
-	public:
-		Responder(const request_ptr_t &request);
-		//If we get back an error (not found, etc...), handle it here
-		virtual void errorWithContent(U32 status, const std::string& reason, const LLSD& content);
-		//If we get back a normal response, handle it here.	 Default just logs it.
-		virtual void result(const LLSD& content);
+    class Handler : public LLHttpSDHandler
+    {
+        LOG_CLASS(Handler);
+    public:
+        Handler(const Request::ptr_t &request);
+        Request::ptr_t getRequest() const { return mRequest; }
 
-		request_ptr_t &getRequest() { return mRequest; }
+    protected:
+        virtual void onSuccess(LLCore::HttpResponse * response, const LLSD &content);
+        virtual void onFailure(LLCore::HttpResponse * response, LLCore::HttpStatus status);
 
-	private:
-		request_ptr_t mRequest;
-	};
+    private:
+        Request::ptr_t mRequest;
+    };
+
 
 	class RetryTimer : public LLEventTimer
 	{
 	public:
-		RetryTimer(F32 time, request_ptr_t);
+		RetryTimer(F32 time, Request::ptr_t);
 		virtual BOOL tick();
 	private:
 		// back-pointer
-		request_ptr_t mRequest;
+		Request::ptr_t mRequest;
 	};
 		
 	
 protected:
-	typedef std::list<request_ptr_t> request_queue_t;
-	typedef std::set<request_ptr_t> request_set_t;
+	typedef std::list<Request::ptr_t> request_queue_t;
+	typedef std::set<Request::ptr_t> request_set_t;
 
 	// Subclasses must override to return a cap name
 	virtual const char *getCapabilityName() const = 0;
 
 	// Puts the request into a queue, appropriately handling duplicates, etc.
-	virtual void enqueue(Request*) = 0;
+    virtual void enqueue(Request::ptr_t) = 0;
 	
 	virtual void serviceQueue();
+    virtual void serviceHttp();
 
 	virtual request_queue_t *getQueue() { return &mQueue; };
 
 	// Gets the next request, removing it from the queue
-	virtual request_ptr_t dequeue();
+	virtual Request::ptr_t dequeue();
 	
-	virtual bool canServiceRequest(request_ptr_t request) { return true; };
+	virtual bool canServiceRequest(Request::ptr_t request) { return true; };
 
 	// Returns a request to the head of the queue (should only be used for requests that came from dequeue
-	virtual void pushBack(request_ptr_t request);
+	virtual void pushBack(Request::ptr_t request);
 	
-	void trackRequest(request_ptr_t request);
-	void stopTrackingRequest(request_ptr_t request);
+	void trackRequest(Request::ptr_t request);
+	void stopTrackingRequest(Request::ptr_t request);
+
+    bool isDoneProcessing() const;
 	
 	request_queue_t mQueue;
 
@@ -256,6 +269,11 @@ protected:
 
 	void startQueueTimer();
 	void stopQueueTimer();
+
+    LLCore::HttpRequest::ptr_t  mHttpRequest;
+    LLCore::HttpHeaders::ptr_t  mHttpHeaders;
+    LLCore::HttpOptions::ptr_t  mHttpOpts;
+    LLCore::HttpRequest::policy_t mHttpPolicy;
 
 private:
 	
@@ -278,17 +296,17 @@ private:
 		
 	bool mQueueTimerIsRunning;
 
-	template <typename T> friend typename T::iterator find_matching_request(T &c, const LLMediaDataClient::Request *request, LLMediaDataClient::Request::Type match_type = LLMediaDataClient::Request::ANY);
-	template <typename T> friend typename T::iterator find_matching_request(T &c, const LLUUID &id, LLMediaDataClient::Request::Type match_type = LLMediaDataClient::Request::ANY);
-	template <typename T> friend void remove_matching_requests(T &c, const LLUUID &id, LLMediaDataClient::Request::Type match_type = LLMediaDataClient::Request::ANY);
-
+// 	template <typename T> friend typename T::iterator find_matching_request(T &c, const LLMediaDataClient::Request *request, LLMediaDataClient::Request::Type match_type);
+// 	template <typename T> friend typename T::iterator find_matching_request(T &c, const LLUUID &id, LLMediaDataClient::Request::Type match_type);
+// 	template <typename T> friend void remove_matching_requests(T &c, const LLUUID &id, LLMediaDataClient::Request::Type match_type);
 };
 
 // MediaDataClient specific for the ObjectMedia cap
 class LLObjectMediaDataClient : public LLMediaDataClient
 {
-public:
+protected:
     LOG_CLASS(LLObjectMediaDataClient);
+public:
     LLObjectMediaDataClient(F32 queue_timer_delay = QUEUE_TIMER_DELAY,
 							F32 retry_timer_delay = UNAVAILABLE_RETRY_TIMER_DELAY,
 							U32 max_retries = MAX_RETRIES,
@@ -306,7 +324,7 @@ public:
 	public:
 		RequestGet(LLMediaDataClientObject *obj, LLMediaDataClient *mdc);
 		/*virtual*/ LLSD getPayload() const;
-		/*virtual*/ Responder *createResponder();
+        /*virtual*/ LLCore::HttpHandler::ptr_t createHandler();
 	};
 
 	class RequestUpdate: public Request
@@ -314,7 +332,7 @@ public:
 	public:
 		RequestUpdate(LLMediaDataClientObject *obj, LLMediaDataClient *mdc);
 		/*virtual*/ LLSD getPayload() const;
-		/*virtual*/ Responder *createResponder();
+        /*virtual*/ LLCore::HttpHandler::ptr_t createHandler();
 	};
 
 	// Returns true iff the queue is empty
@@ -328,7 +346,7 @@ public:
 
 	virtual bool processQueueTimer();
 
-	virtual bool canServiceRequest(request_ptr_t request);
+	virtual bool canServiceRequest(Request::ptr_t request);
 
 protected:
 	// Subclasses must override to return a cap name
@@ -337,15 +355,20 @@ protected:
 	virtual request_queue_t *getQueue();
 
 	// Puts the request into the appropriate queue
-	virtual void enqueue(Request*);
+	virtual void enqueue(Request::ptr_t);
 		    
-    class Responder : public LLMediaDataClient::Responder
+    class Handler: public LLMediaDataClient::Handler
     {
+        LOG_CLASS(Handler);
     public:
-        Responder(const request_ptr_t &request)
-            : LLMediaDataClient::Responder(request) {}
-        virtual void result(const LLSD &content);
+        Handler(const Request::ptr_t &request):
+            LLMediaDataClient::Handler(request)
+        {}
+
+    protected:
+        virtual void onSuccess(LLCore::HttpResponse * response, const LLSD &content);
     };
+
 private:
 	// The Get/Update data client needs a second queue to avoid object updates starving load-ins.
 	void swapCurrentQueue();
@@ -354,7 +377,7 @@ private:
 	bool mCurrentQueueIsTheSortedQueue;
 
 	// Comparator for sorting
-	static bool compareRequestScores(const request_ptr_t &o1, const request_ptr_t &o2);
+	static bool compareRequestScores(const Request::ptr_t &o1, const Request::ptr_t &o2);
 	void sortQueue();
 };
 
@@ -362,8 +385,9 @@ private:
 // MediaDataClient specific for the ObjectMediaNavigate cap
 class LLObjectMediaNavigateClient : public LLMediaDataClient
 {
-public:
+protected:
     LOG_CLASS(LLObjectMediaNavigateClient);
+public:
 	// NOTE: from llmediaservice.h
 	static const int ERROR_PERMISSION_DENIED_CODE = 8002;
 	
@@ -378,14 +402,14 @@ public:
     void navigate(LLMediaDataClientObject *object, U8 texture_index, const std::string &url);
 
 	// Puts the request into the appropriate queue
-	virtual void enqueue(Request*);
+    virtual void enqueue(Request::ptr_t);
 
 	class RequestNavigate: public Request
 	{
 	public:
 		RequestNavigate(LLMediaDataClientObject *obj, LLMediaDataClient *mdc, U8 texture_index, const std::string &url);
 		/*virtual*/ LLSD getPayload() const;
-		/*virtual*/ Responder *createResponder();
+        /*virtual*/ LLCore::HttpHandler::ptr_t createHandler();
 		/*virtual*/ std::string getURL() { return mURL; }
 	private:
 		std::string mURL;
@@ -395,13 +419,18 @@ protected:
 	// Subclasses must override to return a cap name
 	virtual const char *getCapabilityName() const;
 
-    class Responder : public LLMediaDataClient::Responder
+    class Handler : public LLMediaDataClient::Handler
     {
+        LOG_CLASS(Handler);
     public:
-        Responder(const request_ptr_t &request)
-            : LLMediaDataClient::Responder(request) {}
-		virtual void errorWithContent(U32 status, const std::string& reason, const LLSD& content);
-        virtual void result(const LLSD &content);
+        Handler(const Request::ptr_t &request):
+            LLMediaDataClient::Handler(request)
+        {}
+
+    protected:
+        virtual void onSuccess(LLCore::HttpResponse * response, const LLSD &content);
+        virtual void onFailure(LLCore::HttpResponse * response, LLCore::HttpStatus status);
+
     private:
         void mediaNavigateBounceBack();
     };

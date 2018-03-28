@@ -48,7 +48,7 @@
 #include "llsidetraypanelcontainer.h"
 #include "llviewercontrol.h"
 
-static LLRegisterPanelClassWrapper<LLPanelBlockedList> t_panel_blocked_list("panel_block_list_sidetray");
+static LLPanelInjector<LLPanelBlockedList> t_panel_blocked_list("panel_block_list_sidetray");
 
 //
 // Constants
@@ -90,7 +90,7 @@ BOOL LLPanelBlockedList::postBuild()
 		mBlockedList->sortByType();
 		break;
 	default:
-		llwarns << "Unrecognized sort order for blocked list" << llendl;
+		LL_WARNS() << "Unrecognized sort order for blocked list" << LL_ENDL;
 		break;
 	}
 
@@ -123,6 +123,7 @@ void LLPanelBlockedList::onOpen(const LLSD& key)
 
 void LLPanelBlockedList::selectBlocked(const LLUUID& mute_id)
 {
+	mBlockedList->resetSelection();
 	mBlockedList->selectItemByUUID(mute_id);
 }
 
@@ -141,6 +142,9 @@ void LLPanelBlockedList::updateButtons()
 	bool hasSelected = NULL != mBlockedList->getSelectedItem();
 	getChildView("unblock_btn")->setEnabled(hasSelected);
 	getChildView("blocked_gear_btn")->setEnabled(hasSelected);
+
+	getChild<LLUICtrl>("block_limit")->setTextArg("[COUNT]", llformat("%d", mBlockedList->getMuteListSize()));
+	getChild<LLUICtrl>("block_limit")->setTextArg("[LIMIT]", llformat("%d", gSavedSettings.getS32("MuteListLimit")));
 }
 
 void LLPanelBlockedList::unblockItem()

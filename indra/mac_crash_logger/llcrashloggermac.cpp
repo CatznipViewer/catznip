@@ -64,17 +64,12 @@ void LLCrashLoggerMac::gatherPlatformSpecificFiles()
 {
 }
 
-bool LLCrashLoggerMac::mainLoop()
+bool LLCrashLoggerMac::frame()
 {
+
     if (mCrashBehavior == CRASH_BEHAVIOR_ALWAYS_SEND)
 	{
 		gSendReport = true;
-	}
-	
-	if(gRememberChoice)
-	{
-		if(gSendReport) saveCrashBehaviorSetting(CRASH_BEHAVIOR_ALWAYS_SEND);
-		else saveCrashBehaviorSetting(CRASH_BEHAVIOR_NEVER_SEND);
 	}
 	
 	if(gSendReport)
@@ -82,6 +77,8 @@ bool LLCrashLoggerMac::mainLoop()
 		setUserText(gUserNotes);
 		sendCrashLogs();
 	}	
+
+	LL_INFOS() << "Sending of logs complete" << LL_ENDL;
 		
 	return true;
 }
@@ -89,5 +86,6 @@ bool LLCrashLoggerMac::mainLoop()
 bool LLCrashLoggerMac::cleanup()
 {
 	commonCleanup();
+    mKeyMaster.releaseMaster();
 	return true;
 }

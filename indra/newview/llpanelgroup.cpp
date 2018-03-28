@@ -49,13 +49,14 @@
 
 #include "llpanelgroupnotices.h"
 #include "llpanelgroupgeneral.h"
+#include "llpanelgrouproles.h"
 
 #include "llaccordionctrltab.h"
 #include "llaccordionctrl.h"
 
 #include "lltrans.h"
 
-static LLRegisterPanelClassWrapper<LLPanelGroup> t_panel_group("panel_group_info_sidetray");
+static LLPanelInjector<LLPanelGroup> t_panel_group("panel_group_info_sidetray");
 
 
 
@@ -176,11 +177,13 @@ BOOL LLPanelGroup::postBuild()
 	LLPanelGroupTab* panel_roles = findChild<LLPanelGroupTab>("group_roles_tab_panel");
 	LLPanelGroupTab* panel_notices = findChild<LLPanelGroupTab>("group_notices_tab_panel");
 	LLPanelGroupTab* panel_land = findChild<LLPanelGroupTab>("group_land_tab_panel");
+	LLPanelGroupTab* panel_experiences = findChild<LLPanelGroupTab>("group_experiences_tab_panel");
 
 	if(panel_general)	mTabs.push_back(panel_general);
 	if(panel_roles)		mTabs.push_back(panel_roles);
 	if(panel_notices)	mTabs.push_back(panel_notices);
 	if(panel_land)		mTabs.push_back(panel_land);
+	if(panel_experiences)		mTabs.push_back(panel_experiences);
 
 	if(panel_general)
 	{
@@ -275,6 +278,7 @@ void LLPanelGroup::onBtnApply(void* user_data)
 {
 	LLPanelGroup* self = static_cast<LLPanelGroup*>(user_data);
 	self->apply();
+	self->refreshData();
 }
 
 void LLPanelGroup::onBtnGroupCallClicked(void* user_data)
@@ -291,7 +295,7 @@ void LLPanelGroup::onBtnGroupChatClicked(void* user_data)
 
 void LLPanelGroup::onBtnJoin()
 {
-	lldebugs << "joining group: " << mID << llendl;
+	LL_DEBUGS() << "joining group: " << mID << LL_ENDL;
 	LLGroupActions::join(mID);
 }
 
@@ -329,11 +333,12 @@ void LLPanelGroup::update(LLGroupChange gc)
 	if(gdatap)
 	{
 		std::string group_name =  gdatap->mName.empty() ? LLTrans::getString("LoadingData") : gdatap->mName;
-		childSetValue("group_name", group_name);
-		childSetToolTip("group_name",group_name);
+		LLUICtrl* group_name_ctrl = getChild<LLUICtrl>("group_name");
+		group_name_ctrl->setValue(group_name);
+		group_name_ctrl->setToolTip(group_name);
 		
 		LLGroupData agent_gdatap;
-		bool is_member = gAgent.getGroupData(mID,agent_gdatap) || gAgent.isGodlike();
+		bool is_member = gAgent.getGroupData(mID,agent_gdatap) || gAgent.isGodlikeWithoutAdminMenuFakery();
 		bool join_btn_visible = !is_member && gdatap->mOpenEnrollment;
 		
 		mButtonJoin->setVisible(join_btn_visible);
@@ -376,8 +381,9 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 	if(gdatap)
 	{
 		std::string group_name =  gdatap->mName.empty() ? LLTrans::getString("LoadingData") : gdatap->mName;
-		childSetValue("group_name", group_name);
-		childSetToolTip("group_name",group_name);
+		LLUICtrl* group_name_ctrl = getChild<LLUICtrl>("group_name");
+		group_name_ctrl->setValue(group_name);
+		group_name_ctrl->setToolTip(group_name);
 	}
 
 	LLButton* button_apply = findChild<LLButton>("btn_apply");
@@ -414,6 +420,7 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 	LLAccordionCtrlTab* tab_roles = getChild<LLAccordionCtrlTab>("group_roles_tab");
 	LLAccordionCtrlTab* tab_notices = getChild<LLAccordionCtrlTab>("group_notices_tab");
 	LLAccordionCtrlTab* tab_land = getChild<LLAccordionCtrlTab>("group_land_tab");
+	LLAccordionCtrlTab* tab_experiences = getChild<LLAccordionCtrlTab>("group_experiences_tab");
 
 	if(mButtonJoin)
 		mButtonJoin->setVisible(false);
@@ -430,10 +437,13 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 			tab_notices->changeOpenClose(tab_notices->getDisplayChildren());
 		if(tab_land->getDisplayChildren())
 			tab_land->changeOpenClose(tab_land->getDisplayChildren());
+		if(tab_experiences->getDisplayChildren())
+			tab_experiences->changeOpenClose(tab_land->getDisplayChildren());
 
 		tab_roles->setVisible(false);
 		tab_notices->setVisible(false);
 		tab_land->setVisible(false);
+		tab_experiences->setVisible(false);
 
 		getChild<LLUICtrl>("group_name")->setVisible(false);
 		getChild<LLUICtrl>("group_name_editor")->setVisible(true);
@@ -455,14 +465,17 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 				tab_notices->changeOpenClose(tab_notices->getDisplayChildren());
 			if(tab_land->getDisplayChildren())
 				tab_land->changeOpenClose(tab_land->getDisplayChildren());
+			if(tab_experiences->getDisplayChildren())
+				tab_experiences->changeOpenClose(tab_land->getDisplayChildren());
 		}
 
 		LLGroupData agent_gdatap;
-		bool is_member = gAgent.getGroupData(mID,agent_gdatap) || gAgent.isGodlike();
+		bool is_member = gAgent.getGroupData(mID,agent_gdatap) || gAgent.isGodlikeWithoutAdminMenuFakery();
 		
 		tab_roles->setVisible(is_member);
 		tab_notices->setVisible(is_member);
 		tab_land->setVisible(is_member);
+		tab_experiences->setVisible(is_member);
 
 		getChild<LLUICtrl>("group_name")->setVisible(true);
 		getChild<LLUICtrl>("group_name_editor")->setVisible(false);
@@ -495,6 +508,22 @@ bool LLPanelGroup::apply(LLPanelGroupTab* tab)
 	{
 		//we skip refreshing group after ew manually apply changes since its very annoying
 		//for those who are editing group
+
+		LLPanelGroupRoles * roles_tab = dynamic_cast<LLPanelGroupRoles*>(tab);
+		if (roles_tab)
+		{
+			LLGroupMgr* gmgrp = LLGroupMgr::getInstance();
+			LLGroupMgrGroupData* gdatap = gmgrp->getGroupData(roles_tab->getGroupID());
+
+			// allow refresh only for one specific case:
+			// there is only one member in group and it is not owner
+			// it's a wrong situation and need refresh panels from server
+			if (gdatap && gdatap->isSingleMemberNotOwner())
+			{
+				return true;
+			}
+		}
+
 		mSkipRefresh = TRUE;
 		return true;
 	}
@@ -514,6 +543,7 @@ bool LLPanelGroup::apply()
 		&& apply(findChild<LLPanelGroupTab>("group_roles_tab_panel"))
 		&& apply(findChild<LLPanelGroupTab>("group_notices_tab_panel"))
 		&& apply(findChild<LLPanelGroupTab>("group_land_tab_panel"))
+		&& apply(findChild<LLPanelGroupTab>("group_experiences_tab_panel"))
 		;
 }
 

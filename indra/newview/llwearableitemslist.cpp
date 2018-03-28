@@ -35,6 +35,7 @@
 #include "llappearancemgr.h"
 #include "llinventoryfunctions.h"
 #include "llinventoryicon.h"
+#include "llgesturemgr.h"
 #include "lltransutil.h"
 #include "llviewerattachmenu.h"
 #include "llvoavatarself.h"
@@ -55,7 +56,8 @@ bool LLFindOutfitItems::operator()(LLInventoryCategory* cat,
 	{
 		if((item->getType() == LLAssetType::AT_CLOTHING)
 		   || (item->getType() == LLAssetType::AT_BODYPART)
-		   || (item->getType() == LLAssetType::AT_OBJECT))
+		   || (item->getType() == LLAssetType::AT_OBJECT)
+		   || (item->getType() == LLAssetType::AT_GESTURE))
 		{
 			return TRUE;
 		}
@@ -124,7 +126,7 @@ void LLPanelWearableOutfitItem::updateItem(const std::string& name,
 	// We don't use get_is_item_worn() here because this update is triggered by
 	// an inventory observer upon link in COF beind added or removed so actual
 	// worn status of a linked item may still remain unchanged.
-	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkInCOF(mInventoryItemUUID))
+	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkedInCOF(mInventoryItemUUID))
 	{
 		search_label += LLTrans::getString("worn");
 		item_state = IS_WORN;
@@ -364,8 +366,14 @@ void LLPanelAttachmentListItem::updateItem(const std::string& name,
 	LLViewerInventoryItem* inv_item = getItem();
 	if (inv_item && isAgentAvatarValid() && gAgentAvatarp->isWearingAttachment(inv_item->getLinkedUUID()))
 	{
-		std::string joint = LLTrans::getString(gAgentAvatarp->getAttachedPointName(inv_item->getLinkedUUID()));
-		title_joint =  title_joint + " (" + joint + ")";
+		std::string found_name;
+		bool found = gAgentAvatarp->getAttachedPointName(inv_item->getLinkedUUID(),found_name);
+		std::string trans_name = LLTrans::getString(found_name);
+		if (!found)
+		{
+			LL_WARNS() << "invalid attachment joint, err " << found_name << LL_ENDL;
+		}
+		title_joint =  title_joint + " (" + trans_name + ")";
 	}
 
 	LLPanelInventoryListItemBase::updateItem(title_joint, item_state);
@@ -485,6 +493,7 @@ LLWearableItemTypeNameComparator::LLWearableItemTypeNameComparator()
 	mWearableOrder[LLAssetType::AT_CLOTHING] = LLWearableTypeOrder(ORDER_RANK_1, false, false);
 	mWearableOrder[LLAssetType::AT_OBJECT]   = LLWearableTypeOrder(ORDER_RANK_2, true, true);
 	mWearableOrder[LLAssetType::AT_BODYPART] = LLWearableTypeOrder(ORDER_RANK_3, false, true);
+	mWearableOrder[LLAssetType::AT_GESTURE] = LLWearableTypeOrder(ORDER_RANK_4, true, false);
 }
 
 void LLWearableItemTypeNameComparator::setOrder(LLAssetType::EType items_of_type,  LLWearableItemTypeNameComparator::ETypeListOrder order_priority, bool sort_asset_items_by_name, bool sort_wearable_items_by_name)
@@ -558,7 +567,7 @@ LLWearableItemTypeNameComparator::ETypeListOrder LLWearableItemTypeNameComparato
 
 	if(const_it == mWearableOrder.end())
 	{
-		llwarns<<"Absent information about order rang of items of "<<LLAssetType::getDesc(item_type)<<" type"<<llendl;
+		LL_WARNS()<<"Absent information about order rang of items of "<<LLAssetType::getDesc(item_type)<<" type"<<LL_ENDL;
 		return ORDER_RANK_UNKNOWN;
 	}
 
@@ -572,7 +581,7 @@ bool LLWearableItemTypeNameComparator::sortAssetTypeByName(LLAssetType::EType it
 
 	if(const_it == mWearableOrder.end())
 	{
-		llwarns<<"Absent information about sorting items of "<<LLAssetType::getDesc(item_type)<<" type"<<llendl;
+		LL_WARNS()<<"Absent information about sorting items of "<<LLAssetType::getDesc(item_type)<<" type"<<LL_ENDL;
 		return true;
 	}
 
@@ -588,7 +597,7 @@ bool LLWearableItemTypeNameComparator::sortWearableTypeByName(LLAssetType::EType
 
 	if(const_it == mWearableOrder.end())
 	{
-		llwarns<<"Absent information about sorting items of "<<LLAssetType::getDesc(item_type)<<" type"<<llendl;
+		LL_WARNS()<<"Absent information about sorting items of "<<LLAssetType::getDesc(item_type)<<" type"<<LL_ENDL;
 		return true;
 }
 
@@ -636,7 +645,7 @@ LLWearableItemsList::LLWearableItemsList(const LLWearableItemsList::Params& p)
 		setRightMouseDownCallback(boost::bind(&LLWearableItemsList::onRightClick, this, _2, _3));
 	}
 	mWornIndicationEnabled = p.worn_indication_enabled;
-	setNoItemsCommentText(LLTrans::getString("LoadingData"));
+	setNoItemsCommentText(LLTrans::getString("NoneFound"));
 }
 
 // virtual
@@ -644,24 +653,16 @@ LLWearableItemsList::~LLWearableItemsList()
 {}
 
 // virtual
-void LLWearableItemsList::addNewItem(LLViewerInventoryItem* item, bool rearrange /*= true*/)
+LLPanel* LLWearableItemsList::createNewItem(LLViewerInventoryItem* item)
 {
-	if (!item)
-	{
-		llwarns << "No inventory item. Couldn't create flat list item." << llendl;
-		llassert(item != NULL);
-	}
+    if (!item)
+    {
+        LL_WARNS() << "No inventory item. Couldn't create flat list item." << LL_ENDL;
+        llassert(item != NULL);
+        return NULL;
+    }
 
-	LLPanelWearableOutfitItem *list_item = LLPanelWearableOutfitItem::create(item, mWornIndicationEnabled);
-	if (!list_item)
-		return;
-
-	bool is_item_added = addItem(list_item, item->getUUID(), ADD_BOTTOM, rearrange);
-	if (!is_item_added)
-	{
-		llwarns << "Couldn't add flat list item." << llendl;
-		llassert(is_item_added);
-	}
+    return LLPanelWearableOutfitItem::create(item, mWornIndicationEnabled);
 }
 
 void LLWearableItemsList::updateList(const LLUUID& category_id)
@@ -825,7 +826,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 {
 	if (!menu)
 	{
-		llwarns << "Invalid menu" << llendl;
+		LL_WARNS() << "Invalid menu" << LL_ENDL;
 		return;
 	}
 
@@ -846,7 +847,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 
 		if (!item)
 		{
-			llwarns << "Invalid item" << llendl;
+			LL_WARNS() << "Invalid item" << LL_ENDL;
 			// *NOTE: the logic below may not work in this case
 			continue;
 		}
@@ -888,13 +889,13 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	setMenuItemVisible(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0 && can_be_worn);
 	setMenuItemEnabled(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0);
 	setMenuItemVisible(menu, "wear_add",			wear_add_visible);
-	setMenuItemEnabled(menu, "wear_add",			canAddWearables(ids));
+	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
 	setMenuItemVisible(menu, "wear_replace",		n_worn == 0 && n_already_worn != 0 && can_be_worn);
 	//visible only when one item selected and this item is worn
 	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART) && n_worn == n_items && n_worn == 1);
 	setMenuItemEnabled(menu, "edit",				n_editable == 1 && n_worn == 1 && n_items == 1);
 	setMenuItemVisible(menu, "create_new",			mask & (MASK_CLOTHING|MASK_BODYPART) && n_items == 1);
-	setMenuItemEnabled(menu, "create_new",			canAddWearables(ids));
+	setMenuItemEnabled(menu, "create_new",			LLAppearanceMgr::instance().canAddWearables(ids));
 	setMenuItemVisible(menu, "show_original",		!standalone);
 	setMenuItemEnabled(menu, "show_original",		n_items == 1 && n_links == n_items);
 	setMenuItemVisible(menu, "take_off",			mask == MASK_CLOTHING && n_worn == n_items);
@@ -919,7 +920,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 
 	if (mask & MASK_UNKNOWN)
 	{
-		llwarns << "Non-wearable items passed." << llendl;
+		LL_WARNS() << "Non-wearable items passed." << LL_ENDL;
 	}
 
 	U32 num_visible_items = 0;
@@ -983,6 +984,10 @@ void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType 
 	{
 		mask |= MASK_ATTACHMENT;
 	}
+	else if (at == LLAssetType::AT_GESTURE)
+	{
+		mask |= MASK_GESTURE;
+	}
 	else
 	{
 		mask |= MASK_UNKNOWN;
@@ -996,67 +1001,6 @@ void LLWearableItemsList::ContextMenu::createNewWearable(const LLUUID& item_id)
 	if (!item || !item->isWearableType()) return;
 
 	LLAgentWearables::createWearable(item->getWearableType(), true);
-}
-
-// Returns true if all the given objects and clothes can be added.
-// static
-bool LLWearableItemsList::ContextMenu::canAddWearables(const uuid_vec_t& item_ids)
-{
-	// TODO: investigate wearables may not be loaded at this point EXT-8231
-
-	U32 n_objects = 0;
-	boost::unordered_map<LLWearableType::EType, U32> clothes_by_type;
-
-	// Count given clothes (by wearable type) and objects.
-	for (uuid_vec_t::const_iterator it = item_ids.begin(); it != item_ids.end(); ++it)
-	{
-		LLViewerInventoryItem* item = gInventory.getItem(*it);
-		if (!item)
-		{
-			return false;
-		}
-
-		if (item->getType() == LLAssetType::AT_OBJECT)
-		{
-			++n_objects;
-		}
-		else if (item->getType() == LLAssetType::AT_CLOTHING)
-		{
-			++clothes_by_type[item->getWearableType()];
-		}
-		else
-		{
-			llwarns << "Unexpected wearable type" << llendl;
-			return false;
-		}
-	}
-
-	// Check whether we can add all the objects.
-	if (!isAgentAvatarValid() || !gAgentAvatarp->canAttachMoreObjects(n_objects))
-	{
-		return false;
-	}
-
-	// Check whether we can add all the clothes.
-	boost::unordered_map<LLWearableType::EType, U32>::const_iterator m_it;
-	for (m_it = clothes_by_type.begin(); m_it != clothes_by_type.end(); ++m_it)
-	{
-		LLWearableType::EType w_type	= m_it->first;
-		U32 n_clothes					= m_it->second;
-
-		U32 wearable_count = gAgentWearables.getWearableCount(w_type);
-		if ((wearable_count > 0) && !LLWearableType::getAllowMultiwear(w_type))
-		{
-			return false;
-		}
-		if ((wearable_count + n_clothes) > LLAgentWearables::MAX_CLOTHING_PER_TYPE)
-		{
-			return false;
-		}
-
-	}
-
-	return true;
 }
 
 // EOF

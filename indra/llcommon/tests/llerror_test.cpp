@@ -38,9 +38,12 @@
 
 namespace
 {
+#ifdef __clang__
+#   pragma clang diagnostic ignored "-Wunused-function"
+#endif
 	void test_that_error_h_includes_enough_things_to_compile_a_message()
 	{
-		llinfos << "!" << llendl;
+		LL_INFOS() << "!" << LL_ENDL;
 	}
 }
 
@@ -55,10 +58,10 @@ namespace tut
 	class TestRecorder : public LLError::Recorder
 	{
 	public:
-		TestRecorder() : mWantsTime(false) { }
-		~TestRecorder() { LLError::removeRecorder(this); }
+		TestRecorder() { mWantsTime = false; }
+		virtual ~TestRecorder() {  }
 
-		void recordMessage(LLError::ELevel level,
+		virtual void recordMessage(LLError::ELevel level,
 						   const std::string& message)
 		{
 			mMessages.push_back(message);
@@ -68,7 +71,6 @@ namespace tut
 		void clearMessages()		{ mMessages.clear(); }
 
 		void setWantsTime(bool t)	{ mWantsTime = t; }
-		bool wantsTime()			{ return mWantsTime; }
 
 		std::string message(int n)
 		{
@@ -82,21 +84,15 @@ namespace tut
 	private:
 		typedef std::vector<std::string> MessageVector;
 		MessageVector mMessages;
-
-		bool mWantsTime;
 	};
 
 	struct ErrorTestData
 	{
-		// addRecorder() expects to be able to later delete the passed
-		// Recorder*. Even though removeRecorder() reclaims ownership, passing
-		// a pointer to a data member rather than a heap Recorder subclass
-		// instance would just be Wrong.
-		TestRecorder* mRecorder;
-		LLError::Settings* mPriorErrorSettings;
+		LLError::RecorderPtr mRecorder;
+		LLError::SettingsStoragePtr mPriorErrorSettings;
 
 		ErrorTestData():
-			mRecorder(new TestRecorder)
+			mRecorder(new TestRecorder())
 		{
 			fatalWasCalled = false;
 
@@ -109,13 +105,32 @@ namespace tut
 		~ErrorTestData()
 		{
 			LLError::removeRecorder(mRecorder);
-			delete mRecorder;
 			LLError::restoreSettings(mPriorErrorSettings);
+		}
+
+		int countMessages()
+		{
+			return boost::dynamic_pointer_cast<TestRecorder>(mRecorder)->countMessages();
+		}
+
+		void clearMessages()
+		{
+			boost::dynamic_pointer_cast<TestRecorder>(mRecorder)->clearMessages();
+		}
+
+		void setWantsTime(bool t)
+		{
+			boost::dynamic_pointer_cast<TestRecorder>(mRecorder)->setWantsTime(t);
+		}
+
+		std::string message(int n)
+		{
+			return boost::dynamic_pointer_cast<TestRecorder>(mRecorder)->message(n);
 		}
 
 		void ensure_message_count(int expectedCount)
 		{
-			ensure_equals("message count", mRecorder->countMessages(), expectedCount);
+			ensure_equals("message count", countMessages(), expectedCount);
 		}
 
 		void ensure_message_contains(int n, const std::string& expectedText)
@@ -123,7 +138,7 @@ namespace tut
 			std::ostringstream test_name;
 			test_name << "testing message " << n;
 
-			ensure_contains(test_name.str(), mRecorder->message(n), expectedText);
+			ensure_contains(test_name.str(), message(n), expectedText);
 		}
 
 		void ensure_message_does_not_contain(int n, const std::string& expectedText)
@@ -131,7 +146,7 @@ namespace tut
 			std::ostringstream test_name;
 			test_name << "testing message " << n;
 
-			ensure_does_not_contain(test_name.str(), mRecorder->message(n), expectedText);
+			ensure_does_not_contain(test_name.str(), message(n), expectedText);
 		}
 	};
 
@@ -144,8 +159,8 @@ namespace tut
 	void ErrorTestObject::test<1>()
 		// basic test of output
 	{
-		llinfos << "test" << llendl;
-		llinfos << "bob" << llendl;
+		LL_INFOS() << "test" << LL_ENDL;
+		LL_INFOS() << "bob" << LL_ENDL;
 
 		ensure_message_contains(0, "test");
 		ensure_message_contains(1, "bob");
@@ -156,11 +171,11 @@ namespace
 {
 	void writeSome()
 	{
-		lldebugs << "one" << llendl;
-		llinfos << "two" << llendl;
-		llwarns << "three" << llendl;
-		llerrs << "four" << llendl;
-			// fatal messages write out and addtional "error" message
+		LL_DEBUGS() << "one" << LL_ENDL;
+		LL_INFOS() << "two" << LL_ENDL;
+		LL_WARNS() << "three" << LL_ENDL;
+		// fatal messages write out an additional "error" message
+		LL_ERRS() << "four" << LL_ENDL;
 	}
 };
 
@@ -222,8 +237,21 @@ namespace tut
 	void ErrorTestObject::test<4>()
 		// file abbreviation
 	{
-		std::string thisFile = __FILE__;
-		std::string abbreviateFile = LLError::abbreviateFile(thisFile);
+		std::string prev, abbreviateFile = __FILE__;
+        do
+        {
+            prev = abbreviateFile;
+            abbreviateFile = LLError::abbreviateFile(abbreviateFile);
+            // __FILE__ is assumed to end with
+            // indra/llcommon/tests/llerror_test.cpp. This test used to call
+            // abbreviateFile() exactly once, then check below whether it
+            // still contained the string 'indra'. That fails if the FIRST
+            // part of the pathname also contains indra! Certain developer
+            // machine images put local directory trees under
+            // /ngi-persist/indra, which is where we observe the problem. So
+            // now, keep calling abbreviateFile() until it returns its
+            // argument unchanged, THEN check.
+        } while (abbreviateFile != prev);
 
 		ensure_ends_with("file name abbreviation",
 			abbreviateFile,
@@ -259,19 +287,20 @@ namespace
 
 	std::string writeReturningLocation()
 	{
-		llinfos << "apple" << llendl;	int this_line = __LINE__;
+		LL_INFOS() << "apple" << LL_ENDL;	int this_line = __LINE__;
 		return locationString(this_line);
 	}
 
-	std::string writeReturningLocationAndFunction()
+	void writeReturningLocationAndFunction(std::string& location, std::string& function)
 	{
-		llinfos << "apple" << llendl;	int this_line = __LINE__;
-		return locationString(this_line) + __FUNCTION__;
+		LL_INFOS() << "apple" << LL_ENDL;	int this_line = __LINE__;
+		location = locationString(this_line);
+		function = __FUNCTION__;
 	}
 
 	std::string errorReturningLocation()
 	{
-		llerrs << "die" << llendl;	int this_line = __LINE__;
+		LL_ERRS() << "die" << LL_ENDL;	int this_line = __LINE__;
 		return locationString(this_line);
 	}
 }
@@ -306,13 +335,13 @@ namespace tut
 
 std::string logFromGlobal(bool id)
 {
-	llinfos << (id ? "logFromGlobal: " : "") << "hi" << llendl;
+	LL_INFOS() << (id ? "logFromGlobal: " : "") << "hi" << LL_ENDL;
 	return "logFromGlobal";
 }
 
 static std::string logFromStatic(bool id)
 {
-	llinfos << (id ? "logFromStatic: " : "") << "hi" << llendl;
+	LL_INFOS() << (id ? "logFromStatic: " : "") << "hi" << LL_ENDL;
 	return "logFromStatic";
 }
 
@@ -320,7 +349,7 @@ namespace
 {
 	std::string logFromAnon(bool id)
 	{
-		llinfos << (id ? "logFromAnon: " : "") << "hi" << llendl;
+		LL_INFOS() << (id ? "logFromAnon: " : "") << "hi" << LL_ENDL;
 		return "logFromAnon";
 	}
 }
@@ -328,7 +357,7 @@ namespace
 namespace Foo {
 	std::string logFromNamespace(bool id)
 	{
-		llinfos << (id ? "Foo::logFromNamespace: " : "") << "hi" << llendl;
+		LL_INFOS() << (id ? "Foo::logFromNamespace: " : "") << "hi" << LL_ENDL;
 		//return "Foo::logFromNamespace";
 			// there is no standard way to get the namespace name, hence
 			// we won't be testing for it
@@ -342,12 +371,12 @@ namespace
 	public:
 		std::string logFromMember(bool id)
 		{
-			llinfos << (id ? "ClassWithNoLogType::logFromMember: " : "") << "hi" << llendl;
+			LL_INFOS() << (id ? "ClassWithNoLogType::logFromMember: " : "") << "hi" << LL_ENDL;
 			return "ClassWithNoLogType::logFromMember";
 		}
 		static std::string logFromStatic(bool id)
 		{
-			llinfos << (id ? "ClassWithNoLogType::logFromStatic: " : "") << "hi" << llendl;
+			LL_INFOS() << (id ? "ClassWithNoLogType::logFromStatic: " : "") << "hi" << LL_ENDL;
 			return "ClassWithNoLogType::logFromStatic";
 		}
 	};
@@ -357,19 +386,17 @@ namespace
 	public:
 		std::string logFromMember(bool id)
 		{
-			llinfos << (id ? "ClassWithLogType::logFromMember: " : "") << "hi" << llendl;
+			LL_INFOS() << (id ? "ClassWithLogType::logFromMember: " : "") << "hi" << LL_ENDL;
 			return "ClassWithLogType::logFromMember";
 		}
 		static std::string logFromStatic(bool id)
 		{
-			llinfos << (id ? "ClassWithLogType::logFromStatic: " : "") << "hi" << llendl;
+			LL_INFOS() << (id ? "ClassWithLogType::logFromStatic: " : "") << "hi" << LL_ENDL;
 			return "ClassWithLogType::logFromStatic";
 		}
 	};
 
 	std::string logFromNamespace(bool id) { return Foo::logFromNamespace(id); }
-	std::string logFromClassWithNoLogTypeMember(bool id) { ClassWithNoLogType c; return c.logFromMember(id); }
-	std::string logFromClassWithNoLogTypeStatic(bool id) { return ClassWithNoLogType::logFromStatic(id); }
 	std::string logFromClassWithLogTypeMember(bool id) { ClassWithLogType c; return c.logFromMember(id); }
 	std::string logFromClassWithLogTypeStatic(bool id) { return ClassWithLogType::logFromStatic(id); }
 
@@ -380,22 +407,22 @@ namespace
 		if (n1 == std::string::npos)
 		{
 			std::stringstream ss;
-			ss << message << ": " << "expected to find a copy of " << expected
-				<< " in actual " << actual;
+			ss << message << ": " << "expected to find a copy of '" << expected
+			   << "' in actual '" << actual << "'";
 			throw tut::failure(ss.str().c_str());
 		}
 	}
 
 	typedef std::string (*LogFromFunction)(bool);
-	void testLogName(tut::TestRecorder* recorder, LogFromFunction f,
+	void testLogName(LLError::RecorderPtr recorder, LogFromFunction f,
 		const std::string& class_name = "")
 	{
-		recorder->clearMessages();
+		boost::dynamic_pointer_cast<tut::TestRecorder>(recorder)->clearMessages();
 		std::string name = f(false);
 		f(true);
 
-		std::string messageWithoutName = recorder->message(0);
-		std::string messageWithName = recorder->message(1);
+		std::string messageWithoutName = boost::dynamic_pointer_cast<tut::TestRecorder>(recorder)->message(0);
+		std::string messageWithName = boost::dynamic_pointer_cast<tut::TestRecorder>(recorder)->message(1);
 
 		ensure_has(name + " logged without name",
 			messageWithoutName, name);
@@ -422,9 +449,6 @@ namespace tut
 		testLogName(mRecorder, logFromStatic);
 		testLogName(mRecorder, logFromAnon);
 		testLogName(mRecorder, logFromNamespace);
-		//testLogName(mRecorder, logFromClassWithNoLogTypeMember, "ClassWithNoLogType");
-		//testLogName(mRecorder, logFromClassWithNoLogTypeStatic, "ClassWithNoLogType");
-			// XXX: figure out what the exepcted response is for these
 		testLogName(mRecorder, logFromClassWithLogTypeMember, "ClassWithLogType");
 		testLogName(mRecorder, logFromClassWithLogTypeStatic, "ClassWithLogType");
 	}
@@ -434,19 +458,14 @@ namespace
 {
 	std::string innerLogger()
 	{
-		llinfos << "inside" << llendl;
+		LL_INFOS() << "inside" << LL_ENDL;
 		return "moo";
 	}
 
 	std::string outerLogger()
 	{
-		llinfos << "outside(" << innerLogger() << ")" << llendl;
+		LL_INFOS() << "outside(" << innerLogger() << ")" << LL_ENDL;
 		return "bar";
-	}
-
-	void uberLogger()
-	{
-		llinfos << "uber(" << outerLogger() << "," << innerLogger() << ")" << llendl;
 	}
 
 	class LogWhileLogging
@@ -454,7 +473,7 @@ namespace
 	public:
 		void print(std::ostream& out) const
 		{
-			llinfos << "logging" << llendl;
+			LL_INFOS() << "logging" << LL_ENDL;
 			out << "baz";
 		}
 	};
@@ -465,7 +484,7 @@ namespace
 	void metaLogger()
 	{
 		LogWhileLogging l;
-		llinfos << "meta(" << l << ")" << llendl;
+		LL_INFOS() << "meta(" << l << ")" << LL_ENDL;
 	}
 
 }
@@ -481,21 +500,14 @@ namespace tut
 		ensure_message_contains(1, "outside(moo)");
 		ensure_message_count(2);
 
-		uberLogger();
-		ensure_message_contains(2, "inside");
-		ensure_message_contains(3, "inside");
-		ensure_message_contains(4, "outside(moo)");
-		ensure_message_contains(5, "uber(bar,moo)");
-		ensure_message_count(6);
-
 		metaLogger();
-		ensure_message_contains(6, "logging");
-		ensure_message_contains(7, "meta(baz)");
-		ensure_message_count(8);
+		ensure_message_contains(2, "logging");
+		ensure_message_contains(3, "meta(baz)");
+		ensure_message_count(4);
 	}
 
 	template<> template<>
-		// special handling of llerrs calls
+		// special handling of LL_ERRS() calls
 	void ErrorTestObject::test<8>()
 	{
 		LLError::setPrintLocation(false);
@@ -518,7 +530,7 @@ namespace
 
 	void ufoSighting()
 	{
-		llinfos << "ufo" << llendl;
+		LL_INFOS() << "ufo" << LL_ENDL;
 	}
 }
 
@@ -530,12 +542,12 @@ namespace tut
 	{
 		LLError::setTimeFunction(roswell);
 
-		mRecorder->setWantsTime(false);
+		setWantsTime(false);
 		ufoSighting();
 		ensure_message_contains(0, "ufo");
 		ensure_message_does_not_contain(0, roswell());
 
-		mRecorder->setWantsTime(true);
+		setWantsTime(true);
 		ufoSighting();
 		ensure_message_contains(1, "ufo");
 		ensure_message_contains(1, roswell());
@@ -547,42 +559,47 @@ namespace tut
 	{
 		LLError::setPrintLocation(true);
 		LLError::setTimeFunction(roswell);
-		mRecorder->setWantsTime(true);
-		std::string locationAndFunction = writeReturningLocationAndFunction();
+		setWantsTime(true);
+		std::string location,
+					function;
+		writeReturningLocationAndFunction(location, function);
 
-		ensure_equals("order is time type location function message",
-			mRecorder->message(0),
-			roswell() + " INFO: " + locationAndFunction + ": apple");
+		ensure_equals("order is time location type function message",
+			message(0),
+			roswell() + " INFO: " + location + function + ": apple");
 	}
 
 	template<> template<>
 		// multiple recorders
 	void ErrorTestObject::test<11>()
 	{
-		TestRecorder* altRecorder(new TestRecorder);
+		LLError::RecorderPtr altRecorder(new TestRecorder());
 		LLError::addRecorder(altRecorder);
 
-		llinfos << "boo" << llendl;
+		LL_INFOS() << "boo" << LL_ENDL;
 
 		ensure_message_contains(0, "boo");
-		ensure_equals("alt recorder count", altRecorder->countMessages(), 1);
-		ensure_contains("alt recorder message 0", altRecorder->message(0), "boo");
+		ensure_equals("alt recorder count", boost::dynamic_pointer_cast<TestRecorder>(altRecorder)->countMessages(), 1);
+		ensure_contains("alt recorder message 0", boost::dynamic_pointer_cast<TestRecorder>(altRecorder)->message(0), "boo");
 
 		LLError::setTimeFunction(roswell);
 
-		TestRecorder* anotherRecorder(new TestRecorder);
-		anotherRecorder->setWantsTime(true);
+		LLError::RecorderPtr anotherRecorder(new TestRecorder());
+		boost::dynamic_pointer_cast<TestRecorder>(anotherRecorder)->setWantsTime(true);
 		LLError::addRecorder(anotherRecorder);
 
-		llinfos << "baz" << llendl;
+		LL_INFOS() << "baz" << LL_ENDL;
 
 		std::string when = roswell();
 
 		ensure_message_does_not_contain(1, when);
-		ensure_equals("alt recorder count", altRecorder->countMessages(), 2);
-		ensure_does_not_contain("alt recorder message 1", altRecorder->message(1), when);
-		ensure_equals("another recorder count", anotherRecorder->countMessages(), 1);
-		ensure_contains("another recorder message 0", anotherRecorder->message(0), when);
+		ensure_equals("alt recorder count", boost::dynamic_pointer_cast<TestRecorder>(altRecorder)->countMessages(), 2);
+		ensure_does_not_contain("alt recorder message 1", boost::dynamic_pointer_cast<TestRecorder>(altRecorder)->message(1), when);
+		ensure_equals("another recorder count", boost::dynamic_pointer_cast<TestRecorder>(anotherRecorder)->countMessages(), 1);
+		ensure_contains("another recorder message 0", boost::dynamic_pointer_cast<TestRecorder>(anotherRecorder)->message(0), when);
+
+		LLError::removeRecorder(altRecorder);
+		LLError::removeRecorder(anotherRecorder);
 	}
 }
 
@@ -590,10 +607,10 @@ class TestAlpha
 {
 	LOG_CLASS(TestAlpha);
 public:
-	static void doDebug()	{ lldebugs << "add dice" << llendl; }
-	static void doInfo()	{ llinfos  << "any idea" << llendl; }
-	static void doWarn()	{ llwarns  << "aim west" << llendl; }
-	static void doError()	{ llerrs   << "ate eels" << llendl; }
+	static void doDebug()	{ LL_DEBUGS() << "add dice" << LL_ENDL; }
+	static void doInfo()	{ LL_INFOS()  << "any idea" << LL_ENDL; }
+	static void doWarn()	{ LL_WARNS()  << "aim west" << LL_ENDL; }
+	static void doError()	{ LL_ERRS()   << "ate eels" << LL_ENDL; }
 	static void doAll() { doDebug(); doInfo(); doWarn(); doError(); }
 };
 
@@ -601,10 +618,10 @@ class TestBeta
 {
 	LOG_CLASS(TestBeta);
 public:
-	static void doDebug()	{ lldebugs << "bed down" << llendl; }
-	static void doInfo()	{ llinfos  << "buy iron" << llendl; }
-	static void doWarn()	{ llwarns  << "bad word" << llendl; }
-	static void doError()	{ llerrs   << "big easy" << llendl; }
+	static void doDebug()	{ LL_DEBUGS() << "bed down" << LL_ENDL; }
+	static void doInfo()	{ LL_INFOS()  << "buy iron" << LL_ENDL; }
+	static void doWarn()	{ LL_WARNS()  << "bad word" << LL_ENDL; }
+	static void doError()	{ LL_ERRS()   << "big easy" << LL_ENDL; }
 	static void doAll() { doDebug(); doInfo(); doWarn(); doError(); }
 };
 

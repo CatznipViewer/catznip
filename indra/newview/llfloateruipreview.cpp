@@ -180,7 +180,6 @@ private:
 	LLButton*					mToggleOverlapButton;				// button to togle overlap panel/highlighting
 	LLComboBox*					mLanguageSelection;					// combo box for primary language selection
 	LLComboBox*					mLanguageSelection_2;				// combo box for secondary language selection
-	LLScrollContainer*			mOverlapScrollView;					// overlapping elements scroll container
 	S32							mLastDisplayedX, mLastDisplayedY;	// stored position of last floater so the new one opens up in the same place
 	std::string 				mDelim;								// the OS-specific delimiter character (/ or \) (*TODO: this shouldn't be needed, right?)
 
@@ -607,7 +606,7 @@ void LLFloaterUIPreview::onClose(bool app_quitting)
 // *TODO: this is currently unlocalized.  Add to alerts/notifications.xml, someday, maybe.
 void LLFloaterUIPreview::popupAndPrintWarning(const std::string& warning)
 {
-	llwarns << warning << llendl;
+	LL_WARNS() << warning << LL_ENDL;
 	LLSD args;
 	args["MESSAGE"] = warning;
 	LLNotificationsUtil::add("GenericAlert", args);
@@ -960,7 +959,7 @@ void LLFloaterUIPreview::onClickEditFloater()
 		std::string file_name = mFileList->getSelectedItemLabel(1);	// get the file name of the currently-selected floater
 		if (file_name.empty())					// if no item is selected
 		{
-			llwarns << "No file selected" << llendl;
+			LL_WARNS() << "No file selected" << LL_ENDL;
 			return;															// ignore click
 		}
 		file_path = getLocalizedDirectory() + file_name;
@@ -1020,12 +1019,11 @@ void LLFloaterUIPreview::onClickEditFloater()
 // Respond to button click to browse for an executable with which to edit XML files
 void LLFloaterUIPreview::onClickBrowseForEditor()
 {
-	// create load dialog box
-	LLFilePicker::ELoadFilter type = (LLFilePicker::ELoadFilter)((intptr_t)((void*)LLFilePicker::FFLOAD_ALL));	// nothing for *.exe so just use all
+	// Let the user choose an executable through the file picker dialog box
 	LLFilePicker& picker = LLFilePicker::instance();
-	if (!picker.getOpenFile(type))	// user cancelled -- do nothing
+    if (!picker.getOpenFile(LLFilePicker::FFLOAD_EXE))
 	{
-		return;
+		return; // user cancelled -- do nothing
 	}
 
 	// put the selected path into text field
@@ -1268,8 +1266,8 @@ void LLFloaterUIPreview::highlightChangedElements()
 			// if we still didn't find it...
 			if(NULL == element)												
 			{
-				llinfos << "Unable to find element in XuiDelta file named \"" << *iter << "\" in file \"" << mLiveFile->mFileName <<
-							"\". The element may no longer exist, the path may be incorrect, or it may not be a non-displayable element (not an LLView) such as a \"string\" type." << llendl;
+				LL_INFOS() << "Unable to find element in XuiDelta file named \"" << *iter << "\" in file \"" << mLiveFile->mFileName <<
+							"\". The element may no longer exist, the path may be incorrect, or it may not be a non-displayable element (not an LLView) such as a \"string\" type." << LL_ENDL;
 				failed = TRUE;
 				break;
 			}

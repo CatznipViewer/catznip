@@ -1,6 +1,6 @@
 /**
  * @file lluploadfloaterobservers.h
- * @brief LLUploadModelPremissionsResponder declaration
+ * @brief LLUploadModelPermissionsResponder declaration
  *
  * $LicenseInfo:firstyear=2011&license=viewerlgpl$
  * Second Life Viewer Source Code
@@ -28,7 +28,6 @@
 #define LL_LLUPLOADFLOATEROBSERVERS_H
 
 #include "llfloater.h"
-#include "llhttpclient.h"
 #include "llhandle.h"
 
 class LLUploadPermissionsObserver
@@ -39,7 +38,7 @@ public:
 	virtual ~LLUploadPermissionsObserver() {}
 
 	virtual void onPermissionsReceived(const LLSD& result) = 0;
-	virtual void setPermissonsErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setPermissonsErrorStatus(S32 status, const std::string& reason) = 0;
 
 	LLHandle<LLUploadPermissionsObserver> getPermObserverHandle() const {return mUploadPermObserverHandle;}
 
@@ -54,7 +53,7 @@ public:
 	virtual ~LLWholeModelFeeObserver() {}
 
 	virtual void onModelPhysicsFeeReceived(const LLSD& result, std::string upload_url) = 0;
-	virtual void setModelPhysicsFeeErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setModelPhysicsFeeErrorStatus(S32 status, const std::string& reason) = 0;
 
 	LLHandle<LLWholeModelFeeObserver> getWholeModelFeeObserverHandle() const { return mWholeModelFeeObserverHandle; }
 
@@ -77,21 +76,6 @@ public:
 
 protected:
 	LLRootHandle<LLWholeModelUploadObserver> mWholeModelUploadObserverHandle;
-};
-
-
-class LLUploadModelPremissionsResponder : public LLHTTPClient::Responder
-{
-public:
-
-	LLUploadModelPremissionsResponder(const LLHandle<LLUploadPermissionsObserver>& observer);
-
-	void errorWithContent(U32 status, const std::string& reason, const LLSD& content);
-
-	void result(const LLSD& content);
-
-private:
-	LLHandle<LLUploadPermissionsObserver> mObserverHandle;
 };
 
 #endif /* LL_LLUPLOADFLOATEROBSERVERS_H */

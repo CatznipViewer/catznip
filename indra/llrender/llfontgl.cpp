@@ -29,6 +29,7 @@
 #include "llfontgl.h"
 
 // Linden library includes
+#include "llfasttimer.h"
 #include "llfontfreetype.h"
 #include "llfontbitmapcache.h"
 #include "llfontregistry.h"
@@ -59,12 +60,6 @@ LLFontRegistry* LLFontGL::sFontRegistry = NULL;
 LLCoordGL LLFontGL::sCurOrigin;
 F32 LLFontGL::sCurDepth;
 std::vector<std::pair<LLCoordGL, F32> > LLFontGL::sOriginStack;
-
-const F32 EXT_X_BEARING = 1.f;
-const F32 EXT_Y_BEARING = 0.f;
-const F32 EXT_KERNING = 1.f;
-const F32 PIXEL_BORDER_THRESHOLD = 0.0001f;
-const F32 PIXEL_CORRECTION_DISTANCE = 0.01f;
 
 const F32 PAD_UVY = 0.5f; // half of vertical padding between glyphs in the glyph texture
 const F32 DROP_SHADOW_SOFT_STRENGTH = 0.3f;
@@ -97,28 +92,35 @@ BOOL LLFontGL::loadFace(const std::string& filename, F32 point_size, F32 vert_dp
 	return mFontFreetype->loadFace(filename, point_size, vert_dpi, horz_dpi, components, is_fallback);
 }
 
-static LLFastTimer::DeclareTimer FTM_RENDER_FONTS("Fonts");
+static LLTrace::BlockTimerStatHandle FTM_RENDER_FONTS("Fonts");
 
-S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, const LLRect& rect, const LLColor4 &color, HAlign halign, VAlign valign, U8 style, 
+S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, const LLRect& rect, const LLColor4 &color, HAlign halign, VAlign valign, U8 style,
+    ShadowType shadow, S32 max_chars, F32* right_x, BOOL use_ellipses) const
+{
+    LLRectf rect_float(rect.mLeft, rect.mTop, rect.mRight, rect.mBottom);
+    return render(wstr, begin_offset, rect_float, color, halign, valign, style, shadow, max_chars, right_x, use_ellipses);
+}
+
+S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, const LLRectf& rect, const LLColor4 &color, HAlign halign, VAlign valign, U8 style, 
 					 ShadowType shadow, S32 max_chars, F32* right_x, BOOL use_ellipses) const
 {
-	F32 x = (F32)rect.mLeft;
+	F32 x = rect.mLeft;
 	F32 y = 0.f;
 
 	switch(valign)
 	{
 	case TOP:
-		y = (F32)rect.mTop;
+		y = rect.mTop;
 		break;
 	case VCENTER:
-		y = (F32)rect.getCenterY();
+		y = rect.getCenterY();
 		break;
 	case BASELINE:
 	case BOTTOM:
-		y = (F32)rect.mBottom;
+		y = rect.mBottom;
 		break;
 	default:
-		y = (F32)rect.mBottom;
+		y = rect.mBottom;
 		break;
 	}
 	return render(wstr, begin_offset, x, y, color, halign, valign, style, shadow, max_chars, rect.getWidth(), right_x, use_ellipses);
@@ -128,7 +130,7 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, const LLRect& rect
 S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, const LLColor4 &color, HAlign halign, VAlign valign, U8 style, 
 					 ShadowType shadow, S32 max_chars, S32 max_pixels, F32* right_x, BOOL use_ellipses) const
 {
-	LLFastTimer _(FTM_RENDER_FONTS);
+	LL_RECORD_BLOCK_TIME(FTM_RENDER_FONTS);
 
 	if(!sDisplayFont) //do not display texts
 	{
@@ -216,10 +218,10 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 	case LEFT:
 		break;
 	case RIGHT:
-	  	cur_x -= llmin(scaled_max_pixels, llround(getWidthF32(wstr.c_str(), begin_offset, length) * sScaleX));
+	  	cur_x -= llmin(scaled_max_pixels, ll_round(getWidthF32(wstr.c_str(), begin_offset, length) * sScaleX));
 		break;
 	case HCENTER:
-	    cur_x -= llmin(scaled_max_pixels, llround(getWidthF32(wstr.c_str(), begin_offset, length) * sScaleX)) / 2;
+	    cur_x -= llmin(scaled_max_pixels, ll_round(getWidthF32(wstr.c_str(), begin_offset, length) * sScaleX)) / 2;
 		break;
 	default:
 		break;
@@ -228,7 +230,7 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 	cur_render_y = cur_y;
 	cur_render_x = cur_x;
 
-	F32 start_x = (F32)llround(cur_x);
+	F32 start_x = (F32)ll_round(cur_x);
 
 	const LLFontBitmapCache* font_bitmap_cache = mFontFreetype->getFontBitmapCache();
 
@@ -242,12 +244,12 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 	if (use_ellipses)
 	{
 		// check for too long of a string
-		S32 string_width = llround(getWidthF32(wstr.c_str(), begin_offset, max_chars) * sScaleX);
+		S32 string_width = ll_round(getWidthF32(wstr.c_str(), begin_offset, max_chars) * sScaleX);
 		if (string_width > scaled_max_pixels)
 		{
 			// use four dots for ellipsis width to generate padding
 			const LLWString dots(utf8str_to_wstring(std::string("....")));
-			scaled_max_pixels = llmax(0, scaled_max_pixels - llround(getWidthF32(dots.c_str())));
+			scaled_max_pixels = llmax(0, scaled_max_pixels - ll_round(getWidthF32(dots.c_str())));
 			draw_ellipses = TRUE;
 		}
 	}
@@ -275,7 +277,7 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 		}
 		if (!fgi)
 		{
-			llerrs << "Missing Glyph Info" << llendl;
+			LL_ERRS() << "Missing Glyph Info" << LL_ENDL;
 			break;
 		}
 		// Per-glyph bitmap texture.
@@ -312,10 +314,10 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 				(fgi->mXBitmapOffset + fgi->mWidth) * inv_width,
 				(fgi->mYBitmapOffset - PAD_UVY) * inv_height);
 		// snap glyph origin to whole screen pixel
-		LLRectf screen_rect((F32)llround(cur_render_x + (F32)fgi->mXBearing),
-				    (F32)llround(cur_render_y + (F32)fgi->mYBearing),
-				    (F32)llround(cur_render_x + (F32)fgi->mXBearing) + (F32)fgi->mWidth,
-				    (F32)llround(cur_render_y + (F32)fgi->mYBearing) - (F32)fgi->mHeight);
+		LLRectf screen_rect((F32)ll_round(cur_render_x + (F32)fgi->mXBearing),
+				    (F32)ll_round(cur_render_y + (F32)fgi->mYBearing),
+				    (F32)ll_round(cur_render_x + (F32)fgi->mXBearing) + (F32)fgi->mWidth,
+				    (F32)ll_round(cur_render_y + (F32)fgi->mYBearing) - (F32)fgi->mHeight);
 		
 		if (glyph_count >= GLYPH_BATCH_SIZE)
 		{
@@ -346,8 +348,8 @@ S32 LLFontGL::render(const LLWString &wstr, S32 begin_offset, F32 x, F32 y, cons
 		// Must do this to cur_x, not just to cur_render_x, otherwise you
 		// will squish sub-pixel kerned characters too close together.
 		// For example, "CCCCC" looks bad.
-		cur_x = (F32)llround(cur_x);
-		//cur_y = (F32)llround(cur_y);
+		cur_x = (F32)ll_round(cur_x);
+		//cur_y = (F32)ll_round(cur_y);
 
 		cur_render_x = cur_x;
 		cur_render_y = cur_y;
@@ -457,7 +459,7 @@ S32 LLFontGL::getWidth(const std::string& utf8text, S32 begin_offset, S32 max_ch
 S32 LLFontGL::getWidth(const llwchar* wchars, S32 begin_offset, S32 max_chars) const
 {
 	F32 width = getWidthF32(wchars, begin_offset, max_chars);
-	return llround(width);
+	return ll_round(width);
 }
 
 F32 LLFontGL::getWidthF32(const std::string& utf8text) const
@@ -519,7 +521,7 @@ F32 LLFontGL::getWidthF32(const llwchar* wchars, S32 begin_offset, S32 max_chars
 			cur_x += mFontFreetype->getXKerning(fgi, next_glyph);
 		}
 		// Round after kerning.
-		cur_x = (F32)llround(cur_x);
+		cur_x = (F32)ll_round(cur_x);
 	}
 
 	// add in extra pixels for last character's width past its xadvance
@@ -627,7 +629,7 @@ S32 LLFontGL::maxDrawableChars(const llwchar* wchars, F32 max_pixels, S32 max_ch
 		}
 
 		// Round after kerning.
-		cur_x = (F32)llround(cur_x);
+		cur_x = (F32)ll_round(cur_x);
 	}
 
 	if( clip )
@@ -697,7 +699,7 @@ S32	LLFontGL::firstDrawableChar(const llwchar* wchars, F32 max_pixels, S32 text_
 		}
 
 		// Round after kerning.
-		total_width = (F32)llround(total_width);
+		total_width = (F32)ll_round(total_width);
 	}
 
 	if (drawable_chars == 0)
@@ -780,7 +782,7 @@ S32 LLFontGL::charFromPixelOffset(const llwchar* wchars, S32 begin_offset, F32 t
 
 
 		// Round after kerning.
-		cur_x = (F32)llround(cur_x);
+		cur_x = (F32)ll_round(cur_x);
 	}
 
 	return llmin(max_chars, pos - begin_offset);
@@ -1069,7 +1071,7 @@ std::string LLFontGL::getFontPathSystem()
 	system_root = getenv("SystemRoot");	/* Flawfinder: ignore */
 	if (!system_root)
 	{
-		llwarns << "SystemRoot not found, attempting to load fonts from default path." << llendl;
+		LL_WARNS() << "SystemRoot not found, attempting to load fonts from default path." << LL_ENDL;
 	}
 #endif
 
@@ -1114,12 +1116,12 @@ std::string LLFontGL::getFontPathLocal()
 
 LLFontGL::LLFontGL(const LLFontGL &source)
 {
-	llerrs << "Not implemented!" << llendl;
+	LL_ERRS() << "Not implemented!" << LL_ENDL;
 }
 
 LLFontGL &LLFontGL::operator=(const LLFontGL &source)
 {
-	llerrs << "Not implemented" << llendl;
+	LL_ERRS() << "Not implemented" << LL_ENDL;
 	return *this;
 }
 

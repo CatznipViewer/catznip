@@ -140,6 +140,7 @@ public:
 	/*virtual*/ BOOL lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, 
 										  S32 face = -1,                        // which face to check, -1 = ALL_SIDES
 										  BOOL pick_transparent = FALSE,
+										  BOOL pick_rigged = FALSE,
 										  S32* face_hit = NULL,                 // which face was hit
 										  LLVector4a* intersection = NULL,       // return the intersection point
 										  LLVector2* tex_coord = NULL,          // return the texture coordinates of the intersection point
@@ -312,7 +313,7 @@ public:
 	
 
 	//rigged volume update (for raycasting)
-	void updateRiggedVolume();
+	void updateRiggedVolume(bool force_update = false);
 	LLRiggedVolume* getRiggedVolume();
 
 	//returns true if volume should be treated as a rigged volume
@@ -339,6 +340,10 @@ protected:
 	void cleanUpMediaImpls();
 	void addMediaImpl(LLViewerMediaImpl* media_impl, S32 texture_index) ;
 	void removeMediaImpl(S32 texture_index) ;
+
+private:
+	bool lodOrSculptChanged(LLDrawable *drawable, BOOL &compiled);
+
 public:
 
 	static S32 getRenderComplexityMax() {return mRenderComplexity_last;}
@@ -372,17 +377,37 @@ private:
 
 	// statics
 public:
-	static F32 sLODSlopDistanceFactor;// Changing this to zero, effectively disables the LOD transition slop 
+	static F32 sLODSlopDistanceFactor;// Changing this to zero, effectively disables the LOD transition slop
 	static F32 sLODFactor;				// LOD scale factor
 	static F32 sDistanceFactor;			// LOD distance factor
-		
+
 	static LLPointer<LLObjectMediaDataClient> sObjectMediaClient;
 	static LLPointer<LLObjectMediaNavigateClient> sObjectMediaNavigateClient;
 
 protected:
 	static S32 sNumLODChanges;
-	
+
 	friend class LLVolumeImplFlexible;
+
+public:
+	bool notifyAboutCreatingTexture(LLViewerTexture *texture);
+	bool notifyAboutMissingAsset(LLViewerTexture *texture);
+
+private:
+	struct material_info 
+	{
+		LLRender::eTexIndex map;
+		U8 te;
+
+		material_info(LLRender::eTexIndex map_, U8 te_)
+			: map(map_)
+			, te(te_)
+		{}
+	};
+
+	typedef std::multimap<LLUUID, material_info> mmap_UUID_MAP_t;
+	mmap_UUID_MAP_t	mWaitingTextureInfo;
+
 };
 
 #endif // LL_LLVOVOLUME_H

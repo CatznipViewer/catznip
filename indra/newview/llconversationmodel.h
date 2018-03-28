@@ -70,6 +70,9 @@ public:
 	virtual const std::string& getName() const { return mName; }
 	virtual const std::string& getDisplayName() const { return mName; }
 	virtual const std::string& getSearchableName() const { return mName; }
+	virtual std::string getSearchableDescription() const { return LLStringUtil::null; }
+	virtual std::string getSearchableCreatorName() const { return LLStringUtil::null; }
+	virtual std::string getSearchableUUIDString() const {return LLStringUtil::null;}
 	virtual const LLUUID& getUUID() const { return mUUID; }
 	virtual time_t getCreationDate() const { return 0; }
 	virtual LLPointer<LLUIImage> getIcon() const { return NULL; }
@@ -86,7 +89,7 @@ public:
 	virtual void move( LLFolderViewModelItem* parent_listener ) { }
 	virtual BOOL isItemCopyable() const { return FALSE; }
 	virtual BOOL copyToClipboard() const { return FALSE; }
-	virtual BOOL cutToClipboard() const { return FALSE; }
+	virtual BOOL cutToClipboard() { return FALSE; }
 	virtual BOOL isClipboardPasteable() const { return FALSE; }
 	virtual void pasteFromClipboard() { }
 	virtual void pasteLinkFromClipboard() { }
@@ -143,6 +146,7 @@ protected:
 	bool mNeedsRefresh;	// Flag signaling to the view that something changed for this item
 	F64  mLastActiveTime;
 	bool mDisplayModeratorOptions;
+	bool mDisplayGroupBanOptions;
 	boost::signals2::connection mAvatarNameCacheConnection;
 };	
 
@@ -206,12 +210,12 @@ public:
 	void dumpDebugData();
 	void setModeratorOptionsVisible(bool visible) { mDisplayModeratorOptions = visible; }
 	void setDisplayModeratorRole(bool displayRole);
+	void setGroupBanVisible(bool visible) { mDisplayGroupBanOptions = visible; }
 
 private:
 	void onAvatarNameCache(const LLAvatarName& av_name);	// callback used by fetchAvatarName
 	void updateName(const LLAvatarName& av_name);
 
-	bool mIsMuted;		         // default is false
 	bool mIsModerator;	         // default is false
 	bool mDisplayModeratorLabel; // default is false
 	std::string mDisplayName;
@@ -291,6 +295,9 @@ class LLConversationViewModel
 {
 public:
 	typedef LLFolderViewModel<LLConversationSort, LLConversationItem, LLConversationItem, LLConversationFilter> base_t;
+	LLConversationViewModel() 
+	:	base_t(new LLConversationSort(), new LLConversationFilter())
+	{}
 	
 	void sort(LLFolderViewFolder* folder);
 	bool contentsReady() { return true; }	// *TODO : we need to check that participants names are available somewhat

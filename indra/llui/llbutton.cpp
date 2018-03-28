@@ -253,7 +253,7 @@ LLButton::LLButton(const LLButton::Params& p)
 	
 	if (mImageUnselected.isNull())
 	{
-		llwarns << "Button: " << getName() << " with no image!" << llendl;
+		LL_WARNS() << "Button: " << getName() << " with no image!" << LL_ENDL;
 	}
 	
 	if (p.click_callback.isProvided())
@@ -384,7 +384,7 @@ BOOL LLButton::postBuild()
 {
 	autoResize();
 
-	addBadgeToParentPanel();
+	addBadgeToParentHolder();
 
 	return LLUICtrl::postBuild();
 }
@@ -595,7 +595,7 @@ BOOL LLButton::handleHover(S32 x, S32 y, MASK mask)
 
 		// We only handle the click if the click both started and ended within us
 		getWindow()->setCursor(UI_CURSOR_ARROW);
-		lldebugst(LLERR_USER_INPUT) << "hover handled by " << getName() << llendl;
+		LL_DEBUGS("UserInput") << "hover handled by " << getName() << LL_ENDL;
 	}
 	return TRUE;
 }
@@ -606,8 +606,8 @@ void LLButton::getOverlayImageSize(S32& overlay_width, S32& overlay_height)
 	overlay_height = mImageOverlay->getHeight();
 
 	F32 scale_factor = llmin((F32)getRect().getWidth() / (F32)overlay_width, (F32)getRect().getHeight() / (F32)overlay_height, 1.f);
-	overlay_width = llround((F32)overlay_width * scale_factor);
-	overlay_height = llround((F32)overlay_height * scale_factor);
+	overlay_width = ll_round((F32)overlay_width * scale_factor);
+	overlay_height = ll_round((F32)overlay_height * scale_factor);
 }
 
 
@@ -641,7 +641,7 @@ void LLButton::draw()
 	
 	bool use_glow_effect = FALSE;
 	LLColor4 highlighting_color = LLColor4::white;
-	LLColor4 glow_color;
+	LLColor4 glow_color = LLColor4::white;
 	LLRender::eBlendType glow_type = LLRender::BT_ADD_WITH_ALPHA;
 	LLUIImage* imagep = NULL;
 
@@ -776,18 +776,18 @@ void LLButton::draw()
 	if (hasFocus())
 	{
 		F32 lerp_amt = gFocusMgr.getFocusFlashAmt();
-		drawBorder(imagep, gFocusMgr.getFocusColor() % alpha, llround(lerp(1.f, 3.f, lerp_amt)));
+		drawBorder(imagep, gFocusMgr.getFocusColor() % alpha, ll_round(lerp(1.f, 3.f, lerp_amt)));
 	}
 	
 	if (use_glow_effect)
 	{
 		mCurGlowStrength = lerp(mCurGlowStrength,
-					mFlashing ? (mFlashingTimer->isCurrentlyHighlighted() || !mFlashingTimer->isFlashingInProgress() || mNeedsHighlight? 1.0 : 0.0) : mHoverGlowStrength,
-					LLCriticalDamp::getInterpolant(0.05f));
+					mFlashing ? (mFlashingTimer->isCurrentlyHighlighted() || !mFlashingTimer->isFlashingInProgress() || mNeedsHighlight? 1.f : 0.f) : mHoverGlowStrength,
+					LLSmoothInterpolation::getInterpolant(0.05f));
 	}
 	else
 	{
-		mCurGlowStrength = lerp(mCurGlowStrength, 0.f, LLCriticalDamp::getInterpolant(0.05f));
+		mCurGlowStrength = lerp(mCurGlowStrength, 0.f, LLSmoothInterpolation::getInterpolant(0.05f));
 	}
 
 	// Draw button image, if available.
@@ -808,11 +808,12 @@ void LLButton::draw()
 		}
 		else
 		{
-			imagep->draw(0, 0, (enabled ? mImageColor.get() : disabled_color) % alpha );
+			S32 y = getLocalRect().getHeight() - imagep->getHeight();
+			imagep->draw(0, y, (enabled ? mImageColor.get() : disabled_color) % alpha);
 			if (mCurGlowStrength > 0.01f)
 			{
 				gGL.setSceneBlendType(glow_type);
-				imagep->drawSolid(0, 0, glow_color % (mCurGlowStrength * alpha));
+				imagep->drawSolid(0, y, glow_color % (mCurGlowStrength * alpha));
 				gGL.setSceneBlendType(LLRender::BT_ALPHA);
 			}
 		}
@@ -820,7 +821,7 @@ void LLButton::draw()
 	else
 	{
 		// no image
-		lldebugs << "No image for button " << getName() << llendl;
+		LL_DEBUGS() << "No image for button " << getName() << LL_ENDL;
 		// draw it in pink so we can find it
 		gl_rect_2d(0, getRect().getHeight(), getRect().getWidth(), 0, LLColor4::pink1 % alpha, FALSE);
 	}
@@ -954,7 +955,8 @@ void LLButton::drawBorder(LLUIImage* imagep, const LLColor4& color, S32 size)
 	}
 	else
 	{
-		imagep->drawBorder(0, 0, color, size);
+		S32 y = getLocalRect().getHeight() - imagep->getHeight();
+		imagep->drawBorder(0, y, color, size);
 	}
 }
 
@@ -1044,7 +1046,7 @@ void LLButton::setImageUnselected(LLPointer<LLUIImage> image)
 	mImageUnselected = image;
 	if (mImageUnselected.isNull())
 	{
-		llwarns << "Setting default button image for: " << getName() << " to NULL" << llendl;
+		LL_WARNS() << "Setting default button image for: " << getName() << " to NULL" << LL_ENDL;
 	}
 }
 
@@ -1067,7 +1069,7 @@ void LLButton::resize(LLUIString label)
 		{
 			S32 overlay_width = mImageOverlay->getWidth();
 			F32 scale_factor = (getRect().getHeight() - (mImageOverlayBottomPad + mImageOverlayTopPad)) / (F32)mImageOverlay->getHeight();
-			overlay_width = llround((F32)overlay_width * scale_factor);
+			overlay_width = ll_round((F32)overlay_width * scale_factor);
 
 			switch(mImageOverlayAlignment)
 			{

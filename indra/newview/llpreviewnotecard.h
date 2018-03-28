@@ -47,6 +47,7 @@ public:
 	virtual ~LLPreviewNotecard();
 	
 	bool saveItem();
+	void setObjectID(const LLUUID& object_id);
 
 	// llview
 	virtual void draw();
@@ -93,6 +94,10 @@ protected:
 							   S32 status, LLExtStat ext_status);
 
 	bool handleSaveChangesDialog(const LLSD& notification, const LLSD& response);
+	bool handleConfirmDeleteDialog(const LLSD& notification, const LLSD& response);
+
+    static void finishInventoryUpload(LLUUID itemId, LLUUID newAssetId, LLUUID newItemId);
+    static void finishTaskUpload(LLUUID itemId, LLUUID newAssetId, LLUUID taskId);
 
 protected:
 	LLViewerTextEditor* mEditor;

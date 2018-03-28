@@ -64,6 +64,9 @@
 #include "llurllineeditorctrl.h"
 #include "llagentui.h"
 
+#include "llmenuoptionpathfindingrebakenavmesh.h"
+#include "llpathfindingmanager.h"
+
 //============================================================================
 /*
  * "ADD LANDMARK" BUTTON UPDATING LOGIC
@@ -107,8 +110,8 @@ public:
 private:
 	/*virtual*/ void done()
 	{
-		uuid_vec_t::const_iterator it = mAdded.begin(), end = mAdded.end();
-		for(; it != end; ++it)
+		const uuid_set_t& added = gInventory.getAddedIDs();
+		for (uuid_set_t::const_iterator it = added.begin(); it != added.end(); ++it)
 		{
 			LLInventoryItem* item = gInventory.getItem(*it);
 			if (!item || item->getType() != LLAssetType::AT_LANDMARK)
@@ -124,8 +127,6 @@ private:
 				mInput->onLandmarkLoaded(lm);
 			}
 		}
-
-		mAdded.clear();
 	}
 
 	LLLocationInputCtrl* mInput;
@@ -142,7 +143,11 @@ public:
 private:
 	/*virtual*/ void changed(U32 mask)
 	{
-		if (mask & (~(LLInventoryObserver::LABEL|LLInventoryObserver::INTERNAL|LLInventoryObserver::ADD)))
+		if (mask & (~(LLInventoryObserver::LABEL|
+					  LLInventoryObserver::INTERNAL|
+					  LLInventoryObserver::ADD|
+					  LLInventoryObserver::CREATE|
+					  LLInventoryObserver::UPDATE_CREATE)))
 		{
 			mInput->updateAddLandmarkButton();
 		}
@@ -238,7 +243,7 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	params.commit_on_focus_lost(false);
 	params.follows.flags(FOLLOWS_ALL);
 	mTextEntry = LLUICtrlFactory::create<LLURLLineEditor>(params);
-	mTextEntry->setContextMenu(NULL);
+	mTextEntry->resetContextMenu();
 	addChild(mTextEntry);
 	// LLLineEditor is replaced with LLLocationLineEditor
 
@@ -384,7 +389,7 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	mLocationContextMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_navbar.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	if (!mLocationContextMenu)
 	{
-		llwarns << "Error loading navigation bar context menu" << llendl;
+		LL_WARNS() << "Error loading navigation bar context menu" << LL_ENDL;
 		
 	}
 	getTextEntry()->setRightMouseUpCallback(boost::bind(&LLLocationInputCtrl::onTextEditorRightClicked,this,_2,_3,_4));
@@ -407,14 +412,14 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	// - Make the "Add landmark" button updated when either current parcel gets changed
 	//   or a landmark gets created or removed from the inventory.
 	// - Update the location string on parcel change.
-	mParcelMgrConnection = LLViewerParcelMgr::getInstance()->addAgentParcelChangedCallback(
+	mParcelMgrConnection = gAgent.addParcelChangedCallback(
 		boost::bind(&LLLocationInputCtrl::onAgentParcelChange, this));
 	// LLLocationHistory instance is being created before the location input control, so we have to update initial state of button manually.
 	mButton->setEnabled(LLLocationHistory::instance().getItemCount() > 0);
 	mLocationHistoryConnection = LLLocationHistory::getInstance()->setChangedCallback(
 			boost::bind(&LLLocationInputCtrl::onLocationHistoryChanged, this,_1));
 
-	mRegionCrossingSlot = LLEnvManagerNew::getInstance()->setRegionChangeCallback(boost::bind(&LLLocationInputCtrl::onRegionBoundaryCrossed, this));
+	mRegionCrossingSlot = gAgent.addRegionChangedCallback(boost::bind(&LLLocationInputCtrl::onRegionBoundaryCrossed, this));
 	createNavMeshStatusListenerForCurrentRegion();
 
 	mRemoveLandmarkObserver	= new LLRemoveLandmarkObserver(this);
@@ -777,7 +782,7 @@ void LLLocationInputCtrl::refreshLocation()
 	    (mTextEntry && mTextEntry->hasFocus()) ||
 	    (mAddLandmarkBtn->hasFocus()))
 	{
-		llwarns << "Location input should not be refreshed when having focus" << llendl;
+		LL_WARNS() << "Location input should not be refreshed when having focus" << LL_ENDL;
 		return;
 	}
 
@@ -1192,6 +1197,18 @@ bool LLLocationInputCtrl::onLocationContextMenuItemEnabled(const LLSD& userdata)
 	return false;
 }
 
+void LLLocationInputCtrl::callbackRebakeRegion(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (option == 0) // OK
+	{
+		if (LLPathfindingManager::getInstance() != NULL)
+		{
+			LLMenuOptionPathfindingRebakeNavmesh::getInstance()->sendRequestRebakeNavmesh();
+		}
+	}
+}
+
 void LLLocationInputCtrl::onParcelIconClick(EParcelIcon icon)
 {
 	switch (icon)
@@ -1209,6 +1226,16 @@ void LLLocationInputCtrl::onParcelIconClick(EParcelIcon icon)
 		LLNotificationsUtil::add("NoBuild");
 		break;
 	case PATHFINDING_DIRTY_ICON:
+		if (LLPathfindingManager::getInstance() != NULL)
+		{
+			LLMenuOptionPathfindingRebakeNavmesh *rebakeInstance = LLMenuOptionPathfindingRebakeNavmesh::getInstance();
+			if (rebakeInstance && rebakeInstance->canRebakeRegion() && (rebakeInstance->getMode() == LLMenuOptionPathfindingRebakeNavmesh::kRebakeNavMesh_Available))
+			{
+				LLNotificationsUtil::add("PathfindingDirtyRebake", LLSD(), LLSD(),
+										 boost::bind(&LLLocationInputCtrl::callbackRebakeRegion, this, _1, _2));
+				break;
+			}
+		}
 		LLNotificationsUtil::add("PathfindingDirty");
 		break;
 	case PATHFINDING_DISABLED_ICON:

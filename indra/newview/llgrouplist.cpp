@@ -30,7 +30,7 @@
 
 // libs
 #include "llbutton.h"
-#include "lliconctrl.h"
+#include "llgroupiconctrl.h"
 #include "llmenugl.h"
 #include "lltextbox.h"
 #include "lltextutil.h"
@@ -50,6 +50,8 @@ S32 LLGroupListItem::sIconWidth = 0;
 class LLGroupComparator : public LLFlatListView::ItemComparator
 {
 public:
+	LLGroupComparator() {};
+
 	/** Returns true if item1 < item2, false otherwise */
 	/*virtual*/ bool compare(const LLPanel* item1, const LLPanel* item2) const
 	{
@@ -163,7 +165,7 @@ static bool findInsensitive(std::string haystack, const std::string& needle_uppe
 void LLGroupList::refresh()
 {
 	const LLUUID& 		highlight_id	= gAgent.getGroupID();
-	S32					count			= gAgent.mGroups.count();
+	S32					count			= gAgent.mGroups.size();
 	LLUUID				id;
 	bool				have_filter		= !mNameFilter.empty();
 
@@ -171,8 +173,8 @@ void LLGroupList::refresh()
 
 	for(S32 i = 0; i < count; ++i)
 	{
-		id = gAgent.mGroups.get(i).mID;
-		const LLGroupData& group_data = gAgent.mGroups.get(i);
+		id = gAgent.mGroups.at(i).mID;
+		const LLGroupData& group_data = gAgent.mGroups.at(i);
 		if (have_filter && !findInsensitive(group_data.mName, mNameFilter))
 			continue;
 		addNewItem(id, group_data.mName, group_data.mInsigniaID, ADD_BOTTOM);
@@ -317,7 +319,7 @@ LLGroupListItem::~LLGroupListItem()
 //virtual
 BOOL  LLGroupListItem::postBuild()
 {
-	mGroupIcon = getChild<LLIconCtrl>("group_icon");
+	mGroupIcon = getChild<LLGroupIconCtrl>("group_icon");
 	mGroupNameBox = getChild<LLTextBox>("group_name");
 
 	mInfoBtn = getChild<LLButton>("info_btn");
@@ -377,10 +379,7 @@ void LLGroupListItem::setGroupID(const LLUUID& group_id)
 
 void LLGroupListItem::setGroupIconID(const LLUUID& group_icon_id)
 {
-	if (group_icon_id.notNull())
-	{
-		mGroupIcon->setValue(group_icon_id);
-	}
+	mGroupIcon->setIconId(group_icon_id);
 }
 
 void LLGroupListItem::setGroupIconVisible(bool visible)

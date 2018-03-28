@@ -40,29 +40,32 @@ const int MAX_URL_COUNT = 10;
 // static
 bool LLURLHistory::loadFile(const std::string& filename)
 {
+    bool dataloaded = false;
+    sHistorySD = LLSD();
 	LLSD data;
-	{
-		std::string temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter();
 
-		llifstream file((temp_str + filename));
+    std::string user_filename(gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter() + filename);
 
-		if (file.is_open())
-		{
-			llinfos << "Loading history.xml file at " << filename << llendl;
-			LLSDSerialize::fromXML(data, file);
-		}
-
-		if (data.isUndefined())
-		{
-			llinfos << "file missing, ill-formed, "
-				"or simply undefined; not changing the"
-				" file" << llendl;
-			sHistorySD = LLSD();
-			return false;
-		}
-	}
-	sHistorySD = data;
-	return true;
+    llifstream file(user_filename.c_str());
+    if (file.is_open())
+    {
+        LLSDSerialize::fromXML(data, file);
+        if (data.isUndefined())
+        {
+            LL_WARNS() << "error loading " << user_filename << LL_ENDL;
+        }
+        else
+        {
+            LL_INFOS() << "Loaded history file at " << user_filename << LL_ENDL;
+            sHistorySD = data;
+            dataloaded = true;
+        }
+    }
+    else
+    {
+        LL_INFOS() << "Unable to open history file at " << user_filename << LL_ENDL;
+    }
+	return dataloaded;
 }
 
 // static
@@ -71,15 +74,15 @@ bool LLURLHistory::saveFile(const std::string& filename)
 	std::string temp_str = gDirUtilp->getLindenUserDir();
 	if( temp_str.empty() )
 	{
-		llinfos << "Can't save URL history - no user directory set yet." << llendl;
+		LL_INFOS() << "Can't save URL history - no user directory set yet." << LL_ENDL;
 		return false;
 	}
 
 	temp_str += gDirUtilp->getDirDelimiter() + filename;
-	llofstream out(temp_str);
+	llofstream out(temp_str.c_str());
 	if (!out.good())
 	{
-		llwarns << "Unable to open " << filename << " for output." << llendl;
+		LL_WARNS() << "Unable to open " << temp_str << " for output." << LL_ENDL;
 		return false;
 	}
 

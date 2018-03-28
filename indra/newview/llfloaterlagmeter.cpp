@@ -75,26 +75,26 @@ BOOL LLFloaterLagMeter::postBuild()
 	mServerCause = getChild<LLTextBox>("server_lag_cause");
 
 	std::string config_string = getString("client_frame_rate_critical_fps", mStringArgs);
-	mClientFrameTimeCritical = 1.0f / (float)atof( config_string.c_str() );
+	mClientFrameTimeCritical = F32Seconds(1.0f / (float)atof( config_string.c_str() ));
 	config_string = getString("client_frame_rate_warning_fps", mStringArgs);
-	mClientFrameTimeWarning = 1.0f / (float)atof( config_string.c_str() );
+	mClientFrameTimeWarning = F32Seconds(1.0f / (float)atof( config_string.c_str() ));
 
 	config_string = getString("network_packet_loss_critical_pct", mStringArgs);
-	mNetworkPacketLossCritical = (float)atof( config_string.c_str() );
+	mNetworkPacketLossCritical = F32Percent((float)atof( config_string.c_str() ));
 	config_string = getString("network_packet_loss_warning_pct", mStringArgs);
-	mNetworkPacketLossWarning = (float)atof( config_string.c_str() );
+	mNetworkPacketLossWarning = F32Percent((float)atof( config_string.c_str() ));
 
 	config_string = getString("network_ping_critical_ms", mStringArgs);
-	mNetworkPingCritical = (float)atof( config_string.c_str() );
+	mNetworkPingCritical = F32Milliseconds((float)atof( config_string.c_str() ));
 	config_string = getString("network_ping_warning_ms", mStringArgs);
-	mNetworkPingWarning = (float)atof( config_string.c_str() );
+	mNetworkPingWarning = F32Milliseconds((float)atof( config_string.c_str() ));
 	config_string = getString("server_frame_rate_critical_fps", mStringArgs);
 
-	mServerFrameTimeCritical = 1000.0f / (float)atof( config_string.c_str() );
+	mServerFrameTimeCritical = F32Seconds(1.0f / (float)atof( config_string.c_str() ));
 	config_string = getString("server_frame_rate_warning_fps", mStringArgs);
-	mServerFrameTimeWarning = 1000.0f / (float)atof( config_string.c_str() );
+	mServerFrameTimeWarning = F32Seconds(1.0f / (float)atof( config_string.c_str() ));
 	config_string = getString("server_single_process_max_time_ms", mStringArgs);
-	mServerSingleProcessMaxTime = (float)atof( config_string.c_str() );
+	mServerSingleProcessMaxTime = F32Seconds((float)atof( config_string.c_str() ));
 
 //	mShrunk = false;
 	config_string = getString("max_width_px", mStringArgs);
@@ -141,7 +141,7 @@ void LLFloaterLagMeter::draw()
 
 void LLFloaterLagMeter::determineClient()
 {
-	F32 client_frame_time = LLViewerStats::getInstance()->mFPSStat.getMeanDuration();
+	F32Milliseconds client_frame_time = LLTrace::get_frame_recording().getPeriodMean(LLStatViewer::FRAME_STACKTIME);
 	bool find_cause = false;
 
 	if (!gFocusMgr.getAppHasFocus())
@@ -179,7 +179,7 @@ void LLFloaterLagMeter::determineClient()
 		{
 			mClientCause->setText( getString("client_texture_loading_cause_msg", mStringArgs) );
 		}
-		else if((BYTES_TO_MEGA_BYTES(LLViewerTexture::sBoundTextureMemoryInBytes)) > LLViewerTexture::sMaxBoundTextureMemInMegaBytes)
+		else if(LLViewerTexture::sBoundTextureMemory > LLViewerTexture::sMaxBoundTextureMemory)
 		{
 			mClientCause->setText( getString("client_texture_memory_cause_msg", mStringArgs) );
 		}
@@ -192,8 +192,9 @@ void LLFloaterLagMeter::determineClient()
 
 void LLFloaterLagMeter::determineNetwork()
 {
-	F32 packet_loss = LLViewerStats::getInstance()->mPacketsLostPercentStat.getMean();
-	F32 ping_time = LLViewerStats::getInstance()->mSimPingStat.getMean();
+	LLTrace::PeriodicRecording& frame_recording = LLTrace::get_frame_recording();
+	F32Percent packet_loss = frame_recording.getPeriodMean(LLStatViewer::PACKETS_LOST_PERCENT);
+	F32Milliseconds ping_time = frame_recording.getPeriodMean(LLStatViewer::SIM_PING);
 	bool find_cause_loss = false;
 	bool find_cause_ping = false;
 
@@ -201,7 +202,7 @@ void LLFloaterLagMeter::determineNetwork()
 	// particular if the frame rate is low, because a low frame
 	// rate is a sure recipe for bad ping times right now until
 	// the network handlers are de-synched from the rendering.
-	F32 client_frame_time_ms = 1000.0f * LLViewerStats::getInstance()->mFPSStat.getMeanDuration();
+	F32Milliseconds client_frame_time = frame_recording.getPeriodMean(LLStatViewer::FRAME_STACKTIME);
 	
 	if(packet_loss >= mNetworkPacketLossCritical)
 	{
@@ -212,7 +213,7 @@ void LLFloaterLagMeter::determineNetwork()
 	else if(ping_time >= mNetworkPingCritical)
 	{
 		mNetworkButton->setImageUnselected(LLUI::getUIImage(LAG_CRITICAL_IMAGE_NAME));
-		if (client_frame_time_ms < mNetworkPingCritical)
+		if (client_frame_time < mNetworkPingCritical)
 		{
 			mNetworkText->setText( getString("network_ping_critical_msg", mStringArgs) );
 			find_cause_ping = true;
@@ -227,7 +228,7 @@ void LLFloaterLagMeter::determineNetwork()
 	else if(ping_time >= mNetworkPingWarning)
 	{
 		mNetworkButton->setImageUnselected(LLUI::getUIImage(LAG_WARNING_IMAGE_NAME));
-		if (client_frame_time_ms < mNetworkPingWarning)
+		if (client_frame_time < mNetworkPingWarning)
 		{
 			mNetworkText->setText( getString("network_ping_warning_msg", mStringArgs) );
 			find_cause_ping = true;
@@ -255,7 +256,7 @@ void LLFloaterLagMeter::determineNetwork()
 
 void LLFloaterLagMeter::determineServer()
 {
-	F32 sim_frame_time = LLViewerStats::getInstance()->mSimFrameMsec.getCurrent();
+	F32Milliseconds sim_frame_time = LLTrace::get_frame_recording().getLastRecording().getLastValue(LLStatViewer::SIM_FRAME_TIME);
 	bool find_cause = false;
 
 	if(sim_frame_time >= mServerFrameTimeCritical)
@@ -279,23 +280,25 @@ void LLFloaterLagMeter::determineServer()
 
 	if(find_cause)
 	{
-		if(LLViewerStats::getInstance()->mSimSimPhysicsMsec.getCurrent() > mServerSingleProcessMaxTime)
+		LLTrace::Recording& last_recording = LLTrace::get_frame_recording().getLastRecording();
+
+		if(last_recording.getLastValue(LLStatViewer::SIM_PHYSICS_TIME) > mServerSingleProcessMaxTime)
 		{
 			mServerCause->setText( getString("server_physics_cause_msg", mStringArgs) );
 		}
-		else if(LLViewerStats::getInstance()->mSimScriptMsec.getCurrent() > mServerSingleProcessMaxTime)
+		else if(last_recording.getLastValue(LLStatViewer::SIM_SCRIPTS_TIME) > mServerSingleProcessMaxTime)
 		{
 			mServerCause->setText( getString("server_scripts_cause_msg", mStringArgs) );
 		}
-		else if(LLViewerStats::getInstance()->mSimNetMsec.getCurrent() > mServerSingleProcessMaxTime)
+		else if(last_recording.getLastValue(LLStatViewer::SIM_NET_TIME) > mServerSingleProcessMaxTime)
 		{
 			mServerCause->setText( getString("server_net_cause_msg", mStringArgs) );
 		}
-		else if(LLViewerStats::getInstance()->mSimAgentMsec.getCurrent() > mServerSingleProcessMaxTime)
+		else if(last_recording.getLastValue(LLStatViewer::SIM_AGENTS_TIME) > mServerSingleProcessMaxTime)
 		{
 			mServerCause->setText( getString("server_agent_cause_msg", mStringArgs) );
 		}
-		else if(LLViewerStats::getInstance()->mSimImagesMsec.getCurrent() > mServerSingleProcessMaxTime)
+		else if(last_recording.getLastValue(LLStatViewer::SIM_IMAGES_TIME) > mServerSingleProcessMaxTime)
 		{
 			mServerCause->setText( getString("server_images_cause_msg", mStringArgs) );
 		}

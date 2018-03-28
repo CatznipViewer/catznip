@@ -130,7 +130,7 @@ S32 LLPrimTextureList::copyTexture(const U8 index, const LLTextureEntry& te)
 	if (S32(index) >= mEntryList.size())
 	{
 		S32 current_size = mEntryList.size();
-		llwarns << "ignore copy of index = " << S32(index) << " into texture entry list of size = " << current_size << llendl;
+		LL_WARNS() << "ignore copy of index = " << S32(index) << " into texture entry list of size = " << current_size << LL_ENDL;
 		return TEM_CHANGE_NONE;
 	}
 
@@ -375,6 +375,16 @@ S32 LLPrimTextureList::setMaterialParams(const U8 index, const LLMaterialPtr pMa
 		return mEntryList[index]->setMaterialParams(pMaterialParams);
 	}
 	return TEM_CHANGE_NONE;
+}
+
+LLMaterialPtr LLPrimTextureList::getMaterialParams(const U8 index)
+{
+	if (index < mEntryList.size())
+	{
+		return mEntryList[index]->getMaterialParams();
+	}
+	
+	return LLMaterialPtr();
 }
 
 S32 LLPrimTextureList::size() const

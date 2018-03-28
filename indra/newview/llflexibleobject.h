@@ -72,7 +72,6 @@ class LLVolumeImplFlexible : public LLVolumeInterface
 {
 private:
 	static std::vector<LLVolumeImplFlexible*> sInstanceList;
-	static std::vector<S32> sUpdateDelay;
 	S32 mInstanceIndex;
 
 	public:
@@ -100,7 +99,7 @@ private:
 		const LLMatrix4& getWorldMatrix(LLXformMatrix* xform) const;
 		void updateRelativeXform(bool force_identity);
 		void doFlexibleUpdate(); // Called to update the simulation
-		void doFlexibleRebuild(); // Called to rebuild the geometry
+		void doFlexibleRebuild(bool rebuild_volume); // Called to rebuild the geometry
 		void preRebuild();
 
 		//void				setAttributes( LLFlexibleObjectData );
@@ -133,7 +132,8 @@ private:
 		S32							mInitializedRes;
 		S32							mSimulateRes;
 		S32							mRenderRes;
-		U32							mFrameNum;
+		U64							mLastFrameNum;
+		U32							mLastUpdatePeriod;
 		LLVector3					mCollisionSpherePosition;
 		F32							mCollisionSphereRadius;
 		U32							mID;

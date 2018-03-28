@@ -62,9 +62,9 @@ void LLUrlRegistryNullCallback(const std::string &url,
 ///
 class LLUrlRegistry : public LLSingleton<LLUrlRegistry>
 {
-public:
+	LLSINGLETON(LLUrlRegistry);
 	~LLUrlRegistry();
-
+public:
 	/// add a new Url handler to the registry (will be freed on destruction)
 	/// optionally force it to the front of the list, making it take
 	/// priority over other regular expression matches for URLs
@@ -73,7 +73,8 @@ public:
 	/// get the next Url in an input string, starting at a given character offset
 	/// your callback is invoked if the matched Url's label changes in the future
 	bool findUrl(const std::string &text, LLUrlMatch &match,
-				 const LLUrlLabelCallback &cb = &LLUrlRegistryNullCallback);
+				 const LLUrlLabelCallback &cb = &LLUrlRegistryNullCallback,
+				 bool is_content_trusted = false);
 
 	/// a slightly less efficient version of findUrl for wide strings
 	bool findUrl(const LLWString &text, LLUrlMatch &match,
@@ -88,10 +89,13 @@ public:
 	bool isUrl(const LLWString &text);
 
 private:
-	LLUrlRegistry();
-	friend class LLSingleton<LLUrlRegistry>;
-
 	std::vector<LLUrlEntryBase *> mUrlEntry;
+	LLUrlEntryBase*	mUrlEntryTrusted;
+	LLUrlEntryBase*	mUrlEntryIcon;
+	LLUrlEntryBase* mLLUrlEntryInvalidSLURL;
+	LLUrlEntryBase* mUrlEntryHTTPLabel;
+	LLUrlEntryBase* mUrlEntrySLLabel;
+	LLUrlEntryBase* mUrlEntryNoLink;
 };
 
 #endif

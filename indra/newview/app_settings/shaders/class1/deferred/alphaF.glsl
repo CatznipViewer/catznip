@@ -25,6 +25,8 @@
  
 #extension GL_ARB_texture_rectangle : enable
 
+/*[EXTRA_CODE_HERE]*/
+
 #define INDEXED 1
 #define NON_INDEXED 2
 #define NON_INDEXED_NO_COLOR 3
@@ -534,6 +536,7 @@ void main()
 #ifdef FOR_IMPOSTOR
 	vec4 color;
 	color.rgb = diff.rgb;
+	color.a = 1.0;
 
 #ifdef USE_VERTEX_COLOR
 	float final_alpha = diff.a * vertex_color.a;

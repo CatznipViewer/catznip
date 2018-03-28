@@ -44,7 +44,7 @@ public:
 		mExpanderLabel(more_text)
 	{}
 
-	/*virtual*/ bool	getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const 
+	/*virtual*/ bool	getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const 
 	{
 		// more label always spans width of text box
 		if (num_chars == 0)
@@ -63,10 +63,10 @@ public:
 	{ 
 		return start_offset;
 	}
-	/*virtual*/ S32		getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const 
+	/*virtual*/ S32		getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 	{ 
 		// require full line to ourselves
-		if (line_offset == 0) 
+		if (line_offset == 0)
 		{
 			// print all our text
 			return getEnd() - getStart(); 
@@ -77,7 +77,7 @@ public:
 			return 0;
 		}
 	}
-	/*virtual*/ F32		draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+	/*virtual*/ F32		draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 	{
 		F32 right_x;
 		mStyle->getFont()->renderUTF8(mExpanderLabel, start, 
@@ -116,14 +116,12 @@ LLExpandableTextBox::LLTextBoxEx::LLTextBoxEx(const Params& p)
 	mExpanderVisible(false)
 {
 	setIsChrome(TRUE);
-
+	setMaxTextLength(p.max_text_length);
 }
 
 void LLExpandableTextBox::LLTextBoxEx::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	LLTextEditor::reshape(width, height, called_from_parent);
-
-	hideOrShowExpandTextAsNeeded();
 }
 
 void LLExpandableTextBox::LLTextBoxEx::setText(const LLStringExplicit& text,const LLStyle::Params& input_params)
@@ -237,6 +235,7 @@ LLExpandableTextBox::LLExpandableTextBox(const Params& p)
 	LLTextBoxEx::Params textbox_params = p.textbox;
 	textbox_params.rect(rc);
 	mTextBox = LLUICtrlFactory::create<LLTextBoxEx>(textbox_params);
+	mTextBox->setContentTrusted(false);
 	mScroll->addChild(mTextBox);
 
 	updateTextBoxRect();
@@ -258,6 +257,11 @@ void LLExpandableTextBox::draw()
 	collapseIfPosChanged();
 
 	LLUICtrl::draw();
+}
+
+void LLExpandableTextBox::setContentTrusted(bool trusted_content)
+{
+    mTextBox->setContentTrusted(trusted_content);
 }
 
 void LLExpandableTextBox::collapseIfPosChanged()
@@ -292,6 +296,12 @@ void LLExpandableTextBox::updateTextBoxRect()
 
 	mTextBox->reshape(rc.getWidth(), rc.getHeight());
 	mTextBox->setRect(rc);
+	// *HACK
+	// hideExpandText brakes text styles (replaces hyper-links with plain text), see ticket EXT-3290
+	// Also text segments are not removed properly. Same issue at expandTextBox().
+	// So set text again to make text box re-apply styles and clear segments.
+	// *TODO Find a solution that does not involve text segment.
+	mTextBox->setText(mText);
 }
 
 S32 LLExpandableTextBox::recalculateTextDelta(S32 text_delta)
@@ -397,7 +407,6 @@ void LLExpandableTextBox::collapseTextBox()
 	setRect(mCollapsedRect);
 
 	updateTextBoxRect();
-
 	gViewerWindow->removePopup(this);
 }
 
@@ -417,11 +426,15 @@ void LLExpandableTextBox::onTopLost()
 
 void LLExpandableTextBox::updateTextShape()
 {
-	// I guess this should be done on every reshape(),
-	// but adding this code to reshape() currently triggers bug VWR-26455,
-	// which makes the text virtually unreadable.
 	llassert(!mExpanded);
 	updateTextBoxRect();
+}
+
+void LLExpandableTextBox::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+    mExpanded = false;
+    LLUICtrl::reshape(width, height, called_from_parent);
+    updateTextBoxRect();
 }
 
 void LLExpandableTextBox::setValue(const LLSD& value)

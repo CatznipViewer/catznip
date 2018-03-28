@@ -27,7 +27,6 @@
 #ifndef LL_LLINVENTORY_H
 #define LL_LLINVENTORY_H
 
-#include "lldarray.h"
 #include "llfoldertype.h"
 #include "llinventorytype.h"
 #include "llpermissions.h"
@@ -35,6 +34,7 @@
 #include "llsaleinfo.h"
 #include "llsd.h"
 #include "lluuid.h"
+#include "lltrace.h"
 
 class LLMessageSystem;
 
@@ -44,10 +44,11 @@ class LLMessageSystem;
 //   Base class for anything in the user's inventory.   Handles the common code 
 //   between items and categories. 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class LLInventoryObject : public LLRefCount
+class LLInventoryObject : public LLRefCount, public LLTrace::MemTrackable<LLInventoryObject>
 {
 public:
 	typedef std::list<LLPointer<LLInventoryObject> > object_list_t;
+	typedef std::list<LLConstPointer<LLInventoryObject> > const_object_list_t;
 
 	//--------------------------------------------------------------------
 	// Initialization
@@ -86,22 +87,19 @@ public:
 	void setType(LLAssetType::EType type);
 	virtual void setCreationDate(time_t creation_date_utc); // only stored for items
 
-private:
 	// in place correction for inventory name string
-	void correctInventoryName(std::string& name);
+	static void correctInventoryName(std::string& name);
 
 	//--------------------------------------------------------------------
 	// File Support
 	//   Implemented here so that a minimal information set can be transmitted
 	//   between simulator and viewer.
 	//--------------------------------------------------------------------
-public:
 	// virtual BOOL importFile(LLFILE* fp);
 	virtual BOOL exportFile(LLFILE* fp, BOOL include_asset_key = TRUE) const;
 	virtual BOOL importLegacyStream(std::istream& input_stream);
 	virtual BOOL exportLegacyStream(std::ostream& output_stream, BOOL include_asset_key = TRUE) const;
 
-	virtual void removeFromServer();
 	virtual void updateParentOnServer(BOOL) const;
 	virtual void updateServer(BOOL) const;
 
@@ -124,7 +122,7 @@ protected:
 class LLInventoryItem : public LLInventoryObject
 {
 public:
-	typedef LLDynamicArray<LLPointer<LLInventoryItem> > item_array_t;
+	typedef std::vector<LLPointer<LLInventoryItem> > item_array_t;
 
 	//--------------------------------------------------------------------
 	// Initialization
@@ -174,6 +172,7 @@ public:
 	//--------------------------------------------------------------------
 public:
 	void setAssetUUID(const LLUUID& asset_id);
+	static void correctInventoryDescription(std::string& name);
 	void setDescription(const std::string& new_desc);
 	void setSaleInfo(const LLSaleInfo& sale_info);
 	void setPermissions(const LLPermissions& perm);
@@ -212,7 +211,7 @@ public:
 	void unpackBinaryBucket(U8* bin_bucket, S32 bin_bucket_size);
 	LLSD asLLSD() const;
 	void asLLSD( LLSD& sd ) const;
-	bool fromLLSD(const LLSD& sd);
+	bool fromLLSD(const LLSD& sd, bool is_new = true);
 
 	//--------------------------------------------------------------------
 	// Member Variables
@@ -235,7 +234,7 @@ protected:
 class LLInventoryCategory : public LLInventoryObject
 {
 public:
-	typedef LLDynamicArray<LLPointer<LLInventoryCategory> > cat_array_t;
+	typedef std::vector<LLPointer<LLInventoryCategory> > cat_array_t;
 
 	//--------------------------------------------------------------------
 	// Initialization

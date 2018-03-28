@@ -91,7 +91,7 @@ const unsigned short *copyFromPBoard()
 		NSArray *objToPaste = [pboard readObjectsForClasses:classArray options:[NSDictionary dictionary]];
 		str = [objToPaste objectAtIndex:0];
 	}
-	unichar* temp = (unichar*)calloc([str length], sizeof(unichar));
+	unichar* temp = (unichar*)calloc([str length]+1, sizeof(unichar));
 	[str getCharacters:temp];
 	[pool release];
 	return temp;
@@ -163,6 +163,11 @@ void showNSCursor()
 	[NSCursor unhide];
 }
 
+bool isCGCursorVisible()
+{
+    return CGCursorIsVisible();
+}
+
 void hideNSCursorTillMove(bool hide)
 {
 	[NSCursor setHiddenUntilMouseMoves:hide];
@@ -220,6 +225,11 @@ GLViewRef createOpenGLView(NSWindowRef window, unsigned int samples, bool vsync)
 	LLOpenGLView *glview = [[LLOpenGLView alloc]initWithFrame:[(LLNSWindow*)window frame] withSamples:samples andVsync:vsync];
 	[(LLNSWindow*)window setContentView:glview];
 	return glview;
+}
+
+void setResizeMode(bool oldresize, void* glview)
+{
+    [(LLOpenGLView *)glview setOldResize:oldresize];
 }
 
 void glSwapBuffers(void* context)

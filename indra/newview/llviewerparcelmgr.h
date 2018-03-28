@@ -28,7 +28,6 @@
 #define LL_LLVIEWERPARCELMGR_H
 
 #include "v3dmath.h"
-#include "lldarray.h"
 #include "llframetimer.h"
 #include "llsingleton.h"
 #include "llparcelselection.h"
@@ -76,15 +75,14 @@ public:
 
 class LLViewerParcelMgr : public LLSingleton<LLViewerParcelMgr>
 {
+	LLSINGLETON(LLViewerParcelMgr);
+	~LLViewerParcelMgr();
 
 public:
 	typedef boost::function<void (const LLVector3d&, const bool& local)> teleport_finished_callback_t;
 	typedef boost::signals2::signal<void (const LLVector3d&, const bool&)> teleport_finished_signal_t;
-	typedef boost::function<void()> parcel_changed_callback_t;
-	typedef boost::signals2::signal<void()> parcel_changed_signal_t;
-
-	LLViewerParcelMgr();
-	~LLViewerParcelMgr();
+	typedef boost::function<void()> teleport_failed_callback_t;
+	typedef boost::signals2::signal<void()> teleport_failed_signal_t;
 
 	static void cleanupGlobals();
 
@@ -219,7 +217,7 @@ public:
 
 	// Takes an Access List flag, like AL_ACCESS or AL_BAN
 	void	sendParcelAccessListUpdate(U32 which);
-
+	
 	// Takes an Access List flag, like AL_ACCESS or AL_BAN
 	void	sendParcelAccessListRequest(U32 flags);
 
@@ -283,9 +281,8 @@ public:
 	// the agent is banned or not in the allowed group
 	BOOL isCollisionBanned();
 
-	boost::signals2::connection addAgentParcelChangedCallback(parcel_changed_callback_t cb);
 	boost::signals2::connection setTeleportFinishedCallback(teleport_finished_callback_t cb);
-	boost::signals2::connection setTeleportFailedCallback(parcel_changed_callback_t cb);
+	boost::signals2::connection setTeleportFailedCallback(teleport_failed_callback_t cb);
 	void onTeleportFinished(bool local, const LLVector3d& new_pos);
 	void onTeleportFailed();
 
@@ -293,6 +290,8 @@ public:
 	static BOOL isParcelModifiableByAgent(const LLParcel* parcelp, U64 group_proxy_power);
 
 private:
+	static void sendParcelAccessListUpdate(U32 flags, const std::map<LLUUID, class LLAccessEntry>& entries, LLViewerRegion* region, S32 parcel_local_id);
+	static void sendParcelExperienceUpdate( const U32 flags, uuid_vec_t experience_ids, LLViewerRegion* region, S32 parcel_local_id );
 	static bool releaseAlertCB(const LLSD& notification, const LLSD& response);
 
 	// If the user is claiming land and the current selection 
@@ -334,12 +333,12 @@ private:
 	LLVector3d					mHoverWestSouth;
 	LLVector3d					mHoverEastNorth;
 
-	LLDynamicArray<LLParcelObserver*> mObservers;
+	std::vector<LLParcelObserver*> mObservers;
 
 	BOOL						mTeleportInProgress;
+	LLVector3d					mTeleportInProgressPosition;
 	teleport_finished_signal_t	mTeleportFinishedSignal;
-	parcel_changed_signal_t		mTeleportFailedSignal;
-	parcel_changed_signal_t		mAgentParcelChangedSignal;
+	teleport_failed_signal_t	mTeleportFailedSignal;
 
 	// Array of pieces of parcel edges to potentially draw
 	// Has (parcels_per_edge + 1) * (parcels_per_edge + 1) elements so

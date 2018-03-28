@@ -31,7 +31,7 @@
 #include "v3math.h"
 
 
-LLGlobalEconomy::LLGlobalEconomy()
+LLBaseEconomy::LLBaseEconomy()
 :	mObjectCount( -1 ),
 	mObjectCapacity( -1 ),
 	mPriceObjectClaim( -1 ),
@@ -45,15 +45,15 @@ LLGlobalEconomy::LLGlobalEconomy()
 	mPriceGroupCreate( -1 )
 { }
 
-LLGlobalEconomy::~LLGlobalEconomy()
+LLBaseEconomy::~LLBaseEconomy()
 { }
 
-void LLGlobalEconomy::addObserver(LLEconomyObserver* observer)
+void LLBaseEconomy::addObserver(LLEconomyObserver* observer)
 {
 	mObservers.push_back(observer);
 }
 
-void LLGlobalEconomy::removeObserver(LLEconomyObserver* observer)
+void LLBaseEconomy::removeObserver(LLEconomyObserver* observer)
 {
 	std::list<LLEconomyObserver*>::iterator it =
 		std::find(mObservers.begin(), mObservers.end(), observer);
@@ -63,7 +63,7 @@ void LLGlobalEconomy::removeObserver(LLEconomyObserver* observer)
 	}
 }
 
-void LLGlobalEconomy::notifyObservers()
+void LLBaseEconomy::notifyObservers()
 {
 	for (std::list<LLEconomyObserver*>::iterator it = mObservers.begin();
 		it != mObservers.end();
@@ -74,7 +74,7 @@ void LLGlobalEconomy::notifyObservers()
 }
 
 // static
-void LLGlobalEconomy::processEconomyData(LLMessageSystem *msg, LLGlobalEconomy* econ_data)
+void LLBaseEconomy::processEconomyData(LLMessageSystem *msg, LLBaseEconomy* econ_data)
 {
 	S32 i;
 	F32 f;
@@ -101,7 +101,7 @@ void LLGlobalEconomy::processEconomyData(LLMessageSystem *msg, LLGlobalEconomy* 
 	if (fakeprice_str)
 	{
 		S32 fakeprice = (S32)atoi(fakeprice_str);
-		llwarns << "LL_FAKE_UPLOAD_PRICE: Faking upload price as L$" << fakeprice << llendl;
+		LL_WARNS() << "LL_FAKE_UPLOAD_PRICE: Faking upload price as L$" << fakeprice << LL_ENDL;
 		econ_data->setPriceUpload(fakeprice);
 	}
 #endif
@@ -117,7 +117,7 @@ void LLGlobalEconomy::processEconomyData(LLMessageSystem *msg, LLGlobalEconomy* 
 	econ_data->notifyObservers();
 }
 
-S32	LLGlobalEconomy::calculateTeleportCost(F32 distance) const
+S32	LLBaseEconomy::calculateTeleportCost(F32 distance) const
 {
 	S32 min_cost = getTeleportMinPrice();
 	F32 exponent = getTeleportPriceExponent();
@@ -135,32 +135,31 @@ S32	LLGlobalEconomy::calculateTeleportCost(F32 distance) const
 	return cost;
 }
 
-S32	LLGlobalEconomy::calculateLightRent(const LLVector3& object_size) const
+S32	LLBaseEconomy::calculateLightRent(const LLVector3& object_size) const
 {
 	F32 intensity_mod = llmax(object_size.magVec(), 1.f);
 	return (S32)(intensity_mod * getPriceRentLight());
 }
 
-void LLGlobalEconomy::print()
+void LLBaseEconomy::print()
 {
-	llinfos << "Global Economy Settings: " << llendl;
-	llinfos << "Object Capacity: " << mObjectCapacity << llendl;
-	llinfos << "Object Count: " << mObjectCount << llendl;
-	llinfos << "Claim Price Per Object: " << mPriceObjectClaim << llendl;
-	llinfos << "Claim Price Per Public Object: " << mPricePublicObjectDecay << llendl;
-	llinfos << "Delete Price Per Public Object: " << mPricePublicObjectDelete << llendl;
-	llinfos << "Release Price Per Public Object: " << getPricePublicObjectRelease() << llendl;
-	llinfos << "Price Per Energy Unit: " << mPriceEnergyUnit << llendl;
-	llinfos << "Price Per Upload: " << mPriceUpload << llendl;
-	llinfos << "Light Base Price: " << mPriceRentLight << llendl;
-	llinfos << "Teleport Min Price: " << mTeleportMinPrice << llendl;
-	llinfos << "Teleport Price Exponent: " << mTeleportPriceExponent << llendl;
-	llinfos << "Price for group creation: " << mPriceGroupCreate << llendl;
+	LL_INFOS() << "Global Economy Settings: " << LL_ENDL;
+	LL_INFOS() << "Object Capacity: " << mObjectCapacity << LL_ENDL;
+	LL_INFOS() << "Object Count: " << mObjectCount << LL_ENDL;
+	LL_INFOS() << "Claim Price Per Object: " << mPriceObjectClaim << LL_ENDL;
+	LL_INFOS() << "Claim Price Per Public Object: " << mPricePublicObjectDecay << LL_ENDL;
+	LL_INFOS() << "Delete Price Per Public Object: " << mPricePublicObjectDelete << LL_ENDL;
+	LL_INFOS() << "Release Price Per Public Object: " << getPricePublicObjectRelease() << LL_ENDL;
+	LL_INFOS() << "Price Per Energy Unit: " << mPriceEnergyUnit << LL_ENDL;
+	LL_INFOS() << "Price Per Upload: " << mPriceUpload << LL_ENDL;
+	LL_INFOS() << "Light Base Price: " << mPriceRentLight << LL_ENDL;
+	LL_INFOS() << "Teleport Min Price: " << mTeleportMinPrice << LL_ENDL;
+	LL_INFOS() << "Teleport Price Exponent: " << mTeleportPriceExponent << LL_ENDL;
+	LL_INFOS() << "Price for group creation: " << mPriceGroupCreate << LL_ENDL;
 }
 
 LLRegionEconomy::LLRegionEconomy()
-:	LLGlobalEconomy(),
-	mPriceObjectRent( -1.f ),
+:	mPriceObjectRent( -1.f ),
 	mPriceObjectScaleFactor( -1.f ),
 	mEnergyEfficiency( -1.f ),
 	mBasePriceParcelClaimDefault(-1),
@@ -187,7 +186,7 @@ void LLRegionEconomy::processEconomyData(LLMessageSystem *msg, void** user_data)
 
 	LLRegionEconomy *this_ptr = (LLRegionEconomy*)user_data;
 
-	LLGlobalEconomy::processEconomyData(msg, this_ptr);
+	LLBaseEconomy::processEconomyData(msg, this_ptr);
 
 	msg->getS32Fast(_PREHASH_Info, _PREHASH_PriceParcelClaim, i);
 	this_ptr->setBasePriceParcelClaimDefault(i);
@@ -209,8 +208,8 @@ void LLRegionEconomy::processEconomyDataRequest(LLMessageSystem *msg, void **use
 	LLRegionEconomy *this_ptr = (LLRegionEconomy*)user_data;
 	if (!this_ptr->hasData())
 	{
-		llwarns << "Dropping EconomyDataRequest, because EconomyData message "
-				<< "has not been processed" << llendl;
+		LL_WARNS() << "Dropping EconomyDataRequest, because EconomyData message "
+				<< "has not been processed" << LL_ENDL;
 	}
 
 	msg->newMessageFast(_PREHASH_EconomyData);
@@ -252,14 +251,14 @@ S32 LLRegionEconomy::getPriceParcelRent() const
 
 void LLRegionEconomy::print()
 {
-	this->LLGlobalEconomy::print();
+	this->LLBaseEconomy::print();
 
-	llinfos << "Region Economy Settings: " << llendl;
-	llinfos << "Land (square meters): " << mAreaTotal << llendl;
-	llinfos << "Owned Land (square meters): " << mAreaOwned << llendl;
-	llinfos << "Daily Object Rent: " << mPriceObjectRent << llendl;
-	llinfos << "Daily Land Rent (per meter): " << getPriceParcelRent() << llendl;
-	llinfos << "Energey Efficiency: " << mEnergyEfficiency << llendl;
+	LL_INFOS() << "Region Economy Settings: " << LL_ENDL;
+	LL_INFOS() << "Land (square meters): " << mAreaTotal << LL_ENDL;
+	LL_INFOS() << "Owned Land (square meters): " << mAreaOwned << LL_ENDL;
+	LL_INFOS() << "Daily Object Rent: " << mPriceObjectRent << LL_ENDL;
+	LL_INFOS() << "Daily Land Rent (per meter): " << getPriceParcelRent() << LL_ENDL;
+	LL_INFOS() << "Energey Efficiency: " << mEnergyEfficiency << LL_ENDL;
 }
 
 

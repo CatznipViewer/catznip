@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Coisas" name="objects panel">
-	<panel label="" name="sidepanel__inventory_panel">
+	<panel label="" name="sidepanel_inventory_panel">
 		<layout_stack name="inventory_layout_stack">
 			<layout_panel name="inbox_layout_panel">
 				<panel label="" name="marketplace_inbox">
@@ -33,7 +33,7 @@
 				<layout_panel name="shop_btn_lp">
 					<button label="Comprar" name="shop_btn" tool_tip="Abrir página do Marketplace"/>
 					<button label="Vestir" name="wear_btn" tool_tip="Vestir visual selecionado"/>
-					<button label="Tocar" name="play_btn"/>
+					<button label="Jogar" name="play_btn"/>
 					<button label="Teletransportar" name="teleport_btn" tool_tip="Teletransportar para a área selecionada"/>
 				</layout_panel>
 			</layout_stack>

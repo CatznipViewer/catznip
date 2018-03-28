@@ -155,6 +155,7 @@ extern PFNGLUNIFORM3IVARBPROC glUniform3ivARB;
 extern PFNGLUNIFORM4IVARBPROC glUniform4ivARB;
 extern PFNGLUNIFORMMATRIX2FVARBPROC glUniformMatrix2fvARB;
 extern PFNGLUNIFORMMATRIX3FVARBPROC glUniformMatrix3fvARB;
+extern PFNGLUNIFORMMATRIX3X4FVPROC glUniformMatrix3x4fv;
 extern PFNGLUNIFORMMATRIX4FVARBPROC glUniformMatrix4fvARB;
 extern PFNGLGETOBJECTPARAMETERFVARBPROC glGetObjectParameterfvARB;
 extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
@@ -422,6 +423,7 @@ extern PFNGLUNIFORM3IVARBPROC glUniform3ivARB;
 extern PFNGLUNIFORM4IVARBPROC glUniform4ivARB;
 extern PFNGLUNIFORMMATRIX2FVARBPROC glUniformMatrix2fvARB;
 extern PFNGLUNIFORMMATRIX3FVARBPROC glUniformMatrix3fvARB;
+extern PFNGLUNIFORMMATRIX3X4FVPROC glUniformMatrix3x4fv;
 extern PFNGLUNIFORMMATRIX4FVARBPROC glUniformMatrix4fvARB;
 extern PFNGLGETOBJECTPARAMETERFVARBPROC glGetObjectParameterfvARB;
 extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
@@ -551,9 +553,7 @@ extern PFNGLBINDBUFFERBASEPROC glBindBufferBase;
 // LL_WINDOWS
 
 // windows gl headers depend on things like APIENTRY, so include windows.
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
+#include "llwin32headerslean.h"
 
 //----------------------------------------------------------------------------
 #include <GL/gl.h>
@@ -670,6 +670,7 @@ extern PFNGLUNIFORM3IVARBPROC glUniform3ivARB;
 extern PFNGLUNIFORM4IVARBPROC glUniform4ivARB;
 extern PFNGLUNIFORMMATRIX2FVARBPROC glUniformMatrix2fvARB;
 extern PFNGLUNIFORMMATRIX3FVARBPROC glUniformMatrix3fvARB;
+extern PFNGLUNIFORMMATRIX3X4FVPROC glUniformMatrix3x4fv;
 extern PFNGLUNIFORMMATRIX4FVARBPROC glUniformMatrix4fvARB;
 extern PFNGLGETOBJECTPARAMETERFVARBPROC glGetObjectParameterfvARB;
 extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;

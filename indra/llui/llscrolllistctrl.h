@@ -34,7 +34,6 @@
 
 #include "lluictrl.h"
 #include "llctrlselectioninterface.h"
-//#include "lldarray.h"
 #include "llfontgl.h"
 #include "llui.h"
 #include "llstring.h"	// LLWString
@@ -201,6 +200,8 @@ public:
 	BOOL			isSorted() const { return mSorted; }
 
 	virtual BOOL	isSelected(const LLSD& value) const;
+
+	BOOL 			hasSelectedItem() const;
 
 	BOOL			handleClick(S32 x, S32 y, MASK mask);
 	BOOL			selectFirstItem();
@@ -433,6 +434,7 @@ private:
 	static void		showProfile(std::string id, bool is_group);
 	static void		sendIM(std::string id);
 	static void		addFriend(std::string id);
+	static void		removeFriend(std::string id);
 	static void		showNameDetails(std::string id, bool is_group);
 	static void		copyNameToClipboard(std::string id, bool is_group);
 	static void		copySLURLToClipboard(std::string id, bool is_group);

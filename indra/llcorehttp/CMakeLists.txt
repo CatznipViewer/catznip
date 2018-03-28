@@ -5,8 +5,8 @@ project(llcorehttp)
 include(00-Common)
 include(GoogleMock)
 include(CURL)
-include(CARes)
 include(OpenSSL)
+include(NGHTTP2)
 include(ZLIB)
 include(LLCoreHttp)
 include(LLAddBuildTest)
@@ -26,10 +26,12 @@ set(llcorehttp_SOURCE_FILES
     bufferarray.cpp
     bufferstream.cpp
     httpcommon.cpp
+    llhttpconstants.cpp
     httpheaders.cpp
     httpoptions.cpp
     httprequest.cpp
     httpresponse.cpp
+    httpstats.cpp
     _httplibcurl.cpp
     _httpopcancel.cpp
     _httpoperation.cpp
@@ -51,11 +53,13 @@ set(llcorehttp_HEADER_FILES
     bufferarray.h
     bufferstream.h
     httpcommon.h
+    llhttpconstants.h
     httphandler.h
     httpheaders.h
     httpoptions.h
     httprequest.h
     httpresponse.h
+    httpstats.h
     _httpinternal.h
     _httplibcurl.h
     _httpopcancel.h
@@ -89,10 +93,11 @@ add_library (llcorehttp ${llcorehttp_SOURCE_FILES})
 target_link_libraries(
   llcorehttp
   ${CURL_LIBRARIES}
-  ${CARES_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${CRYPTO_LIBRARIES}
+  ${NGHTTP2_LIBRARIES}
   ${BOOST_THREAD_LIBRARY}
+  ${BOOST_SYSTEM_LIBRARY}
   )
 
 # tests
@@ -127,19 +132,66 @@ if (LL_TESTS)
       ${LLCOMMON_LIBRARIES}
       ${GOOGLEMOCK_LIBRARIES}
       ${CURL_LIBRARIES}
-      ${CARES_LIBRARIES}
       ${OPENSSL_LIBRARIES}
       ${CRYPTO_LIBRARIES}
-      ${BOOST_SYSTEM_LIBRARY}
+      ${NGHTTP2_LIBRARIES}
       ${BOOST_THREAD_LIBRARY}
+      ${BOOST_SYSTEM_LIBRARY}
       )
 
+  # If http_proxy is in the current environment (e.g. to fetch s3-proxy
+  # autobuild packages), suppress it for this integration test: it screws up
+  # the tests.
   LL_ADD_INTEGRATION_TEST(llcorehttp
                           "${llcorehttp_TEST_SOURCE_FILES}"
                           "${test_libs}"
+                          "-Dhttp_proxy"
                           ${PYTHON_EXECUTABLE}
                           "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_llcorehttp_peer.py"
                           )
+
+if (DARWIN)
+  # Path inside the app bundle where we'll need to copy libraries
+  set(LL_TEST_DESTINATION_DIR
+    ${CMAKE_BINARY_DIR}/sharedlibs/Resources
+  )
+
+  # Create the Contents/Resources directory
+  add_custom_command(
+    TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS
+      -E
+      make_directory
+      ${LL_TEST_DESTINATION_DIR}
+    COMMENT "Creating Resources directory in app bundle."
+  )
+  
+  # Copy the required libraries to the package app
+  add_custom_command(TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libapr-1.0.dylib ${LL_TEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libapr-1.0.dylib
+  )
+  add_custom_command(TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libaprutil-1.0.dylib ${LL_TEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libaprutil-1.0.dylib
+  )
+  add_custom_command(TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libexception_handler.dylib ${LL_TEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libexception_handler.dylib
+  )
+  add_custom_command(TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libnghttp2*.dylib ${LL_TEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libnghttp2.dylib
+  )
+  foreach(expat ${EXPAT_COPY})
+    add_custom_command(TARGET INTEGRATION_TEST_llcorehttp PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/${expat} ${LL_TEST_DESTINATION_DIR}
+      DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/${expat}
+    )
+  endforeach(expat)
+
+endif (DARWIN)
 
   #
   # Example Programs
@@ -155,11 +207,11 @@ if (LL_TESTS)
       ${LLCOMMON_LIBRARIES}
       ${GOOGLEMOCK_LIBRARIES}
       ${CURL_LIBRARIES}
-      ${CARES_LIBRARIES}
       ${OPENSSL_LIBRARIES}
       ${CRYPTO_LIBRARIES}
-      ${BOOST_SYSTEM_LIBRARY}
+      ${NGHTTP2_LIBRARIES}
       ${BOOST_THREAD_LIBRARY}
+      ${BOOST_SYSTEM_LIBRARY}
       )
 
   add_executable(http_texture_load
@@ -174,7 +226,7 @@ if (LL_TESTS)
     # The following come from LLAddBuildTest.cmake's INTEGRATION_TEST_xxxx target.
     set_target_properties(http_texture_load
                           PROPERTIES
-                          LINK_FLAGS "/debug /NODEFAULTLIB:LIBCMT /SUBSYSTEM:WINDOWS ${TCMALLOC_LINK_FLAGS}"
+                          LINK_FLAGS "/debug /NODEFAULTLIB:LIBCMT /SUBSYSTEM:CONSOLE"
                           LINK_FLAGS_DEBUG "/NODEFAULTLIB:\"LIBCMT;LIBCMTD;MSVCRT\" /INCREMENTAL:NO"
                           LINK_FLAGS_RELEASE ""
                           )

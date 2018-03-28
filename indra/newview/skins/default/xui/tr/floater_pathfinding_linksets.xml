@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_pathfinding_linksets" title="Yol bulma bağlantı kümeleri">
+<floater name="floater_pathfinding_linksets" title="BÖLGE NESNELERİ">
 	<floater.string name="messaging_get_inprogress">
 		Yol bulma bağlantı kümeleri için sorgulama yapılıyor ...
 	</floater.string>
@@ -16,7 +16,7 @@
 		Yol bulma bağlantı kümeleri yok.
 	</floater.string>
 	<floater.string name="messaging_complete_available">
-		Toplam [NUM_TOTAL] bağlantı kümesi içerisinden [NUM_SELECTED] adet seçildi.
+		[NUM_SELECTED] / [NUM_TOTAL] seçildi.
 	</floater.string>
 	<floater.string name="messaging_not_enabled">
 		Bu bölgede yol bulma etkin değil.
@@ -90,7 +90,16 @@
 	<floater.string name="linkset_choose_use">
 		Bağlantı kümesi kullanımını seç...
 	</floater.string>
-	<panel>
+	<panel name="pathfinding_linksets_main">
+		<text name="linksets_filter_label">
+			Şuna göre filtrele:
+		</text>
+		<text name="linksets_name_label">
+			Ad
+		</text>
+		<text name="linksets_desc_label">
+			Açıklama
+		</text>
 		<combo_box name="filter_by_linkset_use">
 			<combo_box.item label="Bağlantı kümesi kullanımına göre filtrele..." name="filter_by_linkset_use_none"/>
 			<combo_box.item label="Yürüyebilir" name="filter_by_linkset_use_walkable"/>
@@ -109,7 +118,7 @@
 			<scroll_list.columns label="Komut Dosyalı" name="scripted"/>
 			<scroll_list.columns label="Etki" name="land_impact"/>
 			<scroll_list.columns label="Mesafe" name="dist_from_you"/>
-			<scroll_list.columns label="Bağlantı kümesi kullanımı" name="linkset_use"/>
+			<scroll_list.columns label="Yol bulma kullanımı" name="linkset_use"/>
 			<scroll_list.columns label="% A" name="a_percent"/>
 			<scroll_list.columns label="% B" name="b_percent"/>
 			<scroll_list.columns label="% C" name="c_percent"/>
@@ -122,7 +131,10 @@
 		<button label="Tümünü seç" name="select_all_objects"/>
 		<button label="Hiçbirini seçme" name="select_none_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_actions">
+		<text name="linksets_actions_label">
+			Seçilenler üzerindeki eylemler
+		</text>
 		<check_box label="İşareti göster" name="show_beacon"/>
 		<button label="Al" name="take_objects"/>
 		<button label="Kopya al" name="take_copy_objects"/>
@@ -130,7 +142,10 @@
 		<button label="İade Et" name="return_objects"/>
 		<button label="Sil" name="delete_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_attributes">
+		<text name="linksets_attributes_label">
+			Yol bulma özelliklerini düzenle
+		</text>
 		<text name="walkability_coefficients_label">
 			Yürüyebilirlik:
 		</text>

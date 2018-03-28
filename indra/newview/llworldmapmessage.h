@@ -27,17 +27,19 @@
 #ifndef LL_LLWORLDMAPMESSAGE_H
 #define LL_LLWORLDMAPMESSAGE_H
 
+#include "boost/function.hpp"
+
 // Handling of messages (send and process) as well as SLURL callback if necessary
 class LLMessageSystem;
 
 class LLWorldMapMessage : public LLSingleton<LLWorldMapMessage>
 {
+	LLSINGLETON(LLWorldMapMessage);
+	~LLWorldMapMessage();
+
 public:
 	typedef boost::function<void(U64 region_handle, const std::string& url, const LLUUID& snapshot_id, bool teleport)>
 		url_callback_t;
-
-	LLWorldMapMessage();
-	~LLWorldMapMessage();
 
 	// Process incoming answers to map stuff requests
 	static void processMapBlockReply(LLMessageSystem*, void**);

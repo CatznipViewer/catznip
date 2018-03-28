@@ -29,7 +29,7 @@
 #ifndef LL_LLSDUTIL_H
 #define LL_LLSDUTIL_H
 
-class LLSD;
+#include "llsd.h"
 
 // U32
 LL_COMMON_API LLSD ll_sd_from_U32(const U32);
@@ -55,6 +55,8 @@ LL_COMMON_API char* ll_print_sd(const LLSD& sd);
 // Serializes sd to static buffer and returns pointer, using "pretty printing" mode.
 LL_COMMON_API char* ll_pretty_print_sd_ptr(const LLSD* sd);
 LL_COMMON_API char* ll_pretty_print_sd(const LLSD& sd);
+
+LL_COMMON_API std::string ll_stream_notation_sd(const LLSD& sd);
 
 //compares the structure of an LLSD to a template LLSD and stores the
 //"valid" values in a 3rd LLSD. Default values
@@ -126,7 +128,7 @@ LL_COMMON_API std::string llsd_matches(const LLSD& prototype, const LLSD& data, 
 /// Deep equality. If you want to compare LLSD::Real values for approximate
 /// equality rather than bitwise equality, pass @a bits as for
 /// is_approx_equal_fraction().
-LL_COMMON_API bool llsd_equals(const LLSD& lhs, const LLSD& rhs, unsigned bits=-1);
+LL_COMMON_API bool llsd_equals(const LLSD& lhs, const LLSD& rhs, int bits=-1);
 
 // Simple function to copy data out of input & output iterators if
 // there is no need for casting.

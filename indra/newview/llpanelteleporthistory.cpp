@@ -45,6 +45,7 @@
 #include "llviewermenu.h"
 #include "lllandmarkactions.h"
 #include "llclipboard.h"
+#include "lltrans.h"
 
 // Maximum number of items that can be added to a list in one pass.
 // Used to limit time spent for items list update per frame.
@@ -55,7 +56,8 @@ static const std::string COLLAPSED_BY_USER = "collapsed_by_user";
 class LLTeleportHistoryFlatItem : public LLPanel
 {
 public:
-	LLTeleportHistoryFlatItem(S32 index, LLTeleportHistoryPanel::ContextMenu *context_menu, const std::string &region_name, const std::string &hl);
+	LLTeleportHistoryFlatItem(S32 index, LLTeleportHistoryPanel::ContextMenu *context_menu, const std::string &region_name,
+										 	 LLDate date, const std::string &hl);
 	virtual ~LLTeleportHistoryFlatItem();
 
 	virtual BOOL postBuild();
@@ -66,8 +68,11 @@ public:
 	void setIndex(S32 index) { mIndex = index; }
 	const std::string& getRegionName() { return mRegionName;}
 	void setRegionName(const std::string& name);
+	void setDate(LLDate date);
 	void setHighlightedText(const std::string& text);
 	void updateTitle();
+	void updateTimestamp();
+	std::string getTimestamp();
 
 	/*virtual*/ void setValue(const LLSD& value);
 
@@ -84,12 +89,14 @@ private:
 
 	LLButton* mProfileBtn;
 	LLTextBox* mTitle;
+	LLTextBox* mTimeTextBox;
 	
 	LLTeleportHistoryPanel::ContextMenu *mContextMenu;
 
 	S32 mIndex;
 	std::string mRegionName;
 	std::string mHighlight;
+	LLDate 		mDate;
 	LLRootHandle<LLTeleportHistoryFlatItem> mItemHandle;
 };
 
@@ -97,7 +104,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class LLTeleportHistoryFlatItemStorage: public LLSingleton<LLTeleportHistoryFlatItemStorage> {
+class LLTeleportHistoryFlatItemStorage: public LLSingleton<LLTeleportHistoryFlatItemStorage>
+{
+	LLSINGLETON_EMPTY_CTOR(LLTeleportHistoryFlatItemStorage);
 protected:
 	typedef std::vector< LLHandle<LLTeleportHistoryFlatItem> > flat_item_list_t;
 
@@ -121,11 +130,13 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LLTeleportHistoryFlatItem::LLTeleportHistoryFlatItem(S32 index, LLTeleportHistoryPanel::ContextMenu *context_menu, const std::string &region_name, const std::string &hl)
+LLTeleportHistoryFlatItem::LLTeleportHistoryFlatItem(S32 index, LLTeleportHistoryPanel::ContextMenu *context_menu, const std::string &region_name,
+																LLDate date, const std::string &hl)
 :	LLPanel(),
 	mIndex(index),
 	mContextMenu(context_menu),
 	mRegionName(region_name),
+	mDate(date),
 	mHighlight(hl)
 {
 	buildFromFile( "panel_teleport_history_item.xml");
@@ -140,11 +151,14 @@ BOOL LLTeleportHistoryFlatItem::postBuild()
 {
 	mTitle = getChild<LLTextBox>("region");
 
+	mTimeTextBox = getChild<LLTextBox>("timestamp");
+
 	mProfileBtn = getChild<LLButton>("profile_btn");
         
 	mProfileBtn->setClickedCallback(boost::bind(&LLTeleportHistoryFlatItem::onProfileBtnClick, this));
 
 	updateTitle();
+	updateTimestamp();
 
 	return true;
 }
@@ -179,6 +193,38 @@ void LLTeleportHistoryFlatItem::setRegionName(const std::string& name)
 	mRegionName = name;
 }
 
+void LLTeleportHistoryFlatItem::setDate(LLDate date)
+{
+	mDate = date;
+}
+
+std::string LLTeleportHistoryFlatItem::getTimestamp()
+{
+	const LLDate &date = mDate;
+	std::string timestamp = "";
+
+	LLDate now = LLDate::now();
+	S32 now_year, now_month, now_day, now_hour, now_min, now_sec;
+	now.split(&now_year, &now_month, &now_day, &now_hour, &now_min, &now_sec);
+
+	const S32 seconds_in_day = 24 * 60 * 60;
+	S32 seconds_today = now_hour * 60 * 60 + now_min * 60 + now_sec;
+	S32 time_diff = (S32) now.secondsSinceEpoch() - (S32) date.secondsSinceEpoch();
+
+	// Only show timestamp for today and yesterday
+	if(time_diff < seconds_today + seconds_in_day)
+	{
+		timestamp = "[" + LLTrans::getString("TimeHour12")+"]:["
+						+ LLTrans::getString("TimeMin")+"] ["+ LLTrans::getString("TimeAMPM")+"]";
+		LLSD substitution;
+		substitution["datetime"] = (S32) date.secondsSinceEpoch();
+		LLStringUtil::format(timestamp, substitution);
+	}
+
+	return timestamp;
+
+}
+
 void LLTeleportHistoryFlatItem::updateTitle()
 {
 	static LLUIColor sFgColor = LLUIColorTable::instance().getColor("MenuItemEnabledColor", LLColor4U(255, 255, 255));
@@ -187,6 +233,17 @@ void LLTeleportHistoryFlatItem::updateTitle()
 		mTitle,
 		LLStyle::Params().color(sFgColor),
 		mRegionName,
+		mHighlight);
+}
+
+void LLTeleportHistoryFlatItem::updateTimestamp()
+{
+	static LLUIColor sFgColor = LLUIColorTable::instance().getColor("MenuItemEnabledColor", LLColor4U(255, 255, 255));
+
+	LLTextUtil::textboxSetHighlightedVal(
+		mTimeTextBox,
+		LLStyle::Params().color(sFgColor),
+		getTimestamp(),
 		mHighlight);
 }
 
@@ -248,9 +305,11 @@ LLTeleportHistoryFlatItemStorage::getFlatItemForPersistentItem (
 		{
 			item->setIndex(cur_item_index);
 			item->setRegionName(persistent_item.mTitle);
+			item->setDate(persistent_item.mDate);
 			item->setHighlightedText(hl);
 			item->setVisible(TRUE);
 			item->updateTitle();
+			item->updateTimestamp();
 		}
 		else
 		{
@@ -264,6 +323,7 @@ LLTeleportHistoryFlatItemStorage::getFlatItemForPersistentItem (
 		item = new LLTeleportHistoryFlatItem(cur_item_index,
 											 context_menu,
 											 persistent_item.mTitle,
+											 persistent_item.mDate,
 											 hl);
 		mItems.push_back(item->getItemHandle());
 	}
@@ -341,6 +401,7 @@ LLContextMenu* LLTeleportHistoryPanel::ContextMenu::createMenu()
 	registrar.add("TeleportHistory.CopyToClipboard",boost::bind(&LLTeleportHistoryPanel::ContextMenu::onCopyToClipboard, this));
 
 	// create the context menu from the XUI
+	llassert(LLMenuGL::sMenuContainer != NULL);
 	return LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(
 		"menu_teleport_history_item.xml", LLMenuGL::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
 }
@@ -359,6 +420,11 @@ void LLTeleportHistoryPanel::ContextMenu::onInfo()
 void LLTeleportHistoryPanel::ContextMenu::gotSLURLCallback(const std::string& slurl)
 {
 	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(slurl),0,slurl.size());
+
+	LLSD args;
+	args["SLURL"] = slurl;
+
+	LLNotificationsUtil::add("CopySLURL", args);
 }
 
 void LLTeleportHistoryPanel::ContextMenu::onCopyToClipboard()
@@ -416,7 +482,7 @@ BOOL LLTeleportHistoryPanel::postBuild()
 				// All accordion tabs are collapsed initially
 				setAccordionCollapsedByUser(tab, true);
 
-				mItemContainers.put(tab);
+				mItemContainers.push_back(tab);
 
 				LLFlatListView* fl = getFlatListViewFromTab(tab);
 				if (fl)
@@ -432,14 +498,14 @@ BOOL LLTeleportHistoryPanel::postBuild()
 		// Open first 2 accordion tabs
 		if (mItemContainers.size() > 1)
 		{
-			LLAccordionCtrlTab* tab = mItemContainers.get(mItemContainers.size() - 1);
+			LLAccordionCtrlTab* tab = mItemContainers.at(mItemContainers.size() - 1);
 			tab->setDisplayChildren(true);
 			setAccordionCollapsedByUser(tab, false);
 		}
 
 		if (mItemContainers.size() > 2)
 		{
-			LLAccordionCtrlTab* tab = mItemContainers.get(mItemContainers.size() - 2);
+			LLAccordionCtrlTab* tab = mItemContainers.at(mItemContainers.size() - 2);
 			tab->setDisplayChildren(true);
 			setAccordionCollapsedByUser(tab, false);
 		}
@@ -683,7 +749,7 @@ void LLTeleportHistoryPanel::refresh()
 			tab_idx = mItemContainers.size() - 1 - tab_idx;
 			if (tab_idx >= 0)
 			{
-				LLAccordionCtrlTab* tab = mItemContainers.get(tab_idx);
+				LLAccordionCtrlTab* tab = mItemContainers.at(tab_idx);
 				tab->setVisible(true);
 
 				// Expand all accordion tabs when filtering
@@ -717,7 +783,7 @@ void LLTeleportHistoryPanel::refresh()
 											  mCurrentItem,
 											  filter_string);
 			if ( !curr_flat_view->addItem(item, LLUUID::null, ADD_BOTTOM, false) )
-				llerrs << "Couldn't add flat item to teleport history." << llendl;
+				LL_ERRS() << "Couldn't add flat item to teleport history." << LL_ENDL;
 			if (mLastSelectedItemIndex == mCurrentItem)
 				curr_flat_view->selectItem(item, true);
 		}
@@ -730,7 +796,7 @@ void LLTeleportHistoryPanel::refresh()
 
 	for (S32 n = mItemContainers.size() - 1; n >= 0; --n)
 	{
-		LLAccordionCtrlTab* tab = mItemContainers.get(n);
+		LLAccordionCtrlTab* tab = mItemContainers.at(n);
 		LLFlatListView* fv = getFlatListViewFromTab(tab);
 		if (fv)
 		{
@@ -792,7 +858,7 @@ void LLTeleportHistoryPanel::replaceItem(S32 removed_index)
 	// to point to the right item in LLTeleportHistoryStorage
 	for (S32 tab_idx = mItemContainers.size() - 1; tab_idx >= 0; --tab_idx)
 	{
-		LLAccordionCtrlTab* tab = mItemContainers.get(tab_idx);
+		LLAccordionCtrlTab* tab = mItemContainers.at(tab_idx);
 		if (!tab->getVisible())
 			continue;
 
@@ -846,7 +912,7 @@ void LLTeleportHistoryPanel::showTeleportHistory()
 
 	for (S32 n = mItemContainers.size() - 1; n >= 0; --n)
 	{
-		LLAccordionCtrlTab* tab = mItemContainers.get(n);
+		LLAccordionCtrlTab* tab = mItemContainers.at(n);
 		if (tab)
 		{
 			tab->setVisible(false);
@@ -873,7 +939,7 @@ void LLTeleportHistoryPanel::handleItemSelect(LLFlatListView* selected)
 
 	for (S32 n = 0; n < tabs_cnt; n++)
 	{
-		LLAccordionCtrlTab* tab = mItemContainers.get(n);
+		LLAccordionCtrlTab* tab = mItemContainers.at(n);
 
 		if (!tab->getVisible())
 			continue;
@@ -930,6 +996,7 @@ void LLTeleportHistoryPanel::onAccordionTabRightClick(LLView *view, S32 x, S32 y
 	registrar.add("TeleportHistory.TabClose",	boost::bind(&LLTeleportHistoryPanel::onAccordionTabClose, this, tab));
 
 	// create the context menu from the XUI
+	llassert(LLMenuGL::sMenuContainer != NULL);
 	mAccordionTabMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(
 		"menu_teleport_history_tab.xml", LLMenuGL::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
 
@@ -958,7 +1025,7 @@ void LLTeleportHistoryPanel::onExpandAllFolders()
 
 	for (S32 n = 0; n < tabs_cnt; n++)
 	{
-		mItemContainers.get(n)->setDisplayChildren(true);
+		mItemContainers.at(n)->setDisplayChildren(true);
 	}
 	mHistoryAccordion->arrange();
 }
@@ -969,7 +1036,7 @@ void LLTeleportHistoryPanel::onCollapseAllFolders()
 
 	for (S32 n = 0; n < tabs_cnt; n++)
 	{
-		mItemContainers.get(n)->setDisplayChildren(false);
+		mItemContainers.at(n)->setDisplayChildren(false);
 	}
 	mHistoryAccordion->arrange();
 
@@ -1024,7 +1091,7 @@ bool LLTeleportHistoryPanel::isActionEnabled(const LLSD& userdata) const
 
 	for (S32 n = 0; n < tabs_cnt; n++)
 	{
-		LLAccordionCtrlTab* tab = mItemContainers.get(n);
+		LLAccordionCtrlTab* tab = mItemContainers.at(n);
 		if (!tab->getVisible())
 			continue;
 

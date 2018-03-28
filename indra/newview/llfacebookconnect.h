@@ -30,6 +30,8 @@
 
 #include "llsingleton.h"
 #include "llimage.h"
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 class LLEventPump;
 
@@ -41,6 +43,8 @@ class LLEventPump;
  */
 class LLFacebookConnect : public LLSingleton<LLFacebookConnect>
 {
+	LLSINGLETON(LLFacebookConnect);
+	~LLFacebookConnect() {};
 	LOG_CLASS(LLFacebookConnect);
 public:
     enum EConnectionState
@@ -84,12 +88,9 @@ public:
     void openFacebookWeb(std::string url);
 
 private:
-	friend class LLSingleton<LLFacebookConnect>;
 
-	LLFacebookConnect();
-	~LLFacebookConnect() {};
  	std::string getFacebookConnectURL(const std::string& route = "", bool include_read_from_master = false);
-   
+
     EConnectionState mConnectionState;
 	BOOL mConnected;
 	LLSD mInfo;
@@ -101,6 +102,15 @@ private:
 	static boost::scoped_ptr<LLEventPump> sStateWatcher;
 	static boost::scoped_ptr<LLEventPump> sInfoWatcher;
 	static boost::scoped_ptr<LLEventPump> sContentWatcher;
+
+    bool testShareStatus(LLSD &results);
+    void facebookConnectCoro(std::string authCode, std::string authState);
+    void facebookConnectedCheckCoro(bool autoConnect);
+    void facebookDisconnectCoro();
+    void facebookShareCoro(std::string route, LLSD share);
+    void facebookShareImageCoro(std::string route, LLPointer<LLImageFormatted> image, std::string caption);
+    void facebookConnectInfoCoro();
+    void facebookConnectFriendsCoro();
 };
 
 #endif // LL_LLFACEBOOKCONNECT_H

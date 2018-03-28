@@ -42,13 +42,6 @@
 #include "llvoavatar.h"
 #include "llworld.h"
 
-
-const F32 PARTICLE_SPACING = 0.01f;
-const F32 MAX_SIZE = 0.025f;
-const F32 START_POS_MAG = 1.f;
-const F32 END_POS_MAG = 1.2f;
-
-
 LLHUDEffectSpiral::LLHUDEffectSpiral(const U8 type) : LLHUDEffect(type), mbInit(FALSE)
 {
 	mKillTime = 10.f;
@@ -85,7 +78,7 @@ void LLHUDEffectSpiral::packData(LLMessageSystem *mesgsys)
 {
 	if (!mSourceObject)
 	{
-		//llwarns << "Missing object in trail pack!" << llendl;
+		//LL_WARNS() << "Missing object in trail pack!" << LL_ENDL;
 	}
 	LLHUDEffect::packData(mesgsys);
 
@@ -117,7 +110,7 @@ void LLHUDEffectSpiral::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
 	size_t size = mesgsys->getSizeFast(_PREHASH_Effect, blocknum, _PREHASH_TypeData);
 	if (size != EFFECT_SIZE)
 	{
-		llwarns << "Spiral effect with bad size " << size << llendl;
+		LL_WARNS() << "Spiral effect with bad size " << size << LL_ENDL;
 		return;
 	}
 	mesgsys->getBinaryDataFast(_PREHASH_Effect, _PREHASH_TypeData, 

@@ -27,6 +27,7 @@
 
 #include "llviewerprecompiledheaders.h"
 #include "llwatchdog.h"
+#include "llthread.h"
 
 const U32 WATCHDOG_SLEEP_TIME_USEC = 1000000;
 
@@ -123,11 +124,17 @@ void LLWatchdogTimeout::setTimeout(F32 d)
 
 void LLWatchdogTimeout::start(const std::string& state) 
 {
-	// Order of operation is very impmortant here.
+    if (mTimeout == 0)
+    {
+        LL_WARNS() << "Cant' start watchdog entry - no timeout set" << LL_ENDL;
+        return;
+    }
+	// Order of operation is very important here.
 	// After LLWatchdogEntry::start() is called
 	// LLWatchdogTimeout::isAlive() will be called asynchronously. 
 	ping(state);
-	mTimer.start(); 
+	mTimer.start();
+    mTimer.setTimerExpirySec(mTimeout); // timer expiration set to 0 by start()
 	LLWatchdogEntry::start();
 }
 
@@ -221,7 +228,7 @@ void LLWatchdog::run()
 	
 	if(current_run_delta > (WATCHDOG_SLEEP_TIME_USEC * TIME_ELAPSED_MULTIPLIER))
 	{
-		llinfos << "Watchdog thread delayed: resetting entries." << llendl;
+		LL_INFOS() << "Watchdog thread delayed: resetting entries." << LL_ENDL;
 		std::for_each(mSuspects.begin(), 
 			mSuspects.end(), 
 			std::mem_fun(&LLWatchdogEntry::reset)
@@ -234,7 +241,6 @@ void LLWatchdog::run()
 				mSuspects.end(), 
 				std::not1(std::mem_fun(&LLWatchdogEntry::isAlive))
 				);
-
 		if(result != mSuspects.end())
 		{
 			// error!!!
@@ -243,7 +249,7 @@ void LLWatchdog::run()
 				mTimer->stop();
 			}
 
-			llinfos << "Watchdog detected error:" << llendl;
+			LL_INFOS() << "Watchdog detected error:" << LL_ENDL;
 			mKillerCallback();
 		}
 	}

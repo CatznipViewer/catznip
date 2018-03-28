@@ -67,6 +67,7 @@
 #include "llvowlsky.h"
 #include "llrender.h"
 #include "llnavigationbar.h"
+#include "llnotificationsutil.h"
 #include "llfloatertools.h"
 #include "llpaneloutfitsinventory.h"
 #include "llpanellogin.h"
@@ -74,7 +75,6 @@
 #include "llspellcheck.h"
 #include "llslurl.h"
 #include "llstartup.h"
-#include "llupdaterservice.h"
 
 // Third party library includes
 #include <boost/algorithm/string.hpp>
@@ -118,6 +118,13 @@ static bool handleTerrainDetailChanged(const LLSD& newvalue)
 	return true;
 }
 
+
+static bool handleDebugAvatarJointsChanged(const LLSD& newvalue)
+{
+    std::string new_string = newvalue.asString();
+    LLJoint::setDebugJointNames(new_string);
+    return true;
+}
 
 static bool handleSetShaderChanged(const LLSD& newvalue)
 {
@@ -165,11 +172,6 @@ static bool handleRenderPerfTestChanged(const LLSD& newvalue)
        }
 
        return true;
-}
-
-bool handleRenderAvatarComplexityLimitChanged(const LLSD& newvalue)
-{
-	return true;
 }
 
 bool handleRenderTransparentWaterChanged(const LLSD& newvalue)
@@ -224,12 +226,6 @@ static bool handleAvatarPhysicsLODChanged(const LLSD& newvalue)
 	return true;
 }
 
-static bool handleAvatarMaxVisibleChanged(const LLSD& newvalue)
-{
-	LLVOAvatar::sMaxVisible = (U32) newvalue.asInteger();
-	return true;
-}
-
 static bool handleTerrainLODChanged(const LLSD& newvalue)
 {
 		LLVOSurfacePatch::sLODFactor = (F32)newvalue.asReal();
@@ -264,7 +260,7 @@ static bool handleGammaChanged(const LLSD& newvalue)
 		// Only save it if it's changed
 		if (!gViewerWindow->getWindow()->setGamma(gamma))
 		{
-			llwarns << "setGamma failed!" << llendl;
+			LL_WARNS() << "setGamma failed!" << LL_ENDL;
 		}
 	}
 
@@ -289,7 +285,7 @@ static bool handleMaxPartCountChanged(const LLSD& newvalue)
 
 static bool handleVideoMemoryChanged(const LLSD& newvalue)
 {
-	gTextureList.updateMaxResidentTexMem(newvalue.asInteger());
+	gTextureList.updateMaxResidentTexMem(S32Megabytes(newvalue.asInteger()));
 	return true;
 }
 
@@ -368,6 +364,7 @@ static bool handleRepartition(const LLSD&)
 	if (gPipeline.isInit())
 	{
 		gOctreeMaxCapacity = gSavedSettings.getU32("OctreeMaxNodeCapacity");
+		gOctreeMinSize = gSavedSettings.getF32("OctreeMinimumNodeSize");
 		gObjectList.repartitionObjects();
 	}
 	return true;
@@ -419,12 +416,6 @@ static bool handleRenderBumpChanged(const LLSD& newval)
 		gPipeline.resetVertexBuffers();
 		LLViewerShaderMgr::instance()->setShaders();
 	}
-	return true;
-}
-
-static bool handleRenderUseImpostorsChanged(const LLSD& newvalue)
-{
-	LLVOAvatar::sUseImpostors = newvalue.asBoolean();
 	return true;
 }
 
@@ -499,7 +490,7 @@ bool handleVelocityInterpolate(const LLSD& newvalue)
 		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 		gAgent.sendReliableMessage();
-		llinfos << "Velocity Interpolation On" << llendl;
+		LL_INFOS() << "Velocity Interpolation On" << LL_ENDL;
 	}
 	else
 	{
@@ -508,14 +499,14 @@ bool handleVelocityInterpolate(const LLSD& newvalue)
 		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 		gAgent.sendReliableMessage();
-		llinfos << "Velocity Interpolation Off" << llendl;
+		LL_INFOS() << "Velocity Interpolation Off" << LL_ENDL;
 	}
 	return true;
 }
 
 bool handleForceShowGrid(const LLSD& newvalue)
 {
-	LLPanelLogin::updateServer( );
+	LLPanelLogin::updateLocationSelectorsVisibility();
 	return true;
 }
 
@@ -591,19 +582,6 @@ bool toggle_show_object_render_cost(const LLSD& newvalue)
 	return true;
 }
 
-void toggle_updater_service_active(const LLSD& new_value)
-{
-    if(new_value.asInteger())
-    {
-		LLUpdaterService update_service;
-		if(!update_service.isChecking()) update_service.startChecking();
-    }
-    else
-    {
-        LLUpdaterService().stopChecking();
-    }
-}
-
 ////////////////////////////////////////////////////////////////////////////
 
 void settings_setup_listeners()
@@ -634,8 +612,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderAvatarCloth")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("WindLightUseAtmosShaders")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderGammaFull")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
-	gSavedSettings.getControl("RenderAvatarMaxVisible")->getSignal()->connect(boost::bind(&handleAvatarMaxVisibleChanged, _2));
-	gSavedSettings.getControl("RenderAvatarComplexityLimit")->getSignal()->connect(boost::bind(&handleRenderAvatarComplexityLimitChanged, _2));
 	gSavedSettings.getControl("RenderVolumeLODFactor")->getSignal()->connect(boost::bind(&handleVolumeLODChanged, _2));
 	gSavedSettings.getControl("RenderAvatarLODFactor")->getSignal()->connect(boost::bind(&handleAvatarLODChanged, _2));
 	gSavedSettings.getControl("RenderAvatarPhysicsLODFactor")->getSignal()->connect(boost::bind(&handleAvatarPhysicsLODChanged, _2));
@@ -653,7 +629,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderObjectBump")->getSignal()->connect(boost::bind(&handleRenderBumpChanged, _2));
 	gSavedSettings.getControl("RenderMaxVBOSize")->getSignal()->connect(boost::bind(&handleResetVertexBuffersChanged, _2));
 	gSavedSettings.getControl("RenderDeferredNoise")->getSignal()->connect(boost::bind(&handleReleaseGLBufferChanged, _2));
-	gSavedSettings.getControl("RenderUseImpostors")->getSignal()->connect(boost::bind(&handleRenderUseImpostorsChanged, _2));
 	gSavedSettings.getControl("RenderDebugGL")->getSignal()->connect(boost::bind(&handleRenderDebugGLChanged, _2));
 	gSavedSettings.getControl("RenderDebugPipeline")->getSignal()->connect(boost::bind(&handleRenderDebugPipelineChanged, _2));
 	gSavedSettings.getControl("RenderResolutionDivisor")->getSignal()->connect(boost::bind(&handleRenderResolutionDivisorChanged, _2));
@@ -754,12 +729,12 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("ShowNavbarNavigationPanel")->getSignal()->connect(boost::bind(&toggle_show_navigation_panel, _2));
 	gSavedSettings.getControl("ShowMiniLocationPanel")->getSignal()->connect(boost::bind(&toggle_show_mini_location_panel, _2));
 	gSavedSettings.getControl("ShowObjectRenderingCost")->getSignal()->connect(boost::bind(&toggle_show_object_render_cost, _2));
-	gSavedSettings.getControl("UpdaterServiceSetting")->getSignal()->connect(boost::bind(&toggle_updater_service_active, _2));
 	gSavedSettings.getControl("ForceShowGrid")->getSignal()->connect(boost::bind(&handleForceShowGrid, _2));
 	gSavedSettings.getControl("RenderTransparentWater")->getSignal()->connect(boost::bind(&handleRenderTransparentWaterChanged, _2));
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("SpellCheckDictionary")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("LoginLocation")->getSignal()->connect(boost::bind(&handleLoginLocationChanged));
+    gSavedSettings.getControl("DebugAvatarJoints")->getCommitSignal()->connect(boost::bind(&handleDebugAvatarJointsChanged, _2));
 }
 
 #if TEST_CACHED_CONTROL
@@ -785,13 +760,13 @@ static LLCachedControl<std::string> test_BrowserHomePage("BrowserHomePage", "hah
 
 void test_cached_control()
 {
-#define do { TEST_LLCC(T, V) if((T)mySetting_##T != V) llerrs << "Fail "#T << llendl; } while(0)
+#define do { TEST_LLCC(T, V) if((T)mySetting_##T != V) LL_ERRS() << "Fail "#T << LL_ENDL; } while(0)
 	TEST_LLCC(U32, 666);
 	TEST_LLCC(S32, (S32)-666);
 	TEST_LLCC(F32, (F32)-666.666);
 	TEST_LLCC(bool, true);
 	TEST_LLCC(BOOL, FALSE);
-	if((std::string)mySetting_string != "Default String Value") llerrs << "Fail string" << llendl;
+	if((std::string)mySetting_string != "Default String Value") LL_ERRS() << "Fail string" << LL_ENDL;
 	TEST_LLCC(LLVector3, LLVector3(1.0f, 2.0f, 3.0f));
 	TEST_LLCC(LLVector3d, LLVector3d(6.0f, 5.0f, 4.0f));
 	TEST_LLCC(LLRect, LLRect(0, 0, 100, 500));
@@ -800,7 +775,7 @@ void test_cached_control()
 	TEST_LLCC(LLColor4U, LLColor4U(255, 200, 100, 255));
 //There's no LLSD comparsion for LLCC yet. TEST_LLCC(LLSD, test_llsd); 
 
-	if((std::string)test_BrowserHomePage != "http://www.secondlife.com") llerrs << "Fail BrowserHomePage" << llendl;
+	if((std::string)test_BrowserHomePage != "http://www.secondlife.com") LL_ERRS() << "Fail BrowserHomePage" << LL_ENDL;
 }
 #endif // TEST_CACHED_CONTROL
 

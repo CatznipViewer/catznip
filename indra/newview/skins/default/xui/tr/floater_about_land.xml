@@ -10,13 +10,13 @@
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
 	<floater.string name="Minutes">
-		[MINUTES] dakika
+		[MINUTES] dak.
 	</floater.string>
 	<floater.string name="Minute">
-		dakika
+		dak.
 	</floater.string>
 	<floater.string name="Seconds">
-		[SECONDS] saniye
+		[SECONDS] sn.
 	</floater.string>
 	<floater.string name="Remaining">
 		kaldı
@@ -331,22 +331,6 @@ Sadece büyük parseller aramada görünür.
 			<check_box label="Güvenli (hasar yok)" name="check safe" tool_tip="İşaretliyse, araziyi Güvenli moda getirerek hasar çarpışmasını etkinsizleştirir İşaretli değilse hasar çarpışması etkinleşir."/>
 			<check_box label="İtme Yok" name="PushRestrictCheck" tool_tip="Komut dosyalarının itmesini önler Bu seçeneğin işaretlenmesi arazinizdeki bozucu davranışları önlemeye yardımcı olabilir."/>
 			<check_box label="Konumu Arama sonuçlarında göster (L$30/hafta)" name="ShowDirectoryCheck" tool_tip="Arama sonuçlarında bu parsel görünsün"/>
-			<combo_box name="land category with adult">
-				<combo_box.item label="Herh. Bir Kategori" name="item0"/>
-				<combo_box.item label="Linden Konumu" name="item1"/>
-				<combo_box.item label="Yetişkin" name="item2"/>
-				<combo_box.item label="Sanat ve Kültür" name="item3"/>
-				<combo_box.item label="İş" name="item4"/>
-				<combo_box.item label="Eğitim" name="item5"/>
-				<combo_box.item label="Oyun" name="item6"/>
-				<combo_box.item label="Uğrak Mekan" name="item7"/>
-				<combo_box.item label="Yeni Gelenlere Yardım Sunan" name="item8"/>
-				<combo_box.item label="Park ve Doğa" name="item9"/>
-				<combo_box.item label="Yerleşim" name="item10"/>
-				<combo_box.item label="Alışveriş" name="item11"/>
-				<combo_box.item label="Kiralık" name="item13"/>
-				<combo_box.item label="Diğer" name="item12"/>
-			</combo_box>
 			<combo_box name="land category">
 				<combo_box.item label="Herh. Bir Kategori" name="item0"/>
 				<combo_box.item label="Linden Konumu" name="item1"/>
@@ -446,13 +430,10 @@ Sadece büyük parseller aramada görünür.
 			<panel.string name="estate_override">
 				Bu seçeneklerden biri veya daha fazlası gayrimenkul düzeyinde ayarlanır
 			</panel.string>
-			<check_box label="Kamusal Erişime İzin Ver (Bunun işaretinin kaldırılması yasaklama çizgileri oluşturacaktır)" name="public_access"/>
-			<text name="Only Allow">
-				Sadece şu Sakinlere erişim izni verin:
-			</text>
-			<check_box label="Ödeme bilgileri kayıtlı [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Sakinlerin bu parsele erişebilmesi için ödeme bilgilerinin kayıtlı olması gerekir.  Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
-			<check_box label="18 veya üzeri bir yaşta [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Sakinlerin bu parsele erişebilmesi için 18 veya üzeri bir yaşta olmaları gerekir. Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
-			<check_box label="Grup Erişimine İzin Ver: [GROUP]" name="GroupCheck" tool_tip="Genel sekmesinde grup ayarla."/>
+			<check_box label="Herkes ziyaret edebilir (Bunun işaretinin kaldırılması yasaklama çizgileri oluşturacaktır)" name="public_access"/>
+			<check_box label="18 yaşından büyük olmalıdır [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Sakinlerin bu parsele erişebilmesi için 18 veya üzeri bir yaşta olmaları gerekir. Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
+			<check_box label="Dosyadaki ödeme bilgisine sahip olmalıdır [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Sakinlerin bu parsele erişebilmesi için ödeme bilgilerinin kayıtlı olması gerekir.  Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
+			<check_box label="[GROUP] grubuna kısıtlama olmadan izin ver" name="GroupCheck" tool_tip="Genel sekmesinde grup ayarla."/>
 			<check_box label="Geçiş haklr. şuna sat:" name="PassCheck" tool_tip="Bu parsele geçici erişim verir"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="Herkes" name="Anyone"/>
@@ -460,9 +441,12 @@ Sadece büyük parseller aramada görünür.
 			</combo_box>
 			<spinner label="L$ olarak Fiyat:" name="PriceSpin"/>
 			<spinner label="Erişim saatleri:" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(Gayrimenkul sahibi, bu seçimleri kısıtlamış olabilir)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Her Zaman İzin Ver" name="AllowedText">
-					İzin Verilen Sakinler
+					Her zaman izin verilen ([COUNT], maks. [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] listeli, [MAX] maksimum)"/>
 				<button label="Ekle" name="add_allowed"/>
@@ -470,12 +454,13 @@ Sadece büyük parseller aramada görünür.
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Yasakla" name="BanCheck">
-					Yasaklı Sakinler
+					Her zaman engellenen ([COUNT], maks. [MAX])
 				</text>
 				<name_list name="BannedList" tool_tip="([LISTED] listeli, [MAX] maksimum)"/>
 				<button label="Ekle" name="add_banned"/>
 				<button label="Kaldır" label_selected="Kaldır" name="remove_banned"/>
 			</panel>
 		</panel>
+		<panel label="DENEYİMLER" name="land_experiences_panel"/>
 	</tab_container>
 </floater>

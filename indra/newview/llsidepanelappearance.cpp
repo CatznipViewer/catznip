@@ -49,7 +49,7 @@
 #include "llvoavatarself.h"
 #include "llviewerwearable.h"
 
-static LLRegisterPanelClassWrapper<LLSidepanelAppearance> t_appearance("sidepanel_appearance");
+static LLPanelInjector<LLSidepanelAppearance> t_appearance("sidepanel_appearance");
 
 class LLCurrentlyWornFetchObserver : public LLInventoryFetchItemsObserver
 {
@@ -142,7 +142,7 @@ BOOL LLSidepanelAppearance::postBuild()
 	mCurrOutfitPanel = getChild<LLPanel>("panel_currentlook");
 
 
-	setVisibleCallback(boost::bind(&LLSidepanelAppearance::onVisibilityChange,this,_2));
+	setVisibleCallback(boost::bind(&LLSidepanelAppearance::onVisibilityChanged,this,_2));
 
 	return TRUE;
 }
@@ -181,7 +181,7 @@ void LLSidepanelAppearance::onOpen(const LLSD& key)
 	mOpened = true;
 }
 
-void LLSidepanelAppearance::onVisibilityChange(const LLSD &new_visibility)
+void LLSidepanelAppearance::onVisibilityChanged(const LLSD &new_visibility)
 {
 	LLSD visibility;
 	visibility["visible"] = new_visibility.asBoolean();
@@ -198,10 +198,10 @@ void LLSidepanelAppearance::updateToVisibility(const LLSD &new_visibility)
 
 		if (is_outfit_edit_visible || is_wearable_edit_visible)
 		{
-			const LLViewerWearable *wearable_ptr = mEditWearable->getWearable();
+			const LLViewerWearable *wearable_ptr = mEditWearable ? mEditWearable->getWearable() : NULL;
 			if (!wearable_ptr)
 			{
-				llwarns << "Visibility change to invalid wearable" << llendl;
+				LL_WARNS() << "Visibility change to invalid wearable" << LL_ENDL;
 				return;
 			}
 			// Disable camera switch is currently just for WT_PHYSICS type since we don't want to freeze the avatar
@@ -212,7 +212,8 @@ void LLSidepanelAppearance::updateToVisibility(const LLSD &new_visibility)
 			}
 			if (is_wearable_edit_visible)
 			{
-				if (gAgentWearables.getWearableIndex(wearable_ptr) == LLAgentWearables::MAX_CLOTHING_PER_TYPE)
+				U32 index;
+				if (!gAgentWearables.getWearableIndex(wearable_ptr,index))
 				{
 					// we're no longer wearing the wearable we were last editing, switch back to outfit editor
 					showOutfitEditPanel();
@@ -231,7 +232,7 @@ void LLSidepanelAppearance::updateToVisibility(const LLSD &new_visibility)
 		{
 			gAgentCamera.changeCameraToDefault();
 			gAgentCamera.resetView();
-		}
+		}	
 	}
 }
 
@@ -382,11 +383,21 @@ void LLSidepanelAppearance::toggleOutfitEditPanel(BOOL visible, BOOL disable_cam
 
 void LLSidepanelAppearance::toggleWearableEditPanel(BOOL visible, LLViewerWearable *wearable, BOOL disable_camera_switch)
 {
-	if (!mEditWearable || mEditWearable->getVisible() == visible)
+	if (!mEditWearable)
 	{
-		// visibility isn't changing, hence nothing to do
 		return;
 	}
+
+	if (mEditWearable->getVisible() == visible && (!visible || mEditWearable->getWearable() == wearable))
+	{
+		// visibility isn't changing and panel doesn't need an update, hence nothing to do
+		return;
+	}
+
+	// If we're just switching between outfit and wearable editing or updating item,
+	// don't end customization and don't switch camera
+	// Don't end customization and don't switch camera without visibility change
+	BOOL change_state = !disable_camera_switch && mEditWearable->getVisible() != visible;
 
 	if (!wearable)
 	{
@@ -402,18 +413,19 @@ void LLSidepanelAppearance::toggleWearableEditPanel(BOOL visible, LLViewerWearab
 
 	if (visible)
 	{
-		LLVOAvatarSelf::onCustomizeStart(disable_camera_switch);
-		mEditWearable->setWearable(wearable, disable_camera_switch);
+		LLVOAvatarSelf::onCustomizeStart(!change_state);
+		mEditWearable->setWearable(wearable, !change_state);
 		mEditWearable->onOpen(LLSD()); // currently no-op, just for consistency
 	}
 	else
 	{
 		// Save changes if closing.
 		mEditWearable->saveChanges();
+		mEditWearable->setWearable(NULL);
 		LLAppearanceMgr::getInstance()->updateIsDirty();
-		if (!disable_camera_switch)   // if we're just switching between outfit and wearable editing, don't end customization.
+		if (change_state)
 		{
-			LLVOAvatarSelf::onCustomizeEnd(disable_camera_switch);
+			LLVOAvatarSelf::onCustomizeEnd(!change_state);
 		}
 	}
 }
@@ -452,7 +464,7 @@ void LLSidepanelAppearance::editWearable(LLViewerWearable *wearable, LLView *dat
 	LLFloaterSidePanelContainer::showPanel("appearance", LLSD());
 	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(data);
 	if (panel)
-	{
+	{	
 		panel->showWearableEditPanel(wearable, disable_camera_switch);
 	}
 }

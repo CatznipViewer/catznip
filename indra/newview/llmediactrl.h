@@ -95,10 +95,11 @@ public:
 		virtual BOOL handleToolTip(S32 x, S32 y, MASK mask);
 
 		// navigation
-		void navigateTo( std::string url_in, std::string mime_type = "");
+		void navigateTo( std::string url_in, std::string mime_type = "", bool clean_browser = false);
 		void navigateBack();
 		void navigateHome();
 		void navigateForward();	
+		void navigateStop();
 		void navigateToLocalPage( const std::string& subdir, const std::string& filename_in );
 		bool canNavigateBack();
 		bool canNavigateForward();
@@ -150,7 +151,8 @@ public:
 
 		// over-rides
 		virtual BOOL handleKeyHere( KEY key, MASK mask);
-		virtual void handleVisibilityChange ( BOOL new_visibility );
+		virtual BOOL handleKeyUpHere(KEY key, MASK mask);
+		virtual void onVisibilityChange ( BOOL new_visibility );
 		virtual BOOL handleUnicodeCharHere(llwchar uni_char);
 		virtual void reshape( S32 width, S32 height, BOOL called_from_parent = TRUE);
 		virtual void draw();
@@ -168,11 +170,22 @@ public:
 
 		LLUUID getTextureID() {return mMediaTextureID;}
 
+		void updateContextMenuParent(LLView* pNewParent);
+
+        // The Browser windows want keyup and keydown events. Overridden from LLFocusableElement to return true.
+        virtual bool    wantsKeyUpKeyDown() const;
+        virtual bool    wantsReturnKey() const;
+
+        virtual BOOL	acceptsTextInput() const {return TRUE;}
+
 	protected:
 		void convertInputCoords(S32& x, S32& y);
 
+    private:
+		void calcOffsetsAndSize(S32 *x_offset, S32 *y_offset, S32 *width, S32 *height);
+
 	private:
-		void onVisibilityChange ( const LLSD& new_visibility );
+		void onVisibilityChanged ( const LLSD& new_visibility );
 		void onPopup(const LLSD& notification, const LLSD& response);
 
 		const S32 mTextureDepthBytes;
@@ -189,7 +202,8 @@ public:
 				mHidingInitialLoad,
 				mClearCache,
 				mHoverTextChanged,
-				mDecoupleTextureSize;
+				mDecoupleTextureSize,
+				mUpdateScrolls;
 
 		std::string mHomePageUrl,
 					mHomePageMimeType,

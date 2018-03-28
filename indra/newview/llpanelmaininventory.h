@@ -34,6 +34,7 @@
 
 #include "llfolderview.h"
 
+class LLComboBox;
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLSaveFolderState;
@@ -72,9 +73,12 @@ public:
 									   std::string& tooltip_msg);
 	/*virtual*/ void changed(U32);
 	/*virtual*/ void draw();
+	/*virtual*/ void 	onVisibilityChange ( BOOL new_visibility );
 
 	LLInventoryPanel* getPanel() { return mActivePanel; }
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
+	LLInventoryPanel* getAllItemsPanel();
+	void selectAllItemsPanel();
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
 
 	const std::string& getFilterText() const { return mFilterText; }
@@ -85,6 +89,10 @@ public:
 
 	void setFocusFilterEditor();
 
+	static void newWindow();
+
+	void toggleFindOptions();
+
 protected:
 	//
 	// Misc functions
@@ -92,7 +100,6 @@ protected:
 	void setFilterTextFromFilter();
 	void startSearch();
 	
-	void toggleFindOptions();
 	void onSelectionChange(LLInventoryPanel *panel, const std::deque<LLFolderViewItem*>& items, BOOL user_action);
 
 	static BOOL filtersVisible(void* user_data);
@@ -105,11 +112,10 @@ protected:
 
 	const std::string getFilterSubString();
 	void setFilterSubString(const std::string& string);
-	
+
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();
-	void newWindow();
 	void doCreate(const LLSD& userdata);
 	void resetFilters();
 	void setSortBy(const LLSD& userdata);
@@ -118,19 +124,28 @@ protected:
 	void updateItemcountText();
 
 	void onFocusReceived();
+	void onSelectSearchType();
+	void updateSearchTypeCombo();
 
 private:
 	LLFloaterInventoryFinder* getFinder();
 
 	LLFilterEditor*				mFilterEditor;
 	LLTabContainer*				mFilterTabs;
-    LLUICtrl*                   mCounterCtrl;
+	LLUICtrl*					mCounterCtrl;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+	LLInventoryPanel*			mWornItemsPanel;
 	bool						mResortActivePanel;
 	LLSaveFolderState*			mSavedFolderState;
 	std::string					mFilterText;
 	std::string					mFilterSubString;
+	S32							mItemCount;
+	std::string					mItemCountString;
+	S32							mCategoryCount;
+	std::string					mCategoryCountString;
+	LLComboBox*					mSearchTypeCombo;
+
 
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -153,8 +168,8 @@ protected:
 private:
 	LLDragAndDropButton*		mTrashButton;
 	LLToggleableMenu*			mMenuGearDefault;
-	LLMenuGL*					mMenuAdd;
 	LLMenuButton*				mGearMenuButton;
+	LLHandle<LLView>			mMenuAddHandle;
 
 	bool						mNeedUploadCost;
 	// List Commands                                                              //

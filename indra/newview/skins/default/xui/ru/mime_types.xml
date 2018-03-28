@@ -44,9 +44,22 @@
 			Воспроизвести звук для этого места
 		</playtip>
 	</widgetset>
+	<widgetset name="none">
+		<label name="none_label">
+			Нет контента
+		</label>
+		<tooltip name="none_tooltip">
+			Здесь нет медиа
+		</tooltip>
+	</widgetset>
 	<scheme name="rtsp">
 		<label name="rtsp_label">
 			Поток RealTime
+		</label>
+	</scheme>
+	<scheme name="libvlc">
+		<label name="libvlc_label">
+			Медиа с поддержкой LibVLC
 		</label>
 	</scheme>
 	<mimetype name="blank">
@@ -192,6 +205,11 @@
 	<mimetype name="video/mp4">
 		<label name="video/mp4_label">
 			Видео (MP4)
+		</label>
+	</mimetype>
+	<mimetype name="application/octet-stream">
+		<label name="video/octet-stream">
+			Видео
 		</label>
 	</mimetype>
 	<mimetype name="video/quicktime">

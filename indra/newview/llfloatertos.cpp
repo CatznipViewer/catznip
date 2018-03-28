@@ -35,8 +35,6 @@
 // linden library includes
 #include "llbutton.h"
 #include "llevents.h"
-#include "llhttpclient.h"
-#include "llhttpstatuscodes.h"	// for HTTP_FOUND
 #include "llnotificationsutil.h"
 #include "llradiogroup.h"
 #include "lltextbox.h"
@@ -45,65 +43,18 @@
 #include "llvfile.h"
 #include "message.h"
 #include "llstartup.h"              // login_alert_done
-
+#include "llcorehttputil.h"
+#include "llfloaterreg.h"
 
 LLFloaterTOS::LLFloaterTOS(const LLSD& data)
 :	LLModalDialog( data["message"].asString() ),
 	mMessage(data["message"].asString()),
-	mWebBrowserWindowId( 0 ),
 	mLoadingScreenLoaded(false),
 	mSiteAlive(false),
 	mRealNavigateBegun(false),
 	mReplyPumpName(data["reply_pump"].asString())
 {
 }
-
-// helper class that trys to download a URL from a web site and calls a method 
-// on parent class indicating if the web server is working or not
-class LLIamHere : public LLHTTPClient::Responder
-{
-	private:
-		LLIamHere( LLFloaterTOS* parent ) :
-		   mParent( parent )
-		{}
-
-		LLFloaterTOS* mParent;
-
-	public:
-
-		static LLIamHere* build( LLFloaterTOS* parent )
-		{
-			return new LLIamHere( parent );
-		};
-		
-		virtual void  setParent( LLFloaterTOS* parentIn )
-		{
-			mParent = parentIn;
-		};
-		
-		virtual void result( const LLSD& content )
-		{
-			if ( mParent )
-				mParent->setSiteIsAlive( true );
-		};
-
-		virtual void error( U32 status, const std::string& reason )
-		{
-			if ( mParent )
-			{
-				// *HACK: For purposes of this alive check, 302 Found
-				// (aka Moved Temporarily) is considered alive.  The web site
-				// redirects this link to a "cache busting" temporary URL. JC
-				bool alive = (status == HTTP_FOUND);
-				mParent->setSiteIsAlive( alive );
-			}
-		};
-};
-
-// this is global and not a class member to keep crud out of the header file
-namespace {
-	LLPointer< LLIamHere > gResponsePtr = 0;
-};
 
 BOOL LLFloaterTOS::postBuild()
 {	
@@ -123,8 +74,7 @@ BOOL LLFloaterTOS::postBuild()
 	}
 
 	// disable Agree to TOS radio button until the page has fully loaded
-	LLCheckBoxCtrl* tos_agreement = getChild<LLCheckBoxCtrl>("agree_chk");
-	tos_agreement->setEnabled( false );
+        updateAgreeEnabled(false);
 
 	// hide the SL text widget if we're displaying TOS with using a browser widget.
 	LLUICtrl *editor = getChild<LLUICtrl>("tos_text");
@@ -133,11 +83,32 @@ BOOL LLFloaterTOS::postBuild()
 	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("tos_html");
 	if ( web_browser )
 	{
+// if we are forced to send users to an external site in their system browser
+// (e.g.) Linux users because of lack of media support for HTML ToS page
+// remove exisiting UI and replace with a link to external page where users can accept ToS
+#ifdef EXTERNAL_TOS
+		LLTextBox* header = getChild<LLTextBox>("tos_heading");
+		if (header)
+			header->setVisible(false);
+
+		LLTextBox* external_prompt = getChild<LLTextBox>("external_tos_required");
+		if (external_prompt)
+			external_prompt->setVisible(true);
+
+		web_browser->setVisible(false);
+#else
 		web_browser->addObserver(this);
 
 		// Don't use the start_url parameter for this browser instance -- it may finish loading before we get to add our observer.
 		// Store the URL separately and navigate here instead.
 		web_browser->navigateTo( getString( "loading_url" ) );
+		LLPluginClassMedia* media_plugin = web_browser->getMediaPlugin();
+		if (media_plugin)
+		{
+			// All links from tos_html should be opened in external browser
+			media_plugin->setOverrideClickTarget("_external");
+		}
+#endif
 	}
 
 	return TRUE;
@@ -145,6 +116,13 @@ BOOL LLFloaterTOS::postBuild()
 
 void LLFloaterTOS::setSiteIsAlive( bool alive )
 {
+// if we are forced to send users to an external site in their system browser
+// (e.g.) Linux users because of lack of media support for HTML ToS page
+// force the regular HTML UI to deactivate so alternative is rendered instead.
+#ifdef EXTERNAL_TOS
+	mSiteAlive = false;
+#else
+
 	mSiteAlive = alive;
 	
 	// only do this for TOS pages
@@ -169,17 +147,16 @@ void LLFloaterTOS::setSiteIsAlive( bool alive )
 			LL_INFOS("TOS") << "ToS page: ToS page unavailable!" << LL_ENDL;
 			// normally this is set when navigation to TOS page navigation completes (so you can't accept before TOS loads)
 			// but if the page is unavailable, we need to do this now
-			LLCheckBoxCtrl* tos_agreement = getChild<LLCheckBoxCtrl>("agree_chk");
-			tos_agreement->setEnabled( true );
+			updateAgreeEnabled(true);
+			LLTextBox* tos_list = getChild<LLTextBox>("agree_list");
+			tos_list->setEnabled(true);
 		}
 	}
+#endif
 }
 
 LLFloaterTOS::~LLFloaterTOS()
 {
-	// tell the responder we're not here anymore
-	if ( gResponsePtr )
-		gResponsePtr->setParent( 0 );
 }
 
 // virtual
@@ -187,6 +164,17 @@ void LLFloaterTOS::draw()
 {
 	// draw children
 	LLModalDialog::draw();
+}
+
+
+// update status of "Agree" checkbox and text
+void LLFloaterTOS::updateAgreeEnabled(bool enabled)
+{
+	LLCheckBoxCtrl* tos_agreement_agree_cb = getChild<LLCheckBoxCtrl>("agree_chk");
+	tos_agreement_agree_cb->setEnabled(enabled);
+
+	LLTextBox* tos_agreement_agree_text = getChild<LLTextBox>("agree_list");
+	tos_agreement_agree_text->setEnabled(enabled);
 }
 
 // static
@@ -240,17 +228,54 @@ void LLFloaterTOS::handleMediaEvent(LLPluginClassMedia* /*self*/, EMediaEvent ev
 		if(!mLoadingScreenLoaded)
 		{
 			mLoadingScreenLoaded = true;
+            std::string url(getString("real_url"));
 
-			gResponsePtr = LLIamHere::build( this );
-			LLHTTPClient::get( getString( "real_url" ), gResponsePtr );
+            LLHandle<LLFloater> handle = getHandle();
+
+            LLCoros::instance().launch("LLFloaterTOS::testSiteIsAliveCoro",
+                boost::bind(&LLFloaterTOS::testSiteIsAliveCoro, handle, url));
 		}
 		else if(mRealNavigateBegun)
 		{
 			LL_INFOS("TOS") << "TOS: NAVIGATE COMPLETE" << LL_ENDL;
-			// enable Agree to TOS radio button now that page has loaded
-			LLCheckBoxCtrl * tos_agreement = getChild<LLCheckBoxCtrl>("agree_chk");
-			tos_agreement->setEnabled( true );
+			// enable Agree to TOS check box now that page has loaded
+			updateAgreeEnabled(true);
 		}
 	}
 }
+
+void LLFloaterTOS::testSiteIsAliveCoro(LLHandle<LLFloater> handle, std::string url)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("genericPostCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts = LLCore::HttpOptions::ptr_t(new LLCore::HttpOptions);
+
+    httpOpts->setWantHeaders(true);
+	httpOpts->setHeadersOnly(true);
+
+    LL_INFOS("testSiteIsAliveCoro") << "Generic POST for " << url << LL_ENDL;
+
+    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (handle.isDead())
+    {
+        LL_WARNS("testSiteIsAliveCoro") << "Dialog canceled before response." << LL_ENDL;
+        return;
+    }
+
+    LLFloaterTOS *that = dynamic_cast<LLFloaterTOS *>(handle.get());
+    
+    if (that)
+        that->setSiteIsAlive(static_cast<bool>(status)); 
+    else
+    {
+        LL_WARNS("testSiteIsAliveCoro") << "Handle was not a TOS floater." << LL_ENDL;
+    }
+}
+
 

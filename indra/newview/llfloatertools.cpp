@@ -92,6 +92,7 @@
 // Globals
 LLFloaterTools *gFloaterTools = NULL;
 bool LLFloaterTools::sShowObjectCost = true;
+bool LLFloaterTools::sPreviousFocusOnAvatar = false;
 
 const std::string PANEL_NAMES[LLFloaterTools::PANEL_COUNT] =
 {
@@ -266,7 +267,7 @@ BOOL	LLFloaterTools::postBuild()
 			found->setClickedCallback(boost::bind(&LLFloaterTools::setObjectType, toolData[t]));
 			mButtons.push_back( found );
 		}else{
-			llwarns << "Tool button not found! DOA Pending." << llendl;
+			LL_WARNS() << "Tool button not found! DOA Pending." << LL_ENDL;
 		}
 	}
 	mCheckCopySelection = getChild<LLCheckBoxCtrl>("checkbox copy selection");
@@ -369,6 +370,7 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 	mLandImpactsObserver(NULL),
 
 	mDirty(TRUE),
+	mHasSelection(TRUE),
 	mNeedMediaTitle(TRUE)
 {
 	gFloaterTools = this;
@@ -500,7 +502,7 @@ void LLFloaterTools::refresh()
 			}
 			else
 			{
-				llwarns << "Failed to get selected object" << llendl;
+				LL_WARNS() << "Failed to get selected object" << LL_ENDL;
 			}
 		}
 
@@ -540,7 +542,14 @@ void LLFloaterTools::refresh()
 
 void LLFloaterTools::draw()
 {
-	if (mDirty)
+    BOOL has_selection = !LLSelectMgr::getInstance()->getSelection()->isEmpty();
+    if(!has_selection && (mHasSelection != has_selection))
+    {
+        mDirty = TRUE;
+    }
+    mHasSelection = has_selection;
+
+    if (mDirty)
 	{
 		refresh();
 		mDirty = FALSE;
@@ -629,20 +638,20 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	// HACK - highlight buttons for next click
 	mRadioGroupMove->setVisible(move_visible);
-	if (!gGrabBtnSpin && 
-		!gGrabBtnVertical &&
-		!(mask == MASK_VERTICAL) && 
-		!(mask == MASK_SPIN) )
+	if (!(gGrabBtnSpin || 
+		gGrabBtnVertical || 
+		(mask == MASK_VERTICAL) || 
+		(mask == MASK_SPIN)))
 	{
 		mRadioGroupMove->setValue("radio move");
 	}
-	else if (gGrabBtnVertical || 
-			 (mask == MASK_VERTICAL) )
+	else if ((mask == MASK_VERTICAL) ||
+			 (gGrabBtnVertical && (mask != MASK_SPIN)))
 	{
 		mRadioGroupMove->setValue("radio lift");
 	}
-	else if (gGrabBtnSpin || 
-			 (mask == MASK_SPIN) )
+	else if ((mask == MASK_SPIN) || 
+			 (gGrabBtnSpin && (mask != MASK_VERTICAL)))
 	{
 		mRadioGroupMove->setValue("radio spin");
 	}
@@ -888,6 +897,15 @@ void LLFloaterTools::onClose(bool app_quitting)
 
 	// hide the advanced object weights floater
 	LLFloaterReg::hideInstance("object_weights");
+
+	// prepare content for next call
+	mPanelContents->clearContents();
+
+	if(sPreviousFocusOnAvatar)
+	{
+		sPreviousFocusOnAvatar = false;
+		gAgentCamera.setAllowChangeToFollow(TRUE);
+	}
 }
 
 void click_popup_info(void*)
@@ -1069,9 +1087,9 @@ void LLFloaterTools::setGridMode(S32 mode)
 
 void LLFloaterTools::onClickGridOptions()
 {
-	LLFloaterReg::showInstance("build_options");
-	// RN: this makes grid options dependent on build tools window
-	//floaterp->addDependentFloater(LLFloaterBuildOptions::getInstance(), FALSE);
+	LLFloater* floaterp = LLFloaterReg::showInstance("build_options");
+	// position floater next to build tools, not over
+	floaterp->setRect(gFloaterView->findNeighboringPosition(this, floaterp));
 }
 
 // static
@@ -1095,7 +1113,7 @@ void LLFloaterTools::setTool(const LLSD& user_data)
 	else if (control_name == "Land" )
 		LLToolMgr::getInstance()->getCurrentToolset()->selectTool( (LLTool *) LLToolSelectLand::getInstance());
 	else
-		llwarns<<" no parameter name "<<control_name<<" found!! No Tool selected!!"<< llendl;
+		LL_WARNS()<<" no parameter name "<<control_name<<" found!! No Tool selected!!"<< LL_ENDL;
 }
 
 void LLFloaterTools::onFocusReceived()
@@ -1159,7 +1177,12 @@ void LLFloaterTools::updateLandImpacts()
 
 	S32 rezzed_prims = parcel->getSimWidePrimCount();
 	S32 total_capacity = parcel->getSimWideMaxPrimCapacity();
-
+	LLViewerRegion* region = LLViewerParcelMgr::getInstance()->getSelectionRegion();
+	if (region)
+	{
+		S32 max_tasks_per_region = (S32)region->getMaxTasks();
+		total_capacity = llmin(total_capacity, max_tasks_per_region);
+	}
 	std::string remaining_capacity_str = "";
 
 	bool show_mesh_cost = gMeshRepo.meshRezEnabled();
@@ -1294,7 +1317,6 @@ void LLFloaterTools::getMediaState()
 	
 	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
 	std::string media_title = "";
-	mNeedMediaTitle = false;
 	// update UI depending on whether "object" (prim or face) has media
 	// and whether or not you are allowed to edit it.
 	
@@ -1312,17 +1334,12 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 			// else all faces might be empty. 
 		}
 		else // there' re Different Medias' been set on on the faces.
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		
 		getChildView("media_tex")->setEnabled(bool_has_media && editable);
@@ -1339,7 +1356,6 @@ void LLFloaterTools::getMediaState()
 		if(LLFloaterMediaSettings::getInstance()->mMultipleValidMedia)
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		else
 		{
@@ -1348,10 +1364,6 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 		}
 		
@@ -1360,6 +1372,8 @@ void LLFloaterTools::getMediaState()
 		getChildView("delete_media")->setEnabled(TRUE);
 		getChildView("add_media")->setEnabled(editable);
 	}
+
+	navigateToTitleMedia(media_title);
 	media_info->setText(media_title);
 	
 	// load values for media settings
@@ -1449,16 +1463,31 @@ void LLFloaterTools::clearMediaSettings()
 //
 void LLFloaterTools::navigateToTitleMedia( const std::string url )
 {
-	if ( mTitleMedia )
+	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
+	if (url.empty() || multi_media_info_str == url)
+	{
+		// nothing to show
+		mNeedMediaTitle = false;
+	}
+	else if (mTitleMedia)
 	{
 		LLPluginClassMedia* media_plugin = mTitleMedia->getMediaPlugin();
-		if ( media_plugin )
+
+		if ( media_plugin ) // Shouldn't this be after navigateTo creates plugin?
 		{
 			// if it's a movie, we don't want to hear it
 			media_plugin->setVolume( 0 );
 		};
-		mTitleMedia->navigateTo( url );
-	};
+
+		// check if url changed or if we need a new media source
+		if (mTitleMedia->getCurrentNavUrl() != url || media_plugin == NULL)
+		{
+			mTitleMedia->navigateTo( url );
+		}
+
+		// flag that we need to update the title (even if no request were made)
+		mNeedMediaTitle = true;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

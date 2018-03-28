@@ -28,9 +28,7 @@
 #define LL_LLWINDOWWIN32_H
 
 // Limit Windows API to small and manageable set.
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
+#include "llwin32headerslean.h"
 
 #include "llwindow.h"
 #include "llwindowcallbacks.h"
@@ -85,6 +83,7 @@ public:
 	/*virtual*/ void gatherInput();
 	/*virtual*/ void delayInputProcessing();
 	/*virtual*/ void swapBuffers();
+	/*virtual*/ void restoreGLContext() {};
 
 	// handy coordinate space conversion routines
 	/*virtual*/ BOOL convertCoords(LLCoordScreen from, LLCoordWindow *to);
@@ -111,10 +110,12 @@ public:
 	/*virtual*/ void interruptLanguageTextInput();
 	/*virtual*/ void spawnWebBrowser(const std::string& escaped_url, bool async);
 
+	/*virtual*/ F32 getSystemUISize();
+
 	LLWindowCallbacks::DragNDropResult completeDragNDropRequest( const LLCoordGL gl_coord, const MASK mask, LLWindowCallbacks::DragNDropAction action, const std::string url );
 
 	static std::vector<std::string> getDynamicFallbackFontList();
-
+	static void setDPIAwareness();
 protected:
 	LLWindowWin32(LLWindowCallbacks* callbacks,
 		const std::string& title, const std::string& name, int x, int y, int width, int height, U32 flags, 
@@ -127,7 +128,7 @@ protected:
 	HCURSOR loadColorCursor(LPCTSTR name);
 	BOOL	isValid();
 	void	moveWindow(const LLCoordScreen& position,const LLCoordScreen& size);
-	LLSD	getNativeKeyData();
+	virtual LLSD	getNativeKeyData();
 
 	// Changes display resolution. Returns true if successful
 	BOOL	setDisplayResolution(S32 width, S32 height, S32 bits, S32 refresh);
@@ -147,7 +148,7 @@ protected:
 	U32		fillReconvertString(const LLWString &text, S32 focus, S32 focus_length, RECONVERTSTRING *reconvert_string);
 	void	handleStartCompositionMessage();
 	void	handleCompositionMessage(U32 indexes);
-	BOOL	handleImeRequests(U32 request, U32 param, LRESULT *result);
+	BOOL	handleImeRequests(WPARAM request, LPARAM param, LRESULT *result);
 
 protected:
 	//
@@ -209,6 +210,11 @@ protected:
 	U32				mKeyCharCode;
 	U32				mKeyScanCode;
 	U32				mKeyVirtualKey;
+	U32				mRawMsg;
+	U32				mRawWParam;
+	U32				mRawLParam;
+
+	BOOL			mMouseVanish;
 
 	friend class LLWindowManager;
 };

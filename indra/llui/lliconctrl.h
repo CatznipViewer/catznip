@@ -31,7 +31,6 @@
 #include "v4color.h"
 #include "lluictrl.h"
 #include "lluiimage.h"
-#include "stdenums.h"
 
 class LLTextBox;
 class LLUICtrlFactory;
@@ -50,12 +49,17 @@ public:
 		Optional<LLUIImage*>	image;
 		Optional<LLUIColor>		color;
 		Optional<bool>			use_draw_context_alpha;
+		Optional<S32>			min_width,
+								min_height;
 		Ignored					scale_image;
+
 		Params();
 	};
 protected:
 	LLIconCtrl(const Params&);
 	friend class LLUICtrlFactory;
+
+	void setValue(const LLSD& value, S32 priority);
 
 public:
 	virtual ~LLIconCtrl();
@@ -72,15 +76,14 @@ public:
 	void			setImage(LLPointer<LLUIImage> image) { mImagep = image; }
 	const LLPointer<LLUIImage> getImage() { return mImagep; }
 	
-private:
-	void setIconImageDrawSize() ;
-
 protected:
 	S32 mPriority;
 
 	//the output size of the icon image if set.
-	S32 mDrawWidth ;
-	S32 mDrawHeight ;
+	S32 mMinWidth,
+		mMinHeight,
+		mMaxWidth,
+		mMaxHeight;
 
 	// If set to true (default), use the draw context transparency.
 	// If false, will use transparency returned by getCurrentTransparency(). See STORM-698.

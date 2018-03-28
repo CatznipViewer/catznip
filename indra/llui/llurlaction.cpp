@@ -83,18 +83,19 @@ void LLUrlAction::openURLExternal(std::string url)
 	}
 }
 
-void LLUrlAction::executeSLURL(std::string url)
+bool LLUrlAction::executeSLURL(std::string url, bool trusted_content)
 {
 	if (sExecuteSLURLCallback)
 	{
-		sExecuteSLURLCallback(url);
+		return sExecuteSLURLCallback(url, trusted_content);
 	}
+	return false;
 }
 
-void LLUrlAction::clickAction(std::string url)
+void LLUrlAction::clickAction(std::string url, bool trusted_content)
 {
 	// Try to handle as SLURL first, then http Url
-	if ( (sExecuteSLURLCallback) && !sExecuteSLURLCallback(url) )
+	if ( (sExecuteSLURLCallback) && !sExecuteSLURLCallback(url, trusted_content) )
 	{
 		if (sOpenURLCallback)
 		{
@@ -227,6 +228,16 @@ void LLUrlAction::blockObject(std::string url)
 	std::string object_name = getObjectName(url);
 	if (LLUUID::validate(object_id))
 	{
-		executeSLURL("secondlife:///app/agent/" + object_id + "/block/" + object_name);
+		executeSLURL("secondlife:///app/agent/" + object_id + "/block/" + LLURI::escape(object_name));
 	}
+}
+
+void LLUrlAction::unblockObject(std::string url)
+{
+    std::string object_id = getObjectId(url);
+    std::string object_name = getObjectName(url);
+    if (LLUUID::validate(object_id))
+    {
+        executeSLURL("secondlife:///app/agent/" + object_id + "/unblock/" + object_name);
+    }
 }

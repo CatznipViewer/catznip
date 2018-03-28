@@ -37,6 +37,7 @@
 #include "lltextparser.h"
 #include "lltextutil.h"
 #include "lltooltip.h"
+#include "lltrans.h"
 #include "lluictrl.h"
 #include "llurlaction.h"
 #include "llurlregistry.h"
@@ -70,43 +71,36 @@ bool LLTextBase::compare_segment_end::operator()(const LLTextSegmentPtr& a, cons
 
 
 // helper functors
-struct LLTextBase::compare_bottom
+bool LLTextBase::compare_bottom::operator()(const S32& a, const LLTextBase::line_info& b) const
 {
-	bool operator()(const S32& a, const LLTextBase::line_info& b) const
-	{
-		return a > b.mRect.mBottom; // bottom of a is higher than bottom of b
-	}
+	return a > b.mRect.mBottom; // bottom of a is higher than bottom of b
+}
 
-	bool operator()(const LLTextBase::line_info& a, const S32& b) const
-	{
-		return a.mRect.mBottom > b; // bottom of a is higher than bottom of b
-	}
+bool LLTextBase::compare_bottom::operator()(const LLTextBase::line_info& a, const S32& b) const
+{
+	return a.mRect.mBottom > b; // bottom of a is higher than bottom of b
+}
 
-	bool operator()(const LLTextBase::line_info& a, const LLTextBase::line_info& b) const
-	{
-		return a.mRect.mBottom > b.mRect.mBottom; // bottom of a is higher than bottom of b
-	}
-
-};
+bool LLTextBase::compare_bottom::operator()(const LLTextBase::line_info& a, const LLTextBase::line_info& b) const
+{
+	return a.mRect.mBottom > b.mRect.mBottom; // bottom of a is higher than bottom of b
+}
 
 // helper functors
-struct LLTextBase::compare_top
+bool LLTextBase::compare_top::operator()(const S32& a, const LLTextBase::line_info& b) const
 {
-	bool operator()(const S32& a, const LLTextBase::line_info& b) const
-	{
-		return a > b.mRect.mTop; // top of a is higher than top of b
-	}
+	return a > b.mRect.mTop; // top of a is higher than top of b
+}
 
-	bool operator()(const LLTextBase::line_info& a, const S32& b) const
-	{
-		return a.mRect.mTop > b; // top of a is higher than top of b
-	}
+bool LLTextBase::compare_top::operator()(const LLTextBase::line_info& a, const S32& b) const
+{
+	return a.mRect.mTop > b; // top of a is higher than top of b
+}
 
-	bool operator()(const LLTextBase::line_info& a, const LLTextBase::line_info& b) const
-	{
-		return a.mRect.mTop > b.mRect.mTop; // top of a is higher than top of b
-	}
-};
+bool LLTextBase::compare_top::operator()(const LLTextBase::line_info& a, const LLTextBase::line_info& b) const
+{
+	return a.mRect.mTop > b.mRect.mTop; // top of a is higher than top of b
+}
 
 struct LLTextBase::line_end_compare
 {
@@ -167,8 +161,10 @@ LLTextBase::Params::Params()
 	max_text_length("max_length", 255),
 	font_shadow("font_shadow"),
 	wrap("wrap"),
+	trusted_content("trusted_content", true),
 	use_ellipses("use_ellipses", false),
 	parse_urls("parse_urls", false),
+	force_urls_external("force_urls_external", false),
 	parse_highlights("parse_highlights", false)
 {
 	addSynonym(track_end, "track_bottom");
@@ -181,10 +177,11 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 :	LLUICtrl(p, LLTextViewModelPtr(new LLTextViewModel)),
 	mURLClickSignal(NULL),
 	mIsFriendSignal(NULL),
+	mIsObjectBlockedSignal(NULL),
 	mMaxTextByteLength( p.max_text_length ),
 	mFont(p.font),
 	mFontShadow(p.font_shadow),
-	mPopupMenu(NULL),
+	mPopupMenuHandle(),
 	mReadOnly(p.read_only),
 	mSpellCheck(p.spellcheck),
 	mSpellCheckStart(-1),
@@ -211,6 +208,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mLineSpacingPixels(p.line_spacing.pixels),
 	mClip(p.clip),
 	mClipPartial(p.clip_partial && !p.allow_scroll),
+	mTrustedContent(p.trusted_content),
 	mTrackEnd( p.track_end ),
 	mScrollIndex(-1),
 	mSelectionStart( 0 ),
@@ -220,6 +218,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mWordWrap(p.wrap),
 	mUseEllipses( p.use_ellipses ),
 	mParseHTML(p.parse_urls),
+	mForceUrlsExternal(p.force_urls_external),
 	mParseHighlights(p.parse_highlights),
 	mBGVisible(p.bg_visible),
 	mScroller(NULL),
@@ -270,6 +269,8 @@ LLTextBase::~LLTextBase()
 {
 	mSegments.clear();
 	delete mURLClickSignal;
+	delete mIsFriendSignal;
+	delete mIsObjectBlockedSignal;
 }
 
 void LLTextBase::initFromParams(const LLTextBase::Params& p)
@@ -571,7 +572,8 @@ void LLTextBase::drawText()
 	if ( (getSpellCheck()) && (getWText().length() > 2) )
 	{
 		// Calculate start and end indices for the spell checking range
-		S32 start = line_start, end = getLineEnd(last_line);
+		S32 start = line_start;
+		S32 end   = getLineEnd(last_line);
 
 		if ( (mSpellCheckStart != start) || (mSpellCheckEnd != end) )
 		{
@@ -676,7 +678,7 @@ void LLTextBase::drawText()
 			line_end = next_start;
 		}
 
-		LLRect text_rect(line.mRect);
+        LLRectf text_rect(line.mRect.mLeft, line.mRect.mTop, line.mRect.mRight, line.mRect.mBottom);
 		text_rect.mRight = mDocumentView->getRect().getWidth(); // clamp right edge to document extents
 		text_rect.translate(mDocumentView->getRect().mLeft, mDocumentView->getRect().mBottom); // adjust by scroll position
 
@@ -689,7 +691,7 @@ void LLTextBase::drawText()
 				seg_iter++;
 				if (seg_iter == mSegments.end())
 				{
-					llwarns << "Ran off the segmentation end!" << llendl;
+					LL_WARNS() << "Ran off the segmentation end!" << LL_ENDL;
 
 					return;
 				}
@@ -749,7 +751,7 @@ void LLTextBase::drawText()
 				++misspell_it;
 			}
 
-			text_rect.mLeft = (S32)(cur_segment->draw(seg_start - cur_segment->getStart(), clipped_end, selection_left, selection_right, text_rect));
+			text_rect.mLeft = cur_segment->draw(seg_start - cur_segment->getStart(), clipped_end, selection_left, selection_right, text_rect);
 
 			seg_start = clipped_end + cur_segment->getStart();
 		}
@@ -1259,13 +1261,14 @@ void LLTextBase::setReadOnlyColor(const LLColor4 &c)
 }
 
 //virtual
-void LLTextBase::handleVisibilityChange( BOOL new_visibility )
+void LLTextBase::onVisibilityChange( BOOL new_visibility )
 {
-	if(!new_visibility && mPopupMenu)
+	LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+	if(!new_visibility && menu)
 	{
-		mPopupMenu->hide();
+		menu->hide();
 	}
-	LLUICtrl::handleVisibilityChange(new_visibility);
+	LLUICtrl::onVisibilityChange(new_visibility);
 }
 
 //virtual
@@ -1311,14 +1314,16 @@ void LLTextBase::replaceWithSuggestion(U32 index)
 		if ( (it->first <= (U32)mCursorPos) && (it->second >= (U32)mCursorPos) )
 		{
 			deselect();
-
-			// Delete the misspelled word
-			removeStringNoUndo(it->first, it->second - it->first);
-
 			// Insert the suggestion in its place
 			LLWString suggestion = utf8str_to_wstring(mSuggestionList[index]);
 			insertStringNoUndo(it->first, utf8str_to_wstring(mSuggestionList[index]));
+
+			// Delete the misspelled word
+			removeStringNoUndo(it->first + (S32)suggestion.length(), it->second - it->first);
+
+
 			setCursorPos(it->first + (S32)suggestion.length());
+			onSpellCheckPerformed();
 
 			break;
 		}
@@ -1436,10 +1441,10 @@ S32 LLTextBase::getLeftOffset(S32 width)
 }
 
 
-static LLFastTimer::DeclareTimer FTM_TEXT_REFLOW ("Text Reflow");
+static LLTrace::BlockTimerStatHandle FTM_TEXT_REFLOW ("Text Reflow");
 void LLTextBase::reflow()
 {
-	LLFastTimer ft(FTM_TEXT_REFLOW);
+	LL_RECORD_BLOCK_TIME(FTM_TEXT_REFLOW);
 
 	updateSegments();
 
@@ -1481,7 +1486,7 @@ void LLTextBase::reflow()
 		// use an even number of iterations to avoid user visible oscillation of the layout
 		if(++reflow_count > 2)
 		{
-			lldebugs << "Breaking out of reflow due to possible infinite loop in " << getName() << llendl;
+			LL_DEBUGS() << "Breaking out of reflow due to possible infinite loop in " << getName() << LL_ENDL;
 			break;
 		}
 	
@@ -1500,8 +1505,8 @@ void LLTextBase::reflow()
 		segment_set_t::iterator seg_iter = mSegments.begin();
 		S32 seg_offset = 0;
 		S32 line_start_index = 0;
-		const S32 text_available_width = mVisibleTextRect.getWidth() - mHPad;  // reserve room for margin
-		S32 remaining_pixels = text_available_width;
+		const F32 text_available_width = mVisibleTextRect.getWidth() - mHPad;  // reserve room for margin
+		F32 remaining_pixels = text_available_width;
 		S32 line_count = 0;
 
 		// find and erase line info structs starting at start_index and going to end of document
@@ -1517,6 +1522,7 @@ void LLTextBase::reflow()
 		}
 
 		S32 line_height = 0;
+		S32 seg_line_offset = line_count + 1;
 
 		while(seg_iter != mSegments.end())
 		{
@@ -1526,13 +1532,15 @@ void LLTextBase::reflow()
 			S32 cur_index = segment->getStart() + seg_offset;
 
 			// ask segment how many character fit in remaining space
-			S32 character_count = segment->getNumChars(getWordWrap() ? llmax(0, remaining_pixels) : S32_MAX,
+			S32 character_count = segment->getNumChars(getWordWrap() ? llmax(0, ll_round(remaining_pixels)) : S32_MAX,
 														seg_offset, 
 														cur_index - line_start_index, 
-														S32_MAX);
+														S32_MAX,
+														line_count - seg_line_offset);
 
-			S32 segment_width, segment_height;
-			bool force_newline = segment->getDimensions(seg_offset, character_count, segment_width, segment_height);
+			F32 segment_width;
+			S32 segment_height;
+			bool force_newline = segment->getDimensionsF32(seg_offset, character_count, segment_width, segment_height);
 			// grow line height as necessary based on reported height of this segment
 			line_height = llmax(line_height, segment_height);
 			remaining_pixels -= segment_width;
@@ -1541,11 +1549,13 @@ void LLTextBase::reflow()
 
 			S32 last_segment_char_on_line = segment->getStart() + seg_offset;
 
-			S32 text_actual_width = text_available_width - remaining_pixels;
+			// Note: make sure text will fit in width - use ceil, but also make sure
+			// ceil is used only once per line
+			S32 text_actual_width = llceil(text_available_width - remaining_pixels);
 			S32 text_left = getLeftOffset(text_actual_width);
 			LLRect line_rect(text_left, 
 							cur_top, 
-							text_left + text_actual_width, 
+							text_left + text_actual_width,
 							cur_top - line_height);
 
 			// if we didn't finish the current segment...
@@ -1559,7 +1569,7 @@ void LLTextBase::reflow()
 											line_count));
 
 				line_start_index = segment->getStart() + seg_offset;
-				cur_top -= llround((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
+				cur_top -= ll_round((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
 				remaining_pixels = text_available_width;
 				line_height = 0;
 			}
@@ -1571,7 +1581,7 @@ void LLTextBase::reflow()
 											last_segment_char_on_line, 
 											line_rect, 
 											line_count));
-				cur_top -= llround((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
+				cur_top -= ll_round((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
 				break;
 			}
 			// ...or finished a segment and there are segments remaining on this line
@@ -1586,12 +1596,13 @@ void LLTextBase::reflow()
 												line_rect, 
 												line_count));
 					line_start_index = segment->getStart() + seg_offset;
-					cur_top -= llround((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
+					cur_top -= ll_round((F32)line_height * mLineSpacingMult) + mLineSpacingPixels;
 					line_height = 0;
 					remaining_pixels = text_available_width;
 				}
 				++seg_iter;
 				seg_offset = 0;
+				seg_line_offset = force_newline ? line_count + 1 : line_count;
 			}
 			if (force_newline) 
 			{
@@ -1778,10 +1789,10 @@ void LLTextBase::removeDocumentChild(LLView* view)
 }
 
 
-static LLFastTimer::DeclareTimer FTM_UPDATE_TEXT_SEGMENTS("Update Text Segments");
+static LLTrace::BlockTimerStatHandle FTM_UPDATE_TEXT_SEGMENTS("Update Text Segments");
 void LLTextBase::updateSegments()
 {
-	LLFastTimer ft(FTM_UPDATE_TEXT_SEGMENTS);
+	LL_RECORD_BLOCK_TIME(FTM_UPDATE_TEXT_SEGMENTS);
 	createDefaultSegment();
 }
 
@@ -1870,7 +1881,6 @@ LLTextBase::segment_set_t::iterator LLTextBase::getSegIterContaining(S32 index)
 	// when there are no segments, we return the end iterator, which must be checked by caller
 	if (mSegments.size() <= 1) { return mSegments.begin(); }
 
-	//FIXME: avoid operator new somehow (without running into refcount problems)
 	index_segment->setStart(index);
 	index_segment->setEnd(index);
 	segment_set_t::iterator it = mSegments.upper_bound(index_segment);
@@ -1940,8 +1950,9 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.Open", boost::bind(&LLUrlAction::openURL, url));
 	registrar.add("Url.OpenInternal", boost::bind(&LLUrlAction::openURLInternal, url));
 	registrar.add("Url.OpenExternal", boost::bind(&LLUrlAction::openURLExternal, url));
-	registrar.add("Url.Execute", boost::bind(&LLUrlAction::executeSLURL, url));
+	registrar.add("Url.Execute", boost::bind(&LLUrlAction::executeSLURL, url, true));
 	registrar.add("Url.Block", boost::bind(&LLUrlAction::blockObject, url));
+	registrar.add("Url.Unblock", boost::bind(&LLUrlAction::unblockObject, url));
 	registrar.add("Url.Teleport", boost::bind(&LLUrlAction::teleportToLocation, url));
 	registrar.add("Url.ShowProfile", boost::bind(&LLUrlAction::showProfile, url));
 	registrar.add("Url.AddFriend", boost::bind(&LLUrlAction::addFriend, url));
@@ -1952,27 +1963,48 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
 
 	// create and return the context menu from the XUI file
-	delete mPopupMenu;
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
-																		 LLMenuHolderGL::child_registry_t::instance());	
-	if (mIsFriendSignal)
-	{
-		bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-		LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
-		LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
 
-		if (addFriendButton && removeFriendButton)
-		{
-			addFriendButton->setEnabled(!isFriend);
-			removeFriendButton->setEnabled(isFriend);
-		}
-	}
-	
-	if (mPopupMenu)
-	{
-		mPopupMenu->show(x, y);
-		LLMenuGL::showPopup(this, mPopupMenu, x, y);
-	}
+    LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+    if (menu)
+    {
+        menu->die();
+        mPopupMenuHandle.markDead();
+    }
+	llassert(LLMenuGL::sMenuContainer != NULL);
+    menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
+																		 LLMenuHolderGL::child_registry_t::instance());
+    if (menu)
+    {
+        mPopupMenuHandle = menu->getHandle();
+
+        if (mIsFriendSignal)
+        {
+            bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
+            LLView* addFriendButton = menu->getChild<LLView>("add_friend");
+            LLView* removeFriendButton = menu->getChild<LLView>("remove_friend");
+
+            if (addFriendButton && removeFriendButton)
+            {
+                addFriendButton->setEnabled(!isFriend);
+                removeFriendButton->setEnabled(isFriend);
+            }
+        }
+
+        if (mIsObjectBlockedSignal)
+        {
+            bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
+            LLView* blockButton = menu->getChild<LLView>("block_object");
+            LLView* unblockButton = menu->getChild<LLView>("unblock_object");
+
+            if (blockButton && unblockButton)
+            {
+                blockButton->setVisible(!is_blocked);
+                unblockButton->setVisible(is_blocked);
+            }
+        }
+        menu->show(x, y);
+        LLMenuGL::showPopup(this, menu, x, y);
+    }
 }
 
 void LLTextBase::setText(const LLStringExplicit &utf8str, const LLStyle::Params& input_params)
@@ -2020,7 +2052,9 @@ static LLUIImagePtr image_from_icon_name(const std::string& icon_name)
 	}
 }
 
-static LLFastTimer::DeclareTimer FTM_PARSE_HTML("Parse HTML");
+static LLTrace::BlockTimerStatHandle FTM_PARSE_HTML("Parse HTML");
+
+
 
 void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Params& input_params)
 {
@@ -2030,12 +2064,12 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 	S32 part = (S32)LLTextParser::WHOLE;
 	if (mParseHTML && !style_params.is_link) // Don't search for URLs inside a link segment (STORM-358).
 	{
-		LLFastTimer _(FTM_PARSE_HTML);
+		LL_RECORD_BLOCK_TIME(FTM_PARSE_HTML);
 		S32 start=0,end=0;
 		LLUrlMatch match;
 		std::string text = new_text;
 		while ( LLUrlRegistry::instance().findUrl(text, match,
-				boost::bind(&LLTextBase::replaceUrl, this, _1, _2, _3)) )
+				boost::bind(&LLTextBase::replaceUrl, this, _1, _2, _3),isContentTrusted()))
 		{
 			start = match.getStart();
 			end = match.getEnd()+1;
@@ -2058,21 +2092,38 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 				std::string subtext=text.substr(0,start);
 				appendAndHighlightText(subtext, part, style_params); 
 			}
-			// output the styled Url
-			appendAndHighlightTextImpl(match.getLabel(), part, link_params, match.underlineOnHoverOnly());
-			
-			// set the tooltip for the Url label
-			if (! match.getTooltip().empty())
+
+			// add icon before url if need
+			LLTextUtil::processUrlMatch(&match, this, isContentTrusted() || match.isTrusted());
+			if ((isContentTrusted() || match.isTrusted()) && !match.getIcon().empty() )
 			{
-				segment_set_t::iterator it = getSegIterContaining(getLength()-1);
-				if (it != mSegments.end())
-					{
-						LLTextSegmentPtr segment = *it;
-						segment->setToolTip(match.getTooltip());
-					}
+				setLastSegmentToolTip(LLTrans::getString("TooltipSLIcon"));
 			}
 
-			LLTextUtil::processUrlMatch(&match,this);
+			// output the styled Url
+			appendAndHighlightTextImpl(match.getLabel(), part, link_params, match.underlineOnHoverOnly());
+			bool tooltip_required =  !match.getTooltip().empty();
+
+			// set the tooltip for the Url label
+			if (tooltip_required)
+			{
+				setLastSegmentToolTip(match.getTooltip());
+			}
+
+			// show query part of url with gray color only for LLUrlEntryHTTP url entries
+			std::string label = match.getQuery();
+			if (label.size())
+			{
+				link_params.color = LLColor4::grey;
+				link_params.readonly_color = LLColor4::grey;
+				appendAndHighlightTextImpl(label, part, link_params, match.underlineOnHoverOnly());
+
+				// set the tooltip for the query part of url
+				if (tooltip_required)
+				{
+					setLastSegmentToolTip(match.getTooltip());
+				}
+			}
 
 			// move on to the rest of the text after the Url
 			if (end < (S32)text.length()) 
@@ -2097,11 +2148,21 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 	}
 }
 
-static LLFastTimer::DeclareTimer FTM_APPEND_TEXT("Append Text");
+void LLTextBase::setLastSegmentToolTip(const std::string &tooltip)
+{
+	segment_set_t::iterator it = getSegIterContaining(getLength()-1);
+	if (it != mSegments.end())
+	{
+		LLTextSegmentPtr segment = *it;
+		segment->setToolTip(tooltip);
+	}
+}
+
+static LLTrace::BlockTimerStatHandle FTM_APPEND_TEXT("Append Text");
 
 void LLTextBase::appendText(const std::string &new_text, bool prepend_newline, const LLStyle::Params& input_params)
 {
-	LLFastTimer _(FTM_APPEND_TEXT);
+	LL_RECORD_BLOCK_TIME(FTM_APPEND_TEXT);
 	if (new_text.empty()) 
 		return;
 
@@ -2150,7 +2211,7 @@ void LLTextBase::setFont(const LLFontGL* font)
 
 void LLTextBase::needsReflow(S32 index)
 {
-	lldebugs << "reflow on object " << (void*)this << " index = " << mReflowIndex << ", new index = " << index << llendl;
+	LL_DEBUGS() << "reflow on object " << (void*)this << " index = " << mReflowIndex << ", new index = " << index << LL_ENDL;
 	mReflowIndex = llmin(mReflowIndex, index);
 }
 
@@ -2384,7 +2445,7 @@ S32 LLTextBase::getDocIndexFromLocalCoord( S32 local_x, S32 local_y, BOOL round,
 	// binary search for line that starts before local_y
 	line_list_t::const_iterator line_iter = std::lower_bound(mLineInfoList.begin(), mLineInfoList.end(), doc_y, compare_bottom());
 
-	if (line_iter == mLineInfoList.end())
+	if (!mLineInfoList.size() || line_iter == mLineInfoList.end())
 	{
 		return getLength(); // past the end
 	}
@@ -2476,7 +2537,6 @@ LLRect LLTextBase::getDocRectFromDocIndex(S32 pos) const
 	// clamp pos to valid values
 	pos = llclamp(pos, 0, mLineInfoList.back().mDocIndexEnd - 1);
 
-	// find line that contains cursor
 	line_list_t::const_iterator line_iter = std::upper_bound(mLineInfoList.begin(), mLineInfoList.end(), pos, line_end_compare());
 
 	doc_rect.mLeft = line_iter->mRect.mLeft; 
@@ -2652,6 +2712,12 @@ void LLTextBase::changeLine( S32 delta )
         LLRect visible_region = getVisibleDocumentRect();
         S32 new_cursor_pos = getDocIndexFromLocalCoord(mDesiredXPixel,
                                                        mLineInfoList[new_line].mRect.mBottom + mVisibleTextRect.mBottom - visible_region.mBottom, TRUE);
+		S32 actual_line = getLineNumFromDocIndex(new_cursor_pos);
+		if (actual_line != new_line)
+		{
+			// line edge, correcting position by 1 to move onto proper line
+			new_cursor_pos += new_line - actual_line;
+		}
         setCursorPos(new_cursor_pos, true);
     }
 }
@@ -2847,13 +2913,44 @@ void LLTextBase::updateRects()
 		needsReflow();
 	}
 
+	// update mTextBoundingRect after mVisibleTextRect took scrolls into account
+	if (!mLineInfoList.empty() && mScroller)
+	{
+		S32 delta_pos = 0;
+
+		switch(mVAlign)
+		{
+		case LLFontGL::TOP:
+			delta_pos = llmax(mVisibleTextRect.getHeight() - mTextBoundingRect.mTop, -mTextBoundingRect.mBottom);
+			break;
+		case LLFontGL::VCENTER:
+			delta_pos = (llmax(mVisibleTextRect.getHeight() - mTextBoundingRect.mTop, -mTextBoundingRect.mBottom) + (mVisibleTextRect.mBottom - mTextBoundingRect.mBottom)) / 2;
+			break;
+		case LLFontGL::BOTTOM:
+			delta_pos = mVisibleTextRect.mBottom - mTextBoundingRect.mBottom;
+			break;
+		case LLFontGL::BASELINE:
+			// do nothing
+			break;
+		}
+		// move line segments to fit new visible rect
+		if (delta_pos != 0)
+		{
+			for (line_list_t::iterator it = mLineInfoList.begin(); it != mLineInfoList.end(); ++it)
+			{
+				it->mRect.translate(0, delta_pos);
+			}
+			mTextBoundingRect.translate(0, delta_pos);
+		}
+	}
+
 	// update document container again, using new mVisibleTextRect (that has scrollbars enabled as needed)
 	doc_rect.mBottom = llmin(mVisibleTextRect.mBottom,  mTextBoundingRect.mBottom);
 	doc_rect.mLeft = 0;
 	doc_rect.mRight = mScroller 
 		? llmax(mVisibleTextRect.getWidth(), mTextBoundingRect.mRight)
 		: mVisibleTextRect.getWidth();
-	doc_rect.mTop = llmax(mVisibleTextRect.mTop, mTextBoundingRect.mTop);
+	doc_rect.mTop = llmax(mVisibleTextRect.getHeight(), mTextBoundingRect.getHeight()) + doc_rect.mBottom;
 	if (!mScroller)
 	{
 		// push doc rect to top of text widget
@@ -2956,6 +3053,15 @@ boost::signals2::connection LLTextBase::setIsFriendCallback(const is_friend_sign
 	return mIsFriendSignal->connect(cb);
 }
 
+boost::signals2::connection LLTextBase::setIsObjectBlockedCallback(const is_blocked_signal_t::slot_type& cb)
+{
+    if (!mIsObjectBlockedSignal)
+    {
+        mIsObjectBlockedSignal = new is_blocked_signal_t();
+    }
+    return mIsObjectBlockedSignal->connect(cb);
+}
+
 //
 // LLTextSegment
 //
@@ -2963,11 +3069,19 @@ boost::signals2::connection LLTextBase::setIsFriendCallback(const is_friend_sign
 LLTextSegment::~LLTextSegment()
 {}
 
-bool LLTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const { width = 0; height = 0; return false;}
+bool LLTextSegment::getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const { width = 0; height = 0; return false; }
+bool LLTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+{
+	F32 fwidth = 0;
+	bool result = getDimensionsF32(first_char, num_chars, fwidth, height);
+	width = ll_round(fwidth);
+	return result;
+}
+
 S32	LLTextSegment::getOffset(S32 segment_local_x_coord, S32 start_offset, S32 num_chars, bool round) const { return 0; }
-S32	LLTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const { return 0; }
+S32	LLTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const { return 0; }
 void LLTextSegment::updateLayout(const LLTextBase& editor) {}
-F32	LLTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect) { return draw_rect.mLeft; }
+F32	LLTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect) { return draw_rect.mLeft; }
 bool LLTextSegment::canEdit() const { return false; }
 void LLTextSegment::unlinkFromDocument(LLTextBase*) {}
 void LLTextSegment::linkToDocument(LLTextBase*) {}
@@ -3033,7 +3147,7 @@ LLNormalTextSegment::~LLNormalTextSegment()
 }
 
 
-F32 LLNormalTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+F32 LLNormalTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 {
 	if( end - start > 0 )
 	{
@@ -3043,7 +3157,7 @@ F32 LLNormalTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selec
 }
 
 // Draws a single text segment, reversing the color for selection if needed.
-F32 LLNormalTextSegment::drawClippedSegment(S32 seg_start, S32 seg_end, S32 selection_start, S32 selection_end, LLRect rect)
+F32 LLNormalTextSegment::drawClippedSegment(S32 seg_start, S32 seg_end, S32 selection_start, S32 selection_end, LLRectf rect)
 {
 	F32 alpha = LLViewDrawContext::getCurrentContext().mAlpha;
 
@@ -3075,7 +3189,7 @@ F32 LLNormalTextSegment::drawClippedSegment(S32 seg_start, S32 seg_end, S32 sele
 				 &right_x, 
 				 mEditor.getUseEllipses());
 	}
-	rect.mLeft = (S32)ceil(right_x);
+	rect.mLeft = right_x;
 	
 	if( (selection_start < seg_end) && (selection_end > seg_start) )
 	{
@@ -3094,7 +3208,7 @@ F32 LLNormalTextSegment::drawClippedSegment(S32 seg_start, S32 seg_end, S32 sele
 				 &right_x, 
 				 mEditor.getUseEllipses());
 	}
-	rect.mLeft = (S32)ceil(right_x);
+	rect.mLeft = right_x;
 	if( selection_end < seg_end )
 	{
 		// Draw normally
@@ -3111,7 +3225,7 @@ F32 LLNormalTextSegment::drawClippedSegment(S32 seg_start, S32 seg_end, S32 sele
 				 &right_x, 
 				 mEditor.getUseEllipses());
 	}
-	return right_x;
+    return right_x;
 }
 
 BOOL LLNormalTextSegment::handleHover(S32 x, S32 y, MASK mask)
@@ -3164,7 +3278,15 @@ BOOL LLNormalTextSegment::handleMouseUp(S32 x, S32 y, MASK mask)
 		// Only process the click if it's actually in this segment, not to the right of the end-of-line.
 		if(mEditor.getSegmentAtLocalPos(x, y, false) == this)
 		{
-			LLUrlAction::clickAction(getStyle()->getLinkHREF());
+            std::string url = getStyle()->getLinkHREF();
+            if (!mEditor.mForceUrlsExternal)
+            {
+                LLUrlAction::clickAction(url, mEditor.isContentTrusted());
+            }
+            else if (!LLUrlAction::executeSLURL(url, mEditor.isContentTrusted()))
+            {
+                LLUrlAction::openURLExternal(url);
+            }
 			return TRUE;
 		}
 	}
@@ -3197,13 +3319,13 @@ void LLNormalTextSegment::setToolTip(const std::string& tooltip)
 	// we cannot replace a keyword tooltip that's loaded from a file
 	if (mToken)
 	{
-		llwarns << "LLTextSegment::setToolTip: cannot replace keyword tooltip." << llendl;
+		LL_WARNS() << "LLTextSegment::setToolTip: cannot replace keyword tooltip." << LL_ENDL;
 		return;
 	}
 	mTooltip = tooltip;
 }
 
-bool LLNormalTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+bool LLNormalTextSegment::getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const
 {
 	height = 0;
 	width = 0;
@@ -3212,7 +3334,7 @@ bool LLNormalTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& widt
 		height = mFontHeight;
 		const LLWString &text = getWText();
 		// if last character is a newline, then return true, forcing line break
-		width = mStyle->getFont()->getWidth(text.c_str(), mStart + first_char, num_chars);
+		width = mStyle->getFont()->getWidthF32(text.c_str(), mStart + first_char, num_chars);
 	}
 	return false;
 }
@@ -3227,7 +3349,7 @@ S32	LLNormalTextSegment::getOffset(S32 segment_local_x_coord, S32 start_offset, 
 											   round);
 }
 
-S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	const LLWString &text = getWText();
 
@@ -3244,7 +3366,7 @@ S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 lin
 
 	// if no character yet displayed on this line, don't require word wrapping since
 	// we can just move to the next line, otherwise insist on it so we make forward progress
-	LLFontGL::EWordWrapStyle word_wrap_style = (line_offset == 0) 
+	LLFontGL::EWordWrapStyle word_wrap_style = (line_offset == 0)
 		? LLFontGL::WORD_BOUNDARY_IF_POSSIBLE 
 		: LLFontGL::ONLY_WORD_BOUNDARIES;
 	
@@ -3253,14 +3375,14 @@ S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 lin
 
 	if(getLength() < segment_offset + mStart)
 	{ 
-		llinfos << "getLength() < segment_offset + mStart\t getLength()\t" << getLength() << "\tsegment_offset:\t" 
-						<< segment_offset << "\tmStart:\t" << mStart << "\tsegments\t" << mEditor.mSegments.size() << "\tmax_chars\t" << max_chars << llendl;
+		LL_INFOS() << "getLength() < segment_offset + mStart\t getLength()\t" << getLength() << "\tsegment_offset:\t" 
+						<< segment_offset << "\tmStart:\t" << mStart << "\tsegments\t" << mEditor.mSegments.size() << "\tmax_chars\t" << max_chars << LL_ENDL;
 	}
 
 	if( (offsetLength + 1) < max_chars)
 	{
-		llinfos << "offsetString.length() + 1 < max_chars\t max_chars:\t" << max_chars << "\toffsetLength:\t" << offsetLength << " getLength() : "
-			<< getLength() << "\tsegment_offset:\t" << segment_offset << "\tmStart:\t" << mStart << "\tsegments\t" << mEditor.mSegments.size() << llendl;
+		LL_INFOS() << "offsetString.length() + 1 < max_chars\t max_chars:\t" << max_chars << "\toffsetString.length():\t" << offsetLength << " getLength() : "
+			<< getLength() << "\tsegment_offset:\t" << segment_offset << "\tmStart:\t" << mStart << "\tsegments\t" << mEditor.mSegments.size() << LL_ENDL;
 	}
 	
 	S32 num_chars = mStyle->getFont()->maxDrawableChars( text.c_str() + (segment_offset + mStart),
@@ -3290,13 +3412,13 @@ S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 lin
 
 void LLNormalTextSegment::dump() const
 {
-	llinfos << "Segment [" << 
+	LL_INFOS() << "Segment [" << 
 //			mColor.mV[VX] << ", " <<
 //			mColor.mV[VY] << ", " <<
 //			mColor.mV[VZ] << "]\t[" <<
 		mStart << ", " <<
 		getEnd() << "]" <<
-		llendl;
+		LL_ENDL;
 }
 
 /*virtual*/
@@ -3342,7 +3464,7 @@ LLOnHoverChangeableTextSegment::LLOnHoverChangeableTextSegment( LLStyleConstSP s
 	  mNormalStyle(normal_style){}
 
 /*virtual*/ 
-F32 LLOnHoverChangeableTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+F32 LLOnHoverChangeableTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 {
 	F32 result = LLNormalTextSegment::draw(start, end, selection_start, selection_end, draw_rect);
 	if (end == mEnd - mStart)
@@ -3380,14 +3502,28 @@ LLInlineViewSegment::~LLInlineViewSegment()
 	mView->die();
 }
 
-bool LLInlineViewSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+bool LLInlineViewSegment::getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const
 {
-	if (first_char == 0 && num_chars == 0) 
+	if (first_char == 0 && num_chars == 0)
 	{
-		// we didn't fit on a line, the widget will fall on the next line
-		// so dimensions here are 0
+		// We didn't fit on a line or were forced to new string
+		// the widget will fall on the next line, so width here is 0
 		width = 0;
-		height = 0;
+
+		if (mForceNewLine)
+		{
+			// Chat, string can't be smaller then font height even if it is empty
+			LLStyleSP s(new LLStyle(LLStyle::Params().visible(true)));
+			height = s->getFont()->getLineHeight();
+
+			return true; // new line
+		}
+		else
+		{
+			// height from previous segment in same string will be used, word-wrap
+			height = 0;
+		}
+
 	}
 	else
 	{
@@ -3398,13 +3534,16 @@ bool LLInlineViewSegment::getDimensions(S32 first_char, S32 num_chars, S32& widt
 	return false;
 }
 
-S32	LLInlineViewSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLInlineViewSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	// if putting a widget anywhere but at the beginning of a line
 	// and the widget doesn't fit or mForceNewLine is true
 	// then return 0 chars for that line, and all characters for the next
-	if (line_offset != 0 
-		&& (mForceNewLine || num_pixels < mView->getRect().getWidth())) 
+	if (mForceNewLine && line_ind == 0)
+	{
+		return 0;
+	}
+	else if (line_offset != 0 && num_pixels < mView->getRect().getWidth())
 	{
 		return 0;
 	}
@@ -3420,7 +3559,7 @@ void LLInlineViewSegment::updateLayout(const LLTextBase& editor)
 	mView->setOrigin(start_rect.mLeft + mLeftPad, start_rect.mBottom + mBottomPad);
 }
 
-F32	LLInlineViewSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+F32	LLInlineViewSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 {
 	// return padded width of widget
 	// widget is actually drawn during mDocumentView's draw()
@@ -3450,18 +3589,18 @@ LLLineBreakTextSegment::LLLineBreakTextSegment(LLStyleConstSP style,S32 pos):LLT
 LLLineBreakTextSegment::~LLLineBreakTextSegment()
 {
 }
-bool LLLineBreakTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+bool LLLineBreakTextSegment::getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const
 {
 	width = 0;
 	height = mFontHeight;
 
 	return true;
 }
-S32	LLLineBreakTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLLineBreakTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	return 1;
 }
-F32	LLLineBreakTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+F32	LLLineBreakTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 {
 	return  draw_rect.mLeft;
 }
@@ -3479,7 +3618,7 @@ LLImageTextSegment::~LLImageTextSegment()
 
 static const S32 IMAGE_HPAD = 3;
 
-bool LLImageTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+bool LLImageTextSegment::getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const
 {
 	width = 0;
 	height = mStyle->getFont()->getLineHeight();
@@ -3493,7 +3632,7 @@ bool LLImageTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width
 	return false;
 }
 
-S32	 LLImageTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	 LLImageTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	LLUIImagePtr image = mStyle->getImage();
 	
@@ -3511,7 +3650,23 @@ S32	 LLImageTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 lin
 	return 0;
 }
 
-F32	LLImageTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect)
+BOOL LLImageTextSegment::handleToolTip(S32 x, S32 y, MASK mask)
+{
+	if (!mTooltip.empty())
+	{
+		LLToolTipMgr::instance().show(mTooltip);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void LLImageTextSegment::setToolTip(const std::string& tooltip)
+{
+	mTooltip = tooltip;
+}
+
+F32	LLImageTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect)
 {
 	if ( (start >= 0) && (end <= mEnd - mStart))
 	{

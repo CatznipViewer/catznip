@@ -33,7 +33,6 @@
 #include "llsurface.h"
 #include "pipeline.h"
 #include "llagent.h"
-#include "timing.h"
 #include "llsky.h"
 #include "llviewercamera.h"
 
@@ -44,11 +43,11 @@
 #include "noise.h"
 
 extern bool gShiftFrame;
-extern U64 gFrameTime;
+extern U64MicrosecondsImplicit gFrameTime;
 extern LLPipeline gPipeline;
 
-LLSurfacePatch::LLSurfacePatch() :
-	mHasReceivedData(FALSE),
+LLSurfacePatch::LLSurfacePatch() 
+:	mHasReceivedData(FALSE),
 	mSTexUpdate(FALSE),
 	mDirty(FALSE),
 	mDirtyZStats(TRUE),
@@ -100,7 +99,7 @@ void LLSurfacePatch::dirty()
 	}
 	else
 	{
-		llwarns << "No viewer object for this surface patch!" << llendl;
+		LL_WARNS() << "No viewer object for this surface patch!" << LL_ENDL;
 	}
 
 	mDirtyZStats = TRUE;
@@ -231,8 +230,8 @@ void LLSurfacePatch::eval(const U32 x, const U32 y, const U32 stride, LLVector3 
 	const F32 xyScaleInv = (1.f / xyScale)*(0.2222222222f);
 
 	F32 vec[3] = {
-					fmod((F32)(mOriginGlobal.mdV[0] + x)*xyScaleInv, 256.f),
-					fmod((F32)(mOriginGlobal.mdV[1] + y)*xyScaleInv, 256.f),
+                    (F32)fmod((F32)(mOriginGlobal.mdV[0] + x)*xyScaleInv, 256.f),
+                    (F32)fmod((F32)(mOriginGlobal.mdV[1] + y)*xyScaleInv, 256.f),
 					0.f
 				};
 	F32 rand_val = llclamp(noise2(vec)* 0.75f + 0.5f, 0.f, 1.f);

@@ -8,16 +8,19 @@ include(LLCommon)
 include(Linking)
 include(Boost)
 include(LLSharedLibs)
+include(JsonCpp)
 include(GoogleBreakpad)
-include(GooglePerfTools)
 include(Copy3rdPartyLibs)
 include(ZLIB)
+include(URIPARSER)
 
 include_directories(
     ${EXPAT_INCLUDE_DIRS}
     ${LLCOMMON_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIRS}
     ${BREAKPAD_INCLUDE_DIRECTORIES}
+    ${URIPARSER_INCLUDE_DIRS}
     )
 
 # add_executable(lltreeiterators lltreeiterators.cpp)
@@ -26,23 +29,26 @@ include_directories(
 #     ${LLCOMMON_LIBRARIES})
 
 set(llcommon_SOURCE_FILES
-    imageids.cpp
     indra_constants.cpp
     llallocator.cpp
     llallocator_heap_profile.cpp
     llapp.cpp
     llapr.cpp
     llassettype.cpp
-    llavatarname.cpp
     llbase32.cpp
     llbase64.cpp
+    llbitpack.cpp
+    llcallbacklist.cpp
+    llcallstack.cpp
+    llcleanup.cpp
     llcommon.cpp
     llcommonutils.cpp
+    llcoro_get_id.cpp
     llcoros.cpp
     llcrc.cpp
     llcriticaldamp.cpp
-    llcursortypes.cpp
     lldate.cpp
+    lldeadmantimer.cpp
     lldependencies.cpp
     lldictionary.cpp
     llerror.cpp
@@ -54,43 +60,45 @@ set(llcommon_SOURCE_FILES
     lleventfilter.cpp
     llevents.cpp
     lleventtimer.cpp
+    llexception.cpp
     llfasttimer.cpp
     llfile.cpp
     llfindlocale.cpp
     llfixedbuffer.cpp
-    llfoldertype.cpp
     llformat.cpp
     llframetimer.cpp
     llheartbeat.cpp
+    llheteromap.cpp
     llinitparam.cpp
+    llinitdestroyclass.cpp
     llinstancetracker.cpp
     llleap.cpp
     llleaplistener.cpp
     llliveappconfig.cpp
     lllivefile.cpp
-    lllog.cpp
     llmd5.cpp
     llmemory.cpp
     llmemorystream.cpp
     llmetrics.cpp
     llmetricperformancetester.cpp
     llmortician.cpp
-    lloptioninterface.cpp
+    llmutex.cpp
     llptrto.cpp 
+    llpredicate.cpp
     llprocess.cpp
     llprocessor.cpp
+    llprocinfo.cpp
     llqueuedthread.cpp
     llrand.cpp
     llrefcount.cpp
     llrun.cpp
     llsd.cpp
+    llsdjson.cpp
     llsdparam.cpp
     llsdserialize.cpp
     llsdserialize_xml.cpp
     llsdutil.cpp
-    llsecondlifeurls.cpp
     llsingleton.cpp
-    llstat.cpp
     llstacktrace.cpp
     llstreamqueue.cpp
     llstreamtools.cpp
@@ -98,67 +106,58 @@ set(llcommon_SOURCE_FILES
     llstringtable.cpp
     llsys.cpp
     llthread.cpp
+    llthreadlocalstorage.cpp
     llthreadsafequeue.cpp
     lltimer.cpp
+    lltrace.cpp
+    lltraceaccumulators.cpp
+    lltracerecording.cpp
+    lltracethreadrecorder.cpp
     lluri.cpp
+    lluriparser.cpp
     lluuid.cpp
     llworkerthread.cpp
-    metaclass.cpp
-    metaproperty.cpp
-    reflective.cpp
     timing.cpp
     u64.cpp
+    StackWalker.cpp
     )
     
 set(llcommon_HEADER_FILES
     CMakeLists.txt
 
-    bitpack.h
     ctype_workaround.h
-    doublelinkedlist.h
     fix_macros.h
-    imageids.h
     indra_constants.h
     linden_common.h
-    linked_lists.h
-    llaccountingcost.h
     llalignedarray.h
     llallocator.h
     llallocator_heap_profile.h
-    llagentconstants.h
-    llavatarname.h
     llapp.h
     llapr.h
     llassettype.h
-    llassoclist.h
-    llavatarconstants.h
     llbase32.h
     llbase64.h
+    llbitpack.h
     llboost.h
-    llchat.h
-    llclickaction.h
+    llcallbacklist.h
+    llcallstack.h
+    llcleanup.h
     llcommon.h
     llcommonutils.h
+    llcoro_get_id.h
     llcoros.h
     llcrc.h
     llcriticaldamp.h
-    llcursortypes.h
-    lldarray.h
-    lldarrayptr.h
     lldate.h
+    lldeadmantimer.h
     lldefs.h
     lldependencies.h
-    lldeleteutils.h
     lldepthstack.h
     lldictionary.h
-    lldlinked.h
     lldoubledispatch.h
-    lldqueueptr.h
     llendianswizzle.h
-    llenum.h
     llerror.h
     llerrorcontrol.h
-    llerrorlegacy.h
     llerrorthread.h
     llevent.h
     lleventapi.h
@@ -167,33 +166,27 @@ set(llcommon_HEADER_FILES
     lleventfilter.h
     llevents.h
     lleventemitter.h
-    llextendedstatus.h
+    llexception.h
     llfasttimer.h
     llfile.h
     llfindlocale.h
     llfixedbuffer.h
-    llfoldertype.h
     llformat.h
     llframetimer.h
     llhandle.h
     llhash.h
     llheartbeat.h
-    llhttpstatuscodes.h
-    llindexedqueue.h
+    llheteromap.h
+    llindexedvector.h
+    llinitdestroyclass.h
     llinitparam.h
     llinstancetracker.h
     llkeythrottle.h
-    lllazy.h
     llleap.h
     llleaplistener.h
     lllistenerwrapper.h
-    lllinkedqueue.h
     llliveappconfig.h
     lllivefile.h
-    lllocalidhashmap.h
-    lllog.h
-    lllslconstants.h
-    llmap.h
     llmd5.h
     llmemory.h
     llmemorystream.h
@@ -201,14 +194,14 @@ set(llcommon_HEADER_FILES
     llmetricperformancetester.h
     llmortician.h
     llnametable.h
-    lloptioninterface.h
     llpointer.h
+    llpounceable.h
+    llpredicate.h
     llpreprocessor.h
     llpriqueuemap.h
     llprocess.h
     llprocessor.h
-    llptrskiplist.h
-    llptrskipmap.h
+    llprocinfo.h
     llptrto.h
     llqueuedthread.h
     llrand.h
@@ -218,20 +211,14 @@ set(llcommon_HEADER_FILES
     llrefcount.h
     llsafehandle.h
     llsd.h
+    llsdjson.h
     llsdparam.h
     llsdserialize.h
     llsdserialize_xml.h
     llsdutil.h
-    llsecondlifeurls.h
     llsimplehash.h
     llsingleton.h
-    llskiplist.h
-    llskipmap.h
-    llsortedvector.h
-    llstack.h
     llstacktrace.h
-    llstat.h
-    llstatenums.h
     llstl.h
     llstreamqueue.h
     llstreamtools.h
@@ -239,32 +226,30 @@ set(llcommon_HEADER_FILES
     llstring.h
     llstringtable.h
     llstaticstringtable.h
+    llstatsaccumulator.h
     llsys.h
     llthread.h
+    llthreadlocalstorage.h
     llthreadsafequeue.h
     lltimer.h
+    lltrace.h
+    lltraceaccumulators.h
+    lltracerecording.h
+    lltracethreadrecorder.h
     lltreeiterators.h
-    lltypeinfolookup.h
+    llunits.h
+    llunittype.h
     lluri.h
+    lluriparser.h
     lluuid.h
-    lluuidhashmap.h
-    llversionserver.h
+    llwin32headers.h
+    llwin32headerslean.h
     llworkerthread.h
-    ll_template_cast.h
-    metaclass.h
-    metaclasst.h
-    metaproperty.h
-    metapropertyt.h
-    reflective.h
-    reflectivet.h
-    roles_constants.h
-    stdenums.h
     stdtypes.h
-    string_table.h
     stringize.h
     timer.h
-    timing.h
     u64.h
+    StackWalker.h
     )
 
 set_source_files_properties(${llcommon_HEADER_FILES}
@@ -274,13 +259,13 @@ list(APPEND llcommon_SOURCE_FILES ${llcommon_HEADER_FILES})
 
 if(LLCOMMON_LINK_SHARED)
   add_library (llcommon SHARED ${llcommon_SOURCE_FILES})
-  if(NOT WORD_SIZE EQUAL 32)
+  if(NOT ADDRESS_SIZE EQUAL 32)
     if(WINDOWS)
-      add_definitions(/FIXED:NO)
+      ##add_definitions(/FIXED:NO)
     else(WINDOWS) # not windows therefore gcc LINUX and DARWIN
       add_definitions(-fPIC)
     endif(WINDOWS)
-  endif(NOT WORD_SIZE EQUAL 32)
+  endif(NOT ADDRESS_SIZE EQUAL 32)
   if(WINDOWS)
     # always generate llcommon.pdb, even for "Release" builds
     set_target_properties(llcommon PROPERTIES LINK_FLAGS "/DEBUG")
@@ -296,11 +281,16 @@ target_link_libraries(
     ${APRUTIL_LIBRARIES}
     ${APR_LIBRARIES}
     ${EXPAT_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${WINDOWS_LIBRARIES}
+    ${BOOST_COROUTINE_LIBRARY}
+    ${BOOST_CONTEXT_LIBRARY}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${BOOST_REGEX_LIBRARY}
+    ${BOOST_SYSTEM_LIBRARY}
     ${GOOGLE_PERFTOOLS_LIBRARIES}
+    ${URIPARSER_LIBRARIES}
     )
 
 if (DARWIN)
@@ -319,33 +309,46 @@ if (LL_TESTS)
   LL_ADD_PROJECT_UNIT_TESTS(llcommon "${llcommon_TEST_SOURCE_FILES}")
 
   #set(TEST_DEBUG on)
-  set(test_libs llcommon ${LLCOMMON_LIBRARIES} ${WINDOWS_LIBRARIES} ${GOOGLEMOCK_LIBRARIES})
+  set(test_libs llcommon 
+      ${LLCOMMON_LIBRARIES} 
+      ${WINDOWS_LIBRARIES} 
+      ${GOOGLEMOCK_LIBRARIES} 
+      ${BOOST_COROUTINE_LIBRARY} 
+      ${BOOST_CONTEXT_LIBRARY} 
+      ${BOOST_THREAD_LIBRARY} 
+      ${BOOST_SYSTEM_LIBRARY})
   LL_ADD_INTEGRATION_TEST(commonmisc "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(bitpack "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llbase64 "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lldate "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lldeadmantimer "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lldependencies "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llerror "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventfilter "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llframetimer "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llheteromap "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llinstancetracker "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lllazy "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llpounceable "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llprocessor "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llprocinfo "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llrand "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llsdserialize "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llsingleton "" "${test_libs}")                          
+  LL_ADD_INTEGRATION_TEST(llsingleton "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llstring "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lltrace "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lltreeiterators "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lluri "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(reflection "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llunits "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(stringize "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs};${BOOST_CONTEXT_LIBRARY}")
-  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
 
-  # *TODO - reenable these once tcmalloc libs no longer break the build.
-  #ADD_BUILD_TEST(llallocator llcommon)
-  #ADD_BUILD_TEST(llallocator_heap_profile llcommon)
-  #ADD_BUILD_TEST(llmemtype llcommon)
+## llexception_test.cpp isn't a regression test, and doesn't need to be run
+## every build. It's to help a developer make implementation choices about
+## throwing and catching exceptions.
+##LL_ADD_INTEGRATION_TEST(llexception "" "${test_libs}")
+
 endif (LL_TESTS)

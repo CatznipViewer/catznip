@@ -53,11 +53,11 @@ const F32 FLY_FRAMES = 4;
 const F32 NUDGE_TIME = 0.25f;  // in seconds
 const S32 NUDGE_FRAMES = 2;
 const F32 ORBIT_NUDGE_RATE = 0.05f;  // fraction of normal speed
-const F32 YAW_NUDGE_RATE = 0.05f;  // fraction of normal speed
 
 struct LLKeyboardActionRegistry 
 :	public LLRegistrySingleton<std::string, boost::function<void (EKeystate keystate)>, LLKeyboardActionRegistry>
 {
+	LLSINGLETON_EMPTY_CTOR(LLKeyboardActionRegistry);
 };
 
 LLViewerKeyboard gViewerKeyboard;
@@ -66,7 +66,7 @@ void agent_jump( EKeystate s )
 {
 	if( KEYSTATE_UP == s  ) return;
 	F32 time = gKeyboard->getCurKeyElapsedTime();
-	S32 frame_count = llround(gKeyboard->getCurKeyElapsedFrameCount());
+	S32 frame_count = ll_round(gKeyboard->getCurKeyElapsedFrameCount());
 
 	if( time < FLY_TIME 
 		|| frame_count <= FLY_FRAMES 
@@ -88,18 +88,25 @@ void agent_push_down( EKeystate s )
 	gAgent.moveUp(-1);
 }
 
+static void agent_check_temporary_run(LLAgent::EDoubleTapRunMode mode)
+{
+	if (gAgent.mDoubleTapRunMode == mode &&
+		gAgent.getRunning() &&
+		!gAgent.getAlwaysRun())
+	{
+		// Turn off temporary running.
+		gAgent.clearRunning();
+		gAgent.sendWalkRun(gAgent.getRunning());
+	}
+}
+
 static void agent_handle_doubletap_run(EKeystate s, LLAgent::EDoubleTapRunMode mode)
 {
 	if (KEYSTATE_UP == s)
 	{
-		if (gAgent.mDoubleTapRunMode == mode &&
-		    gAgent.getRunning() &&
-		    !gAgent.getAlwaysRun())
-		{
-			// Turn off temporary running.
-			gAgent.clearRunning();
-			gAgent.sendWalkRun(gAgent.getRunning());
-		}
+		// Note: in case shift is already released, slide left/right run
+		// will be released in agent_turn_left()/agent_turn_right()
+		agent_check_temporary_run(mode);
 	}
 	else if (gSavedSettings.getBOOL("AllowTapTapHoldRun") &&
 		 KEYSTATE_DOWN == s &&
@@ -126,7 +133,7 @@ static void agent_push_forwardbackward( EKeystate s, S32 direction, LLAgent::EDo
 	if (KEYSTATE_UP == s) return;
 
 	F32 time = gKeyboard->getCurKeyElapsedTime();
-	S32 frame_count = llround(gKeyboard->getCurKeyElapsedFrameCount());
+	S32 frame_count = ll_round(gKeyboard->getCurKeyElapsedFrameCount());
 
 	if( time < NUDGE_TIME || frame_count <= NUDGE_FRAMES)
 	{
@@ -142,26 +149,38 @@ void camera_move_forward( EKeystate s );
 
 void agent_push_forward( EKeystate s )
 {
+	if(gAgent.isMovementLocked()) return;
+
 	//in free camera control mode we need to intercept keyboard events for avatar movements
 	if (LLFloaterCamera::inFreeCameraMode())
 	{
 		camera_move_forward(s);
-		return;
 	}
-	agent_push_forwardbackward(s, 1, LLAgent::DOUBLETAP_FORWARD);
+	else
+	{
+		agent_push_forwardbackward(s, 1, LLAgent::DOUBLETAP_FORWARD);
+	}
 }
 
 void camera_move_backward( EKeystate s );
 
 void agent_push_backward( EKeystate s )
 {
+	if(gAgent.isMovementLocked()) return;
+
 	//in free camera control mode we need to intercept keyboard events for avatar movements
 	if (LLFloaterCamera::inFreeCameraMode())
 	{
 		camera_move_backward(s);
-		return;
 	}
-	agent_push_forwardbackward(s, -1, LLAgent::DOUBLETAP_BACKWARD);
+	else if (!gAgent.backwardGrabbed() && gAgentAvatarp->isSitting() && gSavedSettings.getBOOL("LeaveMouselook"))
+	{
+		gAgentCamera.changeCameraToThirdPerson();
+	}
+	else
+	{
+		agent_push_forwardbackward(s, -1, LLAgent::DOUBLETAP_BACKWARD);
+	}
 }
 
 static void agent_slide_leftright( EKeystate s, S32 direction, LLAgent::EDoubleTapRunMode mode )
@@ -169,7 +188,7 @@ static void agent_slide_leftright( EKeystate s, S32 direction, LLAgent::EDoubleT
 	agent_handle_doubletap_run(s, mode);
 	if( KEYSTATE_UP == s ) return;
 	F32 time = gKeyboard->getCurKeyElapsedTime();
-	S32 frame_count = llround(gKeyboard->getCurKeyElapsedFrameCount());
+	S32 frame_count = ll_round(gKeyboard->getCurKeyElapsedFrameCount());
 
 	if( time < NUDGE_TIME || frame_count <= NUDGE_FRAMES)
 	{
@@ -184,12 +203,14 @@ static void agent_slide_leftright( EKeystate s, S32 direction, LLAgent::EDoubleT
 
 void agent_slide_left( EKeystate s )
 {
+	if(gAgent.isMovementLocked()) return;
 	agent_slide_leftright(s, 1, LLAgent::DOUBLETAP_SLIDELEFT);
 }
 
 
 void agent_slide_right( EKeystate s )
 {
+	if(gAgent.isMovementLocked()) return;
 	agent_slide_leftright(s, -1, LLAgent::DOUBLETAP_SLIDERIGHT);
 }
 
@@ -204,13 +225,20 @@ void agent_turn_left( EKeystate s )
 		return;
 	}
 
+	if(gAgent.isMovementLocked()) return;
+
 	if (LLToolCamera::getInstance()->mouseSteerMode())
 	{
 		agent_slide_left(s);
 	}
 	else
 	{
-		if (KEYSTATE_UP == s) return;
+		if (KEYSTATE_UP == s)
+		{
+			// Check temporary running. In case user released 'left' key with shift already released.
+			agent_check_temporary_run(LLAgent::DOUBLETAP_SLIDELEFT);
+			return;
+		}
 		F32 time = gKeyboard->getCurKeyElapsedTime();
 		gAgent.moveYaw( LLFloaterMove::getYawRate( time ) );
 	}
@@ -227,13 +255,20 @@ void agent_turn_right( EKeystate s )
 		return;
 	}
 
+	if(gAgent.isMovementLocked()) return;
+
 	if (LLToolCamera::getInstance()->mouseSteerMode())
 	{
 		agent_slide_right(s);
 	}
 	else
 	{
-		if (KEYSTATE_UP == s) return;
+		if (KEYSTATE_UP == s)
+		{
+			// Check temporary running. In case user released 'right' key with shift already released.
+			agent_check_temporary_run(LLAgent::DOUBLETAP_SLIDERIGHT);
+			return;
+		}
 		F32 time = gKeyboard->getCurKeyElapsedTime();
 		gAgent.moveYaw( -LLFloaterMove::getYawRate( time ) );
 	}
@@ -269,7 +304,7 @@ F32 get_orbit_rate()
 	if( time < NUDGE_TIME )
 	{
 		F32 rate = ORBIT_NUDGE_RATE + time * (1 - ORBIT_NUDGE_RATE)/ NUDGE_TIME;
-		//llinfos << rate << llendl;
+		//LL_INFOS() << rate << LL_ENDL;
 		return rate;
 	}
 	else
@@ -295,8 +330,8 @@ void camera_spin_around_cw( EKeystate s )
 
 void camera_spin_around_ccw_sitting( EKeystate s )
 {
-	if( KEYSTATE_UP == s ) return;
-	if (gAgent.rotateGrabbed() || gAgentCamera.sitCameraEnabled())
+	if( KEYSTATE_UP == s && gAgent.mDoubleTapRunMode != LLAgent::DOUBLETAP_SLIDERIGHT ) return;
+	if (gAgent.rotateGrabbed() || gAgentCamera.sitCameraEnabled() || gAgent.getRunning())
 	{
 		//send keystrokes, but do not change camera
 		agent_turn_right(s);
@@ -311,8 +346,8 @@ void camera_spin_around_ccw_sitting( EKeystate s )
 
 void camera_spin_around_cw_sitting( EKeystate s )
 {
-	if( KEYSTATE_UP == s  ) return;
-	if (gAgent.rotateGrabbed() || gAgentCamera.sitCameraEnabled())
+	if( KEYSTATE_UP == s && gAgent.mDoubleTapRunMode != LLAgent::DOUBLETAP_SLIDELEFT ) return;
+	if (gAgent.rotateGrabbed() || gAgentCamera.sitCameraEnabled() || gAgent.getRunning())
 	{
 		//send keystrokes, but do not change camera
 		agent_turn_left(s);
@@ -388,8 +423,8 @@ void camera_move_backward( EKeystate s )
 
 void camera_move_forward_sitting( EKeystate s )
 {
-	if( KEYSTATE_UP == s  ) return;
-	if (gAgent.forwardGrabbed() || gAgentCamera.sitCameraEnabled())
+	if( KEYSTATE_UP == s && gAgent.mDoubleTapRunMode != LLAgent::DOUBLETAP_FORWARD ) return;
+	if (gAgent.forwardGrabbed() || gAgentCamera.sitCameraEnabled() || (gAgent.getRunning() && !gAgent.getAlwaysRun()))
 	{
 		agent_push_forward(s);
 	}
@@ -402,9 +437,9 @@ void camera_move_forward_sitting( EKeystate s )
 
 void camera_move_backward_sitting( EKeystate s )
 {
-	if( KEYSTATE_UP == s  ) return;
+	if( KEYSTATE_UP == s && gAgent.mDoubleTapRunMode != LLAgent::DOUBLETAP_BACKWARD ) return;
 
-	if (gAgent.backwardGrabbed() || gAgentCamera.sitCameraEnabled())
+	if (gAgent.backwardGrabbed() || gAgentCamera.sitCameraEnabled() || (gAgent.getRunning() && !gAgent.getAlwaysRun()))
 	{
 		agent_push_backward(s);
 	}
@@ -676,7 +711,7 @@ BOOL LLViewerKeyboard::handleKey(KEY translated_key,  MASK translated_mask, BOOL
 		return FALSE;
 	}
 
-	lldebugst(LLERR_USER_INPUT) << "keydown -" << translated_key << "-" << llendl;
+	LL_DEBUGS("UserInput") << "keydown -" << translated_key << "-" << LL_ENDL;
 	// skip skipped keys
 	if(mKeysSkippedByUI.find(translated_key) != mKeysSkippedByUI.end()) 
 	{
@@ -695,7 +730,10 @@ BOOL LLViewerKeyboard::handleKey(KEY translated_key,  MASK translated_mask, BOOL
 	return mKeyHandledByUI[translated_key];
 }
 
-
+BOOL LLViewerKeyboard::handleKeyUp(KEY translated_key, MASK translated_mask)
+{
+	return gViewerWindow->handleKeyUp(translated_key, translated_mask);
+}
 
 BOOL LLViewerKeyboard::bindKey(const S32 mode, const KEY key, const MASK mask, const std::string& function_name)
 {
@@ -733,7 +771,7 @@ BOOL LLViewerKeyboard::bindKey(const S32 mode, const KEY key, const MASK mask, c
 
 	if (!function)
 	{
-		llerrs << "Can't bind key to function " << function_name << ", no function with this name found" << llendl;
+		LL_ERRS() << "Can't bind key to function " << function_name << ", no function with this name found" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -746,13 +784,13 @@ BOOL LLViewerKeyboard::bindKey(const S32 mode, const KEY key, const MASK mask, c
 
 	if (index >= MAX_KEY_BINDINGS)
 	{
-		llerrs << "LLKeyboard::bindKey() - too many keys for mode " << mode << llendl;
+		LL_ERRS() << "LLKeyboard::bindKey() - too many keys for mode " << mode << LL_ENDL;
 		return FALSE;
 	}
 
 	if (mode >= MODE_COUNT)
 	{
-		llerror("LLKeyboard::bindKey() - unknown mode passed", mode);
+		LL_ERRS() << "LLKeyboard::bindKey() - unknown mode passed" << mode << LL_ENDL;
 		return FALSE;
 	}
 
@@ -841,7 +879,7 @@ S32 LLViewerKeyboard::loadBindings(const std::string& filename)
 
 	if(filename.empty())
 	{
-		llerrs << " No filename specified" << llendl;
+		LL_ERRS() << " No filename specified" << LL_ENDL;
 		return 0;
 	}
 
@@ -873,35 +911,35 @@ S32 LLViewerKeyboard::loadBindings(const std::string& filename)
 
 		if (tokens_read == EOF)
 		{
-			llinfos << "Unexpected end-of-file at line " << line_count << " of key binding file " << filename << llendl;
+			LL_INFOS() << "Unexpected end-of-file at line " << line_count << " of key binding file " << filename << LL_ENDL;
 			fclose(fp);
 			return 0;
 		}
 		else if (tokens_read < 4)
 		{
-			llinfos << "Can't read line " << line_count << " of key binding file " << filename << llendl;
+			LL_INFOS() << "Can't read line " << line_count << " of key binding file " << filename << LL_ENDL;
 			continue;
 		}
 
 		// convert mode
 		if (!modeFromString(mode_string, &mode))
 		{
-			llinfos << "Unknown mode on line " << line_count << " of key binding file " << filename << llendl;
-			llinfos << "Mode must be one of FIRST_PERSON, THIRD_PERSON, EDIT, EDIT_AVATAR" << llendl;
+			LL_INFOS() << "Unknown mode on line " << line_count << " of key binding file " << filename << LL_ENDL;
+			LL_INFOS() << "Mode must be one of FIRST_PERSON, THIRD_PERSON, EDIT, EDIT_AVATAR" << LL_ENDL;
 			continue;
 		}
 
 		// convert key
 		if (!LLKeyboard::keyFromString(key_string, &key))
 		{
-			llinfos << "Can't interpret key on line " << line_count << " of key binding file " << filename << llendl;
+			LL_INFOS() << "Can't interpret key on line " << line_count << " of key binding file " << filename << LL_ENDL;
 			continue;
 		}
 
 		// convert mask
 		if (!LLKeyboard::maskFromString(mask_string, &mask))
 		{
-			llinfos << "Can't interpret mask on line " << line_count << " of key binding file " << filename << llendl;
+			LL_INFOS() << "Can't interpret mask on line " << line_count << " of key binding file " << filename << LL_ENDL;
 			continue;
 		}
 

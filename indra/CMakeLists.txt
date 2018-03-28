@@ -3,8 +3,8 @@
 # cmake_minimum_required should appear before any
 # other commands to guarantee full compatibility
 # with the version specified
-## prior to 2.8, the add_custom_target commands used in setting the version did not work correctly
-cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
+## prior to 3.4, the Windows manifest handling was missing
+cmake_minimum_required(VERSION 3.4.0 FATAL_ERROR)
 
 set(ROOT_PROJECT_NAME "SecondLife" CACHE STRING
     "The root project/makefile/solution name. Defaults to SecondLife.")
@@ -20,12 +20,6 @@ if (NOT CMAKE_BUILD_TYPE)
       "Build type.  One of: Debug Release RelWithDebInfo" FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
 
-# For the library installation process;
-# see cmake/Prebuild.cmake for the counterpart code.
-if ("${CMAKE_SOURCE_DIR}/../autobuild.xml" IS_NEWER_THAN "${CMAKE_BINARY_DIR}/temp/sentinel_installed")
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/temp)
-  file(WRITE ${CMAKE_BINARY_DIR}/temp/sentinel_installed "0")
-endif ("${CMAKE_SOURCE_DIR}/../autobuild.xml" IS_NEWER_THAN "${CMAKE_BINARY_DIR}/temp/sentinel_installed")
 add_subdirectory(cmake)
 
 add_subdirectory(${LIBS_OPEN_PREFIX}llaudio)
@@ -45,8 +39,6 @@ add_subdirectory(${LIBS_OPEN_PREFIX}llvfs)
 add_subdirectory(${LIBS_OPEN_PREFIX}llwindow)
 add_subdirectory(${LIBS_OPEN_PREFIX}llxml)
 
-add_subdirectory(${LIBS_OPEN_PREFIX}lscript)
-
 if (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
   add_subdirectory(${LIBS_CLOSED_PREFIX}copy_win_scripts)
 endif (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
@@ -60,23 +52,18 @@ add_subdirectory(${LIBS_OPEN_PREFIX}viewer_components)
 # Legacy C++ tests. Build always, run if LL_TESTS is true.
 add_subdirectory(${VIEWER_PREFIX}test)
 
+if (ENABLE_MEDIA_PLUGINS)
 # viewer media plugins
 add_subdirectory(${LIBS_OPEN_PREFIX}media_plugins)
-
-  # llplugin testbed code (is this the right way to include it?)
-  if (LL_TESTS AND NOT LINUX)
-    add_subdirectory(${VIEWER_PREFIX}test_apps/llplugintest)
-    add_subdirectory(${VIEWER_PREFIX}test_apps/llfbconnecttest)
-  endif (LL_TESTS AND NOT LINUX)
+endif (ENABLE_MEDIA_PLUGINS)
 
 if (LINUX)
   add_subdirectory(${VIEWER_PREFIX}linux_crash_logger)
-  add_subdirectory(${VIEWER_PREFIX}linux_updater)
   if (INSTALL_PROPRIETARY)
       include(LLAppearanceUtility)
       add_subdirectory(${LLAPPEARANCEUTILITY_SRC_DIR} ${LLAPPEARANCEUTILITY_BIN_DIR})
   endif (INSTALL_PROPRIETARY)
-  add_dependencies(viewer linux-crash-logger-strip-target linux-updater)
+  add_dependencies(viewer linux-crash-logger-strip-target)
 elseif (DARWIN)
   add_subdirectory(${VIEWER_PREFIX}mac_crash_logger)
   add_dependencies(viewer mac-crash-logger)
@@ -86,19 +73,18 @@ elseif (WINDOWS)
   if (EXISTS ${VIEWER_DIR}win_setup)
     add_subdirectory(${VIEWER_DIR}win_setup)
   endif (EXISTS ${VIEWER_DIR}win_setup)
-  add_subdirectory(${VIEWER_PREFIX}win_updater)
-  # add_dependencies(viewer windows-updater windows-setup windows-crash-logger)
-  add_dependencies(viewer windows-updater windows-crash-logger)
-elseif (SOLARIS)
-  add_subdirectory(solaris_crash_logger)
-  add_dependencies(viewer solaris-crash-logger)
+  # add_dependencies(viewer windows-setup windows-crash-logger)
+  add_dependencies(viewer windows-crash-logger)
 endif (LINUX)
 
 add_subdirectory(${VIEWER_PREFIX}newview)
 add_dependencies(viewer secondlife-bin)
+
+add_subdirectory(${VIEWER_PREFIX}doxygen EXCLUDE_FROM_ALL)
 
 if (LL_TESTS)
   # Define after the custom targets are created so
   # individual apps can add themselves as dependencies
   add_subdirectory(${INTEGRATION_TESTS_PREFIX}integration_tests)
 endif (LL_TESTS)
+

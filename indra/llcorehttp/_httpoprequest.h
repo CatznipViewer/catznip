@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2013, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,19 +33,22 @@
 #include <string>
 #include <curl/curl.h>
 
+#include <openssl/x509_vfy.h>
+#include <openssl/ssl.h>
+
 #include "httpcommon.h"
 #include "httprequest.h"
 #include "_httpoperation.h"
 #include "_refcounted.h"
 
+#include "httpheaders.h"
+#include "httpoptions.h"
 
 namespace LLCore
 {
 
 
 class BufferArray;
-class HttpHeaders;
-class HttpOptions;
 
 
 /// HttpOpRequest requests a supported HTTP method invocation with
@@ -63,9 +66,10 @@ class HttpOptions;
 class HttpOpRequest : public HttpOperation
 {
 public:
+    typedef boost::shared_ptr<HttpOpRequest> ptr_t;
+
 	HttpOpRequest();
 
-protected:
 	virtual ~HttpOpRequest();							// Use release()
 
 private:
@@ -77,9 +81,14 @@ public:
 	{
 		HOR_GET,
 		HOR_POST,
-		HOR_PUT
+		HOR_PUT,
+        HOR_DELETE,
+        HOR_PATCH,
+        HOR_COPY,
+        HOR_MOVE
 	};
-	
+    static std::string methodToString(const EMethod &);
+
 	virtual void stageFromRequest(HttpService *);
 	virtual void stageFromReady(HttpService *);
 	virtual void stageFromActive(HttpService *);
@@ -98,32 +107,57 @@ public:
 	HttpStatus setupGet(HttpRequest::policy_t policy_id,
 						HttpRequest::priority_t priority,
 						const std::string & url,
-						HttpOptions * options,
-						HttpHeaders * headers);
+						const HttpOptions::ptr_t & options,
+						const HttpHeaders::ptr_t & headers);
 	
 	HttpStatus setupGetByteRange(HttpRequest::policy_t policy_id,
 								 HttpRequest::priority_t priority,
 								 const std::string & url,
 								 size_t offset,
 								 size_t len,
-								 HttpOptions * options,
-								 HttpHeaders * headers);
+                                 const HttpOptions::ptr_t & options,
+								 const HttpHeaders::ptr_t & headers);
 	
 	HttpStatus setupPost(HttpRequest::policy_t policy_id,
 						 HttpRequest::priority_t priority,
 						 const std::string & url,
 						 BufferArray * body,
-						 HttpOptions * options,
-						 HttpHeaders * headers);
+                         const HttpOptions::ptr_t & options,
+						 const HttpHeaders::ptr_t & headers);
 	
 	HttpStatus setupPut(HttpRequest::policy_t policy_id,
 						HttpRequest::priority_t priority,
 						const std::string & url,
 						BufferArray * body,
-						HttpOptions * options,
-						HttpHeaders * headers);
+                        const HttpOptions::ptr_t & options,
+						const HttpHeaders::ptr_t & headers);
 
-	// Internal method used to setup the libcurl options for a request.
+    HttpStatus setupDelete(HttpRequest::policy_t policy_id,
+                        HttpRequest::priority_t priority,
+                        const std::string & url,
+                        const HttpOptions::ptr_t & options,
+                        const HttpHeaders::ptr_t & headers);
+
+    HttpStatus setupPatch(HttpRequest::policy_t policy_id,
+                        HttpRequest::priority_t priority,
+                        const std::string & url,
+                        BufferArray * body,
+                        const HttpOptions::ptr_t & options,
+                        const HttpHeaders::ptr_t & headers);
+
+    HttpStatus setupCopy(HttpRequest::policy_t policy_id,
+                        HttpRequest::priority_t priority,
+                        const std::string & url,
+                        const HttpOptions::ptr_t & options,
+                        const HttpHeaders::ptr_t & headers);
+
+    HttpStatus setupMove(HttpRequest::policy_t policy_id,
+                        HttpRequest::priority_t priority,
+                        const std::string & url,
+                        const HttpOptions::ptr_t & options,
+                        const HttpHeaders::ptr_t & headers);
+
+    // Internal method used to setup the libcurl options for a request.
 	// Does all the libcurl handle setup in one place.
 	//
 	// Threading:  called by worker thread
@@ -141,8 +175,8 @@ protected:
 					 HttpRequest::priority_t priority,
 					 const std::string & url,
 					 BufferArray * body,
-					 HttpOptions * options,
-					 HttpHeaders * headers);
+                     const HttpOptions::ptr_t & options,
+					 const HttpHeaders::ptr_t & headers);
 
 	// libcurl operational callbacks
 	//
@@ -150,13 +184,20 @@ protected:
 	//
 	static size_t writeCallback(void * data, size_t size, size_t nmemb, void * userdata);
 	static size_t readCallback(void * data, size_t size, size_t nmemb, void * userdata);
+    static int seekCallback(void *data, curl_off_t offset, int origin);
 	static size_t headerCallback(void * data, size_t size, size_t nmemb, void * userdata);
+	static CURLcode curlSslCtxCallback(CURL *curl, void *ssl_ctx, void *userptr);
+	static int sslCertVerifyCallback(X509_STORE_CTX *ctx, void *param);
+
 	static int debugCallback(CURL *, curl_infotype info, char * buffer, size_t len, void * userdata);
 
 protected:
 	unsigned int		mProcFlags;
 	static const unsigned int	PF_SCAN_RANGE_HEADER = 0x00000001U;
 	static const unsigned int	PF_SAVE_HEADERS = 0x00000002U;
+	static const unsigned int	PF_USE_RETRY_AFTER = 0x00000004U;
+
+	HttpRequest::policyCallback_t	mCallbackSSLVerify;
 
 public:
 	// Request data
@@ -165,8 +206,8 @@ public:
 	BufferArray *		mReqBody;
 	off_t				mReqOffset;
 	size_t				mReqLength;
-	HttpHeaders *		mReqHeaders;
-	HttpOptions *		mReqOptions;
+	HttpHeaders::ptr_t	mReqHeaders;
+    HttpOptions::ptr_t  mReqOptions;
 
 	// Transport data
 	bool				mCurlActive;
@@ -174,6 +215,8 @@ public:
 	HttpService *		mCurlService;
 	curl_slist *		mCurlHeaders;
 	size_t				mCurlBodyPos;
+	char *				mCurlTemp;				// Scratch buffer for header processing
+	size_t				mCurlTempLen;
 	
 	// Result data
 	HttpStatus			mStatus;
@@ -181,14 +224,19 @@ public:
 	off_t				mReplyOffset;
 	size_t				mReplyLength;
 	size_t				mReplyFullLength;
-	HttpHeaders *		mReplyHeaders;
+	HttpHeaders::ptr_t	mReplyHeaders;
 	std::string			mReplyConType;
+	int					mReplyRetryAfter;
 
 	// Policy data
 	int					mPolicyRetries;
+	int					mPolicy503Retries;
 	HttpTime			mPolicyRetryAt;
 	int					mPolicyRetryLimit;
+	HttpTime			mPolicyMinRetryBackoff; // initial delay between retries (mcs)
+	HttpTime			mPolicyMaxRetryBackoff;
 };  // end class HttpOpRequest
+
 
 
 /// HttpOpRequestCompare isn't an operation but a uniform comparison
@@ -210,7 +258,7 @@ public:
 
 // Internal function to append the contents of an HttpHeaders
 // instance to a curl_slist object.
-curl_slist * append_headers_to_slist(const HttpHeaders *, curl_slist * slist);
+curl_slist * append_headers_to_slist(const HttpHeaders::ptr_t &, curl_slist * slist);
 
 }   // end namespace LLCore
 

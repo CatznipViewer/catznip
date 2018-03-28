@@ -31,6 +31,7 @@
 #include "llcoord.h"
 #include "llstring.h"
 #include "llcursortypes.h"
+#include "llinstancetracker.h"
 #include "llsd.h"
 
 class LLSplashScreen;
@@ -123,7 +124,7 @@ public:
 	virtual void swapBuffers() = 0;
 	virtual void bringToFront() = 0;
 	virtual void focusClient() { };		// this may not have meaning or be required on other platforms, therefore, it's not abstract
-	
+	virtual void setOldResize(bool oldresize) { };
 	// handy coordinate space conversion routines
 	// NB: screen to window and vice verse won't work on width/height coordinate pairs,
 	// as the conversion must take into account left AND right border widths, etc.
@@ -165,6 +166,8 @@ public:
 	// Provide native key event data
 	virtual LLSD getNativeKeyData() { return LLSD::emptyMap(); }
 
+	// Get system UI size based on DPI (for 96 DPI UI size should be 1.0)
+	virtual F32 getSystemUISize() { return 1.0; }
 protected:
 	LLWindow(LLWindowCallbacks* callbacks, BOOL fullscreen, U32 flags);
 	virtual ~LLWindow();

@@ -30,7 +30,6 @@
 
 #include "llagent.h"
 #include "llagentpicksinfo.h"
-#include "llavatarconstants.h"
 #include "llcommandhandler.h"
 #include "lldispatcher.h"
 #include "llflatlistview.h"
@@ -69,7 +68,7 @@ static const std::string CLASSIFIED_ID("classified_id");
 static const std::string CLASSIFIED_NAME("classified_name");
 
 
-static LLRegisterPanelClassWrapper<LLPanelPicks> t_panel_picks("panel_picks");
+static LLPanelInjector<LLPanelPicks> t_panel_picks("panel_picks");
 
 
 class LLPickHandler : public LLCommandHandler,
@@ -123,7 +122,7 @@ public:
 		}
 		else
 		{
-			llwarns << "unknown verb " << verb << llendl;
+			LL_WARNS() << "unknown verb " << verb << LL_ENDL;
 			return false;
 		}
 	}
@@ -174,7 +173,7 @@ public:
 		}
 		else
 		{
-			llwarns << "Can't edit a pick you did not create" << llendl;
+			LL_WARNS() << "Can't edit a pick you did not create" << LL_ENDL;
 		}
 
 		// remove our observer now that we're done
@@ -281,7 +280,7 @@ public:
 		{
 			if (c_info->creator_id == gAgent.getID())
 			{
-				llwarns << "edit in progress" << llendl;
+				LL_WARNS() << "edit in progress" << LL_ENDL;
 				// open the new classified panel on the Me > Picks sidetray
 				LLSD params;
 				params["id"] = gAgent.getID();
@@ -292,7 +291,7 @@ public:
 			}
 			else
 			{
-				llwarns << "Can't edit a classified you did not create" << llendl;
+				LL_WARNS() << "Can't edit a classified you did not create" << LL_ENDL;
 			}
 		}
 	}
@@ -385,9 +384,9 @@ void LLPanelPicks::processProperties(void* data, EAvatarProcessorType type)
 		LLAvatarPicks* avatar_picks = static_cast<LLAvatarPicks*>(data);
 		if(avatar_picks && getAvatarId() == avatar_picks->target_id)
 		{
-			std::string full_name;
-			gCacheName->getFullName(getAvatarId(), full_name);
-			getChild<LLUICtrl>("pick_title")->setTextArg("[NAME]", full_name);
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(getAvatarId(), &av_name);
+			getChild<LLUICtrl>("pick_title")->setTextArg("[NAME]", av_name.getUserName());
 			
 			// Save selection, to be able to edit same item after saving changes. See EXT-3023.
 			LLUUID selected_id = mPicksList->getSelectedValue()[PICK_ID];
@@ -433,7 +432,7 @@ void LLPanelPicks::processProperties(void* data, EAvatarProcessorType type)
 		
 		mNoPicks = !mPicksList->size();
 	}
-	else if(APT_CLASSIFIEDS == type)
+	else if((APT_CLASSIFIEDS == type) || (APT_CLASSIFIED_INFO == type))
 	{
 		LLAvatarClassifieds* c_info = static_cast<LLAvatarClassifieds*>(data);
 		if(c_info && getAvatarId() == c_info->target_id)
@@ -677,7 +676,7 @@ void LLPanelPicks::onListCommit(const LLFlatListView* f_list)
 	}
 	else
 	{
-		llwarns << "Unknown list" << llendl;
+		LL_WARNS() << "Unknown list" << LL_ENDL;
 	}
 
 	updateButtons();
@@ -937,7 +936,7 @@ void LLPanelPicks::openClassifiedInfo(const LLSD &params)
 void LLPanelPicks::openClassifiedEdit(const LLSD& params)
 {
 	LLUUID classified_id = params["classified_id"].asUUID();;
-	llinfos << "opening classified " << classified_id << " for edit" << llendl;
+	LL_INFOS() << "opening classified " << classified_id << " for edit" << LL_ENDL;
 	editClassified(classified_id);
 }
 
@@ -1169,7 +1168,7 @@ void LLPanelPicks::editClassified(const LLUUID&  classified_id)
 	LLClassifiedItem* c_item = findClassifiedById(classified_id);
 	if (!c_item)
 	{
-		llwarns << "item not found for classified_id " << classified_id << llendl;
+		LL_WARNS() << "item not found for classified_id " << classified_id << LL_ENDL;
 		return;
 	}
 

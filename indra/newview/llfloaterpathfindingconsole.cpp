@@ -34,11 +34,11 @@
 
 #include <boost/signals2.hpp>
 
+#include "llagent.h"
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
 #include "llcontrol.h"
-#include "llenvmanager.h"
 #include "llfloaterpathfindingcharacters.h"
 #include "llfloaterpathfindinglinksets.h"
 #include "llfloaterreg.h"
@@ -207,7 +207,7 @@ void LLFloaterPathfindingConsole::onOpen(const LLSD& pKey)
 	if ( LLPathingLib::getInstance() == NULL )
 	{ 
 		setConsoleState(kConsoleStateLibraryNotImplemented);
-		llwarns <<"Errror: cannot find pathing library implementation."<<llendl;
+		LL_WARNS() <<"Errror: cannot find pathing library implementation."<<LL_ENDL;
 	}
 	else
 	{	
@@ -224,7 +224,7 @@ void LLFloaterPathfindingConsole::onOpen(const LLSD& pKey)
 
 	if (!mRegionBoundarySlot.connected())
 	{
-		mRegionBoundarySlot = LLEnvManagerNew::instance().setRegionChangeCallback(boost::bind(&LLFloaterPathfindingConsole::onRegionBoundaryCross, this));
+		mRegionBoundarySlot = gAgent.addRegionChangedCallback(boost::bind(&LLFloaterPathfindingConsole::onRegionBoundaryCross, this));
 	}
 
 	if (!mTeleportFailedSlot.connected())

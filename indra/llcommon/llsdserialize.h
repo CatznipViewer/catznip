@@ -416,7 +416,8 @@ public:
 	typedef enum e_formatter_options_type
 	{
 		OPTIONS_NONE = 0,
-		OPTIONS_PRETTY = 1
+		OPTIONS_PRETTY = 1,
+		OPTIONS_PRETTY_BINARY = 2
 	} EFormatterOptions;
 
 	/** 
@@ -507,6 +508,17 @@ public:
 	 * @return Returns The number of LLSD objects fomatted out
 	 */
 	virtual S32 format(const LLSD& data, std::ostream& ostr, U32 options = LLSDFormatter::OPTIONS_NONE) const;
+
+protected:
+
+	/** 
+	 * @brief Implementation to format the data. This is called recursively.
+	 *
+	 * @param data The data to write.
+	 * @param ostr The destination stream for the data.
+	 * @return Returns The number of LLSD objects fomatted out
+	 */
+	S32 format_impl(const LLSD& data, std::ostream& ostr, U32 options, U32 level) const;
 };
 
 
@@ -634,7 +646,7 @@ protected:
  *  </code>
  *
  * *NOTE - formerly this class inherited from its template parameter Formatter,
- * but all insnatiations passed in LLRefCount subclasses.  This conflicted with
+ * but all instantiations passed in LLRefCount subclasses.  This conflicted with
  * the auto allocation intended for this class template (demonstrated in the
  * example above).  -brad
  */
@@ -720,6 +732,18 @@ public:
 		LLPointer<LLSDNotationFormatter> f = new LLSDNotationFormatter;
 		return f->format(sd, str, LLSDFormatter::OPTIONS_NONE);
 	}
+	static S32 toPrettyNotation(const LLSD& sd, std::ostream& str)
+	{
+		LLPointer<LLSDNotationFormatter> f = new LLSDNotationFormatter;
+		return f->format(sd, str, LLSDFormatter::OPTIONS_PRETTY);
+	}
+	static S32 toPrettyBinaryNotation(const LLSD& sd, std::ostream& str)
+	{
+		LLPointer<LLSDNotationFormatter> f = new LLSDNotationFormatter;
+		return f->format(sd, str, 
+				LLSDFormatter::OPTIONS_PRETTY | 
+				LLSDFormatter::OPTIONS_PRETTY_BINARY);
+	}
 	static S32 fromNotation(LLSD& sd, std::istream& str, S32 max_bytes)
 	{
 		LLPointer<LLSDNotationParser> p = new LLSDNotationParser;
@@ -790,8 +814,24 @@ public:
 	}
 };
 
+class LL_COMMON_API LLUZipHelper : public LLRefCount
+{
+public:
+    typedef enum e_zip_result
+    {
+        ZR_OK = 0,
+        ZR_MEM_ERROR,
+        ZR_SIZE_ERROR,
+        ZR_DATA_ERROR,
+        ZR_PARSE_ERROR,
+    } EZipRresult;
+    // return OK or reason for failure
+    static EZipRresult unzip_llsd(LLSD& data, std::istream& is, S32 size);
+};
+
 //dirty little zip functions -- yell at davep
 LL_COMMON_API std::string zip_llsd(LLSD& data);
-LL_COMMON_API bool unzip_llsd(LLSD& data, std::istream& is, S32 size);
+
+
 LL_COMMON_API U8* unzip_llsdNavMesh( bool& valid, unsigned int& outsize,std::istream& is, S32 size);
 #endif // LL_LLSDSERIALIZE_H

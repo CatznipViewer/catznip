@@ -51,6 +51,7 @@ LLConversationItem::LLConversationItem(std::string display_name, const LLUUID& u
 	mConvType(CONV_UNKNOWN),
 	mLastActiveTime(0.0),
 	mDisplayModeratorOptions(false),
+	mDisplayGroupBanOptions(false),
 	mAvatarNameCacheConnection()
 {
 }
@@ -63,6 +64,7 @@ LLConversationItem::LLConversationItem(const LLUUID& uuid, LLFolderViewModelInte
 	mConvType(CONV_UNKNOWN),
 	mLastActiveTime(0.0),
 	mDisplayModeratorOptions(false),
+	mDisplayGroupBanOptions(false),
 	mAvatarNameCacheConnection()
 {
 }
@@ -75,6 +77,7 @@ LLConversationItem::LLConversationItem(LLFolderViewModelInterface& root_view_mod
 	mConvType(CONV_UNKNOWN),
 	mLastActiveTime(0.0),
 	mDisplayModeratorOptions(false),
+	mDisplayGroupBanOptions(false),
 	mAvatarNameCacheConnection()
 {
 }
@@ -133,7 +136,24 @@ void LLConversationItem::buildParticipantMenuOptions(menuentry_vec_t& items, U32
 		items.push_back(std::string("im"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
+
+		if (getType() != CONV_SESSION_1_ON_1)
+		{
+			items.push_back(std::string("voice_call"));
+		}
+		else
+		{
+			LLVoiceChannel* voice_channel = LLIMModel::getInstance() ? LLIMModel::getInstance()->getVoiceChannel(this->getUUID()) : NULL;
+			if(voice_channel != LLVoiceChannel::getCurrentVoiceChannel())
+			{
+				items.push_back(std::string("voice_call"));
+			}
+			else
+			{
+				items.push_back(std::string("disconnect_from_voice"));
+			}
+		}
+
 		items.push_back(std::string("chat_history"));
 		items.push_back(std::string("separator_chat_history"));
 		items.push_back(std::string("add_friend"));
@@ -158,6 +178,12 @@ void LLConversationItem::buildParticipantMenuOptions(menuentry_vec_t& items, U32
 			items.push_back(std::string("ModerateVoiceUnMuteSelected"));
 			items.push_back(std::string("ModerateVoiceMute"));
 			items.push_back(std::string("ModerateVoiceUnmute"));
+		}
+
+		if ((getType() != CONV_SESSION_1_ON_1) && mDisplayGroupBanOptions)
+		{
+			items.push_back(std::string("Group Ban Separator"));
+			items.push_back(std::string("BanMember"));
 		}
 	}
 }
@@ -361,7 +387,7 @@ void LLConversationItemSession::setDistance(const LLUUID& participant_id, F64 di
 
 void LLConversationItemSession::buildContextMenu(LLMenuGL& menu, U32 flags)
 {
-    lldebugs << "LLConversationItemParticipant::buildContextMenu()" << llendl;
+    LL_DEBUGS() << "LLConversationItemParticipant::buildContextMenu()" << LL_ENDL;
     menuentry_vec_t items;
     menuentry_vec_t disabled_items;
     if((flags & ITEM_IN_MULTI_SELECTION) && (this->getType() != CONV_SESSION_NEARBY))
@@ -439,7 +465,7 @@ const bool LLConversationItemSession::getTime(F64& time) const
 void LLConversationItemSession::dumpDebugData(bool dump_children)
 {
 	// Session info
-	llinfos << "Merov debug : session " << this << ", uuid = " << mUUID << ", name = " << mName << ", is loaded = " << mIsLoaded << llendl;
+	LL_INFOS() << "Merov debug : session " << this << ", uuid = " << mUUID << ", name = " << mName << ", is loaded = " << mIsLoaded << LL_ENDL;
 	// Children info
 	if (dump_children)
 	{
@@ -557,7 +583,7 @@ LLConversationItemSession* LLConversationItemParticipant::getParentSession()
 
 void LLConversationItemParticipant::dumpDebugData()
 {
-	llinfos << "Merov debug : participant, uuid = " << mUUID << ", name = " << mName << ", display name = " << mDisplayName << ", muted = " << isVoiceMuted() << ", moderator = " << mIsModerator << llendl;
+	LL_INFOS() << "Merov debug : participant, uuid = " << mUUID << ", name = " << mName << ", display name = " << mDisplayName << ", muted = " << isVoiceMuted() << ", moderator = " << mIsModerator << LL_ENDL;
 }
 
 void LLConversationItemParticipant::setDisplayModeratorRole(bool displayRole)
@@ -576,12 +602,12 @@ bool LLConversationItemParticipant::isVoiceMuted()
 
 void LLConversationItemParticipant::muteVoice(bool mute_voice)
 {
-	std::string name;
-	gCacheName->getFullName(mUUID, name);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(mUUID, &av_name);
 	LLMuteList * mute_listp = LLMuteList::getInstance();
-	bool voice_already_muted = mute_listp->isMuted(mUUID, name);
+	bool voice_already_muted = mute_listp->isMuted(mUUID, av_name.getUserName());
 
-	LLMute mute(mUUID, name, LLMute::AGENT);
+	LLMute mute(mUUID, av_name.getUserName(), LLMute::AGENT);
 	if (voice_already_muted && !mute_voice)
 	{
 		mute_listp->remove(mute);

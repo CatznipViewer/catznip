@@ -34,8 +34,8 @@
 // Viewer includes
 #include "llagent.h"
 #include "llagentui.h"
-#include "llappviewer.h" 
-#include "llsecondlifeurls.h"
+#include "llappviewer.h"
+#include "llnotificationsutil.h"
 #include "llslurl.h"
 #include "llvoiceclient.h"
 #include "lluictrlfactory.h"
@@ -49,7 +49,6 @@
 // Linden library includes
 #include "llaudioengine.h"
 #include "llbutton.h"
-#include "llcurl.h"
 #include "llglheaders.h"
 #include "llfloater.h"
 #include "llfloaterreg.h"
@@ -62,6 +61,8 @@
 #include "stringize.h"
 #include "llsdutil_math.h"
 #include "lleventapi.h"
+#include "llcorehttputil.h"
+#include "lldir.h"
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -69,25 +70,6 @@
 
 extern LLMemoryInfo gSysMemory;
 extern U32 gPacketsIn;
-
-static std::string get_viewer_release_notes_url();
-
-///----------------------------------------------------------------------------
-/// Class LLServerReleaseNotesURLFetcher
-///----------------------------------------------------------------------------
-class LLServerReleaseNotesURLFetcher : public LLHTTPClient::Responder
-{
-	LOG_CLASS(LLServerReleaseNotesURLFetcher);
-public:
-
-	static void startFetch();
-	/*virtual*/ void completedHeader(U32 status, const std::string& reason, const LLSD& content);
-	/*virtual*/ void completedRaw(
-		U32 status,
-		const std::string& reason,
-		const LLChannelDescriptors& channels,
-		const LLIOPipe::buffer_ptr_t& buffer);
-};
 
 ///----------------------------------------------------------------------------
 /// Class LLFloaterAbout
@@ -107,11 +89,24 @@ public:
 	/// separated so that we can programmatically access the same info.
 	static LLSD getInfo();
 	void onClickCopyToClipboard();
-
-	void updateServerReleaseNotesURL(const std::string& url);
+	void onClickUpdateCheck();
+    static void setUpdateListener();
 
 private:
 	void setSupportText(const std::string& server_release_notes_url);
+
+	// notifications for user requested checks
+	static void showCheckUpdateNotification(S32 state);
+
+	// callback method for manual checks
+	static bool callbackCheckUpdate(LLSD const & event);
+    
+    // listener name for update checks
+    static const std::string sCheckUpdateListenerName;
+	
+    static void startFetchServerReleaseNotes();
+    static void fetchServerReleaseNotesCoro(const std::string& cap_url);
+    static void handleServerReleaseNotes(LLSD results);
 };
 
 
@@ -133,27 +128,30 @@ BOOL LLFloaterAbout::postBuild()
 	LLViewerTextEditor *support_widget = 
 		getChild<LLViewerTextEditor>("support_editor", true);
 
-	LLViewerTextEditor *linden_names_widget = 
-		getChild<LLViewerTextEditor>("linden_names", true);
-
 	LLViewerTextEditor *contrib_names_widget = 
 		getChild<LLViewerTextEditor>("contrib_names", true);
 
-	LLViewerTextEditor *trans_names_widget = 
-		getChild<LLViewerTextEditor>("trans_names", true);
+	LLViewerTextEditor *licenses_widget = 
+		getChild<LLViewerTextEditor>("licenses_editor", true);
 
 	getChild<LLUICtrl>("copy_btn")->setCommitCallback(
 		boost::bind(&LLFloaterAbout::onClickCopyToClipboard, this));
+    
+    getChild<LLUICtrl>("update_btn")->setCommitCallback(
+        boost::bind(&LLFloaterAbout::onClickUpdateCheck, this));
+
+	static const LLUIColor about_color = LLUIColorTable::instance().getColor("TextFgReadOnlyColor");
 
 	if (gAgent.getRegion())
 	{
 		// start fetching server release notes URL
 		setSupportText(LLTrans::getString("RetrievingData"));
-		LLServerReleaseNotesURLFetcher::startFetch();
+        startFetchServerReleaseNotes();
 	}
 	else // not logged in
 	{
-		setSupportText(LLStringUtil::null);
+		LL_DEBUGS("ViewerInfo") << "cannot display region info when not connected" << LL_ENDL;
+		setSupportText(LLTrans::getString("NotConnected"));
 	}
 
 	support_widget->blockUndo();
@@ -162,29 +160,11 @@ BOOL LLFloaterAbout::postBuild()
 	support_widget->setEnabled(FALSE);
 	support_widget->startOfDoc();
 
-	// Get the names of Lindens, added by viewer_manifest.py at build time
-	std::string lindens_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"lindens.txt");
-	llifstream linden_file;
-	std::string lindens;
-	linden_file.open(lindens_path);		/* Flawfinder: ignore */
-	if (linden_file.is_open())
-	{
-		std::getline(linden_file, lindens); // all names are on a single line
-		linden_file.close();
-		linden_names_widget->setText(lindens);
-	}
-	else
-	{
-		LL_INFOS("AboutInit") << "Could not read lindens file at " << lindens_path << LL_ENDL;
-	}
-	linden_names_widget->setEnabled(FALSE);
-	linden_names_widget->startOfDoc();
-
 	// Get the names of contributors, extracted from .../doc/contributions.txt by viewer_manifest.py at build time
 	std::string contributors_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"contributors.txt");
 	llifstream contrib_file;
 	std::string contributors;
-	contrib_file.open(contributors_path);		/* Flawfinder: ignore */
+	contrib_file.open(contributors_path.c_str());		/* Flawfinder: ignore */
 	if (contrib_file.is_open())
 	{
 		std::getline(contrib_file, contributors); // all names are on a single line
@@ -198,128 +178,106 @@ BOOL LLFloaterAbout::postBuild()
 	contrib_names_widget->setEnabled(FALSE);
 	contrib_names_widget->startOfDoc();
 
-	// Get the names of translators, extracted from .../doc/tranlations.txt by viewer_manifest.py at build time
-	std::string translators_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"translators.txt");
-	llifstream trans_file;
-	std::string translators;
-	trans_file.open(translators_path);		/* Flawfinder: ignore */
-	if (trans_file.is_open())
+    // Get the Versions and Copyrights, created at build time
+	std::string licenses_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"packages-info.txt");
+	llifstream licenses_file;
+	licenses_file.open(licenses_path.c_str());		/* Flawfinder: ignore */
+	if (licenses_file.is_open())
 	{
-		std::getline(trans_file, translators); // all names are on a single line
-		trans_file.close();
+		std::string license_line;
+		licenses_widget->clear();
+		while ( std::getline(licenses_file, license_line) )
+		{
+			licenses_widget->appendText(license_line+"\n", FALSE,
+										LLStyle::Params() .color(about_color));
+		}
+		licenses_file.close();
 	}
 	else
 	{
-		LL_WARNS("AboutInit") << "Could not read translators file at " << translators_path << LL_ENDL;
+		// this case will use the (out of date) hard coded value from the XUI
+		LL_INFOS("AboutInit") << "Could not read licenses file at " << licenses_path << LL_ENDL;
 	}
-	trans_names_widget->setText(translators);
-	trans_names_widget->setEnabled(FALSE);
-	trans_names_widget->startOfDoc();
+	licenses_widget->setEnabled(FALSE);
+	licenses_widget->startOfDoc();
 
 	return TRUE;
 }
 
-// static
 LLSD LLFloaterAbout::getInfo()
 {
-	// The point of having one method build an LLSD info block and the other
-	// construct the user-visible About string is to ensure that the same info
-	// is available to a getInfo() caller as to the user opening
-	// LLFloaterAbout.
-	LLSD info;
-	LLSD version;
-	version.append(LLVersionInfo::getMajor());
-	version.append(LLVersionInfo::getMinor());
-	version.append(LLVersionInfo::getPatch());
-	version.append(LLVersionInfo::getBuild());
-	info["VIEWER_VERSION"] = version;
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
-	info["BUILD_DATE"] = __DATE__;
-	info["BUILD_TIME"] = __TIME__;
-	info["CHANNEL"] = LLVersionInfo::getChannel();
-
-	info["VIEWER_RELEASE_NOTES_URL"] = get_viewer_release_notes_url();
-
-#if LL_MSVC
-	info["COMPILER"] = "MSVC";
-	info["COMPILER_VERSION"] = _MSC_VER;
-#elif LL_GNUC
-	info["COMPILER"] = "GCC";
-	info["COMPILER_VERSION"] = GCC_VERSION;
-#endif
-
-	// Position
-	LLViewerRegion* region = gAgent.getRegion();
-	if (region)
-	{
-		LLVector3d pos = gAgent.getPositionGlobal();
-		info["POSITION"] = ll_sd_from_vector3d(pos);
-		info["POSITION_LOCAL"] = ll_sd_from_vector3(gAgent.getPosAgentFromGlobal(pos));
-		info["REGION"] = gAgent.getRegion()->getName();
-		info["HOSTNAME"] = gAgent.getRegion()->getHost().getHostName();
-		info["HOSTIP"] = gAgent.getRegion()->getHost().getString();
-		info["SERVER_VERSION"] = gLastVersionChannel;
-		LLSLURL slurl;
-		LLAgentUI::buildSLURL(slurl);
-		info["SLURL"] = slurl.getSLURLString();
-	}
-
-	// CPU
-	info["CPU"] = gSysCPU.getCPUString();
-	info["MEMORY_MB"] = LLSD::Integer(gSysMemory.getPhysicalMemoryKB() / 1024);
-	// Moved hack adjustment to Windows memory size into llsys.cpp
-	info["OS_VERSION"] = LLAppViewer::instance()->getOSInfo().getOSString();
-	info["GRAPHICS_CARD_VENDOR"] = (const char*)(glGetString(GL_VENDOR));
-	info["GRAPHICS_CARD"] = (const char*)(glGetString(GL_RENDERER));
-
-#if LL_WINDOWS
-    LLSD driver_info = gDXHardware.getDisplayInfo();
-    if (driver_info.has("DriverVersion"))
-    {
-        info["GRAPHICS_DRIVER_VERSION"] = driver_info["DriverVersion"];
-    }
-#endif
-
-	info["OPENGL_VERSION"] = (const char*)(glGetString(GL_VERSION));
-	info["LIBCURL_VERSION"] = LLCurl::getVersionString();
-	info["J2C_VERSION"] = LLImageJ2C::getEngineInfo();
-	bool want_fullname = true;
-	info["AUDIO_DRIVER_VERSION"] = gAudiop ? LLSD(gAudiop->getDriverName(want_fullname)) : LLSD();
-	if(LLVoiceClient::getInstance()->voiceEnabled())
-	{
-		LLVoiceVersionInfo version = LLVoiceClient::getInstance()->getVersion();
-		std::ostringstream version_string;
-		version_string << version.serverType << " " << version.serverVersion << std::endl;
-		info["VOICE_VERSION"] = version_string.str();
-	}
-	else 
-	{
-		info["VOICE_VERSION"] = LLTrans::getString("NotConnected");
-	}
-	
-	// TODO: Implement media plugin version query
-	info["QT_WEBKIT_VERSION"] = "4.7.1 (version number hard-coded)";
-
-	if (gPacketsIn > 0)
-	{
-		info["PACKETS_LOST"] = LLViewerStats::getInstance()->mPacketsLostStat.getCurrent();
-		info["PACKETS_IN"] = F32(gPacketsIn);
-		info["PACKETS_PCT"] = 100.f*info["PACKETS_LOST"].asReal() / info["PACKETS_IN"].asReal();
-	}
-
-    return info;
+	return LLAppViewer::instance()->getViewerInfo();
 }
 
-static std::string get_viewer_release_notes_url()
+/*static*/
+void LLFloaterAbout::startFetchServerReleaseNotes()
 {
-	// return a URL to the release notes for this viewer, such as:
-	// http://wiki.secondlife.com/wiki/Release_Notes/Second Life Beta Viewer/2.1.0.123456
-	std::string url = LLTrans::getString("RELEASE_NOTES_BASE_URL");
-	if (! LLStringUtil::endsWith(url, "/"))
-		url += "/";
-	url += LLVersionInfo::getChannel() + "/";
-	url += LLVersionInfo::getVersion();
-	return LLWeb::escapeURL(url);
+    LLViewerRegion* region = gAgent.getRegion();
+    if (!region) return;
+
+    // We cannot display the URL returned by the ServerReleaseNotes capability
+    // because opening it in an external browser will trigger a warning about untrusted
+    // SSL certificate.
+    // So we query the URL ourselves, expecting to find
+    // an URL suitable for external browsers in the "Location:" HTTP header.
+    std::string cap_url = region->getCapability("ServerReleaseNotes");
+
+    LLCoros::instance().launch("fetchServerReleaseNotesCoro", boost::bind(&LLFloaterAbout::fetchServerReleaseNotesCoro, cap_url));
+
+}
+
+/*static*/
+void LLFloaterAbout::fetchServerReleaseNotesCoro(const std::string& cap_url)
+{
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("fetchServerReleaseNotesCoro", LLCore::HttpRequest::DEFAULT_POLICY_ID));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
+
+    httpOpts->setWantHeaders(true);
+    httpOpts->setFollowRedirects(false);
+
+    LLSD result = httpAdapter->getAndSuspend(httpRequest, cap_url, httpOpts);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        handleServerReleaseNotes(httpResults);
+    }
+    else
+    {
+        handleServerReleaseNotes(result);
+    }
+}
+
+/*static*/
+void LLFloaterAbout::handleServerReleaseNotes(LLSD results)
+{
+    LLSD http_headers;
+    if (results.has(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS))
+    {
+        LLSD http_results = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+        http_headers = http_results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
+    }
+    else
+    {
+        http_headers = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
+    }
+
+    std::string location = http_headers[HTTP_IN_HEADER_LOCATION].asString();
+    if (location.empty())
+    {
+        location = LLTrans::getString("ErrorFetchingServerReleaseNotesURL");
+    }
+    LLAppViewer::instance()->setServerReleaseNotesURL(location);
+
+    LLFloaterAbout* floater_about = LLFloaterReg::findTypedInstance<LLFloaterAbout>("sl_about");
+    if (floater_about)
+    {
+        floater_about->setSupportText(location);
+    }
 }
 
 class LLFloaterAboutListener: public LLEventAPI
@@ -356,9 +314,9 @@ void LLFloaterAbout::onClickCopyToClipboard()
 	support_widget->deselect();
 }
 
-void LLFloaterAbout::updateServerReleaseNotesURL(const std::string& url)
+void LLFloaterAbout::onClickUpdateCheck()
 {
-	setSupportText(url);
+    setUpdateListener();
 }
 
 void LLFloaterAbout::setSupportText(const std::string& server_release_notes_url)
@@ -367,85 +325,106 @@ void LLFloaterAbout::setSupportText(const std::string& server_release_notes_url)
 	getWindow()->incBusyCount();
 	getWindow()->setCursor(UI_CURSOR_ARROW);
 #endif
-	LLSD info(getInfo());
 #if LL_WINDOWS
 	getWindow()->decBusyCount();
 	getWindow()->setCursor(UI_CURSOR_ARROW);
 #endif
 
-	if (LLStringUtil::startsWith(server_release_notes_url, "http")) // it's an URL
-	{
-		info["SERVER_RELEASE_NOTES_URL"] = "[" + LLWeb::escapeURL(server_release_notes_url) + " " + LLTrans::getString("ReleaseNotes") + "]";
-	}
-	else
-	{
-		info["SERVER_RELEASE_NOTES_URL"] = server_release_notes_url;
-	}
-
 	LLViewerTextEditor *support_widget =
 		getChild<LLViewerTextEditor>("support_editor", true);
 
-	std::ostringstream support;
-
-	// Render the LLSD from getInfo() as a format_map_t
-	LLStringUtil::format_map_t args;
-
-	// allow the "Release Notes" URL label to be localized
-	args["ReleaseNotes"] = LLTrans::getString("ReleaseNotes");
-
-	for (LLSD::map_const_iterator ii(info.beginMap()), iend(info.endMap());
-		 ii != iend; ++ii)
-	{
-		if (! ii->second.isArray())
-		{
-			// Scalar value
-			if (ii->second.isUndefined())
-			{
-				args[ii->first] = getString("none");
-			}
-			else
-			{
-				// don't forget to render value asString()
-				args[ii->first] = ii->second.asString();
-			}
-		}
-		else
-		{
-			// array value: build KEY_0, KEY_1 etc. entries
-			for (LLSD::Integer n(0), size(ii->second.size()); n < size; ++n)
-			{
-				args[STRINGIZE(ii->first << '_' << n)] = ii->second[n].asString();
-			}
-		}
-	}
-
-	// Now build the various pieces
-	support << getString("AboutHeader", args);
-	if (info.has("REGION"))
-	{
-		support << "\n\n" << getString("AboutPosition", args);
-	}
-	support << "\n\n" << getString("AboutSystem", args);
-	support << "\n";
-	if (info.has("GRAPHICS_DRIVER_VERSION"))
-	{
-		support << "\n" << getString("AboutDriver", args);
-	}
-	support << "\n" << getString("AboutLibs", args);
-	if (info.has("COMPILER"))
-	{
-		support << "\n" << getString("AboutCompiler", args);
-	}
-	if (info.has("PACKETS_IN"))
-	{
-		support << '\n' << getString("AboutTraffic", args);
-	}
-
+	LLUIColor about_color = LLUIColorTable::instance().getColor("TextFgReadOnlyColor");
 	support_widget->clear();
-	support_widget->appendText(support.str(),
-								FALSE,
-								LLStyle::Params()
-									.color(LLUIColorTable::instance().getColor("TextFgReadOnlyColor")));
+	support_widget->appendText(LLAppViewer::instance()->getViewerInfoString(),
+							   FALSE, LLStyle::Params() .color(about_color));
+}
+
+//This is bound as a callback in postBuild()
+void LLFloaterAbout::setUpdateListener()
+{
+    typedef std::vector<std::string> vec;
+    
+    //There are four possibilities:
+    //no downloads directory or version directory in "getOSUserAppDir()/downloads"
+    //   => no update
+    //version directory exists and .done file is not present
+    //   => download in progress
+    //version directory exists and .done file exists
+    //   => update ready for install
+    //version directory, .done file and either .skip or .next file exists
+    //   => update deferred
+    BOOL downloads = false;
+    std::string downloadDir = "";
+    BOOL done = false;
+    BOOL next = false;
+    BOOL skip = false;
+    
+    LLSD info(LLFloaterAbout::getInfo());
+    std::string version = info["VIEWER_VERSION_STR"].asString();
+    std::string appDir = gDirUtilp->getOSUserAppDir();
+    
+    //drop down two directory levels so we aren't searching for markers among the log files and crash dumps
+    //or among other possible viewer upgrade directories if the resident is running multiple viewer versions
+    //we should end up with a path like ../downloads/1.2.3.456789
+    vec file_vec = gDirUtilp->getFilesInDir(appDir);
+    
+    for(vec::const_iterator iter=file_vec.begin(); iter!=file_vec.end(); ++iter)
+    {
+        if ( (iter->rfind("downloads") ) )
+        {
+            vec dir_vec = gDirUtilp->getFilesInDir(*iter);
+            for(vec::const_iterator dir_iter=dir_vec.begin(); dir_iter!=dir_vec.end(); ++dir_iter)
+            {
+                if ( (dir_iter->rfind(version)))
+                {
+                    downloads = true;
+                    downloadDir = *dir_iter;
+                }
+            }
+        }
+    }
+    
+    if ( downloads )
+    {
+        for(vec::const_iterator iter=file_vec.begin(); iter!=file_vec.end(); ++iter)
+        {
+            if ( (iter->rfind(version)))
+            {
+                if ( (iter->rfind(".done") ) )
+                {
+                    done = true;
+                }
+                else if ( (iter->rfind(".next") ) )
+                {
+                    next = true;
+                }
+                else if ( (iter->rfind(".skip") ) )
+                {
+                    skip = true;
+                }
+            }
+        }
+    }
+    
+    if ( !downloads )
+    {
+        LLNotificationsUtil::add("UpdateViewerUpToDate");
+    }
+    else
+    {
+        if ( !done )
+        {
+            LLNotificationsUtil::add("UpdateDownloadInProgress");
+        }
+        else if ( (!next) && (!skip) )
+        {
+            LLNotificationsUtil::add("UpdateDownloadComplete");
+        }
+        else //done and there is a next or skip
+        {
+            LLNotificationsUtil::add("UpdateDeferred");
+        }
+    }
 }
 
 ///----------------------------------------------------------------------------
@@ -455,54 +434,10 @@ void LLFloaterAboutUtil::registerFloater()
 {
 	LLFloaterReg::add("sl_about", "floater_about.xml",
 		&LLFloaterReg::build<LLFloaterAbout>);
-
 }
 
-///----------------------------------------------------------------------------
-/// Class LLServerReleaseNotesURLFetcher implementation
-///----------------------------------------------------------------------------
-// static
-void LLServerReleaseNotesURLFetcher::startFetch()
+void LLFloaterAboutUtil::checkUpdatesAndNotify()
 {
-	LLViewerRegion* region = gAgent.getRegion();
-	if (!region) return;
-
-	// We cannot display the URL returned by the ServerReleaseNotes capability
-	// because opening it in an external browser will trigger a warning about untrusted
-	// SSL certificate.
-	// So we query the URL ourselves, expecting to find
-	// an URL suitable for external browsers in the "Location:" HTTP header.
-	std::string cap_url = region->getCapability("ServerReleaseNotes");
-	LLHTTPClient::get(cap_url, new LLServerReleaseNotesURLFetcher);
+    LLFloaterAbout::setUpdateListener();
 }
 
-// virtual
-void LLServerReleaseNotesURLFetcher::completedHeader(U32 status, const std::string& reason, const LLSD& content)
-{
-	lldebugs << "Status: " << status << llendl;
-	lldebugs << "Reason: " << reason << llendl;
-	lldebugs << "Headers: " << content << llendl;
-
-	LLFloaterAbout* floater_about = LLFloaterReg::getTypedInstance<LLFloaterAbout>("sl_about");
-	if (floater_about)
-	{
-		std::string location = content["location"].asString();
-		if (location.empty())
-		{
-			location = floater_about->getString("ErrorFetchingServerReleaseNotesURL");
-		}
-		floater_about->updateServerReleaseNotesURL(location);
-	}
-}
-
-// virtual
-void LLServerReleaseNotesURLFetcher::completedRaw(
-	U32 status,
-	const std::string& reason,
-	const LLChannelDescriptors& channels,
-	const LLIOPipe::buffer_ptr_t& buffer)
-{
-	// Do nothing.
-	// We're overriding just because the base implementation tries to
-	// deserialize LLSD which triggers warnings.
-}

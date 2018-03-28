@@ -46,7 +46,6 @@ const S32 LEADING_PAD = 5;
 const S32 TITLE_HPAD = 8;
 const S32 BORDER_PAD = 1;
 const S32 LEFT_PAD = BORDER_PAD + TITLE_HPAD + LEADING_PAD;
-const S32 RIGHT_PAD = BORDER_PAD + 32; // HACK: space for close btn and minimize btn
 
 S32 LLDragHandle::sSnapMargin = 5;
 
@@ -315,14 +314,15 @@ BOOL LLDragHandle::handleHover(S32 x, S32 y, MASK mask)
 		S32 delta_y = screen_y - mDragLastScreenY;
 
 		// if dragging a docked floater we want to undock
-		if (((LLFloater*)getParent())->isDocked())
+		LLFloater * parent = dynamic_cast<LLFloater *>(getParent());
+		if (parent && parent->isDocked())
 		{
 			const S32 SLOP = 12;
 
 			if (delta_y <= -SLOP || 
 				delta_y >= SLOP)
 			{
-				((LLFloater*)getParent())->setDocked(false, false);
+				parent->setDocked(false, false);
 				return TRUE;
 			}
 			else
@@ -365,13 +365,13 @@ BOOL LLDragHandle::handleHover(S32 x, S32 y, MASK mask)
 		mDragLastScreenY += delta_y;
 
 		getWindow()->setCursor(UI_CURSOR_ARROW);
-		lldebugst(LLERR_USER_INPUT) << "hover handled by " << getName() << " (active)" <<llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by " << getName() << " (active)" <<LL_ENDL;		
 		handled = TRUE;
 	}
 	else
 	{
 		getWindow()->setCursor(UI_CURSOR_ARROW);
-		lldebugst(LLERR_USER_INPUT) << "hover handled by " << getName() << " (inactive)" << llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by " << getName() << " (inactive)" << LL_ENDL;		
 		handled = TRUE;
 	}
 

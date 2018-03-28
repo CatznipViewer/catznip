@@ -30,7 +30,7 @@
 #ifndef XML_STATIC
 #define XML_STATIC
 #endif
-#ifdef LL_STANDALONE
+#ifdef LL_USESYSTEMLIBS
 #include <expat.h>
 #else
 #include "expat/expat.h"
@@ -38,17 +38,16 @@
 #include <map>
 
 #include "indra_constants.h"
+#include "llrefcount.h"
 #include "llpointer.h"
-#include "llthread.h"		// LLThreadSafeRefCount
 #include "llstring.h"
 #include "llstringtable.h"
 #include "llfile.h"
-
+#include "lluuid.h"
 
 class LLVector3;
 class LLVector3d;
 class LLQuaternion;
-class LLUUID;
 class LLColor4;
 class LLColor4U;
 

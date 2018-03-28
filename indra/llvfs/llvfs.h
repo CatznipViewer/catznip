@@ -29,7 +29,6 @@
 
 #include <deque>
 #include "lluuid.h"
-#include "linked_lists.h"
 #include "llassettype.h"
 #include "llthread.h"
 
@@ -128,6 +127,7 @@ public:
 	void dumpStatistics();
 	void listFiles();
 	void dumpFiles();
+	time_t creationTime();
 
 protected:
 	void removeFileBlock(LLVFSFileBlock *fileblock);

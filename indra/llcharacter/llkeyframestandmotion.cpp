@@ -119,7 +119,7 @@ LLMotion::LLMotionInitStatus LLKeyframeStandMotion::onInitialize(LLCharacter *ch
 			!mKneeRightState ||
 			!mAnkleRightState )
 	{
-		llinfos << getName() << ": Can't find necessary joint states" << llendl;
+		LL_INFOS() << getName() << ": Can't find necessary joint states" << LL_ENDL;
 		return STATUS_FAILURE;
 	}
 
@@ -201,10 +201,12 @@ BOOL LLKeyframeStandMotion::onUpdate(F32 time, U8* joint_mask)
 	//-------------------------------------------------------------------------
 	// propagate joint positions to internal versions
 	//-------------------------------------------------------------------------
+    // SL-315
 	mPelvisJoint.setPosition(
 			root_world_pos +
 			mPelvisState->getPosition() );
 
+    // SL-315
 	mHipLeftJoint.setPosition( mHipLeftState->getJoint()->getPosition() );
 	mKneeLeftJoint.setPosition( mKneeLeftState->getJoint()->getPosition() );
 	mAnkleLeftJoint.setPosition( mAnkleLeftState->getJoint()->getPosition() );
@@ -213,6 +215,7 @@ BOOL LLKeyframeStandMotion::onUpdate(F32 time, U8* joint_mask)
 	mKneeLeftJoint.setScale( mKneeLeftState->getJoint()->getScale() );
 	mAnkleLeftJoint.setScale( mAnkleLeftState->getJoint()->getScale() );
 
+    // SL-315
 	mHipRightJoint.setPosition( mHipRightState->getJoint()->getPosition() );
 	mKneeRightJoint.setPosition( mKneeRightState->getJoint()->getPosition() );
 	mAnkleRightJoint.setPosition( mAnkleRightState->getJoint()->getPosition() );
@@ -265,6 +268,7 @@ BOOL LLKeyframeStandMotion::onUpdate(F32 time, U8* joint_mask)
 		mCharacter->getGround( mAnkleLeftJoint.getWorldPosition(), mPositionLeft, mNormalLeft);
 		mCharacter->getGround( mAnkleRightJoint.getWorldPosition(), mPositionRight, mNormalRight);
 
+        // SL-315
 		mTargetLeft.setPosition( mPositionLeft );
 		mTargetRight.setPosition( mPositionRight );
 	}
@@ -329,9 +333,9 @@ BOOL LLKeyframeStandMotion::onUpdate(F32 time, U8* joint_mask)
 	mKneeRightState->setRotation( mKneeRightJoint.getRotation() );
 	mAnkleRightState->setRotation( mAnkleRightJoint.getRotation() );
 
-	//llinfos << "Stand drift amount " << (mCharacter->getCharacterPosition() - mLastGoodPosition).magVec() << llendl;
+	//LL_INFOS() << "Stand drift amount " << (mCharacter->getCharacterPosition() - mLastGoodPosition).magVec() << LL_ENDL;
 
-//	llinfos << "DEBUG: " << speed << " : " << mTrackAnkles << llendl;
+//	LL_INFOS() << "DEBUG: " << speed << " : " << mTrackAnkles << LL_ENDL;
 	return TRUE;
 }
 

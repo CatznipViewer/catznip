@@ -32,6 +32,7 @@
 #include "llscreenchannel.h"
 #include "llsyswellitem.h"
 #include "lltransientdockablefloater.h"
+#include "llinitdestroyclass.h"
 
 class LLAvatarName;
 class LLChiclet;
@@ -93,57 +94,6 @@ protected:
 	LLSysWellChiclet* mSysWellChiclet;
 
 	bool mIsReshapedByUser;
-};
-
-/**
- * Class intended to manage incoming notifications.
- * 
- * It contains a list of notifications that have not been responded to.
- */
-class LLNotificationWellWindow : public LLSysWellWindow
-{
-public:
-	LLNotificationWellWindow(const LLSD& key);
-	static LLNotificationWellWindow* getInstance(const LLSD& key = LLSD());
-
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void setVisible(BOOL visible);
-	/*virtual*/ void onAdd(LLNotificationPtr notify);
-	// Operating with items
-	void addItem(LLSysWellItem::Params p);
-
-	// Closes all notifications and removes them from the Notification Well
-	void closeAll();
-
-protected:
-	struct WellNotificationChannel : public LLNotificationChannel
-	{
-		WellNotificationChannel(LLNotificationWellWindow*);
-		void onDelete(LLNotificationPtr notify)
-		{
-			mWellWindow->removeItemByID(notify->getID());
-		} 
-
-		LLNotificationWellWindow* mWellWindow;
-	};
-
-	LLNotificationChannelPtr mNotificationUpdates;
-	/*virtual*/ const std::string& getAnchorViewName() { return NOTIFICATION_WELL_ANCHOR_NAME; }
-
-private:
-	// init Window's channel
-	void initChannel();
-	void clearScreenChannels();
-
-	void onStoreToast(LLPanel* info_panel, LLUUID id);
-
-	// Handlers
-	void onItemClick(LLSysWellItem* item);
-	void onItemClose(LLSysWellItem* item);
-
-	// ID of a toast loaded by user (by clicking notification well item)
-	LLUUID mLoadedToastId;
-
 };
 
 /**

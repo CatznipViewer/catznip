@@ -168,13 +168,13 @@ BOOL LLToolSelectLand::handleHover(S32 x, S32 y, MASK mask)
 				roundXY(mWestSouthBottom);
 				roundXY(mEastNorthTop);
 
-				lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolSelectLand (active, land)" << llendl;
+				LL_DEBUGS("UserInput") << "hover handled by LLToolSelectLand (active, land)" << LL_ENDL;
 				gViewerWindow->setCursor(UI_CURSOR_ARROW);
 			}
 			else
 			{
 				mDragEndValid = FALSE;
-				lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolSelectLand (active, no land)" << llendl;
+				LL_DEBUGS("UserInput") << "hover handled by LLToolSelectLand (active, no land)" << LL_ENDL;
 				gViewerWindow->setCursor(UI_CURSOR_NO);
 			}
 
@@ -183,13 +183,13 @@ BOOL LLToolSelectLand::handleHover(S32 x, S32 y, MASK mask)
 		}
 		else
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolSelectLand (active, in slop)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolSelectLand (active, in slop)" << LL_ENDL;
 			gViewerWindow->setCursor(UI_CURSOR_ARROW);
 		}
 	}
 	else
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolSelectLand (inactive)" << llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by LLToolSelectLand (inactive)" << LL_ENDL;		
 		gViewerWindow->setCursor(UI_CURSOR_ARROW);
 	}
 
@@ -219,8 +219,8 @@ void LLToolSelectLand::handleDeselect()
 
 void LLToolSelectLand::roundXY(LLVector3d &vec)
 {
-	vec.mdV[VX] = llround( vec.mdV[VX], (F64)PARCEL_GRID_STEP_METERS );
-	vec.mdV[VY] = llround( vec.mdV[VY], (F64)PARCEL_GRID_STEP_METERS );
+	vec.mdV[VX] = ll_round( vec.mdV[VX], (F64)PARCEL_GRID_STEP_METERS );
+	vec.mdV[VY] = ll_round( vec.mdV[VY], (F64)PARCEL_GRID_STEP_METERS );
 }
 
 

@@ -82,7 +82,7 @@ protected:
 	friend class LLUICtrlFactory;
 public:
 	// LLView overrides
-	/*virtual*/ void handleVisibilityChange(BOOL new_visibility);
+	/*virtual*/ void onVisibilityChange(BOOL new_visibility);
 	/*virtual*/ BOOL handleHover(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL handleRightMouseUp(S32 x, S32 y, MASK mask);
@@ -158,6 +158,10 @@ public:
 	virtual BOOL handleMouseDown( S32 x, S32 y, MASK mask );
 	virtual BOOL handleMouseUp( S32 x, S32 y, MASK mask );
 	virtual BOOL handleScrollWheel( S32 x, S32 y, S32 clicks );
+
+	virtual void	onMouseEnter(S32 x, S32 y, MASK mask);
+	virtual void	onMouseLeave(S32 x, S32 y, MASK mask);
+
 	virtual void draw( void );
 
 	BOOL getHover() const { return mGotHover; }
@@ -343,7 +347,9 @@ private:
 
 // child widget registry
 struct MenuRegistry : public LLChildRegistry<MenuRegistry>
-{};
+{
+	LLSINGLETON_EMPTY_CTOR(MenuRegistry);
+};
 
 
 class LLMenuGL 
@@ -525,6 +531,9 @@ public:
 	void resetScrollPositionOnShow(bool reset_scroll_pos) { mResetScrollPositionOnShow = reset_scroll_pos; }
 	bool isScrollPositionOnShowReset() { return mResetScrollPositionOnShow; }
 
+	void setAlwaysShowMenu(BOOL show) { mAlwaysShowMenu = show; }
+	BOOL getAlwaysShowMenu() { return mAlwaysShowMenu; }
+
 	// add a context menu branch
 	BOOL appendContextSubMenu(LLMenuGL *menu);
 
@@ -565,6 +574,8 @@ private:
 
 	static LLColor4 sDefaultBackgroundColor;
 	static BOOL		sKeyboardMode;
+
+	BOOL			mAlwaysShowMenu;
 
 	LLUIColor		mBackgroundColor;
 	BOOL			mBgVisible;
@@ -637,7 +648,7 @@ public:
 	virtual void updateBranchParent( LLView* parentp );
 
 	// LLView Functionality
-	virtual void handleVisibilityChange( BOOL curVisibilityIn );
+	virtual void onVisibilityChange( BOOL curVisibilityIn );
 
 	virtual void draw();
 
@@ -753,6 +764,7 @@ public:
 	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
 	/*virtual*/ BOOL handleJumpKey(KEY key);
 	/*virtual*/ BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
 	/*virtual*/ void draw();
 	/*virtual*/ BOOL jumpKeysActive();
@@ -895,7 +907,8 @@ class view_listener_t : public boost::signals2::trackable
 {
 public:
 	virtual bool handleEvent(const LLSD& userdata) = 0;
-	virtual ~view_listener_t() {}
+	view_listener_t() { sListeners.insert(this); }
+	virtual ~view_listener_t() { sListeners.erase(this); }
 	
 	static void addEnable(view_listener_t* listener, const std::string& name)
 	{
@@ -913,6 +926,20 @@ public:
 		addEnable(listener, name);
 		addCommit(listener, name);
 	}
+
+	static void cleanup()
+	{
+		listener_vector_t listeners(sListeners.begin(), sListeners.end());
+		sListeners.clear();
+
+		std::for_each(listeners.begin(), listeners.end(), DeletePointer());
+		listeners.clear();
+	}
+
+private:
+	typedef std::set<view_listener_t*> listener_map_t;
+	typedef std::vector<view_listener_t*> listener_vector_t;
+	static listener_map_t sListeners;
 };
 
 #endif // LL_LLMENUGL_H

@@ -46,10 +46,13 @@ class LLTextureCache : public LLWorkerThread
 
 private:
 	// Entries
+	static const U32 sHeaderEncoderStringSize = 32;
 	struct EntriesInfo
 	{
-		EntriesInfo() : mVersion(0.f), mEntries(0) {}
+		EntriesInfo() : mVersion(0.f), mAdressSize(0), mEntries(0) { memset(mEncoderVersion, 0, sHeaderEncoderStringSize); }
 		F32 mVersion;
+		U32 mAdressSize;
+		char mEncoderVersion[sHeaderEncoderStringSize];
 		U32 mEntries;
 	};
 	struct Entry
@@ -104,7 +107,7 @@ public:
 
 	/*virtual*/ S32 update(F32 max_time_ms);	
 	
-	void purgeCache(ELLPath location);
+	void purgeCache(ELLPath location, bool remove_dir = true);
 	void setReadOnly(BOOL read_only) ;
 	S64 initCache(ELLPath location, S64 maxsize, BOOL texture_cache_mismatch);
 
@@ -131,8 +134,8 @@ public:
 	// debug
 	S32 getNumReads() { return mReaders.size(); }
 	S32 getNumWrites() { return mWriters.size(); }
-	S64 getUsage() { return mTexturesSizeTotal; }
-	S64 getMaxUsage() { return sCacheMaxTexturesSize; }
+	S64Bytes getUsage() { return S64Bytes(mTexturesSizeTotal); }
+	S64Bytes getMaxUsage() { return S64Bytes(sCacheMaxTexturesSize); }
 	U32 getEntries() { return mHeaderEntriesInfo.mEntries; }
 	U32 getMaxEntries() { return sCacheMaxEntries; };
 	BOOL isInCache(const LLUUID& id) ;
@@ -156,6 +159,7 @@ private:
 	LLAPRFile* openHeaderEntriesFile(bool readonly, S32 offset);
 	void closeHeaderEntriesFile();
 	void readEntriesHeader();
+	void setEntriesHeader();
 	void writeEntriesHeader();
 	S32 openAndReadEntry(const LLUUID& id, Entry& entry, bool create);
 	bool updateEntry(S32& idx, Entry& entry, S32 new_image_size, S32 new_body_size);
@@ -224,6 +228,8 @@ private:
 
 	// Statics
 	static F32 sHeaderCacheVersion;
+	static U32 sHeaderCacheAddressSize;
+	static std::string sHeaderCacheEncoderVersion;
 	static U32 sCacheMaxEntries;
 	static S64 sCacheMaxTexturesSize;
 };

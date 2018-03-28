@@ -48,23 +48,12 @@
 #include "pipeline.h"
 #include <boost/tokenizer.hpp>
 
-
-const F32 SPRING_STRENGTH = 0.7f;
-const F32 RESTORATION_SPRING_TIME_CONSTANT = 0.1f;
 const F32 HORIZONTAL_PADDING = 15.f;
 const F32 VERTICAL_PADDING = 12.f;
 const F32 BUFFER_SIZE = 2.f;
-const F32 MIN_EDGE_OVERLAP = 3.f;
 const F32 HUD_TEXT_MAX_WIDTH = 190.f;
 const F32 HUD_TEXT_MAX_WIDTH_NO_BUBBLE = 1000.f;
-const F32 RESIZE_TIME = 0.f;
-const S32 NUM_OVERLAP_ITERATIONS = 10;
-const F32 NEIGHBOR_FORCE_FRACTION = 1.f;
-const F32 POSITION_DAMPING_TC = 0.2f;
-const F32 MAX_STABLE_CAMERA_VELOCITY = 0.1f;
-//const F32 LOD_0_SCREEN_COVERAGE = 0.15f;
-//const F32 LOD_1_SCREEN_COVERAGE = 0.30f;
-//const F32 LOD_2_SCREEN_COVERAGE = 0.40f;
+const F32 MAX_DRAW_DISTANCE = 300.f;
 
 std::set<LLPointer<LLHUDText> > LLHUDText::sTextObjects;
 std::vector<LLPointer<LLHUDText> > LLHUDText::sVisibleTextObjects;
@@ -346,7 +335,7 @@ void LLHUDText::updateVisibility()
 
 	if (!mSourceObject)
 	{
-		//llwarns << "LLHUDText::updateScreenPos -- mSourceObject is NULL!" << llendl;
+		//LL_WARNS() << "LLHUDText::updateScreenPos -- mSourceObject is NULL!" << LL_ENDL;
 		mVisible = TRUE;
 		if (mOnHUDAttachment)
 		{
@@ -385,7 +374,7 @@ void LLHUDText::updateVisibility()
 		mVisible = FALSE;
 		return;
 	}
-		
+
 	if (vec_from_camera * LLViewerCamera::getInstance()->getAtAxis() <= LLViewerCamera::getInstance()->getNear() + 0.1f + mSourceObject->getVObjRadius())
 	{
 		mPositionAgent = LLViewerCamera::getInstance()->getOrigin() + vec_from_camera * ((LLViewerCamera::getInstance()->getNear() + 0.1f) / (vec_from_camera * LLViewerCamera::getInstance()->getAtAxis()));
@@ -402,6 +391,28 @@ void LLHUDText::updateVisibility()
 		mVisible = FALSE;
 		return;
 	}
+
+	LLVector3 pos_agent_center = gAgent.getPosAgentFromGlobal(mPositionGlobal) - dir_from_camera;
+	F32 last_distance_center = (pos_agent_center - LLViewerCamera::getInstance()->getOrigin()).magVec();
+	F32 max_draw_distance = gSavedSettings.getF32("PrimTextMaxDrawDistance");
+
+	if(max_draw_distance < 0)
+	{
+		max_draw_distance = 0;
+		gSavedSettings.setF32("PrimTextMaxDrawDistance", max_draw_distance);
+	}
+	else if(max_draw_distance > MAX_DRAW_DISTANCE)
+	{
+		max_draw_distance = MAX_DRAW_DISTANCE;
+		gSavedSettings.setF32("PrimTextMaxDrawDistance", MAX_DRAW_DISTANCE);
+	}
+
+	if(last_distance_center > max_draw_distance)
+	{
+		mVisible = FALSE;
+		return;
+	}
+
 
 	LLVector3 x_pixel_vec;
 	LLVector3 y_pixel_vec;

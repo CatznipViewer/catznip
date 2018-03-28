@@ -42,7 +42,9 @@ LLIconCtrl::Params::Params()
 :	image("image_name"),
 	color("color"),
 	use_draw_context_alpha("use_draw_context_alpha", true),
-	scale_image("scale_image")
+	scale_image("scale_image"),
+	min_width("min_width", 0),
+	min_height("min_height", 0)
 {}
 
 LLIconCtrl::LLIconCtrl(const LLIconCtrl::Params& p)
@@ -51,8 +53,10 @@ LLIconCtrl::LLIconCtrl(const LLIconCtrl::Params& p)
 	mImagep(p.image),
 	mUseDrawContextAlpha(p.use_draw_context_alpha),
 	mPriority(0),
-	mDrawWidth(0),
-	mDrawHeight(0)
+	mMinWidth(p.min_width),
+	mMinHeight(p.min_height),
+	mMaxWidth(0),
+	mMaxHeight(0)
 {
 	if (mImagep.notNull())
 	{
@@ -79,7 +83,12 @@ void LLIconCtrl::draw()
 
 // virtual
 // value might be a string or a UUID
-void LLIconCtrl::setValue(const LLSD& value )
+void LLIconCtrl::setValue(const LLSD& value)
+{
+    setValue(value, mPriority);
+}
+
+void LLIconCtrl::setValue(const LLSD& value, S32 priority)
 {
 	LLSD tvalue(value);
 	if (value.isString() && LLUUID::validate(value.asString()))
@@ -90,14 +99,28 @@ void LLIconCtrl::setValue(const LLSD& value )
 	LLUICtrl::setValue(tvalue);
 	if (tvalue.isUUID())
 	{
-		mImagep = LLUI::getUIImageByID(tvalue.asUUID(), mPriority);
+        mImagep = LLUI::getUIImageByID(tvalue.asUUID(), priority);
 	}
 	else
 	{
-		mImagep = LLUI::getUIImage(tvalue.asString(), mPriority);
+        mImagep = LLUI::getUIImage(tvalue.asString(), priority);
 	}
 
-	setIconImageDrawSize();
+	if(mImagep.notNull() 
+		&& mImagep->getImage().notNull() 
+		&& mMinWidth 
+		&& mMinHeight)
+	{
+        S32 desired_draw_width = llmax(mMinWidth, mImagep->getWidth());
+        S32 desired_draw_height = llmax(mMinHeight, mImagep->getHeight());
+        if (mMaxWidth && mMaxHeight)
+        {
+            desired_draw_width = llmin(desired_draw_width, mMaxWidth);
+            desired_draw_height = llmin(desired_draw_height, mMaxHeight);
+        }
+
+        mImagep->getImage()->setKnownDrawSize(desired_draw_width, desired_draw_height);
+	}
 }
 
 std::string LLIconCtrl::getImageName() const
@@ -108,14 +131,4 @@ std::string LLIconCtrl::getImageName() const
 		return std::string();
 }
 
-void LLIconCtrl::setIconImageDrawSize()
-{
-	if(mImagep.notNull() && mDrawWidth && mDrawHeight)
-	{
-		if(mImagep->getImage().notNull())
-		{
-			mImagep->getImage()->setKnownDrawSize(mDrawWidth, mDrawHeight) ;
-		}
-	}
-}
 

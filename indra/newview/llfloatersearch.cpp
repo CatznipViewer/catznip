@@ -30,6 +30,7 @@
 #include "llcommandhandler.h"
 #include "llfloaterreg.h"
 #include "llfloatersearch.h"
+#include "llhttpconstants.h"
 #include "llmediactrl.h"
 #include "llnotificationsutil.h"
 #include "lllogininstance.h"
@@ -99,6 +100,7 @@ LLFloaterSearch::LLFloaterSearch(const Params& key) :
 	mCategoryPaths["events"]       = "search/events";
 	mCategoryPaths["groups"]       = "search/groups";
 	mCategoryPaths["wiki"]         = "search/wiki";
+	mCategoryPaths["land"]         = "land";
 	mCategoryPaths["destinations"] = "destinations";
 	mCategoryPaths["classifieds"]  = "classifieds";
 }
@@ -200,5 +202,5 @@ void LLFloaterSearch::search(const SearchQuery &p)
 	url = LLWeb::expandURLSubstitutions(url, subs);
 
 	// and load the URL in the web view
-	mWebBrowser->navigateTo(url, "text/html");
+	mWebBrowser->navigateTo(url, HTTP_CONTENT_TEXT_HTML);
 }

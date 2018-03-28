@@ -29,7 +29,6 @@
 #define LLAVATARNAMECACHE_H
 
 #include "llavatarname.h"	// for convenience
-
 #include <boost/signals2.hpp>
 
 class LLSD;
@@ -46,10 +45,10 @@ namespace LLAvatarNameCache
 	void cleanupClass();
 
 	// Import/export the name cache to file.
-	void importFile(std::istream& istr);
+	bool importFile(std::istream& istr);
 	void exportFile(std::ostream& ostr);
 
-	// On the viewer, usually a simulator capabilitity.
+	// On the viewer, usually a simulator capabilities.
 	// If empty, name cache will fall back to using legacy name lookup system.
 	void setNameLookupURL(const std::string& name_lookup_url);
 
@@ -80,15 +79,25 @@ namespace LLAvatarNameCache
 	// Set display name: flips the switch and triggers the callbacks.
 	void setUseDisplayNames(bool use);
 	
+	void setUseUsernames(bool use);
+
 	void insert(const LLUUID& agent_id, const LLAvatarName& av_name);
 	void erase(const LLUUID& agent_id);
 
-    /// Provide some fallback for agents that return errors.
+	// A way to find agent id by UUID, very slow, also unreliable
+	// since it doesn't request names, just serch exsisting ones
+	// that are likely not in cache.
+	//
+	// Todo: Find a way to remove this.
+	// Curently this method is used for chat history and in some cases notices.
+	LLUUID findIdByName(const std::string& name);
+
+	/// Provide some fallback for agents that return errors.
 	void handleAgentError(const LLUUID& agent_id);
 
 	// Compute name expiration time from HTTP Cache-Control header,
 	// or return default value, in seconds from epoch.
-	F64 nameExpirationFromHeaders(LLSD headers);
+    F64 nameExpirationFromHeaders(const LLSD& headers);
 
 	void addUseDisplayNamesCallback(const use_display_name_signal_t::slot_type& cb);
 }

@@ -29,14 +29,18 @@
 
 #include "llmemory.h"
 #include "llthread.h"
+#include "lltrace.h"
+#include "lltracethreadrecorder.h"
+#include "llcleanup.h"
 
 //static
 BOOL LLCommon::sAprInitialized = FALSE;
 
+static LLTrace::ThreadRecorder* sMasterThreadRecorder = NULL;
+
 //static
 void LLCommon::initClass()
 {
-	LLMemory::initClass();
 	if (!sAprInitialized)
 	{
 		ll_init_apr();
@@ -45,21 +49,24 @@ void LLCommon::initClass()
 	LLTimer::initClass();
 	LLThreadSafeRefCount::initThreadSafeRefCount();
 	assert_main_thread();		// Make sure we record the main thread
-// 	LLWorkerThread::initClass();
-// 	LLFrameCallbackManager::initClass();
+	if (!sMasterThreadRecorder)
+	{
+		sMasterThreadRecorder = new LLTrace::ThreadRecorder();
+		LLTrace::set_master_thread_recorder(sMasterThreadRecorder);
+	}
 }
 
 //static
 void LLCommon::cleanupClass()
 {
-// 	LLFrameCallbackManager::cleanupClass();
-// 	LLWorkerThread::cleanupClass();
+	delete sMasterThreadRecorder;
+	sMasterThreadRecorder = NULL;
+	LLTrace::set_master_thread_recorder(NULL);
 	LLThreadSafeRefCount::cleanupThreadSafeRefCount();
-	LLTimer::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLTimer);
 	if (sAprInitialized)
 	{
 		ll_cleanup_apr();
 		sAprInitialized = FALSE;
 	}
-	LLMemory::cleanupClass();
 }

@@ -27,7 +27,6 @@
 #ifndef LL_LLAVATARACTIONS_H
 #define LL_LLAVATARACTIONS_H
 
-#include "lldarray.h"
 #include "llsd.h"
 #include "lluuid.h"
 
@@ -132,6 +131,11 @@ public:
 	static void toggleBlock(const LLUUID& id);
 
 	/**
+	 * Mute/unmute avatar.
+	 */
+	static void toggleMute(const LLUUID& id, U32 flags);
+
+	/**
 	 * Block/unblock the avatar voice.
 	 */
 	static void toggleMuteVoice(const LLUUID& id);
@@ -174,6 +178,9 @@ public:
 	 */	
 	static void inviteToGroup(const LLUUID& id);
 	
+	static void freezeAvatar(const LLUUID& id);
+
+	static void ejectAvatar(const LLUUID& id, bool ban_enabled = false);
 	/**
 	 * Kick avatar off grid
 	 */	
@@ -222,7 +229,7 @@ public:
 	 * @param avatar_names - a vector of given avatar names from which resulting string is built
 	 * @param residents_string - the resulting string
 	 */
-	static void buildResidentsString(std::vector<LLAvatarName> avatar_names, std::string& residents_string);
+	static void buildResidentsString(std::vector<LLAvatarName> avatar_names, std::string& residents_string, bool complete_name = false);
 
 	/**
 	 * Builds a string of residents' display names separated by "words_separator" string.
@@ -243,6 +250,8 @@ private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
 	static bool handleRemove(const LLSD& notification, const LLSD& response);
 	static bool handlePay(const LLSD& notification, const LLSD& response, LLUUID avatar_id);
+	static bool handleFreezeAvatar(const LLSD& notification, const LLSD& response);
+	static bool handleEjectAvatar(const LLSD& notification, const LLSD& response);
 	static bool handleKick(const LLSD& notification, const LLSD& response);
 	static bool handleFreeze(const LLSD& notification, const LLSD& response);
 	static bool handleUnfreeze(const LLSD& notification, const LLSD& response);

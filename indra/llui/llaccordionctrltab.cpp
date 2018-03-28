@@ -361,6 +361,7 @@ LLAccordionCtrlTab::LLAccordionCtrlTab(const LLAccordionCtrlTab::Params&p)
 {
 	mStoredOpenCloseState = false;
 	mWasStateStored = false;
+	mSkipChangesOnNotifyParent = false;
 	
 	mDropdownBGColor = LLColor4::white;
 	LLAccordionCtrlTabHeader::Params headerParams;
@@ -444,9 +445,9 @@ void LLAccordionCtrlTab::changeOpenClose(bool is_open)
 	}
 }
 
-void LLAccordionCtrlTab::handleVisibilityChange(BOOL new_visibility)
+void LLAccordionCtrlTab::onVisibilityChange(BOOL new_visibility)
 {
-	LLUICtrl::handleVisibilityChange(new_visibility);
+	LLUICtrl::onVisibilityChange(new_visibility);
 
 	notifyParent(LLSD().with("child_visibility_change", new_visibility));
 }
@@ -691,7 +692,7 @@ S32	LLAccordionCtrlTab::notifyParent(const LLSD& info)
 			
 			mExpandedHeight = height;
 			
-			if(isExpanded())
+			if(isExpanded() && !mSkipChangesOnNotifyParent)
 			{
 				LLRect panel_rect = getRect();
 				panel_rect.setLeftTopAndSize( panel_rect.mLeft, panel_rect.mTop, panel_rect.getWidth(), height);
@@ -822,6 +823,11 @@ BOOL LLAccordionCtrlTab::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 
 void LLAccordionCtrlTab::showAndFocusHeader()
 {
+	if (!mHeader)
+	{
+		return;
+	}
+
 	mHeader->setFocus(true);
 	mHeader->setSelected(mSelectionEnabled);
 

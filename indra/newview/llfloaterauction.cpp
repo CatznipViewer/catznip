@@ -57,6 +57,7 @@
 #include "llsdutil.h"
 #include "llsdutil_math.h"
 #include "lltrans.h"
+#include "llcorehttputil.h"
 
 ///----------------------------------------------------------------------------
 /// Local function declarations, constants, enums, and typedefs
@@ -194,7 +195,7 @@ void LLFloaterAuction::onClickSnapshot(void* data)
 		{
 			gViewerWindow->playSnapshotAnimAndSound();
 		}
-		llinfos << "Writing TGA..." << llendl;
+		LL_INFOS() << "Writing TGA..." << LL_ENDL;
 
 		LLPointer<LLImageTGA> tga = new LLImageTGA;
 		tga->encode(raw);
@@ -202,7 +203,7 @@ void LLFloaterAuction::onClickSnapshot(void* data)
 		
 		raw->biasedScaleToPowerOfTwo(LLViewerTexture::MAX_IMAGE_SIZE_DEFAULT);
 
-		llinfos << "Writing J2C..." << llendl;
+		LL_INFOS() << "Writing J2C..." << LL_ENDL;
 
 		LLPointer<LLImageJ2C> j2c = new LLImageJ2C;
 		j2c->encode(raw, 0.0f);
@@ -214,7 +215,7 @@ void LLFloaterAuction::onClickSnapshot(void* data)
 	}
 	else
 	{
-		llwarns << "Unable to take snapshot" << llendl;
+		LL_WARNS() << "Unable to take snapshot" << LL_ENDL;
 	}
 }
 
@@ -359,9 +360,12 @@ void LLFloaterAuction::doResetParcel()
 		body["user_look_at"] = ll_sd_from_vector3( LLVector3::zero );
 		body["landing_type"] = (U8) LLParcel::L_DIRECT;
 
-		llinfos << "Sending parcel update to reset for auction via capability to: "
-			<< mParcelUpdateCapUrl << llendl;
-		LLHTTPClient::post(mParcelUpdateCapUrl, body, new LLHTTPClient::Responder());
+		LL_INFOS() << "Sending parcel update to reset for auction via capability to: "
+			<< mParcelUpdateCapUrl << LL_ENDL;
+
+        LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(mParcelUpdateCapUrl, body,
+            "Parcel reset for auction",
+            "Parcel not set for auction.");
 
 		// Send a message to clear the object return time
 		LLMessageSystem *msg = gMessageSystem;
@@ -376,13 +380,16 @@ void LLFloaterAuction::doResetParcel()
 		msg->sendReliable(region->getHost());
 
 		// Clear the access lists
-		clearParcelAccessLists(parcelp, region);
+		clearParcelAccessList(parcelp, region, AL_ACCESS);
+		clearParcelAccessList(parcelp, region, AL_BAN);
+		clearParcelAccessList(parcelp, region, AL_ALLOW_EXPERIENCE);
+		clearParcelAccessList(parcelp, region, AL_BLOCK_EXPERIENCE);
 	}
 }
 
 
 
-void LLFloaterAuction::clearParcelAccessLists(LLParcel* parcel, LLViewerRegion* region)
+void LLFloaterAuction::clearParcelAccessList(LLParcel* parcel, LLViewerRegion* region, U32 list)
 {
 	if (!region || !parcel) return;
 
@@ -391,40 +398,16 @@ void LLFloaterAuction::clearParcelAccessLists(LLParcel* parcel, LLViewerRegion* 
 
 	LLMessageSystem* msg = gMessageSystem;
 
-	// Clear access list
-	//	parcel->mAccessList.clear();
-
 	msg->newMessageFast(_PREHASH_ParcelAccessListUpdate);
 	msg->nextBlockFast(_PREHASH_AgentData);
 	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID() );
 	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID() );
 	msg->nextBlockFast(_PREHASH_Data);
-	msg->addU32Fast(_PREHASH_Flags, AL_ACCESS);
+	msg->addU32Fast(_PREHASH_Flags, list);
 	msg->addS32(_PREHASH_LocalID, parcel->getLocalID() );
 	msg->addUUIDFast(_PREHASH_TransactionID, transactionUUID);
 	msg->addS32Fast(_PREHASH_SequenceID, 1);			// sequence_id
 	msg->addS32Fast(_PREHASH_Sections, 0);				// num_sections
-
-	// pack an empty block since there will be no data
-	msg->nextBlockFast(_PREHASH_List);
-	msg->addUUIDFast(_PREHASH_ID,  LLUUID::null );
-	msg->addS32Fast(_PREHASH_Time, 0 );
-	msg->addU32Fast(_PREHASH_Flags,	0 );
-
-	msg->sendReliable( region->getHost() );
-
-	// Send message for empty ban list
-	//parcel->mBanList.clear();
-	msg->newMessageFast(_PREHASH_ParcelAccessListUpdate);
-	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID() );
-	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID() );
-	msg->nextBlockFast(_PREHASH_Data);
-	msg->addU32Fast(_PREHASH_Flags, AL_BAN);
-	msg->addS32(_PREHASH_LocalID, parcel->getLocalID() );
-	msg->addUUIDFast(_PREHASH_TransactionID, transactionUUID);
-	msg->addS32Fast(_PREHASH_SequenceID, 1);		// sequence_id
-	msg->addS32Fast(_PREHASH_Sections, 0);			// num_sections
 
 	// pack an empty block since there will be no data
 	msg->nextBlockFast(_PREHASH_List);
@@ -509,9 +492,12 @@ void LLFloaterAuction::doSellToAnyone()
 		body["sale_price"] = parcelp->getArea();	// Sell for L$1 per square meter
 		body["auth_buyer_id"] = LLUUID::null;		// To anyone
 
-		llinfos << "Sending parcel update to sell to anyone for L$1 via capability to: "
-			<< mParcelUpdateCapUrl << llendl;
-		LLHTTPClient::post(mParcelUpdateCapUrl, body, new LLHTTPClient::Responder());
+		LL_INFOS() << "Sending parcel update to sell to anyone for L$1 via capability to: "
+			<< mParcelUpdateCapUrl << LL_ENDL;
+
+        LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(mParcelUpdateCapUrl, body,
+            "Parcel set as sell to everyone.",
+            "Parcel sell to everyone failed.");
 
 		// clean up floater, and get out
 		cleanupAndClose();
@@ -526,8 +512,8 @@ void LLFloaterAuction::doSellToAnyone()
 void auction_tga_upload_done(const LLUUID& asset_id, void* user_data, S32 status, LLExtStat ext_status) // StoreAssetData callback (fixed)
 {
 	std::string* name = (std::string*)(user_data);
-	llinfos << "Upload of asset '" << *name << "' " << asset_id
-			<< " returned " << status << llendl;
+	LL_INFOS() << "Upload of asset '" << *name << "' " << asset_id
+			<< " returned " << status << LL_ENDL;
 	delete name;
 
 	gViewerWindow->getWindow()->decBusyCount();
@@ -547,8 +533,8 @@ void auction_tga_upload_done(const LLUUID& asset_id, void* user_data, S32 status
 void auction_j2c_upload_done(const LLUUID& asset_id, void* user_data, S32 status, LLExtStat ext_status) // StoreAssetData callback (fixed)
 {
 	std::string* name = (std::string*)(user_data);
-	llinfos << "Upload of asset '" << *name << "' " << asset_id
-			<< " returned " << status << llendl;
+	LL_INFOS() << "Upload of asset '" << *name << "' " << asset_id
+			<< " returned " << status << LL_ENDL;
 	delete name;
 
 	gViewerWindow->getWindow()->decBusyCount();

@@ -44,22 +44,30 @@ class LLNameListItem : public LLScrollListItem, public LLHandleProvider<LLNameLi
 public:
 	bool isGroup() const { return mIsGroup; }
 	void setIsGroup(bool is_group) { mIsGroup = is_group; }
+	bool isExperience() const { return mIsExperience; }
+	void setIsExperience(bool is_experience) { mIsExperience = is_experience; }
 
 protected:
 	friend class LLNameListCtrl;
 
 	LLNameListItem( const LLScrollListItem::Params& p )
-	:	LLScrollListItem(p), mIsGroup(false)
+	:	LLScrollListItem(p), mIsGroup(false), mIsExperience(false)
 	{
 	}
 
 	LLNameListItem( const LLScrollListItem::Params& p, bool is_group )
-	:	LLScrollListItem(p), mIsGroup(is_group)
+	:	LLScrollListItem(p), mIsGroup(is_group), mIsExperience(false)
+	{
+	}
+
+	LLNameListItem( const LLScrollListItem::Params& p, bool is_group, bool is_experience )
+	:	LLScrollListItem(p), mIsGroup(is_group), mIsExperience(is_experience)
 	{
 	}
 
 private:
 	bool mIsGroup;
+	bool mIsExperience;
 };
 
 
@@ -67,12 +75,14 @@ class LLNameListCtrl
 :	public LLScrollListCtrl, public LLInstanceTracker<LLNameListCtrl>
 {
 public:
+	typedef boost::signals2::signal<void(bool)> namelist_complete_signal_t;
 
 	typedef enum e_name_type
 	{
 		INDIVIDUAL,
 		GROUP,
-		SPECIAL
+		SPECIAL,
+		EXPERIENCE
 	} ENameType;
 
 	// provide names for enums
@@ -114,21 +124,26 @@ protected:
 	LLNameListCtrl(const Params&);
 	virtual ~LLNameListCtrl()
 	{
-		if (mAvatarNameCacheConnection.connected())
+		for (avatar_name_cache_connection_map_t::iterator it = mAvatarNameCacheConnections.begin(); it != mAvatarNameCacheConnections.end(); ++it)
 		{
-			mAvatarNameCacheConnection.disconnect();
+			if (it->second.connected())
+			{
+				it->second.disconnect();
+			}
 		}
+		mAvatarNameCacheConnections.clear();
 	}
 	friend class LLUICtrlFactory;
 public:
 	// Add a user to the list by name.  It will be added, the name
 	// requested from the cache, and updated as necessary.
 	LLScrollListItem* addNameItem(const LLUUID& agent_id, EAddPosition pos = ADD_BOTTOM,
-					 BOOL enabled = TRUE, const std::string& suffix = LLStringUtil::null);
+					 BOOL enabled = TRUE, const std::string& suffix = LLStringUtil::null, const std::string& prefix = LLStringUtil::null);
 	LLScrollListItem* addNameItem(NameItem& item, EAddPosition pos = ADD_BOTTOM);
 
 	/*virtual*/ LLScrollListItem* addElement(const LLSD& element, EAddPosition pos = ADD_BOTTOM, void* userdata = NULL);
-	LLScrollListItem* addNameItemRow(const NameItem& value, EAddPosition pos = ADD_BOTTOM, const std::string& suffix = LLStringUtil::null);
+	LLScrollListItem* addNameItemRow(const NameItem& value, EAddPosition pos = ADD_BOTTOM, const std::string& suffix = LLStringUtil::null,
+																							const std::string& prefix = LLStringUtil::null);
 
 	// Add a user to the list by name.  It will be added, the name
 	// requested from the cache, and updated as necessary.
@@ -152,17 +167,28 @@ public:
 
 	/*virtual*/ void updateColumns(bool force_update);
 
-	/*virtual*/ void	mouseOverHighlightNthItem( S32 index );
+	/*virtual*/ void mouseOverHighlightNthItem( S32 index );
 private:
-	void showInspector(const LLUUID& avatar_id, bool is_group);
-	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name, LLHandle<LLNameListItem> item);
+	void showInspector(const LLUUID& avatar_id, bool is_group, bool is_experience = false);
+	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name, std::string suffix, std::string prefix, LLHandle<LLNameListItem> item);
 
 private:
 	S32    			mNameColumnIndex;
 	std::string		mNameColumn;
 	BOOL			mAllowCallingCardDrop;
 	bool			mShortNames;  // display name only, no SLID
-	boost::signals2::connection mAvatarNameCacheConnection;
+	typedef std::map<LLUUID, boost::signals2::connection> avatar_name_cache_connection_map_t;
+	avatar_name_cache_connection_map_t mAvatarNameCacheConnections;
+
+	S32 mPendingLookupsRemaining;
+	namelist_complete_signal_t mNameListCompleteSignal;
+	
+public:
+	boost::signals2::connection setOnNameListCompleteCallback(boost::function<void(bool)> onNameListCompleteCallback) 
+	{ 
+		return mNameListCompleteSignal.connect(onNameListCompleteCallback); 
+	}
+
 };
 
 

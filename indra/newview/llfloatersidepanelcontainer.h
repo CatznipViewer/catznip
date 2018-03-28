@@ -51,7 +51,9 @@ public:
 
 	/*virtual*/ void onOpen(const LLSD& key);
 
-	/*virtual*/ void onClickCloseBtn(bool app_quitting = false);
+	/*virtual*/ void closeFloater(bool app_quitting = false);
+
+	void cleanup() { destroy(); }
 
 	LLPanel* openChildPanel(const std::string& panel_name, const LLSD& params);
 
@@ -74,7 +76,7 @@ public:
 		T* panel = dynamic_cast<T*>(getPanel(floater_name, panel_name));
 		if (!panel)
 		{
-			llwarns << "Child named \"" << panel_name << "\" of type " << typeid(T*).name() << " not found" << llendl;
+			LL_WARNS() << "Child named \"" << panel_name << "\" of type " << typeid(T*).name() << " not found" << LL_ENDL;
 		}
 		return panel;
 	}

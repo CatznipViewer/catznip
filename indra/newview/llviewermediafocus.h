@@ -41,10 +41,10 @@ class LLViewerMediaFocus :
 	public LLFocusableElement, 
 	public LLSingleton<LLViewerMediaFocus>
 {
-public:
-	LLViewerMediaFocus();
+	LLSINGLETON(LLViewerMediaFocus);
 	~LLViewerMediaFocus();
-	
+
+public:
 	// Set/clear the face that has media focus (takes keyboard input and has the full set of controls)
 	void setFocusFace(LLPointer<LLViewerObject> objectp, S32 face, viewer_media_t media_impl, LLVector3 pick_normal = LLVector3::zero);
 	void clearFocus();
@@ -56,6 +56,7 @@ public:
 	
 	/*virtual*/ bool	getFocus();
 	/*virtual*/ BOOL	handleKey(KEY key, MASK mask, BOOL called_from_parent);
+	/*virtual*/ BOOL	handleKeyUp(KEY key, MASK mask, BOOL called_from_parent);
 	/*virtual*/ BOOL	handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
 	BOOL handleScrollWheel(S32 x, S32 y, S32 clicks);
 
@@ -86,6 +87,10 @@ public:
 	
 	// Return the ID of the media instance the controls are currently attached to (either focus or hover).
 	LLUUID getControlsMediaID();
+
+    // The MoaP object wants keyup and keydown events.  Overridden to return true.
+    virtual bool    wantsKeyUpKeyDown() const;
+    virtual bool    wantsReturnKey() const;
 
 protected:
 	/*virtual*/ void	onFocusReceived();

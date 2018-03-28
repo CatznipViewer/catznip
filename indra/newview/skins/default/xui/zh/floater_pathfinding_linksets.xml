@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_pathfinding_linksets" title="尋徑聯結集">
+<floater name="floater_pathfinding_linksets" title="地區物件">
 	<floater.string name="messaging_get_inprogress">
 		尋徑聯結集查詢中…
 	</floater.string>
@@ -16,7 +16,7 @@
 		沒有尋徑聯結集。
 	</floater.string>
 	<floater.string name="messaging_complete_available">
-		從 [NUM_TOTAL] 個聯結集中選取了 [NUM_SELECTED] 個。
+		從[NUM_TOTAL]個中選取了[NUM_SELECTED]個。
 	</floater.string>
 	<floater.string name="messaging_not_enabled">
 		這地區並未啟用尋徑。
@@ -90,7 +90,16 @@
 	<floater.string name="linkset_choose_use">
 		選擇聯結集的使用…
 	</floater.string>
-	<panel>
+	<panel name="pathfinding_linksets_main">
+		<text name="linksets_filter_label">
+			過濾方式：
+		</text>
+		<text name="linksets_name_label">
+			名稱
+		</text>
+		<text name="linksets_desc_label">
+			描述
+		</text>
 		<combo_box name="filter_by_linkset_use">
 			<combo_box.item label="按聯結集的使用來過濾…" name="filter_by_linkset_use_none"/>
 			<combo_box.item label="可行走的" name="filter_by_linkset_use_walkable"/>
@@ -109,7 +118,7 @@
 			<scroll_list.columns label="有腳本" name="scripted"/>
 			<scroll_list.columns label="衝擊" name="land_impact"/>
 			<scroll_list.columns label="距離" name="dist_from_you"/>
-			<scroll_list.columns label="聯結集的使用" name="linkset_use"/>
+			<scroll_list.columns label="尋徑所用" name="linkset_use"/>
 			<scroll_list.columns label="A %" name="a_percent"/>
 			<scroll_list.columns label="B %" name="b_percent"/>
 			<scroll_list.columns label="C %" name="c_percent"/>
@@ -122,7 +131,10 @@
 		<button label="全選" name="select_all_objects"/>
 		<button label="全都不選" name="select_none_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_actions">
+		<text name="linksets_actions_label">
+			對所選採取的動作
+		</text>
 		<check_box label="顯示指標" name="show_beacon"/>
 		<button label="取得" name="take_objects"/>
 		<button label="拿取副本" name="take_copy_objects"/>
@@ -130,7 +142,10 @@
 		<button label="退回" name="return_objects"/>
 		<button label="刪除" name="delete_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_attributes">
+		<text name="linksets_attributes_label">
+			編輯尋徑屬性
+		</text>
 		<text name="walkability_coefficients_label">
 			可行走性：
 		</text>

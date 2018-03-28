@@ -34,10 +34,10 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
+#include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llfolderview.h"
-#include "llhttpclient.h"
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
@@ -59,7 +59,7 @@
 #include "llviewernetwork.h"
 #include "llweb.h"
 
-static LLRegisterPanelClassWrapper<LLSidepanelInventory> t_inventory("sidepanel_inventory");
+static LLPanelInjector<LLSidepanelInventory> t_inventory("sidepanel_inventory");
 
 //
 // Constants
@@ -70,10 +70,7 @@ static LLRegisterPanelClassWrapper<LLSidepanelInventory> t_inventory("sidepanel_
 
 static const char * const INBOX_BUTTON_NAME = "inbox_btn";
 static const char * const INBOX_LAYOUT_PANEL_NAME = "inbox_layout_panel";
-static const char * const MAIN_INVENTORY_LAYOUT_PANEL_NAME = "main_inventory_layout_panel";
-
 static const char * const INVENTORY_LAYOUT_STACK_NAME = "inventory_layout_stack";
-
 static const char * const MARKETPLACE_INBOX_PANEL = "marketplace_inbox";
 
 //
@@ -119,7 +116,6 @@ private:
 LLSidepanelInventory::LLSidepanelInventory()
 	: LLPanel()
 	, mItemPanel(NULL)
-	, mInventoryPanelInbox(NULL)
 	, mPanelMainInventory(NULL)
 	, mInboxEnabled(false)
 	, mCategoriesObserver(NULL)
@@ -161,7 +157,7 @@ BOOL LLSidepanelInventory::postBuild()
 {
 	// UI elements from inventory panel
 	{
-		mInventoryPanel = getChild<LLPanel>("sidepanel__inventory_panel");
+		mInventoryPanel = getChild<LLPanel>("sidepanel_inventory_panel");
 
 		mInfoBtn = mInventoryPanel->getChild<LLButton>("info_btn");
 		mInfoBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onInfoButtonClicked, this));
@@ -258,12 +254,9 @@ void LLSidepanelInventory::updateInbox()
 	//
 	// Track inbox folder changes
 	//
-
-	const bool do_not_create_folder = false;
-
-	const LLUUID inbox_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, do_not_create_folder);
+	const LLUUID inbox_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, true);
 	
-	// Set up observer to listen for creation of inbox if at least one of them doesn't exist
+	// Set up observer to listen for creation of inbox if it doesn't exist
 	if (inbox_id.isNull())
 	{
 		observeInboxCreation();
@@ -271,6 +264,11 @@ void LLSidepanelInventory::updateInbox()
 	// Set up observer for inbox changes, if we have an inbox already
 	else 
 	{
+        // Consolidate Received items
+        // We shouldn't have to do that but with a client/server system relying on a "well known folder" convention,
+        // things can get messy and conventions broken. This call puts everything back together in its right place.
+        gInventory.consolidateForType(inbox_id, LLFolderType::FT_INBOX);
+        
 		// Enable the display of the inbox if it exists
 		enableInbox(true);
 
@@ -299,7 +297,7 @@ void LLSidepanelInventory::observeInboxModifications(const LLUUID& inboxID)
 	// (this can happen multiple times on the initial session that creates the inbox)
 	//
 
-	if (mInventoryPanelInbox != NULL)
+	if (mInventoryPanelInbox.get() != NULL)
 	{
 		return;
 	}
@@ -310,7 +308,7 @@ void LLSidepanelInventory::observeInboxModifications(const LLUUID& inboxID)
 
 	if (inboxID.isNull())
 	{
-		llwarns << "Attempting to track modifications to non-existent inbox" << llendl;
+		LL_WARNS() << "Attempting to track modifications to non-existent inbox" << LL_ENDL;
 		return;
 	}
 
@@ -333,7 +331,8 @@ void LLSidepanelInventory::observeInboxModifications(const LLUUID& inboxID)
 	//
 
 	LLPanelMarketplaceInbox * inbox = getChild<LLPanelMarketplaceInbox>(MARKETPLACE_INBOX_PANEL);
-	mInventoryPanelInbox = inbox->setupInventoryPanel();
+    LLInventoryPanel* inventory_panel = inbox->setupInventoryPanel();
+	mInventoryPanelInbox = inventory_panel->getInventoryPanelHandle();
 }
 
 void LLSidepanelInventory::enableInbox(bool enabled)
@@ -453,7 +452,7 @@ void LLSidepanelInventory::onShareButtonClicked()
 
 void LLSidepanelInventory::onShopButtonClicked()
 {
-	LLWeb::loadURLExternal(gSavedSettings.getString("MarketplaceURL"));
+	LLWeb::loadURL(gSavedSettings.getString("MarketplaceURL"));
 }
 
 void LLSidepanelInventory::performActionOnSelection(const std::string &action)
@@ -461,9 +460,9 @@ void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 	LLFolderViewItem* current_item = mPanelMainInventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
 	if (!current_item)
 	{
-		if (mInventoryPanelInbox)
+		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
 		{
-			current_item = mInventoryPanelInbox->getRootFolder()->getCurSelectedItem();
+			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
 		}
 
 		if (!current_item)
@@ -614,10 +613,10 @@ void LLSidepanelInventory::updateVerbs()
 
 bool LLSidepanelInventory::canShare()
 {
-	LLInventoryPanel* inbox = mInventoryPanelInbox;
+	LLInventoryPanel* inbox = mInventoryPanelInbox.get();
 
 	// Avoid flicker in the Recent tab while inventory is being loaded.
-	if ( (!inbox || inbox->getRootFolder()->getSelectionList().empty())
+	if ( (!inbox || !inbox->getRootFolder() || inbox->getRootFolder()->getSelectionList().empty())
 		&& (mPanelMainInventory && !mPanelMainInventory->getActivePanel()->getRootFolder()->hasVisibleChildren()) )
 	{
 		return false;
@@ -652,9 +651,9 @@ LLInventoryItem *LLSidepanelInventory::getSelectedItem()
 	
 	if (!current_item)
 	{
-		if (mInventoryPanelInbox)
+		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
 		{
-			current_item = mInventoryPanelInbox->getRootFolder()->getCurSelectedItem();
+			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
 		}
 
 		if (!current_item)
@@ -671,12 +670,12 @@ U32 LLSidepanelInventory::getSelectedCount()
 {
 	int count = 0;
 
-	std::set<LLFolderViewItem*> selection_list =    mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
+	std::set<LLFolderViewItem*> selection_list = mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
 	count += selection_list.size();
 
-	if ((count == 0) && mInboxEnabled && (mInventoryPanelInbox != NULL))
+	if ((count == 0) && mInboxEnabled && mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
 	{
-		selection_list = mInventoryPanelInbox->getRootFolder()->getSelectionList();
+		selection_list = mInventoryPanelInbox.get()->getRootFolder()->getSelectionList();
 
 		count += selection_list.size();
 	}
@@ -697,6 +696,19 @@ LLInventoryPanel *LLSidepanelInventory::getActivePanel()
 	return NULL;
 }
 
+void LLSidepanelInventory::selectAllItemsPanel()
+{
+	if (!getVisible())
+	{
+		return;
+	}
+	if (mInventoryPanel->getVisible())
+	{
+		 mPanelMainInventory->selectAllItemsPanel();
+	}
+
+}
+
 BOOL LLSidepanelInventory::isMainInventoryPanelActive() const
 {
 	return mInventoryPanel->getVisible();
@@ -710,13 +722,13 @@ void LLSidepanelInventory::clearSelections(bool clearMain, bool clearInbox)
 		
 		if (inv_panel)
 		{
-			inv_panel->clearSelection();
+			inv_panel->getRootFolder()->clearSelection();
 		}
 	}
 	
-	if (clearInbox && mInboxEnabled && (mInventoryPanelInbox != NULL))
+	if (clearInbox && mInboxEnabled && mInventoryPanelInbox.get())
 	{
-		mInventoryPanelInbox->clearSelection();
+		mInventoryPanelInbox.get()->getRootFolder()->clearSelection();
 	}
 	
 	updateVerbs();
@@ -726,10 +738,23 @@ std::set<LLFolderViewItem*> LLSidepanelInventory::getInboxSelectionList()
 {
 	std::set<LLFolderViewItem*> inventory_selected_uuids;
 	
-	if (mInboxEnabled && (mInventoryPanelInbox != NULL))
+	if (mInboxEnabled && mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
 	{
-		inventory_selected_uuids = mInventoryPanelInbox->getRootFolder()->getSelectionList();
+		inventory_selected_uuids = mInventoryPanelInbox.get()->getRootFolder()->getSelectionList();
 	}
 	
 	return inventory_selected_uuids;
+}
+
+void LLSidepanelInventory::cleanup()
+{
+	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end();)
+	{
+		LLFloaterSidePanelContainer* iv = dynamic_cast<LLFloaterSidePanelContainer*>(*iter++);
+		if (iv)
+		{
+			iv->cleanup();
+		}
+	}
 }

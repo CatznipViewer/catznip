@@ -43,8 +43,6 @@
 #include "llresmgr.h"
 #include "lluictrlfactory.h"
 
-const U32 MAX_STRING_LENGTH = 10;
-
 static LLDefaultChildRegistry::Register<LLSliderCtrl> r("slider");
 
 LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
@@ -58,7 +56,8 @@ LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
 	mPrecision(p.decimal_digits),
 	mTextEnabledColor(p.text_color()),
 	mTextDisabledColor(p.text_disabled_color()),
-	mLabelWidth(p.label_width)
+	mLabelWidth(p.label_width),
+	mEditorCommitSignal(NULL)
 {
 	S32 top = getRect().getHeight();
 	S32 bottom = 0;
@@ -196,6 +195,11 @@ LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
 	updateText();
 }
 
+LLSliderCtrl::~LLSliderCtrl()
+{
+	delete mEditorCommitSignal;
+}
+
 // static
 void LLSliderCtrl::onEditorGainFocus( LLFocusableElement* caller, void *userdata )
 {
@@ -308,6 +312,8 @@ void LLSliderCtrl::onEditorCommit( LLUICtrl* ctrl, const LLSD& userdata )
 	if( success )
 	{
 		self->onCommit();
+		if (self->mEditorCommitSignal)
+			(*(self->mEditorCommitSignal))(self, self->getValueF32());
 	}
 	else
 	{
@@ -403,7 +409,7 @@ void LLSliderCtrl::setPrecision(S32 precision)
 {
 	if (precision < 0 || precision > 10)
 	{
-		llerrs << "LLSliderCtrl::setPrecision - precision out of range" << llendl;
+		LL_ERRS() << "LLSliderCtrl::setPrecision - precision out of range" << LL_ENDL;
 		return;
 	}
 
@@ -421,6 +427,11 @@ boost::signals2::connection LLSliderCtrl::setSliderMouseUpCallback( const commit
 	return mSlider->setMouseUpCallback( cb );
 }
 
+boost::signals2::connection LLSliderCtrl::setSliderEditorCommitCallback( const commit_signal_t::slot_type& cb )   
+{ 
+	if (!mEditorCommitSignal) mEditorCommitSignal = new commit_signal_t();
+	return mEditorCommitSignal->connect(cb); 
+}
 void LLSliderCtrl::onTabInto()
 {
 	if( mEditor )

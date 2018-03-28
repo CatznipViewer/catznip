@@ -31,7 +31,6 @@
 
 #include "llstring.h"
 #include "lluuid.h"
-#include "stdenums.h"
 #include "llsingleton.h"
 #include "llassettype.h"
 #include "llinventory.h"
@@ -49,10 +48,10 @@
 
 class LLClipboard : public LLSingleton<LLClipboard>
 {
-public:
-	LLClipboard();
+	LLSINGLETON(LLClipboard);
 	~LLClipboard();
 	
+public:
 	// Clears the clipboard
 	void reset();
 	// Returns the state of the clipboard so client can know if it has been modified (comparing with tracked state)

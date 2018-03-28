@@ -202,6 +202,21 @@ void LLToast::hide()
 	}
 }
 
+/*virtual*/
+void LLToast::setFocus(BOOL b)
+{
+    if (b && !hasFocus() && mPanel)
+    {
+        LLModalDialog::setFocus(TRUE);
+        // mostly for buttons
+        mPanel->setFocus(TRUE);
+    }
+    else
+    {
+        LLModalDialog::setFocus(b);
+    }
+}
+
 void LLToast::onFocusLost()
 {
 	if(mWrapperPanel && !isBackgroundVisible())
@@ -233,6 +248,8 @@ void LLToast::setFadingTime(S32 seconds)
 void LLToast::closeToast()
 {
 	mOnDeleteToastSignal(this);
+
+	setSoundFlags(SILENT);
 
 	closeFloater();
 }
@@ -377,10 +394,6 @@ void LLToast::setVisible(BOOL show)
 		if(!mTimer->getStarted() && mCanFade)
 		{
 			mTimer->start();
-		}
-		if (!getVisible())
-		{
-			LLModalDialog::setFrontmost(FALSE);
 		}
 	}
 	else
@@ -605,7 +618,7 @@ void LLToast::cleanupToasts()
 			toastp = &(*iter);
 		}
 
-		//llinfos << "Cleaning up toast id " << toastp->getNotificationID() << llendl;
+		//LL_INFOS() << "Cleaning up toast id " << toastp->getNotificationID() << LL_ENDL;
 
 		// LLToast destructor will remove it from the LLInstanceTracker.
 		if (!toastp)

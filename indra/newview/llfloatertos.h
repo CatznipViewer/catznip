@@ -31,6 +31,8 @@
 #include "llassetstorage.h"
 #include "llmediactrl.h"
 #include <boost/function.hpp>
+#include "lleventcoro.h"
+#include "llcoros.h"
 
 class LLButton;
 class LLRadioGroup;
@@ -56,17 +58,21 @@ public:
 
 	void			setSiteIsAlive( bool alive );
 
+	void			updateAgreeEnabled(bool enabled);
+
 	// inherited from LLViewerMediaObserver
 	/*virtual*/ void handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event);
 
 private:
+    static void testSiteIsAliveCoro(LLHandle<LLFloater> handle, std::string url);
 
 	std::string		mMessage;
-	int				mWebBrowserWindowId;
 	bool			mLoadingScreenLoaded;
 	bool			mSiteAlive;
 	bool			mRealNavigateBegun;
 	std::string		mReplyPumpName;
+
+
 };
 
 #endif // LL_LLFLOATERTOS_H

@@ -53,7 +53,7 @@ typedef std::pair<LLUUID, std::string> folder_pair_t;
 static bool cmp_folders(const folder_pair_t& left, const folder_pair_t& right);
 static void collectLandmarkFolders(LLInventoryModel::cat_array_t& cats);
 
-static LLRegisterPanelClassWrapper<LLPanelLandmarkInfo> t_landmark_info("panel_landmark_info");
+static LLPanelInjector<LLPanelLandmarkInfo> t_landmark_info("panel_landmark_info");
 
 // Statics for textures filenames
 static std::string icon_pg;
@@ -128,12 +128,16 @@ void LLPanelLandmarkInfo::setInfoType(EInfoType type)
 			LLViewerParcelMgr* parcel_mgr = LLViewerParcelMgr::getInstance();
 			std::string name = parcel_mgr->getAgentParcelName();
 			LLVector3 agent_pos = gAgent.getPositionAgent();
+			
+			std::string desc;
+			LLAgentUI::buildLocationString(desc, LLAgentUI::LOCATION_FORMAT_FULL, agent_pos);
+			mNotesEditor->setText(desc);			
 
 			if (name.empty())
 			{
-				S32 region_x = llround(agent_pos.mV[VX]);
-				S32 region_y = llround(agent_pos.mV[VY]);
-				S32 region_z = llround(agent_pos.mV[VZ]);
+				S32 region_x = ll_round(agent_pos.mV[VX]);
+				S32 region_y = ll_round(agent_pos.mV[VY]);
+				S32 region_z = ll_round(agent_pos.mV[VZ]);
 
 				std::string region_name;
 				LLViewerRegion* region = parcel_mgr->getSelectionRegion();
@@ -143,7 +147,8 @@ void LLPanelLandmarkInfo::setInfoType(EInfoType type)
 				}
 				else
 				{
-					region_name = getString("unknown");
+					LLAgentUI::buildLocationString(desc, LLAgentUI::LOCATION_FORMAT_NORMAL, agent_pos);
+					region_name = desc;
 				}
 
 				mLandmarkTitleEditor->setText(llformat("%s (%d, %d, %d)",
@@ -153,10 +158,6 @@ void LLPanelLandmarkInfo::setInfoType(EInfoType type)
 			{
 				mLandmarkTitleEditor->setText(name);
 			}
-
-			std::string desc;
-			LLAgentUI::buildLocationString(desc, LLAgentUI::LOCATION_FORMAT_FULL, agent_pos);
-			mNotesEditor->setText(desc);
 
 			// Moved landmark creation here from LLPanelLandmarkInfo::processParcelInfo()
 			// because we use only agent's current coordinates instead of waiting for
@@ -435,7 +436,7 @@ void LLPanelLandmarkInfo::populateFoldersList()
 	const LLViewerInventoryCategory* lmcat = gInventory.getCategory(landmarks_id);
 	if (!lmcat)
 	{
-		llwarns << "Cannot find the landmarks folder" << llendl;
+		LL_WARNS() << "Cannot find the landmarks folder" << LL_ENDL;
 	}
 	else
 	{
@@ -446,9 +447,9 @@ void LLPanelLandmarkInfo::populateFoldersList()
 	typedef std::vector<folder_pair_t> folder_vec_t;
 	folder_vec_t folders;
 	// Sort the folders by their full name.
-	for (S32 i = 0; i < cats.count(); i++)
+	for (S32 i = 0; i < cats.size(); i++)
 	{
-		const LLViewerInventoryCategory* cat = cats.get(i);
+		const LLViewerInventoryCategory* cat = cats.at(i);
 		std::string cat_full_name = getFullFolderName(cat);
 		folders.push_back(folder_pair_t(cat->getUUID(), cat_full_name));
 	}
@@ -483,10 +484,10 @@ static void collectLandmarkFolders(LLInventoryModel::cat_array_t& cats)
 	LLViewerInventoryCategory* favorites_cat = gInventory.getCategory(favorites_id);
 	if (!favorites_cat)
 	{
-		llwarns << "Cannot find the favorites folder" << llendl;
+		LL_WARNS() << "Cannot find the favorites folder" << LL_ENDL;
 	}
 	else
 	{
-		cats.put(favorites_cat);
+		cats.push_back(favorites_cat);
 	}
 }

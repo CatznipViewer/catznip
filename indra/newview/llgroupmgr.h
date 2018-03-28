@@ -32,8 +32,26 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "lleventcoro.h"
+#include "llcoros.h"
 
+// Forward Declarations
 class LLMessageSystem;
+class LLGroupRoleData;
+class LLGroupMgr;
+
+enum LLGroupChange
+{
+	GC_PROPERTIES,
+	GC_MEMBER_DATA,
+	GC_ROLE_DATA,
+	GC_ROLE_MEMBER_DATA,
+	GC_TITLES,
+	GC_BANLIST,
+	GC_ALL
+};
+
+const U32 GB_MAX_BANNED_AGENTS = 500;
 
 class LLGroupMgrObserver
 {
@@ -53,8 +71,6 @@ public:
 	virtual ~LLParticularGroupObserver(){}
 	virtual void changed(const LLUUID& group_id, LLGroupChange gc) = 0;
 };
-
-class LLGroupRoleData;
 
 class LLGroupMemberData
 {
@@ -135,7 +151,7 @@ public:
 
 	const uuid_vec_t& getRoleMembers() const { return mMemberIDs; }
 	S32 getMembersInRole(uuid_vec_t members, BOOL needs_sort = TRUE);
-	S32 getTotalMembersInRole() { return mMemberIDs.size(); }
+	S32 getTotalMembersInRole() { return mMemberCount ? mMemberCount : mMemberIDs.size(); } //FIXME: Returns 0 for Everyone role when Member list isn't yet loaded, see MAINT-5225
 
 	LLRoleData getRoleData() const { return mRoleData; }
 	void setRoleData(LLRoleData data) { mRoleData = data; }
@@ -190,14 +206,23 @@ struct lluuid_pair_less
 	}
 };
 
+
+struct LLGroupBanData
+{
+	LLGroupBanData(): mBanDate()	{}
+	~LLGroupBanData()	{}
+	
+	LLDate mBanDate;
+	// TODO: std:string ban_reason;
+};
+
+
 struct LLGroupTitle
 {
 	std::string mTitle;
 	LLUUID		mRoleID;
 	BOOL		mSelected;
 };
-
-class LLGroupMgr;
 
 class LLGroupMgrGroupData
 {
@@ -228,27 +253,38 @@ public:
 	void recalcAllAgentPowers();
 	void recalcAgentPowers(const LLUUID& agent_id);
 
-	BOOL isMemberDataComplete() { return mMemberDataComplete; }
-	BOOL isRoleDataComplete() { return mRoleDataComplete; }
-	BOOL isRoleMemberDataComplete() { return mRoleMemberDataComplete; }
-	BOOL isGroupPropertiesDataComplete() { return mGroupPropertiesDataComplete; }
+	bool isMemberDataComplete() { return mMemberDataComplete; }
+	bool isRoleDataComplete() { return mRoleDataComplete; }
+	bool isRoleMemberDataComplete() { return mRoleMemberDataComplete; }
+	bool isGroupPropertiesDataComplete() { return mGroupPropertiesDataComplete; }
+
+	bool isSingleMemberNotOwner();
 
 	F32 getAccessTime() const { return mAccessTime; }
 	void setAccessed();
 
 	const LLUUID& getMemberVersion() const { return mMemberVersion; }
 
+	void clearBanList() { mBanList.clear(); }
+	void getBanList(const LLUUID& group_id, LLGroupBanData& ban_data);
+	const LLGroupBanData& getBanEntry(const LLUUID& ban_id) { return mBanList[ban_id]; }
+	
+	void createBanEntry(const LLUUID& ban_id, const LLGroupBanData& ban_data = LLGroupBanData());
+	void removeBanEntry(const LLUUID& ban_id);
+	void banMemberById(const LLUUID& participant_uuid);
+	
 public:
 	typedef	std::map<LLUUID,LLGroupMemberData*> member_list_t;
 	typedef	std::map<LLUUID,LLGroupRoleData*> role_list_t;
 	typedef std::map<lluuid_pair,LLRoleMemberChange,lluuid_pair_less> change_map_t;
 	typedef std::map<LLUUID,LLRoleData> role_data_map_t;
+	typedef std::map<LLUUID,LLGroupBanData> ban_list_t;
+
 	member_list_t		mMembers;
 	role_list_t			mRoles;
-
-	
 	change_map_t		mRoleMemberChanges;
 	role_data_map_t		mRoleChanges;
+	ban_list_t			mBanList;
 
 	std::vector<LLGroupTitle> mTitles;
 
@@ -268,6 +304,9 @@ public:
 	S32					mMemberCount;
 	S32					mRoleCount;
 
+	bool				mPendingBanRequest;
+	LLUUID				mPendingBanMemberID;
+
 protected:
 	void sendRoleChanges();
 	void cancelRoleChanges();
@@ -279,12 +318,12 @@ private:
 	LLUUID				mTitlesRequestID;
 	U32					mReceivedRoleMemberPairs;
 
-	BOOL				mMemberDataComplete;
-	BOOL				mRoleDataComplete;
-	BOOL				mRoleMemberDataComplete;
-	BOOL				mGroupPropertiesDataComplete;
+	bool				mMemberDataComplete;
+	bool				mRoleDataComplete;
+	bool				mRoleMemberDataComplete;
+	bool				mGroupPropertiesDataComplete;
 
-	BOOL				mPendingRoleMemberRequest;
+	bool				mPendingRoleMemberRequest;
 	F32					mAccessTime;
 
 	// Generate a new ID every time mMembers
@@ -309,11 +348,29 @@ struct LLRoleActionSet
 
 class LLGroupMgr : public LLSingleton<LLGroupMgr>
 {
+	LLSINGLETON(LLGroupMgr);
+	~LLGroupMgr();
 	LOG_CLASS(LLGroupMgr);
 	
 public:
-	LLGroupMgr();
-	~LLGroupMgr();
+	enum EBanRequestType
+	{
+		REQUEST_GET = 0,
+		REQUEST_POST,
+		REQUEST_PUT,
+		REQUEST_DEL
+	};
+
+	enum EBanRequestAction
+	{
+		BAN_NO_ACTION	= 0,
+		BAN_CREATE		= 1,
+		BAN_DELETE		= 2,
+		BAN_UPDATE		= 4
+	};
+
+
+public:
 
 	void addObserver(LLGroupMgrObserver* observer);
 	void addObserver(const LLUUID& group_id, LLParticularGroupObserver* observer);
@@ -344,10 +401,14 @@ public:
 	static void sendGroupMemberInvites(const LLUUID& group_id, std::map<LLUUID,LLUUID>& role_member_pairs);
 	static void sendGroupMemberEjects(const LLUUID& group_id,
 									  uuid_vec_t& member_ids);
+	
+	void sendGroupBanRequest(EBanRequestType request_type, 
+									const LLUUID& group_id,	
+									U32 ban_action = BAN_NO_ACTION,
+									const uuid_vec_t &ban_list = uuid_vec_t());
 
-	// BAKER
+
 	void sendCapGroupMembersRequest(const LLUUID& group_id);
-	static void processCapGroupMembersRequest(const LLSD& content);
 
 	void cancelGroupRoleChanges(const LLUUID& group_id);
 
@@ -370,6 +431,14 @@ public:
 	void clearGroupData(const LLUUID& group_id);
 
 private:
+    void groupMembersRequestCoro(std::string url, LLUUID groupId);
+    void processCapGroupMembersRequest(const LLSD& content);
+
+    void getGroupBanRequestCoro(std::string url, LLUUID groupId);
+    void postGroupBanRequestCoro(std::string url, LLUUID groupId, U32 action, uuid_vec_t banList, bool update);
+
+    static void processGroupBanRequest(const LLSD& content);
+
 	void notifyObservers(LLGroupChange gc);
 	void notifyObserver(const LLUUID& group_id, LLGroupChange gc);
 	void addGroup(LLGroupMgrGroupData* group_datap);
@@ -385,9 +454,8 @@ private:
 	typedef std::map<LLUUID,observer_set_t> observer_map_t;
 	observer_map_t mParticularObservers;
 
-	S32 mLastGroupMembersRequestFrame;
+    bool mMemberRequestInFlight;
 };
 
 
 #endif
-

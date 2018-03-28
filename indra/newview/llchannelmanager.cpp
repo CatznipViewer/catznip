@@ -35,6 +35,7 @@
 #include "llviewerwindow.h"
 #include "llrootview.h"
 #include "llsyswellwindow.h"
+#include "llfloaternotificationstabbed.h"
 #include "llfloaterreg.h"
 
 #include <algorithm>
@@ -50,7 +51,7 @@ LLChannelManager::LLChannelManager()
 	
 	if(!gViewerWindow)
 	{
-		llerrs << "LLChannelManager::LLChannelManager() - viwer window is not initialized yet" << llendl;
+		LL_ERRS() << "LLChannelManager::LLChannelManager() - viwer window is not initialized yet" << LL_ENDL;
 	}
 }
 
@@ -131,7 +132,7 @@ void LLChannelManager::onLoginCompleted()
 			S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
 			S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
 			mStartUpChannel->init(channel_right_bound - channel_width, channel_right_bound);
-			mStartUpChannel->setMouseDownCallback(boost::bind(&LLNotificationWellWindow::onStartUpToastClick, LLNotificationWellWindow::getInstance(), _2, _3, _4));
+			mStartUpChannel->setMouseDownCallback(boost::bind(&LLFloaterNotificationsTabbed::onStartUpToastClick, LLFloaterNotificationsTabbed::getInstance(), _2, _3, _4));
 
 			mStartUpChannel->setCommitCallback(boost::bind(&LLChannelManager::onStartUpToastClose, this));
 			mStartUpChannel->createStartUpToast(away_notifications, gSavedSettings.getS32("StartUpToastLifeTime"));
@@ -247,7 +248,7 @@ LLNotificationsUI::LLScreenChannel* LLChannelManager::getNotificationScreenChann
 
 	if (channel == NULL)
 	{
-		llwarns << "Can't find screen channel by NotificationChannelUUID" << llendl;
+		LL_WARNS() << "Can't find screen channel by NotificationChannelUUID" << LL_ENDL;
 		llassert(!"Can't find screen channel by NotificationChannelUUID");
 	}
 

@@ -44,8 +44,8 @@ public:
 	};
 
 	BOOL isValidPng(U8* src);
-	BOOL readPng(U8* src, LLImageRaw* rawImage, ImageInfo *infop = NULL);
-	BOOL writePng(const LLImageRaw* rawImage, U8* dst);
+	BOOL readPng(U8* src, S32 dataSize, LLImageRaw* rawImage, ImageInfo *infop = NULL);
+	BOOL writePng(const LLImageRaw* rawImage, U8* dst, size_t destSize);
 	U32  getFinalSize();
 	const std::string& getErrorMessage();
 
@@ -61,6 +61,7 @@ private:
 	{
 		U8 *mData;
 		U32 mOffset;
+		S32 mDataSize;
 	};
 
 	static void writeFlush(png_structp png_ptr);

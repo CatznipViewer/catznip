@@ -53,6 +53,7 @@ typedef enum ELLPath
 	LL_PATH_EXECUTABLE = 16,
 	LL_PATH_DEFAULT_SKIN = 17,
 	LL_PATH_FONTS = 18,
+    LL_PATH_DUMP = 19,
 	LL_PATH_LAST
 } ELLPath;
 
@@ -71,7 +72,8 @@ class LLDir
 		const std::string& app_read_only_data_dir = "") = 0;
 
 	virtual S32 deleteFilesInDir(const std::string &dirname, const std::string &mask);
-
+    U32 deleteDirAndContents(const std::string& dir_name);
+    std::vector<std::string> getFilesInDir(const std::string &dirname);
 // pure virtual functions
 	virtual std::string getCurPath() = 0;
 	virtual bool fileExists(const std::string &filename) const = 0;
@@ -92,6 +94,7 @@ class LLDir
 	const std::string &getOSUserAppDir() const;	// Location of the os-specific user app dir
 	const std::string &getLindenUserDir() const;	// Location of the Linden user dir.
 	const std::string &getChatLogsDir() const;	// Location of the chat logs dir.
+	const std::string &getDumpDir() const;	// Location of the per-run dump dir.
 	const std::string &getPerAccountChatLogsDir() const;	// Location of the per account chat logs dir.
 	const std::string &getTempDir() const;			// Common temporary directory
 	const std::string  getCacheDir(bool get_default = false) const;	// Location of the cache.
@@ -179,6 +182,8 @@ class LLDir
 	// For producing safe download file names from potentially unsafe ones
 	static std::string getScrubbedFileName(const std::string uncleanFileName);
 	static std::string getForbiddenFileChars();
+    void setDumpDir( const std::string& path );
+
 
 	virtual void setChatLogsDir(const std::string &path);		// Set the chat logs dir to this user's dir
 	virtual void setPerAccountChatLogsDir(const std::string &username);		// Set the per user chat log directory.
@@ -197,9 +202,28 @@ class LLDir
 	/// Append specified @a name to @a destpath, separated by getDirDelimiter()
 	/// if both are non-empty.
 	void append(std::string& destpath, const std::string& name) const;
-	/// Append specified @a name to @a path, separated by getDirDelimiter()
-	/// if both are non-empty. Return result, leaving @a path unmodified.
-	std::string add(const std::string& path, const std::string& name) const;
+	/// Variadic form: append @a name0 and @a name1 and arbitrary other @a
+	/// names to @a destpath, separated by getDirDelimiter() as needed.
+	template <typename... NAMES>
+	void append(std::string& destpath, const std::string& name0, const std::string& name1,
+				const NAMES& ... names) const
+	{
+		// In a typical recursion case, we'd accept (destpath, name0, names).
+		// We accept (destpath, name0, name1, names) because it's important to
+		// delegate the two-argument case to the non-template implementation.
+		append(destpath, name0);
+		append(destpath, name1, names...);
+	}
+
+	/// Append specified @a names to @a path, separated by getDirDelimiter()
+	/// as needed. Return result, leaving @a path unmodified.
+	template <typename... NAMES>
+	std::string add(const std::string& path, const NAMES& ... names) const
+	{
+		std::string destpath(path);
+		append(destpath, names...);
+		return destpath;
+	}
 
 protected:
 	// Does an add() or append() call need a directory delimiter?
@@ -245,6 +269,7 @@ protected:
 	std::vector<std::string> mSearchSkinDirs;
 	std::string mLanguage;              // Current viewer language
 	std::string mLLPluginDir;			// Location for plugins and plugin shell
+    static std::string sDumpDir;            // Per-run crash report subdir of log directory.
 	std::string mUserName;				// Current user name
 };
 

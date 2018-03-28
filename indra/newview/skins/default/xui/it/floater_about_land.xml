@@ -10,13 +10,13 @@
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
 	<floater.string name="Minutes">
-		[MINUTES] minuti
+		[MINUTES] min
 	</floater.string>
 	<floater.string name="Minute">
-		minuto
+		min
 	</floater.string>
 	<floater.string name="Seconds">
-		[SECONDS] secondi
+		[SECONDS] s
 	</floater.string>
 	<floater.string name="Remaining">
 		rimanenti
@@ -313,9 +313,6 @@ Solamente terreni più grandi possono essere abilitati nella ricerca.
 			<panel.string name="push_restrict_region_text">
 				Nessuna spinta (Impostazione regionale)
 			</panel.string>
-			<panel.string name="see_avs_text">
-				Gli avatar in altri lotti possono vedere
-			</panel.string>
 			<text name="allow_label">
 				Permetti ad altri residenti di:
 			</text>
@@ -341,22 +338,6 @@ Solamente terreni più grandi possono essere abilitati nella ricerca.
 			<check_box label="Sicuro (senza danno)" name="check safe" tool_tip="Se spuntato, imposta il terreno su &apos;sicuro&apos;, disabilitando i danni da combattimento. Se non spuntato, viene abilitato il combattimento con danni."/>
 			<check_box label="Nessuna spinta" name="PushRestrictCheck" tool_tip="Previeni i colpi. Selezionare questa opzione può essere utile per prevenire comportamenti dannosi sul tuo terreno."/>
 			<check_box label="Mostra luogo nella ricerca (30 L$/settimana)" name="ShowDirectoryCheck" tool_tip="Consenti che il lotto sia visto nei risultati di ricerca"/>
-			<combo_box name="land category with adult">
-				<combo_box.item label="Tutte le categorie" name="item0"/>
-				<combo_box.item label="Luogo dei Linden" name="item1"/>
-				<combo_box.item label="Adulti" name="item2"/>
-				<combo_box.item label="Arte e cultura" name="item3"/>
-				<combo_box.item label="Affari" name="item4"/>
-				<combo_box.item label="Istruzione" name="item5"/>
-				<combo_box.item label="Gioco" name="item6"/>
-				<combo_box.item label="Divertimento" name="item7"/>
-				<combo_box.item label="Accoglienza nuovi residenti" name="item8"/>
-				<combo_box.item label="Parchi &amp; Natura" name="item9"/>
-				<combo_box.item label="Residenziale" name="item10"/>
-				<combo_box.item label="Shopping" name="item11"/>
-				<combo_box.item label="Affitto" name="item13"/>
-				<combo_box.item label="Altro" name="item12"/>
-			</combo_box>
 			<combo_box name="land category">
 				<combo_box.item label="Tutte le categorie" name="item0"/>
 				<combo_box.item label="Luogo dei Linden" name="item1"/>
@@ -456,22 +437,13 @@ Media:
 			<panel.string name="access_estate_defined">
 				(Definito dalla proprietà)
 			</panel.string>
-			<panel.string name="allow_public_access">
-				Consenti accesso pubblico ([MATURITY]) (Nota: se si rimuove la selezione vengono create linee di espulsione)
-			</panel.string>
 			<panel.string name="estate_override">
 				Una o più di queste impostazioni sono già impostate a livello regionale
 			</panel.string>
-			<text name="Limit access to this parcel to:">
-				Accesso a questo terreno
-			</text>
-			<check_box label="Consenti l&apos;accesso pubblico (se si rimuove la selezione vengono create linee di espulsione)" name="public_access"/>
-			<text name="Only Allow">
-				Consenti l&apos;accesso solo ai Residenti che:
-			</text>
-			<check_box label="Hanno informazioni di pagamento in archivio [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Per poter visitare questo lotto i Residenti devono aver fornito informazioni di pagamento a Linden Lab.  Vedi [SUPPORT_SITE] per maggiori informazioni."/>
-			<check_box label="Hanno almeno 18 anni [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Per poter visitare questo lotto i Residenti devono avere almeno 18 anni. Vedi [SUPPORT_SITE] per maggiori informazioni."/>
-			<check_box label="Permetti accesso al gruppo: [GROUP]" name="GroupCheck" tool_tip="Imposta il gruppo nel pannello generale."/>
+			<check_box label="Chiunque può visitare (Se si rimuove la selezione vengono create linee di espulsione)" name="public_access"/>
+			<check_box label="È necessario avere più di 18 anni [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Per poter visitare questo lotto i Residenti devono avere almeno 18 anni. Vedi [SUPPORT_SITE] per maggiori informazioni."/>
+			<check_box label="È necessario aver registrato le informazioni di pagamento [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Per poter visitare questo lotto i Residenti devono aver fornito informazioni di pagamento a Linden Lab.  Vedi [SUPPORT_SITE] per maggiori informazioni."/>
+			<check_box label="Consenti gruppo [GRUPPO] senza restrizioni" name="GroupCheck" tool_tip="Imposta il gruppo nel pannello generale."/>
 			<check_box label="Vendi pass a:" name="PassCheck" tool_tip="Permetti in questo terreno l&apos;accesso temporaneo"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="Chiunque" name="Anyone"/>
@@ -479,9 +451,12 @@ Media:
 			</combo_box>
 			<spinner label="Prezzo in L$:" name="PriceSpin"/>
 			<spinner label="Ore di accesso:" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(Può essere che il proprietario immobiliare abbia limitato queste scelte)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Consenti sempre" name="AllowedText">
-					Residenti consentiti
+					Sempre consentiti ([COUNT], max [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] in lista, [MAX] max)"/>
 				<button label="Aggiungi" name="add_allowed"/>
@@ -489,12 +464,13 @@ Media:
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Espelli" name="BanCheck">
-					Residenti con divieto
+					Sempre esclusi ([COUNT], max [MAX])
 				</text>
 				<name_list name="BannedList" tool_tip="([LISTED] in lista, [MAX] max)"/>
 				<button label="Aggiungi" name="add_banned"/>
 				<button label="Rimuovi" label_selected="Rimuovi" name="remove_banned"/>
 			</panel>
 		</panel>
+		<panel label="ESPERIENZE" name="land_experiences_panel"/>
 	</tab_container>
 </floater>

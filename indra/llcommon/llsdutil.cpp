@@ -182,7 +182,7 @@ char* ll_pretty_print_sd_ptr(const LLSD* sd)
 
 char* ll_pretty_print_sd(const LLSD& sd)
 {
-	const U32 bufferSize = 10 * 1024;
+	const U32 bufferSize = 100 * 1024;
 	static char buffer[bufferSize];
 	std::ostringstream stream;
 	//stream.rdbuf()->pubsetbuf(buffer, bufferSize);
@@ -192,6 +192,14 @@ char* ll_pretty_print_sd(const LLSD& sd)
 	buffer[bufferSize - 1] = '\0';
 	return buffer;
 }
+
+std::string ll_stream_notation_sd(const LLSD& sd)
+{
+	std::ostringstream stream;
+	stream << LLSDOStreamer<LLSDNotationFormatter>(sd);
+    return stream.str();
+}
+
 
 //compares the structure of an LLSD to a template LLSD and stores the
 //"valid" values in a 3rd LLSD.  Default values pulled from the template
@@ -572,7 +580,7 @@ std::string llsd_matches(const LLSD& prototype, const LLSD& data, const std::str
     return match_types(prototype.type(), TypeVector(), data.type(), pfx);
 }
 
-bool llsd_equals(const LLSD& lhs, const LLSD& rhs, unsigned bits)
+bool llsd_equals(const LLSD& lhs, const LLSD& rhs, int bits)
 {
     // We're comparing strict equality of LLSD representation rather than
     // performing any conversions. So if the types aren't equal, the LLSD

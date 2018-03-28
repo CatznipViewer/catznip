@@ -85,6 +85,8 @@ static const std::string RECENT_TAB_NAME	= "recent_panel";
 static const std::string BLOCKED_TAB_NAME	= "blocked_panel"; // blocked avatars
 static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
 
+const S32 BASE_MAX_AGENT_GROUPS = 42;
+const S32 PREMIUM_MAX_AGENT_GROUPS = 60;
 
 extern S32 gMaxAgentGroups;
 
@@ -216,7 +218,7 @@ static const LLAvatarItemStatusComparator STATUS_COMPARATOR;
 static LLAvatarItemDistanceComparator DISTANCE_COMPARATOR;
 static const LLAvatarItemRecentSpeakerComparator RECENT_SPEAKER_COMPARATOR;
 
-static LLRegisterPanelClassWrapper<LLPanelPeople> t_people("panel_people");
+static LLPanelInjector<LLPanelPeople> t_people("panel_people");
 
 //=============================================================================
 
@@ -394,7 +396,7 @@ private:
 		}
 		/*virtual*/ void changed(U32 mask)
 		{
-			lldebugs << "Inventory changed: " << mask << llendl;
+			LL_DEBUGS() << "Inventory changed: " << mask << LL_ENDL;
 
 			static bool synchronize_friends_folders = true;
 			if (synchronize_friends_folders)
@@ -410,9 +412,9 @@ private:
 			// That means LLInventoryObserver::STRUCTURE is present in MASK instead of LLInventoryObserver::REMOVE
 			if ((CALLINGCARD_ADDED & mask) == CALLINGCARD_ADDED)
 			{
-				lldebugs << "Calling card added: count: " << gInventory.getChangedIDs().size() 
+				LL_DEBUGS() << "Calling card added: count: " << gInventory.getChangedIDs().size() 
 					<< ", first Inventory ID: "<< (*gInventory.getChangedIDs().begin())
-					<< llendl;
+					<< LL_ENDL;
 
 				bool friendFound = false;
 				std::set<LLUUID> changedIDs = gInventory.getChangedIDs();
@@ -427,7 +429,7 @@ private:
 
 				if (friendFound)
 				{
-					lldebugs << "friend found, panel should be updated" << llendl;
+					LL_DEBUGS() << "friend found, panel should be updated" << LL_ENDL;
 					mUpdater->changed(LLFriendObserver::ADD);
 				}
 			}
@@ -505,7 +507,7 @@ public:
 
 LLPanelPeople::LLPanelPeople()
 	:	LLPanel(),
-		mTryToConnectToFbc(true),
+		mTryToConnectToFacebook(true),
 		mTabContainer(NULL),
 		mOnlineFriendList(NULL),
 		mAllFriendList(NULL),
@@ -556,7 +558,7 @@ void LLPanelPeople::onFriendsAccordionExpandedCollapsed(LLUICtrl* ctrl, const LL
 {
 	if(!avatar_list)
 	{
-		llerrs << "Bad parameter" << llendl;
+		LL_ERRS() << "Bad parameter" << LL_ENDL;
 		return;
 	}
 
@@ -586,6 +588,12 @@ BOOL LLPanelPeople::postBuild()
 	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 
+	if(gMaxAgentGroups <= BASE_MAX_AGENT_GROUPS)
+	{
+	    getChild<LLTextBox>("groupcount")->setText(getString("GroupCountWithInfo"));
+	    getChild<LLTextBox>("groupcount")->setURLClickedCallback(boost::bind(&LLPanelPeople::onGroupLimitInfo, this));
+	}
+
 	mTabContainer = getChild<LLTabContainer>("tabs");
 	mTabContainer->setCommitCallback(boost::bind(&LLPanelPeople::onTabSelected, this, _2));
 	mSavedFilters.resize(mTabContainer->getTabCount());
@@ -603,9 +611,11 @@ BOOL LLPanelPeople::postBuild()
 	mOnlineFriendList->setNoItemsCommentText(getString("no_friends_online"));
 	mOnlineFriendList->setShowIcons("FriendsListShowIcons");
 	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
+	mOnlineFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 	mAllFriendList->setNoItemsCommentText(getString("no_friends"));
 	mAllFriendList->setShowIcons("FriendsListShowIcons");
 	mAllFriendList->showPermissions("FriendsListShowPermissions");
+	mAllFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 
 	LLPanel* nearby_tab = getChild<LLPanel>(NEARBY_TAB_NAME);
 	nearby_tab->setVisibleCallback(boost::bind(&Updater::setActive, mNearbyListUpdater, _2));
@@ -614,6 +624,7 @@ BOOL LLPanelPeople::postBuild()
 	mNearbyList->setNoItemsMsg(getString("no_one_near"));
 	mNearbyList->setNoFilteredItemsMsg(getString("no_one_filtered_near"));
 	mNearbyList->setShowIcons("NearbyListShowIcons");
+	mNearbyList->setShowCompleteName(!gSavedSettings.getBOOL("NearbyListHideUsernames"));
 	mMiniMap = (LLNetMap*)getChildView("Net Map",true);
 	mMiniMap->setToolTipMsg(gSavedSettings.getBOOL("DoubleClickTeleport") ? 
 		getString("AltMiniMapToolTipMsg") :	getString("MiniMapToolTipMsg"));
@@ -668,7 +679,7 @@ BOOL LLPanelPeople::postBuild()
 	}
 	else
 	{
-		llwarns << "People->Groups list menu not found" << llendl;
+		LL_WARNS() << "People->Groups list menu not found" << LL_ENDL;
 	}
 
 	LLAccordionCtrlTab* accordion_tab = getChild<LLAccordionCtrlTab>("tab_all");
@@ -753,12 +764,12 @@ void LLPanelPeople::updateFriendList()
 
 	if (buddies_uuids.size() > 0)
 	{
-		lldebugs << "Friends added to the list: " << buddies_uuids.size() << llendl;
+		LL_DEBUGS() << "Friends added to the list: " << buddies_uuids.size() << LL_ENDL;
 		all_friendsp = buddies_uuids;
 	}
 	else
 	{
-		lldebugs << "No friends found" << llendl;
+		LL_DEBUGS() << "No friends found" << LL_ENDL;
 	}
 
 	LLAvatarTracker::buddy_map_t::const_iterator buddy_it = all_buddies.begin();
@@ -865,10 +876,10 @@ void LLPanelPeople::updateFacebookList(bool visible)
 		{
 			LLFacebookConnect::instance().loadFacebookFriends();
 		}
-		else if(mTryToConnectToFbc)
+		else if(mTryToConnectToFacebook)
 		{
 			LLFacebookConnect::instance().checkConnectionToFacebook();
-			mTryToConnectToFbc = false;
+			mTryToConnectToFacebook = false;
 		}
     
 		updateSuggestedFriendList();
@@ -902,8 +913,11 @@ void LLPanelPeople::updateButtons()
 
 		LLPanel* groups_panel = mTabContainer->getCurrentPanel();
 		groups_panel->getChildView("minus_btn")->setEnabled(item_selected && selected_id.notNull()); // a real group selected
-		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[COUNT]", llformat("%d",gAgent.mGroups.count()));
-		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[REMAINING]", llformat("%d",(gMaxAgentGroups-gAgent.mGroups.count())));
+
+		U32 groups_count = gAgent.mGroups.size();
+		U32 groups_ramaining = gMaxAgentGroups > groups_count ? gMaxAgentGroups - groups_count : 0;
+		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[COUNT]", llformat("%d", groups_count));
+		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[REMAINING]", llformat("%d", groups_ramaining));
 	}
 	else
 	{
@@ -1037,7 +1051,7 @@ void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save
 		list->sort();
 		break;
 	default:
-		llwarns << "Unrecognized people sort order for " << list->getName() << llendl;
+		LL_WARNS() << "Unrecognized people sort order for " << list->getName() << LL_ENDL;
 		return;
 	}
 
@@ -1112,6 +1126,14 @@ void LLPanelPeople::onFilterEdit(const std::string& search_string)
 	{
 		mRecentList->setNameFilter(filter);
 	}
+}
+
+void LLPanelPeople::onGroupLimitInfo()
+{
+	LLSD args;
+	args["MAX_BASIC"] = BASE_MAX_AGENT_GROUPS;
+	args["MAX_PREMIUM"] = PREMIUM_MAX_AGENT_GROUPS;
+	LLNotificationsUtil::add("GroupLimitInfo", args);
 }
 
 void LLPanelPeople::onTabSelected(const LLSD& param)
@@ -1323,6 +1345,16 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 		mAllFriendList->showPermissions(show_permissions);
 		mOnlineFriendList->showPermissions(show_permissions);
 	}
+	else if (chosen_item == "view_usernames")
+	{
+		bool hide_usernames = !gSavedSettings.getBOOL("FriendsListHideUsernames");
+		gSavedSettings.setBOOL("FriendsListHideUsernames", hide_usernames);
+
+		mAllFriendList->setShowCompleteName(!hide_usernames);
+		mAllFriendList->handleDisplayNamesOptionChanged();
+		mOnlineFriendList->setShowCompleteName(!hide_usernames);
+		mOnlineFriendList->handleDisplayNamesOptionChanged();
+	}
 	}
 
 void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
@@ -1354,6 +1386,14 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	else if (chosen_item == "sort_distance")
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
+	}
+	else if (chosen_item == "view_usernames")
+	{
+	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
+	    gSavedSettings.setBOOL("NearbyListHideUsernames", hide_usernames);
+
+	    mNearbyList->setShowCompleteName(!hide_usernames);
+	    mNearbyList->handleDisplayNamesOptionChanged();
 	}
 }
 
@@ -1425,7 +1465,17 @@ void	LLPanelPeople::onOpen(const LLSD& key)
 {
 	std::string tab_name = key["people_panel_tab_name"];
 	if (!tab_name.empty())
+	{
 		mTabContainer->selectTabByName(tab_name);
+		if(tab_name == BLOCKED_TAB_NAME)
+		{
+			LLPanel* blocked_tab = mTabContainer->getCurrentPanel()->findChild<LLPanel>("panel_block_list_sidetray");
+			if(blocked_tab)
+			{
+				blocked_tab->onOpen(key);
+			}
+		}
+	}
 }
 
 bool LLPanelPeople::notifyChildren(const LLSD& info)
@@ -1435,7 +1485,7 @@ bool LLPanelPeople::notifyChildren(const LLSD& info)
 		LLSideTrayPanelContainer* container = dynamic_cast<LLSideTrayPanelContainer*>(getParent());
 		if (!container)
 		{
-			llwarns << "Cannot find People panel container" << llendl;
+			LL_WARNS() << "Cannot find People panel container" << LL_ENDL;
 			return true;
 		}
 
@@ -1457,7 +1507,7 @@ void LLPanelPeople::showAccordion(const std::string name, bool show)
 {
 	if(name.empty())
 	{
-		llwarns << "No name provided" << llendl;
+		LL_WARNS() << "No name provided" << LL_ENDL;
 		return;
 	}
 
@@ -1510,7 +1560,7 @@ void LLPanelPeople::setAccordionCollapsedByUser(LLUICtrl* acc_tab, bool collapse
 {
 	if(!acc_tab)
 	{
-		llwarns << "Invalid parameter" << llendl;
+		LL_WARNS() << "Invalid parameter" << LL_ENDL;
 		return;
 	}
 
@@ -1528,7 +1578,7 @@ bool LLPanelPeople::isAccordionCollapsedByUser(LLUICtrl* acc_tab)
 {
 	if(!acc_tab)
 	{
-		llwarns << "Invalid parameter" << llendl;
+		LL_WARNS() << "Invalid parameter" << LL_ENDL;
 		return false;
 	}
 

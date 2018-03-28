@@ -39,13 +39,13 @@
 
 #include "lluictrl.h"
 #include "v4color.h"
-#include "stdenums.h"
 #include "lldepthstack.h"
 #include "lleditmenuhandler.h"
 #include "llfontgl.h"
 #include "llscrollcontainer.h"
 
 class LLFolderViewModelInterface;
+class LLFolderViewGroupedItemModel;
 class LLFolderViewFolder;
 class LLFolderViewItem;
 class LLFolderViewFilter;
@@ -94,6 +94,7 @@ public:
 								use_ellipses,
 								show_item_link_overlays;
 		Mandatory<LLFolderViewModelInterface*>	view_model;
+		Optional<LLFolderViewGroupedItemModel*> grouped_item_model;
         Mandatory<std::string>   options_menu;
 
 
@@ -101,7 +102,7 @@ public:
 	};
 
 	friend class LLFolderViewScrollContainer;
-    typedef std::deque<LLFolderViewItem*> selected_items_t;
+    typedef folder_view_item_deque selected_items_t;
 
 	LLFolderView(const Params&);
 	virtual ~LLFolderView( void );
@@ -114,6 +115,9 @@ public:
 	LLFolderViewModelInterface* getFolderViewModel() { return mViewModel; }
 	const LLFolderViewModelInterface* getFolderViewModel() const { return mViewModel; }
 
+    LLFolderViewGroupedItemModel* getFolderViewGroupedItemModel() { return mGroupedItemModel; }
+    const LLFolderViewGroupedItemModel* getFolderViewGroupedItemModel() const { return mGroupedItemModel; }
+    
 	typedef boost::signals2::signal<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)> signal_t;
 	void setSelectCallback(const signal_t::slot_type& cb) { mSelectSignal.connect(cb); }
 	void setReshapeCallback(const signal_t::slot_type& cb) { mReshapeSignal.connect(cb); }
@@ -209,9 +213,9 @@ public:
 	LLRect getVisibleRect();
 
 	BOOL search(LLFolderViewItem* first_item, const std::string &search_string, BOOL backward);
-	void setShowSelectionContext(BOOL show) { mShowSelectionContext = show; }
+	void setShowSelectionContext(bool show) { mShowSelectionContext = show; }
 	BOOL getShowSelectionContext();
-	void setShowSingleSelection(BOOL show);
+	void setShowSingleSelection(bool show);
 	BOOL getShowSingleSelection() { return mShowSingleSelection; }
 	F32  getSelectionFadeElapsedTime() { return mMultiSelectionFadeTimer.getElapsedTimeF32(); }
 	bool getUseEllipses() { return mUseEllipses; }
@@ -229,15 +233,20 @@ public:
 
 	void setCallbackRegistrar(LLUICtrl::CommitCallbackRegistry::ScopedRegistrar* registrar) { mCallbackRegistrar = registrar; }
 
-	LLPanel* getParentPanel() { return mParentPanel; }
+	LLPanel* getParentPanel() { return mParentPanel.get(); }
 	// DEBUG only
 	void dumpSelectionInformation();
 
 	virtual S32	notify(const LLSD& info) ;
 	
 	bool useLabelSuffix() { return mUseLabelSuffix; }
-	void updateMenu();
+	virtual void updateMenu();
 
+	void finishRenamingItem( void );
+
+    // Note: We may eventually have to move that method up the hierarchy to LLFolderViewItem.
+	LLHandle<LLFolderView>	getHandle() const { return getDerivedHandle<LLFolderView>(); }
+    
 private:
 	void updateMenuOptions(LLMenuGL* menu);
 	void updateRenamerPosition();
@@ -248,7 +257,6 @@ protected:
 	void commitRename( const LLSD& data );
 	void onRenamerLost();
 
-	void finishRenamingItem( void );
 	void closeRenamer( void );
 
 	bool selectFirstItem();
@@ -261,31 +269,32 @@ protected:
 	LLHandle<LLView>					mPopupMenuHandle;
 	
 	selected_items_t				mSelectedItems;
-	BOOL							mKeyboardSelection;
-	BOOL							mAllowMultiSelect;
-	BOOL							mShowEmptyMessage;
-	BOOL							mShowFolderHierarchy;
+	bool							mKeyboardSelection,
+									mAllowMultiSelect,
+									mShowEmptyMessage,
+									mShowFolderHierarchy,
+									mNeedsScroll,
+									mPinningSelectedItem,
+									mNeedsAutoSelect,
+									mAutoSelectOverride,
+									mNeedsAutoRename,
+									mUseLabelSuffix,
+									mDragAndDropThisFrame,
+									mShowItemLinkOverlays,
+									mShowSelectionContext,
+									mShowSingleSelection;
 
 	// Renaming variables and methods
 	LLFolderViewItem*				mRenameItem;  // The item currently being renamed
 	LLLineEditor*					mRenamer;
 
-	BOOL							mNeedsScroll;
-	BOOL							mPinningSelectedItem;
 	LLRect							mScrollConstraintRect;
-	BOOL							mNeedsAutoSelect;
-	BOOL							mAutoSelectOverride;
-	BOOL							mNeedsAutoRename;
-	bool							mUseLabelSuffix;
-	bool							mShowItemLinkOverlays;
 	
 	LLDepthStack<LLFolderViewFolder>	mAutoOpenItems;
 	LLFolderViewFolder*				mAutoOpenCandidate;
 	LLFrameTimer					mAutoOpenTimer;
 	LLFrameTimer					mSearchTimer;
 	std::string						mSearchString;
-	BOOL							mShowSelectionContext;
-	BOOL							mShowSingleSelection;
 	LLFrameTimer					mMultiSelectionFadeTimer;
 	S32								mArrangeGeneration;
 
@@ -293,11 +302,11 @@ protected:
 	signal_t						mReshapeSignal;
 	S32								mSignalSelectCallback;
 	S32								mMinWidth;
-	BOOL							mDragAndDropThisFrame;
 	
-	LLPanel*						mParentPanel;
+	LLHandle<LLPanel>               mParentPanel;
 	
 	LLFolderViewModelInterface*		mViewModel;
+    LLFolderViewGroupedItemModel*   mGroupedItemModel;
 
 	/**
 	 * Is used to determine if we need to cut text In LLFolderViewItem to avoid horizontal scroll.
@@ -389,6 +398,18 @@ public:
 	virtual ~LLOpenFoldersWithSelection() {}
 	virtual void doFolder(LLFolderViewFolder* folder);
 	virtual void doItem(LLFolderViewItem* item);
+};
+
+class LLAllDescendentsPassedFilter : public LLFolderViewFunctor
+{
+public:
+	LLAllDescendentsPassedFilter() : mAllDescendentsPassedFilter(true) {}
+	/*virtual*/ ~LLAllDescendentsPassedFilter() {}
+	/*virtual*/ void doFolder(LLFolderViewFolder* folder);
+	/*virtual*/ void doItem(LLFolderViewItem* item);
+	bool allDescendentsPassedFilter() const { return mAllDescendentsPassedFilter; }
+protected:
+	bool mAllDescendentsPassedFilter;
 };
 
 // Flags for buildContextMenu()

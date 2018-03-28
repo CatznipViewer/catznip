@@ -127,10 +127,11 @@ void LLConversationViewSession::setHighlightState(bool hihglight_state)
 
 void LLConversationViewSession::startFlashing()
 {
-	LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
-
 	// Need to start flashing only when "Conversations" is opened or brought on top
-	if (isInVisibleChain() && !im_box->isMinimized() && mFlashStateOn && !mFlashStarted)
+	if (isInVisibleChain()
+		&& mFlashStateOn
+		&& !mFlashStarted
+		&& ! LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->isMinimized() )
 	{
 		mFlashStarted = true;
 		mFlashTimer->startFlashing();
@@ -267,7 +268,6 @@ BOOL LLConversationViewSession::handleMouseDown( S32 x, S32 y, MASK mask )
     //This node (conversation) was selected and a child (participant) was not
     if(result && getRoot())
     {
-
 		if(getRoot()->getCurSelectedItem() == this)
 		{
 			LLConversationItem* item = dynamic_cast<LLConversationItem *>(getViewModelItem());
@@ -282,7 +282,6 @@ BOOL LLConversationViewSession::handleMouseDown( S32 x, S32 y, MASK mask )
 			{
 				im_container->collapseMessagesPane(false);
 			}
-
 		}
 		selectConversationItem();
     }
@@ -297,14 +296,14 @@ BOOL LLConversationViewSession::handleMouseUp( S32 x, S32 y, MASK mask )
 	LLFloater* volume_floater = LLFloaterReg::findInstance("floater_voice_volume");
 	LLFloater* chat_volume_floater = LLFloaterReg::findInstance("chat_voice");
 	if (result 
-		&& getRoot()
+		&& getRoot() && (getRoot()->getCurSelectedItem() == this)
 		&& !(volume_floater && volume_floater->isShown() && volume_floater->hasFocus())
 		&& !(chat_volume_floater && chat_volume_floater->isShown() && chat_volume_floater->hasFocus()))
 	{
 		LLConversationItem* item = dynamic_cast<LLConversationItem *>(getViewModelItem());
 		LLUUID session_id = item? item->getUUID() : LLUUID();
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
-		if(!session_floater->hasFocus())
+		if(session_floater && !session_floater->hasFocus())
 		{
 			session_floater->setFocus(true);
 		}
@@ -459,6 +458,11 @@ void LLConversationViewSession::refresh()
 			}
 		}
 	}
+    
+    if (mSpeakingIndicator)
+    {
+        mSpeakingIndicator->setShowParticipantsSpeaking(mIsInActiveVoiceChannel);
+    }
 	requestArrange();
 	// Do the regular upstream refresh
 	LLFolderViewFolder::refresh();

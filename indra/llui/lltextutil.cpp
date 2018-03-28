@@ -56,6 +56,26 @@ void LLTextUtil::textboxSetHighlightedVal(LLTextBox *txtbox, const LLStyle::Para
 	txtbox->appendText(text.substr(hl_begin + hl_len),	false, normal_style);
 }
 
+void LLTextUtil::textboxSetGreyedVal(LLTextBox *txtbox, const LLStyle::Params& normal_style, const std::string& text, const std::string& greyed)
+{
+    static LLUIColor sGreyedTextColor = LLUIColorTable::instance().getColor("Gray", LLColor4::grey);
+
+    size_t greyed_begin = 0, greyed_len = greyed.size();
+
+    if (greyed_len == 0 || (greyed_begin = text.find(greyed)) == std::string::npos)
+    {
+        txtbox->setText(text, normal_style);
+        return;
+    }
+
+    LLStyle::Params greyed_style = normal_style;
+    greyed_style.color = sGreyedTextColor;
+    txtbox->setText(LLStringUtil::null); // clear text
+    txtbox->appendText(text.substr(0, greyed_begin),        false, normal_style);
+    txtbox->appendText(text.substr(greyed_begin, greyed_len),   false, greyed_style);
+    txtbox->appendText(text.substr(greyed_begin + greyed_len),  false, normal_style);
+}
+
 const std::string& LLTextUtil::formatPhoneNumber(const std::string& phone_str)
 {
 	static const std::string PHONE_SEPARATOR = LLUI::sSettingGroups["config"]->getString("AvalinePhoneSeparator");
@@ -72,7 +92,7 @@ const std::string& LLTextUtil::formatPhoneNumber(const std::string& phone_str)
 	return formatted_phone_str;
 }
 
-bool LLTextUtil::processUrlMatch(LLUrlMatch* match,LLTextBase* text_base)
+bool LLTextUtil::processUrlMatch(LLUrlMatch* match,LLTextBase* text_base, bool is_content_trusted)
 {
 	if (match == 0 || text_base == 0)
 		return false;
@@ -85,7 +105,7 @@ bool LLTextUtil::processUrlMatch(LLUrlMatch* match,LLTextBase* text_base)
 	}
 
 	// output an optional icon before the Url
-	if (!match->getIcon().empty() )
+	if (is_content_trusted && !match->getIcon().empty() )
 	{
 		LLUIImagePtr image = LLUI::getUIImage(match->getIcon());
 		if (image)

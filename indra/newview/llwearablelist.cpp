@@ -81,6 +81,7 @@ void LLWearableList::getAsset(const LLAssetID& assetID, const std::string& weara
 	LLViewerWearable* instance = get_if_there(mList, assetID, (LLViewerWearable*)NULL );
 	if( instance )
 	{
+		LL_DEBUGS("Avatar") << "wearable " << assetID << " found in LLWearableList" << LL_ENDL;
 		asset_arrived_callback( instance, userdata );
 	}
 	else
@@ -148,7 +149,6 @@ void LLWearableList::processGetAssetReply( const char* filename, const LLAssetID
 		{
 			LLFile::remove(std::string(filename));
 		}
-		LLViewerStats::getInstance()->incStat( LLViewerStats::ST_DOWNLOAD_FAILED );
 
 		LL_WARNS("Wearable") << "Wearable download failed: " << LLAssetStorage::getErrorString( status ) << " " << uuid << LL_ENDL;
 		switch( status )
@@ -217,7 +217,7 @@ void LLWearableList::processGetAssetReply( const char* filename, const LLAssetID
 
 LLViewerWearable* LLWearableList::createCopy(const LLViewerWearable* old_wearable, const std::string& new_name)
 {
-	lldebugs << "LLWearableList::createCopy()" << llendl;
+	LL_DEBUGS() << "LLWearableList::createCopy()" << LL_ENDL;
 
 	LLViewerWearable *wearable = generateNewWearable();
 	wearable->copyDataFrom(old_wearable);
@@ -236,7 +236,7 @@ LLViewerWearable* LLWearableList::createCopy(const LLViewerWearable* old_wearabl
 
 LLViewerWearable* LLWearableList::createNewWearable( LLWearableType::EType type, LLAvatarAppearance *avatarp )
 {
-	lldebugs << "LLWearableList::createNewWearable()" << llendl;
+	LL_DEBUGS() << "LLWearableList::createNewWearable()" << LL_ENDL;
 
 	LLViewerWearable *wearable = generateNewWearable();
 	wearable->setType( type, avatarp );

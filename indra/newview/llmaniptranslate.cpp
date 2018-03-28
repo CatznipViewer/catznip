@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llmaniptranslate.cpp
  * @brief LLManipTranslate class implementation
  *
@@ -61,10 +61,10 @@
 #include "llui.h"
 #include "pipeline.h"
 #include "llviewershadermgr.h"
+#include "lltrans.h"
 
 const S32 NUM_AXES = 3;
 const S32 MOUSE_DRAG_SLOP = 2;       // pixels
-const F32 HANDLE_HIDE_ANGLE = 0.15f; // radians
 const F32 SELECTED_ARROW_SCALE = 1.3f;
 const F32 MANIPULATOR_HOTSPOT_START = 0.2f;
 const F32 MANIPULATOR_HOTSPOT_END = 1.2f;
@@ -111,7 +111,6 @@ LLManipTranslate::LLManipTranslate( LLToolComposite* composite )
 :	LLManip( std::string("Move"), composite ),
 	mLastHoverMouseX(-1),
 	mLastHoverMouseY(-1),
-	mSendUpdateOnMouseUp(FALSE),
 	mMouseOutsideSlop(FALSE),
 	mCopyMadeThisDrag(FALSE),
 	mMouseDownX(-1),
@@ -125,7 +124,6 @@ LLManipTranslate::LLManipTranslate( LLToolComposite* composite )
 	mSnapOffsetMeters(0.f),
 	mSubdivisions(10.f),
 	mInSnapRegime(FALSE),
-	mSnapped(FALSE),
 	mArrowScales(1.f, 1.f, 1.f),
 	mPlaneScales(1.f, 1.f, 1.f),
 	mPlaneManipPositions(1.f, 1.f, 1.f, 1.f)
@@ -355,7 +353,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 	if (!selectNode)
 	{
 		// didn't find the object in our selection...oh well
-		llwarns << "Trying to translate an unselected object" << llendl;
+		LL_WARNS() << "Trying to translate an unselected object" << LL_ENDL;
 		return TRUE;
 	}
 
@@ -363,7 +361,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 	if (!selected_object)
 	{
 		// somehow we lost the object!
-		llwarns << "Translate manip lost the object, no selected object" << llendl;
+		LL_WARNS() << "Translate manip lost the object, no selected object" << LL_ENDL;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
@@ -375,7 +373,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 	//LLVector3 select_center_agent = gAgent.getPosAgentFromGlobal(LLSelectMgr::getInstance()->getSelectionCenterGlobal());
 	// TomY: The above should (?) be identical to the below
 	LLVector3 select_center_agent = getPivotPoint();
-	mSubdivisions = llclamp(getSubdivisionLevel(select_center_agent, axis_exists ? axis : LLVector3::z_axis, getMinGridScale()), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+	mSubdivisions = getSubdivisionLevel(select_center_agent, axis_exists ? axis : LLVector3::z_axis, getMinGridScale());
 
 	// if we clicked on a planar manipulator, recenter mouse cursor
 	if (mManipPart >= LL_YZ_PLANE && mManipPart <= LL_XY_PLANE)
@@ -384,7 +382,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 		if (!LLViewerCamera::getInstance()->projectPosAgentToScreen(select_center_agent, mouse_pos))
 		{
 			// mouse_pos may be nonsense
-			llwarns << "Failed to project object center to screen" << llendl;
+			LL_WARNS() << "Failed to project object center to screen" << LL_ENDL;
 		}
 		else if (gSavedSettings.getBOOL("SnapToMouseCursor"))
 		{
@@ -412,7 +410,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	// Bail out if mouse not down.
 	if( !hasMouseCapture() )
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (inactive)" << llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (inactive)" << LL_ENDL;		
 		// Always show cursor
 		// gViewerWindow->setCursor(UI_CURSOR_ARROW);
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
@@ -448,7 +446,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	// rotation above.
 	if( x == mLastHoverMouseX && y == mLastHoverMouseY && !rotated)
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse unmoved)" << llendl;
+		LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (mouse unmoved)" << LL_ENDL;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
@@ -461,7 +459,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	{
 		if (abs(mMouseDownX - x) < MOUSE_DRAG_SLOP && abs(mMouseDownY - y) < MOUSE_DRAG_SLOP )
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse inside slop)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (mouse inside slop)" << LL_ENDL;
 			gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 			return TRUE;
 		}
@@ -478,7 +476,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 
 				// When we make the copy, we don't want to do any other processing.
 				// If so, the object will also be moved, and the copy will be offset.
-				lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (made copy)" << llendl;
+				LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (made copy)" << LL_ENDL;
 				gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 			}
 		}
@@ -495,7 +493,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	if (!selectNode)
 	{
 		// somehow we lost the object!
-		llwarns << "Translate manip lost the object, no selectNode" << llendl;
+		LL_WARNS() << "Translate manip lost the object, no selectNode" << LL_ENDL;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
@@ -504,7 +502,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	if (!object)
 	{
 		// somehow we lost the object!
-		llwarns << "Translate manip lost the object, no object in selectNode" << llendl;
+		LL_WARNS() << "Translate manip lost the object, no object in selectNode" << LL_ENDL;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
@@ -517,7 +515,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	LLSelectMgr::getInstance()->updateSelectionCenter();
 	LLVector3d current_pos_global = gAgent.getPosGlobalFromAgent(getPivotPoint());
 
-	mSubdivisions = llclamp(getSubdivisionLevel(getPivotPoint(), axis_f, getMinGridScale()), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+	mSubdivisions = getSubdivisionLevel(getPivotPoint(), axis_f, getMinGridScale());
 
 	// Project the cursor onto that plane
 	LLVector3d relative_move;
@@ -531,7 +529,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 
 		if (relative_move.magVecSquared() > max_drag_distance * max_drag_distance)
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (too far)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (too far)" << LL_ENDL;
 			gViewerWindow->setCursor(UI_CURSOR_NOLOCKED);
 			return TRUE;
 		}
@@ -550,12 +548,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 		if (off_axis_magnitude > mSnapOffsetMeters)
 		{
 			mInSnapRegime = TRUE;
-			LLVector3 mouse_down_offset(mDragCursorStartGlobal - mDragSelectionStartGlobal);
 			LLVector3 cursor_snap_agent = gAgent.getPosAgentFromGlobal(cursor_point_snap_line);
-			if (!gSavedSettings.getBOOL("SnapToMouseCursor"))
-			{
-				cursor_snap_agent -= mouse_down_offset;
-			}
 
 			F32 cursor_grid_dist = (cursor_snap_agent - mGridOrigin) * axis_f;
 			
@@ -607,7 +600,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 				max_grid_scale = mGridScale.mV[VZ];
 			}
 
-			F32 num_subdivisions = llclamp(getSubdivisionLevel(getPivotPoint(), camera_projected_dir, max_grid_scale), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+			F32 num_subdivisions = getSubdivisionLevel(getPivotPoint(), camera_projected_dir, max_grid_scale);
 
 			F32 grid_scale_a;
 			F32 grid_scale_b;
@@ -776,7 +769,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	gAgentCamera.clearFocusObject();
 	dialog_refresh_all();		// ??? is this necessary?
 
-	lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (active)" << llendl;
+	LL_DEBUGS("UserInput") << "hover handled by LLManipTranslate (active)" << LL_ENDL;
 	gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 	return TRUE;
 }
@@ -1247,7 +1240,7 @@ void LLManipTranslate::renderSnapGuides()
 		// find distance to nearest smallest grid unit
 		F32 offset_nearest_grid_unit = fmodf(dist_grid_axis, smallest_grid_unit_scale);
 		// how many smallest grid units are we away from largest grid scale?
-		S32 sub_div_offset = llround(fmod(dist_grid_axis - offset_nearest_grid_unit, getMinGridScale() / sGridMinSubdivisionLevel) / smallest_grid_unit_scale);
+		S32 sub_div_offset = ll_round(fmodf(dist_grid_axis - offset_nearest_grid_unit, getMinGridScale() / sGridMinSubdivisionLevel) / smallest_grid_unit_scale);
 		S32 num_ticks_per_side = llmax(1, llfloor(0.5f * guide_size_meters / smallest_grid_unit_scale));
 
 		LLGLDepthTest gls_depth(GL_FALSE);
@@ -1255,6 +1248,7 @@ void LLManipTranslate::renderSnapGuides()
 		for (S32 pass = 0; pass < 3; pass++)
 		{
 			LLColor4 line_color = setupSnapGuideRenderPass(pass);
+			LLGLDepthTest gls_depth(pass != 1);
 
 			gGL.begin(LLRender::LINES);
 			{
@@ -1286,12 +1280,12 @@ void LLManipTranslate::renderSnapGuides()
 				{
 					tick_start = selection_center + (translate_axis * (smallest_grid_unit_scale * (F32)i - offset_nearest_grid_unit));
 
-					F32 cur_subdivisions = llclamp(getSubdivisionLevel(tick_start, translate_axis, getMinGridScale()), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
-
-					if (fmodf((F32)(i + sub_div_offset), (max_subdivisions / cur_subdivisions)) != 0.f)
+					//No need check this condition to prevent tick position scaling (FIX MAINT-5207/5208)
+					//F32 cur_subdivisions = getSubdivisionLevel(tick_start, translate_axis, getMinGridScale());
+					/*if (fmodf((F32)(i + sub_div_offset), (max_subdivisions / cur_subdivisions)) != 0.f)
 					{
 						continue;
-					}
+					}*/
 
 					// add in off-axis offset
 					tick_start += (mSnapOffsetAxis * mSnapOffsetMeters);
@@ -1361,12 +1355,12 @@ void LLManipTranslate::renderSnapGuides()
 			}
 		}
 
-		sub_div_offset = llround(fmod(dist_grid_axis - offset_nearest_grid_unit, getMinGridScale() * 32.f) / smallest_grid_unit_scale);
+		sub_div_offset = ll_round(fmod(dist_grid_axis - offset_nearest_grid_unit, getMinGridScale() * 32.f) / smallest_grid_unit_scale);
 
 		LLVector2 screen_translate_axis(llabs(translate_axis * LLViewerCamera::getInstance()->getLeftAxis()), llabs(translate_axis * LLViewerCamera::getInstance()->getUpAxis()));
 		screen_translate_axis.normVec();
 
-		S32 tick_label_spacing = llround(screen_translate_axis * sTickLabelSpacing);
+		S32 tick_label_spacing = ll_round(screen_translate_axis * sTickLabelSpacing);
         
 		// render tickmark values
 		for (S32 i = -num_ticks_per_side; i <= num_ticks_per_side; i++)
@@ -1384,7 +1378,7 @@ void LLManipTranslate::renderSnapGuides()
 				tick_scale *= 0.7f;
 			}
 
-			if (fmodf((F32)(i + sub_div_offset), (max_subdivisions / llmin(sGridMaxSubdivisionLevel, getSubdivisionLevel(tick_pos, translate_axis, getMinGridScale(), tick_label_spacing)))) == 0.f)
+			if (fmodf((F32)(i + sub_div_offset), (max_subdivisions / getSubdivisionLevel(tick_pos, translate_axis, getMinGridScale(), tick_label_spacing))) == 0.f)
 			{
 				F32 snap_offset_meters;
 
@@ -1404,7 +1398,7 @@ void LLManipTranslate::renderSnapGuides()
 				F32 offset_val = 0.5f * tick_offset.mV[ARROW_TO_AXIS[mManipPart]] / getMinGridScale();
 				EGridMode grid_mode = LLSelectMgr::getInstance()->getGridMode();
 				F32 text_highlight = 0.8f;
-				if(i - llround(offset_nearest_grid_unit / smallest_grid_unit_scale) == 0 && mInSnapRegime)
+				if(i - ll_round(offset_nearest_grid_unit / smallest_grid_unit_scale) == 0 && mInSnapRegime)
 				{
 					text_highlight = 1.f;
 				}
@@ -1441,13 +1435,13 @@ void LLManipTranslate::renderSnapGuides()
 				LLVector3 help_text_pos = selection_center_start + (snap_offset_meters_up * 3.f * mSnapOffsetAxis);
 				const LLFontGL* big_fontp = LLFontGL::getFontSansSerif();
 
-				std::string help_text = "Move mouse cursor over ruler";
+				std::string help_text = LLTrans::getString("manip_hint1");
 				LLColor4 help_text_color = LLColor4::white;
 				help_text_color.mV[VALPHA] = clamp_rescale(mHelpTextTimer.getElapsedTimeF32(), sHelpTextVisibleTime, sHelpTextVisibleTime + sHelpTextFadeTime, line_alpha, 0.f);
-				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
-				help_text = "to snap to grid";
+				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, false);
+				help_text = LLTrans::getString("manip_hint2");
 				help_text_pos -= LLViewerCamera::getInstance()->getUpAxis() * mSnapOffsetMeters * 0.2f;
-				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
+				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, false);
 			}
 		}
 	}
@@ -1863,6 +1857,9 @@ void LLManipTranslate::renderTranslationHandles()
 			mArrowLengthMeters = 1.0f;
 		}
 	}
+	//Assume that UI scale factor is equivalent for X and Y axis
+	F32 ui_scale_factor = LLUI::getScaleFactor().mV[VX];
+	mArrowLengthMeters *= ui_scale_factor;
 
 	mPlaneManipOffsetMeters = mArrowLengthMeters * 1.8f;
 	mGridSizeMeters = gSavedSettings.getF32("GridDrawSize");
@@ -1905,18 +1902,18 @@ void LLManipTranslate::renderTranslationHandles()
 			{
 				if (index == mManipPart - LL_X_ARROW || index == mHighlightedPart - LL_X_ARROW)
 				{
-					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], SELECTED_ARROW_SCALE, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
-					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], 1.f, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], SELECTED_ARROW_SCALE, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], 1.f, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
 				}
 				else if (index == mManipPart - LL_YZ_PLANE || index == mHighlightedPart - LL_YZ_PLANE)
 				{
-					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], 1.f, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
-					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], SELECTED_ARROW_SCALE, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], 1.f, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], SELECTED_ARROW_SCALE, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
 				}
 				else
 				{
-					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], 1.f, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
-					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], 1.f, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mArrowScales.mV[index] = lerp(mArrowScales.mV[index], 1.f, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
+					mPlaneScales.mV[index] = lerp(mPlaneScales.mV[index], 1.f, LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE ));
 				}
 			}
 
@@ -2251,7 +2248,7 @@ void LLManipTranslate::renderArrow(S32 which_arrow, S32 selected_arrow, F32 box_
 			axis.mV[0] = 1.0f;
 			break;
 		default:
-			llerrs << "renderArrow called with bad arrow " << which_arrow << llendl;
+			LL_ERRS() << "renderArrow called with bad arrow " << which_arrow << LL_ENDL;
 			break;
 		}
 

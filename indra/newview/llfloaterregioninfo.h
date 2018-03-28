@@ -36,6 +36,7 @@
 #include "llextendedstatus.h"
 
 #include "llenvmanager.h" // for LLEnvironmentSettings
+#include "lleventcoro.h"
 
 class LLAvatarName;
 class LLDispatcher;
@@ -60,6 +61,9 @@ class LLPanelRegionDebugInfo;
 class LLPanelRegionTerrainInfo;
 class LLPanelEstateInfo;
 class LLPanelEstateCovenant;
+class LLPanelExperienceListEditor;
+class LLPanelExperiences;
+class LLPanelRegionExperiences;
 
 class LLEventTimer;
 class LLEnvironmentSettings;
@@ -90,20 +94,27 @@ public:
 	static LLPanelEstateInfo* getPanelEstate();
 	static LLPanelEstateCovenant* getPanelCovenant();
 	static LLPanelRegionTerrainInfo* getPanelRegionTerrain();
+	static LLPanelRegionExperiences* getPanelExperiences();
+	static LLPanelRegionGeneralInfo* getPanelGeneral();
 
 	// from LLPanel
 	virtual void refresh();
 	
 	void requestRegionInfo();
 	void requestMeshRezInfo();
+	void enableTopButtons();
+	void disableTopButtons();
 
 private:
 	
 	LLFloaterRegionInfo(const LLSD& seed);
 	~LLFloaterRegionInfo();
+
+
 	
 protected:
 	void onTabSelected(const LLSD& param);
+	void disableTabCtrls();
 	void refreshFromRegion(LLViewerRegion* region);
 
 	// member data
@@ -173,6 +184,9 @@ public:
 	// LLPanel
 	virtual BOOL postBuild();
 	
+	void onBtnSet();
+	void setObjBonusFactor(F32 object_bonus_factor) {mObjBonusFactor = object_bonus_factor;}
+
 protected:
 	virtual BOOL sendUpdate();
 	void onClickKick();
@@ -181,6 +195,9 @@ protected:
 	bool onKickAllCommit(const LLSD& notification, const LLSD& response);
 	static void onClickMessage(void* userdata);
 	bool onMessageCommit(const LLSD& notification, const LLSD& response);
+	bool onChangeObjectBonus(const LLSD& notification, const LLSD& response);
+
+	F32 mObjBonusFactor;
 
 };
 
@@ -209,6 +226,7 @@ protected:
 	static void onClickRestart(void* data);
 	bool callbackRestart(const LLSD& notification, const LLSD& response);
 	static void onClickCancelRestart(void* data);
+	static void onClickDebugConsole(void* data);
 	
 private:
 	LLUUID mTargetAvatar;
@@ -230,6 +248,7 @@ public:
 	void setEnvControls(bool available);									// Whether environment settings are available for this region
 
 	BOOL validateTextureSizes();
+	BOOL validateTextureHeights();
 
 	//static void onChangeAnything(LLUICtrl* ctrl, void* userData);			// callback for any change, to enable commit button
 	
@@ -239,6 +258,11 @@ public:
 	static void onClickUploadRaw(void*);
 	static void onClickBakeTerrain(void*);
 	bool callbackBakeTerrain(const LLSD& notification, const LLSD& response);
+	bool callbackTextureHeights(const LLSD& notification, const LLSD& response);
+
+private:
+	bool mConfirmedTextureHeights;
+	bool mAskedTextureHeights;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -250,6 +274,7 @@ public:
 	
 	void onChangeFixedSun();
 	void onChangeUseGlobalTime();
+	void onChangeAccessOverride();
 	
 	void onClickEditSky();
 	void onClickEditSkyHelp();	
@@ -402,7 +427,7 @@ public:
 	/*virtual*/ void onOpen(const LLSD& key);
 
 	// LLView
-	/*virtual*/ void handleVisibilityChange(BOOL new_visibility);
+	/*virtual*/ void onVisibilityChange(BOOL new_visibility);
 
 	// LLPanelRegionInfo
 	/*virtual*/ bool refreshFromRegion(LLViewerRegion* region);
@@ -448,6 +473,38 @@ private:
 	LLComboBox*		mWaterPresetCombo;
 	LLComboBox*		mSkyPresetCombo;
 	LLComboBox*		mDayCyclePresetCombo;
+};
+
+class LLPanelRegionExperiences : public LLPanelRegionInfo
+{
+	LOG_CLASS(LLPanelEnvironmentInfo);
+
+public:
+	LLPanelRegionExperiences(){}
+	/*virtual*/ BOOL postBuild();
+	virtual BOOL sendUpdate();
+	
+	static bool experienceCoreConfirm(const LLSD& notification, const LLSD& response);
+	static void sendEstateExperienceDelta(U32 flags, const LLUUID& agent_id);
+
+	static void infoCallback(LLHandle<LLPanelRegionExperiences> handle, const LLSD& content);
+	bool refreshFromRegion(LLViewerRegion* region);
+	void sendPurchaseRequest()const;
+	void processResponse( const LLSD& content );
+private:
+	void refreshRegionExperiences();
+
+    static std::string regionCapabilityQuery(LLViewerRegion* region, const std::string &cap);
+
+	LLPanelExperienceListEditor* setupList(const char* control_name, U32 add_id, U32 remove_id);
+	static LLSD addIds( LLPanelExperienceListEditor* panel );
+
+	void itemChanged(U32 event_type, const LLUUID& id);
+
+	LLPanelExperienceListEditor* mTrusted;
+	LLPanelExperienceListEditor* mAllowed;
+	LLPanelExperienceListEditor* mBlocked;
+	LLUUID mDefaultExperience;
 };
 
 #endif

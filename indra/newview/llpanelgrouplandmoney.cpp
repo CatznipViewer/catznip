@@ -55,7 +55,7 @@
 #include "llfloaterworldmap.h"
 #include "llviewermessage.h"
 
-static LLRegisterPanelClassWrapper<LLPanelGroupLandMoney> t_panel_group_money("panel_group_land_money");
+static LLPanelInjector<LLPanelGroupLandMoney> t_panel_group_money("panel_group_land_money");
 
 
 
@@ -131,7 +131,7 @@ public:
 
 
 
-	static LLMap<LLUUID, LLGroupMoneyTabEventHandler*> sInstanceIDs;
+	static std::map<LLUUID, LLGroupMoneyTabEventHandler*> sInstanceIDs;
 	static std::map<LLPanel*, LLGroupMoneyTabEventHandler*> sTabsToHandlers;
 protected:
 	LLGroupMoneyTabEventHandlerImpl* mImplementationp;
@@ -324,7 +324,7 @@ bool LLPanelGroupLandMoney::impl::applyContribution()
 		if(!gAgent.setGroupContribution(mPanel.mGroupID, new_contribution))
 		{
 			// should never happen...
-			llwarns << "Unable to set contribution." << llendl;
+			LL_WARNS() << "Unable to set contribution." << LL_ENDL;
 			return false;
 		}
 	}
@@ -425,29 +425,47 @@ void LLPanelGroupLandMoney::impl::processGroupLand(LLMessageSystem* msg)
 		{
 			// special block which has total contribution
 			++first_block;
-			
+
+			S32 committed = 0;
+			S32 billable_area = 0;
+
+			if(count == 1)
+			{
+				msg->getS32("QueryData", "BillableArea", committed, 0);
+			}
+			else
+			{
+				for(S32 i = first_block; i < count; ++i)
+				{
+					msg->getS32("QueryData", "BillableArea", billable_area, i);
+					committed+=billable_area;
+				}
+			}
+
 			S32 total_contribution;
 			msg->getS32("QueryData", "ActualArea", total_contribution, 0);
 			mPanel.getChild<LLUICtrl>("total_contributed_land_value")->setTextArg("[AREA]", llformat("%d", total_contribution));
 
-			S32 committed;
-			msg->getS32("QueryData", "BillableArea", committed, 0);
 			mPanel.getChild<LLUICtrl>("total_land_in_use_value")->setTextArg("[AREA]", llformat("%d", committed));
-			
 			S32 available = total_contribution - committed;
 			mPanel.getChild<LLUICtrl>("land_available_value")->setTextArg("[AREA]", llformat("%d", available));
 
+
 			if ( mGroupOverLimitTextp && mGroupOverLimitIconp )
+
 			{
 				mGroupOverLimitIconp->setVisible(available < 0);
 				mGroupOverLimitTextp->setVisible(available < 0);
 			}
+
 		}
 
 		if ( trans_id != mTransID ) return;
+
 		// This power was removed to make group roles simpler
 		//if ( !gAgent.hasPowerInGroup(mGroupID, GP_LAND_VIEW_OWNED) ) return;
 		if (!gAgent.isInGroup(mPanel.mGroupID)) return;
+
 		mGroupParcelsp->setCommentText(mEmptyParcelsText);
 
 		std::string name;
@@ -460,7 +478,7 @@ void LLPanelGroupLandMoney::impl::processGroupLand(LLMessageSystem* msg)
 		std::string sim_name;
 		std::string land_sku;
 		std::string land_type;
-		
+
 		for(S32 i = first_block; i < count; ++i)
 		{
 			msg->getUUID("QueryData", "OwnerID", owner_id, i);
@@ -476,7 +494,7 @@ void LLPanelGroupLandMoney::impl::processGroupLand(LLMessageSystem* msg)
 			if ( msg->getSizeFast(_PREHASH_QueryData, i, _PREHASH_ProductSKU) > 0 )
 			{
 				msg->getStringFast(	_PREHASH_QueryData, _PREHASH_ProductSKU, land_sku, i);
-				llinfos << "Land sku: " << land_sku << llendl;
+				LL_INFOS() << "Land sku: " << land_sku << LL_ENDL;
 				land_type = LLProductInfoRequestManager::instance().getDescriptionForSku(land_sku);
 			}
 			else
@@ -485,10 +503,12 @@ void LLPanelGroupLandMoney::impl::processGroupLand(LLMessageSystem* msg)
 				land_type = LLTrans::getString("land_type_unknown");
 			}
 
-			S32 region_x = llround(global_x) % REGION_WIDTH_UNITS;
-			S32 region_y = llround(global_y) % REGION_WIDTH_UNITS;
+			S32 region_x = ll_round(global_x) % REGION_WIDTH_UNITS;
+			S32 region_y = ll_round(global_y) % REGION_WIDTH_UNITS;
 			std::string location = sim_name + llformat(" (%d, %d)", region_x, region_y);
 			std::string area;
+
+
 			if(billable_area == actual_area)
 			{
 				area = llformat("%d", billable_area);
@@ -534,7 +554,7 @@ void LLPanelGroupLandMoney::impl::processGroupLand(LLMessageSystem* msg)
 
 
 //static
-LLMap<LLUUID, LLPanelGroupLandMoney*> LLPanelGroupLandMoney::sGroupIDs;
+std::map<LLUUID, LLPanelGroupLandMoney*> LLPanelGroupLandMoney::sGroupIDs;
 
 LLPanelGroupLandMoney::LLPanelGroupLandMoney() :
 	LLPanelGroupTab() 
@@ -547,13 +567,13 @@ LLPanelGroupLandMoney::LLPanelGroupLandMoney() :
 	//will then only be working for the last panel for a given group id :(
 
 	//FIXME - add to setGroupID()
-	//LLPanelGroupLandMoney::sGroupIDs.addData(group_id, this);
+	//LLPanelGroupLandMoney::sGroupIDs.insert(group_id, this);
 }
 
 LLPanelGroupLandMoney::~LLPanelGroupLandMoney()
 {
 	delete mImplementationp;
-	LLPanelGroupLandMoney::sGroupIDs.removeData(mGroupID);
+	LLPanelGroupLandMoney::sGroupIDs.erase(mGroupID);
 }
 
 void LLPanelGroupLandMoney::activate()
@@ -821,15 +841,15 @@ void LLPanelGroupLandMoney::processPlacesReply(LLMessageSystem* msg, void**)
 	LLUUID group_id;
 	msg->getUUID("AgentData", "QueryID", group_id);
 
-	LLPanelGroupLandMoney* selfp = sGroupIDs.getIfThere(group_id);
-	if(!selfp)
+	group_id_map_t::iterator found_it = sGroupIDs.find(group_id);
+	if(found_it == sGroupIDs.end())
 	{
-		llinfos << "Group Panel Land L$ " << group_id << " no longer in existence."
-				<< llendl;
+		LL_INFOS() << "Group Panel Land L$ " << group_id << " no longer in existence."
+				<< LL_ENDL;
 		return;
 	}
 
-	selfp->mImplementationp->processGroupLand(msg);
+	found_it->second->mImplementationp->processGroupLand(msg);
 }
 
 
@@ -885,7 +905,7 @@ void LLGroupMoneyTabEventHandlerImpl::updateButtons()
 //** LLGroupMoneyTabEventHandler Functions **
 //*******************************************
 
-LLMap<LLUUID, LLGroupMoneyTabEventHandler*> LLGroupMoneyTabEventHandler::sInstanceIDs;
+std::map<LLUUID, LLGroupMoneyTabEventHandler*> LLGroupMoneyTabEventHandler::sInstanceIDs;
 std::map<LLPanel*, LLGroupMoneyTabEventHandler*> LLGroupMoneyTabEventHandler::sTabsToHandlers;
 
 LLGroupMoneyTabEventHandler::LLGroupMoneyTabEventHandler(LLButton* earlier_buttonp,
@@ -922,13 +942,13 @@ LLGroupMoneyTabEventHandler::LLGroupMoneyTabEventHandler(LLButton* earlier_butto
 		tab_containerp->setCommitCallback(boost::bind(&LLGroupMoneyTabEventHandler::onClickTab, this));
 	}
 
-	sInstanceIDs.addData(mImplementationp->mPanelID, this);
+	sInstanceIDs.insert(std::make_pair(mImplementationp->mPanelID, this));
 	sTabsToHandlers[panelp] = this;
 }
 
 LLGroupMoneyTabEventHandler::~LLGroupMoneyTabEventHandler()
 {
-	sInstanceIDs.removeData(mImplementationp->mPanelID);
+	sInstanceIDs.erase(mImplementationp->mPanelID);
 	sTabsToHandlers.erase(mImplementationp->mTabPanelp);
 
 	delete mImplementationp;
@@ -1045,7 +1065,7 @@ void LLGroupMoneyDetailsTabEventHandler::processReply(LLMessageSystem* msg,
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id );
 	if (mImplementationp->getGroupID() != group_id) 
 	{
-		llwarns << "Group Account details not for this group!" << llendl;
+		LL_WARNS() << "Group Account details not for this group!" << LL_ENDL;
 		return;
 	}
 
@@ -1068,8 +1088,8 @@ void LLGroupMoneyDetailsTabEventHandler::processReply(LLMessageSystem* msg,
 	if ( interval_days != mImplementationp->mIntervalLength || 
 		 current_interval != mImplementationp->mCurrentInterval )
 	{
-		llinfos << "Out of date details packet " << interval_days << " " 
-			<< current_interval << llendl;
+		LL_INFOS() << "Out of date details packet " << interval_days << " " 
+			<< current_interval << LL_ENDL;
 		return;
 	}
 
@@ -1116,16 +1136,16 @@ void LLPanelGroupLandMoney::processGroupAccountDetailsReply(LLMessageSystem* msg
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id );
 	if (gAgent.getID() != agent_id)
 	{
-		llwarns << "Got group L$ history reply for another agent!" << llendl;
+		LL_WARNS() << "Got group L$ history reply for another agent!" << LL_ENDL;
 		return;
 	}
 
 	LLUUID request_id;
 	msg->getUUIDFast(_PREHASH_MoneyData, _PREHASH_RequestID, request_id );
-	LLGroupMoneyTabEventHandler* selfp = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
+	LLGroupMoneyTabEventHandler* selfp = get_ptr_in_map(LLGroupMoneyTabEventHandler::sInstanceIDs, request_id);
 	if (!selfp)
 	{
-		llwarns << "GroupAccountDetails recieved for non-existent group panel." << llendl;
+		LL_WARNS() << "GroupAccountDetails received for non-existent group panel." << LL_ENDL;
 		return;
 	}
 
@@ -1186,7 +1206,7 @@ void LLGroupMoneySalesTabEventHandler::processReply(LLMessageSystem* msg,
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id );
 	if (mImplementationp->getGroupID() != group_id) 
 	{
-		llwarns << "Group Account Transactions not for this group!" << llendl;
+		LL_WARNS() << "Group Account Transactions not for this group!" << LL_ENDL;
 		return;
 	}
 
@@ -1203,8 +1223,8 @@ void LLGroupMoneySalesTabEventHandler::processReply(LLMessageSystem* msg,
 	if (interval_days != mImplementationp->mIntervalLength ||
 	    current_interval != mImplementationp->mCurrentInterval)
 	{
-		llinfos << "Out of date details packet " << interval_days << " " 
-			<< current_interval << llendl;
+		LL_INFOS() << "Out of date details packet " << interval_days << " " 
+			<< current_interval << LL_ENDL;
 		return;
 	}
 
@@ -1293,7 +1313,7 @@ void LLPanelGroupLandMoney::processGroupAccountTransactionsReply(LLMessageSystem
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id );
 	if (gAgent.getID() != agent_id)
 	{
-		llwarns << "Got group L$ history reply for another agent!" << llendl;
+		LL_WARNS() << "Got group L$ history reply for another agent!" << LL_ENDL;
 		return;
 	}
 
@@ -1302,10 +1322,10 @@ void LLPanelGroupLandMoney::processGroupAccountTransactionsReply(LLMessageSystem
 
 	LLGroupMoneyTabEventHandler* self;
 
-	self = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
+	self = get_ptr_in_map(LLGroupMoneyTabEventHandler::sInstanceIDs, request_id);
 	if (!self)
 	{
-		llwarns << "GroupAccountTransactions recieved for non-existent group panel." << llendl;
+		LL_WARNS() << "GroupAccountTransactions recieved for non-existent group panel." << LL_ENDL;
 		return;
 	}
 
@@ -1364,7 +1384,7 @@ void LLGroupMoneyPlanningTabEventHandler::processReply(LLMessageSystem* msg,
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id );
 	if (mImplementationp->getGroupID() != group_id) 
 	{
-		llwarns << "Group Account Summary received not for this group!" << llendl;
+		LL_WARNS() << "Group Account Summary received not for this group!" << LL_ENDL;
 		return;
 	}
 
@@ -1415,8 +1435,8 @@ void LLGroupMoneyPlanningTabEventHandler::processReply(LLMessageSystem* msg,
 	if (interval_days != mImplementationp->mIntervalLength || 
 		current_interval != mImplementationp->mCurrentInterval)
 	{
-		llinfos << "Out of date summary packet " << interval_days << " " 
-			<< current_interval << llendl;
+		LL_INFOS() << "Out of date summary packet " << interval_days << " " 
+			<< current_interval << LL_ENDL;
 		return;
 	}
 
@@ -1473,7 +1493,7 @@ void LLPanelGroupLandMoney::processGroupAccountSummaryReply(LLMessageSystem* msg
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id );
 	if (gAgent.getID() != agent_id)
 	{
-		llwarns << "Got group L$ history reply for another agent!" << llendl;
+		LL_WARNS() << "Got group L$ history reply for another agent!" << LL_ENDL;
 		return;
 	}
 
@@ -1482,10 +1502,10 @@ void LLPanelGroupLandMoney::processGroupAccountSummaryReply(LLMessageSystem* msg
 
 	LLGroupMoneyTabEventHandler* self;
 
-	self = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
+	self = get_ptr_in_map(LLGroupMoneyTabEventHandler::sInstanceIDs, request_id);
 	if (!self)
 	{
-		llwarns << "GroupAccountSummary recieved for non-existent group L$ planning tab." << llendl;
+		LL_WARNS() << "GroupAccountSummary recieved for non-existent group L$ planning tab." << LL_ENDL;
 		return;
 	}
 
@@ -1494,9 +1514,9 @@ void LLPanelGroupLandMoney::processGroupAccountSummaryReply(LLMessageSystem* msg
 
 void LLPanelGroupLandMoney::setGroupID(const LLUUID& id)
 {
-	LLPanelGroupLandMoney::sGroupIDs.removeData(mGroupID);
+	LLPanelGroupLandMoney::sGroupIDs.erase(mGroupID);
 	LLPanelGroupTab::setGroupID(id);
-	LLPanelGroupLandMoney::sGroupIDs.addData(mGroupID, this);
+	LLPanelGroupLandMoney::sGroupIDs.insert(std::make_pair(mGroupID, this));
 
 
 	bool can_view = gAgent.isInGroup(mGroupID);

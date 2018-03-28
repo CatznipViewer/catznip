@@ -27,7 +27,6 @@
 #ifndef LL_LLPREVIEWSCRIPT_H
 #define LL_LLPREVIEWSCRIPT_H
 
-#include "lldarray.h"
 #include "llpreview.h"
 #include "lltabcontainer.h"
 #include "llinventory.h"
@@ -35,10 +34,11 @@
 #include "lliconctrl.h"
 #include "llframetimer.h"
 #include "llfloatergotoline.h"
+#include "llsyntaxid.h"
 
 class LLLiveLSLFile;
 class LLMessageSystem;
-class LLTextEditor;
+class LLScriptEditor;
 class LLButton;
 class LLCheckBoxCtrl;
 class LLScrollListCtrl;
@@ -51,6 +51,7 @@ class LLVFS;
 class LLViewerInventoryItem;
 class LLScriptEdContainer;
 class LLFloaterGotoLine;
+class LLFloaterExperienceProfile;
 
 // Inner, implementation class.  LLPreviewScript and LLLiveLSLEditor each own one of these.
 class LLScriptEdCore : public LLPanel
@@ -72,11 +73,15 @@ protected:
 		void (*save_callback)(void* userdata, BOOL close_after_save),
 		void (*search_replace_callback)(void* userdata),
 		void* userdata,
+		bool live,
 		S32 bottom_pad = 0);	// pad below bottom row of buttons
 public:
 	~LLScriptEdCore();
 	
+	void			initializeKeywords();
 	void			initMenu();
+	void			processKeywords();
+	void			processLoaded();
 
 	virtual void	draw();
 	/*virtual*/	BOOL	postBuild();
@@ -85,6 +90,7 @@ public:
 	bool			canLoadOrSaveToFile( void* userdata );
 
 	void            setScriptText(const std::string& text, BOOL is_valid);
+	void			makeEditorPristine();
 	bool			loadScriptText(const std::string& filename);
 	bool			writeToFile(const std::string& filename);
 	void			sync();
@@ -103,12 +109,18 @@ public:
 	static void		onBtnInsertSample(void*);
 	static void		onBtnInsertFunction(LLUICtrl*, void*);
 	static void		onBtnLoadFromFile(void*);
-	static void		onBtnSaveToFile(void*);
+    static void		onBtnSaveToFile(void*);
 
 	static bool		enableSaveToFileMenu(void* userdata);
 	static bool		enableLoadFromFileMenu(void* userdata);
 
-	virtual bool	hasAccelerators() const { return true; }
+    virtual bool	hasAccelerators() const { return true; }
+	LLUUID 			getAssociatedExperience()const;
+	void            setAssociatedExperience( const LLUUID& experience_id );
+
+	void 			setScriptName(const std::string& name){mScriptName = name;};
+
+	void 			setItemRemoved(bool script_removed){mScriptRemoved = script_removed;};
 
 private:
 	void		onBtnHelp();
@@ -127,21 +139,25 @@ protected:
 	void deleteBridges();
 	void setHelpPage(const std::string& help_string);
 	void updateDynamicHelp(BOOL immediate = FALSE);
+	bool isKeyword(LLKeywordToken* token);
 	void addHelpItemToHistory(const std::string& help_string);
 	static void onErrorList(LLUICtrl*, void* user_data);
 
+	bool			mLive;
+
 private:
 	std::string		mSampleText;
-	LLTextEditor*	mEditor;
+	std::string		mScriptName;
+	LLScriptEditor*	mEditor;
 	void			(*mLoadCallback)(void* userdata);
 	void			(*mSaveCallback)(void* userdata, BOOL close_after_save);
 	void			(*mSearchReplaceCallback) (void* userdata);
-	void*			mUserdata;
-	LLComboBox		*mFunctions;
+    void*			mUserdata;
+    LLComboBox		*mFunctions;
 	BOOL			mForceClose;
 	LLPanel*		mCodePanel;
 	LLScrollListCtrl* mErrorList;
-	LLDynamicArray<LLEntryAndEdCore*> mBridges;
+	std::vector<LLEntryAndEdCore*> mBridges;
 	LLHandle<LLFloater>	mLiveHelpHandle;
 	LLKeywordToken* mLastHelpToken;
 	LLFrameTimer	mLiveHelpTimer;
@@ -149,8 +165,15 @@ private:
 	BOOL			mEnableSave;
 	BOOL			mHasScriptData;
 	LLLiveLSLFile*	mLiveFile;
+	LLUUID			mAssociatedExperience;
+	BOOL			mScriptRemoved;
+	BOOL			mSaveDialogShown;
 
 	LLScriptEdContainer* mContainer; // parent view
+
+public:
+	boost::signals2::connection mSyntaxIDConnection;
+
 };
 
 class LLScriptEdContainer : public LLPreview
@@ -159,6 +182,7 @@ class LLScriptEdContainer : public LLPreview
 
 public:
 	LLScriptEdContainer(const LLSD& key);
+	LLScriptEdContainer(const LLSD& key, const bool live);
 
 protected:
 	std::string		getTmpFileName();
@@ -168,7 +192,7 @@ protected:
 	LLScriptEdCore*		mScriptEd;
 };
 
-// Used to view and edit a LSL from your inventory.
+// Used to view and edit an LSL script from your inventory.
 class LLPreviewLSL : public LLScriptEdContainer
 {
 public:
@@ -179,17 +203,12 @@ public:
 	/*virtual*/ BOOL postBuild();
 
 protected:
+	virtual void draw();
 	virtual BOOL canClose();
 	void closeIfNeeded();
 
 	virtual void loadAsset();
 	/*virtual*/ void saveIfNeeded(bool sync = true);
-	void uploadAssetViaCaps(const std::string& url,
-							const std::string& filename, 
-							const LLUUID& item_id);
-	void uploadAssetLegacy(const std::string& filename,
-							const LLUUID& item_id,
-							const LLTransactionID& tid);
 
 	static void onSearchReplace(void* userdata);
 	static void onLoad(void* userdata);
@@ -198,13 +217,11 @@ protected:
 	static void onLoadComplete(LLVFS *vfs, const LLUUID& uuid,
 							   LLAssetType::EType type,
 							   void* user_data, S32 status, LLExtStat ext_status);
-	static void onSaveComplete(const LLUUID& uuid, void* user_data, S32 status, LLExtStat ext_status);
-	static void onSaveBytecodeComplete(const LLUUID& asset_uuid, void* user_data, S32 status, LLExtStat ext_status);
-	
+
 protected:
 	static void* createScriptEdPanel(void* userdata);
 
-
+    static void finishedLSLUpload(LLUUID itemId, LLSD response);
 protected:
 
 	// Can safely close only after both text and bytecode are uploaded
@@ -213,7 +230,7 @@ protected:
 };
 
 
-// Used to view and edit an LSL that is attached to an object.
+// Used to view and edit an LSL script that is attached to an object.
 class LLLiveLSLEditor : public LLScriptEdContainer
 {
 	friend class LLLiveLSLFile;
@@ -230,7 +247,18 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 	
-	void setIsNew() { mIsNew = TRUE; }
+    void setIsNew() { mIsNew = TRUE; }
+
+	static void setAssociatedExperience( LLHandle<LLLiveLSLEditor> editor, const LLSD& experience );
+	static void onToggleExperience(LLUICtrl *ui, void* userdata);
+	static void onViewProfile(LLUICtrl *ui, void* userdata);
+
+	void setExperienceIds(const LLSD& experience_ids);
+	void buildExperienceList();
+	void updateExperiencePanel();
+	void requestExperiences();
+	void experienceChanged();
+	void addAssociatedExperience(const LLSD& experience);
 	
 private:
 	virtual BOOL canClose();
@@ -240,15 +268,6 @@ private:
 	virtual void loadAsset();
 	void loadAsset(BOOL is_new);
 	/*virtual*/ void saveIfNeeded(bool sync = true);
-	void uploadAssetViaCaps(const std::string& url,
-							const std::string& filename, 
-							const LLUUID& task_id,
-							const LLUUID& item_id,
-							BOOL is_running);
-	void uploadAssetLegacy(const std::string& filename,
-						   LLViewerObject* object,
-						   const LLTransactionID& tid,
-						   BOOL is_running);
 	BOOL monoChecked() const;
 
 
@@ -259,8 +278,6 @@ private:
 	static void onLoadComplete(LLVFS *vfs, const LLUUID& asset_uuid,
 							   LLAssetType::EType type,
 							   void* user_data, S32 status, LLExtStat ext_status);
-	static void onSaveTextComplete(const LLUUID& asset_uuid, void* user_data, S32 status, LLExtStat ext_status);
-	static void onSaveBytecodeComplete(const LLUUID& asset_uuid, void* user_data, S32 status, LLExtStat ext_status);
 	static void onRunningCheckboxClicked(LLUICtrl*, void* userdata);
 	static void onReset(void* userdata);
 
@@ -271,6 +288,9 @@ private:
 	static void* createScriptEdPanel(void* userdata);
 
 	static void	onMonoCheckboxClicked(LLUICtrl*, void* userdata);
+
+    static void finishLSLUpload(LLUUID itemId, LLUUID taskId, LLUUID newAssetId, LLSD response, bool isRunning);
+    static void receiveExperienceIds(LLSD result, LLHandle<LLLiveLSLEditor> parent);
 
 private:
 	bool				mIsNew;
@@ -284,10 +304,19 @@ private:
 	// need to save both text and script, so need to decide when done
 	S32					mPendingUploads;
 
+	BOOL                mIsSaving;
+
 	BOOL getIsModifiable() const { return mIsModifiable; } // Evaluated on load assert
-	
+
 	LLCheckBoxCtrl*	mMonoCheckbox;
 	BOOL mIsModifiable;
+
+
+	LLComboBox*		mExperiences;
+	LLCheckBoxCtrl*	mExperienceEnabled;
+	LLSD			mExperienceIds;
+
+	LLHandle<LLFloater> mExperienceProfile;
 };
 
 #endif  // LL_LLPREVIEWSCRIPT_H

@@ -112,7 +112,7 @@ void LLVOTree::initClass()
 
 	if (!tree_def_tree.parseFile(xml_filename))
 	{
-		llerrs << "Failed to parse tree file." << llendl;
+		LL_ERRS() << "Failed to parse tree file." << LL_ENDL;
 	}
 
 	LLXmlTreeNode* rootp = tree_def_tree.getRoot();
@@ -123,7 +123,7 @@ void LLVOTree::initClass()
 		{
 			if (!tree_def->hasName("tree"))
 			{
-				llwarns << "Invalid tree definition node " << tree_def->getName() << llendl;
+				LL_WARNS() << "Invalid tree definition node " << tree_def->getName() << LL_ENDL;
 				continue;
 			}
 			F32 F32_val;
@@ -138,19 +138,19 @@ void LLVOTree::initClass()
 			static LLStdStringHandle species_id_string = LLXmlTree::addAttributeString("species_id");
 			if (!tree_def->getFastAttributeS32(species_id_string, species))
 			{
-				llwarns << "No species id defined" << llendl;
+				LL_WARNS() << "No species id defined" << LL_ENDL;
 				continue;
 			}
 
 			if (species < 0)
 			{
-				llwarns << "Invalid species id " << species << llendl;
+				LL_WARNS() << "Invalid species id " << species << LL_ENDL;
 				continue;
 			}
 
 			if (sSpeciesTable.count(species))
 			{
-				llwarns << "Tree species " << species << " already defined! Duplicate discarded." << llendl;
+				LL_WARNS() << "Tree species " << species << " already defined! Duplicate discarded." << LL_ENDL;
 				continue;
 			}
 
@@ -241,7 +241,7 @@ void LLVOTree::initClass()
 				std::string name;
 				static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 				tree_def->getFastAttributeString(name_string, name);
-				llwarns << "Incomplete definition of tree " << name << llendl;
+				LL_WARNS() << "Incomplete definition of tree " << name << LL_ENDL;
 			}
 		}
 		
@@ -269,6 +269,7 @@ void LLVOTree::initClass()
 void LLVOTree::cleanupClass()
 {
 	std::for_each(sSpeciesTable.begin(), sSpeciesTable.end(), DeletePairedPointer());
+	sSpeciesTable.clear();
 }
 
 U32 LLVOTree::processUpdateMessage(LLMessageSystem *mesgsys,
@@ -283,7 +284,7 @@ U32 LLVOTree::processUpdateMessage(LLMessageSystem *mesgsys,
 		||(getAcceleration().lengthSquared() > 0.f)
 		||(getAngularVelocity().lengthSquared() > 0.f))
 	{
-		llinfos << "ACK! Moving tree!" << llendl;
+		LL_INFOS() << "ACK! Moving tree!" << LL_ENDL;
 		setVelocity(LLVector3::zero);
 		setAcceleration(LLVector3::zero);
 		setAngularVelocity(LLVector3::zero);
@@ -339,7 +340,7 @@ U32 LLVOTree::processUpdateMessage(LLMessageSystem *mesgsys,
 	return retval;
 }
 
-void LLVOTree::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
+void LLVOTree::idleUpdate(LLAgent &agent, const F64 &time)
 {
  	if (mDead || !(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_TREE)))
 	{
@@ -394,9 +395,6 @@ void LLVOTree::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
 
 	mTrunkLOD = trunk_LOD;
 }
-
-const F32 TREE_BLEND_MIN = 1.f;
-const F32 TREE_BLEND_RANGE = 1.f;
 
 void LLVOTree::render(LLAgent &agent)
 {
@@ -479,11 +477,11 @@ LLDrawable* LLVOTree::createDrawable(LLPipeline *pipeline)
 const S32 LEAF_INDICES = 24;
 const S32 LEAF_VERTICES = 16;
 
-static LLFastTimer::DeclareTimer FTM_UPDATE_TREE("Update Tree");
+static LLTrace::BlockTimerStatHandle FTM_UPDATE_TREE("Update Tree");
 
 BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 {
-	LLFastTimer ftm(FTM_UPDATE_TREE);
+	LL_RECORD_BLOCK_TIME(FTM_UPDATE_TREE);
 
 	if(mTrunkLOD >= sMAX_NUM_TREE_LOD_LEVELS) //do not display the tree.
 	{
@@ -527,7 +525,14 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 		}
 
 		mReferenceBuffer = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK, 0);
-		mReferenceBuffer->allocateBuffer(max_vertices, max_indices, TRUE);
+		if (!mReferenceBuffer->allocateBuffer(max_vertices, max_indices, TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer on update to "
+				<< max_vertices << " vertices and "
+				<< max_indices << " indices" << LL_ENDL;
+			mReferenceBuffer = NULL; //unref
+			return TRUE;
+		}
 
 		LLStrider<LLVector3> vertices;
 		LLStrider<LLVector3> normals;
@@ -697,8 +702,8 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 			slices = sLODSlices[lod];
 			F32 base_radius = 0.65f;
 			F32 top_radius = base_radius * sSpeciesTable[mSpecies]->mTaper;
-			//llinfos << "Species " << ((U32) mSpecies) << ", taper = " << sSpeciesTable[mSpecies].mTaper << llendl;
-			//llinfos << "Droop " << mDroop << ", branchlength: " << mBranchLength << llendl;
+			//LL_INFOS() << "Species " << ((U32) mSpecies) << ", taper = " << sSpeciesTable[mSpecies].mTaper << LL_ENDL;
+			//LL_INFOS() << "Droop " << mDroop << ", branchlength: " << mBranchLength << LL_ENDL;
 			F32 angle = 0;
 			F32 angle_inc = 360.f/(slices-1);
 			F32 z = 0.f;
@@ -885,7 +890,21 @@ void LLVOTree::updateMesh()
 	LLFace* facep = mDrawable->getFace(0);
 	if (!facep) return;
 	LLVertexBuffer* buff = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK, GL_STATIC_DRAW_ARB);
-	buff->allocateBuffer(vert_count, index_count, TRUE);
+	if (!buff->allocateBuffer(vert_count, index_count, TRUE))
+	{
+		LL_WARNS() << "Failed to allocate Vertex Buffer on mesh update to "
+			<< vert_count << " vertices and "
+			<< index_count << " indices" << LL_ENDL;
+		buff->allocateBuffer(1, 3, true);
+		memset((U8*)buff->getMappedData(), 0, buff->getSize());
+		memset((U8*)buff->getMappedIndices(), 0, buff->getIndicesSize());
+		facep->setSize(1, 3);
+		facep->setVertexBuffer(buff);
+		mReferenceBuffer->flush();
+		buff->flush();
+		return;
+	}
+
 	facep->setVertexBuffer(buff);
 	
 	LLStrider<LLVector3> vertices;
@@ -1112,7 +1131,7 @@ void LLVOTree::updateSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 	mDrawable->setPositionGroup(pos);
 }
 
-BOOL LLVOTree::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, S32 face, BOOL pick_transparent, S32 *face_hitp,
+BOOL LLVOTree::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, S32 face, BOOL pick_transparent, BOOL pick_rigged, S32 *face_hitp,
 									  LLVector4a* intersection,LLVector2* tex_coord, LLVector4a* normal, LLVector4a* tangent)
 	
 {
@@ -1167,8 +1186,8 @@ U32 LLVOTree::getPartitionType() const
 	return LLViewerRegion::PARTITION_TREE; 
 }
 
-LLTreePartition::LLTreePartition()
-: LLSpatialPartition(0, FALSE, GL_DYNAMIC_DRAW_ARB)
+LLTreePartition::LLTreePartition(LLViewerRegion* regionp)
+: LLSpatialPartition(0, FALSE, GL_DYNAMIC_DRAW_ARB, regionp)
 {
 	mDrawableType = LLPipeline::RENDER_TYPE_TREE;
 	mPartitionType = LLViewerRegion::PARTITION_TREE;

@@ -162,12 +162,7 @@ void LLFloaterColorPicker::createUI ()
 	// create palette
 	for ( S32 each = 0; each < numPaletteColumns * numPaletteRows; ++each )
 	{
-		std::ostringstream codec;
-		codec << "ColorPaletteEntry" << std::setfill ( '0' ) << std::setw ( 2 ) << each + 1;
-
-		// argh!
-		const std::string s ( codec.str () );
-		mPalette.push_back ( new LLColor4 ( LLUIColorTable::instance().getColor ( s )  ) );
+		mPalette.push_back(new LLColor4(LLUIColorTable::instance().getColor(llformat("ColorPaletteEntry%02d", each + 1))));
 	}
 }
 
@@ -178,6 +173,7 @@ void LLFloaterColorPicker::showUI ()
 	openFloater(getKey());
 	setVisible ( TRUE );
 	setFocus ( TRUE );
+	setRevertOnCancel(FALSE);
 
 	// HACK: if system color picker is required - close the SL one we made and use default system dialog
 	if ( gSavedSettings.getBOOL ( "UseDefaultColorPicker" ) )
@@ -395,7 +391,10 @@ void LLFloaterColorPicker::onClickCancel ( void* data )
 
 		if ( self )
 		{
-			self->cancelSelection ();
+		    if(self->getRevertOnCancel())
+		    {
+		        self->cancelSelection ();
+		    }
 			self->closeFloater();
 		}
 	}
@@ -452,8 +451,7 @@ void LLFloaterColorPicker::onImmediateCheck( LLUICtrl* ctrl, void* data)
 	if (self)
 	{
 		gSavedSettings.setBOOL("ApplyColorImmediately", self->mApplyImmediateCheck->get());
-
-		if (self->mApplyImmediateCheck->get())
+		if (self->mApplyImmediateCheck->get() && self->isColorChanged())
 		{
 			LLColorSwatchCtrl::onColorChanged ( self->getSwatch (), LLColorSwatchCtrl::COLOR_CHANGE );
 		}
@@ -462,11 +460,8 @@ void LLFloaterColorPicker::onImmediateCheck( LLUICtrl* ctrl, void* data)
 
 void LLFloaterColorPicker::onColorSelect( const LLTextureEntry& te )
 {
-	setCurRgb(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE]);
-	if (mApplyImmediateCheck->get())
-	{
-		LLColorSwatchCtrl::onColorChanged ( getSwatch (), LLColorSwatchCtrl::COLOR_CHANGE );
-	}
+	// Pipete
+	selectCurRgb(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE]);
 }
 
 void LLFloaterColorPicker::onMouseCaptureLost()
@@ -479,6 +474,11 @@ F32 LLFloaterColorPicker::getSwatchTransparency()
 {
 	// If the floater is focused, don't apply its alpha to the color swatch (STORM-676).
 	return getTransparencyType() == TT_ACTIVE ? 1.f : LLFloater::getCurrentTransparency();
+}
+
+BOOL LLFloaterColorPicker::isColorChanged()
+{
+    return ((getOrigR() != getCurR()) || (getOrigG() != getCurG()) || (getOrigB() != getCurB()));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -529,11 +529,11 @@ void LLFloaterColorPicker::draw()
 	if (gFocusMgr.childHasMouseCapture(getDragHandle()))
 	{
 		mContextConeOpacity = lerp(mContextConeOpacity, gSavedSettings.getF32("PickerContextOpacity"), 
-                                        LLCriticalDamp::getInterpolant(mContextConeFadeTime));
+                                        LLSmoothInterpolation::getInterpolant(mContextConeFadeTime));
 	}
 	else
 	{
-		mContextConeOpacity = lerp(mContextConeOpacity, 0.f, LLCriticalDamp::getInterpolant(mContextConeFadeTime));
+		mContextConeOpacity = lerp(mContextConeOpacity, 0.f, LLSmoothInterpolation::getInterpolant(mContextConeFadeTime));
 	}
 
 	mPipetteBtn->setToggleState(LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
@@ -642,6 +642,28 @@ const LLColor4& LLFloaterColorPicker::getComplimentaryColor ( const LLColor4& ba
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// set current RGB and rise change event if needed.
+void LLFloaterColorPicker::selectCurRgb ( F32 curRIn, F32 curGIn, F32 curBIn )
+{
+	setCurRgb(curRIn, curGIn, curBIn);
+	if (mApplyImmediateCheck->get())
+	{
+		LLColorSwatchCtrl::onColorChanged ( getSwatch (), LLColorSwatchCtrl::COLOR_CHANGE );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// set current HSL and rise change event if needed.
+void LLFloaterColorPicker::selectCurHsl ( F32 curHIn, F32 curSIn, F32 curLIn )
+{
+	setCurHsl(curHIn, curSIn, curLIn);
+	if (mApplyImmediateCheck->get())
+	{
+		LLColorSwatchCtrl::onColorChanged ( getSwatch (), LLColorSwatchCtrl::COLOR_CHANGE );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // draw color palette
 void LLFloaterColorPicker::drawPalette ()
 {
@@ -735,7 +757,7 @@ void LLFloaterColorPicker::onTextEntryChanged ( LLUICtrl* ctrl )
 		}
 
 		// update current RGB (and implicitly HSL)
-		setCurRgb ( rVal, gVal, bVal );
+		selectCurRgb ( rVal, gVal, bVal );
 
 		updateTextEntry ();
 	}
@@ -758,14 +780,9 @@ void LLFloaterColorPicker::onTextEntryChanged ( LLUICtrl* ctrl )
 			lVal = (F32)ctrl->getValue().asReal() / 100.0f;
 
 		// update current HSL (and implicitly RGB)
-		setCurHsl ( hVal, sVal, lVal );
+		selectCurHsl ( hVal, sVal, lVal );
 
 		updateTextEntry ();
-	}
-
-	if (mApplyImmediateCheck->get())
-	{
-		LLColorSwatchCtrl::onColorChanged ( getSwatch (), LLColorSwatchCtrl::COLOR_CHANGE );
 	}
 }
 
@@ -779,7 +796,7 @@ BOOL LLFloaterColorPicker::updateRgbHslFromPoint ( S32 xPosIn, S32 yPosIn )
 		 yPosIn >= mRGBViewerImageTop - mRGBViewerImageHeight )
 	{
 		// update HSL (and therefore RGB) based on new H & S and current L
-		setCurHsl ( ( ( F32 )xPosIn - ( F32 )mRGBViewerImageLeft ) / ( F32 )mRGBViewerImageWidth,
+		selectCurHsl ( ( ( F32 )xPosIn - ( F32 )mRGBViewerImageLeft ) / ( F32 )mRGBViewerImageWidth,
 					( ( F32 )yPosIn - ( ( F32 )mRGBViewerImageTop - ( F32 )mRGBViewerImageHeight ) ) / ( F32 )mRGBViewerImageHeight,
 					getCurL () );
 
@@ -794,7 +811,7 @@ BOOL LLFloaterColorPicker::updateRgbHslFromPoint ( S32 xPosIn, S32 yPosIn )
 	{
 
 		// update HSL (and therefore RGB) based on current HS and new L
-		 setCurHsl ( getCurH (),
+		 selectCurHsl ( getCurH (),
 					 getCurS (),
 					( ( F32 )yPosIn - ( ( F32 )mRGBViewerImageTop - ( F32 )mRGBViewerImageHeight ) ) / ( F32 )mRGBViewerImageHeight );
 
@@ -886,7 +903,7 @@ BOOL LLFloaterColorPicker::handleMouseDown ( S32 x, S32 y, MASK mask )
 		{
 			LLColor4 selected = *mPalette [ index ];
 
-			setCurRgb ( selected [ 0 ], selected [ 1 ], selected [ 2 ] );
+			selectCurRgb ( selected [ 0 ], selected [ 1 ], selected [ 2 ] );
 
 			if (mApplyImmediateCheck->get())
 			{

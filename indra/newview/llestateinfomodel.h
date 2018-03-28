@@ -30,12 +30,15 @@
 class LLMessageSystem;
 
 #include "llsingleton.h"
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 /**
  * Contains estate info, notifies interested parties of its changes.
  */
 class LLEstateInfoModel : public LLSingleton<LLEstateInfoModel>
 {
+	LLSINGLETON(LLEstateInfoModel);
 	LOG_CLASS(LLEstateInfoModel);
 
 public:
@@ -52,6 +55,7 @@ public:
 	bool				getDenyAnonymous()			const;
 	bool				getDenyAgeUnverified()		const;
 	bool				getAllowVoiceChat()			const;
+    bool                getAllowAccessOverride()    const;
 
 	const std::string&	getName()					const { return mName; }
 	const LLUUID&		getOwnerID()				const { return mOwnerID; }
@@ -65,17 +69,14 @@ public:
 	void setDenyAnonymous(bool val);
 	void setDenyAgeUnverified(bool val);
 	void setAllowVoiceChat(bool val);
+    void setAllowAccessOverride(bool val);
 
 	void setSunHour(F32 sun_hour) { mSunHour = sun_hour; }
 
 protected:
 	typedef std::vector<std::string> strings_t;
 
-	friend class LLSingleton<LLEstateInfoModel>;
 	friend class LLDispatchEstateUpdateInfo;
-	friend class LLEstateChangeInfoResponder;
-
-	LLEstateInfoModel();
 
 	/// refresh model with data from the incoming server message
 	void update(const strings_t& strings);
@@ -99,6 +100,8 @@ private:
 
 	update_signal_t mUpdateSignal; /// emitted when we receive update from sim
 	update_signal_t mCommitSignal; /// emitted when our update gets applied to sim
+
+    void commitEstateInfoCapsCoro(std::string url);
 };
 
 inline bool LLEstateInfoModel::getFlag(U64 flag) const

@@ -43,7 +43,9 @@ import subprocess
 
 class ManifestError(RuntimeError):
     """Use an exception more specific than generic Python RuntimeError"""
-    pass
+    def __init__(self, msg):
+        self.msg = msg
+        super(ManifestError, self).__init__(self.msg)
 
 class MissingError(ManifestError):
     """You specified a file that doesn't exist"""
@@ -85,7 +87,8 @@ def get_default_platform(dummy):
             }[sys.platform]
 
 DEFAULT_SRCTREE = os.path.dirname(sys.argv[0])
-RELEASE_CHANNEL = 'Second Life Release'
+CHANNEL_VENDOR_BASE = 'Second Life'
+RELEASE_CHANNEL = CHANNEL_VENDOR_BASE + ' Release'
 
 ARGUMENTS=[
     dict(name='actions',
@@ -112,13 +115,14 @@ ARGUMENTS=[
          default="Release"),
     dict(name='dest', description='Destination directory.', default=DEFAULT_SRCTREE),
     dict(name='grid',
-         description="""Which grid the client will try to connect to. Even
-        though it's not strictly a grid, 'firstlook' is also an acceptable
-        value for this parameter.""",
-         default=""),
+         description="""Which grid the client will try to connect to.""",
+         default=None),
     dict(name='channel',
          description="""The channel to use for updates, packaging, settings name, etc.""",
          default='CHANNEL UNSET'),
+    dict(name='channel_suffix',
+         description="""Addition to the channel for packaging and channel value, but not application name (used internally)""",
+         default=None),
     dict(name='installer_name',
          description=""" The name of the file that the installer should be
         packaged up into. Only used on Linux at the moment.""",
@@ -141,6 +145,9 @@ ARGUMENTS=[
          default=None),
     dict(name='versionfile',
          description="""The name of a file containing the full version number."""),
+    dict(name='bundleid',
+         description="""The Mac OS X Bundle identifier.""",
+         default="com.secondlife.indra.viewer"),
     dict(name='signature',
          description="""This specifies an identity to sign the viewer with, if any.
         If no value is supplied, the default signature will be used, if any. Currently
@@ -213,9 +220,9 @@ def main():
             print "Unable to read versionfile '%s'" % args['versionfile']
             raise
 
-    # default and agni are default
-    if args['grid'] in ['default', 'agni']:
-        args['grid'] = ''
+    # unspecified, default, and agni are default
+    if args['grid'] in ['', 'default', 'agni']:
+        args['grid'] = None
 
     if 'actions' in args:
         args['actions'] = args['actions'].split()
@@ -286,23 +293,29 @@ def main():
         base_channel_name = args['channel']
         # Build each additional package.
         package_id_list = additional_packages.split(" ")
+        args['channel'] = base_channel_name
         for package_id in package_id_list:
             try:
-                args['package_id'] = package_id
-                args['channel'] = base_channel_name + os.environ[package_id + "_viewer_channel_suffix"]
+                if package_id + "_viewer_channel_suffix" in os.environ:
+                    args['channel_suffix'] = os.environ[package_id + "_viewer_channel_suffix"]
+                else:
+                    args['channel_suffix'] = None
                 if package_id + "_sourceid" in os.environ:
                     args['sourceid'] = os.environ[package_id + "_sourceid"]
                 else:
-                    args['sourceid'] = ""
+                    args['sourceid'] = None
                 args['dest'] = base_dest_prefix + os.sep + package_id + os.sep + base_dest_postfix
             except KeyError:
                 sys.stderr.write("Failed to create package for package_id: %s" % package_id)
                 sys.stderr.flush()
                 continue
             if touch:
-                print 'Creating additional package for ', package_id, ' in ', args['dest']
-            wm = LLManifest.for_platform(args['platform'], args.get('arch'))(args)
-            wm.do(*args['actions'])
+                print 'Creating additional package for "', package_id, '" in ', args['dest']
+            try:
+                wm = LLManifest.for_platform(args['platform'], args.get('arch'))(args)
+                wm.do(*args['actions'])
+            except Exception as err:
+                sys.exit(str(err))
             if touch:
                 print 'Created additional package ', wm.package_file, ' for ', package_id
                 faketouch = base_touch_prefix + '/' + package_id + '/' + base_touch_postfix
@@ -332,7 +345,7 @@ class LLManifest(object):
     manifests = {}
     def for_platform(self, platform, arch = None):
         if arch:
-            platform = platform + '_' + arch
+            platform = platform + '_' + arch + '_'
         return self.manifests[platform.lower()]
     for_platform = classmethod(for_platform)
 
@@ -349,8 +362,6 @@ class LLManifest(object):
         self.created_paths = []
         self.package_name = "Unknown"
         
-    def default_grid(self):
-        return self.args.get('grid', None) == ''
     def default_channel(self):
         return self.args.get('channel', None) == RELEASE_CHANNEL
 
@@ -365,12 +376,30 @@ class LLManifest(object):
         self.excludes.append(glob)
 
     def prefix(self, src='', build=None, dst=None):
-        """ Pushes a prefix onto the stack.  Until end_prefix is
-        called, all relevant method calls (esp. to path()) will prefix
-        paths with the entire prefix stack.  Source and destination
-        prefixes can be different, though if only one is provided they
-        are both equal.  To specify a no-op, use an empty string, not
-        None."""
+        """
+        Usage:
+
+        with self.prefix(...args as described...):
+            self.path(...)
+
+        For the duration of the 'with' block, pushes a prefix onto the stack.
+        Within that block, all relevant method calls (esp. to path()) will
+        prefix paths with the entire prefix stack. Source and destination
+        prefixes can be different, though if only one is provided they are
+        both equal. To specify a no-op, use an empty string, not None.
+
+        Also supports the older (pre-Python-2.5) syntax:
+
+        if self.prefix(...args as described...):
+            self.path(...)
+            self.end_prefix(...)
+
+        Before the arrival of the 'with' statement, one was required to code
+        self.prefix() and self.end_prefix() in matching pairs to push and to
+        pop the prefix stacks, respectively. The older prefix() method
+        returned True specifically so that the caller could indent the
+        relevant block of code with 'if', just for aesthetic purposes.
+        """
         if dst is None:
             dst = src
         if build is None:
@@ -379,7 +408,57 @@ class LLManifest(object):
         self.artwork_prefix.append(src)
         self.build_prefix.append(build)
         self.dst_prefix.append(dst)
-        return True  # so that you can wrap it in an if to get indentation
+
+        # The above code is unchanged from the original implementation. What's
+        # new is the return value. We're going to return an instance of
+        # PrefixManager that binds this LLManifest instance and Does The Right
+        # Thing on exit.
+        return self.PrefixManager(self)
+
+    class PrefixManager(object):
+        def __init__(self, manifest):
+            self.manifest = manifest
+            # stack attributes we manage in this LLManifest (sub)class
+            # instance
+            stacks = ("src_prefix", "artwork_prefix", "build_prefix", "dst_prefix")
+            # If the caller wrote:
+            # with self.prefix(...):
+            # as intended, then bind the state of each prefix stack as it was
+            # just BEFORE the call to prefix(). Since prefix() appended an
+            # entry to each prefix stack, capture len()-1.
+            self.prevlen = { stack: len(getattr(self.manifest, stack)) - 1
+                             for stack in stacks }
+
+        def __nonzero__(self):
+            # If the caller wrote:
+            # if self.prefix(...):
+            # then a value of this class had better evaluate as 'True'.
+            return True
+
+        def __enter__(self):
+            # nobody uses 'with self.prefix(...) as variable:'
+            return None
+
+        def __exit__(self, type, value, traceback):
+            # First, if the 'with' block raised an exception, just propagate.
+            # Do NOT swallow it.
+            if type is not None:
+                return False
+
+            # Okay, 'with' block completed successfully. Restore previous
+            # state of each of the prefix stacks in self.stacks.
+            # Note that we do NOT simply call pop() on them as end_prefix()
+            # does. This is to cope with the possibility that the coder
+            # changed 'if self.prefix(...):' to 'with self.prefix(...):' yet
+            # forgot to remove the self.end_prefix(...) call at the bottom of
+            # the block. In that case, calling pop() again would be Bad! But
+            # if we restore the length of each stack to what it was before the
+            # current prefix() block, it doesn't matter whether end_prefix()
+            # was called or not.
+            for stack, prevlen in self.prevlen.items():
+                # find the attribute in 'self.manifest' named by 'stack', and
+                # truncate that list back to 'prevlen'
+                del getattr(self.manifest, stack)[prevlen:]
 
     def end_prefix(self, descr=None):
         """Pops a prefix off the stack.  If given an argument, checks
@@ -443,29 +522,17 @@ class LLManifest(object):
         return path
 
     def run_command(self, command):
-        """ Runs an external command, and returns the output.  Raises
-        an exception if the command returns a nonzero status code.  For
-        debugging/informational purposes, prints out the command's
-        output as it is received."""
+        """ 
+        Runs an external command.  
+        Raises ManifestError exception if the command returns a nonzero status.
+        """
         print "Running command:", command
         sys.stdout.flush()
-        child = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 shell=True)
-        lines = []
-        while True:
-            lines.append(child.stdout.readline())
-            if lines[-1] == '':
-                break
-            else:
-                print lines[-1],
-        output = ''.join(lines)
-        child.stdout.close()
-        status = child.wait()
-        if status:
-            raise ManifestError(
-                "Command %s returned non-zero status (%s) \noutput:\n%s"
-                % (command, status, output) )
-        return output
+        try:
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError as err:
+            raise ManifestError( "Command %s returned non-zero status (%s)"
+                                % (command, err.returncode) )
 
     def created_path(self, path):
         """ Declare that you've created a path in order to
@@ -478,6 +545,7 @@ class LLManifest(object):
     def put_in_file(self, contents, dst, src=None):
         # write contents as dst
         dst_path = self.dst_path_of(dst)
+        self.cmakedirs(os.path.dirname(dst_path))
         f = open(dst_path, "wb")
         try:
             f.write(contents)
@@ -509,11 +577,7 @@ class LLManifest(object):
             # ensure that destination path exists
             self.cmakedirs(os.path.dirname(dst))
             self.created_paths.append(dst)
-            if not os.path.isdir(src):
-                self.ccopy(src,dst)
-            else:
-                # src is a dir
-                self.ccopytree(src,dst)
+            self.ccopymumble(src, dst)
         else:
             print "Doesn't exist:", src
 
@@ -592,28 +656,38 @@ class LLManifest(object):
                 else:
                     os.remove(path)
 
-    def ccopy(self, src, dst):
-        """ Copy a single file or symlink.  Uses filecmp to skip copying for existing files."""
+    def ccopymumble(self, src, dst):
+        """Copy a single symlink, file or directory."""
         if os.path.islink(src):
             linkto = os.readlink(src)
-            if os.path.islink(dst) or os.path.exists(dst):
+            if os.path.islink(dst) or os.path.isfile(dst):
                 os.remove(dst)  # because symlinking over an existing link fails
+            elif os.path.isdir(dst):
+                shutil.rmtree(dst)
             os.symlink(linkto, dst)
+        elif os.path.isdir(src):
+            self.ccopytree(src, dst)
         else:
-            # Don't recopy file if it's up-to-date.
-            # If we seem to be not not overwriting files that have been
-            # updated, set the last arg to False, but it will take longer.
-            if os.path.exists(dst) and filecmp.cmp(src, dst, True):
-                return
-            # only copy if it's not excluded
-            if self.includes(src, dst):
-                try:
-                    os.unlink(dst)
-                except OSError, err:
-                    if err.errno != errno.ENOENT:
-                        raise
+            self.ccopyfile(src, dst)
+            # XXX What about devices, sockets etc.?
+            # YYY would we put such things into a viewer package?!
 
-                shutil.copy2(src, dst)
+    def ccopyfile(self, src, dst):
+        """ Copy a single file.  Uses filecmp to skip copying for existing files."""
+        # Don't recopy file if it's up-to-date.
+        # If we seem to be not not overwriting files that have been
+        # updated, set the last arg to False, but it will take longer.
+        if os.path.exists(dst) and filecmp.cmp(src, dst, True):
+            return
+        # only copy if it's not excluded
+        if self.includes(src, dst):
+            try:
+                os.unlink(dst)
+            except OSError as err:
+                if err.errno != errno.ENOENT:
+                    raise
+
+            shutil.copy2(src, dst)
 
     def ccopytree(self, src, dst):
         """Direct copy of shutil.copytree with the additional
@@ -629,12 +703,8 @@ class LLManifest(object):
             srcname = os.path.join(src, name)
             dstname = os.path.join(dst, name)
             try:
-                if os.path.isdir(srcname):
-                    self.ccopytree(srcname, dstname)
-                else:
-                    self.ccopy(srcname, dstname)
-                    # XXX What about devices, sockets etc.?
-            except (IOError, os.error), why:
+                self.ccopymumble(srcname, dstname)
+            except (IOError, os.error) as why:
                 errors.append((srcname, dstname, why))
         if errors:
             raise ManifestError, errors

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <menu name="Popup">
+	<menu_item_call label="リストを作成" name="Marketplace Create Listing"/>
+	<menu_item_call label="リストを関連付け" name="Marketplace Associate Listing"/>
+	<menu_item_call label="リストを取得 (更新)" name="Marketplace Get Listing"/>
+	<menu_item_call label="エラーを確認" name="Marketplace Check Listing"/>
+	<menu_item_call label="リストを編集" name="Marketplace Edit Listing"/>
+	<menu_item_call label="リスト" name="Marketplace List"/>
+	<menu_item_call label="リストから取り除く" name="Marketplace Unlist"/>
+	<menu_item_call label="有効にする" name="Marketplace Activate"/>
+	<menu_item_call label="無効にする" name="Marketplace Deactivate"/>
 	<menu_item_call label="共有" name="Share"/>
 	<menu_item_call label="購入" name="Task Buy"/>
 	<menu_item_call label="開く" name="Task Open"/>
@@ -33,6 +42,12 @@
 		<menu_item_call label="新しい髪" name="New Hair"/>
 		<menu_item_call label="新しい眼" name="New Eyes"/>
 	</menu>
+	<menu label="次のデフォルトとして使用" name="upload_def">
+		<menu_item_call label="画像のアップロード" name="Image uploads"/>
+		<menu_item_call label="サウンドのアップロード" name="Sound uploads"/>
+		<menu_item_call label="アニメーションのアップロード" name="Animation uploads"/>
+		<menu_item_call label="モデルのアップロード" name="Model uploads"/>
+	</menu>
 	<menu label="種類を変更" name="Change Type">
 		<menu_item_call label="デフォルト" name="Default"/>
 		<menu_item_call label="手袋" name="Gloves"/>
@@ -51,6 +66,7 @@
 	<menu_item_call label="着用中のアウトフィットを入れ替える" name="Replace Outfit"/>
 	<menu_item_call label="着用中のアウトフィットに追加する" name="Add To Outfit"/>
 	<menu_item_call label="着用中のアウトフィットから取り除く" name="Remove From Outfit"/>
+	<menu_item_call label="アウトフィットのリストをクリップボードにコピー" name="Copy outfit list to clipboard"/>
 	<menu_item_call label="オリジナルを探す" name="Find Original"/>
 	<menu_item_call label="アイテムを除外する" name="Purge Item"/>
 	<menu_item_call label="アイテムを復元する" name="Restore Item"/>
@@ -59,17 +75,19 @@
 	<menu_item_call label="プロパティ" name="Properties"/>
 	<menu_item_call label="名前を変更する" name="Rename"/>
 	<menu_item_call label="UUID をコピーする" name="Copy Asset UUID"/>
+	<menu_item_call label="メイン画面で表示する" name="Show in Main Panel"/>
 	<menu_item_call label="カット" name="Cut"/>
 	<menu_item_call label="コピー" name="Copy"/>
 	<menu_item_call label="貼り付け" name="Paste"/>
 	<menu_item_call label="リンクを貼り付ける" name="Paste As Link"/>
-	<menu_item_call label="削除" name="Remove Link"/>
+	<menu_item_call label="リンクを置き換える" name="Replace Links"/>
 	<menu_item_call label="削除" name="Delete"/>
 	<menu_item_call label="システムフォルダを削除する" name="Delete System Folder"/>
 	<menu_item_call label="コンファレンスチャットを開始する" name="Conference Chat Folder"/>
 	<menu_item_call label="再生する" name="Sound Play"/>
 	<menu_item_call label="SLurl をコピー" name="url_copy"/>
 	<menu_item_call label="ランドマークの情報" name="About Landmark"/>
+	<menu_item_call label="地図に表示" name="show_on_map"/>
 	<menu_item_call label="インワールドで再生する" name="Animation Play"/>
 	<menu_item_call label="ローカルで再生する" name="Animation Audition"/>
 	<menu_item_call label="インスタントメッセージを送信する" name="Send Instant Message"/>
@@ -85,7 +103,7 @@
 	<menu_item_call label="編集" name="Wearable Edit"/>
 	<menu_item_call label="追加" name="Wearable Add"/>
 	<menu_item_call label="取り外す" name="Take Off"/>
-	<menu_item_call label="マーチャントのアウトボックスにコピー" name="Merchant Copy"/>
-	<menu_item_call label="マーケットプレイスに送信" name="Marketplace Send"/>
+	<menu_item_call label="マーケットプレイスのリストにコピー" name="Marketplace Copy"/>
+	<menu_item_call label="マーケットプレイスのリストに移動" name="Marketplace Move"/>
 	<menu_item_call label="－－オプションなし－－" name="--no options--"/>
 </menu>

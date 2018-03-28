@@ -7,6 +7,7 @@ project (llimage_libtest)
 include(00-Common)
 include(LLCommon)
 include(LLImage)
+include(LLMath)
 include(LLImageJ2COJ) 
 include(LLKDU)
 include(LLVFS)
@@ -15,6 +16,7 @@ include_directories(
     ${LLCOMMON_INCLUDE_DIRS}
     ${LLVFS_INCLUDE_DIRS}
     ${LLIMAGE_INCLUDE_DIRS}
+    ${LLMATH_INCLUDE_DIRS}
     )
 include_directories(SYSTEM
     ${LLCOMMON_SYSTEM_INCLUDE_DIRS}
@@ -64,6 +66,7 @@ endif (DARWIN)
 target_link_libraries(llimage_libtest
     ${LLCOMMON_LIBRARIES}
     ${LLVFS_LIBRARIES}
+    ${LLMATH_LIBRARIES}
     ${LLIMAGE_LIBRARIES}
     ${LLKDU_LIBRARIES}
     ${KDU_LIBRARY}
@@ -101,21 +104,23 @@ add_custom_command(TARGET llimage_libtest POST_BUILD
 if (DARWIN)
   # Copy the required libraries to the package app
   add_custom_command(TARGET llimage_libtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libapr-1.0.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libapr-1.0.dylib
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libapr-1.0.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libapr-1.0.dylib
   )
   add_custom_command(TARGET llimage_libtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libaprutil-1.0.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libaprutil-1.0.dylib
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libaprutil-1.0.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libaprutil-1.0.dylib
   )
   add_custom_command(TARGET llimage_libtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libexception_handler.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libexception_handler.dylib
+    COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/libexception_handler.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
+    DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/libexception_handler.dylib
   )
-  add_custom_command(TARGET llimage_libtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libexpat.1.5.2.dylib ${LLIMAGE_LIBTEST_DESTINATION_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/../build-darwin-i386/packages/lib/release/libexpat.1.5.2.dylib
-  )
+  foreach(expat ${EXPAT_COPY})
+    add_custom_command(TARGET llimage_libtest POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${AUTOBUILD_INSTALL_DIR}/lib/release/${expat} ${LLIMAGE_LIBTEST_DESTINATION_DIR}
+      DEPENDS ${AUTOBUILD_INSTALL_DIR}/lib/release/${expat}
+    )
+  endforeach(expat)
 endif (DARWIN)
 
 if (WINDOWS)

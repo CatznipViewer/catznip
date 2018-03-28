@@ -285,7 +285,8 @@ LLPanelObject::LLPanelObject()
 	mIsPhantom(FALSE),
 	mSelectedType(MI_BOX),
 	mSculptTextureRevert(LLUUID::null),
-	mSculptTypeRevert(0)
+	mSculptTypeRevert(0),
+	mSizeChanged(FALSE)
 {
 }
 
@@ -411,9 +412,9 @@ void LLPanelObject::getState( )
 	LLQuaternion object_rot = objectp->getRotationEdit();
 	object_rot.getEulerAngles(&(mCurEulerDegrees.mV[VX]), &(mCurEulerDegrees.mV[VY]), &(mCurEulerDegrees.mV[VZ]));
 	mCurEulerDegrees *= RAD_TO_DEG;
-	mCurEulerDegrees.mV[VX] = fmod(llround(mCurEulerDegrees.mV[VX], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
-	mCurEulerDegrees.mV[VY] = fmod(llround(mCurEulerDegrees.mV[VY], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
-	mCurEulerDegrees.mV[VZ] = fmod(llround(mCurEulerDegrees.mV[VZ], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VX] = fmod(ll_round(mCurEulerDegrees.mV[VX], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VY] = fmod(ll_round(mCurEulerDegrees.mV[VY], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VZ] = fmod(ll_round(mCurEulerDegrees.mV[VZ], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
 
 	if (enable_rotate)
 	{
@@ -625,7 +626,7 @@ void LLPanelObject::getState( )
 		}
 		else
 		{
-			llinfos << "Unknown path " << (S32) path << " profile " << (S32) profile << " in getState" << llendl;
+			LL_INFOS() << "Unknown path " << (S32) path << " profile " << (S32) profile << " in getState" << LL_ENDL;
 			selected_item = MI_BOX;
 		}
 
@@ -1175,11 +1176,11 @@ void LLPanelObject::sendIsPhysical()
 		LLSelectMgr::getInstance()->selectionUpdatePhysics(value);
 		mIsPhysical = value;
 
-		llinfos << "update physics sent" << llendl;
+		LL_INFOS() << "update physics sent" << LL_ENDL;
 	}
 	else
 	{
-		llinfos << "update physics not changed" << llendl;
+		LL_INFOS() << "update physics not changed" << LL_ENDL;
 	}
 }
 
@@ -1191,11 +1192,11 @@ void LLPanelObject::sendIsTemporary()
 		LLSelectMgr::getInstance()->selectionUpdateTemporary(value);
 		mIsTemporary = value;
 
-		llinfos << "update temporary sent" << llendl;
+		LL_INFOS() << "update temporary sent" << LL_ENDL;
 	}
 	else
 	{
-		llinfos << "update temporary not changed" << llendl;
+		LL_INFOS() << "update temporary not changed" << LL_ENDL;
 	}
 }
 
@@ -1208,11 +1209,11 @@ void LLPanelObject::sendIsPhantom()
 		LLSelectMgr::getInstance()->selectionUpdatePhantom(value);
 		mIsPhantom = value;
 
-		llinfos << "update phantom sent" << llendl;
+		LL_INFOS() << "update phantom sent" << LL_ENDL;
 	}
 	else
 	{
-		llinfos << "update phantom not changed" << llendl;
+		LL_INFOS() << "update phantom not changed" << LL_ENDL;
 	}
 }
 
@@ -1322,8 +1323,8 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 		break;
 		
 	default:
-		llwarns << "Unknown base type " << selected_type 
-			<< " in getVolumeParams()" << llendl;
+		LL_WARNS() << "Unknown base type " << selected_type 
+			<< " in getVolumeParams()" << LL_ENDL;
 		// assume a box
 		selected_type = MI_BOX;
 		profile = LL_PCODE_PROFILE_SQUARE;
@@ -1567,9 +1568,9 @@ void LLPanelObject::sendRotation(BOOL btn_down)
 	if (mObject.isNull()) return;
 
 	LLVector3 new_rot(mCtrlRotX->get(), mCtrlRotY->get(), mCtrlRotZ->get());
-	new_rot.mV[VX] = llround(new_rot.mV[VX], OBJECT_ROTATION_PRECISION);
-	new_rot.mV[VY] = llround(new_rot.mV[VY], OBJECT_ROTATION_PRECISION);
-	new_rot.mV[VZ] = llround(new_rot.mV[VZ], OBJECT_ROTATION_PRECISION);
+	new_rot.mV[VX] = ll_round(new_rot.mV[VX], OBJECT_ROTATION_PRECISION);
+	new_rot.mV[VY] = ll_round(new_rot.mV[VY], OBJECT_ROTATION_PRECISION);
+	new_rot.mV[VZ] = ll_round(new_rot.mV[VZ], OBJECT_ROTATION_PRECISION);
 
 	// Note: must compare before conversion to radians
 	LLVector3 delta = new_rot - mCurEulerDegrees;
@@ -1620,9 +1621,10 @@ void LLPanelObject::sendScale(BOOL btn_down)
 	LLVector3 newscale(mCtrlScaleX->get(), mCtrlScaleY->get(), mCtrlScaleZ->get());
 
 	LLVector3 delta = newscale - mObject->getScale();
-	if (delta.magVec() >= 0.0005f)
+	if (delta.magVec() >= 0.0005f || (mSizeChanged && !btn_down))
 	{
 		// scale changed by more than 1/2 millimeter
+		mSizeChanged = btn_down;
 
 		// check to see if we aren't scaling the textures
 		// (in which case the tex coord's need to be recomputed)
@@ -1640,11 +1642,11 @@ void LLPanelObject::sendScale(BOOL btn_down)
 		}
 
 		LLSelectMgr::getInstance()->adjustTexturesByScale(TRUE, !dont_stretch_textures);
-//		llinfos << "scale sent" << llendl;
+//		LL_INFOS() << "scale sent" << LL_ENDL;
 	}
 	else
 	{
-//		llinfos << "scale not changed" << llendl;
+//		LL_INFOS() << "scale not changed" << LL_ENDL;
 	}
 }
 
@@ -1710,7 +1712,7 @@ void LLPanelObject::sendPosition(BOOL btn_down)
 			if (mObject->isRootEdit())
 			{								
 				// only offset by parent's translation
-				mObject->resetChildrenPosition(LLVector3(-delta), TRUE) ;				
+				mObject->resetChildrenPosition(LLVector3(-delta), TRUE, TRUE) ;
 			}
 
 			if(!btn_down)
@@ -1737,9 +1739,10 @@ void LLPanelObject::sendSculpt()
 		return;
 	
 	LLSculptParams sculpt_params;
+	LLUUID sculpt_id = LLUUID::null;
 
 	if (mCtrlSculptTexture)
-		sculpt_params.setSculptTexture(mCtrlSculptTexture->getImageAssetID());
+		sculpt_id = mCtrlSculptTexture->getImageAssetID();
 
 	U8 sculpt_type = 0;
 	
@@ -1763,7 +1766,7 @@ void LLPanelObject::sendSculpt()
 	if ((mCtrlSculptInvert) && (mCtrlSculptInvert->get()))
 		sculpt_type |= LL_SCULPT_FLAG_INVERT;
 	
-	sculpt_params.setSculptType(sculpt_type);
+	sculpt_params.setSculptTexture(sculpt_id, sculpt_type);
 	mObject->setParameterEntry(LLNetworkData::PARAMS_SCULPT, sculpt_params, TRUE);
 }
 
@@ -1998,7 +2001,11 @@ void LLPanelObject::onCancelSculpt(const LLSD& data)
 	LLTextureCtrl* mTextureCtrl = getChild<LLTextureCtrl>("sculpt texture control");
 	if(!mTextureCtrl)
 		return;
-	
+
+	if(mSculptTextureRevert == LLUUID::null)
+	{
+		mSculptTextureRevert = LLUUID(SCULPT_DEFAULT_TEXTURE);
+	}
 	mTextureCtrl->setImageAssetID(mSculptTextureRevert);
 	
 	sendSculpt();

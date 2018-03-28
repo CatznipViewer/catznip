@@ -49,24 +49,21 @@ public:
 				void *callback_data);
 	~LLPanelLogin();
 
-	virtual BOOL handleKeyHere(KEY key, MASK mask);
-	virtual void draw();
 	virtual void setFocus( BOOL b );
-
-	// Show the XUI first name, last name, and password widgets.  They are
-	// hidden on startup for reg-in-client
-	static void showLoginWidgets();
 
 	static void show(const LLRect &rect,
 		void (*callback)(S32 option, void* user_data), 
 		void* callback_data);
 
 	static void setFields(LLPointer<LLCredential> credential, BOOL remember);
-
+  
 	static void getFields(LLPointer<LLCredential>& credential, BOOL& remember);
+
+	static BOOL isCredentialSet() { return sCredentialSet; }
 
 	static BOOL areCredentialFieldsDirty();
 	static void setLocation(const LLSLURL& slurl);
+	static void autologinToLocation(const LLSLURL& slurl);
 	
 	/// Call when preferences that control visibility may have changed
 	static void updateLocationSelectorsVisibility();
@@ -74,6 +71,8 @@ public:
 	static void closePanel();
 
 	void setSiteIsAlive( bool alive );
+
+	void showLoginWidgets();
 
 	static void loadLoginPage();	
 	static void giveFocus();
@@ -86,9 +85,11 @@ public:
 	/// to be called from LLStartUp::setStartSLURL
 	static void onUpdateStartSLURL(const LLSLURL& new_start_slurl);
 
+	// called from prefs when initializing panel
+	static bool getShowFavorites();
+
 private:
 	friend class LLPanelLoginListener;
-	void reshapeBrowser();
 	void addFavoritesToStartLocation();
 	void addUsersWithFavoritesToUsername();
 	void onSelectServer();
@@ -103,16 +104,25 @@ private:
 	static void updateServerCombo();
 
 private:
-	LLPointer<LLUIImage> mLogoImage;
 	boost::scoped_ptr<LLPanelLoginListener> mListener;
+
+	void updateLoginButtons();
 
 	void			(*mCallback)(S32 option, void *userdata);
 	void*			mCallbackData;
 
 	BOOL            mPasswordModified;
+	bool			mShowFavorites;
 
 	static LLPanelLogin* sInstance;
 	static BOOL		sCapslockDidNotification;
+	bool			mFirstLoginThisInstall;
+    
+    static BOOL sCredentialSet;
+
+	unsigned int mUsernameLength;
+	unsigned int mPasswordLength;
+	unsigned int mLocationLength;
 };
 
 #endif

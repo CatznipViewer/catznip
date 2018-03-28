@@ -45,6 +45,7 @@
 #include "llpanelpick.h"
 #include "lltexturectrl.h"
 #include "llviewerregion.h"
+#include "llhttpconstants.h"
 
 LLPanelPlaceInfo::LLPanelPlaceInfo()
 :	LLPanel(),
@@ -150,17 +151,8 @@ void LLPanelPlaceInfo::displayParcelInfo(const LLUUID& region_id,
 	std::string url = region->getCapability("RemoteParcelRequest");
 	if (!url.empty())
 	{
-		body["location"] = ll_sd_from_vector3(mPosRegion);
-		if (!region_id.isNull())
-		{
-			body["region_id"] = region_id;
-		}
-		if (!pos_global.isExactlyZero())
-		{
-			U64 region_handle = to_region_handle(pos_global);
-			body["region_handle"] = ll_sd_from_U64(region_handle);
-		}
-		LLHTTPClient::post(url, body, new LLRemoteParcelRequestResponder(getObserverHandle()));
+        LLRemoteParcelInfoProcessor::getInstance()->requestRegionParcelInfo(url,
+            region_id, mPosRegion, pos_global, getObserverHandle());
 	}
 	else
 	{
@@ -169,15 +161,15 @@ void LLPanelPlaceInfo::displayParcelInfo(const LLUUID& region_id,
 }
 
 // virtual
-void LLPanelPlaceInfo::setErrorStatus(U32 status, const std::string& reason)
+void LLPanelPlaceInfo::setErrorStatus(S32 status, const std::string& reason)
 {
 	// We only really handle 404 and 499 errors
 	std::string error_text;
-	if(status == 404)
+	if(status == HTTP_NOT_FOUND)
 	{
 		error_text = getString("server_error_text");
 	}
-	else if(status == 499)
+	else if(status == HTTP_INTERNAL_ERROR)
 	{
 		error_text = getString("server_forbidden_text");
 	}
@@ -201,7 +193,7 @@ void LLPanelPlaceInfo::setErrorStatus(U32 status, const std::string& reason)
 // virtual
 void LLPanelPlaceInfo::processParcelInfo(const LLParcelData& parcel_data)
 {
-	if(parcel_data.snapshot_id.notNull())
+	if(mSnapshotCtrl)
 	{
 		mSnapshotCtrl->setImageAssetID(parcel_data.snapshot_id);
 	}
@@ -231,15 +223,15 @@ void LLPanelPlaceInfo::processParcelInfo(const LLParcelData& parcel_data)
 	// If the region position is zero, grab position from the global
 	if(mPosRegion.isExactlyZero())
 	{
-		region_x = llround(parcel_data.global_x) % REGION_WIDTH_UNITS;
-		region_y = llround(parcel_data.global_y) % REGION_WIDTH_UNITS;
-		region_z = llround(parcel_data.global_z);
+		region_x = ll_round(parcel_data.global_x) % REGION_WIDTH_UNITS;
+		region_y = ll_round(parcel_data.global_y) % REGION_WIDTH_UNITS;
+		region_z = ll_round(parcel_data.global_z);
 	}
 	else
 	{
-		region_x = llround(mPosRegion.mV[VX]);
-		region_y = llround(mPosRegion.mV[VY]);
-		region_z = llround(mPosRegion.mV[VZ]);
+		region_x = ll_round(mPosRegion.mV[VX]);
+		region_y = ll_round(mPosRegion.mV[VY]);
+		region_z = ll_round(mPosRegion.mV[VZ]);
 	}
 
 	if (!parcel_data.name.empty())

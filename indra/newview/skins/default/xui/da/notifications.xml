@@ -85,12 +85,6 @@ Check at Internet forbindelsen fungerer korrekt.
 		Gem ændringer til nuværende tøj/krops del?
 		<usetemplate canceltext="Annullér" name="yesnocancelbuttons" notext="Gem ikke" yestext="Gem"/>
 	</notification>
-	<notification name="CompileQueueSaveText">
-		Der var problemer med upload af teksten til et script af følgende årsager: [REASON]. Prøv igen senere.
-	</notification>
-	<notification name="CompileQueueSaveBytecode">
-		Der var problemer med at uploade den kompileret script af følgende årsager: [REASON]. Prøv igen senere.
-	</notification>
 	<notification name="WriteAnimationFail">
 		Der var et problem med skrivning af animations data. Prøv igen senere.
 	</notification>
@@ -1311,9 +1305,6 @@ Prøv igen om lidt.
 	<notification name="NoValidCircuit">
 		Ingen gyldig kode for kredsløb.
 	</notification>
-	<notification name="NoValidTimestamp">
-		Ikke et gyldigt klokkeslæt.
-	</notification>
 	<notification name="NoPendingConnection">
 		Kunne ikke skabe fast forbindelse.
 	</notification>
@@ -1435,7 +1426,7 @@ Hvis du ikke forlader regionen, vil du blive logget af.
 
 [MESSAGE]
 
-Fra objekt: &lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;, ejer: [NAME]?
+Fra objekt: &lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;, ejer: [NAME_SLURL]?
 		<form name="form">
 			<button name="Gotopage" text="Gå til side"/>
 			<button name="Cancel" text="Afbryd"/>
@@ -1574,9 +1565,6 @@ Klik på Acceptér for at deltage eller Afvis for at afvise invitationen. Klik p
 	</notification>
 	<notification name="VoiceChannelJoinFailed">
 		Det lykkedes ikke at forbinde til [VOICE_CHANNEL_NAME], prøv venligst igen senere.  Du vil nu blive koblet til almindelig voice-chat.
-	</notification>
-	<notification name="VoiceLoginRetry">
-		Vi laver en stemmekanal til dig. Det kan tage op til et minut.
 	</notification>
 	<notification name="VoiceEffectsExpired">
 		En eller flere af dine stemme &quot;morphs&quot; er udløbet.

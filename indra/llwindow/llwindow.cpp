@@ -39,7 +39,6 @@
 
 #include "llerror.h"
 #include "llkeyboard.h"
-#include "linked_lists.h"
 #include "llwindowcallbacks.h"
 
 
@@ -50,8 +49,8 @@ LLSplashScreen *gSplashScreenp = NULL;
 BOOL gDebugClicks = FALSE;
 BOOL gDebugWindowProc = FALSE;
 
-const S32 gURLProtocolWhitelistCount = 4;
-const std::string gURLProtocolWhitelist[] = { "secondlife:", "http:", "https:", "data:" };
+const S32 gURLProtocolWhitelistCount = 5;
+const std::string gURLProtocolWhitelist[] = { "secondlife:", "http:", "https:", "data:", "mailto:" };
 
 // CP: added a handler list - this is what's used to open the protocol and is based on registry entry
 //	   only meaningful difference currently is that file: protocols are opened using http:
@@ -72,8 +71,8 @@ S32 OSMessageBox(const std::string& text, const std::string& caption, U32 type)
 	}
 
 	S32 result = 0;
-#if LL_MESA_HEADLESS // !!! *FIX: (???)
-	llwarns << "OSMessageBox: " << text << llendl;
+#if LL_MESA_HEADLESS // !!! *FIX: (?)
+	LL_WARNS() << "OSMessageBox: " << text << LL_ENDL;
 	return OSBTN_OK;
 #elif LL_WINDOWS
 	result = OSMessageBoxWin32(text, caption, type);
@@ -324,7 +323,7 @@ bool LLSplashScreen::isVisible()
 // static
 LLSplashScreen *LLSplashScreen::create()
 {
-#if LL_MESA_HEADLESS || LL_SDL  // !!! *FIX: (???)
+#if LL_MESA_HEADLESS || LL_SDL  // !!! *FIX: (?)
 	return 0;
 #elif LL_WINDOWS
 	return new LLSplashScreenWin32;
@@ -423,7 +422,7 @@ LLWindow* LLWindowManager::createWindow(
 	if (FALSE == new_window->isValid())
 	{
 		delete new_window;
-		llwarns << "LLWindowManager::create() : Error creating window." << llendl;
+		LL_WARNS() << "LLWindowManager::create() : Error creating window." << LL_ENDL;
 		return NULL;
 	}
 	sWindowList.insert(new_window);
@@ -434,8 +433,8 @@ BOOL LLWindowManager::destroyWindow(LLWindow* window)
 {
 	if (sWindowList.find(window) == sWindowList.end())
 	{
-		llerrs << "LLWindowManager::destroyWindow() : Window pointer not valid, this window doesn't exist!" 
-			<< llendl;
+		LL_ERRS() << "LLWindowManager::destroyWindow() : Window pointer not valid, this window doesn't exist!" 
+			<< LL_ENDL;
 		return FALSE;
 	}
 

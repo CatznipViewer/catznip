@@ -3,6 +3,7 @@
 	<action_set description="這些能力包括新增或移除群組成員和允許新成員不受邀即可加入群組的等權力。" name="Membership">
 		<action description="邀請他人加入這個群組" longdescription="欲邀請他人加入這個群組，請按下角色欄下的成員頁籤中的「邀請」按鈕。" name="member invite" value="1"/>
 		<action description="將會員由這個群組中踢出" longdescription="欲將成員從群組踢出，請按下角色欄下的成員頁籤中的「踢出」按鈕。 所有人可踢出任何不具所有人角色的人。 如果你不是所有人，一位成員只在他僅屬於「任何人」角色且沒有其他角色的情況下被踢出群組。 欲卸除成員的角色，你必須有「卸除成員角色」的能力。" name="member eject" value="2"/>
+		<action description="管理禁入清單" longdescription="允許群組成員控制是否禁止或重新允許居民加入這個群組。" name="allow ban" value="51"/>
 		<action description="切換「免費自由加入」設定，更改「加入費」。" longdescription="切換「免費自由加入」設定，讓成員不受邀也可加入，並在基本設定欄更改「加入費」。" name="member options" value="3"/>
 	</action_set>
 	<action_set description="這些能力包括新增、移除、更改群組角色，新增或移除成員的角色，和為角色設定能力等權力。" name="Roles">
@@ -37,7 +38,7 @@
 		<action description="固定允許「編輯地形」" longdescription="身負具此能力的角色的成員可以在群組所有地段上編輯地形，無論這功能在「土地資料」&gt; 選項頁籤裡是否被禁止。" name="land allow edit land" value="23"/>
 		<action description="固定允許「飛行」" longdescription="身負具此能力的角色的成員可以在群組所有地段上飛行，無論這能力是否在「土地資料」&gt; 選項頁籤裡被禁止。" name="land allow fly" value="24"/>
 		<action description="固定允許「新建物件」" longdescription="身負具此能力的角色的成員可以在群組所有地段上新建物件，無論這能力是否在「土地資料」&gt; 選項頁籤裡被禁止。" name="land allow create" value="25"/>
-		<action description="總是允許「新建地標」" longdescription="身負具此能力的角色的成員可以將群組所有的地段設為地標，無論這能力是否在「土地資料」&gt; 選項頁籤裡被禁止。" name="land allow landmark" value="26"/>
+		<action description="忽略降落點" longdescription="身負具此能力的角色的成員可以直接瞬間傳送到一個群組所有的地段，即使「土地資料」&gt;「選項」頁籤裡已設定了某個降落點。" name="land allow direct teleport" value="26"/>
 		<action description="允許在群組所有土地上「將這裡設為我的家」" longdescription="身負具此能力的角色的成員，可以在讓渡給這群組的地段上使用「世界」選單 &gt; 地標 &gt; 「將這裡設為我的家」。" name="land allow set home" value="28"/>
 		<action description="允許在群組所有土地上「開辦活動」" longdescription="身負具這能力的角色的成員，可以選擇群組所有的地段作為開辦活動的場地。" name="land allow host event" value="41"/>
 	</action_set>
@@ -69,5 +70,9 @@
 		<action description="加入群組聊天" longdescription="身負具這能力的角色的成員，可以加入群組的文字或語音聊天會話。" name="join group chat" value="16"/>
 		<action description="加入群組語音聊天" longdescription="身負具這能力的角色的成員，可以加入群組的語音聊天會話。  注意：欲加入語音聊天會話，需有「加入群組聊天」能力。" name="join voice chat" value="27"/>
 		<action description="適度成人內容的群組聊天" longdescription="身負具這能力的角色的成員，可以控制誰可加入群組語音和文字聊天會話。" name="moderate group chat" value="37"/>
+	</action_set>
+	<action_set description="這些能力包括修改本群組所擁有的體驗的權限" name="experience_tools_experience">
+		<action description="體驗管理" longdescription="擔任有此能力的角色的成員，可以編輯一個體驗的元資料。" name="experience admin" value="49"/>
+		<action description="體驗貢獻者" longdescription="擔任有此能力的角色的成員，可以為一個體驗貢獻腳本。" name="experience contributor" value="50"/>
 	</action_set>
 </role_actions>

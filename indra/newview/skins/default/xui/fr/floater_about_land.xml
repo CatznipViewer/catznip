@@ -10,13 +10,13 @@
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
 	<floater.string name="Minutes">
-		[MINUTES] minutes
+		[MINUTES] min
 	</floater.string>
 	<floater.string name="Minute">
-		minute
+		lmin
 	</floater.string>
 	<floater.string name="Seconds">
-		[SECONDS] secondes
+		[SECONDS] s
 	</floater.string>
 	<floater.string name="Remaining">
 		restantes
@@ -312,9 +312,6 @@ Seules les parcelles de grande taille peuvent apparaître dans la recherche.
 			<panel.string name="push_restrict_region_text">
 				Pas de bousculades (les règles de la région priment)
 			</panel.string>
-			<panel.string name="see_avs_text">
-				Les avatars sur les autres parcelles peuvent voir
-			</panel.string>
 			<text name="allow_label">
 				Autoriser les autres résidents à :
 			</text>
@@ -340,22 +337,6 @@ Seules les parcelles de grande taille peuvent apparaître dans la recherche.
 			<check_box label="Sécurisé (pas de dégâts)" name="check safe" tool_tip="Si cette option est cochée, le terrain est sécurisé et il n&apos;y pas de risques de dommages causés par des combats. Si elle est décochée, des dommages causés par les combats peuvent avoir lieu."/>
 			<check_box label="Pas de bousculades" name="PushRestrictCheck" tool_tip="Empêche l&apos;utilisation de scripts causant des bousculades. Cette option est utile pour empêcher les comportements abusifs sur votre terrain."/>
 			<check_box label="Voir le lieu dans la recherche (30 L$/sem.)" name="ShowDirectoryCheck" tool_tip="Afficher la parcelle dans les résultats de recherche"/>
-			<combo_box name="land category with adult">
-				<combo_box.item label="Toutes catégories" name="item0"/>
-				<combo_box.item label="Appartenant aux Lindens" name="item1"/>
-				<combo_box.item label="Adult" name="item2"/>
-				<combo_box.item label="Art et Culture" name="item3"/>
-				<combo_box.item label="Affaires" name="item4"/>
-				<combo_box.item label="Éducation" name="item5"/>
-				<combo_box.item label="Jeux" name="item6"/>
-				<combo_box.item label="Favoris" name="item7"/>
-				<combo_box.item label="Accueil pour les nouveaux" name="item8"/>
-				<combo_box.item label="Parcs et Nature" name="item9"/>
-				<combo_box.item label="Résidentiel" name="item10"/>
-				<combo_box.item label="Shopping" name="item11"/>
-				<combo_box.item label="Location" name="item13"/>
-				<combo_box.item label="Autre" name="item12"/>
-			</combo_box>
 			<combo_box name="land category">
 				<combo_box.item label="Toutes catégories" name="item0"/>
 				<combo_box.item label="Appartenant aux Lindens" name="item1"/>
@@ -456,22 +437,13 @@ musique :
 			<panel.string name="access_estate_defined">
 				(défini par le domaine
 			</panel.string>
-			<panel.string name="allow_public_access">
-				Autoriser l&apos;accès public ([MATURITY]) (Remarque : des lignes d&apos;interdiction seront créées si cette case n&apos;est pas cochée)
-			</panel.string>
 			<panel.string name="estate_override">
 				Au moins une de ces options est définie au niveau du domaine.
 			</panel.string>
-			<text name="Limit access to this parcel to:">
-				Accès à cette parcelle
-			</text>
-			<check_box label="Autoriser l&apos;accès public (des lignes d&apos;interdiction seront créées si cette case n&apos;est pas cochée)" name="public_access"/>
-			<text name="Only Allow">
-				Conditions d&apos;accès des résidents :
-			</text>
-			<check_box label="Informations de paiement enregistrées [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Pour pouvoir accéder à cette parcelle, les résidents doivent avoir enregistré des informations de paiement. Consultez le [SUPPORT_SITE] pour plus d&apos;informations."/>
-			<check_box label="Avoir plus de 18 ans [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Pour accéder à cette parcelle, les résidents doivent avoir au moins 18 ans. Consultez le [SUPPORT_SITE] pour plus d&apos;informations."/>
-			<check_box label="Autoriser l&apos;accès au groupe : [GROUP]" name="GroupCheck" tool_tip="Définir le groupe à l&apos;onglet Général."/>
+			<check_box label="Tout le monde peut rendre visite (Des lignes d&apos;interdiction seront créées si cette case n&apos;est pas cochée)" name="public_access"/>
+			<check_box label="Doit avoir plus de 18 ans [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Pour accéder à cette parcelle, les résidents doivent avoir au moins 18 ans. Consultez le [SUPPORT_SITE] pour plus d&apos;informations."/>
+			<check_box label="Les infos de paiement doivent être enregistrées dans le dossier  [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Pour pouvoir accéder à cette parcelle, les résidents doivent avoir enregistré des informations de paiement. Consultez le [SUPPORT_SITE] pour plus d&apos;informations."/>
+			<check_box label="Autoriser le groupe [GROUP] sans restrictions" name="GroupCheck" tool_tip="Définir le groupe à l&apos;onglet Général."/>
 			<check_box label="Vendre des pass à :" name="PassCheck" tool_tip="Autoriser un accès temporaire à cette parcelle"/>
 			<combo_box name="pass_combo" width="110">
 				<combo_box.item label="Tout le monde" name="Anyone"/>
@@ -479,9 +451,12 @@ musique :
 			</combo_box>
 			<spinner label="Prix en L$ :" name="PriceSpin"/>
 			<spinner label="Durée en heures :" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(Le propriétaire de domaine peut avoir limité ces choix)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Toujours autoriser" name="AllowedText">
-					Résidents autorisés
+					Toujours autorisé ([COUNT], max. [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] dans la liste, [MAX] max.)"/>
 				<button label="Ajouter" name="add_allowed"/>
@@ -489,12 +464,13 @@ musique :
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Bannir" name="BanCheck">
-					Résidents bannis
+					Toujours interdit ([COUNT], max. [MAX])
 				</text>
 				<name_list name="BannedList" tool_tip="([LISTED] dans la liste, [MAX] max.)"/>
 				<button label="Ajouter" name="add_banned"/>
 				<button label="Supprimer" label_selected="Supprimer" name="remove_banned"/>
 			</panel>
 		</panel>
+		<panel label="EXPÉRIENCES" name="land_experiences_panel"/>
 	</tab_container>
 </floater>

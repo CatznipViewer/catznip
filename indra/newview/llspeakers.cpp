@@ -29,14 +29,17 @@
 #include "llspeakers.h"
 
 #include "llagent.h"
+#include "llavatarnamecache.h"
 #include "llappviewer.h"
 #include "llimview.h"
 #include "llgroupmgr.h"
 #include "llsdutil.h"
 #include "lluicolortable.h"
 #include "llviewerobjectlist.h"
+#include "llviewerregion.h"
 #include "llvoavatar.h"
 #include "llworld.h"
+#include "llcorehttputil.h"
 
 extern LLControlGroup gSavedSettings;
 
@@ -73,13 +76,13 @@ void LLSpeaker::lookupName()
 {
 	if (mDisplayName.empty())
 	{
-		gCacheName->get(mID, false, boost::bind(&LLSpeaker::onNameCache, this, _1, _2, _3));
+		LLAvatarNameCache::get(mID, boost::bind(&LLSpeaker::onNameCache, this, _1, _2)); // todo: can be group???
 	}
 }
 
-void LLSpeaker::onNameCache(const LLUUID& id, const std::string& full_name, bool is_group)
+void LLSpeaker::onNameCache(const LLUUID& id, const LLAvatarName& av_name)
 {
-	mDisplayName = full_name;
+	mDisplayName = av_name.getUserName();
 }
 
 bool LLSpeaker::isInVoiceChannel()
@@ -263,47 +266,6 @@ bool LLSpeakersDelayActionsStorage::isTimerStarted(const LLUUID& speaker_id)
 }
 
 //
-// ModerationResponder
-//
-
-class ModerationResponder : public LLHTTPClient::Responder
-{
-public:
-	ModerationResponder(const LLUUID& session_id)
-	{
-		mSessionID = session_id;
-	}
-	
-	virtual void error(U32 status, const std::string& reason)
-	{
-		llwarns << status << ": " << reason << llendl;
-		
-		if ( gIMMgr )
-		{
-			//403 == you're not a mod
-			//should be disabled if you're not a moderator
-			if ( 403 == status )
-			{
-				gIMMgr->showSessionEventError(
-											  "mute",
-											  "not_a_mod_error",
-											  mSessionID);
-			}
-			else
-			{
-				gIMMgr->showSessionEventError(
-											  "mute",
-											  "generic_request_error",
-											  mSessionID);
-			}
-		}
-	}
-	
-private:
-	LLUUID mSessionID;
-};
-
-//
 // LLSpeakerMgr
 //
 
@@ -339,7 +301,7 @@ LLPointer<LLSpeaker> LLSpeakerMgr::setSpeaker(const LLUUID& id, const std::strin
 		speakerp->mStatus = status;
 		mSpeakers.insert(std::make_pair(speakerp->mID, speakerp));
 		mSpeakersSorted.push_back(speakerp);
-		LL_DEBUGS("Speakers") << "Added speaker " << id << llendl;
+		LL_DEBUGS("Speakers") << "Added speaker " << id << LL_ENDL;
 		fireEvent(new LLSpeakerListChangeEvent(this, speakerp->mID), "add");
 	}
 	else
@@ -360,7 +322,7 @@ LLPointer<LLSpeaker> LLSpeakerMgr::setSpeaker(const LLUUID& id, const std::strin
 		}
 		else
 		{
-			LL_WARNS("Speakers") << "Speaker " << id << " not found" << llendl;
+			LL_WARNS("Speakers") << "Speaker " << id << " not found" << LL_ENDL;
 		}
 	}
 
@@ -424,7 +386,7 @@ void LLSpeakerMgr::update(BOOL resort_ok)
 			if (moderator_muted_voice != speakerp->mModeratorMutedVoice)
 			{
 				speakerp->mModeratorMutedVoice = moderator_muted_voice;
-				LL_DEBUGS("Speakers") << (speakerp->mModeratorMutedVoice? "Muted" : "Umuted") << " speaker " << speaker_id<< llendl;
+				LL_DEBUGS("Speakers") << (speakerp->mModeratorMutedVoice? "Muted" : "Umuted") << " speaker " << speaker_id<< LL_ENDL;
 				speakerp->fireEvent(new LLSpeakerVoiceModerationEvent(speakerp));
 			}
 
@@ -540,16 +502,11 @@ void LLSpeakerMgr::updateSpeakerList()
 			LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(session_id);
 			if (session->isGroupSessionType() && (mSpeakers.size() <= 1))
 			{
-                const F32 load_group_timeout = gSavedSettings.getF32("ChatLoadGroupTimeout");
 				// For groups, we need to hit the group manager.
 				// Note: The session uuid and the group uuid are actually one and the same. If that was to change, this will fail.
 				LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(session_id);
-				if (!gdatap && (mGetListTime.getElapsedTimeF32() >= load_group_timeout))
-				{
-					// Request the data the first time around
-					LLGroupMgr::getInstance()->sendCapGroupMembersRequest(session_id);
-				}
-				else if (gdatap && gdatap->isMemberDataComplete() && !gdatap->mMembers.empty())
+
+				if (gdatap && gdatap->isMemberDataComplete() && !gdatap->mMembers.empty())
 				{
 					// Add group members when we get the complete list (note: can take a while before we get that list)
 					LLGroupMgrGroupData::member_list_t::iterator member_it = gdatap->mMembers.begin();
@@ -599,11 +556,14 @@ void LLSpeakerMgr::updateSpeakerList()
 	setSpeaker(gAgentID, "", LLSpeaker::STATUS_VOICE_ACTIVE, LLSpeaker::SPEAKER_AGENT);
 }
 
-void LLSpeakerMgr::setSpeakerNotInChannel(LLSpeaker* speakerp)
+void LLSpeakerMgr::setSpeakerNotInChannel(LLPointer<LLSpeaker> speakerp)
 {
-	speakerp->mStatus = LLSpeaker::STATUS_NOT_IN_CHANNEL;
-	speakerp->mDotColor = INACTIVE_COLOR;
-	mSpeakerDelayRemover->setActionTimer(speakerp->mID);
+	if  (speakerp.notNull())
+	{
+		speakerp->mStatus = LLSpeaker::STATUS_NOT_IN_CHANNEL;
+		speakerp->mDotColor = INACTIVE_COLOR;
+		mSpeakerDelayRemover->setActionTimer(speakerp->mID);
+	}
 }
 
 bool LLSpeakerMgr::removeSpeaker(const LLUUID& speaker_id)
@@ -621,7 +581,7 @@ bool LLSpeakerMgr::removeSpeaker(const LLUUID& speaker_id)
 		}
 	}
 
-	LL_DEBUGS("Speakers") << "Removed speaker " << speaker_id << llendl;
+	LL_DEBUGS("Speakers") << "Removed speaker " << speaker_id << LL_ENDL;
 	fireEvent(new LLSpeakerListChangeEvent(this, speaker_id), "remove");
 
 	update(TRUE);
@@ -739,7 +699,7 @@ void LLIMSpeakerMgr::setSpeakers(const LLSD& speakers)
 				// Fire event only if moderator changed
 				if ( is_moderator != speakerp->mIsModerator )
 				{
-					LL_DEBUGS("Speakers") << "Speaker " << agent_id << (is_moderator ? "is now" : "no longer is") << " a moderator" << llendl;
+					LL_DEBUGS("Speakers") << "Speaker " << agent_id << (is_moderator ? "is now" : "no longer is") << " a moderator" << LL_ENDL;
 					fireEvent(new LLSpeakerUpdateModeratorEvent(speakerp), "update_moderator");
 				}
 			}
@@ -783,7 +743,7 @@ void LLIMSpeakerMgr::updateSpeakers(const LLSD& update)
 
 			if (agent_data.isMap() && agent_data.has("transition"))
 			{
-				if (agent_data["transition"].asString() == "LEAVE" && speakerp.notNull())
+				if (agent_data["transition"].asString() == "LEAVE")
 				{
 					setSpeakerNotInChannel(speakerp);
 				}
@@ -794,7 +754,7 @@ void LLIMSpeakerMgr::updateSpeakers(const LLSD& update)
 				}
 				else
 				{
-					llwarns << "bad membership list update " << ll_print_sd(agent_data["transition"]) << llendl;
+					LL_WARNS() << "bad membership list update from 'agent_updates' for agent " << agent_id << ", transition " << ll_print_sd(agent_data["transition"]) << LL_ENDL;
 				}
 			}
 
@@ -812,7 +772,7 @@ void LLIMSpeakerMgr::updateSpeakers(const LLSD& update)
 					// Fire event only if moderator changed
 					if ( is_moderator != speakerp->mIsModerator )
 					{
-						LL_DEBUGS("Speakers") << "Speaker " << agent_id << (is_moderator ? "is now" : "no longer is") << " a moderator" << llendl;
+						LL_DEBUGS("Speakers") << "Speaker " << agent_id << (is_moderator ? "is now" : "no longer is") << " a moderator" << LL_ENDL;
 						fireEvent(new LLSpeakerUpdateModeratorEvent(speakerp), "update_moderator");
 					}
 				}
@@ -836,7 +796,7 @@ void LLIMSpeakerMgr::updateSpeakers(const LLSD& update)
 			LLPointer<LLSpeaker> speakerp = findSpeaker(agent_id);
 
 			std::string agent_transition = update_it->second.asString();
-			if (agent_transition == "LEAVE" && speakerp.notNull())
+			if (agent_transition == "LEAVE")
 			{
 				setSpeakerNotInChannel(speakerp);
 			}
@@ -847,22 +807,18 @@ void LLIMSpeakerMgr::updateSpeakers(const LLSD& update)
 			}
 			else
 			{
-				llwarns << "bad membership list update "
-						<< agent_transition << llendl;
+				LL_WARNS() << "bad membership list update from 'updates' for agent " << agent_id << ", transition " << agent_transition << LL_ENDL;
 			}
 		}
 	}
 }
-/*prep#
-	virtual void errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-		llwarns << "ModerationResponder error [status:" << status << "]: " << content << llendl;
-		*/
+
 void LLIMSpeakerMgr::toggleAllowTextChat(const LLUUID& speaker_id)
 {
 	LLPointer<LLSpeaker> speakerp = findSpeaker(speaker_id);
 	if (!speakerp) return;
 
-	std::string url = gAgent.getRegion()->getCapability("ChatSessionRequest");
+	std::string url = gAgent.getRegionCapability("ChatSessionRequest");
 	LLSD data;
 	data["method"] = "mute update";
 	data["session-id"] = getSessionID();
@@ -872,7 +828,8 @@ void LLIMSpeakerMgr::toggleAllowTextChat(const LLUUID& speaker_id)
 	//current value represents ability to type, so invert
 	data["params"]["mute_info"]["text"] = !speakerp->mModeratorMutedText;
 
-	LLHTTPClient::post(url, data, new ModerationResponder(getSessionID()));
+    LLCoros::instance().launch("LLIMSpeakerMgr::moderationActionCoro",
+        boost::bind(&LLIMSpeakerMgr::moderationActionCoro, this, url, data));
 }
 
 void LLIMSpeakerMgr::moderateVoiceParticipant(const LLUUID& avatar_id, bool unmute)
@@ -887,7 +844,7 @@ void LLIMSpeakerMgr::moderateVoiceParticipant(const LLUUID& avatar_id, bool unmu
 	// do not send voice moderation changes for avatars not in voice channel
 	if (!is_in_voice) return;
 
-	std::string url = gAgent.getRegion()->getCapability("ChatSessionRequest");
+	std::string url = gAgent.getRegionCapability("ChatSessionRequest");
 	LLSD data;
 	data["method"] = "mute update";
 	data["session-id"] = getSessionID();
@@ -896,10 +853,50 @@ void LLIMSpeakerMgr::moderateVoiceParticipant(const LLUUID& avatar_id, bool unmu
 	data["params"]["mute_info"] = LLSD::emptyMap();
 	data["params"]["mute_info"]["voice"] = !unmute;
 
-	LLHTTPClient::post(
-		url,
-		data,
-		new ModerationResponder(getSessionID()));
+    LLCoros::instance().launch("LLIMSpeakerMgr::moderationActionCoro",
+        boost::bind(&LLIMSpeakerMgr::moderationActionCoro, this, url, data));
+}
+
+void LLIMSpeakerMgr::moderationActionCoro(std::string url, LLSD action)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("moderationActionCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts = LLCore::HttpOptions::ptr_t(new LLCore::HttpOptions);
+
+    httpOpts->setWantHeaders(true);
+
+    LLUUID sessionId = action["session-id"];
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, action, httpOpts);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        if (gIMMgr)
+        {
+            //403 == you're not a mod
+            //should be disabled if you're not a moderator
+            if (status == LLCore::HttpStatus(HTTP_FORBIDDEN))
+            {
+                gIMMgr->showSessionEventError(
+                    "mute",
+                    "not_a_mod_error",
+                    sessionId);
+            }
+            else
+            {
+                gIMMgr->showSessionEventError(
+                    "mute",
+                    "generic_request_error",
+                    sessionId);
+            }
+        }
+        return;
+    }
 }
 
 void LLIMSpeakerMgr::moderateVoiceAllParticipants( bool unmute_everyone )
@@ -927,7 +924,7 @@ void LLIMSpeakerMgr::processSessionUpdate(const LLSD& session_update)
 
 void LLIMSpeakerMgr::moderateVoiceSession(const LLUUID& session_id, bool disallow_voice)
 {
-	std::string url = gAgent.getRegion()->getCapability("ChatSessionRequest");
+	std::string url = gAgent.getRegionCapability("ChatSessionRequest");
 	LLSD data;
 	data["method"] = "session update";
 	data["session-id"] = session_id;
@@ -938,7 +935,8 @@ void LLIMSpeakerMgr::moderateVoiceSession(const LLUUID& session_id, bool disallo
 	data["params"]["update_info"]["moderated_mode"] = LLSD::emptyMap();
 	data["params"]["update_info"]["moderated_mode"]["voice"] = disallow_voice;
 
-	LLHTTPClient::post(url, data, new ModerationResponder(session_id));
+    LLCoros::instance().launch("LLIMSpeakerMgr::moderationActionCoro",
+        boost::bind(&LLIMSpeakerMgr::moderationActionCoro, this, url, data));
 }
 
 void LLIMSpeakerMgr::forceVoiceModeratedMode(bool should_be_muted)
@@ -972,7 +970,7 @@ void LLActiveSpeakerMgr::updateSpeakerList()
 	// always populate from active voice channel
 	if (LLVoiceChannel::getCurrentVoiceChannel() != mVoiceChannel) //MA: seems this is always false
 	{
-		LL_DEBUGS("Speakers") << "Removed all speakers" << llendl;
+		LL_DEBUGS("Speakers") << "Removed all speakers" << LL_ENDL;
 		fireEvent(new LLSpeakerListChangeEvent(this, LLUUID::null), "clear");
 		mSpeakers.clear();
 		mSpeakersSorted.clear();
@@ -1032,11 +1030,11 @@ void LLLocalSpeakerMgr::updateSpeakerList()
 	for (speaker_map_t::iterator speaker_it = mSpeakers.begin(); speaker_it != mSpeakers.end(); ++speaker_it)
 	{
 		LLUUID speaker_id = speaker_it->first;
-		LLSpeaker* speakerp = speaker_it->second;
-		if (speakerp->mStatus == LLSpeaker::STATUS_TEXT_ONLY)
+		LLPointer<LLSpeaker> speakerp = speaker_it->second;
+		if (speakerp.notNull() && speakerp->mStatus == LLSpeaker::STATUS_TEXT_ONLY)
 		{
 			LLVOAvatar* avatarp = (LLVOAvatar*)gObjectList.findObject(speaker_id);
-			if (!avatarp || dist_vec_squared(avatarp->getPositionAgent(), gAgent.getPositionAgent()) > CHAT_NORMAL_RADIUS_SQUARED)
+			if (!avatarp || dist_vec_squared(avatarp->getPositionAgent(), gAgent.getPositionAgent()) > CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS)
 			{
 				setSpeakerNotInChannel(speakerp);
 			}

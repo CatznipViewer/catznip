@@ -32,6 +32,7 @@
 #include "llfloaterreg.h"
 
 // Viewer includes
+#include "llagent.h"
 #include "llagentcamera.h"
 #include "lljoystickbutton.h"
 #include "llviewercontrol.h"
@@ -47,9 +48,7 @@ static LLDefaultChildRegistry::Register<LLPanelCameraItem> r("panel_camera_item"
 const F32 NUDGE_TIME = 0.25f;		// in seconds
 const F32 ORBIT_NUDGE_RATE = 0.05f; // fraction of normal speed
 
-// Constants
-const F32 CAMERA_BUTTON_DELAY = 0.0f;
-
+// constants
 #define ORBIT "cam_rotate_stick"
 #define PAN "cam_track_stick"
 #define ZOOM "zoom"
@@ -151,7 +150,7 @@ void LLPanelCameraItem::setValue(const LLSD& value)
 	getChildView("selected_picture")->setVisible( value["selected"]);
 }
 
-static LLRegisterPanelClassWrapper<LLPanelCameraZoom> t_camera_zoom_panel("camera_zoom_panel");
+static LLPanelInjector<LLPanelCameraZoom> t_camera_zoom_panel("camera_zoom_panel");
 
 //-------------------------------------------------------------------------------
 // LLPanelCameraZoom
@@ -342,6 +341,8 @@ void LLFloaterCamera::onClose(bool app_quitting)
 
 	switchMode(CAMERA_CTRL_MODE_PAN);
 	mClosed = TRUE;
+
+	gAgent.setMovementLocked(FALSE);
 }
 
 LLFloaterCamera::LLFloaterCamera(const LLSD& val)

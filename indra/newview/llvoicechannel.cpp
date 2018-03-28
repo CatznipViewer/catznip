@@ -34,8 +34,9 @@
 #include "llpanel.h"
 #include "llrecentpeople.h"
 #include "llviewercontrol.h"
+#include "llviewerregion.h"
 #include "llvoicechannel.h"
-
+#include "llcorehttputil.h"
 
 LLVoiceChannel::voice_channel_map_t LLVoiceChannel::sVoiceChannelMap;
 LLVoiceChannel::voice_channel_map_uri_t LLVoiceChannel::sVoiceChannelURIMap;
@@ -49,64 +50,6 @@ BOOL LLVoiceChannel::sSuspended = FALSE;
 // Constants
 //
 const U32 DEFAULT_RETRIES_COUNT = 3;
-
-
-class LLVoiceCallCapResponder : public LLHTTPClient::Responder
-{
-public:
-	LLVoiceCallCapResponder(const LLUUID& session_id) : mSessionID(session_id) {};
-
-	// called with bad status codes
-	virtual void errorWithContent(U32 status, const std::string& reason, const LLSD& content);
-	virtual void result(const LLSD& content);
-
-private:
-	LLUUID mSessionID;
-};
-
-
-void LLVoiceCallCapResponder::errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-{
-	LL_WARNS("Voice") << "LLVoiceCallCapResponder error [status:"
-		<< status << "]: " << content << LL_ENDL;
-	LLVoiceChannel* channelp = LLVoiceChannel::getChannelByID(mSessionID);
-	if ( channelp )
-	{
-		if ( 403 == status )
-		{
-			//403 == no ability
-			LLNotificationsUtil::add(
-				"VoiceNotAllowed",
-				channelp->getNotifyArgs());
-		}
-		else
-		{
-			LLNotificationsUtil::add(
-				"VoiceCallGenericError",
-				channelp->getNotifyArgs());
-		}
-		channelp->deactivate();
-	}
-}
-
-void LLVoiceCallCapResponder::result(const LLSD& content)
-{
-	LLVoiceChannel* channelp = LLVoiceChannel::getChannelByID(mSessionID);
-	if (channelp)
-	{
-		//*TODO: DEBUG SPAM
-		LLSD::map_const_iterator iter;
-		for(iter = content.beginMap(); iter != content.endMap(); ++iter)
-		{
-			LL_DEBUGS("Voice") << "LLVoiceCallCapResponder::result got " 
-				<< iter->first << LL_ENDL;
-		}
-
-		channelp->setChannelInfo(
-			content["voice_credentials"]["channel_uri"].asString(),
-			content["voice_credentials"]["channel_credentials"].asString());
-	}
-}
 
 //
 // LLVoiceChannel
@@ -202,19 +145,9 @@ void LLVoiceChannel::handleStatusChange(EStatusType type)
 	switch(type)
 	{
 	case STATUS_LOGIN_RETRY:
-		//mLoginNotificationHandle = LLNotifyBox::showXml("VoiceLoginRetry")->getHandle();
-		LLNotificationsUtil::add("VoiceLoginRetry");
+        // no user notice
 		break;
 	case STATUS_LOGGED_IN:
-		//if (!mLoginNotificationHandle.isDead())
-		//{
-		//	LLNotifyBox* notifyp = (LLNotifyBox*)mLoginNotificationHandle.get();
-		//	if (notifyp)
-		//	{
-		//		notifyp->close();
-		//	}
-		//	mLoginNotificationHandle.markDead();
-		//}
 		break;
 	case STATUS_LEFT_CHANNEL:
 		if (callStarted() && !mIgnoreNextSessionLeave && !sSuspended)
@@ -271,14 +204,14 @@ void LLVoiceChannel::deactivate()
 	if (callStarted())
 	{
 		setState(STATE_HUNG_UP);
-		
+
 		//Default mic is OFF when leaving voice calls
-		if (gSavedSettings.getBOOL("AutoDisengageMic") && 
+		if (gSavedSettings.getBOOL("AutoDisengageMic") &&
 			sCurrentVoiceChannel == this &&
 			LLVoiceClient::getInstance()->getUserPTTState())
 		{
 			gSavedSettings.setBOOL("PTTCurrentlyEnabled", true);
-			LLVoiceClient::getInstance()->inputUserControlState(true);
+			LLVoiceClient::getInstance()->setUserPTTState(false);
 		}
 	}
 	LLVoiceClient::getInstance()->removeObserver(this);
@@ -536,12 +469,9 @@ void LLVoiceChannelGroup::getChannelInfo()
 	if (region)
 	{
 		std::string url = region->getCapability("ChatSessionRequest");
-		LLSD data;
-		data["method"] = "call";
-		data["session-id"] = mSessionID;
-		LLHTTPClient::post(url,
-						   data,
-						   new LLVoiceCallCapResponder(mSessionID));
+
+        LLCoros::instance().launch("LLVoiceChannelGroup::voiceCallCapCoro",
+            boost::bind(&LLVoiceChannelGroup::voiceCallCapCoro, this, url));
 	}
 }
 
@@ -664,6 +594,66 @@ void LLVoiceChannelGroup::setState(EState state)
 	}
 }
 
+void LLVoiceChannelGroup::voiceCallCapCoro(std::string url)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("voiceCallCapCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+
+    LLSD postData;
+    postData["method"] = "call";
+    postData["session-id"] = mSessionID;
+
+    LL_INFOS("Voice", "voiceCallCapCoro") << "Generic POST for " << url << LL_ENDL;
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, postData);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    LLVoiceChannel* channelp = LLVoiceChannel::getChannelByID(mSessionID);
+    if (!channelp)
+    {
+        LL_WARNS("Voice") << "Unable to retrieve channel with Id = " << mSessionID << LL_ENDL;
+        return;
+    }
+
+    if (!status)
+    {
+        if (status == LLCore::HttpStatus(HTTP_FORBIDDEN))
+        {
+            //403 == no ability
+            LLNotificationsUtil::add(
+                "VoiceNotAllowed",
+                channelp->getNotifyArgs());
+        }
+        else
+        {
+            LLNotificationsUtil::add(
+                "VoiceCallGenericError",
+                channelp->getNotifyArgs());
+        }
+        channelp->deactivate();
+        return;
+    }
+
+    result.erase(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS);
+
+    LLSD::map_const_iterator iter;
+    for (iter = result.beginMap(); iter != result.endMap(); ++iter)
+    {
+        LL_DEBUGS("Voice") << "LLVoiceCallCapResponder::result got "
+            << iter->first << LL_ENDL;
+    }
+
+    channelp->setChannelInfo(
+        result["voice_credentials"]["channel_uri"].asString(),
+        result["voice_credentials"]["channel_credentials"].asString());
+
+}
+
+
 //
 // LLVoiceChannelProximal
 //
@@ -716,6 +706,8 @@ void LLVoiceChannelProximal::handleStatusChange(EStatusType status)
 		// do not notify user when leaving proximal channel
 		return;
 	case STATUS_VOICE_DISABLED:
+		LLVoiceClient::getInstance()->setUserPTTState(false);
+		gAgent.setVoiceConnected(false);
 		//skip showing "Voice not available at your current location" when agent voice is disabled (EXT-4749)
 		if(LLVoiceClient::getInstance()->voiceEnabled() && LLVoiceClient::getInstance()->isVoiceWorking())
 		{

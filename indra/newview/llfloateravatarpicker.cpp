@@ -42,7 +42,6 @@
 #include "llavatarnamecache.h"	// IDEVO
 #include "llbutton.h"
 #include "llcachename.h"
-#include "llhttpclient.h"		// IDEVO
 #include "lllineeditor.h"
 #include "llscrolllistctrl.h"
 #include "llscrolllistitem.h"
@@ -52,8 +51,11 @@
 #include "llfocusmgr.h"
 #include "lldraghandle.h"
 #include "message.h"
+#include "llcorehttputil.h"
 
 //#include "llsdserialize.h"
+
+static const U32 AVATAR_PICKER_SEARCH_TIMEOUT = 180U;
 
 //put it back as a member once the legacy path is out?
 static std::map<LLUUID, LLAvatarName> sAvatarNameMap;
@@ -70,7 +72,7 @@ LLFloaterAvatarPicker* LLFloaterAvatarPicker::show(select_callback_t callback,
 		LLFloaterReg::showTypedInstance<LLFloaterAvatarPicker>("avatar_picker", LLSD(name));
 	if (!floater)
 	{
-		llwarns << "Cannot instantiate avatar picker" << llendl;
+		LL_WARNS() << "Cannot instantiate avatar picker" << LL_ENDL;
 		return NULL;
 	}
 	
@@ -348,11 +350,11 @@ void LLFloaterAvatarPicker::populateFriend()
 	
 	for(it = collector.mOnline.begin(); it!=collector.mOnline.end(); it++)
 	{
-		friends_scroller->addStringUUIDItem(it->first, it->second);
+		friends_scroller->addStringUUIDItem(it->second, it->first);
 	}
 	for(it = collector.mOffline.begin(); it!=collector.mOffline.end(); it++)
 	{
-			friends_scroller->addStringUUIDItem(it->first, it->second);
+		friends_scroller->addStringUUIDItem(it->second, it->first);
 	}
 	friends_scroller->sortByColumnIndex(0, TRUE);
 }
@@ -405,11 +407,11 @@ void LLFloaterAvatarPicker::drawFrustum()
 
         if (gFocusMgr.childHasMouseCapture(getDragHandle()))
         {
-            mContextConeOpacity = lerp(mContextConeOpacity, gSavedSettings.getF32("PickerContextOpacity"), LLCriticalDamp::getInterpolant(mContextConeFadeTime));
+            mContextConeOpacity = lerp(mContextConeOpacity, gSavedSettings.getF32("PickerContextOpacity"), LLSmoothInterpolation::getInterpolant(mContextConeFadeTime));
         }
         else
         {
-            mContextConeOpacity = lerp(mContextConeOpacity, 0.f, LLCriticalDamp::getInterpolant(mContextConeFadeTime));
+            mContextConeOpacity = lerp(mContextConeOpacity, 0.f, LLSmoothInterpolation::getInterpolant(mContextConeFadeTime));
         }
     }
 }
@@ -456,38 +458,36 @@ BOOL LLFloaterAvatarPicker::visibleItemsSelected() const
 	return FALSE;
 }
 
-class LLAvatarPickerResponder : public LLHTTPClient::Responder
+/*static*/
+void LLFloaterAvatarPicker::findCoro(std::string url, LLUUID queryID, std::string name)
 {
-public:
-	LLUUID mQueryID;
-    std::string mName;
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("genericPostCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
 
-	LLAvatarPickerResponder(const LLUUID& id, const std::string& name) : mQueryID(id), mName(name) { }
+    LL_INFOS("HttpCoroutineAdapter", "genericPostCoro") << "Generic POST for " << url << LL_ENDL;
 
-	/*virtual*/ void completed(U32 status, const std::string& reason, const LLSD& content)
-	{
-		//std::ostringstream ss;
-		//LLSDSerialize::toPrettyXML(content, ss);
-		//llinfos << ss.str() << llendl;
+    httpOpts->setTimeout(AVATAR_PICKER_SEARCH_TIMEOUT);
 
-		// in case of invalid characters, the avatar picker returns a 400
-		// just set it to process so it displays 'not found'
-		if (isGoodStatus(status) || status == 400)
-		{
-			LLFloaterAvatarPicker* floater =
-				LLFloaterReg::findTypedInstance<LLFloaterAvatarPicker>("avatar_picker", mName);
-			if (floater)
-			{
-				floater->processResponse(mQueryID, content);
-			}
-		}
-		else
-		{
-			llwarns << "avatar picker failed [status:" << status << "]: " << content << llendl;
-			
-		}
-	}
-};
+    LLSD result = httpAdapter->getAndSuspend(httpRequest, url, httpOpts);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (status || (status == LLCore::HttpStatus(HTTP_BAD_REQUEST)))
+    {
+        LLFloaterAvatarPicker* floater =
+            LLFloaterReg::findTypedInstance<LLFloaterAvatarPicker>("avatar_picker", name);
+        if (floater)
+        {
+            result.erase(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS);
+            floater->processResponse(queryID, result);
+        }
+    }
+}
+
 
 void LLFloaterAvatarPicker::find()
 {
@@ -496,41 +496,57 @@ void LLFloaterAvatarPicker::find()
 
 	std::string text = getChild<LLUICtrl>("Edit")->getValue().asString();
 
+	size_t separator_index = text.find_first_of(" ._");
+	if (separator_index != text.npos)
+	{
+		std::string first = text.substr(0, separator_index);
+		std::string last = text.substr(separator_index+1, text.npos);
+		LLStringUtil::trim(last);
+		if("Resident" == last)
+		{
+			text = first;
+		}
+	}
+
 	mQueryID.generate();
 
 	std::string url;
 	url.reserve(128); // avoid a memory allocation or two
 
 	LLViewerRegion* region = gAgent.getRegion();
-	url = region->getCapability("AvatarPickerSearch");
-	// Prefer use of capabilities to search on both SLID and display name
-	if (!url.empty())
+	if(region)
 	{
-		// capability urls don't end in '/', but we need one to parse
-		// query parameters correctly
-		if (url.size() > 0 && url[url.size()-1] != '/')
+		url = region->getCapability("AvatarPickerSearch");
+		// Prefer use of capabilities to search on both SLID and display name
+		if (!url.empty())
 		{
-			url += "/";
-		}
-		url += "?page_size=100&names=";
-		std::replace(text.begin(), text.end(), '.', ' ');
-		url += LLURI::escape(text);
-		llinfos << "avatar picker " << url << llendl;
-		LLHTTPClient::get(url, new LLAvatarPickerResponder(mQueryID, getKey().asString()));
-	}
-	else
-	{
-		LLMessageSystem* msg = gMessageSystem;
-		msg->newMessage("AvatarPickerRequest");
-		msg->nextBlock("AgentData");
-		msg->addUUID("AgentID", gAgent.getID());
-		msg->addUUID("SessionID", gAgent.getSessionID());
-		msg->addUUID("QueryID", mQueryID);	// not used right now
-		msg->nextBlock("Data");
-		msg->addString("Name", text);
-		gAgent.sendReliableMessage();
-	}
+			// capability urls don't end in '/', but we need one to parse
+			// query parameters correctly
+			if (url.size() > 0 && url[url.size()-1] != '/')
+			{
+				url += "/";
+			}
+			url += "?page_size=100&names=";
+			std::replace(text.begin(), text.end(), '.', ' ');
+			url += LLURI::escape(text);
+			LL_INFOS() << "avatar picker " << url << LL_ENDL;
 
+            LLCoros::instance().launch("LLFloaterAvatarPicker::findCoro",
+                boost::bind(&LLFloaterAvatarPicker::findCoro, url, mQueryID, getKey().asString()));
+		}
+		else
+		{
+			LLMessageSystem* msg = gMessageSystem;
+			msg->newMessage("AvatarPickerRequest");
+			msg->nextBlock("AgentData");
+			msg->addUUID("AgentID", gAgent.getID());
+			msg->addUUID("SessionID", gAgent.getSessionID());
+			msg->addUUID("QueryID", mQueryID);	// not used right now
+			msg->nextBlock("Data");
+			msg->addString("Name", text);
+			gAgent.sendReliableMessage();
+		}
+	}
 	getChild<LLScrollListCtrl>("SearchResults")->deleteAllItems();
 	getChild<LLScrollListCtrl>("SearchResults")->setCommentText(getString("searching"));
 	
@@ -735,12 +751,13 @@ void LLFloaterAvatarPicker::processResponse(const LLUUID& query_id, const LLSD& 
 
 		if (search_results->isEmpty())
 		{
-			LLStringUtil::format_map_t map;
-			map["[TEXT]"] = childGetText("Edit");
+			std::string name = "'" + getChild<LLUICtrl>("Edit")->getValue().asString() + "'";
 			LLSD item;
 			item["id"] = LLUUID::null;
 			item["columns"][0]["column"] = "name";
-			item["columns"][0]["value"] = getString("not_found", map);
+			item["columns"][0]["value"] = name;
+			item["columns"][1]["column"] = "username";
+			item["columns"][1]["value"] = getString("not_found_text");
 			search_results->addElement(item);
 			search_results->setEnabled(false);
 			getChildView("ok_btn")->setEnabled(false);
@@ -795,7 +812,7 @@ bool LLFloaterAvatarPicker::isSelectBtnEnabled()
 {
 	bool ret_val = visibleItemsSelected();
 
-	if ( ret_val && mOkButtonValidateSignal.num_slots() )
+	if ( ret_val )
 	{
 		std::string acvtive_panel_name;
 		LLScrollListCtrl* list =  NULL;
@@ -826,7 +843,7 @@ bool LLFloaterAvatarPicker::isSelectBtnEnabled()
 			getSelectedAvatarData(list, avatar_ids, avatar_names);
 			if (avatar_ids.size() >= 1) 
 			{
-				ret_val = mOkButtonValidateSignal(avatar_ids);
+				ret_val = mOkButtonValidateSignal.num_slots()?mOkButtonValidateSignal(avatar_ids):true;
 			}
 			else
 			{

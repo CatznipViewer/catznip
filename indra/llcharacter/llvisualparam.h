@@ -47,6 +47,7 @@ enum EVisualParamGroup
 	VISUAL_PARAM_GROUP_TWEAKABLE,
 	VISUAL_PARAM_GROUP_ANIMATABLE,
 	VISUAL_PARAM_GROUP_TWEAKABLE_NO_TRANSMIT,
+	VISUAL_PARAM_GROUP_TRANSMIT_NOT_TWEAKABLE, // deprecated params that used to be tweakable.
 	NUM_VISUAL_PARAM_GROUPS
 };
 
@@ -119,10 +120,10 @@ public:
 	//virtual BOOL			parseData( LLXmlTreeNode *node ) = 0;
 	virtual void			apply( ESex avatar_sex ) = 0;
 	//  Default functions
-	virtual void			setWeight(F32 weight, BOOL upload_bake);
-	virtual void			setAnimationTarget( F32 target_value, BOOL upload_bake );
-	virtual void			animate(F32 delta, BOOL upload_bake);
-	virtual void			stopAnimating(BOOL upload_bake);
+	virtual void			setWeight(F32 weight);
+	virtual void			setAnimationTarget( F32 target_value);
+	virtual void			animate(F32 delta);
+	virtual void			stopAnimating();
 
 	virtual BOOL			linkDrivenParams(visual_param_mapper mapper, BOOL only_cross_params);
 	virtual void			resetDrivenParams();
@@ -149,11 +150,13 @@ public:
 	F32						getWeight() const		{ return mIsAnimating ? mTargetWeight : mCurWeight; }
 	F32						getCurrentWeight() const 	{ return mCurWeight; }
 	F32						getLastWeight() const	{ return mLastWeight; }
+	void					setLastWeight(F32 val) { mLastWeight = val; }
 	BOOL					isAnimating() const	{ return mIsAnimating; }
 	BOOL					isTweakable() const { return (getGroup() == VISUAL_PARAM_GROUP_TWEAKABLE)  || (getGroup() == VISUAL_PARAM_GROUP_TWEAKABLE_NO_TRANSMIT); }
 
 	LLVisualParam*			getNextParam()		{ return mNext; }
 	void					setNextParam( LLVisualParam *next );
+	void					clearNextParam();
 	
 	virtual void			setAnimating(BOOL is_animating) { mIsAnimating = is_animating && !mIsDummy; }
 	BOOL					getAnimating() const { return mIsAnimating; }
@@ -164,6 +167,8 @@ public:
 	EParamLocation			getParamLocation() const { return mParamLocation; }
 
 protected:
+	LLVisualParam(const LLVisualParam& pOther);
+
 	F32					mCurWeight;			// current weight
 	F32					mLastWeight;		// last weight
 	LLVisualParam*		mNext;				// next param in a shared chain

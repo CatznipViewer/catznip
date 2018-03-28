@@ -56,6 +56,33 @@ class LLColor4;
 class LLVector3;
 class LLSelectNode;
 
+const U8 UPD_NONE      		= 0x00;
+const U8 UPD_POSITION  		= 0x01;
+const U8 UPD_ROTATION  		= 0x02;
+const U8 UPD_SCALE     		= 0x04;
+const U8 UPD_LINKED_SETS 	= 0x08;
+const U8 UPD_UNIFORM 		= 0x10;	// used with UPD_SCALE
+
+// This is used by the DeRezObject message to determine where to put
+// derezed tasks.
+enum EDeRezDestination
+{
+	DRD_SAVE_INTO_AGENT_INVENTORY = 0,
+	DRD_ACQUIRE_TO_AGENT_INVENTORY = 1,		// try to leave copy in world
+	DRD_SAVE_INTO_TASK_INVENTORY = 2,
+	DRD_ATTACHMENT = 3,
+	DRD_TAKE_INTO_AGENT_INVENTORY = 4,		// delete from world
+	DRD_FORCE_TO_GOD_INVENTORY = 5,			// force take copy
+	DRD_TRASH = 6,
+	DRD_ATTACHMENT_TO_INV = 7,
+	DRD_ATTACHMENT_EXISTS = 8,
+	DRD_RETURN_TO_OWNER = 9,				// back to owner's inventory
+	DRD_RETURN_TO_LAST_OWNER = 10,			// deeded object back to last owner's inventory
+
+	DRD_COUNT = 11
+};
+
+
 const S32 SELECT_ALL_TES = -1;
 const S32 SELECT_MAX_TES = 32;
 
@@ -143,6 +170,7 @@ public:
 	void selectTE(S32 te_index, BOOL selected);
 	BOOL isTESelected(S32 te_index);
 	S32 getLastSelectedTE();
+	S32 getLastOperatedTE();
 	S32 getTESelectMask() { return mTESelectMask; }
 	void renderOneWireframe(const LLColor4& color);
 	void renderOneSilhouette(const LLColor4 &color);
@@ -152,6 +180,7 @@ public:
 	void setObject(LLViewerObject* object);
 	// *NOTE: invalidate stored textures and colors when # faces change
 	void saveColors();
+	void saveShinyColors();
 	void saveTextures(const uuid_vec_t& textures);
 	void saveTextureScaleRatios(LLRender::eTexIndex index_to_query);
 
@@ -188,6 +217,7 @@ public:
 	std::string		mSitName;
 	U64				mCreationDate;
 	std::vector<LLColor4>	mSavedColors;
+	std::vector<LLColor4>	mSavedShinyColors;
 	uuid_vec_t		mSavedTextures;
 	std::vector<LLVector3>  mTextureScaleRatios;
 	std::vector<LLVector3>	mSilhouetteVertices;	// array of vertices to render silhouette of object
@@ -203,6 +233,7 @@ protected:
 class LLObjectSelection : public LLRefCount
 {
 	friend class LLSelectMgr;
+	friend class LLSafeHandle<LLObjectSelection>;
 
 protected:
 	~LLObjectSelection();
@@ -276,6 +307,7 @@ public:
 	LLViewerObject*	getFirstCopyableObject(BOOL get_parent = FALSE);
 	LLViewerObject* getFirstDeleteableObject();
 	LLViewerObject*	getFirstMoveableObject(BOOL get_parent = FALSE);
+	LLViewerObject*	getFirstUndoEnabledObject(BOOL get_parent = FALSE);
 
 	/// Return the object that lead to this selection, possible a child
 	LLViewerObject* getPrimaryObject() { return mPrimaryObject; }
@@ -358,6 +390,9 @@ struct LLSelectGetFirstTest;
 
 class LLSelectMgr : public LLEditMenuHandler, public LLSingleton<LLSelectMgr>
 {
+	LLSINGLETON(LLSelectMgr);
+	~LLSelectMgr();
+
 public:
 	static BOOL					sRectSelectInclusive;	// do we need to surround an object to pick it?
 	static BOOL					sRenderHiddenSelections;	// do we show selection silhouettes that are occluded?
@@ -383,9 +418,6 @@ public:
 	LLCachedControl<bool>					mDebugSelectMgr;
 
 public:
-	LLSelectMgr();
-	~LLSelectMgr();
-
 	static void cleanupGlobals();
 
 	// LLEditMenuHandler interface
@@ -425,7 +457,7 @@ public:
 	//
 	// *NOTE: You must hold on to the object selection handle, otherwise
 	// the objects will be automatically deselected in 1 frame.
-	LLObjectSelectionHandle selectObjectAndFamily(LLViewerObject* object, BOOL add_to_end = FALSE);
+	LLObjectSelectionHandle selectObjectAndFamily(LLViewerObject* object, BOOL add_to_end = FALSE, BOOL ignore_select_owned = FALSE);
 
 	// For when you want just a child object.
 	LLObjectSelectionHandle selectObjectOnly(LLViewerObject* object, S32 face = SELECT_ALL_TES);
@@ -477,6 +509,8 @@ public:
 
 	bool unlinkObjects();
 
+	void confirmUnlinkObjects(const LLSD& notification, const LLSD& response);
+
 	bool enableLinkObjects();
 
 	bool enableUnlinkObjects();
@@ -496,7 +530,7 @@ public:
 	void			clearGridObjects();
 	void			setGridMode(EGridMode mode);
 	EGridMode		getGridMode() { return mGridMode; }
-	void			getGrid(LLVector3& origin, LLQuaternion& rotation, LLVector3 &scale);
+	void			getGrid(LLVector3& origin, LLQuaternion& rotation, LLVector3 &scale, bool for_snap_guides = false);
 
 	BOOL getTEMode()		{ return mTEMode; }
 	void setTEMode(BOOL b)	{ mTEMode = b; }
@@ -518,6 +552,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	void saveSelectedObjectTransform(EActionType action_type);
 	void saveSelectedObjectColors();
+	void saveSelectedShinyColors();
 	void saveSelectedObjectTextures();
 
 	// Sets which texture channel to query for scale and rot of display
@@ -546,6 +581,7 @@ public:
 	void selectionSetColorOnly(const LLColor4 &color); // Set only the RGB channels
 	void selectionSetAlphaOnly(const F32 alpha); // Set only the alpha channel
 	void selectionRevertColors();
+	void selectionRevertShinyColors();
 	BOOL selectionRevertTextures();
 	void selectionSetBumpmap( U8 bumpmap );
 	void selectionSetTexGen( U8 texgen );
@@ -578,7 +614,7 @@ public:
 	void validateSelection();
 
 	// returns TRUE if it is possible to select this object
-	BOOL canSelectObject(LLViewerObject* object);
+	BOOL canSelectObject(LLViewerObject* object, BOOL ignore_select_owned = FALSE);
 
 	// Returns TRUE if the viewer has information on all selected objects
 	BOOL selectGetAllRootsValid();
@@ -588,6 +624,9 @@ public:
 	// returns TRUE if you can modify all selected objects. 
 	BOOL selectGetRootsModify();
 	BOOL selectGetModify();
+
+	// returns TRUE if all objects are in same region
+	BOOL selectGetSameRegion();
 
 	// returns TRUE if is all objects are non-permanent-enforced
 	BOOL selectGetRootsNonPermanentEnforced();
@@ -728,6 +767,7 @@ private:
 	void sendListToRegions(	const std::string& message_name,
 							void (*pack_header)(void *user_data), 
 							void (*pack_body)(LLSelectNode* node, void *user_data), 
+							void (*log_func)(LLSelectNode* node, void *user_data), 
 							void *user_data,
 							ESendType send_type);
 
@@ -763,6 +803,9 @@ private:
 	static void packHingeHead(void *user_data);
 	static void packPermissionsHead(void* user_data);
 	static void packGodlikeHead(void* user_data);
+    static void logNoOp(LLSelectNode* node, void *user_data);
+    static void logAttachmentRequest(LLSelectNode* node, void *user_data);
+    static void logDetachRequest(LLSelectNode* node, void *user_data);
 	static bool confirmDelete(const LLSD& notification, const LLSD& response, LLObjectSelectionHandle handle);
 
 	// Get the first ID that matches test and whether or not all ids are identical in selected objects.

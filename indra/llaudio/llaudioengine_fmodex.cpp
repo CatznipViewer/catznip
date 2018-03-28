@@ -5,7 +5,7 @@
  *
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2014, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,11 +58,13 @@ LLAudioEngine_FMODEX::LLAudioEngine_FMODEX(bool enable_profiler)
 	memset(&mDeviceId, 0, sizeof(FMOD_GUID));
 // [/SL:KB]
 	mEnableProfiler = enable_profiler;
+	mWindDSPDesc = new FMOD_DSP_DESCRIPTION();
 }
 
 
 LLAudioEngine_FMODEX::~LLAudioEngine_FMODEX()
 {
+	delete mWindDSPDesc;
 }
 
 
@@ -70,7 +72,7 @@ inline bool Check_FMOD_Error(FMOD_RESULT result, const char *string)
 {
 	if(result == FMOD_OK)
 		return false;
-	lldebugs << string << " Error: " << FMOD_ErrorString(result) << llendl;
+	LL_DEBUGS() << string << " Error: " << FMOD_ErrorString(result) << LL_ENDL;
 	return true;
 }
 
@@ -78,11 +80,11 @@ void* F_STDCALL decode_alloc(unsigned int size, FMOD_MEMORY_TYPE type, const cha
 {
 	if(type & FMOD_MEMORY_STREAM_DECODE)
 	{
-		llinfos << "Decode buffer size: " << size << llendl;
+		LL_INFOS() << "Decode buffer size: " << size << LL_ENDL;
 	}
 	else if(type & FMOD_MEMORY_STREAM_FILE)
 	{
-		llinfos << "Strean buffer size: " << size << llendl;
+		LL_INFOS() << "Strean buffer size: " << size << LL_ENDL;
 	}
 	return new char[size];
 }
@@ -317,7 +319,7 @@ void LLAudioEngine_FMODEX::allocateListener(void)
 	mListenerp = (LLListener *) new LLListener_FMODEX(mSystem);
 	if (!mListenerp)
 	{
-		llwarns << "Listener creation failed" << llendl;
+		LL_WARNS() << "Listener creation failed" << LL_ENDL;
 	}
 }
 
@@ -326,16 +328,16 @@ void LLAudioEngine_FMODEX::shutdown()
 {
 	stopInternetStream();
 
-	llinfos << "About to LLAudioEngine::shutdown()" << llendl;
+	LL_INFOS() << "About to LLAudioEngine::shutdown()" << LL_ENDL;
 	LLAudioEngine::shutdown();
 	
-	llinfos << "LLAudioEngine_FMODEX::shutdown() closing FMOD Ex" << llendl;
+	LL_INFOS() << "LLAudioEngine_FMODEX::shutdown() closing FMOD Ex" << LL_ENDL;
 	if ( mSystem ) // speculative fix for MAINT-2657
 	{
-	mSystem->close();
-	mSystem->release();
+		mSystem->close();
+		mSystem->release();
 	}
-	llinfos << "LLAudioEngine_FMODEX::shutdown() done closing FMOD Ex" << llendl;
+	LL_INFOS() << "LLAudioEngine_FMODEX::shutdown() done closing FMOD Ex" << LL_ENDL;
 
 	delete mListenerp;
 	mListenerp = NULL;
@@ -359,15 +361,14 @@ bool LLAudioEngine_FMODEX::initWind()
 
 	if (!mWindDSP)
 	{
-		FMOD_DSP_DESCRIPTION dspdesc;
-		memset(&dspdesc, 0, sizeof(FMOD_DSP_DESCRIPTION));	//Set everything to zero
-		strncpy(dspdesc.name,"Wind Unit", sizeof(dspdesc.name));	//Set name to "Wind Unit"
-		dspdesc.channels=2;
-		dspdesc.read = &windCallback; //Assign callback.
-		if(Check_FMOD_Error(mSystem->createDSP(&dspdesc, &mWindDSP), "FMOD::createDSP"))
+		memset(mWindDSPDesc, 0, sizeof(*mWindDSPDesc));	//Set everything to zero
+		strncpy(mWindDSPDesc->name, "Wind Unit", sizeof(mWindDSPDesc->name));
+		mWindDSPDesc->channels = 2;
+		mWindDSPDesc->read = &windCallback; // Assign callback - may be called from arbitrary threads
+		if (Check_FMOD_Error(mSystem->createDSP(mWindDSPDesc, &mWindDSP), "FMOD::createDSP"))
 			return false;
 
-		if(mWindGen)
+		if (mWindGen)
 			delete mWindGen;
 	
 		float frequency = 44100;
@@ -376,6 +377,7 @@ bool LLAudioEngine_FMODEX::initWind()
 		mWindDSP->setUserData((void*)mWindGen);
 	}
 
+	// *TODO:  Should this guard against multiple plays?
 	if (mWindDSP)
 	{
 		mSystem->playDSP(FMOD_CHANNEL_FREE, mWindDSP, false, 0);
@@ -512,7 +514,7 @@ bool LLAudioChannelFMODEX::updateBuffer()
 		{
 			// This is bad, there should ALWAYS be a sound associated with a legit
 			// buffer.
-			llerrs << "No FMOD sound!" << llendl;
+			LL_ERRS() << "No FMOD sound!" << LL_ENDL;
 			return false;
 		}
 
@@ -525,7 +527,7 @@ bool LLAudioChannelFMODEX::updateBuffer()
 			Check_FMOD_Error(result, "FMOD::System::playSound");
 		}
 
-		//llinfos << "Setting up channel " << std::hex << mChannelID << std::dec << llendl;
+		//LL_INFOS() << "Setting up channel " << std::hex << mChannelID << std::dec << LL_ENDL;
 	}
 
 	// If we have a source for the channel, we need to update its gain.
@@ -542,8 +544,8 @@ bool LLAudioChannelFMODEX::updateBuffer()
 		{
 			S32 index;
 			mChannelp->getIndex(&index);
- 			llwarns << "Channel " << index << "Source ID: " << mCurrentSourcep->getID()
- 					<< " at " << mCurrentSourcep->getPositionGlobal() << llendl;		
+ 			LL_WARNS() << "Channel " << index << "Source ID: " << mCurrentSourcep->getID()
+ 					<< " at " << mCurrentSourcep->getPositionGlobal() << LL_ENDL;		
 		}*/
 	}
 
@@ -613,11 +615,11 @@ void LLAudioChannelFMODEX::cleanup()
 {
 	if (!mChannelp)
 	{
-		//llinfos << "Aborting cleanup with no channel handle." << llendl;
+		//LL_INFOS() << "Aborting cleanup with no channel handle." << LL_ENDL;
 		return;
 	}
 
-	//llinfos << "Cleaning up channel: " << mChannelID << llendl;
+	//LL_INFOS() << "Cleaning up channel: " << mChannelID << LL_ENDL;
 	Check_FMOD_Error(mChannelp->stop(),"FMOD::Channel::stop");
 
 	mCurrentBufferp = NULL;
@@ -629,7 +631,7 @@ void LLAudioChannelFMODEX::play()
 {
 	if (!mChannelp)
 	{
-		llwarns << "Playing without a channel handle, aborting" << llendl;
+		LL_WARNS() << "Playing without a channel handle, aborting" << LL_ENDL;
 		return;
 	}
 
@@ -737,7 +739,7 @@ bool LLAudioBufferFMODEX::loadWAV(const std::string& filename)
 	if (result != FMOD_OK)
 	{
 		// We failed to load the file for some reason.
-		llwarns << "Could not load data '" << filename << "': " << FMOD_ErrorString(result) << llendl;
+		LL_WARNS() << "Could not load data '" << filename << "': " << FMOD_ErrorString(result) << LL_ENDL;
 
 		//
 		// If we EVER want to load wav files provided by end users, we need
@@ -781,6 +783,9 @@ void LLAudioChannelFMODEX::set3DMode(bool use3d)
 	}
 }
 
+// *NOTE:  This is almost certainly being called on the mixer thread,
+// not the main thread.  May have implications for callees or audio
+// engine shutdown.
 
 FMOD_RESULT F_CALLBACK windCallback(FMOD_DSP_STATE *dsp_state, float *originalbuffer, float *newbuffer, unsigned int length, int inchannels, int outchannels)
 {

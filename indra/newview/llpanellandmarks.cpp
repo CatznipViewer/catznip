@@ -264,7 +264,7 @@ void LLLandmarksPanel::onShowOnMap()
 {
 	if (NULL == mCurrentSelectedList)
 	{
-		llwarns << "There are no selected list. No actions are performed." << llendl;
+		LL_WARNS() << "There are no selected list. No actions are performed." << LL_ENDL;
 		return;
 	}
 
@@ -421,7 +421,7 @@ bool LLLandmarksPanel::isReceivedFolderSelected() const
 
 	// *TODO: it should be filled with logic when EXT-976 is done.
 
-	llwarns << "Not implemented yet until EXT-976 is done." << llendl;
+	LL_WARNS() << "Not implemented yet until EXT-976 is done." << LL_ENDL;
 
 	return false;
 }
@@ -527,9 +527,9 @@ void LLLandmarksPanel::setParcelID(const LLUUID& parcel_id)
 }
 
 // virtual
-void LLLandmarksPanel::setErrorStatus(U32 status, const std::string& reason)
+void LLLandmarksPanel::setErrorStatus(S32 status, const std::string& reason)
 {
-	llwarns << "Can't handle remote parcel request."<< " Http Status: "<< status << ". Reason : "<< reason<<llendl;
+	LL_WARNS() << "Can't handle remote parcel request."<< " Http Status: "<< status << ". Reason : "<< reason<<LL_ENDL;
 }
 
 
@@ -714,6 +714,11 @@ void LLLandmarksPanel::updateListCommands()
 	// keep Options & Add Landmark buttons always enabled
 	mListCommands->getChildView(ADD_FOLDER_BUTTON_NAME)->setEnabled(add_folder_enabled);
 	mListCommands->getChildView(TRASH_BUTTON_NAME)->setEnabled(trash_enabled);
+}
+
+void LLLandmarksPanel::updateMenuVisibility(LLUICtrl* menu)
+{
+	onMenuVisibilityChange(menu, LLSD().with("visibility", true));
 }
 
 void LLLandmarksPanel::onActionsButtonClick()
@@ -1042,7 +1047,7 @@ bool LLLandmarksPanel::isActionEnabled(const LLSD& userdata) const
 	}
 	else
 	{
-		llwarns << "Unprocessed command has come: " << command_name << llendl;
+		LL_WARNS() << "Unprocessed command has come: " << command_name << LL_ENDL;
 	}
 
 	return true;
@@ -1168,7 +1173,8 @@ bool LLLandmarksPanel::canItemBeModified(const std::string& command_name, LLFold
 
 	if ("copy" == command_name)
 	{
-		return root_folder->canCopy();
+		// we shouldn't be able to copy folders from My Inventory Panel
+		return can_be_modified && root_folder->canCopy();
 	}
 	else if ("collapse" == command_name)
 	{
@@ -1201,7 +1207,7 @@ bool LLLandmarksPanel::canItemBeModified(const std::string& command_name, LLFold
 		}
 		else
 		{
-			llwarns << "Unprocessed command has come: " << command_name << llendl;
+			LL_WARNS() << "Unprocessed command has come: " << command_name << LL_ENDL;
 		}
 	}
 
@@ -1258,6 +1264,7 @@ bool LLLandmarksPanel::handleDragAndDropToTrash(BOOL drop, EDragAndDropType carg
 		break;
 	}
 
+	updateVerbs();
 	return true;
 }
 
@@ -1345,23 +1352,14 @@ void LLLandmarksPanel::doCreatePick(LLLandmark* landmark)
 	std::string url = region->getCapability("RemoteParcelRequest");
 	if (!url.empty())
 	{
-		body["location"] = ll_sd_from_vector3(region_pos);
-		if (!region_id.isNull())
-		{
-			body["region_id"] = region_id;
-		}
-		if (!pos_global.isExactlyZero())
-		{
-			U64 region_handle = to_region_handle(pos_global);
-			body["region_handle"] = ll_sd_from_U64(region_handle);
-		}
-		LLHTTPClient::post(url, body, new LLRemoteParcelRequestResponder(getObserverHandle()));
+        LLRemoteParcelInfoProcessor::getInstance()->requestRegionParcelInfo(url,
+            region_id, region_pos, pos_global, getObserverHandle());
 	}
 	else
 	{
-		llwarns << "Can't create pick for landmark for region" << region_id
+		LL_WARNS() << "Can't create pick for landmark for region" << region_id
 				<< ". Region: "	<< region->getName()
-				<< " does not support RemoteParcelRequest" << llendl;
+				<< " does not support RemoteParcelRequest" << LL_ENDL;
 	}
 }
 

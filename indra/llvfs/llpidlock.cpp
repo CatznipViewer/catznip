@@ -38,12 +38,6 @@
 
 #include <windows.h>
 
-namespace {
-	inline DWORD getpid() {
-		return GetCurrentProcessId();
-	}
-}
-
 bool isProcessAlive(U32 pid)
 {
 	return (bool) GetProcessVersion((DWORD)pid);
@@ -101,11 +95,11 @@ LLPidLockFile& LLPidLockFile::instance()
 
 void LLPidLockFile::writeLockFile(LLSD pids)
 {
-	llofstream ofile(mLockName);
+	llofstream ofile(mLockName.c_str());
 
 	if (!LLSDSerialize::toXML(pids,ofile))
 	{
-		llwarns << "Unable to write concurrent save lock file." << llendl;
+		LL_WARNS() << "Unable to write concurrent save lock file." << LL_ENDL;
 	}
 	ofile.close();
 }
@@ -125,7 +119,7 @@ bool LLPidLockFile::requestLock(LLNameTable<void *> *name_table, bool autosave,
 	LLSD out_pids;
 	out_pids.append( (LLSD::Integer)mPID );
 
-	llifstream ifile(mLockName);
+	llifstream ifile(mLockName.c_str());
 
 	if (ifile.is_open()) 
 	{									//If file exists, we need to decide whether or not to continue.
@@ -181,7 +175,7 @@ bool LLPidLockFile::checkLock()
 
 void LLPidLockFile::releaseLock()
 {
-	llifstream ifile(mLockName);
+	llifstream ifile(mLockName.c_str());
 	LLSD in_pids;
 	LLSD out_pids;
 	bool write_file=FALSE;
@@ -273,4 +267,9 @@ void LLPidLock::setClean(bool clean)
 void LLPidLock::setSaveName(std::string savename) 
 { 
 	LLPidLockFile::instance().mSaveName=savename; 
+}
+
+S32 LLPidLock::getPID()
+{
+    return (S32)getpid();
 }

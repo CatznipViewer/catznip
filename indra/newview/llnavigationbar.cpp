@@ -44,6 +44,7 @@
 #include "lllocationinputctrl.h"
 #include "llpaneltopinfobar.h"
 #include "llteleporthistory.h"
+#include "llresizebar.h"
 #include "llsearchcombobox.h"
 #include "llslurl.h"
 #include "llurlregistry.h"
@@ -267,7 +268,10 @@ LLNavigationBar::LLNavigationBar()
 	mBtnForward(NULL),
 	mBtnHome(NULL),
 	mCmbLocation(NULL),
-	mSaveToLocationHistory(false)
+	mSaveToLocationHistory(false),
+	mNavigationPanel(NULL),
+	mFavoritePanel(NULL),
+	mNavPanWidth(0)
 {
 	buildFromFile( "panel_navigation_bar.xml");
 
@@ -286,7 +290,7 @@ BOOL LLNavigationBar::postBuild()
 	mBtnBack	= getChild<LLPullButton>("back_btn");
 	mBtnForward	= getChild<LLPullButton>("forward_btn");
 	mBtnHome	= getChild<LLButton>("home_btn");
-	
+
 	mCmbLocation= getChild<LLLocationInputCtrl>("location_combo");
 
 	mBtnBack->setEnabled(FALSE);
@@ -317,6 +321,11 @@ BOOL LLNavigationBar::postBuild()
 			boost::bind(&LLNavigationBar::onTeleportHistoryChanged, this));
 
 	LLHints::registerHintTarget("nav_bar", getHandle());
+
+	mNavigationPanel = getChild<LLLayoutPanel>("navigation_layout_panel");
+	mFavoritePanel = getChild<LLLayoutPanel>("favorites_layout_panel");
+	mNavigationPanel->getResizeBar()->setResizeListener(boost::bind(&LLNavigationBar::onNavbarResized, this));
+	mFavoritePanel->getResizeBar()->setResizeListener(boost::bind(&LLNavigationBar::onNavbarResized, this));
 
 	return TRUE;
 }
@@ -356,13 +365,24 @@ BOOL LLNavigationBar::handleRightMouseDown(S32 x, S32 y, MASK mask)
 		show_navbar_context_menu(this,x,y);
 		handled = true;
 	}
-					
 	return handled;
 }
 
 void LLNavigationBar::onBackButtonClicked()
 {
 	LLTeleportHistory::getInstance()->goBack();
+}
+
+void LLNavigationBar::onNavbarResized()
+{
+	S32 new_nav_pan_width = mNavigationPanel->getRect().getWidth();
+	if(mNavPanWidth != new_nav_pan_width)
+	{
+		S32 new_stack_width = new_nav_pan_width + mFavoritePanel->getRect().getWidth();
+		F32 ratio = (F32)new_nav_pan_width / (F32)new_stack_width;
+		gSavedPerAccountSettings.setF32("NavigationBarRatio", ratio);
+		mNavPanWidth = new_nav_pan_width;
+	}
 }
 
 void LLNavigationBar::onBackOrForwardButtonHeldDown(LLUICtrl* ctrl, const LLSD& param)
@@ -600,7 +620,7 @@ void LLNavigationBar::onRegionNameResponse(
 		LLVector3d region_pos = from_region_handle(region_handle);
 		LLVector3d global_pos = region_pos + (LLVector3d) local_coords;
 
-		llinfos << "Teleporting to: " << LLSLURL(region_name,	global_pos).getSLURLString()  << llendl;
+		LL_INFOS() << "Teleporting to: " << LLSLURL(region_name,	global_pos).getSLURLString()  << LL_ENDL;
 		gAgent.teleportViaLocation(global_pos);
 	}
 	else if (gSavedSettings.getBOOL("SearchFromAddressBar"))
@@ -614,7 +634,7 @@ void	LLNavigationBar::showTeleportHistoryMenu(LLUICtrl* btn_ctrl)
 	// Don't show the popup if teleport history is empty.
 	if (LLTeleportHistory::getInstance()->isEmpty())
 	{
-		lldebugs << "Teleport history is empty, will not show the menu." << llendl;
+		LL_DEBUGS() << "Teleport history is empty, will not show the menu." << LL_ENDL;
 		return;
 	}
 	
@@ -667,8 +687,18 @@ void LLNavigationBar::handleLoginComplete()
 	LLTeleportHistory::getInstance()->handleLoginComplete();
 	LLPanelTopInfoBar::instance().handleLoginComplete();
 	mCmbLocation->handleLoginComplete();
+	resizeLayoutPanel();
 }
 
+void LLNavigationBar::resizeLayoutPanel()
+{
+	LLRect nav_bar_rect = mNavigationPanel->getRect();
+
+	S32 nav_panel_width = (nav_bar_rect.getWidth() + mFavoritePanel->getRect().getWidth()) * gSavedPerAccountSettings.getF32("NavigationBarRatio");
+
+	nav_bar_rect.setLeftTopAndSize(nav_bar_rect.mLeft, nav_bar_rect.mTop, nav_panel_width, nav_bar_rect.getHeight());
+	mNavigationPanel->handleReshape(nav_bar_rect,true);
+}
 void LLNavigationBar::invokeSearch(std::string search_text)
 {
 	LLFloaterReg::showInstance("search", LLSD().with("category", "all").with("query", LLSD(search_text)));

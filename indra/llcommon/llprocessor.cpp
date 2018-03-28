@@ -26,15 +26,15 @@
 
 #include "linden_common.h"
 #include "llprocessor.h"
-
+#include "llstring.h"
+#include "stringize.h"
 #include "llerror.h"
 
+#include <iomanip>
 //#include <memory>
 
 #if LL_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	include <winsock2.h>
-#	include <windows.h>
+#	include "llwin32headerslean.h"
 #	define _interlockedbittestandset _renamed_interlockedbittestandset
 #	define _interlockedbittestandreset _renamed_interlockedbittestandreset
 #	include <intrin.h>
@@ -190,7 +190,7 @@ namespace
 		case 0xF: return "Intel Pentium 4";
 		case 0x10: return "Intel Itanium 2 (IA-64)";
 		}
-		return "Unknown";
+		return STRINGIZE("Intel <unknown 0x" << std::hex << composed_family << ">");
 	}
 	
 	std::string amd_CPUFamilyName(int composed_family) 
@@ -203,41 +203,26 @@ namespace
 		case 0xF: return "AMD K8";
 		case 0x10: return "AMD K8L";
 		}
-   		return "Unknown";
-	}
-
-	std::string compute_CPUFamilyName(const char* cpu_vendor, int composed_family) 
-	{
-		const char* intel_string = "GenuineIntel";
-		const char* amd_string = "AuthenticAMD";
-		if(!strncmp(cpu_vendor, intel_string, strlen(intel_string)))
-		{
-			return intel_CPUFamilyName(composed_family);
-		}
-		else if(!strncmp(cpu_vendor, amd_string, strlen(amd_string)))
-		{
-			return amd_CPUFamilyName(composed_family);
-		}
-		return "Unknown";
+		return STRINGIZE("AMD <unknown 0x" << std::hex << composed_family << ">");
 	}
 
 	std::string compute_CPUFamilyName(const char* cpu_vendor, int family, int ext_family) 
 	{
 		const char* intel_string = "GenuineIntel";
 		const char* amd_string = "AuthenticAMD";
-		if(!strncmp(cpu_vendor, intel_string, strlen(intel_string)))
+		if (LLStringUtil::startsWith(cpu_vendor, intel_string))
 		{
 			U32 composed_family = family + ext_family;
 			return intel_CPUFamilyName(composed_family);
 		}
-		else if(!strncmp(cpu_vendor, amd_string, strlen(amd_string)))
+		else if (LLStringUtil::startsWith(cpu_vendor, amd_string))
 		{
 			U32 composed_family = (family == 0xF) 
 				? family + ext_family
 				: family;
 			return amd_CPUFamilyName(composed_family);
 		}
-		return "Unknown";
+		return STRINGIZE("Unrecognized CPU vendor <" << cpu_vendor << ">");
 	}
 
 } // end unnamed namespace
@@ -275,8 +260,8 @@ public:
 		return hasExtension("Altivec"); 
 	}
 
-	std::string getCPUFamilyName() const { return getInfo(eFamilyName, "Unknown").asString(); }
-	std::string getCPUBrandName() const { return getInfo(eBrandName, "Unknown").asString(); }
+	std::string getCPUFamilyName() const { return getInfo(eFamilyName, "Unset family").asString(); }
+	std::string getCPUBrandName() const { return getInfo(eBrandName, "Unset brand").asString(); }
 
 	// This is virtual to support a different linux format.
 	// *NOTE:Mani - I didn't want to screw up server use of this data...
@@ -288,7 +273,7 @@ public:
 		out << "//////////////////////////" << std::endl;
 		out << "Processor Name:   " << getCPUBrandName() << std::endl;
 		out << "Frequency:        " << getCPUFrequency() << " MHz" << std::endl;
-		out << "Vendor:			  " << getInfo(eVendor, "Unknown").asString() << std::endl;
+		out << "Vendor:			  " << getInfo(eVendor, "Unset vendor").asString() << std::endl;
 		out << "Family:           " << getCPUFamilyName() << " (" << getInfo(eFamily, 0) << ")" << std::endl;
 		out << "Extended family:  " << getInfo(eExtendedFamily, 0) << std::endl;
 		out << "Model:            " << getInfo(eModel, 0) << std::endl;
@@ -415,7 +400,7 @@ static F64 calculate_cpu_frequency(U32 measure_msecs)
 	HANDLE hThread = GetCurrentThread();
 	unsigned long dwCurPriorityClass = GetPriorityClass(hProcess);
 	int iCurThreadPriority = GetThreadPriority(hThread);
-	unsigned long dwProcessMask, dwSystemMask, dwNewMask = 1;
+	DWORD_PTR dwProcessMask, dwSystemMask, dwNewMask = 1;
 	GetProcessAffinityMask(hProcess, &dwProcessMask, &dwSystemMask);
 
 	SetPriorityClass(hProcess, REALTIME_PRIORITY_CLASS);
@@ -702,7 +687,7 @@ private:
 		__cpuid(0x1, eax, ebx, ecx, edx);
 		if(feature_infos[0] != (S32)edx)
 		{
-			llerrs << "machdep.cpu.feature_bits doesn't match expected cpuid result!" << llendl;
+			LL_ERRS() << "machdep.cpu.feature_bits doesn't match expected cpuid result!" << LL_ENDL;
 		} 
 #endif // LL_RELEASE_FOR_DOWNLOAD 	
 
@@ -795,7 +780,7 @@ private:
 			setInfo(eFamily, family);
 		}
  
-		setInfo(eFamilyName, compute_CPUFamilyName(cpuinfo["vendor_id"].c_str(), family));
+		setInfo(eFamilyName, compute_CPUFamilyName(cpuinfo["vendor_id"].c_str(), family, 0));
 
 		// setInfo(eExtendedModel, getSysctlInt("machdep.cpu.extmodel"));
 		// setInfo(eBrandID, getSysctlInt("machdep.cpu.brand"));
@@ -877,7 +862,7 @@ LLProcessorInfo::LLProcessorInfo() : mImpl(NULL)
 
 
 LLProcessorInfo::~LLProcessorInfo() {}
-F64 LLProcessorInfo::getCPUFrequency() const { return mImpl->getCPUFrequency(); }
+F64MegahertzImplicit LLProcessorInfo::getCPUFrequency() const { return mImpl->getCPUFrequency(); }
 bool LLProcessorInfo::hasSSE() const { return mImpl->hasSSE(); }
 bool LLProcessorInfo::hasSSE2() const { return mImpl->hasSSE2(); }
 bool LLProcessorInfo::hasAltivec() const { return mImpl->hasAltivec(); }

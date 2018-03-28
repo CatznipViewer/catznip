@@ -32,6 +32,7 @@
 #include "lluicolor.h"
 #include "llstyle.h"
 
+#include "llavatarname.h"
 #include "llhost.h" // for resolving parcel name by parcel id
 
 #include <boost/signals2.hpp>
@@ -77,6 +78,9 @@ public:
 	/// Given a matched Url, return a label for the Url
 	virtual std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb) { return url; }
 
+	/// Return port, query and fragment parts for the Url
+	virtual std::string getQuery(const std::string &url) const { return ""; }
+
 	/// Return an icon that can be displayed next to Urls of this type
 	virtual std::string getIcon(const std::string &url);
 
@@ -95,9 +99,15 @@ public:
 	/// Should this link text be underlined only when mouse is hovered over it?
 	virtual bool underlineOnHoverOnly(const std::string &string) const { return false; }
 
+	virtual bool isTrusted() const { return false; }
+
 	virtual LLUUID	getID(const std::string &string) const { return LLUUID::null; }
 
 	bool isLinkDisabled() const;
+
+	bool isWikiLinkCorrect(std::string url);
+
+	virtual bool isSLURLvalid(const std::string &url) const { return TRUE; };
 
 protected:
 	std::string getIDStringFromUrl(const std::string &url) const;
@@ -106,6 +116,8 @@ protected:
 	std::string getLabelFromWikiLink(const std::string &url) const;
 	std::string getUrlFromWikiLink(const std::string &string) const;
 	void addObserver(const std::string &id, const std::string &url, const LLUrlLabelCallback &cb); 
+	std::string urlToLabelWithGreyQuery(const std::string &url) const;
+	std::string urlToGreyQuery(const std::string &url) const;
 	virtual void callObservers(const std::string &id, const std::string &label, const std::string& icon);
 
 	typedef struct {
@@ -128,6 +140,9 @@ class LLUrlEntryHTTP : public LLUrlEntryBase
 public:
 	LLUrlEntryHTTP();
 	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
+	/*virtual*/ std::string getQuery(const std::string &url) const;
+	/*virtual*/ std::string getUrl(const std::string &string) const;
+	/*virtual*/ std::string getTooltip(const std::string &url) const;
 };
 
 ///
@@ -142,15 +157,15 @@ public:
 	/*virtual*/ std::string getUrl(const std::string &string) const;
 };
 
-///
-/// LLUrlEntryHTTPNoProtocol Describes generic Urls like www.google.com
-///
-class LLUrlEntryHTTPNoProtocol : public LLUrlEntryBase
+class LLUrlEntryInvalidSLURL : public LLUrlEntryBase
 {
 public:
-	LLUrlEntryHTTPNoProtocol();
+	LLUrlEntryInvalidSLURL();
 	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
 	/*virtual*/ std::string getUrl(const std::string &string) const;
+	/*virtual*/ std::string getTooltip(const std::string &url) const;
+
+	bool isSLURLvalid(const std::string &url) const;
 };
 
 ///
@@ -162,6 +177,29 @@ public:
 	LLUrlEntrySLURL();
 	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
 	/*virtual*/ std::string getLocation(const std::string &url) const;
+};
+
+///
+/// LLUrlEntrySeconlifeURLs Describes *secondlife.com and *lindenlab.com Urls
+///
+class LLUrlEntrySecondlifeURL : public LLUrlEntryBase
+{
+public:
+	LLUrlEntrySecondlifeURL();
+	/*virtual*/ bool isTrusted() const { return true; }
+	/*virtual*/ std::string getUrl(const std::string &string) const;
+	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
+	/*virtual*/ std::string getQuery(const std::string &url) const;
+	/*virtual*/ std::string getTooltip(const std::string &url) const;
+};
+
+///
+/// LLUrlEntrySeconlifeURLs Describes *secondlife.com and *lindenlab.com Urls
+///
+class LLUrlEntrySimpleSecondlifeURL : public LLUrlEntrySecondlifeURL
+{
+public:
+	LLUrlEntrySimpleSecondlifeURL();
 };
 
 ///
@@ -231,6 +269,14 @@ private:
 	/*virtual*/ std::string getName(const LLAvatarName& avatar_name);
 };
 
+class LLUrlEntryAgentLegacyName : public LLUrlEntryAgentName
+{
+public:
+	LLUrlEntryAgentLegacyName();
+private:
+	/*virtual*/ std::string getName(const LLAvatarName& avatar_name);
+};
+
 ///
 /// LLUrlEntryAgentDisplayName Describes a Second Life agent display name Url, e.g.,
 /// secondlife:///app/agent/0e346d8b-4433-4d66-a6b0-fd37083abc4c/displayname
@@ -256,6 +302,20 @@ public:
 private:
 	/*virtual*/ std::string getName(const LLAvatarName& avatar_name);
 };
+
+///
+/// LLUrlEntryExperienceProfile Describes a Second Life experience profile Url, e.g.,
+/// secondlife:///app/experience/0e346d8b-4433-4d66-a6b0-fd37083abc4c/profile
+/// that displays the experience name
+class LLUrlEntryExperienceProfile : public LLUrlEntryBase
+{
+public:
+    LLUrlEntryExperienceProfile();
+    /*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
+private:
+    void onExperienceDetails(const LLSD& experience_details);
+};
+
 
 ///
 /// LLUrlEntryGroup Describes a Second Life group Url, e.g.,
@@ -439,6 +499,17 @@ public:
 	/*virtual*/ std::string getUrl(const std::string &string) const;
 	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
 	/*virtual*/ std::string getIcon(const std::string &url);
+};
+
+///
+/// LLUrlEntryEmail Describes a generic mailto: Urls
+///
+class LLUrlEntryEmail : public LLUrlEntryBase
+{
+public:
+	LLUrlEntryEmail();
+	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
+	/*virtual*/ std::string getUrl(const std::string &string) const;
 };
 
 

@@ -50,8 +50,6 @@ const LLCommandId LLCommandId::null = LLCommandId("null command");
 LLCommand::Params::Params()
 	: available_in_toybox("available_in_toybox", false)
 	, icon("icon")
-	, hover_icon_unselected("hover_icon_unselected")
-	, hover_icon_selected("hover_icon_selected")
 	, label_ref("label_ref")
 	, name("name")
 	, tooltip_ref("tooltip_ref")
@@ -73,8 +71,6 @@ LLCommand::LLCommand(const LLCommand::Params& p)
 	: mIdentifier(p.name)
 	, mAvailableInToybox(p.available_in_toybox)
 	, mIcon(p.icon)
-	, mHoverIconUnselected(p.hover_icon_unselected)
-	, mHoverIconSelected(p.hover_icon_selected)
 	, mLabelRef(p.label_ref)
 	, mName(p.name)
 	, mTooltipRef(p.tooltip_ref)
@@ -135,13 +131,32 @@ LLCommand * LLCommandManager::getCommand(const LLCommandId& commandId)
 	return command_match;
 }
 
+LLCommand * LLCommandManager::getCommand(const std::string& name)
+{
+	LLCommand * command_match = NULL;
+    
+	CommandVector::const_iterator it = mCommands.begin();
+	
+	while (it != mCommands.end())
+	{
+        if ((*it)->name() == name)
+        {
+            command_match = *it;
+            break;
+        }
+        it++;
+	}
+    
+	return command_match;
+}
+
 void LLCommandManager::addCommand(LLCommand * command)
 {
 	LLCommandId command_id = command->id();
 	mCommandIndices[command_id.uuid()] = mCommands.size();
 	mCommands.push_back(command);
 
-	lldebugs << "Successfully added command: " << command->name() << llendl;
+	LL_DEBUGS() << "Successfully added command: " << command->name() << LL_ENDL;
 }
 
 //static
@@ -157,13 +172,13 @@ bool LLCommandManager::load()
 	
 	if (!parser.readXUI(commands_file, commandsParams))
 	{
-		llerrs << "Unable to load xml file: " << commands_file << llendl;
+		LL_ERRS() << "Unable to load xml file: " << commands_file << LL_ENDL;
 		return false;
 	}
 
 	if (!commandsParams.validateBlock())
 	{
-		llerrs << "Invalid commands file: " << commands_file << llendl;
+		LL_ERRS() << "Invalid commands file: " << commands_file << LL_ENDL;
 		return false;
 	}
 

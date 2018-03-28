@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_pathfinding_linksets" title="Наборы связей для поиска пути">
+<floater name="floater_pathfinding_linksets" title="ОБЪЕКТЫ РЕГИОНА">
 	<floater.string name="messaging_get_inprogress">
 		Запрос наборов связей для поиска пути...
 	</floater.string>
@@ -16,7 +16,7 @@
 		Нет наборов связей для поиска пути.
 	</floater.string>
 	<floater.string name="messaging_complete_available">
-		Выбрано наборов связей: [NUM_SELECTED] из [NUM_TOTAL].
+		Выбрано [NUM_SELECTED] из [NUM_TOTAL].
 	</floater.string>
 	<floater.string name="messaging_not_enabled">
 		В этом регионе не разрешен поиск пути.
@@ -90,7 +90,16 @@
 	<floater.string name="linkset_choose_use">
 		Выберите степень использования наборов связей...
 	</floater.string>
-	<panel>
+	<panel name="pathfinding_linksets_main">
+		<text name="linksets_filter_label">
+			Фильтр:
+		</text>
+		<text name="linksets_name_label">
+			Имя
+		</text>
+		<text name="linksets_desc_label">
+			Описание
+		</text>
 		<combo_box name="filter_by_linkset_use">
 			<combo_box.item label="Фильтр по степени использования наборов связей..." name="filter_by_linkset_use_none"/>
 			<combo_box.item label="Проходимое место" name="filter_by_linkset_use_walkable"/>
@@ -101,7 +110,7 @@
 			<combo_box.item label="Перемещаемый фантом" name="filter_by_linkset_use_dynamic_phantom"/>
 		</combo_box>
 		<button label="Применить" name="apply_filters"/>
-		<button label="Чисто" name="clear_filters"/>
+		<button label="Очистить" name="clear_filters"/>
 		<scroll_list name="objects_scroll_list">
 			<scroll_list.columns label="Имя (корневой примитив)" name="name"/>
 			<scroll_list.columns label="Описание (корневой примитив)" name="description"/>
@@ -109,7 +118,7 @@
 			<scroll_list.columns label="Скриптовые" name="scripted"/>
 			<scroll_list.columns label="Воздействие" name="land_impact"/>
 			<scroll_list.columns label="Расстояние" name="dist_from_you"/>
-			<scroll_list.columns label="Использование набора связей" name="linkset_use"/>
+			<scroll_list.columns label="Использование поиска пути" name="linkset_use"/>
 			<scroll_list.columns label="A %" name="a_percent"/>
 			<scroll_list.columns label="B %" name="b_percent"/>
 			<scroll_list.columns label="C %" name="c_percent"/>
@@ -122,7 +131,10 @@
 		<button label="Выбрать все" name="select_all_objects"/>
 		<button label="Отменить выбор" name="select_none_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_actions">
+		<text name="linksets_actions_label">
+			Действия с выбранным
+		</text>
 		<check_box label="Показать метку" name="show_beacon"/>
 		<button label="Взять" name="take_objects"/>
 		<button label="Сделать копию" name="take_copy_objects"/>
@@ -130,7 +142,10 @@
 		<button label="Возврат" name="return_objects"/>
 		<button label="Удалить" name="delete_objects"/>
 	</panel>
-	<panel>
+	<panel name="pathfinding_linksets_attributes">
+		<text name="linksets_attributes_label">
+			Изменить параметры поиска пути
+		</text>
 		<text name="walkability_coefficients_label">
 			Проходимость:
 		</text>
@@ -145,7 +160,7 @@
 		<text name="edit_c_label">
 			C
 		</text>
-		<line_editor name="edit_c_value" tool_tip="Проходимость для персонажей типа C.  Пример персонажа – механизм."/>
+		<line_editor name="edit_c_value" tool_tip="Проходимость для персонажей типа C. Пример персонажа – механизм."/>
 		<text name="edit_d_label">
 			D
 		</text>

@@ -38,7 +38,6 @@
 #include "lldatapacker.h"
 #include "llsdutil_math.h"
 #include "llprimtexturelist.h"
-#include "imageids.h"
 #include "llmaterialid.h"
 
 /**
@@ -108,8 +107,6 @@ const F32 FLEXIBLE_OBJECT_DEFAULT_LENGTH = 1.0f;
 const BOOL FLEXIBLE_OBJECT_DEFAULT_USING_COLLISION_SPHERE = FALSE;
 const BOOL FLEXIBLE_OBJECT_DEFAULT_RENDERING_COLLISION_SPHERE = FALSE;
 
-const S32 MAX_FACE_BITS = 9;
-
 const char *SCULPT_DEFAULT_TEXTURE = "be293869-d0d9-0a69-5989-ad27f1946fd4"; // old inverted texture: "7595d345-a24c-e7ef-f0bd-78793792133e";
 
 // Texture rotations are sent over the wire as a S16.  This is used to scale the actual float
@@ -127,7 +124,7 @@ void LLPrimitive::setVolumeManager( LLVolumeMgr* volume_manager )
 {
 	if ( !volume_manager || sVolumeManager )
 	{
-		llerrs << "LLPrimitive::sVolumeManager attempting to be set to NULL or it already has been set." << llendl;
+		LL_ERRS() << "LLPrimitive::sVolumeManager attempting to be set to NULL or it already has been set." << LL_ENDL;
 	}
 	sVolumeManager = volume_manager;
 }
@@ -175,7 +172,7 @@ LLPrimitive::~LLPrimitive()
 {
 	clearTextureList();
 	// Cleanup handled by volume manager
-	if (mVolumep)
+	if (mVolumep && sVolumeManager)
 	{
 		sVolumeManager->unrefVolume(mVolumep);
 	}
@@ -198,7 +195,7 @@ LLPrimitive *LLPrimitive::createPrimitive(LLPCode p_code)
 	}
 	else
 	{
-		llerrs << "primitive allocation failed" << llendl;
+		LL_ERRS() << "primitive allocation failed" << LL_ENDL;
 	}
 
 	return retval;
@@ -323,6 +320,11 @@ S32 LLPrimitive::setTEMaterialID(const U8 index, const LLMaterialID& pMaterialID
 S32 LLPrimitive::setTEMaterialParams(const U8 index, const LLMaterialPtr pMaterialParams)
 {
 	return mTextureList.setMaterialParams(index, pMaterialParams);
+}
+
+LLMaterialPtr LLPrimitive::getTEMaterialParams(const U8 index)
+{
+	return mTextureList.getMaterialParams(index);
 }
 
 //===============================================================
@@ -484,7 +486,7 @@ LLPCode LLPrimitive::legacyToPCode(const U8 legacy)
 		pcode = LL_PCODE_TREE_NEW;
 		break;
 	default:
-		llwarns << "Unknown legacy code " << legacy << " [" << (S32)legacy << "]!" << llendl;
+		LL_WARNS() << "Unknown legacy code " << legacy << " [" << (S32)legacy << "]!" << LL_ENDL;
 	}
 
 	return pcode;
@@ -579,7 +581,7 @@ U8 LLPrimitive::pCodeToLegacy(const LLPCode pcode)
 		legacy = TREE_NEW;
 		break;
 	default:
-		llwarns << "Unknown pcode " << (S32)pcode << ":" << pcode << "!" << llendl;
+		LL_WARNS() << "Unknown pcode " << (S32)pcode << ":" << pcode << "!" << LL_ENDL;
 		return 0;
 	}
 	return legacy;
@@ -587,7 +589,7 @@ U8 LLPrimitive::pCodeToLegacy(const LLPCode pcode)
 
 
 // static
-// Don't crash or llerrs here!  This function is used for debug strings.
+// Don't crash or LL_ERRS() here!  This function is used for debug strings.
 std::string LLPrimitive::pCodeToString(const LLPCode pcode)
 {
 	std::string pcode_string;
@@ -666,7 +668,7 @@ std::string LLPrimitive::pCodeToString(const LLPCode pcode)
 		}
 		else
 		{
-			llwarns << "Unknown base mask for pcode: " << base_code << llendl;
+			LL_WARNS() << "Unknown base mask for pcode: " << base_code << LL_ENDL;
 		}
 
 		U8 mask_code = pcode & (~LL_PCODE_BASE_MASK);
@@ -702,7 +704,7 @@ void LLPrimitive::copyTEs(const LLPrimitive *primitivep)
 	U32 i;
 	if (primitivep->getExpectedNumTEs() != getExpectedNumTEs())
 	{
-		llwarns << "Primitives don't have same expected number of TE's" << llendl;
+		LL_WARNS() << "Primitives don't have same expected number of TE's" << LL_ENDL;
 	}
 	U32 num_tes = llmin(primitivep->getExpectedNumTEs(), getExpectedNumTEs());
 	if (mTextureList.size() < getExpectedNumTEs())
@@ -804,7 +806,7 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 		{
 			S32 te_index = face_index_from_id(cur_mask, old_faces);
 			old_tes.copyTexture(face_bit, *(getTE(te_index)));
-			//llinfos << face_bit << ":" << te_index << ":" << old_tes[face_bit].getID() << llendl;
+			//LL_INFOS() << face_bit << ":" << te_index << ":" << old_tes[face_bit].getID() << LL_ENDL;
 		}
 	}
 
@@ -824,7 +826,7 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 
 	if (mVolumep->getNumFaces() == 0 && new_face_mask != 0)
 	{
-		llwarns << "Object with 0 faces found...INCORRECT!" << llendl;
+		LL_WARNS() << "Object with 0 faces found...INCORRECT!" << LL_ENDL;
 		setNumTEs(mVolumep->getNumFaces());
 		return TRUE;
 	}
@@ -882,7 +884,7 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 				}
 				if (i == 4)
 				{
-					llwarns << "No path end or outer face in volume!" << llendl;
+					LL_WARNS() << "No path end or outer face in volume!" << LL_ENDL;
 				}
 				continue;
 			}
@@ -918,7 +920,7 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 				}
 				if (i == 4)
 				{
-					llwarns << "No path end or outer face in volume!" << llendl;
+					LL_WARNS() << "No path end or outer face in volume!" << LL_ENDL;
 				}
 				continue;
 			}
@@ -944,8 +946,8 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 		}
 		if (-1 == min_outer_bit)
 		{
-			llinfos << (LLVolume *)mVolumep << llendl;
-			llwarns << "Bad!  No outer faces, impossible!" << llendl;
+			LL_INFOS() << (LLVolume *)mVolumep << LL_ENDL;
+			LL_WARNS() << "Bad!  No outer faces, impossible!" << LL_ENDL;
 		}
 		face_mapping[face_bit] = min_outer_bit;
 	}
@@ -964,7 +966,7 @@ BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detai
 		{
 			if (-1 == face_mapping[face_bit])
 			{
-				llwarns << "No mapping from old face to new face!" << llendl;
+				LL_WARNS() << "No mapping from old face to new face!" << LL_ENDL;
 			}
 
 			S32 te_num = face_index_from_id(cur_mask, mVolumep->getProfile().mFaces);
@@ -994,8 +996,6 @@ BOOL LLPrimitive::setMaterial(U8 material)
 	}
 }
 
-const F32 LL_MAX_SCALE_S = 100.0f;
-const F32 LL_MAX_SCALE_T = 100.0f;
 S32 LLPrimitive::packTEField(U8 *cur_ptr, U8 *data_ptr, U8 data_size, U8 last_face_index, EMsgVariableType type) const
 {
 	S32 face_index;
@@ -1149,12 +1149,12 @@ BOOL LLPrimitive::packTEMessage(LLMessageSystem *mesgsys) const
 			const LLTextureEntry* te = getTE(face_index);
 			scale_s[face_index] = (F32) te->mScaleS;
 			scale_t[face_index] = (F32) te->mScaleT;
-			offset_s[face_index] = (S16) llround((llclamp(te->mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
-			offset_t[face_index] = (S16) llround((llclamp(te->mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
-			image_rot[face_index] = (S16) llround(((fmod(te->mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
+			offset_s[face_index] = (S16) ll_round((llclamp(te->mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
+			offset_t[face_index] = (S16) ll_round((llclamp(te->mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
+			image_rot[face_index] = (S16) ll_round(((fmod(te->mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
 			bump[face_index] = te->getBumpShinyFullbright();
 			media_flags[face_index] = te->getMediaTexGen();
-			glow[face_index] = (U8) llround((llclamp(te->getGlow(), 0.0f, 1.0f) * (F32)0xFF));
+			glow[face_index] = (U8) ll_round((llclamp(te->getGlow(), 0.0f, 1.0f) * (F32)0xFF));
 
 			// Directly sending material_ids is not safe!
 			memcpy(&material_data[face_index*16],getTE(face_index)->getMaterialID().get(),16);	/* Flawfinder: ignore */ 
@@ -1234,12 +1234,12 @@ BOOL LLPrimitive::packTEMessage(LLDataPacker &dp) const
 			const LLTextureEntry* te = getTE(face_index);
 			scale_s[face_index] = (F32) te->mScaleS;
 			scale_t[face_index] = (F32) te->mScaleT;
-			offset_s[face_index] = (S16) llround((llclamp(te->mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
-			offset_t[face_index] = (S16) llround((llclamp(te->mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
-			image_rot[face_index] = (S16) llround(((fmod(te->mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
+			offset_s[face_index] = (S16) ll_round((llclamp(te->mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
+			offset_t[face_index] = (S16) ll_round((llclamp(te->mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
+			image_rot[face_index] = (S16) ll_round(((fmod(te->mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
 			bump[face_index] = te->getBumpShinyFullbright();
 			media_flags[face_index] = te->getMediaTexGen();
-            glow[face_index] = (U8) llround((llclamp(te->getGlow(), 0.0f, 1.0f) * (F32)0xFF));
+            glow[face_index] = (U8) ll_round((llclamp(te->getGlow(), 0.0f, 1.0f) * (F32)0xFF));
 
 			// Directly sending material_ids is not safe!
 			memcpy(&material_data[face_index*16],getTE(face_index)->getMaterialID().get(),16);	/* Flawfinder: ignore */ 
@@ -1361,9 +1361,8 @@ S32 LLPrimitive::applyParsedTEMessage(LLTEContents& tec)
 		retval |= setTEBumpShinyFullbright(i, tec.bump[i]);
 		retval |= setTEMediaTexGen(i, tec.media_flags[i]);
 		retval |= setTEGlow(i, (F32)tec.glow[i] / (F32)0xFF);
-		
-                retval |= setTEMaterialID(i, tec.material_ids[i]);
-		
+		retval |= setTEMaterialID(i, tec.material_ids[i]);
+
 		coloru = LLColor4U(tec.colors + 4*i);
 
 		// Note:  This is an optimization to send common colors (1.f, 1.f, 1.f, 1.f)
@@ -1422,7 +1421,7 @@ S32 LLPrimitive::unpackTEMessage(LLDataPacker &dp)
 	if (!dp.unpackBinaryData(packed_buffer, size, "TextureEntry"))
 	{
 		retval = TEM_INVALID;
-		llwarns << "Bad texture entry block!  Abort!" << llendl;
+		LL_WARNS() << "Bad texture entry block!  Abort!" << LL_ENDL;
 		return retval;
 	}
 
@@ -1870,9 +1869,12 @@ BOOL LLSculptParams::pack(LLDataPacker &dp) const
 
 BOOL LLSculptParams::unpack(LLDataPacker &dp)
 {
-	dp.unpackUUID(mSculptTexture, "texture");
-	dp.unpackU8(mSculptType, "type");
-	
+	U8 type;
+	LLUUID id;
+	dp.unpackUUID(id, "texture");
+	dp.unpackU8(type, "type");
+
+	setSculptTexture(id, type);
 	return TRUE;
 }
 
@@ -1897,8 +1899,7 @@ bool LLSculptParams::operator==(const LLNetworkData& data) const
 void LLSculptParams::copy(const LLNetworkData& data)
 {
 	const LLSculptParams *param = (LLSculptParams*)&data;
-	mSculptTexture = param->mSculptTexture;
-	mSculptType = param->mSculptType;
+	setSculptTexture(param->mSculptTexture, param->mSculptType);
 }
 
 
@@ -1916,20 +1917,38 @@ LLSD LLSculptParams::asLLSD() const
 bool LLSculptParams::fromLLSD(LLSD& sd)
 {
 	const char *w;
-	w = "texture";
-	if (sd.has(w))
-	{
-		setSculptTexture( sd[w] );
-	} else goto fail;
+	U8 type;
 	w = "type";
 	if (sd.has(w))
 	{
-		setSculptType( (U8)sd[w].asInteger() );
-	} else goto fail;
-	
+		type = sd[w].asInteger();
+	}
+	else return false;
+
+	w = "texture";
+	if (sd.has(w))
+	{
+		setSculptTexture(sd[w], type);
+	}
+	else return false;
+
 	return true;
- fail:
-	return false;
+}
+
+void LLSculptParams::setSculptTexture(const LLUUID& texture_id, U8 sculpt_type)
+{
+	U8 type = sculpt_type & LL_SCULPT_TYPE_MASK;
+	U8 flags = sculpt_type & LL_SCULPT_FLAG_MASK;
+	if (sculpt_type != (type | flags) || type > LL_SCULPT_TYPE_MAX)
+	{
+		mSculptTexture.set(SCULPT_DEFAULT_TEXTURE);
+		mSculptType = LL_SCULPT_TYPE_SPHERE;
+	}
+	else
+	{
+		mSculptTexture = texture_id;
+		mSculptType = sculpt_type;
+	}
 }
 
 //============================================================================

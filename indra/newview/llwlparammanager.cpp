@@ -50,8 +50,6 @@
 #include "llagent.h"
 #include "llviewerregion.h"
 
-#include "lldaycyclemanager.h"
-#include "llenvmanager.h"
 #include "llwlparamset.h"
 #include "llpostprocess.h"
 
@@ -128,12 +126,12 @@ void LLWLParamManager::clearParamSetsOfScope(LLWLParamKey::EScope scope)
 // side effect: applies changes to all internal structures!
 std::map<LLWLParamKey, LLWLParamSet> LLWLParamManager::finalizeFromDayCycle(LLWLParamKey::EScope scope)
 {
-	lldebugs << "mDay before finalizing:" << llendl;
+	LL_DEBUGS() << "mDay before finalizing:" << LL_ENDL;
 	{
 		for (std::map<F32, LLWLParamKey>::iterator iter = mDay.mTimeMap.begin(); iter != mDay.mTimeMap.end(); ++iter)
 		{
 			LLWLParamKey& key = iter->second;
-			lldebugs << iter->first << "->" << key.name << llendl;
+			LL_DEBUGS() << iter->first << "->" << key.name << LL_ENDL;
 		}
 	}
 
@@ -219,12 +217,12 @@ std::map<LLWLParamKey, LLWLParamSet> LLWLParamManager::finalizeFromDayCycle(LLWL
 		final_references[new_key] = iter->second;
 	}
 
-	lldebugs << "mDay after finalizing:" << llendl;
+	LL_DEBUGS() << "mDay after finalizing:" << LL_ENDL;
 	{
 		for (std::map<F32, LLWLParamKey>::iterator iter = mDay.mTimeMap.begin(); iter != mDay.mTimeMap.end(); ++iter)
 		{
 			LLWLParamKey& key = iter->second;
-			lldebugs << iter->first << "->" << key.name << llendl;
+			LL_DEBUGS() << iter->first << "->" << key.name << LL_ENDL;
 		}
 	}
 
@@ -252,13 +250,13 @@ void LLWLParamManager::addAllSkies(const LLWLParamKey::EScope scope, const LLSD&
 	}
 }
 
-void LLWLParamManager::refreshRegionPresets()
+void LLWLParamManager::refreshRegionPresets(const LLSD& region_sky_presets)
 {
 	// Remove all region sky presets because they may belong to a previously visited region.
 	clearParamSetsOfScope(LLEnvKey::SCOPE_REGION);
 
 	// Add all sky presets belonging to the current region.
-	addAllSkies(LLEnvKey::SCOPE_REGION, LLEnvManagerNew::instance().getRegionSettings().getSkyMap());
+	addAllSkies(LLEnvKey::SCOPE_REGION, region_sky_presets);
 }
 
 void LLWLParamManager::loadAllPresets()
@@ -272,7 +270,7 @@ void LLWLParamManager::loadAllPresets()
 
 void LLWLParamManager::loadPresetsFromDir(const std::string& dir)
 {
-	LL_INFOS2("AppInit", "Shaders") << "Loading sky presets from " << dir << LL_ENDL;
+	LL_INFOS("AppInit", "Shaders") << "Loading sky presets from " << dir << LL_ENDL;
 
 	LLDirIterator dir_iter(dir, "*.xml");
 	while (1)
@@ -286,7 +284,7 @@ void LLWLParamManager::loadPresetsFromDir(const std::string& dir)
 		std::string path = gDirUtilp->add(dir, file);
 		if (!loadPreset(path))
 		{
-			llwarns << "Error loading sky preset from " << path << llendl;
+			LL_WARNS() << "Error loading sky preset from " << path << LL_ENDL;
 		}
 	}
 }
@@ -302,7 +300,7 @@ bool LLWLParamManager::loadPreset(const std::string& path)
 		return false;
 	}
 
-	LL_DEBUGS2("AppInit", "Shaders") << "Loading sky " << name << LL_ENDL;
+	LL_DEBUGS("AppInit", "Shaders") << "Loading sky " << name << LL_ENDL;
 
 	LLSD params_data;
 	LLPointer<LLSDParser> parser = new LLSDXMLParser();
@@ -334,7 +332,7 @@ void LLWLParamManager::savePreset(LLWLParamKey key)
 	paramsData = mParamList[key].getAll();
 
 	// write to file
-	llofstream presetsXML(pathName);
+	llofstream presetsXML(pathName.c_str());
 	LLPointer<LLSDFormatter> formatter = new LLSDXMLFormatter();
 	formatter->format(paramsData, presetsXML, LLSDFormatter::OPTIONS_PRETTY);
 	presetsXML.close();
@@ -364,11 +362,11 @@ void LLWLParamManager::updateShaderUniforms(LLGLSLShader * shader)
 	
 }
 
-static LLFastTimer::DeclareTimer FTM_UPDATE_WLPARAM("Update Windlight Params");
+static LLTrace::BlockTimerStatHandle FTM_UPDATE_WLPARAM("Update Windlight Params");
 
 void LLWLParamManager::propagateParameters(void)
 {
-	LLFastTimer ftm(FTM_UPDATE_WLPARAM);
+	LL_RECORD_BLOCK_TIME(FTM_UPDATE_WLPARAM);
 	
 	LLVector4 sunDir;
 	LLVector4 moonDir;
@@ -439,7 +437,7 @@ void LLWLParamManager::propagateParameters(void)
 
 void LLWLParamManager::update(LLViewerCamera * cam)
 {
-	LLFastTimer ftm(FTM_UPDATE_WLPARAM);
+	LL_RECORD_BLOCK_TIME(FTM_UPDATE_WLPARAM);
 	
 	// update clouds, sun, and general
 	mCurParams.updateCloudScrolling();
@@ -487,12 +485,23 @@ bool LLWLParamManager::applyDayCycleParams(const LLSD& params, LLEnvKey::EScope 
 	return true;
 }
 
+void LLWLParamManager::setDefaultDay()
+{
+	mDay.loadDayCycleFromFile("Default.xml");
+}
+
 bool LLWLParamManager::applySkyParams(const LLSD& params)
 {
 	mAnimator.deactivate();
 	mCurParams.setAll(params);
 	return true;
 }
+
+void LLWLParamManager::setDefaultSky()
+{
+	getParamSet(LLWLParamKey("Default", LLWLParamKey::SCOPE_LOCAL), mCurParams);
+}
+
 
 void LLWLParamManager::resetAnimator(F32 curTime, bool run)
 {
@@ -577,7 +586,7 @@ void LLWLParamManager::removeParamSet(const LLWLParamKey& key, bool delete_from_
 
 	if (key.scope == LLEnvKey::SCOPE_REGION)
 	{
-		llwarns << "Removing region skies not supported" << llendl;
+		LL_WARNS() << "Removing region skies not supported" << LL_ENDL;
 		llassert(key.scope == LLEnvKey::SCOPE_LOCAL);
 		return;
 	}
@@ -672,34 +681,8 @@ void LLWLParamManager::initSingleton()
 
 	loadAllPresets();
 
-	// load the day
-	std::string preferred_day = LLEnvManagerNew::instance().getDayCycleName();
-	if (!LLDayCycleManager::instance().getPreset(preferred_day, mDay))
-	{
-		// Fall back to default.
-		llwarns << "No day cycle named " << preferred_day << ", falling back to defaults" << llendl;
-		mDay.loadDayCycleFromFile("Default.xml");
-
-		// *TODO: Fix user preferences accordingly.
-	}
-
-	// *HACK - sets cloud scrolling to what we want... fix this better in the future
-	std::string sky = LLEnvManagerNew::instance().getSkyPresetName();
-	if (!getParamSet(LLWLParamKey(sky, LLWLParamKey::SCOPE_LOCAL), mCurParams))
-	{
-		llwarns << "No sky preset named " << sky << ", falling back to defaults" << llendl;
-		getParamSet(LLWLParamKey("Default", LLWLParamKey::SCOPE_LOCAL), mCurParams);
-
-		// *TODO: Fix user preferences accordingly.
-	}
-
-	// set it to noon
-	resetAnimator(0.5, LLEnvManagerNew::instance().getUseDayCycle());
-
 	// but use linden time sets it to what the estate is
 	mAnimator.setTimeType(LLWLAnimator::TIME_LINDEN);
-
-	LLEnvManagerNew::instance().usePrefs();
 }
 
 // static

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Chat de texto" name="chat">
+	<check_box initial_value="true" label="Auto completar los gestos en el chat cercano" name="auto_complete_gestures"/>
 	<panel name="general_chat_settings">
 		<check_box initial_value="true" label="Ejecutar la animación de escribir al hacerlo en el chat" name="play_typing_animation"/>
 		<check_box label="Cuando estoy desconectado, enviarme los MI al correo-e" name="send_im_to_email"/>
@@ -89,8 +90,19 @@
 		<check_box label="Oferta de inventario" name="inventory_offer"/>
 	</panel>
 	<panel name="log_settings">
+		<text name="logging_label">
+			Guardar:
+		</text>
+		<combo_box name="conversation_log_combo">
+			<item label="Registro y transcripciones" name="log_and_transcripts" value="2"/>
+			<item label="Solo registro" name="log_only" value="1"/>
+			<item label="Ni el registro ni las transcripciones" name="no_log_or_transcript" value="0"/>
+		</combo_box>
 		<button label="Borrar registro..." name="clear_log"/>
 		<button label="Borrar grabaciones..." name="delete_transcripts"/>
+		<text name="log_location_label">
+			Ubicación:
+		</text>
 		<button label="Examinar..." label_selected="Examinar" name="log_path_button"/>
 	</panel>
 	<button label="Traducción…" name="ok_btn"/>

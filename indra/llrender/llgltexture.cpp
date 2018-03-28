@@ -112,7 +112,8 @@ void LLGLTexture::setBoostLevel(S32 level)
 	if(mBoostLevel != level)
 	{
 		mBoostLevel = level ;
-		if(mBoostLevel != LLGLTexture::BOOST_NONE)
+		if(mBoostLevel != LLGLTexture::BOOST_NONE
+		   && mBoostLevel != LLGLTexture::BOOST_ICON)
 		{
 			setNoDelete() ;		
 		}
@@ -294,7 +295,7 @@ LLTexUnit::eTextureAddressMode LLGLTexture::getAddressMode(void) const
 	return mGLTexturep->getAddressMode() ;
 }
 
-S32 LLGLTexture::getTextureMemory() const
+S32Bytes LLGLTexture::getTextureMemory() const
 {
 	llassert(mGLTexturep.notNull()) ;
 

@@ -50,6 +50,7 @@
 #include "llviewerregion.h"
 #include "lluictrlfactory.h"
 #include "llviewerwindow.h"
+#include "llfloaterregioninfo.h"
 
 //LLFloaterTopObjects* LLFloaterTopObjects::sInstance = NULL;
 
@@ -117,25 +118,32 @@ void LLFloaterTopObjects::setMode(U32 mode)
 // static 
 void LLFloaterTopObjects::handle_land_reply(LLMessageSystem* msg, void** data)
 {
-	LLFloaterTopObjects* instance = LLFloaterReg::getTypedInstance<LLFloaterTopObjects>("top_objects");
-	if(!instance) return;
-	// Make sure dialog is on screen
-	LLFloaterReg::showInstance("top_objects");
-	instance->handleReply(msg, data);
-
-	//HACK: for some reason sometimes top scripts originally comes back
-	//with no results even though they're there
-	if (!instance->mObjectListIDs.size() && !instance->mInitialized)
+    LLFloaterTopObjects* instance = LLFloaterReg::getTypedInstance<LLFloaterTopObjects>("top_objects");
+    if(instance && instance->isInVisibleChain())
+    {
+	    instance->handleReply(msg, data);
+	    //HACK: for some reason sometimes top scripts originally comes back
+	    //with no results even though they're there
+	    if (!instance->mObjectListIDs.size() && !instance->mInitialized)
+	    {
+	        instance->onRefresh();
+	        instance->mInitialized = TRUE;
+	    }
+	}
+	else
 	{
-		instance->onRefresh();
-		instance->mInitialized = TRUE;
+	    LLFloaterRegionInfo* region_info_floater = LLFloaterReg::getTypedInstance<LLFloaterRegionInfo>("region_info");
+	    if(region_info_floater)
+	    {
+	        region_info_floater->enableTopButtons();
+	    }
 	}
 
 }
 
 void LLFloaterTopObjects::handleReply(LLMessageSystem *msg, void** data)
 {
-	U32 request_flags;
+    U32 request_flags;
 	U32 total_count;
 
 	msg->getU32Fast(_PREHASH_RequestData, _PREHASH_RequestFlags, request_flags);
@@ -175,10 +183,15 @@ void LLFloaterTopObjects::handleReply(LLMessageSystem *msg, void** data)
 			msg->getU32("DataExtended", "TimeStamp", time_stamp, block);
 			msg->getF32("DataExtended", "MonoScore", mono_score, block);
 			msg->getS32("DataExtended", "PublicURLs", public_urls, block);
-			if (msg->getSize("DataExtended", "ParcelName") > 0)
+
+			std::string parcel_name;
+			F32 script_size = 0.f;
+			msg->getString("DataExtended", "ParcelName", parcel_name, block);
+			msg->getF32("DataExtended", "Size", script_size, block);
+			if (parcel_name.size() > 0 || script_size > 0)
 			{
-				msg->getString("DataExtended", "ParcelName", parcel_buf, block);
-				msg->getF32("DataExtended", "Size", script_memory, block);
+				parcel_buf = parcel_name;
+				script_memory = script_size;
 			}
 		}
 
@@ -207,7 +220,7 @@ void LLFloaterTopObjects::handleReply(LLMessageSystem *msg, void** data)
 		columns[column_num++]["font"] = "SANSSERIF";
 
 		columns[column_num]["column"] = "location";
-		columns[column_num]["value"] = llformat("<%0.1f,%0.1f,%0.1f>", location_x, location_y, location_z);
+		columns[column_num]["value"] = llformat("<%0.f, %0.f, %0.f>", location_x, location_y, location_z);
 		columns[column_num++]["font"] = "SANSSERIF";
 
 		columns[column_num]["column"] = "parcel";
@@ -257,6 +270,8 @@ void LLFloaterTopObjects::handleReply(LLMessageSystem *msg, void** data)
 		format.setArg("[COUNT]", llformat("%d", total_count));
 		format.setArg("[TIME]", llformat("%0.3f", mtotalScore));
 		getChild<LLUICtrl>("title_text")->setValue(LLSD(format));
+		list->setColumnLabel("URLs", getString("URLs"));
+		list->setColumnLabel("memory", getString("memory"));
 	}
 	else
 	{
@@ -268,6 +283,13 @@ void LLFloaterTopObjects::handleReply(LLMessageSystem *msg, void** data)
 		format.setArg("[COUNT]", llformat("%d", total_count));
 		getChild<LLUICtrl>("title_text")->setValue(LLSD(format));
 	}
+
+	LLFloaterRegionInfo* region_info_floater = LLFloaterReg::getTypedInstance<LLFloaterRegionInfo>("region_info");
+	if(region_info_floater)
+	{
+		region_info_floater->enableTopButtons();
+	}
+	getChildView("refresh_btn")->setEnabled(true);
 }
 
 void LLFloaterTopObjects::onCommitObjectsList()
@@ -453,10 +475,22 @@ void LLFloaterTopObjects::onRefresh()
 	msg->addStringFast(_PREHASH_Filter, filter);
 	msg->addS32Fast(_PREHASH_ParcelLocalID, 0);
 
+	LLFloaterRegionInfo* region_info_floater = LLFloaterReg::getTypedInstance<LLFloaterRegionInfo>("region_info");
+	if(region_info_floater)
+	{
+		region_info_floater->disableTopButtons();
+	}
+	disableRefreshBtn();
+
 	msg->sendReliable(gAgent.getRegionHost());
 
 	mFilter.clear();
 	mFlags = 0;
+}
+
+void LLFloaterTopObjects::disableRefreshBtn()
+{
+	getChildView("refresh_btn")->setEnabled(false);
 }
 
 void LLFloaterTopObjects::onGetByObjectName()

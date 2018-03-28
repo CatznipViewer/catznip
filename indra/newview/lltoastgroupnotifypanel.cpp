@@ -31,7 +31,7 @@
 #include "llfocusmgr.h"
 
 #include "llbutton.h"
-#include "lliconctrl.h"
+#include "llgroupiconctrl.h"
 #include "llinventoryfunctions.h"
 #include "llinventoryicon.h"
 #include "llnotifications.h"
@@ -47,7 +47,6 @@
 #include "llglheaders.h"
 #include "llagent.h"
 #include "llavatariconctrl.h"
-#include "llfloaterinventory.h"
 #include "llinventorytype.h"
 
 const S32 LLToastGroupNotifyPanel::DEFAULT_MESSAGE_MAX_LINE_COUNT	= 7;
@@ -61,12 +60,14 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 	LLGroupData groupData;
 	if (!gAgent.getGroupData(payload["group_id"].asUUID(),groupData))
 	{
-		llwarns << "Group notice for unknown group: " << payload["group_id"].asUUID() << llendl;
+		LL_WARNS() << "Group notice for unknown group: " << payload["group_id"].asUUID() << LL_ENDL;
 	}
 
 	//group icon
-	LLIconCtrl* pGroupIcon = getChild<LLIconCtrl>("group_icon", TRUE);
-	pGroupIcon->setValue(groupData.mInsigniaID);
+	LLGroupIconCtrl* pGroupIcon = getChild<LLGroupIconCtrl>("group_icon", TRUE);
+
+	// We should already have this data preloaded, so no sense in setting icon through setValue(group_id)
+	pGroupIcon->setIconId(groupData.mInsigniaID);
 
 	//header title
 	std::string from_name = payload["sender_name"].asString();
@@ -92,12 +93,13 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 							+LLTrans::getString("UTCTimeSec")+"] ["
 							+LLTrans::getString("UTCTimeTimezone")+"]";
 	const LLDate timeStamp = notification->getDate();
-	LLDate notice_date = timeStamp.notNull() ? timeStamp : LLDate::now();
+	LLDate notice_date = timeStamp.notNull() ? timeStamp : payload["received_time"].asDate();
 	LLSD substitution;
 	substitution["datetime"] = (S32) notice_date.secondsSinceEpoch();
 	LLStringUtil::format(timeStr, substitution);
 
 	LLViewerTextEditor* pMessageText = getChild<LLViewerTextEditor>("message");
+	pMessageText->setContentTrusted(false);
 	pMessageText->clear();
 
 	LLStyle::Params style;

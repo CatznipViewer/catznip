@@ -32,6 +32,7 @@
 #include "lldictionary.h"
 #include "llinventorydefines.h"
 #include "llui.h"
+#include "lluiimage.h"
 #include "llwearabletype.h"
 
 struct IconEntry : public LLDictionaryEntry
@@ -45,9 +46,10 @@ struct IconEntry : public LLDictionaryEntry
 class LLIconDictionary : public LLSingleton<LLIconDictionary>,
 						 public LLDictionary<LLInventoryType::EIconName, IconEntry>
 {
-public:
-	LLIconDictionary();
+	LLSINGLETON(LLIconDictionary);
 };
+
+typedef LLPointer<LLUIImage> LLUIImagePtr;
 
 LLIconDictionary::LLIconDictionary()
 {
@@ -180,6 +182,6 @@ const std::string& LLInventoryIcon::getIconName(LLInventoryType::EIconName idx)
 
 LLInventoryType::EIconName LLInventoryIcon::assignWearableIcon(U32 misc_flag)
 {
-	const LLWearableType::EType wearable_type = LLWearableType::EType(LLInventoryItemFlags::II_FLAGS_WEARABLES_MASK & misc_flag);
+	const LLWearableType::EType wearable_type = LLWearableType::inventoryFlagsToWearableType(misc_flag);
 	return LLWearableType::getIconName(wearable_type);
 }

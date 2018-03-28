@@ -51,7 +51,11 @@ private:
 LLDirIterator::Impl::Impl(const std::string &dirname, const std::string &mask)
 	: mIsValid(false)
 {
+#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
+	fs::path dir_path(utf8str_to_utf16str(dirname));
+#else
 	fs::path dir_path(dirname);
+#endif
 
 	bool is_dir = false;
 
@@ -62,13 +66,13 @@ LLDirIterator::Impl::Impl(const std::string &dirname, const std::string &mask)
 	}
 	catch (const fs::filesystem_error& e)
 	{
-		llwarns << e.what() << llendl;
+		LL_WARNS() << e.what() << LL_ENDL;
 		return;
 	}
 
 	if (!is_dir)
 	{
-		llwarns << "Invalid path: \"" << dir_path.string() << "\"" << llendl;
+		LL_WARNS() << "Invalid path: \"" << dir_path.string() << "\"" << LL_ENDL;
 		return;
 	}
 
@@ -79,7 +83,7 @@ LLDirIterator::Impl::Impl(const std::string &dirname, const std::string &mask)
 	}
 	catch (const fs::filesystem_error& e)
 	{
-		llwarns << e.what() << llendl;
+		LL_WARNS() << e.what() << LL_ENDL;
 		return;
 	}
 
@@ -95,8 +99,8 @@ LLDirIterator::Impl::Impl(const std::string &dirname, const std::string &mask)
 	}
 	catch (boost::regex_error& e)
 	{
-		llwarns << "\"" << exp << "\" is not a valid regular expression: "
-				<< e.what() << llendl;
+		LL_WARNS() << "\"" << exp << "\" is not a valid regular expression: "
+				<< e.what() << LL_ENDL;
 		return;
 	}
 
@@ -113,22 +117,32 @@ bool LLDirIterator::Impl::next(std::string &fname)
 
 	if (!mIsValid)
 	{
-		llwarns << "The iterator is not correctly initialized." << llendl;
+		LL_WARNS() << "The iterator is not correctly initialized." << LL_ENDL;
 		return false;
 	}
 
 	fs::directory_iterator end_itr; // default construction yields past-the-end
 	bool found = false;
-	while (mIter != end_itr && !found)
-	{
-		boost::smatch match;
-		std::string name = mIter->path().filename().string();
-		if (found = boost::regex_match(name, match, mFilterExp))
-		{
-			fname = name;
-		}
 
-		++mIter;
+	// Check if path is a directory.
+	try
+	{
+		while (mIter != end_itr && !found)
+		{
+			boost::smatch match;
+			std::string name = mIter->path().filename().string();
+			found = boost::regex_match(name, match, mFilterExp);
+			if (found)
+			{
+				fname = name;
+			}
+
+			++mIter;
+		}
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		LL_WARNS() << e.what() << LL_ENDL;
 	}
 
 	return found;
@@ -176,7 +190,7 @@ std::string glob_to_regex(const std::string& glob)
 			case '}':
 				if (!braces)
 				{
-					llerrs << "glob_to_regex: Closing brace without an equivalent opening brace: " << glob << llendl;
+					LL_ERRS() << "glob_to_regex: Closing brace without an equivalent opening brace: " << glob << LL_ENDL;
 				}
 
 				regex+=')';
@@ -207,7 +221,7 @@ std::string glob_to_regex(const std::string& glob)
 
 	if (braces)
 	{
-		llerrs << "glob_to_regex: Unterminated brace expression: " << glob << llendl;
+		LL_ERRS() << "glob_to_regex: Unterminated brace expression: " << glob << LL_ENDL;
 	}
 
 	return regex;

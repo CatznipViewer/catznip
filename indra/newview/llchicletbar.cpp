@@ -31,23 +31,14 @@
 #include "lllayoutstack.h"
 #include "llpaneltopinfobar.h"
 #include "llsyswellwindow.h"
+#include "llfloaternotificationstabbed.h"
 
 namespace
 {
 	const std::string& PANEL_CHICLET_NAME	= "chiclet_list_panel";
-
-	S32 get_curr_width(LLUICtrl* ctrl)
-	{
-		S32 cur_width = 0;
-		if ( ctrl && ctrl->getVisible() )
-		{
-			cur_width = ctrl->getRect().getWidth();
-		}
-		return cur_width;
-	}
 }
 
-LLChicletBar::LLChicletBar(const LLSD&)
+LLChicletBar::LLChicletBar()
 :	mChicletPanel(NULL),
 	mToolbarStack(NULL)
 {
@@ -59,7 +50,7 @@ BOOL LLChicletBar::postBuild()
 	mToolbarStack = getChild<LLLayoutStack>("toolbar_stack");
 	mChicletPanel = getChild<LLChicletPanel>("chiclet_list");
 
-	showWellButton("notification_well", !LLNotificationWellWindow::getInstance()->isWindowEmpty());
+	showWellButton("notification_well", !LLFloaterNotificationsTabbed::getInstance()->isWindowEmpty());
 
 	LLPanelTopInfoBar::instance().setResizeCallback(boost::bind(&LLChicletBar::fitWithTopInfoBar, this));
 	LLPanelTopInfoBar::instance().setVisibleCallback(boost::bind(&LLChicletBar::fitWithTopInfoBar, this));
@@ -90,16 +81,16 @@ void LLChicletBar::log(LLView* panel, const std::string& descr)
 void LLChicletBar::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	static S32 debug_calling_number = 0;
-	lldebugs << "**************************************** " << ++debug_calling_number << llendl;
+	LL_DEBUGS() << "**************************************** " << ++debug_calling_number << LL_ENDL;
 
 	S32 current_width = getRect().getWidth();
 	S32 delta_width = width - current_width;
-	lldebugs << "Reshaping: "
+	LL_DEBUGS() << "Reshaping: "
 		<< ", width: " << width
 		<< ", cur width: " << current_width
 		<< ", delta_width: " << delta_width
 		<< ", called_from_parent: " << called_from_parent
-		<< llendl;
+		<< LL_ENDL;
 
 	if (mChicletPanel)			log(mChicletPanel, "before");
 
@@ -155,7 +146,7 @@ void LLChicletBar::reshape(S32 width, S32 height, BOOL called_from_parent)
 
 	if (should_be_reshaped)
 	{
-		lldebugs << "Reshape all children with width: " << width << llendl;
+		LL_DEBUGS() << "Reshape all children with width: " << width << LL_ENDL;
 		LLPanel::reshape(width, height, called_from_parent);
 	}
 
@@ -174,23 +165,23 @@ S32 LLChicletBar::processWidthDecreased(S32 delta_width)
 		// we have some space to decrease chiclet panel
 		S32 shrink_by = llmin(-delta_width, chiclet_panel_shrink_headroom);
 
-		lldebugs << "delta_width: " << delta_width
+		LL_DEBUGS() << "delta_width: " << delta_width
 			<< ", panel_delta_min: " << chiclet_panel_shrink_headroom
 			<< ", shrink_by: " << shrink_by
-			<< llendl;
+			<< LL_ENDL;
 
 		// is chiclet panel wide enough to process resizing?
 		delta_width += chiclet_panel_shrink_headroom;
 
 		still_should_be_processed = delta_width < 0;
 
-		lldebugs << "Shrinking chiclet panel by " << shrink_by << " px" << llendl;
+		LL_DEBUGS() << "Shrinking chiclet panel by " << shrink_by << " px" << LL_ENDL;
 		mChicletPanel->getParent()->reshape(mChicletPanel->getParent()->getRect().getWidth() - shrink_by, mChicletPanel->getParent()->getRect().getHeight());
 		log(mChicletPanel, "after processing panel decreasing via chiclet panel");
 
-		lldebugs << "RS_CHICLET_PANEL"
+		LL_DEBUGS() << "RS_CHICLET_PANEL"
 			<< ", delta_width: " << delta_width
-			<< llendl;
+			<< LL_ENDL;
 	}
 
 	S32 extra_shrink_width = 0;
@@ -198,8 +189,8 @@ S32 LLChicletBar::processWidthDecreased(S32 delta_width)
 	if (still_should_be_processed)
 	{
 		extra_shrink_width = -delta_width;
-		llwarns << "There is no enough width to reshape all children: "
-			<< extra_shrink_width << llendl;
+		LL_WARNS() << "There is no enough width to reshape all children: "
+			<< extra_shrink_width << LL_ENDL;
 	}
 
 	return extra_shrink_width;

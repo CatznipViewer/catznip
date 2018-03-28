@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="文字聊天" name="chat">
+	<check_box initial_value="true" label="在附近聊天中，自動完成姿勢" name="auto_complete_gestures"/>
 	<panel name="general_chat_settings">
 		<check_box initial_value="true" label="聊天時呈現打字動作" name="play_typing_animation"/>
 		<check_box label="當我離線時將收到的 IM 訊息郵寄給我" name="send_im_to_email"/>
@@ -89,8 +90,19 @@
 		<check_box label="收納物品贈送" name="inventory_offer"/>
 	</panel>
 	<panel name="log_settings">
+		<text name="logging_label">
+			儲存：
+		</text>
+		<combo_box name="conversation_log_combo">
+			<item label="活動記錄和交談記錄" name="log_and_transcripts" value="2"/>
+			<item label="僅活動記錄" name="log_only" value="1"/>
+			<item label="沒有活動記錄或交談記錄" name="no_log_or_transcript" value="0"/>
+		</combo_box>
 		<button label="清空記錄…" name="clear_log"/>
 		<button label="刪除交談內容記錄…" name="delete_transcripts"/>
+		<text name="log_location_label">
+			位置：
+		</text>
 		<button label="瀏覽…" label_selected="瀏覽" name="log_path_button"/>
 	</panel>
 	<button label="翻譯…" name="ok_btn"/>

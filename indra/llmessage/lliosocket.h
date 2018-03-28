@@ -38,9 +38,13 @@
  */
 
 #include "lliopipe.h"
+#include "llwin32headerslean.h"
 #include "apr_pools.h"
 #include "apr_network_io.h"
 #include "llchainio.h"
+
+extern const std::string CONTEXT_REMOTE_HOST;
+extern const std::string CONTEXT_REMOTE_PORT;
 
 class LLHost;
 

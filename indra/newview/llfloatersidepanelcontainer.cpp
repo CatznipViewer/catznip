@@ -57,7 +57,7 @@ void LLFloaterSidePanelContainer::onOpen(const LLSD& key)
 	getChild<LLPanel>(sMainPanelName)->onOpen(key);
 }
 
-void LLFloaterSidePanelContainer::onClickCloseBtn(bool)
+void LLFloaterSidePanelContainer::closeFloater(bool app_quitting)
 {
 	LLPanelOutfitEdit* panel_outfit_edit =
 		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
@@ -69,13 +69,25 @@ void LLFloaterSidePanelContainer::onClickCloseBtn(bool)
 			LLSidepanelAppearance* panel_appearance = dynamic_cast<LLSidepanelAppearance*>(getPanel("appearance"));
 			if ( panel_appearance )
 			{
-				panel_appearance->getWearable()->onClose();
-				panel_appearance->showOutfitsInventoryPanel();
+				LLPanelEditWearable *edit_wearable_ptr = panel_appearance->getWearable();
+				if (edit_wearable_ptr)
+				{
+					edit_wearable_ptr->onClose();
+				}
+				if(!app_quitting)
+				{
+					panel_appearance->showOutfitsInventoryPanel();
+				}
 			}
 		}
 	}
 	
-	LLFloater::onClickCloseBtn();
+	LLFloater::closeFloater(app_quitting);
+
+	if (getInstanceName() == "inventory" && !getKey().isUndefined())
+	{
+		destroy();
+	}
 }
 
 LLPanel* LLFloaterSidePanelContainer::openChildPanel(const std::string& panel_name, const LLSD& params)

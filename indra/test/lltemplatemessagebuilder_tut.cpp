@@ -35,7 +35,6 @@
 #include "llquaternion.h"
 #include "lltemplatemessagebuilder.h"
 #include "lltemplatemessagereader.h"
-#include "llversionserver.h"
 #include "message_prehash.h"
 #include "u64.h"
 #include "v3dmath.h"
@@ -59,9 +58,9 @@ namespace tut
 				const F32 circuit_timeout=100;
 
 				start_messaging_system("notafile", 13035,
-									   LL_VERSION_MAJOR,
-									   LL_VERSION_MINOR,        
-									   LL_VERSION_PATCH,        
+									   1,
+									   0,        
+									   0,        
 									   FALSE,        
 									   "notasharedsecret",
 									   NULL,
@@ -320,7 +319,7 @@ namespace tut
 	{
 		LLMessageTemplate messageTemplate = defaultTemplate();
 		messageTemplate.addBlock(defaultBlock(MVT_LLQuaternion, 12));
-		LLQuaternion outValue, inValue = LLQuaternion(1,2,3,0);
+		LLQuaternion outValue, inValue = LLQuaternion(0.3713907f, 0.5570861f, 0.7427813f,0.0f);
 		LLTemplateMessageBuilder* builder = defaultBuilder(messageTemplate);
 		builder->addQuat(_PREHASH_Test0, inValue);
 		LLTemplateMessageReader* reader = setReader(messageTemplate, builder);
@@ -787,7 +786,7 @@ namespace tut
 	{
 		LLMessageTemplate messageTemplate = defaultTemplate();
 		messageTemplate.addBlock(defaultBlock(MVT_LLQuaternion, 12));
-		LLQuaternion outValue, inValue = LLQuaternion(1,2,3,0);
+		LLQuaternion outValue, inValue = LLQuaternion(0.3713907f, 0.5570861f, 0.7427813f,0.0f);
 		LLTemplateMessageBuilder* builder = defaultBuilder(messageTemplate);
 		builder->addQuat(_PREHASH_Test0, inValue);
 		LLTemplateMessageReader* reader = setReader(

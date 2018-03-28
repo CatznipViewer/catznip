@@ -30,6 +30,13 @@
 #include "llhandle.h"
 
 #include "llaccountingcost.h"
+#include "httpcommon.h"
+#include "llcoros.h"
+#include "lleventcoro.h"
+#include "httprequest.h"
+#include "httpheaders.h"
+#include "httpoptions.h"
+
 //===============================================================================
 // An interface class for panels which display the parcel accounting information.
 class LLAccountingCostObserver
@@ -38,7 +45,7 @@ public:
 	LLAccountingCostObserver() { mObserverHandle.bind(this); }
 	virtual ~LLAccountingCostObserver() {}
 	virtual void onWeightsUpdate(const SelectionCost& selection_cost) = 0;
-	virtual void setErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setErrorStatus(S32 status, const std::string& reason) = 0;
 	const LLHandle<LLAccountingCostObserver>& getObserverHandle() const { return mObserverHandle; }
 	const LLUUID& getTransactionID() { return mTransactionID; }
 
@@ -51,9 +58,9 @@ protected:
 //===============================================================================
 class LLAccountingCostManager : public LLSingleton<LLAccountingCostManager>
 {
+	LLSINGLETON(LLAccountingCostManager);
+
 public:
-	//Ctor
-	LLAccountingCostManager();
 	//Store an object that will be eventually fetched
 	void addObject( const LLUUID& objectID );
 	//Request quotas for object list
@@ -64,11 +71,13 @@ public:
 	
 private:
 	//Set of objects that will be used to generate a cost
-	std::set<LLUUID> mObjectList;
+	uuid_set_t mObjectList;
 	//During fetchCosts we move object into a the pending set to signify that 
 	//a fetch has been instigated.
-	std::set<LLUUID> mPendingObjectQuota;
-	typedef std::set<LLUUID>::iterator IDIt;
+	uuid_set_t mPendingObjectQuota;
+
+    void accountingCostCoro(std::string url, eSelectionType selectionType, const LLHandle<LLAccountingCostObserver> observerHandle);
+
 };
 //===============================================================================
 

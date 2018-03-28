@@ -38,9 +38,6 @@
 // Constants
 //-----------------------------------------------------------------------------
 const F32 TORSO_TARGET_HALF_LIFE = 0.25f;
-const F32 MAX_TIME_DELTA = 2.f; //max two seconds a frame for calculating interpolation
-const F32 TARGET_PLANE_THRESHOLD_DOT = 0.6f;
-const F32 TORSO_ROT_FRACTION = 0.5f;
 
 //-----------------------------------------------------------------------------
 // LLTargetingMotion()
@@ -80,7 +77,7 @@ LLMotion::LLMotionInitStatus LLTargetingMotion::onInitialize(LLCharacter *charac
 		!mTorsoJoint ||
 		!mRightHandJoint)
 	{
-		llwarns << "Invalid skeleton for targeting motion!" << llendl;
+		LL_WARNS() << "Invalid skeleton for targeting motion!" << LL_ENDL;
 		return STATUS_FAILURE;
 	}
 
@@ -106,7 +103,7 @@ BOOL LLTargetingMotion::onActivate()
 //-----------------------------------------------------------------------------
 BOOL LLTargetingMotion::onUpdate(F32 time, U8* joint_mask)
 {
-	F32 slerp_amt = LLCriticalDamp::getInterpolant(TORSO_TARGET_HALF_LIFE);
+	F32 slerp_amt = LLSmoothInterpolation::getInterpolant(TORSO_TARGET_HALF_LIFE);
 
 	LLVector3 target;
 	LLVector3* lookAtPoint = (LLVector3*)mCharacter->getAnimationData("LookAtPoint");

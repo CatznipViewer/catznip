@@ -105,7 +105,7 @@ LLBadge::LLBadge(const LLBadge::Params& p)
 {
 	if (mImage.isNull())
 	{
-		llwarns << "Badge: " << getName() << " with no image!" << llendl;
+		LL_WARNS() << "Badge: " << getName() << " with no image!" << LL_ENDL;
 	}
 
 	if (p.location_offset_hcenter.isProvided())
@@ -196,10 +196,10 @@ void renderBadgeBackground(F32 centerX, F32 centerY, F32 width, F32 height, cons
 	F32 x = LLFontGL::sCurOrigin.mX + centerX - width * 0.5f;
 	F32 y = LLFontGL::sCurOrigin.mY + centerY - height * 0.5f;
 	
-	LLRectf screen_rect(llround(x),
-						llround(y),
-						llround(x) + width,
-						llround(y) + height);
+	LLRectf screen_rect(ll_round(x),
+						ll_round(y),
+						ll_round(x) + width,
+						ll_round(y) + height);
 	
 	LLVector3 vertices[4];
 	vertices[0] = LLVector3(screen_rect.mRight, screen_rect.mTop,    1.0f);
@@ -224,7 +224,7 @@ void LLBadge::draw()
 	{
 		LLView* owner_view = mOwner.get();
 
-		if (owner_view)
+		if (owner_view && owner_view->isInVisibleChain())
 		{
 			//
 			// Calculate badge size based on label text
@@ -335,7 +335,7 @@ void LLBadge::draw()
 			}
 			else
 			{
-				lldebugs << "No image for badge " << getName() << " on owner " << owner_view->getName() << llendl;
+				LL_DEBUGS() << "No image for badge " << getName() << " on owner " << owner_view->getName() << LL_ENDL;
 				
 				renderBadgeBackground(badge_center_x, badge_center_y,
 									  badge_width, badge_height,

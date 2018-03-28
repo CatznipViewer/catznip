@@ -9,7 +9,10 @@
 		<action description="Eject Members from this Group"
 		     longdescription="Eject Members from this Group using the &apos;Eject&apos; button in the Roles section &gt; Members tab. An Owner can eject anyone except another Owner. If you&apos;re not an Owner, a Member can be ejected from a group if, and only if, they&apos;re only in the Everyone Role, and NO other Roles. To remove Members from Roles, you need to have the &apos;Remove Members from Roles&apos; Ability."
 		     name="member eject" value="2" />
-		<action
+    <action description="Manage ban list"
+         longdescription="Allows the group member to ban / un-ban Residents from this group."
+         name="allow ban" value="51" />
+    <action
 		     description="Toggle &apos;Open Enrollment&apos; and change &apos;Enrollment fee&apos;"
 		     longdescription="Toggle &apos;Open Enrollment&apos; to let new Members join without an invitation, and change the &apos;Enrollment fee&apos; in the General section."
 		     name="member options" value="3" />
@@ -102,9 +105,9 @@
 		<action description="Always allow &apos;Create Objects&apos;"
 		     longdescription="Members in a Role with this Ability can create objects on a group-owned parcel, even if it&apos;s turned off in About Land &gt; Options tab."
 		     name="land allow create" value="25" />
-		<action description="Always allow &apos;Create Landmark&apos;"
-		     longdescription="Members in a Role with this Ability can landmark a group-owned parcel, even if it&apos;s turned off in About Land &gt; Options tab."
-		     name="land allow landmark" value="26" />
+		<action description="Ignore landing point"
+		     longdescription="Members in a Role with this Ability can direct teleport to a group-owned parcel, even if a landing point is set in About Land &gt; Options tab."
+		     name="land allow direct teleport" value="26" />
 		<action description="Allow &apos;Set Home to Here&apos; on group land"
 		     longdescription="Members in a Role with this Ability can use World menu &gt; Landmarks &gt; Set Home to Here on a parcel deeded to this group."
 		     name="land allow set home" value="28" />
@@ -187,4 +190,16 @@
 		     longdescription="Members in a Role with this Ability can control access and participation in group voice and text chat sessions."
 		     name="moderate group chat" value="37" />
 	</action_set>
+  <action_set
+    description="These Abilities include power to modify experiences owned by this group."
+    name="experience_tools_experience">
+    <action description="Experience Admin"
+            longdescription="Members in a role with this ability can edit the meta-data for an experience."
+            name="experience admin"
+            value ="49" />
+    <action description="Experience Contributor"
+            longdescription="Members in a role with this ability can contribute scripts for an experience."
+            name="experience contributor"
+            value ="50" />
+  </action_set>
 </role_actions>

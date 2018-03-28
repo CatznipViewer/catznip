@@ -35,7 +35,9 @@ class LLStatBar;
 
 // widget registrars
 struct StatViewRegistry : public LLChildRegistry<StatViewRegistry>
-{};
+{
+	LLSINGLETON_EMPTY_CTOR(StatViewRegistry);
+};
 
 class LLStatView : public LLContainerView
 {
@@ -46,7 +48,8 @@ public:
 		Params() 
 		:	setting("setting")
 		{
-			changeDefault(follows.flags, FOLLOWS_TOP | FOLLOWS_LEFT);
+			changeDefault(follows.flags, FOLLOWS_TOP | FOLLOWS_LEFT | FOLLOWS_RIGHT);
+			changeDefault(show_label, true);
 		}
 	};
 

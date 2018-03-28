@@ -26,14 +26,14 @@
 
 #include "linden_common.h"
 #include "../llviewerprecompiledheaders.h"
- 
+
 #include <iostream>
 #include "../test/lltut.h"
 
 #include "llsdserialize.h"
 #include "llsdutil.h"
 #include "llerrorcontrol.h"
-#include "llhttpstatuscodes.h"
+#include "llhttpconstants.h"
 
 #include "../llmediadataclient.h"
 #include "../llvovolume.h"
@@ -106,7 +106,7 @@ const char *DATA = _DATA(VALID_OBJECT_ID,"1.0","true");
 
 LLSD *gPostRecords = NULL;
 F64   gMinimumInterestLevel = (F64)0.0;
-
+#if 0
 // stubs:
 void LLHTTPClient::post(
 		const std::string& url,
@@ -129,7 +129,7 @@ void LLHTTPClient::post(
 	{
 		LLSD content;
 		content["reason"] = "fake reason";
-		responder->errorWithContent(HTTP_SERVICE_UNAVAILABLE, "fake reason", content);
+		responder->failureResult(HTTP_SERVICE_UNAVAILABLE, "fake reason", content);
 		return;
 	}
 	else if (url == FAKE_OBJECT_MEDIA_NAVIGATE_CAP_URL_ERROR) 
@@ -137,9 +137,10 @@ void LLHTTPClient::post(
 		LLSD error;
 		error["code"] = LLObjectMediaNavigateClient::ERROR_PERMISSION_DENIED_CODE;
 		result["error"] = error;
-	}	
-	responder->result(result);
+	}
+	responder->successResult(result);
 }
+#endif
 
 const F32 HTTP_REQUEST_EXPIRY_SECS = 60.0f;
 

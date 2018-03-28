@@ -103,7 +103,7 @@ public:
 		Optional<LLScrollContainer::Params> scroll;
 
 		Optional<S32> max_height;
-
+		
 		Optional<bool> bg_visible,
 					   expanded_bg_visible;
 
@@ -147,6 +147,7 @@ public:
 	 * *HACK: Update the inner textbox shape.
 	 */
 	void updateTextShape();
+	virtual void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
 
 	/**
 	 * Draws text box, collapses text box if its expanded and its parent's position changed
@@ -193,6 +194,8 @@ protected:
 	 * Recalculate text delta considering min_height and window rect.
 	 */
 	virtual S32 recalculateTextDelta(S32 text_delta);
+
+	void setContentTrusted(bool trusted_content);
 
 protected:
 

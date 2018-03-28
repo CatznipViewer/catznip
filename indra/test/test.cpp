@@ -34,12 +34,15 @@
  *
  */
 
+
 #include "linden_common.h"
 #include "llerrorcontrol.h"
 #include "lltut.h"
 #include "tests/wrapllerrs.h"             // RecorderProxy
 #include "stringize.h"
 #include "namedtempfile.h"
+#include "lltrace.h"
+#include "lltracethreadrecorder.h"
 
 #include "apr_pools.h"
 #include "apr_getopt.h"
@@ -93,25 +96,20 @@ public:
 	virtual void replay(std::ostream&) {}
 };
 
-class LLReplayLogReal: public LLReplayLog, public LLError::Recorder, public boost::noncopyable
+class RecordToTempFile : public LLError::Recorder, public boost::noncopyable
 {
 public:
-	LLReplayLogReal(LLError::ELevel level, apr_pool_t* pool):
-		mOldSettings(LLError::saveAndResetSettings()),
-		mProxy(new RecorderProxy(this)),
-		mTempFile("log", "", pool),		// create file
-		mFile(mTempFile.getName().c_str()) // open it
+	RecordToTempFile(apr_pool_t* pPool)
+		: LLError::Recorder(),
+		boost::noncopyable(),
+		mTempFile("log", "", pPool),
+		mFile(mTempFile.getName().c_str())
 	{
-		LLError::setFatalFunction(wouldHaveCrashed);
-		LLError::setDefaultLevel(level);
-		LLError::addRecorder(mProxy);
 	}
 
-	virtual ~LLReplayLogReal()
+	virtual ~RecordToTempFile()
 	{
-		LLError::removeRecorder(mProxy);
-		delete mProxy;
-		LLError::restoreSettings(mOldSettings);
+		mFile.close();
 	}
 
 	virtual void recordMessage(LLError::ELevel level, const std::string& message)
@@ -119,13 +117,13 @@ public:
 		mFile << message << std::endl;
 	}
 
-	virtual void reset()
+	void reset()
 	{
 		mFile.close();
 		mFile.open(mTempFile.getName().c_str());
 	}
 
-	virtual void replay(std::ostream& out)
+	void replay(std::ostream& out)
 	{
 		mFile.close();
 		std::ifstream inf(mTempFile.getName().c_str());
@@ -137,10 +135,43 @@ public:
 	}
 
 private:
-	LLError::Settings* mOldSettings;
-	LLError::Recorder* mProxy;
 	NamedTempFile mTempFile;
-	std::ofstream mFile;
+	llofstream mFile;
+};
+
+class LLReplayLogReal: public LLReplayLog, public boost::noncopyable
+{
+public:
+	LLReplayLogReal(LLError::ELevel level, apr_pool_t* pool)
+		: LLReplayLog(),
+		boost::noncopyable(),
+		mOldSettings(LLError::saveAndResetSettings()),
+		mRecorder(new RecordToTempFile(pool))
+	{
+		LLError::setFatalFunction(wouldHaveCrashed);
+		LLError::setDefaultLevel(level);
+		LLError::addRecorder(mRecorder);
+	}
+
+	virtual ~LLReplayLogReal()
+	{
+		LLError::removeRecorder(mRecorder);
+		LLError::restoreSettings(mOldSettings);
+	}
+
+	virtual void reset()
+	{
+		boost::dynamic_pointer_cast<RecordToTempFile>(mRecorder)->reset();
+	}
+
+	virtual void replay(std::ostream& out)
+	{
+		boost::dynamic_pointer_cast<RecordToTempFile>(mRecorder)->replay(out);
+	}
+
+private:
+	LLError::SettingsStoragePtr mOldSettings;
+	LLError::RecorderPtr mRecorder;
 };
 
 class LLTestCallback : public tut::callback
@@ -482,6 +513,8 @@ void wouldHaveCrashed(const std::string& message)
 	tut::fail("llerrs message: " + message);
 }
 
+static LLTrace::ThreadRecorder* sMasterThreadRecorder = NULL;
+
 int main(int argc, char **argv)
 {
 	// The following line must be executed to initialize Google Mock
@@ -493,12 +526,12 @@ int main(int argc, char **argv)
 	const char* LOGTEST = getenv("LOGTEST");
 	if (LOGTEST)
 	{
-		LLError::initForApplication(".", true /* log to stderr */);
+		LLError::initForApplication(".", ".", true /* log to stderr */);
 		LLError::setDefaultLevel(LLError::decodeLevel(LOGTEST));
 	}
 	else
 	{
-		LLError::initForApplication(".", false /* do not log to stderr */);
+		LLError::initForApplication(".", ".", false /* do not log to stderr */);
 		LLError::setDefaultLevel(LLError::LEVEL_DEBUG);
 	}	
 	LLError::setFatalFunction(wouldHaveCrashed);
@@ -512,15 +545,15 @@ int main(int argc, char **argv)
 	ctype_workaround();
 #endif
 
-	apr_initialize();
-	apr_pool_t* pool = NULL;
-	if(APR_SUCCESS != apr_pool_create(&pool, NULL))
+	ll_init_apr();
+	
+	if (!sMasterThreadRecorder)
 	{
-		std::cerr << "Unable to initialize pool" << std::endl;
-		return 1;
+		sMasterThreadRecorder = new LLTrace::ThreadRecorder();
+		LLTrace::set_master_thread_recorder(sMasterThreadRecorder);
 	}
 	apr_getopt_t* os = NULL;
-	if(APR_SUCCESS != apr_getopt_init(&os, pool, argc, argv))
+	if(APR_SUCCESS != apr_getopt_init(&os, gAPRPoolp, argc, argv))
 	{
 		std::cerr << "apr_getopt_init() failed" << std::endl;
 		return 1;
@@ -536,7 +569,7 @@ int main(int argc, char **argv)
 	apr_status_t apr_err;
 	const char* opt_arg = NULL;
 	int opt_id = 0;
-	boost::scoped_ptr<std::ofstream> output;
+	boost::scoped_ptr<llofstream> output;
 	const char *touch = NULL;
 
 	while(true)
@@ -566,7 +599,7 @@ int main(int argc, char **argv)
 				verbose_mode = true;
 				break;
 			case 'o':
-				output.reset(new std::ofstream);
+				output.reset(new llofstream);
 				output->open(opt_arg);
 				break;
 			case 's':	// --sourcedir
@@ -602,7 +635,7 @@ int main(int argc, char **argv)
 	if (LOGFAIL)
 	{
 		LLError::ELevel level = LLError::decodeLevel(LOGFAIL);
-		replayer.reset(new LLReplayLogReal(level, pool));
+		replayer.reset(new LLReplayLogReal(level, gAPRPoolp));
 	}
 	else
 	{
@@ -640,16 +673,17 @@ int main(int argc, char **argv)
 
 	if (touch && success)
 	{
-		std::ofstream s;
+		llofstream s;
 		s.open(touch);
 		s << "ok" << std::endl;
 		s.close();
 	}
 
-	apr_terminate();
+	ll_cleanup_apr();
 
 	int retval = (success ? 0 : 1);
 	return retval;
 
 	//delete mycallback;
+
 }

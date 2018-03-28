@@ -28,6 +28,8 @@
 #define LL_LLFLOATERMODELUPLOADBASE_H
 
 #include "lluploadfloaterobservers.h"
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 class LLFloaterModelUploadBase : public LLFloater, public LLUploadPermissionsObserver, public LLWholeModelFeeObserver, public LLWholeModelUploadObserver
 {
@@ -37,13 +39,13 @@ public:
 
 	virtual ~LLFloaterModelUploadBase(){};
 
-	virtual void setPermissonsErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setPermissonsErrorStatus(S32 status, const std::string& reason) = 0;
 
 	virtual void onPermissionsReceived(const LLSD& result) = 0;
 
 	virtual void onModelPhysicsFeeReceived(const LLSD& result, std::string upload_url) = 0;
 
-	virtual void setModelPhysicsFeeErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setModelPhysicsFeeErrorStatus(S32 status, const std::string& reason) = 0;
 
 	virtual void onModelUploadSuccess() {};
 
@@ -53,6 +55,8 @@ protected:
 
 	// requests agent's permissions to upload model
 	void requestAgentUploadPermissions();
+
+    void requestAgentUploadPermissionsCoro(std::string url, LLHandle<LLUploadPermissionsObserver> observerHandle);
 
 	std::string mUploadModelUrl;
 	bool mHasUploadPerm;

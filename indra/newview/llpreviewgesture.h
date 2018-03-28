@@ -102,7 +102,7 @@ protected:
 	// "Sound", "Chat", or "Wait"
 	LLScrollListItem* addStep(const enum EStepType step_type);
 	
-	void onVisibilityChange ( const LLSD& new_visibility );
+	void onVisibilityChanged ( const LLSD& new_visibility );
 	
 	static std::string getLabel(std::vector<std::string> labels);
 	static void updateLabel(LLScrollListItem* item);
@@ -132,6 +132,7 @@ protected:
 
 	static void onDonePreview(LLMultiGesture* gesture, void* data);
 
+    static void finishInventoryUpload(LLUUID itemId, LLUUID newAssetId);
 private:
 	// LLPreview contains mDescEditor
 	LLLineEditor*	mTriggerEditor;

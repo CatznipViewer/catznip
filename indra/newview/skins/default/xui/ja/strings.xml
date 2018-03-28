@@ -37,6 +37,64 @@
 	<string name="StartupRequireDriverUpdate">
 		グラフィックを初期化できませんでした。グラフィックドライバを更新してください。
 	</string>
+	<string name="AboutHeader">
+		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) ([CHANNEL])
+[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
+	</string>
+	<string name="BuildConfig">
+		ビルド構成 [BUILD_CONFIG]
+	</string>
+	<string name="AboutPosition">
+		あなたの現在地は、[POSITION_LOCAL_0,number,1]、[POSITION_LOCAL_1,number,1]、[POSITION_LOCAL_2,number,1] の [REGION] です。位置は &lt;nolink&gt;[HOSTNAME]&lt;/nolink&gt; です。（[HOSTIP]）
+SLURL:&lt;nolink&gt;[SLURL]&lt;/nolink&gt;
+(グローバル座標 [POSITION_0,number,1]、[POSITION_1,number,1]、[POSITION_2,number,1])
+[SERVER_VERSION]
+[SERVER_RELEASE_NOTES_URL]
+	</string>
+	<string name="AboutSystem">
+		CPU：[CPU]
+メモリ：[MEMORY_MB] MB
+OS バージョン：[OS_VERSION]
+グラフィックカード製造元：[GRAPHICS_CARD_VENDOR]
+グラフィックカード:[GRAPHICS_CARD]
+	</string>
+	<string name="AboutDriver">
+		Windows グラフィックドライババージョン：[GRAPHICS_DRIVER_VERSION]
+	</string>
+	<string name="AboutOGL">
+		OpenGL バージョン：[OPENGL_VERSION]
+	</string>
+	<string name="AboutSettings">
+		ウィンドウサイズ： [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+フォントサイズの調整： [FONT_SIZE_ADJUSTMENT]pt
+UI スケーリング： [UI_SCALE]
+描画距離：[DRAW_DISTANCE]m
+帯域幅：[NET_BANDWITH]kbit/s
+LOD 係数： [LOD_FACTOR]
+表示品質： [RENDER_QUALITY] / 7
+高度なライティングモデル： [GPU_SHADERS]
+テクスチャメモリ： [TEXTURE_MEMORY]MB
+VFS（キャッシュ）作成時間： [VFS_TIME]
+	</string>
+	<string name="AboutLibs">
+		J2C デコーダバージョン：[J2C_VERSION]
+オーディオドライババージョン：[AUDIO_DRIVER_VERSION]
+CEF バージョン： [LIBCEF_VERSION]
+LibVLC バージョン： [LIBVLC_VERSION]
+ボイスサーバーバージョン：[VOICE_VERSION]
+	</string>
+	<string name="AboutTraffic">
+		パケットロス：[PACKETS_LOST,number,0]/[PACKETS_IN,number,0] （[PACKETS_PCT,number,1]%）
+	</string>
+	<string name="AboutTime">
+		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
+	</string>
+	<string name="ErrorFetchingServerReleaseNotesURL">
+		サーバーのリリースノートの URL を取得中にエラーが発生しました。
+	</string>
+	<string name="BuildConfiguration">
+		ビルド構成
+	</string>
 	<string name="ProgressRestoring">
 		復元中です...
 	</string>
@@ -139,6 +197,12 @@
 	<string name="create_account_url">
 		http://join.secondlife.com/?sourceid=[sourceid]
 	</string>
+	<string name="AgniGridLabel">
+		Second Life メイングリッド (Agni)
+	</string>
+	<string name="AditiGridLabel">
+		Second Life ベータテストグリッド (Aditi)
+	</string>
 	<string name="ViewerDownloadURL">
 		http://secondlife.com/download
 	</string>
@@ -198,8 +262,7 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="LoginFailedAccountDisabled">
 		現在リクエストを完了することができません。
-Second Life のサポート（http://secondlife.com/support）にお問い合わせください。
-パスワードを変更できない場合には、(866) 476-9763 に電話でお問い合わせください。
+Second Life のサポート（http://support.secondlife.com）にお問い合わせください。
 	</string>
 	<string name="LoginFailedTransformError">
 		ログイン時にデータの不一致が見つかりました。
@@ -296,6 +359,75 @@ support@secondlife.com にお問い合わせください。
 	<string name="TestingDisconnect">
 		ビューワの接続を切るテスト中
 	</string>
+	<string name="SocialFlickrConnecting">
+		Flickr に接続中...
+	</string>
+	<string name="SocialFlickrPosting">
+		投稿中...
+	</string>
+	<string name="SocialFlickrDisconnecting">
+		Flickr から切断中...
+	</string>
+	<string name="SocialFlickrErrorConnecting">
+		Flickr への接続時のエラー
+	</string>
+	<string name="SocialFlickrErrorPosting">
+		Flickr への投稿時のエラー
+	</string>
+	<string name="SocialFlickrErrorDisconnecting">
+		Flickr からの切断時のエラー
+	</string>
+	<string name="SocialTwitterConnecting">
+		Twitter に接続中...
+	</string>
+	<string name="SocialTwitterPosting">
+		投稿中...
+	</string>
+	<string name="SocialTwitterDisconnecting">
+		Twitter から切断中...
+	</string>
+	<string name="SocialTwitterErrorConnecting">
+		Twitter への接続時のエラー
+	</string>
+	<string name="SocialTwitterErrorPosting">
+		Twitter への投稿時のエラー
+	</string>
+	<string name="SocialTwitterErrorDisconnecting">
+		Twitter からの切断時のエラー
+	</string>
+	<string name="BlackAndWhite">
+		白黒
+	</string>
+	<string name="Colors1970">
+		1970 年代のカラー
+	</string>
+	<string name="Intense">
+		強調
+	</string>
+	<string name="Newspaper">
+		新聞紙
+	</string>
+	<string name="Sepia">
+		セピア
+	</string>
+	<string name="Spotlight">
+		スポットライト
+	</string>
+	<string name="Video">
+		ビデオ
+	</string>
+	<string name="Autocontrast">
+		オートコントラスト
+	</string>
+	<string name="LensFlare">
+		レンズフレア
+	</string>
+	<string name="Miniature">
+		ミニチュア
+	</string>
+	<string name="Toycamera">
+		おもちゃのカメラ
+	</string>
 	<string name="TooltipPerson">
 		人
 	</string>
@@ -341,30 +473,54 @@ support@secondlife.com にお問い合わせください。
 	<string name="TooltipMustSingleDrop">
 		アイテムは 1 つだけここにドラッグできます
 	</string>
+	<string name="TooltipTooManyWearables">
+		[AMOUNT] 以上のアイテムを含むフォルダを装着できません。「詳細設定」 &gt; 「デバッグ設定を表示」 &gt; 「WearFolderLimit」でこの制限を変更できます。
+	</string>
 	<string name="TooltipPrice" value="L$[AMOUNT]："/>
+	<string name="TooltipSLIcon">
+		これは、SecondLife.com または LindenLab.com の公式ドメイン上のページにリンクします。
+	</string>
 	<string name="TooltipOutboxDragToWorld">
-		マーチャントボックス内のアイテムを Rez することはできません
-	</string>
-	<string name="TooltipOutboxNoTransfer">
-		これらオブジェクトの 1 つまたは複数は売り渡したり譲渡したりできないものです。
-	</string>
-	<string name="TooltipOutboxNotInInventory">
-		マーチャントアウトボックスでは、ご自分のインベントリからのアイテムしか受け入れることができません
+		マーケットプレイスのリストフォルダからアイテムを Rez できません
 	</string>
 	<string name="TooltipOutboxWorn">
-		着用しているアイテムをマーチャントアウトボックスに入れることはできません
-	</string>
-	<string name="TooltipOutboxCallingCard">
-		コーリングカードをマーチャントアウトボックスに入れることはできません
+		着ているアイテムをマーケットプレイスのリストフォルダに置くことはできません
 	</string>
 	<string name="TooltipOutboxFolderLevels">
-		ネスト入りフォルダの深さが 3 を超えています
+		ネスト入りフォルダの深さが [AMOUNT] 階層を超えています必要に応じてアイテムを箱に入れ、フォルダの階層を減らします。
 	</string>
 	<string name="TooltipOutboxTooManyFolders">
-		最上位フォルダ内のサブフォルダ数が 20 を超えています
+		サブフォルダ数が [AMOUNT] 個を超えています。必要に応じてアイテムを箱に入れ、リストのフォルダ階層を減らします。
 	</string>
 	<string name="TooltipOutboxTooManyObjects">
-		最上位フォルダ内のアイテム数が 200 を超えています
+		アイテム数が [AMOUNT] 個を超えています。1 つのリスト内で [AMOUNT] 個を超えるアイテムを販売するためには、いくつかのアイテムを箱に入れる必要があります。
+	</string>
+	<string name="TooltipOutboxTooManyStockItems">
+		在庫アイテム数が [AMOUNT] 個を超えています。
+	</string>
+	<string name="TooltipOutboxCannotDropOnRoot">
+		アイテムまたはフォルダは「すべて」または「関連付けされていない」タブによってのみドロップできます。これらのタブのいずれかを選択してから、もう一度アイテムまたはフォルダを選択してください。
+	</string>
+	<string name="TooltipOutboxNoTransfer">
+		これらのオブジェクトの 1 つまたは複数は売り渡したり譲渡したりできないものです
+	</string>
+	<string name="TooltipOutboxNotInInventory">
+		アイテムはインベントリからマーケットプレイスへの移動のみできます
+	</string>
+	<string name="TooltipOutboxLinked">
+		リンクされた相手またはフォルダをマーケットプレイスに置くことはできません
+	</string>
+	<string name="TooltipOutboxCallingCard">
+		コーリングカードをマーケットプレイスに置くことはできません
+	</string>
+	<string name="TooltipOutboxDragActive">
+		表示されているリストを移動できません
+	</string>
+	<string name="TooltipOutboxCannotMoveRoot">
+		ルートフォルダをリストに表示するマーケットプレイスを移動できません
+	</string>
+	<string name="TooltipOutboxMixedStock">
+		在庫フォルダ内のアイテムはすべて同じ種類と権限でなければなりません
 	</string>
 	<string name="TooltipDragOntoOwnChild">
 		フォルダをその子フォルダに移動することはできません
@@ -427,6 +583,9 @@ support@secondlife.com にお問い合わせください。
 		クリックして secondlife:// コマンドを出します
 	</string>
 	<string name="CurrentURL" value=" 現在の URL： [CurrentURL]"/>
+	<string name="TooltipEmail">
+		クリックして電子メールを作成
+	</string>
 	<string name="SLurlLabelTeleport">
 		テレポート
 	</string>
@@ -543,6 +702,19 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		不明のステータス
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		サービスがご利用いただけません。
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		サーバーに予期せぬ問題が発生しました。
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		サービスがご利用いただけないか、アップロードがタイムアウトしました。
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		アップロードリクエスト中にエラーが発生しました。問題を解決するには、サポート
+（http://secondlife.com/support）にお問い合わせください。
 	</string>
 	<string name="texture">
 		テクスチャ
@@ -847,6 +1019,12 @@ support@secondlife.com にお問い合わせください。
 	<string name="use_texture">
 		テクスチャを使用
 	</string>
+	<string name="manip_hint1">
+		マウスカーソルをルーラに合わせて
+	</string>
+	<string name="manip_hint2">
+		グリッドにスナップ
+	</string>
 	<string name="texture_loading">
 		ローディング...
 	</string>
@@ -937,18 +1115,19 @@ support@secondlife.com にお問い合わせください。
 	<string name="ControlYourCamera">
 		カメラのコントロール
 	</string>
+	<string name="TeleportYourAgent">
+		あなたをテレポート
+	</string>
+	<string name="ForceSitAvatar">
+		アバターを強制的に座らせる
+	</string>
 	<string name="NotConnected">
 		接続されていません
 	</string>
 	<string name="AgentNameSubst">
 		(あなた)
 	</string>
-	<string name="TeleportYourAgent">
-		あなたをテレポート
-	</string>
-	<string name="JoinAnExperience">
-		体験に参加する
-	</string>
+	<string name="JoinAnExperience"/>
 	<string name="SilentlyManageEstateAccess">
 		土地のアクセスリストを管理するときにアラートを表示しない
 	</string>
@@ -1014,6 +1193,12 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="bitmap_image_files">
 		ビットマップ画像
+	</string>
+	<string name="png_image_files">
+		PNG 画像
+	</string>
+	<string name="save_texture_image_files">
+		Targa または PNG 画像
 	</string>
 	<string name="avi_movie_file">
 		AVI ムービーファイル
@@ -1243,6 +1428,9 @@ support@secondlife.com にお問い合わせください。
 	<string name="BodyPartsRightLeg">
 		右脚
 	</string>
+	<string name="BodyPartsEnhancedSkeleton">
+		拡張スケルトン
+	</string>
 	<string name="GraphicsQualityLow">
 		低
 	</string>
@@ -1263,6 +1451,9 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="FavoritesNoMatchingItems">
 		ここにランドマークをドラッグしてお気に入りに追加します。
+	</string>
+	<string name="MarketplaceNoMatchingItems">
+		アイテムが見つかりませんでした。検索文字列のスペルを確認して、もう一度やり直してください。
 	</string>
 	<string name="InventoryNoTexture">
 		インベントリ内にこのテクスチャのコピーがありません
@@ -1299,32 +1490,113 @@ support@secondlife.com にお問い合わせください。
 	<string name="InventoryOutboxNoItems">
 		[[MARKETPLACE_DASHBOARD_URL] マーケットプレイス]に販売するアイテムを一覧するには、フォルダをこのエリアにドラッグし、「マーケットプレイスに送信」をクリックします。
 	</string>
+	<string name="InventoryOutboxInitializingTitle">
+		マーケットプレイスの初期化。
+	</string>
+	<string name="InventoryOutboxInitializing">
+		[[MARKETPLACE_CREATE_STORE_URL] マーケットプレイス ストア] のアカウントにアクセスしています。
+	</string>
+	<string name="InventoryOutboxErrorTitle">
+		マーケットプレイス エラー。
+	</string>
+	<string name="InventoryOutboxError">
+		[[MARKETPLACE_CREATE_STORE_URL] マーケットプレイス ストア] がエラーを返しています。
+	</string>
+	<string name="InventoryMarketplaceError">
+		マーケットプレイスのリストを開くときにエラーが発生しました。引き続きこのメッセージを受信するには、Second Life のサポート (http://support.secondlife.com) にお問い合わせください
+	</string>
+	<string name="InventoryMarketplaceListingsNoItemsTitle">
+		マーケットプレイスのリストフォルダが空です。
+	</string>
+	<string name="InventoryMarketplaceListingsNoItems">
+		[[MARKETPLACE_DASHBOARD_URL] マーケットプレイス]に販売するアイテムを一覧するには、フォルダをこのエリアにドラッグします。
+	</string>
+	<string name="Marketplace Validation Warning Stock">
+		バージョンフォルダに在庫フォルダが含まれなければなりません
+	</string>
+	<string name="Marketplace Validation Error Mixed Stock">
+		: エラー：在庫フォルダ内のすべてのアイテムはコピー不可で同じ種類でなければなりません
+	</string>
+	<string name="Marketplace Validation Error Subfolder In Stock">
+		: エラー：在庫フォルダにサブフォルダを含めることはできません
+	</string>
+	<string name="Marketplace Validation Warning Empty">
+		: 警告：フォルダにアイテムが含まれていません
+	</string>
+	<string name="Marketplace Validation Warning Create Stock">
+		: 警告：在庫フォルダを作成しています
+	</string>
+	<string name="Marketplace Validation Warning Create Version">
+		: 警告：バージョンフォルダ作成中
+	</string>
+	<string name="Marketplace Validation Warning Move">
+		: 警告：アイテム移動中
+	</string>
+	<string name="Marketplace Validation Warning Delete">
+		: 警告：フォルダの中身が在庫フォルダに移されました。空のフォルダを削除します
+	</string>
+	<string name="Marketplace Validation Error Stock Item">
+		: エラー：在庫フォルダにコピー不可アイテムを含める必要があります
+	</string>
+	<string name="Marketplace Validation Warning Unwrapped Item">
+		: 警告：バージョンフォルダにアイテムが含まれていなければなりません
+	</string>
+	<string name="Marketplace Validation Error">
+		: エラー：
+	</string>
+	<string name="Marketplace Validation Warning">
+		: 警告：
+	</string>
+	<string name="Marketplace Validation Error Empty Version">
+		: 警告：バージョンフォルダには、最低 1 アイテムが含まれなければなりません
+	</string>
+	<string name="Marketplace Validation Error Empty Stock">
+		: 警告：在庫フォルダには、最低 1 アイテムが含まれていなければなりません
+	</string>
+	<string name="Marketplace Validation No Error">
+		報告するエラーまたは警告はありません
+	</string>
 	<string name="Marketplace Error None">
 		エラーなし
 	</string>
+	<string name="Marketplace Error Prefix">
+		エラー：
+	</string>
 	<string name="Marketplace Error Not Merchant">
-		エラー：マーケットプレイスにアイテムを送る前に、あなた自身をマーチャント登録する必要があります（登録は無料です）。
+		マーケットプレイスに商品を送る前に、あなた自身をマーチャント登録する必要があります（登録は無料です）。
 	</string>
-	<string name="Marketplace Error Empty Folder">
-		エラー：このフォルダは空です。
-	</string>
-	<string name="Marketplace Error Unassociated Products">
-		エラー：あなたのマーチャントアカウントには、商品に関連付けられていないアイテムが多すぎるため、このアイテムをアップロードできませんでした。このエラーを解消するには、マーケットプレイスの Web サイトにログインし、関連付けられていないアイテムの数を減らしてください。
-	</string>
-	<string name="Marketplace Error Object Limit">
-		エラー：このアイテムに含まれるオブジェクトが多すぎます。オブジェクトをいくつかボックスにまとめ、オブジェクト数を200以下に減らしてください。
-	</string>
-	<string name="Marketplace Error Folder Depth">
-		エラー：このアイテムはネスト入りフォルダの階層が多すぎます。ネスト入りフォルダを 3 階層以内にまとめ直してください。
+	<string name="Marketplace Error Not Accepted">
+		アイテムをそのフォルダに移動できません。
 	</string>
 	<string name="Marketplace Error Unsellable Item">
-		エラー：このアイテムをマーケットプレイスで販売することはできません。
+		このアイテムをマーケットプレイスで販売することはできません。
 	</string>
-	<string name="Marketplace Error Internal Import">
-		エラー：このアイテムに関して問題が発生しました。しばらくしてからお試しください。
+	<string name="MarketplaceNoID">
+		Mkt ID なし
+	</string>
+	<string name="MarketplaceLive">
+		リスト掲載済み
+	</string>
+	<string name="MarketplaceActive">
+		有効
+	</string>
+	<string name="MarketplaceMax">
+		最大
+	</string>
+	<string name="MarketplaceStock">
+		在庫
+	</string>
+	<string name="MarketplaceNoStock">
+		在庫なし
+	</string>
+	<string name="MarketplaceUpdating">
+		アップデート中...
 	</string>
 	<string name="Open landmarks">
 		ランドマークを開く
+	</string>
+	<string name="Unconstrained">
+		非拘束
 	</string>
 	<string name="no_transfer" value=" （再販・プレゼント不可）"/>
 	<string name="no_modify" value=" （編集不可）"/>
@@ -1339,6 +1611,7 @@ support@secondlife.com にお問い合わせください。
 		コンテンツなし
 	</string>
 	<string name="WornOnAttachmentPoint" value=" （[ATTACHMENT_POINT] に装着中）"/>
+	<string name="AttachmentErrorMessage" value="([ATTACHMENT_ERROR])"/>
 	<string name="ActiveGesture" value="[GESLABEL] （アクティブ）"/>
 	<string name="PermYes">
 		はい
@@ -1606,8 +1879,62 @@ support@secondlife.com にお問い合わせください。
 	<string name="Avatar Center">
 		アバターの中央
 	</string>
+	<string name="Left Ring Finger">
+		左薬指
+	</string>
+	<string name="Right Ring Finger">
+		右薬指
+	</string>
+	<string name="Tail Base">
+		しっぽのベース
+	</string>
+	<string name="Tail Tip">
+		しっぽの先
+	</string>
+	<string name="Left Wing">
+		左の翼
+	</string>
+	<string name="Right Wing">
+		右の翼
+	</string>
+	<string name="Jaw">
+		顎
+	</string>
+	<string name="Alt Left Ear">
+		代わりの左耳
+	</string>
+	<string name="Alt Right Ear">
+		代わりの右耳
+	</string>
+	<string name="Alt Left Eye">
+		代わりの左目
+	</string>
+	<string name="Alt Right Eye">
+		代わりの右目
+	</string>
+	<string name="Tongue">
+		舌
+	</string>
+	<string name="Groin">
+		脚の付け根
+	</string>
+	<string name="Left Hind Foot">
+		左後足
+	</string>
+	<string name="Right Hind Foot">
+		右後足
+	</string>
 	<string name="Invalid Attachment">
 		装着先が正しくありません
+	</string>
+	<string name="ATTACHMENT_MISSING_ITEM">
+		エラー：アイテムが見つかりません
+	</string>
+	<string name="ATTACHMENT_MISSING_BASE_ITEM">
+		エラー：ベースアイテムが見つかりません
+	</string>
+	<string name="ATTACHMENT_NOT_ATTACHED">
+		エラー：オブジェクトは現在のアウトフィット内にありますが、添付されていません
 	</string>
 	<string name="YearsMonthsOld">
 		[AGEYEARS] [AGEMONTHS]
@@ -1626,6 +1953,42 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="TodayOld">
 		今日参加
+	</string>
+	<string name="av_render_everyone_now">
+		全員にあなたが見えるようになりました。
+	</string>
+	<string name="av_render_not_everyone">
+		あなたのまわりの一部の人には、あなたが見えない可能性があります。
+	</string>
+	<string name="av_render_over_half">
+		あなたの周囲の半分以上の人に、あなたが表示されない可能性があります。
+	</string>
+	<string name="av_render_most_of">
+		あなたのまわりのほとんどの人に、あなたが見えない可能性があります。
+	</string>
+	<string name="av_render_anyone">
+		あなたのまわりの誰にもあなたが見えない可能性があります。
+	</string>
+	<string name="hud_description_total">
+		ご利用の HUD
+	</string>
+	<string name="hud_name_with_joint">
+		[OBJ_NAME]（[JNT_NAME] に装着中）
+	</string>
+	<string name="hud_render_memory_warning">
+		[HUD_DETAILS] はたくさんのテクスチャメモリを使用します
+	</string>
+	<string name="hud_render_cost_warning">
+		[HUD_DETAILS] には高価なオブジェクトやテクスチャがたくさん含まれています
+	</string>
+	<string name="hud_render_heavy_textures_warning">
+		[HUD_DETAILS] は大きなテクスチャがたくさん含まれています
+	</string>
+	<string name="hud_render_cramped_warning">
+		[HUD_DETAILS] に含まれるオブジェクトが多すぎます
+	</string>
+	<string name="hud_render_textures_warning">
+		[HUD_DETAILS] に含まれるテクスチャが多すぎます
 	</string>
 	<string name="AgeYearsA">
 		[COUNT] 年
@@ -1726,6 +2089,9 @@ support@secondlife.com にお問い合わせください。
 	<string name="CompileQueueDownloadedCompiling">
 		ダウンロード完了、コンパイル中
 	</string>
+	<string name="CompileQueueServiceUnavailable">
+		スクリプト コンパイル サービスを利用できません
+	</string>
 	<string name="CompileQueueScriptNotFound">
 		サーバー上にスクリプトが見つかりません。
 	</string>
@@ -1740,6 +2106,9 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="CompileQueueUnknownFailure">
 		原因不明の失敗によりダウンロードができません
+	</string>
+	<string name="CompileNoExperiencePerm">
+		[EXPERIENCE] 体験による [SCRIPT] スクリプトのスキップ。
 	</string>
 	<string name="CompileQueueTitle">
 		リコンパイル進行
@@ -1774,8 +2143,14 @@ support@secondlife.com にお問い合わせください。
 	<string name="SaveComplete">
 		保存完了。
 	</string>
+	<string name="UploadFailed">
+		ファイルのアップロードが失敗しました:
+	</string>
 	<string name="ObjectOutOfRange">
 		スクリプト（オブジェクトが範囲外にあります）
+	</string>
+	<string name="ScriptWasDeleted">
+		スクリプト（インベントリから削除済み）
 	</string>
 	<string name="GodToolsObjectOwnedBy">
 		[OWNER] 所有のオブジェクト「[OBJECT]」
@@ -1834,10 +2209,19 @@ support@secondlife.com にお問い合わせください。
 		あなたが [OWNER] のために管理するすべての不動産
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		許可された住人： （[ALLOWEDAGENTS] 人、最大 [MAXACCESS] 人）
+		常に許可：（[ALLOWEDAGENTS] 人、最大 [MAXACCESS] 人）
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		許可されたグループ： （[ALLOWEDGROUPS]、最大 [MAXACCESS] ）
+		グループを常に許可：（[ALLOWEDGROUPS]、最大 [MAXACCESS]）
+	</string>
+	<string name="RegionInfoBannedResidents">
+		常に禁止：（[BANNEDAGENTS] 人、最大 [MAXBANNED] 人）
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		常に許可
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		常に禁止
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		区画スクリプトメモリ
@@ -1962,11 +2346,11 @@ support@secondlife.com にお問い合わせください。
 	<string name="ATTACH_BELLY">
 		お腹
 	</string>
-	<string name="ATTACH_RPEC">
-		右胸筋
-	</string>
-	<string name="ATTACH_LPEC">
+	<string name="ATTACH_LEFT_PEC">
 		左胸筋
+	</string>
+	<string name="ATTACH_RIGHT_PEC">
+		右胸筋
 	</string>
 	<string name="ATTACH_HUD_CENTER_2">
 		HUD（中央 2）
@@ -1997,6 +2381,51 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="ATTACH_AVATAR_CENTER">
 		アバターの中央
+	</string>
+	<string name="ATTACH_LHAND_RING1">
+		左薬指
+	</string>
+	<string name="ATTACH_RHAND_RING1">
+		右薬指
+	</string>
+	<string name="ATTACH_TAIL_BASE">
+		しっぽのベース
+	</string>
+	<string name="ATTACH_TAIL_TIP">
+		しっぽの先
+	</string>
+	<string name="ATTACH_LWING">
+		左の翼
+	</string>
+	<string name="ATTACH_RWING">
+		右の翼
+	</string>
+	<string name="ATTACH_FACE_JAW">
+		顎
+	</string>
+	<string name="ATTACH_FACE_LEAR">
+		代わりの左耳
+	</string>
+	<string name="ATTACH_FACE_REAR">
+		代わりの右耳
+	</string>
+	<string name="ATTACH_FACE_LEYE">
+		代わりの左目
+	</string>
+	<string name="ATTACH_FACE_REYE">
+		代わりの右目
+	</string>
+	<string name="ATTACH_FACE_TONGUE">
+		舌
+	</string>
+	<string name="ATTACH_GROIN">
+		脚の付け根
+	</string>
+	<string name="ATTACH_HIND_LFOOT">
+		左後足
+	</string>
+	<string name="ATTACH_HIND_RFOOT">
+		右後足
 	</string>
 	<string name="CursorPos">
 		[LINE] 行目、[COLUMN] 列目
@@ -2343,6 +2772,15 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="Play Media">
 		メディアを再生/一時停止
+	</string>
+	<string name="IntelDriverPage">
+		http://www.intel.com/p/en_US/support/detect/graphics
+	</string>
+	<string name="NvidiaDriverPage">
+		http://www.nvidia.com/Download/index.aspx?lang=en-us
+	</string>
+	<string name="AMDDriverPage">
+		http://support.amd.com/us/Pages/AMDSupportHub.aspx
 	</string>
 	<string name="MBCmdLineError">
 		コマンドラインにエラーが見つかりました。
@@ -3987,6 +4425,12 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="OfflineStatus">
 		オフライン
 	</string>
+	<string name="not_online_msg">
+		ユーザーがオンラインでありません - メッセージは保存され、後で配信されます。
+	</string>
+	<string name="not_online_inventory">
+		ユーザーがオンラインでありません - インベントリが保存されました。
+	</string>
 	<string name="answered_call">
 		相手がコールを受けました
 	</string>
@@ -4021,10 +4465,19 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 		[AGENT_NAME] とコンファレンスする
 	</string>
 	<string name="inventory_item_offered-im">
-		インベントリアイテムを送りました
+		持ち物アイテム &apos;[ITEM_NAME]&apos; が送られてきました
+	</string>
+	<string name="inventory_folder_offered-im">
+		持ち物フォルダ &apos;[ITEM_NAME]&apos; が送られてきました
 	</string>
 	<string name="share_alert">
 		インベントリからここにアイテムをドラッグします
+	</string>
+	<string name="flickr_post_success">
+		Flickr に投稿しました。
+	</string>
+	<string name="twitter_post_success">
+		Twitter に投稿しました。
 	</string>
 	<string name="no_session_message">
 		（IM セッションが存在しません）
@@ -4102,15 +4555,24 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 		家の配置の設定。
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] は [REASON] のために L$[AMOUNT] を支払いました。
+	</string>
+	<string name="paid_you_ldollars_gift">
+		[NAME] は L$[AMOUNT] 支払いました：[REASON]
 	</string>
 	<string name="paid_you_ldollars_no_reason">
 		[NAME] は L$[AMOUNT] を支払いました。
 	</string>
 	<string name="you_paid_ldollars">
+		[NAME] に L$ [AMOUNT] を支払いました：[REASON]
+	</string>
+	<string name="you_paid_ldollars_gift">
 		[NAME] に L$ [AMOUNT] を支払いました：[REASON]
 	</string>
 	<string name="you_paid_ldollars_no_info">
@@ -4124,6 +4586,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="you_paid_failure_ldollars">
 		[NAME] に [REASON] の代金 L$ [AMOUNT] を支払えませんでした。
+	</string>
+	<string name="you_paid_failure_ldollars_gift">
+		[NAME] に L$ [AMOUNT] を支払えませんでした：[REASON]
 	</string>
 	<string name="you_paid_failure_ldollars_no_info">
 		L$ [AMOUNT] を支払えませんでした。
@@ -4451,11 +4916,20 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="texture_load_dimensions_error">
 		[WIDTH]*[HEIGHT] 以上の画像は読み込めません
 	</string>
+	<string name="outfit_photo_load_dimensions_error">
+		最大アウトフィット写真サイズは [WIDTH]*[HEIGHT] です。画像のサイズを調整するか、別の画像を使用してください
+	</string>
+	<string name="outfit_photo_select_dimensions_error">
+		最大アウトフィット写真サイズは [WIDTH]*[HEIGHT] です。別のテクスチャを選択してください
+	</string>
+	<string name="outfit_photo_verify_dimensions_error">
+		写真の寸法を確認できません。写真サイズがピッカーに表示されるまでお待ちください
+	</string>
 	<string name="words_separator" value=","/>
 	<string name="server_is_down">
 		大変申し訳ございませんが、予期しない問題が発生しました。
 
-	サービスに関する既知の問題については、status.secondlifegrid.net をご覧ください。
+サービスに関する既知の問題については、http://status.secondlifegrid.net をご覧ください。
 問題が引き続き発生する場合は、お使いのネットワークやファイアウォールの設定を調べてください。
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -4481,6 +4955,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="LocalEstimateUSD">
 		US$ [AMOUNT]
+	</string>
+	<string name="Group Ban">
+		グループへの立入禁止
 	</string>
 	<string name="Membership">
 		会員
@@ -4904,8 +5381,17 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="Command_Destinations_Label">
 		行き先
 	</string>
+	<string name="Command_Facebook_Label">
+		Facebook
+	</string>
+	<string name="Command_Flickr_Label">
+		Flickr
+	</string>
 	<string name="Command_Gestures_Label">
 		ジェスチャー
+	</string>
+	<string name="Command_Grid_Status_Label">
+		グリッドステータス
 	</string>
 	<string name="Command_HowTo_Label">
 		ハウツー
@@ -4917,6 +5403,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 		地図
 	</string>
 	<string name="Command_Marketplace_Label">
+		マーケットプレイス
+	</string>
+	<string name="Command_MarketplaceListings_Label">
 		マーケットプレイス
 	</string>
 	<string name="Command_MiniMap_Label">
@@ -4943,6 +5432,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="Command_Profile_Label">
 		プロフィール
 	</string>
+	<string name="Command_Report_Abuse_Label">
+		嫌がらせの報告
+	</string>
 	<string name="Command_Search_Label">
 		検索
 	</string>
@@ -4951,6 +5443,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="Command_Speak_Label">
 		話す
+	</string>
+	<string name="Command_Twitter_Label">
+		Twitter
 	</string>
 	<string name="Command_View_Label">
 		カメラコントロール
@@ -4982,8 +5477,17 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="Command_Destinations_Tooltip">
 		行ってみたい場所
 	</string>
+	<string name="Command_Facebook_Tooltip">
+		Facebook へ投稿
+	</string>
+	<string name="Command_Flickr_Tooltip">
+		Flickr にアップロード
+	</string>
 	<string name="Command_Gestures_Tooltip">
 		アバターのジェスチャー
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		現在のグリッドステータスを表示
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		一般的タスクの実行方法
@@ -4996,6 +5500,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="Command_Marketplace_Tooltip">
 		ショッピングに出掛ける
+	</string>
+	<string name="Command_MarketplaceListings_Tooltip">
+		創作アイテムを販売します
 	</string>
 	<string name="Command_MiniMap_Tooltip">
 		近くの人を表示する
@@ -5021,6 +5528,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="Command_Profile_Tooltip">
 		プロフィールを編集・表示
 	</string>
+	<string name="Command_Report_Abuse_Tooltip">
+		嫌がらせの報告
+	</string>
 	<string name="Command_Search_Tooltip">
 		場所、イベント、人を検索
 	</string>
@@ -5029,6 +5539,9 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="Command_Speak_Tooltip">
 		マイクを使って近くの人と話す
+	</string>
+	<string name="Command_Twitter_Tooltip">
+		Twitter
 	</string>
 	<string name="Command_View_Tooltip">
 		カメラの角度を変更
@@ -5105,6 +5618,87 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="UserDictionary">
 		[User]
 	</string>
+	<string name="experience_tools_experience">
+		体験
+	</string>
+	<string name="ExperienceNameNull">
+		(体験なし)
+	</string>
+	<string name="ExperienceNameUntitled">
+		(タイトルのない体験)
+	</string>
+	<string name="Land-Scope">
+		ランドスコープ
+	</string>
+	<string name="Grid-Scope">
+		グリッドスコープ
+	</string>
+	<string name="Allowed_Experiences_Tab">
+		許可
+	</string>
+	<string name="Blocked_Experiences_Tab">
+		停止
+	</string>
+	<string name="Contrib_Experiences_Tab">
+		貢献者
+	</string>
+	<string name="Admin_Experiences_Tab">
+		管理
+	</string>
+	<string name="Recent_Experiences_Tab">
+		最新
+	</string>
+	<string name="Owned_Experiences_Tab">
+		所有
+	</string>
+	<string name="ExperiencesCounter">
+		([EXPERIENCES], max [MAXEXPERIENCES])
+	</string>
+	<string name="ExperiencePermission1">
+		コントロールを引き継ぐ
+	</string>
+	<string name="ExperiencePermission3">
+		アバターでアニメーションをトリガー
+	</string>
+	<string name="ExperiencePermission4">
+		アバターに装着
+	</string>
+	<string name="ExperiencePermission9">
+		カメラ追従
+	</string>
+	<string name="ExperiencePermission10">
+		カメラのコントロール
+	</string>
+	<string name="ExperiencePermission11">
+		あなたをテレポート
+	</string>
+	<string name="ExperiencePermission12">
+		体験の権限を自動的に承諾
+	</string>
+	<string name="ExperiencePermissionShortUnknown">
+		が不明な操作を実行しました： [Permission]
+	</string>
+	<string name="ExperiencePermissionShort1">
+		コントロールする
+	</string>
+	<string name="ExperiencePermissionShort3">
+		アニメーションをトリガー
+	</string>
+	<string name="ExperiencePermissionShort4">
+		取り付ける
+	</string>
+	<string name="ExperiencePermissionShort9">
+		カメラを追跡
+	</string>
+	<string name="ExperiencePermissionShort10">
+		カメラを制御
+	</string>
+	<string name="ExperiencePermissionShort11">
+		テレポート
+	</string>
+	<string name="ExperiencePermissionShort12">
+		権限
+	</string>
 	<string name="logging_calls_disabled_log_empty">
 		会話はログに記録されていません。ログの記録を開始するには、「環境設定」&gt;「チャット」で「保存: ログのみ」または「保存: ログと会話のテキスト」を選択します。
 	</string>
@@ -5116,5 +5710,29 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="loading_chat_logs">
 		ロード中...
+	</string>
+	<string name="na">
+		該当なし
+	</string>
+	<string name="preset_combo_label">
+		-空リスト-
+	</string>
+	<string name="Default">
+		デフォルト
+	</string>
+	<string name="none_paren_cap">
+		(なし)
+	</string>
+	<string name="no_limit">
+		無制限
+	</string>
+	<string name="Mav_Details_MAV_FOUND_DEGENERATE_TRIANGLES">
+		物理形状に小さすぎる三角形が含まれています。物理モデルを簡略化してください。
+	</string>
+	<string name="Mav_Details_MAV_CONFIRMATION_DATA_MISMATCH">
+		物理形状に不正な確認データがあります。物理モデルを修正してください。
+	</string>
+	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
+		物理形状のバージョンが正しくありません。物理モデルに正しいバージョンを設定してください。
 	</string>
 </strings>

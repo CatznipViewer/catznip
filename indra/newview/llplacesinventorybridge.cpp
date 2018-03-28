@@ -30,7 +30,6 @@
 
 #include "llplacesinventorybridge.h"
 
-#include "llfloaterinventory.h" // for LLInventoryPanel
 #include "llfolderview.h" // for FIRST_SELECTED_ITEM
 #include "llinventorypanel.h"
 
@@ -63,7 +62,7 @@ void LLPlacesLandmarkBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	if(isItemInTrash())
 	{
 		items.push_back(std::string("Purge Item"));
-		if (!isItemRemovable())
+		if (!isItemRemovable() || (gInventory.getCategory(mUUID) && !gInventory.isCategoryComplete(mUUID)))
 		{
 			disabled_items.push_back(std::string("Purge Item"));
 		}
@@ -162,7 +161,7 @@ LLInvFVBridge* LLPlacesInventoryBridgeBuilder::createBridge(
 	case LLAssetType::AT_LANDMARK:
 		if(!(inv_type == LLInventoryType::IT_LANDMARK))
 		{
-			llwarns << LLAssetType::lookup(asset_type) << " asset has inventory type " << LLInventoryType::lookupHumanReadable(inv_type) << " on uuid " << uuid << llendl;
+			LL_WARNS() << LLAssetType::lookup(asset_type) << " asset has inventory type " << LLInventoryType::lookupHumanReadable(inv_type) << " on uuid " << uuid << LL_ENDL;
 		}
 		new_listener = new LLPlacesLandmarkBridge(inv_type, inventory, root, uuid, flags);
 		break;

@@ -111,7 +111,7 @@ public:
 
 	virtual void deleteAllChildren()
 	{
-		LL_DEBUGS("NearbyChat") << "Clearing toast pool" << llendl;
+		LL_DEBUGS("NearbyChat") << "Clearing toast pool" << LL_ENDL;
 		m_toast_pool.clear();
 		m_active_toasts.clear();
 		LLScreenChannelBase::deleteAllChildren();
@@ -122,7 +122,7 @@ protected:
 	void	addToToastPool(LLToast* toast)
 	{
 		if (!toast) return;
-		LL_DEBUGS("NearbyChat") << "Pooling toast" << llendl;
+		LL_DEBUGS("NearbyChat") << "Pooling toast" << LL_ENDL;
 		toast->setVisible(FALSE);
 		toast->stopTimer();
 		toast->setIsHidden(true);
@@ -189,7 +189,7 @@ void LLFloaterIMNearbyChatScreenChannel::deactivateToast(LLToast* toast)
 
 	if (pos != m_active_toasts.end())
 	{
-		LL_DEBUGS("NearbyChat") << "Deactivating toast" << llendl;
+		LL_DEBUGS("NearbyChat") << "Deactivating toast" << LL_ENDL;
 		m_active_toasts.erase(pos);
 	}
 }
@@ -201,7 +201,7 @@ void	LLFloaterIMNearbyChatScreenChannel::createOverflowToast(S32 bottom, F32 tim
 
 void LLFloaterIMNearbyChatScreenChannel::onToastDestroyed(LLToast* toast, bool app_quitting)
 {	
-	LL_DEBUGS("NearbyChat") << "Toast destroyed (app_quitting=" << app_quitting << ")" << llendl;
+	LL_DEBUGS("NearbyChat") << "Toast destroyed (app_quitting=" << app_quitting << ")" << LL_ENDL;
 
 	if (app_quitting)
 	{
@@ -220,7 +220,7 @@ void LLFloaterIMNearbyChatScreenChannel::onToastDestroyed(LLToast* toast, bool a
 
 void LLFloaterIMNearbyChatScreenChannel::onToastFade(LLToast* toast)
 {	
-	LL_DEBUGS("NearbyChat") << "Toast fading" << llendl;
+	LL_DEBUGS("NearbyChat") << "Toast fading" << LL_ENDL;
 
 	//fade mean we put toast to toast pool
 	if(!toast)
@@ -274,7 +274,7 @@ bool	LLFloaterIMNearbyChatScreenChannel::createPoolToast()
 	// If the toast gets somehow prematurely destroyed, deactivate it to prevent crash (STORM-1352).
 	toast->setOnToastDestroyedCallback(boost::bind(&LLFloaterIMNearbyChatScreenChannel::onToastDestroyed, this, _1, false));
 
-	LL_DEBUGS("NearbyChat") << "Creating and pooling toast" << llendl;	
+	LL_DEBUGS("NearbyChat") << "Creating and pooling toast" << LL_ENDL;	
 	m_toast_pool.push_back(toast->getHandle());
 	return true;
 }
@@ -284,6 +284,14 @@ void LLFloaterIMNearbyChatScreenChannel::addChat(LLSD& chat)
 	//look in pool. if there is any message
 	if(mStopProcessing)
 		return;
+
+	if (mFloaterSnapRegion == NULL)
+	{
+		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
+	}
+	LLRect channel_rect;
+	mFloaterSnapRegion->localRectToOtherView(mFloaterSnapRegion->getLocalRect(), &channel_rect, gFloaterView);
+	chat["available_height"] = channel_rect.getHeight() - channel_rect.mBottom - gSavedSettings.getS32("ToastGap") - 110;;
 
 	/*
     find last toast and check ID
@@ -315,7 +323,7 @@ void LLFloaterIMNearbyChatScreenChannel::addChat(LLSD& chat)
 	if(m_toast_pool.empty())
 	{
 		//"pool" is empty - create one more panel
-		LL_DEBUGS("NearbyChat") << "Empty pool" << llendl;
+		LL_DEBUGS("NearbyChat") << "Empty pool" << LL_ENDL;
 		if(!createPoolToast())//created toast will go to pool. so next call will find it
 			return;
 		addChat(chat);
@@ -335,7 +343,7 @@ void LLFloaterIMNearbyChatScreenChannel::addChat(LLSD& chat)
 
 	//take 1st element from pool, (re)initialize it, put it in active toasts
 
-	LL_DEBUGS("NearbyChat") << "Getting toast from pool" << llendl;
+	LL_DEBUGS("NearbyChat") << "Getting toast from pool" << LL_ENDL;
 	LLToast* toast = m_toast_pool.back().get();
 
 	m_toast_pool.pop_back();
@@ -380,7 +388,7 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 		setFollows(FOLLOWS_ALL);
 	}
 
-	LLRect	toast_rect;	
+	LLRect	toast_rect;
 	updateRect();
 
 	LLRect channel_rect;
@@ -403,7 +411,7 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 		LLToast* toast = it->get();
 		if (!toast)
 		{
-			llwarns << "NULL found in the active chat toasts list!" << llendl;
+			LL_WARNS() << "NULL found in the active chat toasts list!" << LL_ENDL;
 			continue;
 		}
 
@@ -601,12 +609,31 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 			toast_msg = chat_msg.mText;
 		}
 
+		bool chat_overlaps = false;
+		if(nearby_chat->getChatHistory())
+		{
+			LLRect chat_rect = nearby_chat->getChatHistory()->calcScreenRect();
+			for (std::list<LLView*>::const_iterator child_iter = gFloaterView->getChildList()->begin();
+				 child_iter != gFloaterView->getChildList()->end(); ++child_iter)
+			{
+				LLView *view = *child_iter;
+				const LLRect& rect = view->getRect();
+				if(view->isInVisibleChain() && (rect.overlaps(chat_rect)))
+				{
+					if(!nearby_chat->getChatHistory()->hasAncestor(view))
+					{
+						chat_overlaps = true;
+					}
+					break;
+				}
+			}
+		}
 		//Don't show nearby toast, if conversation is visible and selected
 		if ((nearby_chat->hasFocus()) ||
 			(LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized()) ||
-		    ((im_box->getSelectedSession().isNull() &&
-				((LLFloater::isVisible(im_box) && !im_box->isMinimized() && im_box->isFrontmost())
-						|| (LLFloater::isVisible(nearby_chat) && !nearby_chat->isMinimized() && nearby_chat->isFrontmost())))))
+		    ((im_box->getSelectedSession().isNull() && !chat_overlaps &&
+				((LLFloater::isVisible(im_box) && !nearby_chat->isTornOff() && !im_box->isMinimized())
+						|| (LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized())))))
 		{
 			if(nearby_chat->isMessagePaneExpanded())
 			{

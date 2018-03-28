@@ -33,7 +33,6 @@
 #include "llpointer.h"
 #include "llcolorswatch.h"
 #include "llspinctrl.h"
-#include "lltextureentry.h"
 
 class LLButton;
 class LLLineEditor;
@@ -105,6 +104,11 @@ class LLFloaterColorPicker
 		void setMouseDownInSwatch (BOOL mouse_down_in_swatch);
 		BOOL getMouseDownInSwatch () { return mMouseDownInSwatch; }
 
+		void setRevertOnCancel (BOOL revertOnCancel) { mRevertOnCancel = revertOnCancel; };
+		BOOL getRevertOnCancel () { return mRevertOnCancel; }
+
+		BOOL isColorChanged ();
+
 		// called when text entries (RGB/HSL etc.) are changed by user
 		void onTextEntryChanged ( LLUICtrl* ctrl );
 
@@ -121,8 +125,11 @@ class LLFloaterColorPicker
 			   void onClickPipette ( );
 		static void onTextCommit ( LLUICtrl* ctrl, void* data );
 		static void onImmediateCheck ( LLUICtrl* ctrl, void* data );
-			   void onColorSelect( const LLTextureEntry& te );
+			   void onColorSelect( const class LLTextureEntry& te );
 	private:
+		// mutators for color values, can raise event to preview changes at object
+		void selectCurRgb ( F32 curRIn, F32 curGIn, F32 curBIn );
+		void selectCurHsl ( F32 curHIn, F32 curSIn, F32 curLIn );
 		// draws color selection palette
 		void drawPalette ();
 
@@ -141,6 +148,8 @@ class LLFloaterColorPicker
 		BOOL mMouseDownInLumRegion;
 		BOOL mMouseDownInHueRegion;
 		BOOL mMouseDownInSwatch;
+
+		BOOL mRevertOnCancel;
 
 		const S32 mRGBViewerImageLeft;
 		const S32 mRGBViewerImageTop;
@@ -171,7 +180,7 @@ class LLFloaterColorPicker
 		const S32 mPaletteRegionHeight;
 
 		// image used to compose color grid
-		LLPointer<LLViewerTexture> mRGBImage;
+		LLPointer<class LLViewerTexture> mRGBImage;
 
 		// current swatch in use
 		LLColorSwatchCtrl* mSwatch;

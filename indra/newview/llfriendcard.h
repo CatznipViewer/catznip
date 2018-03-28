@@ -37,13 +37,22 @@ class LLFriendCardsManager
 	: public LLSingleton<LLFriendCardsManager>
 	, public LLFriendObserver
 {
+	LLSINGLETON(LLFriendCardsManager);
+	~LLFriendCardsManager();
 	LOG_CLASS(LLFriendCardsManager);
 
-	friend class LLSingleton<LLFriendCardsManager>;
 	friend class CreateFriendCardCallback;
 
 public:
 	typedef std::map<LLUUID, uuid_vec_t > folderid_buddies_map_t;
+
+    enum EManagerState
+    {
+        INIT = 1,
+        LOADING_FRIENDS_FOLDER,
+        LOADING_ALL_FOLDER,
+        MANAGER_READY
+    };
 
 	// LLFriendObserver implementation
 	void changed(U32 mask)
@@ -71,7 +80,14 @@ public:
 	/**
 	 *	Checks is the specified category is a Friend folder or any its subfolder
 	 */
-	bool isAnyFriendCategory(const LLUUID& catID) const;
+    bool isAnyFriendCategory(const LLUUID& catID) const;
+
+    /**
+    *	Indicates that all calling card related folders are created or loaded
+    */
+    bool isManagerReady() const { return mState == MANAGER_READY; }
+
+    EManagerState getManagerState() const { return mState; }
 
 	/**
 	 *	Checks whether "Friends" and "Friends/All" folders exist in "Calling Cards" category
@@ -82,8 +98,6 @@ public:
 private:
 	typedef boost::function<void()> callback_t;
 
-	LLFriendCardsManager();
-	~LLFriendCardsManager();
 
 
 	/**
@@ -144,6 +158,8 @@ private:
 	typedef std::set<LLUUID> avatar_uuid_set_t;
 
 	avatar_uuid_set_t mBuddyIDSet;
+    EManagerState mState;
+
 };
 
 #endif // LL_LLFRIENDCARD_H

@@ -29,12 +29,15 @@
 
 #include "indra_constants.h"
 #include "llevent.h" 				// LLObservable base class
-#include "llagentconstants.h"
 #include "llagentdata.h" 			// gAgentID, gAgentSessionID
 #include "llcharacter.h"
 #include "llcoordframe.h"			// for mFrameAgent
 #include "llavatarappearancedefines.h"
 #include "llpermissionsflags.h"
+#include "llevents.h"
+#include "v3dmath.h"
+#include "httprequest.h"
+#include "llcorehttputil.h"
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -60,6 +63,8 @@ class LLSLURL;
 class LLPauseRequestHandle;
 class LLUIColor;
 class LLTeleportRequest;
+
+
 
 typedef boost::shared_ptr<LLTeleportRequest> LLTeleportRequestPtr;
 
@@ -112,6 +117,8 @@ public:
 	void			init();
 	void			cleanup();
 
+private:
+
 	//--------------------------------------------------------------------
 	// Login
 	//--------------------------------------------------------------------
@@ -161,12 +168,13 @@ public:
 	// Gender
 	//--------------------------------------------------------------------
 public:
-	// On the very first login, gender isn't chosen until the user clicks
-	// in a dialog.  We don't render the avatar until they choose.
-	BOOL 			isGenderChosen() const 	{ return mGenderChosen; }
-	void			setGenderChosen(BOOL b)	{ mGenderChosen = b; }
+	// On the very first login, outfit needs to be chosen by some
+	// mechanism, usually by loading the requested initial outfit.  We
+	// don't render the avatar until the choice is made.
+	BOOL 			isOutfitChosen() const 	{ return mOutfitChosen; }
+	void			setOutfitChosen(BOOL b)	{ mOutfitChosen = b; }
 private:
-	BOOL			mGenderChosen;
+	BOOL			mOutfitChosen;
 
 /**                    Identity
  **                                                                            **
@@ -226,9 +234,25 @@ public:
 	void			setHomePosRegion(const U64& region_handle, const LLVector3& pos_region);
 	BOOL			getHomePosGlobal(LLVector3d* pos_global);
 private:
+    void            setStartPositionSuccess(const LLSD &result);
+
 	BOOL 			mHaveHomePosition;
 	U64				mHomeRegionHandle;
 	LLVector3		mHomePosRegion;
+
+	//--------------------------------------------------------------------
+	// Parcel
+	//--------------------------------------------------------------------
+public:
+	void changeParcels(); // called by LLViewerParcelMgr when we cross a parcel boundary
+	
+	// Register a boost callback to be called when the agent changes parcels
+	typedef boost::function<void()> parcel_changed_callback_t;
+	boost::signals2::connection     addParcelChangedCallback(parcel_changed_callback_t);
+
+private:
+	typedef boost::signals2::signal<void()> parcel_changed_signal_t;
+	parcel_changed_signal_t		mParcelChangedSignal;
 
 	//--------------------------------------------------------------------
 	// Region
@@ -238,8 +262,36 @@ public:
 	LLViewerRegion	*getRegion() const;
 	LLHost			getRegionHost() const;
 	BOOL			inPrelude();
+
+    // Capability 
+    std::string     getRegionCapability(const std::string &name); // short hand for if (getRegion()) { getRegion()->getCapability(name) }
+
+	/**
+	 * Register a boost callback to be called when the agent changes regions
+	 * Note that if you need to access a capability for the region, you may need to wait
+	 * for the capabilities to be received, since in some cases your region changed
+	 * callback will be called before the capabilities have been received.  Your callback
+	 * may need to look something like:
+	 *
+	 * 	 LLViewerRegion* region = gAgent.getRegion();
+	 * 	 if (region->capabilitiesReceived())
+	 * 	 {
+	 *       useCapability(region);
+	 * 	 }
+	 * 	 else // Need to handle via callback after caps arrive.
+	 * 	 {
+	 *       region->setCapabilitiesReceivedCallback(boost::bind(&useCapability,region,_1));
+	 *       // you may or may not want to remove that callback
+	 * 	 }
+	 */
+	typedef boost::signals2::signal<void()> region_changed_signal_t;
+
+	boost::signals2::connection     addRegionChangedCallback(const region_changed_signal_t::slot_type& cb);
+	void                            removeRegionChangedCallback(boost::signals2::connection callback);
+
 private:
 	LLViewerRegion	*mRegionp;
+	region_changed_signal_t		            mRegionChangedSignal;
 
 	//--------------------------------------------------------------------
 	// History
@@ -251,6 +303,7 @@ public:
 	
 	const LLVector3d &getLastPositionGlobal() const { return mLastPositionGlobal; }
 	void			setLastPositionGlobal(const LLVector3d &pos) { mLastPositionGlobal = pos; }
+
 private:
 	std::set<U64>	mRegionsVisited;		// Stat - what distinct regions has the avatar been to?
 	F64				mDistanceTraveled;		// Stat - how far has the avatar moved?
@@ -429,7 +482,7 @@ public:
 	void            stopCurrentAnimations();
 	void			requestStopMotion(LLMotion* motion);
 	void			onAnimStop(const LLUUID& id);
-	void			sendAnimationRequests(LLDynamicArray<LLUUID> &anim_ids, EAnimRequest request);
+	void			sendAnimationRequests(const std::vector<LLUUID> &anim_ids, EAnimRequest request);
 	void			sendAnimationRequest(const LLUUID &anim_id, EAnimRequest request);
 	void			sendAnimationStateReset();
 	void			sendRevokePermissions(const LLUUID & target, U32 permissions);
@@ -473,6 +526,9 @@ public:
 	void			moveUp(S32 direction);
 	void			moveYaw(F32 mag, bool reset_view = true);
 	void			movePitch(F32 mag);
+
+	BOOL			isMovementLocked() const				{ return mMovementKeysLocked; }
+	void			setMovementLocked(BOOL set_locked)	{ mMovementKeysLocked = set_locked; }
 
 	//--------------------------------------------------------------------
  	// Move the avatar's frame
@@ -528,6 +584,7 @@ private:
 	void			(*mAutoPilotFinishedCallback)(BOOL, void *);
 	void*			mAutoPilotCallbackData;
 	LLUUID			mLeaderID;
+	BOOL			mMovementKeysLocked;
 	
 /**                    Movement
  **                                                                            **
@@ -571,6 +628,7 @@ public:
 	void 			teleportViaLocation(const LLVector3d& pos_global);		// To a global location - this will probably need to be deprecated
 	void			teleportViaLocationLookAt(const LLVector3d& pos_global);// To a global location, preserving camera rotation
 	void 			teleportCancel();										// May or may not be allowed by server
+    void            restoreCanceledTeleportRequest();
 	bool			getTeleportKeepsLookAt() { return mbTeleportKeepsLookAt; } // Whether look-at reset after teleport
 protected:
 	bool 			teleportCore(bool is_local = false); 					// Stuff for all teleports; returns true if the teleport can proceed
@@ -586,6 +644,8 @@ public:
 	void            setMaturityRatingChangeDuringTeleport(U8 pMaturityRatingChange);
 
 private:
+
+
 	friend class LLTeleportRequest;
 	friend class LLTeleportRequestViaLandmark;
 	friend class LLTeleportRequestViaLure;
@@ -593,6 +653,7 @@ private:
 	friend class LLTeleportRequestViaLocationLookAt;
 
 	LLTeleportRequestPtr        mTeleportRequest;
+	LLTeleportRequestPtr        mTeleportCanceled;
 	boost::signals2::connection mTeleportFinishedSlot;
 	boost::signals2::connection mTeleportFailedSlot;
 
@@ -612,13 +673,14 @@ private:
 
 	void            handleTeleportFinished();
 	void            handleTeleportFailed();
-	void			handleServerBakeRegionTransition(const LLUUID& region_id);
+
+    static void     onCapabilitiesReceivedAfterTeleport();
 
 	//--------------------------------------------------------------------
 	// Teleport State
 	//--------------------------------------------------------------------
 public:
-	ETeleportState	getTeleportState() const 						{ return mTeleportState; }
+    ETeleportState	getTeleportState() const;
 	void			setTeleportState(ETeleportState state);
 private:
 	ETeleportState	mTeleportState;
@@ -640,9 +702,10 @@ private:
 public:
 	bool			canEditParcel() const { return mCanEditParcel; }
 private:
+	static void     setCanEditParcel();
 	bool			mCanEditParcel;
 
-	static void parcelChangedCallback();
+
 
 /********************************************************************************
  **                                                                            **
@@ -713,11 +776,12 @@ private:
 	unsigned int                    mMaturityPreferenceNumRetries;
 	U8                              mLastKnownRequestMaturity;
 	U8                              mLastKnownResponseMaturity;
+	LLCore::HttpRequest::policy_t	mHttpPolicy;
 
 	bool            isMaturityPreferenceSyncedWithServer() const;
 	void 			sendMaturityPreferenceToServer(U8 pPreferredMaturity);
+    void            processMaturityPreferenceFromServer(const LLSD &result, U8 perferredMaturity);
 
-	friend class LLMaturityPreferencesResponder;
 	void            handlePreferredMaturityResult(U8 pServerMaturity);
 	void            handlePreferredMaturityError();
 	void            reportPreferredMaturitySuccess();
@@ -746,8 +810,7 @@ public:
 	
 private:
 	BOOL			mShowAvatar; 		// Should we render the avatar?
-	U32				mAppearanceSerialNum;
-	
+
 	//--------------------------------------------------------------------
 	// Rendering state bitmap helpers
 	//--------------------------------------------------------------------
@@ -801,7 +864,7 @@ protected:
 	// Only used for building titles.
 	BOOL			isGroupMember() const 		{ return !mGroupID.isNull(); } 
 public:
-	LLDynamicArray<LLGroupData> mGroups;
+	std::vector<LLGroupData> mGroups;
 
 	//--------------------------------------------------------------------
 	// Group Title
@@ -847,12 +910,18 @@ private:
 public:
 	void			sendMessage(); // Send message to this agent's region
 	void			sendReliableMessage();
-	void 			dumpSentAppearance(const std::string& dump_prefix);
-	void			sendAgentSetAppearance();
 	void 			sendAgentDataUpdateRequest();
 	void 			sendAgentUserInfoRequest();
-	// IM to Email and Online visibility
+
+// IM to Email and Online visibility
 	void			sendAgentUpdateUserInfo(bool im_to_email, const std::string& directory_visibility);
+
+private:
+    void            requestAgentUserInfoCoro(std::string capurl);
+    void            updateAgentUserInfoCoro(std::string capurl, bool im_via_email, std::string directory_visibility);
+    // DEPRECATED: may be removed when User Info cap propagates 
+    void 			sendAgentUserInfoRequestMessage();
+    void            sendAgentUpdateUserInfoMessage(bool im_via_email, const std::string& directory_visibility);
 
 	//--------------------------------------------------------------------
 	// Receive
@@ -862,9 +931,26 @@ public:
 	static void		processAgentGroupDataUpdate(LLMessageSystem *msg, void **);
 	static void		processAgentDropGroup(LLMessageSystem *msg, void **);
 	static void		processScriptControlChange(LLMessageSystem *msg, void **);
-	static void		processAgentCachedTextureResponse(LLMessageSystem *mesgsys, void **user_data);
 	
 /**                    Messaging
+ **                                                                            **
+ *******************************************************************************/
+
+/********************************************************************************
+ **                                                                            **
+ **                    UTILITY
+ **/
+public:
+    typedef LLCoreHttpUtil::HttpCoroutineAdapter::completionCallback_t httpCallback_t;
+
+	/// Utilities for allowing the the agent sub managers to post and get via
+	/// HTTP using the agent's policy settings and headers.  
+    bool requestPostCapability(const std::string &capName, LLSD &postData, httpCallback_t cbSuccess = NULL, httpCallback_t cbFailure = NULL);
+    bool requestGetCapability(const std::string &capName, httpCallback_t cbSuccess = NULL, httpCallback_t cbFailure = NULL);
+
+    LLCore::HttpRequest::policy_t getAgentPolicy() const { return mHttpPolicy; }
+
+/**                    Utility
  **                                                                            **
  *******************************************************************************/
 
@@ -890,25 +976,5 @@ inline bool operator==(const LLGroupData &a, const LLGroupData &b)
 {
 	return (a.mID == b.mID);
 }
-
-class LLAgentQueryManager
-{
-	friend class LLAgent;
-	friend class LLAgentWearables;
-	
-public:
-	LLAgentQueryManager();
-	virtual ~LLAgentQueryManager();
-	
-	BOOL 			hasNoPendingQueries() const 	{ return getNumPendingQueries() == 0; }
-	S32 			getNumPendingQueries() const 	{ return mNumPendingQueries; }
-private:
-	S32				mNumPendingQueries;
-	S32				mWearablesCacheQueryID;
-	U32				mUpdateSerialNum;
-	S32		    	mActiveCacheQueries[LLAvatarAppearanceDefines::BAKED_NUM_INDICES];
-};
-
-extern LLAgentQueryManager gAgentQueryManager;
 
 #endif

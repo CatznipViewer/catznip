@@ -1,15 +1,15 @@
 # -*- cmake -*-
 
-project (test)
+project (lltest)
 
 include(00-Common)
 include(LLCommon)
+include(LLCoreHttp)
 include(LLInventory)
 include(LLMath)
 include(LLMessage)
 include(LLVFS)
 include(LLXML)
-include(LScript)
 include(Linking)
 include(Tut)
 include(LLAddBuildTest)
@@ -18,6 +18,7 @@ include(GoogleMock)
 
 include_directories(
     ${LLCOMMON_INCLUDE_DIRS}
+    ${LLCOREHTTP_INCLUDE_DIRS}
     ${LLDATABASE_INCLUDE_DIRS}
     ${LLMATH_INCLUDE_DIRS}
     ${LLMESSAGE_INCLUDE_DIRS}
@@ -47,7 +48,6 @@ set(test_SOURCE_FILES
     llpermissions_tut.cpp
     llpipeutil.cpp
     llsaleinfo_tut.cpp
-    llscriptresource_tut.cpp
     llsdmessagebuilder_tut.cpp
     llsdmessagereader_tut.cpp
     llsd_new_tut.cpp
@@ -56,7 +56,6 @@ set(test_SOURCE_FILES
     llstreamtools_tut.cpp
     lltemplatemessagebuilder_tut.cpp
     lltut.cpp
-    lluuidhashmap_tut.cpp
     message_tut.cpp
     test.cpp
     )
@@ -81,9 +80,9 @@ set_source_files_properties(${test_HEADER_FILES}
 
 list(APPEND test_SOURCE_FILES ${test_HEADER_FILES})
 
-add_executable(test ${test_SOURCE_FILES})
+add_executable(lltest ${test_SOURCE_FILES})
 
-target_link_libraries(test
+target_link_libraries(lltest
     ${LLDATABASE_LIBRARIES}
     ${LLINVENTORY_LIBRARIES}
     ${LLMESSAGE_LIBRARIES}
@@ -92,25 +91,28 @@ target_link_libraries(test
     ${LLXML_LIBRARIES}
     ${LSCRIPT_LIBRARIES}
     ${LLCOMMON_LIBRARIES}
+    ${LLCOREHTTP_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${GOOGLEMOCK_LIBRARIES}
     ${PTHREAD_LIBRARY}
     ${WINDOWS_LIBRARIES}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${BOOST_REGEX_LIBRARY}
+    ${BOOST_COROUTINE_LIBRARY}
+    ${BOOST_CONTEXT_LIBRARY}
+    ${BOOST_SYSTEM_LIBRARY}
     ${DL_LIBRARY}
-    ${GOOGLE_PERFTOOLS_LIBRARIES}
     )
 
 if (WINDOWS)
-  set_target_properties(test
+  set_target_properties(lltest
           PROPERTIES 
           LINK_FLAGS "/NODEFAULTLIB:LIBCMT"
           LINK_FLAGS_DEBUG "/NODEFAULTLIB:\"LIBCMT;LIBCMTD;MSVCRT\""
           )
 endif (WINDOWS)
 
-get_target_property(TEST_EXE test LOCATION)
+set(TEST_EXE $<TARGET_FILE:lltest>)
 
 SET_TEST_PATH(DYLD_LIBRARY_PATH)
 
@@ -123,7 +125,7 @@ LL_TEST_COMMAND(command
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpp_tests_ok.txt
   COMMAND ${command}
-  DEPENDS test
+  DEPENDS lltest
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "C++ unit tests"
   )

@@ -67,9 +67,11 @@ public:
 	/*virtual*/ void setObjectID(const LLUUID& object_id);
 protected:
 	void				init();
+	void				populateRatioList();
 	/* virtual */ BOOL	postBuild();
 	bool				setAspectRatio(const F32 width, const F32 height);
 	static void			onAspectRatioCommit(LLUICtrl*,void* userdata);
+	void				adjustAspectRatio();
 	
 private:
 	void				updateImageID(); // set what image is being uploaded.
@@ -89,11 +91,13 @@ private:
 	// This is stored off in a member variable, because the save-as
 	// button and drag and drop functionality need to know.
 	BOOL mIsCopyable;
+	BOOL mIsFullPerm;
 	BOOL mUpdateDimensions;
 	S32 mLastHeight;
 	S32 mLastWidth;
 	F32 mAspectRatio;	
 
 	LLLoadedCallbackEntry::source_callback_list_t mCallbackTextureList ; 
+	std::vector<std::string>		mRatiosList;
 };
 #endif  // LL_LLPREVIEWTEXTURE_H

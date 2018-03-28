@@ -29,26 +29,13 @@
 #ifndef LL_LLREMOTEPARCELREQUEST_H
 #define LL_LLREMOTEPARCELREQUEST_H
 
-#include "llhttpclient.h"
-#include "llpanel.h"
+#include "llhandle.h"
+#include "llsingleton.h"
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 class LLMessageSystem;
 class LLRemoteParcelInfoObserver;
-
-class LLRemoteParcelRequestResponder : public LLHTTPClient::Responder
-{
-public:
-	LLRemoteParcelRequestResponder(LLHandle<LLRemoteParcelInfoObserver> observer_handle);
-
-	//If we get back a normal response, handle it here
-	/*virtual*/ void result(const LLSD& content);
-
-	//If we get back an error (not found, etc...), handle it here
-	/*virtual*/ void errorWithContent(U32 status, const std::string& reason, const LLSD& content);
-
-protected:
-	LLHandle<LLRemoteParcelInfoObserver> mObserverHandle;
-};
 
 struct LLParcelData
 {
@@ -78,7 +65,7 @@ public:
 	virtual ~LLRemoteParcelInfoObserver() {}
 	virtual void processParcelInfo(const LLParcelData& parcel_data) = 0;
 	virtual void setParcelID(const LLUUID& parcel_id) = 0;
-	virtual void setErrorStatus(U32 status, const std::string& reason) = 0;
+	virtual void setErrorStatus(S32 status, const std::string& reason) = 0;
 	LLHandle<LLRemoteParcelInfoObserver>	getObserverHandle() const { return mObserverHandle; }
 
 protected:
@@ -87,9 +74,10 @@ protected:
 
 class LLRemoteParcelInfoProcessor : public LLSingleton<LLRemoteParcelInfoProcessor>
 {
-public:
+	LLSINGLETON_EMPTY_CTOR(LLRemoteParcelInfoProcessor);
 	virtual ~LLRemoteParcelInfoProcessor() {}
 
+public:
 	void addObserver(const LLUUID& parcel_id, LLRemoteParcelInfoObserver* observer);
 	void removeObserver(const LLUUID& parcel_id, LLRemoteParcelInfoObserver* observer);
 
@@ -97,9 +85,14 @@ public:
 
 	static void processParcelInfoReply(LLMessageSystem* msg, void**);
 
+    bool requestRegionParcelInfo(const std::string &url, const LLUUID &regionId, 
+        const LLVector3 &regionPos, const LLVector3d& globalPos, LLHandle<LLRemoteParcelInfoObserver> observerHandle);
+
 private:
 	typedef std::multimap<LLUUID, LLHandle<LLRemoteParcelInfoObserver> > observer_multimap_t;
 	observer_multimap_t mObservers;
+
+    void regionParcelInfoCoro(std::string url, LLUUID regionId, LLVector3 posRegion, LLVector3d posGlobal, LLHandle<LLRemoteParcelInfoObserver> observerHandle);
 };
 
 #endif // LL_LLREMOTEPARCELREQUEST_H

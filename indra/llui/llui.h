@@ -29,9 +29,11 @@
 #define LL_LLUI_H
 
 #include "llrect.h"
+#include "llcoord.h"
 #include "llcontrol.h"
 #include "llcoord.h"
-#include "v2math.h"
+#include "llcontrol.h"
+#include "llglslshader.h"
 #include "llinitparam.h"
 #include "llregistry.h"
 #include "llrender2dutils.h"
@@ -40,8 +42,8 @@
 #include "lluicolortable.h"
 #include "lluiimage.h"
 #include <boost/signals2.hpp>
-#include "lllazyvalue.h"
 #include "llframetimer.h"
+#include "v2math.h"
 #include <limits>
 
 // for initparam specialization
@@ -52,6 +54,53 @@ class LLUUID;
 class LLWindow;
 class LLView;
 class LLHelp;
+
+
+// this enum is used by the llview.h (viewer) and the llassetstorage.h (viewer and sim) 
+enum EDragAndDropType
+{
+	DAD_NONE			= 0,
+	DAD_TEXTURE			= 1,
+	DAD_SOUND			= 2,
+	DAD_CALLINGCARD		= 3,
+	DAD_LANDMARK		= 4,
+	DAD_SCRIPT			= 5,
+	DAD_CLOTHING 		= 6,
+	DAD_OBJECT			= 7,
+	DAD_NOTECARD		= 8,
+	DAD_CATEGORY		= 9,
+	DAD_ROOT_CATEGORY 	= 10,
+	DAD_BODYPART		= 11,
+	DAD_ANIMATION		= 12,
+	DAD_GESTURE			= 13,
+	DAD_LINK			= 14,
+	DAD_MESH            = 15,
+	DAD_WIDGET          = 16,
+	DAD_PERSON          = 17,
+	DAD_COUNT           = 18,   // number of types in this enum
+};
+
+// Reasons for drags to be denied.
+// ordered by priority for multi-drag
+enum EAcceptance
+{
+	ACCEPT_POSTPONED,	// we are asynchronously determining acceptance
+	ACCEPT_NO,			// Uninformative, general purpose denial.
+	ACCEPT_NO_CUSTOM,	// Denial with custom message.
+	ACCEPT_NO_LOCKED,	// Operation would be valid, but permissions are set to disallow it.
+	ACCEPT_YES_COPY_SINGLE,	// We'll take a copy of a single item
+	ACCEPT_YES_SINGLE,		// Accepted. OK to drag and drop single item here.
+	ACCEPT_YES_COPY_MULTI,	// We'll take a copy of multiple items
+	ACCEPT_YES_MULTI		// Accepted. OK to drag and drop multiple items here.
+};
+
+enum EAddPosition
+{
+	ADD_TOP,
+	ADD_BOTTOM,
+	ADD_DEFAULT
+};
+
 
 void make_ui_sound(const char* name);
 void make_ui_sound_deferred(const char * name);
@@ -123,7 +172,7 @@ public:
 		{
 			if (mMin > mMax)
 			{
-				llwarns << "Bad interval range (" << mMin << ", " << mMax << ")" << llendl;
+				LL_WARNS() << "Bad interval range (" << mMin << ", " << mMax << ")" << LL_ENDL;
 				// since max is usually the most dangerous one to ignore (buffer overflow, etc), prefer it
 				// in the case of a malformed range
 				mMin = mMax;
@@ -294,95 +343,6 @@ private:
 
 
 // Moved LLLocalClipRect to lllocalcliprect.h
-
-class LLCallbackRegistry
-{
-public:
-	typedef boost::signals2::signal<void()> callback_signal_t;
-	
-	void registerCallback(const callback_signal_t::slot_type& slot)
-	{
-		mCallbacks.connect(slot);
-	}
-
-	void fireCallbacks()
-	{
-		mCallbacks();
-	}
-
-private:
-	callback_signal_t mCallbacks;
-};
-
-class LLInitClassList : 
-	public LLCallbackRegistry, 
-	public LLSingleton<LLInitClassList>
-{
-	friend class LLSingleton<LLInitClassList>;
-private:
-	LLInitClassList() {}
-};
-
-class LLDestroyClassList : 
-	public LLCallbackRegistry, 
-	public LLSingleton<LLDestroyClassList>
-{
-	friend class LLSingleton<LLDestroyClassList>;
-private:
-	LLDestroyClassList() {}
-};
-
-template<typename T>
-class LLRegisterWith
-{
-public:
-	LLRegisterWith(boost::function<void ()> func)
-	{
-		T::instance().registerCallback(func);
-	}
-
-	// this avoids a MSVC bug where non-referenced static members are "optimized" away
-	// even if their constructors have side effects
-	S32 reference()
-	{
-		S32 dummy;
-		dummy = 0;
-		return dummy;
-	}
-};
-
-template<typename T>
-class LLInitClass
-{
-public:
-	LLInitClass() { sRegister.reference(); }
-
-	static LLRegisterWith<LLInitClassList> sRegister;
-private:
-
-	static void initClass()
-	{
-		llerrs << "No static initClass() method defined for " << typeid(T).name() << llendl;
-	}
-};
-
-template<typename T>
-class LLDestroyClass
-{
-public:
-	LLDestroyClass() { sRegister.reference(); }
-
-	static LLRegisterWith<LLDestroyClassList> sRegister;
-private:
-
-	static void destroyClass()
-	{
-		llerrs << "No static destroyClass() method defined for " << typeid(T).name() << llendl;
-	}
-};
-
-template <typename T> LLRegisterWith<LLInitClassList> LLInitClass<T>::sRegister(&T::initClass);
-template <typename T> LLRegisterWith<LLDestroyClassList> LLDestroyClass<T>::sRegister(&T::destroyClass);
 
 // useful parameter blocks
 struct TimeIntervalParam : public LLInitParam::ChoiceBlock<TimeIntervalParam>

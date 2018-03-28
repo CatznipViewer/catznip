@@ -82,12 +82,12 @@ void LLDrawPoolMaterials::beginDeferredPass(S32 pass)
 
 	diffuse_channel = mShader->enableTexture(LLShaderMgr::DIFFUSE_MAP);
 		
-	LLFastTimer t(FTM_RENDER_MATERIALS);
+	LL_RECORD_BLOCK_TIME(FTM_RENDER_MATERIALS);
 }
 
 void LLDrawPoolMaterials::endDeferredPass(S32 pass)
 {
-	LLFastTimer t(FTM_RENDER_MATERIALS);
+	LL_RECORD_BLOCK_TIME(FTM_RENDER_MATERIALS);
 
 	mShader->unbind();
 
@@ -96,7 +96,7 @@ void LLDrawPoolMaterials::endDeferredPass(S32 pass)
 
 void LLDrawPoolMaterials::renderDeferred(S32 pass)
 {
-	U32 type_list[] = 
+	static const U32 type_list[] = 
 	{
 		LLRenderPass::PASS_MATERIAL,
 		//LLRenderPass::PASS_MATERIAL_ALPHA,

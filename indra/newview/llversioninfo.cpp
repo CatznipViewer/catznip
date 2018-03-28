@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include "llversioninfo.h"
+#include <boost/regex.hpp>
 
 #if ! defined(LL_VIEWER_CHANNEL)       \
  || ! defined(LL_VIEWER_VERSION_MAJOR) \
@@ -37,8 +38,6 @@
  || ! defined(LL_VIEWER_VERSION_BUILD)
  #error "Channel or Version information is undefined"
 #endif
-
-const char * const LL_CHANNEL = LL_VIEWER_CHANNEL;
 
 //
 // Set the version numbers in indra/VIEWER_VERSION
@@ -100,10 +99,16 @@ const std::string &LLVersionInfo::getShortVersion()
 
 namespace
 {
+	// LL_VIEWER_CHANNEL is a macro defined on the compiler command line. The
+	// macro expands to the string name of the channel, but without quotes. We
+	// need to turn it into a quoted string. This macro trick does that.
+#define stringize_inner(x) #x
+#define stringize_outer(x) stringize_inner(x)
+
 	/// Storage of the channel name the viewer is using.
 	//  The channel name is set by hardcoded constant, 
 	//  or by calling LLVersionInfo::resetChannel()
-	std::string sWorkingChannelName(LL_VIEWER_CHANNEL);
+	std::string sWorkingChannelName(stringize_outer(LL_VIEWER_CHANNEL));
 
 	// Storage for the "version and channel" string.
 	// This will get reset too.
@@ -132,4 +137,49 @@ void LLVersionInfo::resetChannel(const std::string& channel)
 {
 	sWorkingChannelName = channel;
 	sVersionChannel.clear(); // Reset version and channel string til next use.
+}
+
+//static
+LLVersionInfo::ViewerMaturity LLVersionInfo::getViewerMaturity()
+{
+    ViewerMaturity maturity;
+    
+    std::string channel = getChannel();
+
+	static const boost::regex is_test_channel("\\bTest\\b");
+	static const boost::regex is_beta_channel("\\bBeta\\b");
+	static const boost::regex is_project_channel("\\bProject\\b");
+	static const boost::regex is_release_channel("\\bRelease\\b");
+
+    if (boost::regex_search(channel, is_release_channel))
+    {
+        maturity = RELEASE_VIEWER;
+    }
+    else if (boost::regex_search(channel, is_beta_channel))
+    {
+        maturity = BETA_VIEWER;
+    }
+    else if (boost::regex_search(channel, is_project_channel))
+    {
+        maturity = PROJECT_VIEWER;
+    }
+    else if (boost::regex_search(channel, is_test_channel))
+    {
+        maturity = TEST_VIEWER;
+    }
+    else
+    {
+        LL_WARNS() << "Channel '" << channel
+                   << "' does not follow naming convention, assuming Test"
+                   << LL_ENDL;
+        maturity = TEST_VIEWER;
+    }
+    return maturity;
+}
+
+    
+const std::string &LLVersionInfo::getBuildConfig()
+{
+    static const std::string build_configuration(LLBUILD_CONFIG); // set in indra/cmake/BuildVersion.cmake
+    return build_configuration;
 }

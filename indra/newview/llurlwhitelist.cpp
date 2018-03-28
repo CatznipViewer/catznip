@@ -87,7 +87,7 @@ bool LLUrlWhiteList::load ()
 	std::string resolvedFilename = gDirUtilp->getExpandedFilename ( LL_PATH_PER_SL_ACCOUNT, mFilename );
 
 	// open a file for reading
-	llifstream file ( resolvedFilename );
+	llifstream file(resolvedFilename.c_str());
 	if ( file.is_open () )
 	{
 		// add each line in the file to the list
@@ -117,12 +117,12 @@ bool LLUrlWhiteList::save ()
 
 	if (resolvedFilename.empty())
 	{
-		llinfos << "No per-user dir for saving URL whitelist - presumably not logged in yet.  Skipping." << llendl;
+		LL_INFOS() << "No per-user dir for saving URL whitelist - presumably not logged in yet.  Skipping." << LL_ENDL;
 		return false;
 	}
 
 	// open a file for writing
-	llofstream file ( resolvedFilename );
+	llofstream file(resolvedFilename.c_str());
 	if ( file.is_open () )
 	{
 		// for each entry we have

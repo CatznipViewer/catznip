@@ -62,6 +62,7 @@ public:
 	
 	void refresh();
 	const LLUUID& getTaskUUID() { return mTaskUUID;}
+	void clearInventoryTask();
 	void removeSelectedItem();
 	void startRenamingSelectedItem();
 
@@ -94,6 +95,9 @@ protected:
 	void removeItemID(const LLUUID& id);
 	void clearItemIDs();
 
+	BOOL			handleKeyHere( KEY key, MASK mask );
+	BOOL			isSelectionRemovable();
+
 private:
 	std::map<LLUUID, LLFolderViewItem*> mItemMap;
 
@@ -101,6 +105,7 @@ private:
 	LLFolderView* mFolders;
 	
 	LLUUID mTaskUUID;
+	LLUUID mAttachmentUUID;
 	BOOL mHaveInventory;
 	BOOL mIsInventoryEmpty;
 	BOOL mInventoryNeedsUpdate;

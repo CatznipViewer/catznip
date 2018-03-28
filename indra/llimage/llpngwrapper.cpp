@@ -31,6 +31,16 @@
 #include "llimage.h"
 #include "llpngwrapper.h"
 
+#include "llexception.h"
+
+namespace {
+// Failure to load an image shouldn't crash the whole viewer.
+struct PngError: public LLContinueError
+{
+    PngError(png_const_charp msg): LLContinueError(msg) {}
+};
+} // anonymous namespace
+
 // ---------------------------------------------------------------------------
 // LLPngWrapper
 // ---------------------------------------------------------------------------
@@ -75,11 +85,10 @@ BOOL LLPngWrapper::isValidPng(U8* src)
 }
 
 // Called by the libpng library when a fatal encoding or decoding error
-// occurs.  We simply throw the error message and let our try/catch
-// block clean up.
+// occurs. We throw PngError and let our try/catch block clean up.
 void LLPngWrapper::errorHandler(png_structp png_ptr, png_const_charp msg)
 {
-	throw msg;
+	LLTHROW(PngError(msg));
 }
 
 // Called by the libpng library when reading (decoding) the PNG file. We
@@ -87,6 +96,12 @@ void LLPngWrapper::errorHandler(png_structp png_ptr, png_const_charp msg)
 void LLPngWrapper::readDataCallback(png_structp png_ptr, png_bytep dest, png_size_t length)
 {
 	PngDataInfo *dataInfo = (PngDataInfo *) png_get_io_ptr(png_ptr);
+	if(dataInfo->mOffset + length > dataInfo->mDataSize)
+	{
+		png_error(png_ptr, "Data read error. Requested data size exceeds available data size.");
+		return;
+	}
+
 	U8 *src = &dataInfo->mData[dataInfo->mOffset];
 	memcpy(dest, src, length);
 	dataInfo->mOffset += static_cast<U32>(length);
@@ -97,6 +112,11 @@ void LLPngWrapper::readDataCallback(png_structp png_ptr, png_bytep dest, png_siz
 void LLPngWrapper::writeDataCallback(png_structp png_ptr, png_bytep src, png_size_t length)
 {
 	PngDataInfo *dataInfo = (PngDataInfo *) png_get_io_ptr(png_ptr);
+	if (dataInfo->mOffset + length > dataInfo->mDataSize)
+	{
+		png_error(png_ptr, "Data write error. Requested data size exceeds available data size.");
+		return;
+	}
 	U8 *dest = &dataInfo->mData[dataInfo->mOffset];
 	memcpy(dest, src, length);
 	dataInfo->mOffset += static_cast<U32>(length);
@@ -114,7 +134,7 @@ void LLPngWrapper::writeFlush(png_structp png_ptr)
 // The scanline also begins at the bottom of
 // the image (per SecondLife conventions) instead of at the top, so we
 // must assign row-pointers in "reverse" order.
-BOOL LLPngWrapper::readPng(U8* src, LLImageRaw* rawImage, ImageInfo *infop)
+BOOL LLPngWrapper::readPng(U8* src, S32 dataSize, LLImageRaw* rawImage, ImageInfo *infop)
 {
 	try
 	{
@@ -123,7 +143,7 @@ BOOL LLPngWrapper::readPng(U8* src, LLImageRaw* rawImage, ImageInfo *infop)
 			this, &errorHandler, NULL);
 		if (mReadPngPtr == NULL)
 		{
-			throw "Problem creating png read structure";
+			LLTHROW(PngError("Problem creating png read structure"));
 		}
 
 		// Allocate/initialize the memory for image information.
@@ -133,6 +153,7 @@ BOOL LLPngWrapper::readPng(U8* src, LLImageRaw* rawImage, ImageInfo *infop)
 		PngDataInfo dataPtr;
 		dataPtr.mData = src;
 		dataPtr.mOffset = 0;
+		dataPtr.mDataSize = dataSize;
 
 		png_set_read_fn(mReadPngPtr, &dataPtr, &readDataCallback);
 		png_set_sig_bytes(mReadPngPtr, 0);
@@ -180,9 +201,9 @@ BOOL LLPngWrapper::readPng(U8* src, LLImageRaw* rawImage, ImageInfo *infop)
 
 		mFinalSize = dataPtr.mOffset;
 	}
-	catch (png_const_charp msg)
+	catch (const PngError& msg)
 	{
-		mErrorMessage = msg;
+		mErrorMessage = msg.what();
 		releaseResources();
 		return (FALSE);
 	}
@@ -256,7 +277,7 @@ void LLPngWrapper::updateMetaData()
 
 // Method to write raw image into PNG at dest. The raw scanline begins
 // at the bottom of the image per SecondLife conventions.
-BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
+BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest, size_t destSize)
 {
 	try
 	{
@@ -281,14 +302,14 @@ BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
 
 		if (mColorType == -1)
 		{
-			throw "Unsupported image: unexpected number of channels";
+			LLTHROW(PngError("Unsupported image: unexpected number of channels"));
 		}
 
 		mWritePngPtr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
 			NULL, &errorHandler, NULL);
 		if (!mWritePngPtr)
 		{
-			throw "Problem creating png write structure";
+			LLTHROW(PngError("Problem creating png write structure"));
 		}
 
 		mWriteInfoPtr = png_create_info_struct(mWritePngPtr);
@@ -297,6 +318,7 @@ BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
 		PngDataInfo dataPtr;
 		dataPtr.mData = dest;
 		dataPtr.mOffset = 0;
+		dataPtr.mDataSize = destSize;
 		png_set_write_fn(mWritePngPtr, &dataPtr, &writeDataCallback, &writeFlush);
 
 		// Setup image params
@@ -332,9 +354,9 @@ BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
 		png_write_end(mWritePngPtr, mWriteInfoPtr);
 		mFinalSize = dataPtr.mOffset;
 	}
-	catch (png_const_charp msg)
+	catch (const PngError& msg)
 	{
-		mErrorMessage = msg;
+		mErrorMessage = msg.what();
 		releaseResources();
 		return (FALSE);
 	}

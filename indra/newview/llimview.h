@@ -33,13 +33,15 @@
 
 #include "lllogchat.h"
 #include "llvoicechannel.h"
+#include "llinitdestroyclass.h"
 
+#include "llcoros.h"
+#include "lleventcoro.h"
 
 class LLAvatarName;
 class LLFriendObserver;
 class LLCallDialogManager;	
 class LLIMSpeakerMgr;
-
 /**
  * Timeout Timer for outgoing Ad-Hoc/Group IM sessions which being initialized by the server
  */
@@ -60,6 +62,7 @@ private:
  */
 class LLIMModel :  public LLSingleton<LLIMModel>
 {
+	LLSINGLETON(LLIMModel);
 public:
 
 	struct LLIMSession : public boost::signals2::trackable
@@ -95,7 +98,7 @@ public:
 		bool isGroupSessionType() const { return mSessionType == GROUP_SESSION;}
 		bool isAvalineSessionType() const { return mSessionType == AVALINE_SESSION;}
 
-		LLUUID generateOutgouigAdHocHash() const;
+		LLUUID generateOutgoingAdHocHash() const;
 
 		//*TODO make private
 		/** ad-hoc sessions involve sophisticated chat history file naming schemes */
@@ -140,6 +143,8 @@ public:
 
 		bool mHasOfflineMessage;
 
+		bool mIsDNDsend;
+
 	private:
 		void onAdHocNameCache(const LLAvatarName& av_name);
 
@@ -148,7 +153,6 @@ public:
 	};
 	
 
-	LLIMModel();
 
 	/** Session id to session object */
 	std::map<LLUUID, LLIMSession*> mId2SessionMap;
@@ -292,6 +296,7 @@ private:
 	 * Add message to a list of message associated with session specified by session_id
 	 */
 	bool addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text);
+
 };
 
 class LLIMSessionObserver
@@ -308,6 +313,7 @@ public:
 
 class LLIMMgr : public LLSingleton<LLIMMgr>
 {
+	LLSINGLETON(LLIMMgr);
 	friend class LLIMModel;
 
 public:
@@ -318,8 +324,6 @@ public:
 		INVITATION_TYPE_IMMEDIATE = 2
 	};
 
-	LLIMMgr();
-	virtual ~LLIMMgr() {};
 
 	// Add a message to a session. The session can keyed to sesion id
 	// or agent id.
@@ -355,7 +359,7 @@ public:
 	LLUUID addSession(const std::string& name,
 					  EInstantMessage dialog,
 					  const LLUUID& other_participant_id,
-					  const LLDynamicArray<LLUUID>& ids, bool voice = false,
+					  const std::vector<LLUUID>& ids, bool voice = false,
 					  const LLUUID& floater_id = LLUUID::null);
 
 	/**
@@ -443,6 +447,12 @@ public:
 
 	bool isVoiceCall(const LLUUID& session_id);
 
+	void updateDNDMessageStatus();
+
+	bool isDNDMessageSend(const LLUUID& session_id);
+
+	void setDNDMessageSent(const LLUUID& session_id, bool is_send);
+
 	void addNotifiedNonFriendSessionID(const LLUUID& session_id);
 
 	bool isNonFriendSessionNotified(const LLUUID& session_id);
@@ -458,12 +468,12 @@ private:
 	// prints a simple message if they are not online. Used to help
 	// reduce 'hello' messages to the linden employees unlucky enough
 	// to have their calling card in the default inventory.
-	void noteOfflineUsers(const LLUUID& session_id, const LLDynamicArray<LLUUID>& ids);
-	void noteMutedUsers(const LLUUID& session_id, const LLDynamicArray<LLUUID>& ids);
+	void noteOfflineUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
+	void noteMutedUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
 
 	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
 
-	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const std::string& name, bool is_group);
+	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const LLAvatarName& name);
 
 	void notifyObserverSessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, bool has_offline_msg);
     //Triggers when a session has already been added
@@ -557,7 +567,7 @@ public:
 			mAvatarNameCacheConnection.disconnect();
 		}
 	}
-	
+
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 

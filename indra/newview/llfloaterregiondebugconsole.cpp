@@ -30,11 +30,11 @@
 #include "llfloaterregiondebugconsole.h"
 
 #include "llagent.h"
-#include "llhttpclient.h"
 #include "llhttpnode.h"
 #include "lllineeditor.h"
 #include "lltexteditor.h"
 #include "llviewerregion.h"
+#include "llcorehttputil.h"
 
 // Two versions of the sim console API are supported.
 //
@@ -68,50 +68,6 @@ namespace
 	const std::string CONSOLE_NOT_SUPPORTED(
 		"This region does not support the simulator console.");
 
-	// This responder handles the initial response. Unless error() is called
-	// we assume that the simulator has received our request. Error will be
-	// called if this request times out.
-	class AsyncConsoleResponder : public LLHTTPClient::Responder
-	{
-	public:
-		/* virtual */
-		void errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-		{
-			sConsoleReplySignal(UNABLE_TO_SEND_COMMAND);
-		}
-	};
-
-	class ConsoleResponder : public LLHTTPClient::Responder
-	{
-	public:
-		ConsoleResponder(LLTextEditor *output) : mOutput(output)
-		{
-		}
-
-		/*virtual*/
-		void error(U32 status, const std::string& reason)
-		{
-			if (mOutput)
-			{
-				mOutput->appendText(
-					UNABLE_TO_SEND_COMMAND + PROMPT,
-					false);
-			}
-		}
-
-		/*virtual*/
-		void result(const LLSD& content)
-		{
-			if (mOutput)
-			{
-				mOutput->appendText(
-					content.asString() + PROMPT, false);
-			}
-		}
-
-		LLTextEditor * mOutput;
-	};
-
 	// This handles responses for console commands sent via the asynchronous
 	// API.
 	class ConsoleResponseNode : public LLHTTPNode
@@ -123,8 +79,8 @@ namespace
 			const LLSD& context,
 			const LLSD& input) const
 		{
-			llinfos << "Received response from the debug console: "
-				<< input << llendl;
+			LL_INFOS() << "Received response from the debug console: "
+				<< input << LL_ENDL;
 			sConsoleReplySignal(input["body"].asString());
 		}
 	};
@@ -160,11 +116,11 @@ BOOL LLFloaterRegionDebugConsole::postBuild()
 
 	mOutput = getChild<LLTextEditor>("region_debug_console_output");
 
-	std::string url = gAgent.getRegion()->getCapability("SimConsoleAsync");
+	std::string url = gAgent.getRegionCapability("SimConsoleAsync");
 	if (url.empty())
 	{
 		// Fall back to see if the old API is supported.
-		url = gAgent.getRegion()->getCapability("SimConsole");
+		url = gAgent.getRegionCapability("SimConsole");
 		if (url.empty())
 		{
 			mOutput->appendText(
@@ -183,35 +139,66 @@ void LLFloaterRegionDebugConsole::onInput(LLUICtrl* ctrl, const LLSD& param)
 	LLLineEditor* input = static_cast<LLLineEditor*>(ctrl);
 	std::string text = input->getText() + "\n";
 
-	std::string url = gAgent.getRegion()->getCapability("SimConsoleAsync");
+	std::string url = gAgent.getRegionCapability("SimConsoleAsync");
 	if (url.empty())
 	{
 		// Fall back to the old API
-		url = gAgent.getRegion()->getCapability("SimConsole");
+		url = gAgent.getRegionCapability("SimConsole");
 		if (url.empty())
 		{
 			text += CONSOLE_UNAVAILABLE + PROMPT;
 		}
 		else
 		{
-			// Using SimConsole (deprecated)
-			LLHTTPClient::post(
-				url,
-				LLSD(input->getText()),
-				new ConsoleResponder(mOutput));
+            LLSD postData = LLSD(input->getText());
+            LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpPost(url, postData,
+                boost::bind(&LLFloaterRegionDebugConsole::onConsoleSuccess, this, _1),
+                boost::bind(&LLFloaterRegionDebugConsole::onConsoleError, this, _1));
 		}
 	}
 	else
 	{
-		// Using SimConsoleAsync
-		LLHTTPClient::post(
-			url,
-			LLSD(input->getText()),
-			new AsyncConsoleResponder);
+        LLSD postData = LLSD(input->getText());
+        LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpPost(url, postData,
+            NULL,
+            boost::bind(&LLFloaterRegionDebugConsole::onAsyncConsoleError, this, _1));
+
 	}
 
 	mOutput->appendText(text, false);
 	input->clear();
+}
+
+void LLFloaterRegionDebugConsole::onAsyncConsoleError(LLSD result)
+{
+    LL_WARNS("Console") << UNABLE_TO_SEND_COMMAND << LL_ENDL;
+    sConsoleReplySignal(UNABLE_TO_SEND_COMMAND);
+}
+
+void LLFloaterRegionDebugConsole::onConsoleError(LLSD result)
+{
+    LL_WARNS("Console") << UNABLE_TO_SEND_COMMAND << LL_ENDL;
+    if (mOutput)
+    {
+        mOutput->appendText(
+            UNABLE_TO_SEND_COMMAND + PROMPT,
+            false);
+    }
+
+}
+
+void LLFloaterRegionDebugConsole::onConsoleSuccess(LLSD result)
+{
+    if (mOutput)
+    {
+        LLSD response = result;
+        if (response.isMap() && response.has(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_CONTENT))
+        {
+            response = response[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_CONTENT];
+        }
+        mOutput->appendText(
+            response.asString() + PROMPT, false);
+    }
 }
 
 void LLFloaterRegionDebugConsole::onReplyReceived(const std::string& output)

@@ -71,6 +71,8 @@ public:
 
 class LLMuteList : public LLSingleton<LLMuteList>
 {
+	LLSINGLETON(LLMuteList);
+	~LLMuteList();
 public:
 	// reasons for auto-unmuting a resident
 	enum EAutoReason 
@@ -81,13 +83,6 @@ public:
 		AR_COUNT			// enum count
 	};
 
-	LLMuteList();
-	~LLMuteList();
-
-	// Implemented locally so that we can perform some delayed initialization. 
-	// Callers should be careful to call this one and not LLSingleton<LLMuteList>::getInstance()
-	// which would circumvent that mechanism. -MG
-	static LLMuteList* getInstance();
 
 	void addObserver(LLMuteListObserver* observer);
 	void removeObserver(LLMuteListObserver* observer);
@@ -101,7 +96,10 @@ public:
 	
 	// Name is required to test against legacy text-only mutes.
 	BOOL isMuted(const LLUUID& id, const std::string& name = LLStringUtil::null, U32 flags = 0) const;
-	
+
+	// Workaround for username-based mute search, a lot of string conversions so use cautiously
+	BOOL isMuted(const std::string& username, U32 flags = 0) const;
+
 	// Alternate (convenience) form for places we don't need to pass the name, but do need flags
 	BOOL isMuted(const LLUUID& id, U32 flags) const { return isMuted(id, LLStringUtil::null, flags); };
 	
@@ -175,6 +173,29 @@ public:
 	virtual ~LLMuteListObserver() { }
 	virtual void onChange() = 0;
 	virtual void onChangeDetailed(const LLMute& ) { }
+};
+
+class LLRenderMuteList : public LLSingleton<LLRenderMuteList>
+{
+    LLSINGLETON(LLRenderMuteList);
+public:
+	bool loadFromFile();
+	bool saveToFile();
+	S32 getSavedVisualMuteSetting(const LLUUID& agent_id);
+	void saveVisualMuteSetting(const LLUUID& agent_id, S32 setting);
+
+	S32 getVisualMuteDate(const LLUUID& agent_id);
+
+	void addObserver(LLMuteListObserver* observer);
+	void removeObserver(LLMuteListObserver* observer);
+
+	std::map<LLUUID, S32> sVisuallyMuteSettingsMap;
+	std::map<LLUUID, S32> sVisuallyMuteDateMap;
+
+private:
+	void notifyObservers();
+	typedef std::set<LLMuteListObserver*> observer_set_t;
+	observer_set_t mObservers;
 };
 
 

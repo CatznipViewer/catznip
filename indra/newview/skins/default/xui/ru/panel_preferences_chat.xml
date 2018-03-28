@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Текстовый чат" name="chat">
+	<check_box initial_value="true" label="Управление автоматическим завершением находится рядом с чатом" name="auto_complete_gestures"/>
 	<panel name="general_chat_settings">
 		<check_box initial_value="true" label="Воспроизводить анимацию ввода текста при общении" name="play_typing_animation"/>
 		<check_box label="Отправлять мне сообщения по почте, когда меня нет в сети" name="send_im_to_email"/>
@@ -89,8 +90,19 @@
 		<check_box label="Предложение инвентаря" name="inventory_offer"/>
 	</panel>
 	<panel name="log_settings">
+		<text name="logging_label">
+			Сохранять:
+		</text>
+		<combo_box name="conversation_log_combo">
+			<item label="Журнал и записи" name="log_and_transcripts" value="2"/>
+			<item label="Только журнал" name="log_only" value="1"/>
+			<item label="Ни журнал, ни записи" name="no_log_or_transcript" value="0"/>
+		</combo_box>
 		<button label="Очистить журнал..." name="clear_log"/>
 		<button label="Удалить записи..." name="delete_transcripts"/>
+		<text name="log_location_label">
+			Место:
+		</text>
 		<button label="Обзор..." label_selected="Обзор" name="log_path_button"/>
 	</panel>
 	<button label="Перевод..." name="ok_btn"/>

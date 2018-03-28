@@ -42,6 +42,8 @@
 #include "llevents.h"
 #include "lleventfilter.h"
 #include "lleventcoro.h"
+#include "llexception.h"
+#include "stringize.h"
 
 //*********************
 // LLLogin
@@ -107,9 +109,8 @@ private:
     }
 
     // In a coroutine's top-level function args, do NOT NOT NOT accept
-    // references (const or otherwise) to anything but the self argument! Pass
-    // by value only!
-    void login_(LLCoros::self& self, std::string uri, LLSD credentials);
+    // references (const or otherwise) to anything! Pass by value only!
+    void loginCoro(std::string uri, LLSD credentials);
 
     LLEventStream mPump;
 	LLSD mAuthResponse, mValidAuthResponse;
@@ -123,63 +124,22 @@ void LLLogin::Impl::connect(const std::string& uri, const LLSD& login_params)
     // its first wait; at that point, return here.
     std::string coroname = 
         LLCoros::instance().launch("LLLogin::Impl::login_",
-                                   boost::bind(&Impl::login_, this, _1, uri, login_params));
+                                   boost::bind(&Impl::loginCoro, this, uri, login_params));
     LL_DEBUGS("LLLogin") << " connected with  uri '" << uri << "', login_params " << login_params << LL_ENDL;	
 }
 
-void LLLogin::Impl::login_(LLCoros::self& self, std::string uri, LLSD login_params)
+void LLLogin::Impl::loginCoro(std::string uri, LLSD login_params)
 {
-	try
-	{
-	LLSD printable_params = login_params;
-	//if(printable_params.has("params") 
-	//	&& printable_params["params"].has("passwd")) 
-	//{
-	//	printable_params["params"]["passwd"] = "*******";
-	//}
-	LL_DEBUGS("LLLogin") << "Entering coroutine " << LLCoros::instance().getName(self)
-                        << " with uri '" << uri << "', parameters " << printable_params << LL_ENDL;
-
-	// Arriving in SRVRequest state
-    LLEventStream replyPump("SRVreply", true);
-    // Should be an array of one or more uri strings.
-
-    LLSD rewrittenURIs;
+    LLSD printable_params = login_params;
+    if (printable_params.has("params") 
+        && printable_params["params"].has("passwd")) 
     {
-		LLEventTimeout filter(replyPump);
-		sendProgressEvent("offline", "srvrequest");
-
-      // Request SRV record.
-		LL_DEBUGS("LLLogin") << "Requesting SRV record from " << uri << LL_ENDL;
-
-      // *NOTE:Mani - Completely arbitrary default timeout value for SRV request.
-		F32 seconds_to_timeout = 5.0f;
-		if(login_params.has("cfg_srv_timeout"))
-		{
-			seconds_to_timeout = login_params["cfg_srv_timeout"].asReal();
-		}
-
-		// If the SRV request times out (e.g. EXT-3934), simulate response: an
-		// array containing our original URI.
-		LLSD fakeResponse(LLSD::emptyArray());
-		fakeResponse.append(uri);
-		filter.eventAfter(seconds_to_timeout, fakeResponse);
-
-		std::string srv_pump_name = "LLAres";
-		if(login_params.has("cfg_srv_pump"))
-		{
-			srv_pump_name = login_params["cfg_srv_pump"].asString();
-		}
-
-		// Make request
-		LLSD request;
-		request["op"] = "rewriteURI";
-		request["uri"] = uri;
-		request["reply"] = replyPump.getName();
-		rewrittenURIs = postAndWait(self, request, srv_pump_name, filter);
-		// EXP-772: If rewrittenURIs fail, try original URI as a fallback.
-		rewrittenURIs.append(uri);
-    } // we no longer need the filter
+        printable_params["params"]["passwd"] = "*******";
+    }
+    try
+    {
+    LL_DEBUGS("LLLogin") << "Entering coroutine " << LLCoros::instance().getName()
+                        << " with uri '" << uri << "', parameters " << printable_params << LL_ENDL;
 
     LLEventPump& xmlrpcPump(LLEventPumps::instance().obtain("LLXMLRPCTransaction"));
     // EXT-4193: use a DIFFERENT reply pump than for the SRV request. We used
@@ -187,132 +147,122 @@ void LLLogin::Impl::login_(LLCoros::self& self, std::string uri, LLSD login_para
     // SRV response to arrive just as we were expecting the XMLRPC response.
     LLEventStream loginReplyPump("loginreply", true);
 
-    // Loop through the rewrittenURIs, counting attempts along the way.
-    // Because of possible redirect responses, we may make more than one
-    // attempt per rewrittenURIs entry.
     LLSD::Integer attempts = 0;
-    for (LLSD::array_const_iterator urit(rewrittenURIs.beginArray()),
-             urend(rewrittenURIs.endArray());
-         urit != urend; ++urit)
+
+    LLSD request(login_params);
+    request["reply"] = loginReplyPump.getName();
+    request["uri"] = uri;
+    std::string status;
+
+    // Loop back to here if login attempt redirects to a different
+    // request["uri"]
+    for (;;)
     {
-        LLSD request(login_params);
-        request["reply"] = loginReplyPump.getName();
-        request["uri"] = *urit;
-        std::string status;
-
-        // Loop back to here if login attempt redirects to a different
-        // request["uri"]
-        for (;;)
+        ++attempts;
+        LLSD progress_data;
+        progress_data["attempt"] = attempts;
+        progress_data["request"] = request;
+        if (progress_data["request"].has("params")
+            && progress_data["request"]["params"].has("passwd"))
         {
-            ++attempts;
-            LLSD progress_data;
-            progress_data["attempt"] = attempts;
-            progress_data["request"] = request;
-			if(progress_data["request"].has("params")
-				&& progress_data["request"]["params"].has("passwd"))
-			{
-				progress_data["request"]["params"]["passwd"] = "*******";
-			}
-            sendProgressEvent("offline", "authenticating", progress_data);
+            progress_data["request"]["params"]["passwd"] = "*******";
+        }
+        sendProgressEvent("offline", "authenticating", progress_data);
 
-            // We expect zero or more "Downloading" status events, followed by
-            // exactly one event with some other status. Use postAndWait() the
-            // first time, because -- at least in unit-test land -- it's
-            // possible for the reply to arrive before the post() call
-            // returns. Subsequent responses, of course, must be awaited
-            // without posting again.
-            for (mAuthResponse = validateResponse(loginReplyPump.getName(),
-                                 postAndWait(self, request, xmlrpcPump, loginReplyPump, "reply"));
-                 mAuthResponse["status"].asString() == "Downloading";
-                 mAuthResponse = validateResponse(loginReplyPump.getName(),
-                                     waitForEventOn(self, loginReplyPump)))
-            {
-                // Still Downloading -- send progress update.
-                sendProgressEvent("offline", "downloading");
-            }
-	
-			LL_DEBUGS("LLLogin") << "Auth Response: " << mAuthResponse << LL_ENDL;
-            status = mAuthResponse["status"].asString();
-
-            // Okay, we've received our final status event for this
-            // request. Unless we got a redirect response, break the retry
-            // loop for the current rewrittenURIs entry.
-            if (!(status == "Complete" &&
-                  mAuthResponse["responses"]["login"].asString() == "indeterminate"))
-            {
-                break;
-            }
-
-			sendProgressEvent("offline", "indeterminate", mAuthResponse["responses"]);
-
-            // Here the login service at the current URI is redirecting us
-            // to some other URI ("indeterminate" -- why not "redirect"?).
-            // The response should contain another uri to try, with its
-            // own auth method.
-            request["uri"] = mAuthResponse["responses"]["next_url"].asString();
-            request["method"] = mAuthResponse["responses"]["next_method"].asString();
-        } // loop back to try the redirected URI
-
-        // Here we're done with redirects for the current rewrittenURIs
-        // entry.
-        if (status == "Complete")
+        // We expect zero or more "Downloading" status events, followed by
+        // exactly one event with some other status. Use postAndSuspend() the
+        // first time, because -- at least in unit-test land -- it's
+        // possible for the reply to arrive before the post() call
+        // returns. Subsequent responses, of course, must be awaited
+        // without posting again.
+        for (mAuthResponse = validateResponse(loginReplyPump.getName(),
+                    llcoro::postAndSuspend(request, xmlrpcPump, loginReplyPump, "reply"));
+                mAuthResponse["status"].asString() == "Downloading";
+                mAuthResponse = validateResponse(loginReplyPump.getName(),
+                                                llcoro::suspendUntilEventOn(loginReplyPump)))
         {
-            // StatusComplete does not imply auth success. Check the
-            // actual outcome of the request. We've already handled the
-            // "indeterminate" case in the loop above.
-            if (mAuthResponse["responses"]["login"].asString() == "true")
-            {
-                sendProgressEvent("online", "connect", mAuthResponse["responses"]);
-            }
-            else
-            {
-                sendProgressEvent("offline", "fail.login", mAuthResponse["responses"]);
-            }
-            return;             // Done!
+            // Still Downloading -- send progress update.
+            sendProgressEvent("offline", "downloading");
         }
 
-		/* Sometimes we end with "Started" here. Slightly slow server?
-		 * Seems to be ok to just skip it. Otherwise we'd error out and crash in the if below.
-		 */
-		if( status == "Started")
-		{
-			LL_DEBUGS("LLLogin") << mAuthResponse << LL_ENDL;
-			continue;
-		}
+        LL_DEBUGS("LLLogin") << "Auth Response: " << mAuthResponse << LL_ENDL;
+        status = mAuthResponse["status"].asString();
 
-        // If we don't recognize status at all, trouble
-        if (! (status == "CURLError"
-               || status == "XMLRPCError"
-               || status == "OtherError"))
+        // Okay, we've received our final status event for this
+        // request. Unless we got a redirect response, break the retry
+        // loop for the current rewrittenURIs entry.
+        if (!(status == "Complete" &&
+                mAuthResponse["responses"]["login"].asString() == "indeterminate"))
         {
-            LL_ERRS("LLLogin") << "Unexpected status from " << xmlrpcPump.getName() << " pump: "
-                               << mAuthResponse << LL_ENDL;
-            return;
+            break;
         }
 
-        // Here status IS one of the errors tested above.
-    } // Retry if there are any more rewrittenURIs.
+        sendProgressEvent("offline", "indeterminate", mAuthResponse["responses"]);
 
-    // Here we got through all the rewrittenURIs without succeeding. Tell
-    // caller this didn't work out so well. Of course, the only failure data
-    // we can reasonably show are from the last of the rewrittenURIs.
+        // Here the login service at the current URI is redirecting us
+        // to some other URI ("indeterminate" -- why not "redirect"?).
+        // The response should contain another uri to try, with its
+        // own auth method.
+        request["uri"] = mAuthResponse["responses"]["next_url"].asString();
+        request["method"] = mAuthResponse["responses"]["next_method"].asString();
+    } // loop back to try the redirected URI
 
-	// *NOTE: The response from LLXMLRPCListener's Poller::poll method returns an
-	// llsd with no "responses" node. To make the output from an incomplete login symmetrical 
-	// to success, add a data/message and data/reason fields.
-	LLSD error_response;
-	error_response["reason"] = mAuthResponse["status"];
-	error_response["errorcode"] = mAuthResponse["errorcode"];
-	error_response["message"] = mAuthResponse["error"];
-	if(mAuthResponse.has("certificate"))
-	{
-		error_response["certificate"] = mAuthResponse["certificate"];
-	}
-	sendProgressEvent("offline", "fail.login", error_response);
-	}
-	catch (...) {
-		llerrs << "login exception caught" << llendl; 
-	}
+    // Here we're done with redirects.
+    if (status == "Complete")
+    {
+        // StatusComplete does not imply auth success. Check the
+        // actual outcome of the request. We've already handled the
+        // "indeterminate" case in the loop above.
+        if (mAuthResponse["responses"]["login"].asString() == "true")
+        {
+            sendProgressEvent("online", "connect", mAuthResponse["responses"]);
+        }
+        else
+        {
+            sendProgressEvent("offline", "fail.login", mAuthResponse["responses"]);
+        }
+        return;             // Done!
+    }
+
+//  /* Sometimes we end with "Started" here. Slightly slow server?
+//   * Seems to be ok to just skip it. Otherwise we'd error out and crash in the if below.
+//   */
+//  if( status == "Started")
+//  {
+//      LL_DEBUGS("LLLogin") << mAuthResponse << LL_ENDL;
+//      continue;
+//  }
+
+    // If we don't recognize status at all, trouble
+    if (! (status == "CURLError"
+            || status == "XMLRPCError"
+            || status == "OtherError"))
+    {
+        LL_ERRS("LLLogin") << "Unexpected status from " << xmlrpcPump.getName() << " pump: "
+                            << mAuthResponse << LL_ENDL;
+        return;
+    }
+
+    // Here status IS one of the errors tested above.
+    // Tell caller this didn't work out so well.
+
+    // *NOTE: The response from LLXMLRPCListener's Poller::poll method returns an
+    // llsd with no "responses" node. To make the output from an incomplete login symmetrical 
+    // to success, add a data/message and data/reason fields.
+    LLSD error_response;
+    error_response["reason"] = mAuthResponse["status"];
+    error_response["errorcode"] = mAuthResponse["errorcode"];
+    error_response["message"] = mAuthResponse["error"];
+    if(mAuthResponse.has("certificate"))
+    {
+        error_response["certificate"] = mAuthResponse["certificate"];
+    }
+    sendProgressEvent("offline", "fail.login", error_response);
+    }
+    catch (...) {
+        CRASH_ON_UNHANDLED_EXCEPTION(STRINGIZE("coroutine " << LLCoros::instance().getName()
+                                               << "('" << uri << "', " << printable_params << ")"));
+    }
 }
 
 void LLLogin::Impl::disconnect()
@@ -352,29 +302,8 @@ LLEventPump& LLLogin::getEventPump()
 
 // The list associates to event with the original idle_startup() 'STATE'.
 
-// Rewrite URIs
- // State_LOGIN_AUTH_INIT
-// Given a vector of login uris (usually just one), perform a dns lookup for the 
-// SRV record from each URI. I think this is used to distribute login requests to 
-// a single URI to multiple hosts.
-// This is currently a synchronous action. (See LLSRV::rewriteURI() implementation)
-// On dns lookup error the output uris == the input uris.
-//
-// Input: A vector of login uris
-// Output: A vector of login uris
-//
-// Code:
-// std::vector<std::string> uris;
-// LLViewerLogin::getInstance()->getLoginURIs(uris);
-// std::vector<std::string>::const_iterator iter, end;
-// for (iter = uris.begin(), end = uris.end(); iter != end; ++iter)
-// {
-//	std::vector<std::string> rewritten;
-//	rewritten = LLSRV::rewriteURI(*iter);
-//	sAuthUris.insert(sAuthUris.end(),
-//					 rewritten.begin(), rewritten.end());
-// }
-// sAuthUriNum = 0;
+// Setup login
+// State_LOGIN_AUTH_INIT
 
 // Authenticate 
 // STATE_LOGIN_AUTHENTICATE

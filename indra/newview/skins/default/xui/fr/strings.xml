@@ -37,6 +37,64 @@
 	<string name="StartupRequireDriverUpdate">
 		Échec d&apos;initialisation des graphiques. Veuillez mettre votre pilote graphique à jour.
 	</string>
+	<string name="AboutHeader">
+		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) ([CHANNEL])
+[[VIEWER_RELEASE_NOTES_URL] [Notes de version]]
+	</string>
+	<string name="BuildConfig">
+		Configuration de la construction [BUILD_CONFIG]
+	</string>
+	<string name="AboutPosition">
+		Vous êtes à [POSITION_LOCAL_0,number,1], [POSITION_LOCAL_1,number,1], [POSITION_LOCAL_2,number,1] dans [REGION], se trouvant à &lt;nolink&gt;[HOSTNAME]&lt;/nolink&gt; ([HOSTIP])
+SLURL : &lt;nolink&gt;[SLURL]&lt;/nolink&gt;
+(coordonnées globales [POSITION_0,number,1], [POSITION_1,number,1], [POSITION_2,number,1])
+[SERVER_VERSION]
+[SERVER_RELEASE_NOTES_URL]
+	</string>
+	<string name="AboutSystem">
+		CPU : [CPU]
+Mémoire : [MEMORY_MB] Mo
+Version OS : [OS_VERSION]
+Distributeur de cartes graphiques : [GRAPHICS_CARD_VENDOR]
+Carte graphique : [GRAPHICS_CARD]
+	</string>
+	<string name="AboutDriver">
+		Version Windows Graphics Driver : [GRAPHICS_DRIVER_VERSION]
+	</string>
+	<string name="AboutOGL">
+		Version OpenGL : [OPENGL_VERSION]
+	</string>
+	<string name="AboutSettings">
+		Taille de la fenêtre : [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+Ajustement de la taille de la police : [FONT_SIZE_ADJUSTMENT] pts
+Échelle de l’interface : [UI_SCALE]
+Limite d’affichage : [DRAW_DISTANCE] m
+Bande passante : [NET_BANDWITH] kbit/s
+Facteur LOD (niveau de détail) : [LOD_FACTOR]
+Qualité de rendu : [RENDER_QUALITY] / 7
+Modèle d’éclairage avancé : [GPU_SHADERS]
+Mémoire textures : [TEXTURE_MEMORY] Mo
+Durée de création VFS (cache) : [VFS_TIME]
+	</string>
+	<string name="AboutLibs">
+		Version J2C Decoder : [J2C_VERSION]
+Version Audio Driver : [AUDIO_DRIVER_VERSION]
+Version CEF : [LIBCEF_VERSION]
+Version LibVLC : [LIBVLC_VERSION]
+Version serveur vocal : [VOICE_VERSION]
+	</string>
+	<string name="AboutTraffic">
+		Paquets perdus : [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
+	</string>
+	<string name="AboutTime">
+		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
+	</string>
+	<string name="ErrorFetchingServerReleaseNotesURL">
+		Erreur lors de la récupération de l&apos;URL des notes de version du serveur.
+	</string>
+	<string name="BuildConfiguration">
+		Configuration de la construction
+	</string>
 	<string name="ProgressRestoring">
 		Restauration...
 	</string>
@@ -139,6 +197,12 @@
 	<string name="create_account_url">
 		http://join.secondlife.com/?sourceid=[sourceid]
 	</string>
+	<string name="AgniGridLabel">
+		Grille principale de Second Life (Agni)
+	</string>
+	<string name="AditiGridLabel">
+		Grille de test bêta Second Life (Aditi)
+	</string>
 	<string name="ViewerDownloadURL">
 		http://secondlife.com/download
 	</string>
@@ -197,9 +261,8 @@ l&apos;Assistance à l&apos;adresse suivante : support@secondlife.com.
 [TIME], heure du Pacifique.
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		Nous n&apos;avons pas réussi à traiter votre demande.
-Pour obtenir de l&apos;aide, veuillez contacter l&apos;Assistance Second Life à la page suivante : http://secondlife.com/support.
-Si vous ne parvenez pas à changer de mot de passe, veuillez appeler le (866) 476-9763.
+		Impossible de traiter votre demande à l&apos;heure actuelle. 
+Pour obtenir de l&apos;aide, veuillez contacter l&apos;Assistance Second Life à la page suivante : http://support.secondlife.com.
 	</string>
 	<string name="LoginFailedTransformError">
 		Incohérence des données lors de la connexion.
@@ -296,6 +359,75 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="TestingDisconnect">
 		Test de déconnexion du client
 	</string>
+	<string name="SocialFlickrConnecting">
+		Connexion à Flickr...
+	</string>
+	<string name="SocialFlickrPosting">
+		Publication…
+	</string>
+	<string name="SocialFlickrDisconnecting">
+		Déconnexion de Flickr...
+	</string>
+	<string name="SocialFlickrErrorConnecting">
+		Un problème est survenu lors de la connexion à Flickr.
+	</string>
+	<string name="SocialFlickrErrorPosting">
+		Un problème est survenu lors de la publication sur Flickr.
+	</string>
+	<string name="SocialFlickrErrorDisconnecting">
+		Un problème est survenu lors de la déconnexion de Flickr.
+	</string>
+	<string name="SocialTwitterConnecting">
+		Connexion à Twitter...
+	</string>
+	<string name="SocialTwitterPosting">
+		Publication…
+	</string>
+	<string name="SocialTwitterDisconnecting">
+		Déconnexion de Twitter...
+	</string>
+	<string name="SocialTwitterErrorConnecting">
+		Un problème est survenu lors de la connexion à Twitter.
+	</string>
+	<string name="SocialTwitterErrorPosting">
+		Un problème est survenu lors de la publication sur Twitter.
+	</string>
+	<string name="SocialTwitterErrorDisconnecting">
+		Un problème est survenu lors de la déconnexion de Twitter.
+	</string>
+	<string name="BlackAndWhite">
+		Noir et blanc
+	</string>
+	<string name="Colors1970">
+		Couleurs des années 1970
+	</string>
+	<string name="Intense">
+		Intense
+	</string>
+	<string name="Newspaper">
+		Presse
+	</string>
+	<string name="Sepia">
+		Sépia
+	</string>
+	<string name="Spotlight">
+		Projecteur
+	</string>
+	<string name="Video">
+		Vidéo
+	</string>
+	<string name="Autocontrast">
+		Contraste automatique
+	</string>
+	<string name="LensFlare">
+		Halo
+	</string>
+	<string name="Miniature">
+		Miniature
+	</string>
+	<string name="Toycamera">
+		Toy Camera
+	</string>
 	<string name="TooltipPerson">
 		Personne
 	</string>
@@ -341,30 +473,54 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="TooltipMustSingleDrop">
 		Impossible de faire glisser plus d&apos;un objet ici
 	</string>
+	<string name="TooltipTooManyWearables">
+		Vous ne pouvez pas porter un dossier contenant plus de [AMOUNT] articles.  Vous pouvez modifier cette limite dans Avancé &gt; Afficher les paramètres de débogage &gt; WearFolderLimit.
+	</string>
 	<string name="TooltipPrice" value="[AMOUNT] L$ :"/>
+	<string name="TooltipSLIcon">
+		Il s’agit d’un lien vers une page dans le domaine officiel SecondLife.com ou LindenLab.com.
+	</string>
 	<string name="TooltipOutboxDragToWorld">
-		Impossible de rezzer des articles dans la boîte d&apos;envoi vendeur
-	</string>
-	<string name="TooltipOutboxNoTransfer">
-		Impossible de vendre ou de transférer un ou plusieurs de ces objets.
-	</string>
-	<string name="TooltipOutboxNotInInventory">
-		La boîte d&apos;envoi vendeur n&apos;accepte que les articles directement issus de votre inventaire.
+		Vous ne pouvez pas rezzer (charger) des articles du dossier Annonces de la Place de marché
 	</string>
 	<string name="TooltipOutboxWorn">
-		Impossible de placer des articles que vous portez dans votre boîte d&apos;envoi vendeur
-	</string>
-	<string name="TooltipOutboxCallingCard">
-		Impossible de placer des cartes de visite dans votre boîte d&apos;envoi vendeur
+		Vous ne pouvez pas mettre d&apos;articles que vous portez dans le dossier Annonces de la Place du marché
 	</string>
 	<string name="TooltipOutboxFolderLevels">
-		Il existe plus de 3 niveaux de dossiers imbriqués.
+		Le niveau de dossiers imbriqués dépasse [AMOUNT]. Diminuez le nombre de niveaux de dossiers imbriqués dans d&apos;autres dossiers. Si nécessaire, placez certains articles dans une boîte.
 	</string>
 	<string name="TooltipOutboxTooManyFolders">
-		Le dossier de niveau supérieur contient plus de 20 sous-dossiers.
+		Le nombre de sous-dossiers dépasse [AMOUNT]. Diminuez le nombre de sous-dossiers dans votre annonce. Si nécessaire, placez certains articles dans une boîte.
 	</string>
 	<string name="TooltipOutboxTooManyObjects">
-		Le dossier de niveau supérieur contient plus de 200 articles.
+		Le nombre d&apos;articles dépasse [AMOUNT]. Pour pouvoir vendre plus de [AMOUNT] articles au sein d&apos;une même annonce, vous devez placer certains de ces articles dans une boîte.
+	</string>
+	<string name="TooltipOutboxTooManyStockItems">
+		Le nombre d&apos;articles de stock dépasse [AMOUNT].
+	</string>
+	<string name="TooltipOutboxCannotDropOnRoot">
+		Vous pouvez uniquement déposer des articles ou des dossiers dans les onglets TOUS ou NON ASSOCIÉS. Sélectionnez l’un de ces onglets et déplacez à nouveau votre ou vos article ou dossiers.
+	</string>
+	<string name="TooltipOutboxNoTransfer">
+		Impossible de vendre ou de transférer un ou plusieurs de ces objets
+	</string>
+	<string name="TooltipOutboxNotInInventory">
+		Vous ne pouvez mettre sur la Place du marché que des articles de votre inventaire
+	</string>
+	<string name="TooltipOutboxLinked">
+		Vous ne pouvez pas mettre des articles ou dossiers liés sur la Place du marché
+	</string>
+	<string name="TooltipOutboxCallingCard">
+		Vous ne pouvez pas mettre des cartes de visite sur la Place du marché
+	</string>
+	<string name="TooltipOutboxDragActive">
+		vous ne pouvez pas déplacer une annonce publiée
+	</string>
+	<string name="TooltipOutboxCannotMoveRoot">
+		Vous ne pouvez pas déplacer le dossier racine des annonces de la Place du marché
+	</string>
+	<string name="TooltipOutboxMixedStock">
+		tous les articles d&apos;un dossier de stock doivent avoir le même type et droit
 	</string>
 	<string name="TooltipDragOntoOwnChild">
 		Impossible de déplacer un dossier vers son enfant
@@ -427,6 +583,9 @@ Veuillez réessayer de vous connecter dans une minute.
 		Cliquez pour exécuter la commande secondlife://
 	</string>
 	<string name="CurrentURL" value=" URL actuelle : [CurrentURL]"/>
+	<string name="TooltipEmail">
+		Cliquez pour composer un message
+	</string>
 	<string name="SLurlLabelTeleport">
 		Me téléporter vers
 	</string>
@@ -543,6 +702,19 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Statut inconnu
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		Service inaccessible.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Le serveur rencontres des difficultés imprévues.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		Services non disponible ou la durée du chargement est dépassée.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Erreur dans la demande de chargement. Veuillez consulter le site : 
+http://secondlife.com/support pour vous aider à résoudre ce problème.
 	</string>
 	<string name="texture">
 		texture
@@ -847,6 +1019,12 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="use_texture">
 		Utiliser la texture
 	</string>
+	<string name="manip_hint1">
+		Faites glisser le curseur sur l&apos;axe
+	</string>
+	<string name="manip_hint2">
+		pour le fixer sur la grille
+	</string>
 	<string name="texture_loading">
 		Chargement...
 	</string>
@@ -937,18 +1115,19 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="ControlYourCamera">
 		Contrôler votre caméra
 	</string>
+	<string name="TeleportYourAgent">
+		Vous téléporter
+	</string>
+	<string name="ForceSitAvatar">
+		Forcez votre avatar à s’asseoir
+	</string>
 	<string name="NotConnected">
 		Pas connecté(e)
 	</string>
 	<string name="AgentNameSubst">
 		(Vous)
 	</string>
-	<string name="TeleportYourAgent">
-		Vous téléporter
-	</string>
-	<string name="JoinAnExperience">
-		Rejoindre une expérience
-	</string>
+	<string name="JoinAnExperience"/>
 	<string name="SilentlyManageEstateAccess">
 		Supprimer les alertes lors de la gestion des listes d&apos;accès aux domaines
 	</string>
@@ -1014,6 +1193,12 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="bitmap_image_files">
 		Images Bitmap
+	</string>
+	<string name="png_image_files">
+		Images PNG
+	</string>
+	<string name="save_texture_image_files">
+		Images Targa ou PNG
 	</string>
 	<string name="avi_movie_file">
 		Fichier de film AVI
@@ -1243,6 +1428,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="BodyPartsRightLeg">
 		Jambe droite
 	</string>
+	<string name="BodyPartsEnhancedSkeleton">
+		Squelette amélioré
+	</string>
 	<string name="GraphicsQualityLow">
 		Faible
 	</string>
@@ -1263,6 +1451,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="FavoritesNoMatchingItems">
 		Faites glisser un repère ici pour l&apos;ajouter à vos Favoris.
+	</string>
+	<string name="MarketplaceNoMatchingItems">
+		Aucun article trouvé. Vérifiez l&apos;orthographe de votre chaîne de recherche et réessayez.
 	</string>
 	<string name="InventoryNoTexture">
 		Vous n&apos;avez pas de copie de cette texture dans votre inventaire
@@ -1299,32 +1490,114 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="InventoryOutboxNoItems">
 		Pour mettre des dossiers en vente sur la [[MARKETPLACE_DASHBOARD_URL] Place du marché], faites-les glisser vers cette zone et cliquez sur &quot;Envoyer vers la Place du marché&quot;.
 	</string>
+	<string name="InventoryOutboxInitializingTitle">
+		Initialisation de la Place du marché...
+	</string>
+	<string name="InventoryOutboxInitializing">
+		Nous sommes en train d&apos;accéder à votre compte dans la [[MARKETPLACE_CREATE_STORE_URL] boutique de la Place du marché].
+	</string>
+	<string name="InventoryOutboxErrorTitle">
+		Erreurs de la Place du marché.
+	</string>
+	<string name="InventoryOutboxError">
+		La [[MARKETPLACE_CREATE_STORE_URL] boutique de la Place du marché] renvoie des erreurs.
+	</string>
+	<string name="InventoryMarketplaceError">
+		Une erreur est survenue lors de l’ouverture des annonces de la Place du marché.
+Si vous continuez de recevoir ce message, contactez l’assistance Second Life à http://support.secondlife.com pour obtenir de l’aide.
+	</string>
+	<string name="InventoryMarketplaceListingsNoItemsTitle">
+		Votre dossier Annonces de la Place du marché est vide.
+	</string>
+	<string name="InventoryMarketplaceListingsNoItems">
+		Pour mettre des dossiers en vente sur la [[MARKETPLACE_DASHBOARD_URL] Place du marché], faites-les glisser vers cette zone.
+	</string>
+	<string name="Marketplace Validation Warning Stock">
+		le dossier de stock doit être contenu dans un dossier de version
+	</string>
+	<string name="Marketplace Validation Error Mixed Stock">
+		: Erreur : tous les articles d&apos;un dossier de stock doivent être non reproductibles et de même type
+	</string>
+	<string name="Marketplace Validation Error Subfolder In Stock">
+		: Erreur : un dossier de stock ne peut pas contenir de sous-dossiers
+	</string>
+	<string name="Marketplace Validation Warning Empty">
+		: Avertissement : le dossier ne contient aucun article
+	</string>
+	<string name="Marketplace Validation Warning Create Stock">
+		: Avertissement : création du dossier de stock
+	</string>
+	<string name="Marketplace Validation Warning Create Version">
+		: Avertissement : création du dossier de version
+	</string>
+	<string name="Marketplace Validation Warning Move">
+		: Avertissement : déplacement d&apos;articles
+	</string>
+	<string name="Marketplace Validation Warning Delete">
+		: Avertissement : contenu du dossier transféré vers le dossier de stock, suppression du dossier vide
+	</string>
+	<string name="Marketplace Validation Error Stock Item">
+		: Erreur : les articles non reproductibles doivent être contenus dans un dossier de stock
+	</string>
+	<string name="Marketplace Validation Warning Unwrapped Item">
+		: Avertissement : les articles doivent être contenus dans un dossier de version
+	</string>
+	<string name="Marketplace Validation Error">
+		: Erreur :
+	</string>
+	<string name="Marketplace Validation Warning">
+		: Avertissement :
+	</string>
+	<string name="Marketplace Validation Error Empty Version">
+		: Avertissement : le dossier de version doit contenir au moins 1 article
+	</string>
+	<string name="Marketplace Validation Error Empty Stock">
+		: Avertissement : le dossier de stock doit contenir au moins 1 article
+	</string>
+	<string name="Marketplace Validation No Error">
+		Pas d&apos;erreur ni d&apos;avertissement à signaler
+	</string>
 	<string name="Marketplace Error None">
 		Aucune erreur
 	</string>
+	<string name="Marketplace Error Prefix">
+		Erreur :
+	</string>
 	<string name="Marketplace Error Not Merchant">
-		Erreur : avant d&apos;envoyer des articles vers la Place du marché, vous devez vous configurer comme vendeur (gratuit).
+		Avant d&apos;envoyer des articles vers la Place du marché, vous devez vous configurer comme vendeur (gratuit).
 	</string>
-	<string name="Marketplace Error Empty Folder">
-		Erreur : ce dossier est vide.
-	</string>
-	<string name="Marketplace Error Unassociated Products">
-		Erreur : le chargement de cet article a échoué en raison d&apos;un nombre trop important d&apos;articles non associés à des produits au niveau de votre compte de vendeur. Pour résoudre ce problème, connectez-vous au site Web de la Place du marché et réduisez le nombre d&apos;articles non associés.
-	</string>
-	<string name="Marketplace Error Object Limit">
-		Erreur : cet article contient trop d&apos;objets. Pour résoudre le problème, regroupez des objets dans des paquets afin de réduire le nombre total à moins de 200.
-	</string>
-	<string name="Marketplace Error Folder Depth">
-		Erreur : trop de niveaux de dossiers imbriqués concernant cet article. Réorganisez le tout afin qu&apos;un maximum de 3 niveaux soit utilisé.
+	<string name="Marketplace Error Not Accepted">
+		Impossible de déplacer l&apos;article dans ce dossier.
 	</string>
 	<string name="Marketplace Error Unsellable Item">
-		Erreur : cet article ne peut pas être vendu sur la Place du marché.
+		Cet article ne peut pas être vendu sur la Place du marché.
 	</string>
-	<string name="Marketplace Error Internal Import">
-		Erreur : un problème est survenu concernant cet article. Veuillez réessayer ultérieurement.
+	<string name="MarketplaceNoID">
+		no Mkt ID
+	</string>
+	<string name="MarketplaceLive">
+		publié
+	</string>
+	<string name="MarketplaceActive">
+		actif
+	</string>
+	<string name="MarketplaceMax">
+		max.
+	</string>
+	<string name="MarketplaceStock">
+		stock
+	</string>
+	<string name="MarketplaceNoStock">
+		rupture de stock
+	</string>
+	<string name="MarketplaceUpdating">
+		mise à jour...
 	</string>
 	<string name="Open landmarks">
 		Ouvrir les repères
+	</string>
+	<string name="Unconstrained">
+		Sans contraintes
 	</string>
 	<string name="no_transfer" value=" (pas de transfert)"/>
 	<string name="no_modify" value=" (pas de modification)"/>
@@ -1339,6 +1612,7 @@ Veuillez réessayer de vous connecter dans une minute.
 		Aucun contenu
 	</string>
 	<string name="WornOnAttachmentPoint" value=" (porté sur [ATTACHMENT_POINT])"/>
+	<string name="AttachmentErrorMessage" value="([ATTACHMENT_ERROR])"/>
 	<string name="ActiveGesture" value="[GESLABEL] (actif)"/>
 	<string name="PermYes">
 		Oui
@@ -1606,8 +1880,62 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="Avatar Center">
 		Centre de l&apos;avatar
 	</string>
+	<string name="Left Ring Finger">
+		Annulaire gauche
+	</string>
+	<string name="Right Ring Finger">
+		Annulaire droit
+	</string>
+	<string name="Tail Base">
+		Base de la queue
+	</string>
+	<string name="Tail Tip">
+		Bout de la queue
+	</string>
+	<string name="Left Wing">
+		Aile gauche
+	</string>
+	<string name="Right Wing">
+		Aile droite
+	</string>
+	<string name="Jaw">
+		Mâchoire
+	</string>
+	<string name="Alt Left Ear">
+		Oreille gauche différente
+	</string>
+	<string name="Alt Right Ear">
+		Oreille droite différente
+	</string>
+	<string name="Alt Left Eye">
+		Œil gauche différent
+	</string>
+	<string name="Alt Right Eye">
+		Œil droit différent
+	</string>
+	<string name="Tongue">
+		Langue
+	</string>
+	<string name="Groin">
+		Aine
+	</string>
+	<string name="Left Hind Foot">
+		Pied arrière gauche
+	</string>
+	<string name="Right Hind Foot">
+		Pied arrière droit
+	</string>
 	<string name="Invalid Attachment">
 		Point d&apos;attache non valide
+	</string>
+	<string name="ATTACHMENT_MISSING_ITEM">
+		Erreur : article manquant
+	</string>
+	<string name="ATTACHMENT_MISSING_BASE_ITEM">
+		Erreur : article de base manquant
+	</string>
+	<string name="ATTACHMENT_NOT_ATTACHED">
+		Erreur : l&apos;objet est dans une tenue actuelle, mais il n&apos;est pas attaché
 	</string>
 	<string name="YearsMonthsOld">
 		[AGEYEARS] [AGEMONTHS]
@@ -1626,6 +1954,42 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="TodayOld">
 		Inscrit aujourd&apos;hui
+	</string>
+	<string name="av_render_everyone_now">
+		Désormais, tout le monde peut vous voir.
+	</string>
+	<string name="av_render_not_everyone">
+		Vous risquez de ne pas être rendu par tous les gens qui vous entourent.
+	</string>
+	<string name="av_render_over_half">
+		Vous risquez de ne pas être rendu par plus de la moitié des gens qui vous entourent.
+	</string>
+	<string name="av_render_most_of">
+		Vous risquez de ne pas être rendu par la plupart des gens qui vous entourent.
+	</string>
+	<string name="av_render_anyone">
+		Vous risquez de n’être rendu par aucune des personnes qui vous entourent.
+	</string>
+	<string name="hud_description_total">
+		Votre HUD
+	</string>
+	<string name="hud_name_with_joint">
+		[OBJ_NAME] (porté sur [JNT_NAME])
+	</string>
+	<string name="hud_render_memory_warning">
+		[HUD_DETAILS] utilise beaucoup de mémoire textures
+	</string>
+	<string name="hud_render_cost_warning">
+		[HUD_DETAILS] contient beaucoup de textures et d’objets volumineux
+	</string>
+	<string name="hud_render_heavy_textures_warning">
+		[HUD_DETAILS] contient beaucoup de textures volumineuses
+	</string>
+	<string name="hud_render_cramped_warning">
+		[HUD_DETAILS] contient trop d’objets
+	</string>
+	<string name="hud_render_textures_warning">
+		[HUD_DETAILS] contient trop de textures
 	</string>
 	<string name="AgeYearsA">
 		[COUNT] an
@@ -1726,6 +2090,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="CompileQueueDownloadedCompiling">
 		Téléchargé, compilation en cours
 	</string>
+	<string name="CompileQueueServiceUnavailable">
+		Service de compilation de script indisponible.
+	</string>
 	<string name="CompileQueueScriptNotFound">
 		Script introuvable sur le serveur.
 	</string>
@@ -1740,6 +2107,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="CompileQueueUnknownFailure">
 		Échec du téléchargement, erreur inconnue
+	</string>
+	<string name="CompileNoExperiencePerm">
+		En train d’ignorer le script [SCRIPT] avec l’expérience [EXPERIENCE].
 	</string>
 	<string name="CompileQueueTitle">
 		Recompilation - progrès
@@ -1774,8 +2144,14 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="SaveComplete">
 		Enregistrement terminé.
 	</string>
+	<string name="UploadFailed">
+		Échec du chargement de fichier :
+	</string>
 	<string name="ObjectOutOfRange">
 		Script (objet hors de portée)
+	</string>
+	<string name="ScriptWasDeleted">
+		Script (supprimé de l’inventaire)
 	</string>
 	<string name="GodToolsObjectOwnedBy">
 		Objet [OBJECT] appartenant à [OWNER]
@@ -1834,10 +2210,19 @@ Veuillez réessayer de vous connecter dans une minute.
 		tous les domaines que vous gérez pour [OWNER]
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Résidents autorisés : ([ALLOWEDAGENTS], max. [MAXACCESS])
+		Toujours autorisé : ([ALLOWEDAGENTS], max [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Groupes autorisés : ([ALLOWEDGROUPS], max. [MAXACCESS])
+		Groupes toujours autorisés : [ALLOWEDGROUPS], max [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Toujours interdits : ([BANNEDAGENTS], max. [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Toujours autorisé
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Toujours interdit
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Mémoire des scripts de parcelles
@@ -1962,11 +2347,11 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="ATTACH_BELLY">
 		Ventre
 	</string>
-	<string name="ATTACH_RPEC">
-		Pectoral droit
-	</string>
-	<string name="ATTACH_LPEC">
+	<string name="ATTACH_LEFT_PEC">
 		Pectoral gauche
+	</string>
+	<string name="ATTACH_RIGHT_PEC">
+		Pectoral droit
 	</string>
 	<string name="ATTACH_HUD_CENTER_2">
 		HUD centre 2
@@ -1997,6 +2382,51 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="ATTACH_AVATAR_CENTER">
 		Centre de l&apos;avatar
+	</string>
+	<string name="ATTACH_LHAND_RING1">
+		Annulaire gauche
+	</string>
+	<string name="ATTACH_RHAND_RING1">
+		Annulaire droit
+	</string>
+	<string name="ATTACH_TAIL_BASE">
+		Base de la queue
+	</string>
+	<string name="ATTACH_TAIL_TIP">
+		Bout de la queue
+	</string>
+	<string name="ATTACH_LWING">
+		Aile gauche
+	</string>
+	<string name="ATTACH_RWING">
+		Aile droite
+	</string>
+	<string name="ATTACH_FACE_JAW">
+		Mâchoire
+	</string>
+	<string name="ATTACH_FACE_LEAR">
+		Oreille gauche différente
+	</string>
+	<string name="ATTACH_FACE_REAR">
+		Oreille droite différente
+	</string>
+	<string name="ATTACH_FACE_LEYE">
+		Œil gauche différent
+	</string>
+	<string name="ATTACH_FACE_REYE">
+		Œil droit différent
+	</string>
+	<string name="ATTACH_FACE_TONGUE">
+		Langue
+	</string>
+	<string name="ATTACH_GROIN">
+		Aine
+	</string>
+	<string name="ATTACH_HIND_LFOOT">
+		Pied arrière gauche
+	</string>
+	<string name="ATTACH_HIND_RFOOT">
+		Pied arrière droit
 	</string>
 	<string name="CursorPos">
 		Ligne [LINE], colonne [COLUMN]
@@ -2343,6 +2773,15 @@ Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="Play Media">
 		Lire/pauser le média
+	</string>
+	<string name="IntelDriverPage">
+		http://www.intel.com/p/fr_FR/support/detect/graphics
+	</string>
+	<string name="NvidiaDriverPage">
+		http://www.nvidia.com/Download/index.aspx?lang=fr
+	</string>
+	<string name="AMDDriverPage">
+		http://support.amd.com/us/Pages/AMDSupportHub.aspx
 	</string>
 	<string name="MBCmdLineError">
 		Une erreur est survenue lors de la lecture de la ligne de commande.
@@ -3987,6 +4426,12 @@ Si ce message persiste, veuillez aller sur la page [SUPPORT_SITE].
 	<string name="OfflineStatus">
 		Hors ligne
 	</string>
+	<string name="not_online_msg">
+		Utilisateur non connecté -  le message sera enregistré et livré plus tard.
+	</string>
+	<string name="not_online_inventory">
+		Utilisateur non connecté - l&apos;inventaire a été enregistré
+	</string>
 	<string name="answered_call">
 		Votre appel a fait l&apos;objet d&apos;une réponse
 	</string>
@@ -4021,10 +4466,19 @@ Si ce message persiste, veuillez aller sur la page [SUPPORT_SITE].
 		Conférence avec [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Objet de l&apos;inventaire offert
+		Objet de l’inventaire [ITEM_NAME] offert
+	</string>
+	<string name="inventory_folder_offered-im">
+		Dossier de l’inventaire [ITEM_NAME] offert
 	</string>
 	<string name="share_alert">
 		Faire glisser les objets de l&apos;inventaire ici
+	</string>
+	<string name="flickr_post_success">
+		Vous avez publié sur Flickr.
+	</string>
+	<string name="twitter_post_success">
+		Vous avez publié sur Twitter.
 	</string>
 	<string name="no_session_message">
 		(Session IM inexistante)
@@ -4102,16 +4556,25 @@ Si ce message persiste, veuillez aller sur la page [SUPPORT_SITE].
 		Emplacement du domicile défini.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] vous a payé [AMOUNT] L$ [REASON].
+	</string>
+	<string name="paid_you_ldollars_gift">
+		[NAME] vous a payé [AMOUNT] L$ : [REASON]
 	</string>
 	<string name="paid_you_ldollars_no_reason">
 		[NAME] vous a payé [AMOUNT] L$.
 	</string>
 	<string name="you_paid_ldollars">
 		Vous avez payé à [AMOUNT] L$ [REASON].
+	</string>
+	<string name="you_paid_ldollars_gift">
+		Vous avez payé à [NAME] [AMOUNT] L$ : [REASON]
 	</string>
 	<string name="you_paid_ldollars_no_info">
 		Vous avez payé [AMOUNT] L$.
@@ -4124,6 +4587,9 @@ Si ce message persiste, veuillez aller sur la page [SUPPORT_SITE].
 	</string>
 	<string name="you_paid_failure_ldollars">
 		Votre paiement de [AMOUNT] L$ à [NAME] [REASON] a échoué.
+	</string>
+	<string name="you_paid_failure_ldollars_gift">
+		Votre paiement de [AMOUNT] L$ à [NAME] a échoué : [REASON]
 	</string>
 	<string name="you_paid_failure_ldollars_no_info">
 		Votre paiement de [AMOUNT] L$ a échoué.
@@ -4451,11 +4917,20 @@ du rapport d&apos;infraction
 	<string name="texture_load_dimensions_error">
 		Impossible de charger des images de taille supérieure à [WIDTH]*[HEIGHT]
 	</string>
+	<string name="outfit_photo_load_dimensions_error">
+		Taille max. de la photo de la tenue : [WIDTH]*[HEIGHT]. Redimensionnez l’image ou utilisez-en une autre.
+	</string>
+	<string name="outfit_photo_select_dimensions_error">
+		Taille max. de la photo de la tenue : [WIDTH]*[HEIGHT]. Sélectionnez une autre texture.
+	</string>
+	<string name="outfit_photo_verify_dimensions_error">
+		Impossible de vérifier les dimensions de la photo. Attendez que la taille de la photo s’affiche dans le sélecteur.
+	</string>
 	<string name="words_separator" value=","/>
 	<string name="server_is_down">
-		Malgré nos efforts, une erreur inattendue s&apos;est produite.
+		Malgré nos efforts, une erreur inattendue s’est produite.
 
-	Veuillez vous reporter à status.secondlifegrid.net afin de déterminer si un problème connu existe avec ce service.
+Veuillez vous reporter à http://status.secondlifegrid.net afin de déterminer si un problème connu existe avec ce service.
         Si le problème persiste, vérifiez la configuration de votre réseau et de votre pare-feu.
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -4481,6 +4956,9 @@ du rapport d&apos;infraction
 	</string>
 	<string name="LocalEstimateUSD">
 		[AMOUNT] US$
+	</string>
+	<string name="Group Ban">
+		Bannissement de groupe
 	</string>
 	<string name="Membership">
 		Inscription
@@ -4904,8 +5382,17 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="Command_Destinations_Label">
 		Destinations
 	</string>
+	<string name="Command_Facebook_Label">
+		Facebook
+	</string>
+	<string name="Command_Flickr_Label">
+		Flickr
+	</string>
 	<string name="Command_Gestures_Label">
 		Gestes
+	</string>
+	<string name="Command_Grid_Status_Label">
+		État de la grille
 	</string>
 	<string name="Command_HowTo_Label">
 		Aide rapide
@@ -4917,6 +5404,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 		Carte
 	</string>
 	<string name="Command_Marketplace_Label">
+		Place du marché
+	</string>
+	<string name="Command_MarketplaceListings_Label">
 		Place du marché
 	</string>
 	<string name="Command_MiniMap_Label">
@@ -4943,6 +5433,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="Command_Profile_Label">
 		Profil
 	</string>
+	<string name="Command_Report_Abuse_Label">
+		Signaler une infraction
+	</string>
 	<string name="Command_Search_Label">
 		Recherche
 	</string>
@@ -4951,6 +5444,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="Command_Speak_Label">
 		Parler
+	</string>
+	<string name="Command_Twitter_Label">
+		Twitter
 	</string>
 	<string name="Command_View_Label">
 		Caméra
@@ -4982,8 +5478,17 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="Command_Destinations_Tooltip">
 		Destinations intéressantes
 	</string>
+	<string name="Command_Facebook_Tooltip">
+		Publier sur Facebook
+	</string>
+	<string name="Command_Flickr_Tooltip">
+		Charger sur Flickr
+	</string>
 	<string name="Command_Gestures_Tooltip">
 		Gestes de votre avatar
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Afficher l’état actuel de la grille
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Comment effectuer les opérations courantes
@@ -4996,6 +5501,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="Command_Marketplace_Tooltip">
 		Faire du shopping
+	</string>
+	<string name="Command_MarketplaceListings_Tooltip">
+		Vendez votre création
 	</string>
 	<string name="Command_MiniMap_Tooltip">
 		Afficher les personnes près de vous
@@ -5021,6 +5529,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="Command_Profile_Tooltip">
 		Modifier ou afficher votre profil
 	</string>
+	<string name="Command_Report_Abuse_Tooltip">
+		Signaler une infraction
+	</string>
 	<string name="Command_Search_Tooltip">
 		Trouver des lieux, personnes, événements
 	</string>
@@ -5029,6 +5540,9 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="Command_Speak_Tooltip">
 		Parler aux personnes près de vous en utilisant votre micro
+	</string>
+	<string name="Command_Twitter_Tooltip">
+		Twitter
 	</string>
 	<string name="Command_View_Tooltip">
 		Changer l&apos;angle de la caméra
@@ -5105,6 +5619,87 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="UserDictionary">
 		[User]
 	</string>
+	<string name="experience_tools_experience">
+		Expérience
+	</string>
+	<string name="ExperienceNameNull">
+		(aucune expérience)
+	</string>
+	<string name="ExperienceNameUntitled">
+		(expérience sans titre)
+	</string>
+	<string name="Land-Scope">
+		À l’échelle des terrains
+	</string>
+	<string name="Grid-Scope">
+		À l’échelle de la grille
+	</string>
+	<string name="Allowed_Experiences_Tab">
+		AUTORISÉE
+	</string>
+	<string name="Blocked_Experiences_Tab">
+		BLOQUÉE
+	</string>
+	<string name="Contrib_Experiences_Tab">
+		CONTRIBUTEUR
+	</string>
+	<string name="Admin_Experiences_Tab">
+		ADMIN
+	</string>
+	<string name="Recent_Experiences_Tab">
+		RÉCENTE
+	</string>
+	<string name="Owned_Experiences_Tab">
+		AVEC PROPRIÉTAIRE
+	</string>
+	<string name="ExperiencesCounter">
+		([EXPERIENCES], [MAXEXPERIENCES] max.)
+	</string>
+	<string name="ExperiencePermission1">
+		assumer vos contrôles
+	</string>
+	<string name="ExperiencePermission3">
+		déclencher des animations pour votre avatar
+	</string>
+	<string name="ExperiencePermission4">
+		attacher à votre avatar
+	</string>
+	<string name="ExperiencePermission9">
+		suivre votre caméra
+	</string>
+	<string name="ExperiencePermission10">
+		contrôler votre caméra
+	</string>
+	<string name="ExperiencePermission11">
+		vous téléporter
+	</string>
+	<string name="ExperiencePermission12">
+		accepter automatiquement les permissions d’expérience
+	</string>
+	<string name="ExperiencePermissionShortUnknown">
+		a effectué une opération inconnue : [Permission]
+	</string>
+	<string name="ExperiencePermissionShort1">
+		Prendre le contrôle
+	</string>
+	<string name="ExperiencePermissionShort3">
+		Déclencher des animations
+	</string>
+	<string name="ExperiencePermissionShort4">
+		Attacher
+	</string>
+	<string name="ExperiencePermissionShort9">
+		Suivre la caméra
+	</string>
+	<string name="ExperiencePermissionShort10">
+		Contrôler la caméra
+	</string>
+	<string name="ExperiencePermissionShort11">
+		Téléportation
+	</string>
+	<string name="ExperiencePermissionShort12">
+		Permission
+	</string>
 	<string name="logging_calls_disabled_log_empty">
 		Les conversations ne sont pas archivées. Pour commencer à tenir un journal, choisissez Enregistrer : Journal seul ou Enregistrer : Journal et transcriptions sous Préférences &gt; Chat.
 	</string>
@@ -5116,5 +5711,29 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="loading_chat_logs">
 		Chargement...
+	</string>
+	<string name="na">
+		s.o.
+	</string>
+	<string name="preset_combo_label">
+		-Liste vide-
+	</string>
+	<string name="Default">
+		Valeur par défaut
+	</string>
+	<string name="none_paren_cap">
+		(Aucun/Aucune)
+	</string>
+	<string name="no_limit">
+		Aucune limite
+	</string>
+	<string name="Mav_Details_MAV_FOUND_DEGENERATE_TRIANGLES">
+		La forme physique contient des triangles trop petits. Essayez de simplifier le modèle physique.
+	</string>
+	<string name="Mav_Details_MAV_CONFIRMATION_DATA_MISMATCH">
+		La forme physique contient de mauvaises données de confirmation. Essayez de corriger le modèle physique.
+	</string>
+	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
+		La forme physique n’a pas la version correcte. Configurez la version correcte pour le modèle physique.
 	</string>
 </strings>

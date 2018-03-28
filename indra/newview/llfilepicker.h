@@ -50,6 +50,7 @@
 
 // Need commdlg.h for OPENFILENAMEA
 #ifdef LL_WINDOWS
+#include "llwin32headers.h"
 #include <commdlg.h>
 #endif
 
@@ -86,7 +87,8 @@ public:
 		FFLOAD_COLLADA = 10,
 		FFLOAD_SCRIPT = 11,
 		FFLOAD_DICTIONARY = 12,
-        FFLOAD_DIRECTORY = 13   //To call from lldirpicker. 
+        FFLOAD_DIRECTORY = 13,   // To call from lldirpicker.
+        FFLOAD_EXE = 14          // Note: EXE will be treated as ALL on Windows and Linux but not on Darwin
 	};
 
 	enum ESaveFilter
@@ -162,11 +164,9 @@ private:
 #if LL_DARWIN
     S32 mPickOptions;
 	std::vector<std::string> mFileVector;
-	UInt32 mFileIndex;
 	
 	bool doNavChooseDialog(ELoadFilter filter);
 	bool doNavSaveDialog(ESaveFilter filter, const std::string& filename);
-	//static Boolean navOpenFilterProc(AEDesc *theItem, void *info, void *callBackUD, NavFilterModes filterMode);
     std::vector<std::string>* navOpenFilterProc(ELoadFilter filter);
 #endif
 

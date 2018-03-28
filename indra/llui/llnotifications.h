@@ -88,10 +88,12 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/signals2.hpp>
+#include <boost/range.hpp>
 
 #include "llevents.h"
 #include "llfunctorregistry.h"
 #include "llinitparam.h"
+#include "llinstancetracker.h"
 #include "llmortician.h"
 #include "llnotificationptr.h"
 #include "llpointer.h"
@@ -177,6 +179,7 @@ public:
 		Optional<bool>			save_option;
 		Optional<std::string>	control;
 		Optional<bool>			invert_control;
+		Optional<bool>			session_only;
 
 		FormIgnore();
 	};
@@ -230,7 +233,8 @@ public:
 	typedef enum e_ignore_type
 	{ 
 		IGNORE_NO,
-		IGNORE_WITH_DEFAULT_RESPONSE, 
+		IGNORE_WITH_DEFAULT_RESPONSE,
+		IGNORE_WITH_DEFAULT_RESPONSE_SESSION_ONLY,
 		IGNORE_WITH_LAST_RESPONSE, 
 		IGNORE_SHOW_AGAIN 
 	} EIgnoreType;
@@ -412,6 +416,9 @@ private:
 	 using the same mechanism.
 	 */
 	bool mTemporaryResponder;
+	
+	// keep track of other notifications combined with COMBINE_WITH_NEW
+	std::vector<LLNotificationPtr> mCombinedNotifications;
 
 	void init(const std::string& template_name, const LLSD& form_elements);
 
@@ -548,16 +555,19 @@ public:
 	std::string getLabel() const;
 	std::string getURL() const;
 	S32 getURLOption() const;
-    S32 getURLOpenExternally() const;
+	S32 getURLOpenExternally() const; //for url responce option
+	bool getForceUrlsExternal() const;
 	bool canLogToChat() const;
 	bool canLogToIM() const;
 	bool canShowToast() const;
+	bool canFadeToast() const;
 	bool hasFormElements() const;
     void playSound();
 
 	typedef enum e_combine_behavior
 	{
 		REPLACE_WITH_NEW,
+		COMBINE_WITH_NEW,
 		KEEP_OLD,
 		CANCEL_OLD
 
@@ -839,6 +849,11 @@ public:
 	typedef LLNotificationSet::iterator Iterator;
     
 	std::string getName() const { return mName; }
+	typedef std::vector<std::string>::const_iterator parents_iter;
+	boost::iterator_range<parents_iter> getParents() const
+	{
+		return boost::iterator_range<parents_iter>(mParents);
+	}
     
 	void connectToChannel(const std::string& channel_name);
     
@@ -848,12 +863,12 @@ public:
     Iterator begin();
     Iterator end();
 	size_t size();
-
+	
 	std::string summarize();
 
 private:
 	std::string mName;
-	std::string mParent;
+	std::vector<std::string> mParents;
 };
 
 // An interface class to provide a clean linker seam to the LLNotifications class.
@@ -872,9 +887,9 @@ class LLNotifications :
 	public LLSingleton<LLNotifications>, 
 	public LLNotificationChannelBase
 {
+	LLSINGLETON(LLNotifications);
 	LOG_CLASS(LLNotifications);
 
-	friend class LLSingleton<LLNotifications>;
 public:
 
     // Needed to clear up RefCounted things prior to actual destruction
@@ -913,6 +928,7 @@ public:
 	void add(const LLNotificationPtr pNotif);
 	void cancel(LLNotificationPtr pNotif);
 	void cancelByName(const std::string& name);
+	void cancelByOwner(const LLUUID ownerId);
 	void update(const LLNotificationPtr pNotif);
 
 	LLNotificationPtr find(LLUUID uuid);
@@ -950,11 +966,12 @@ public:
 	void setIgnoreAllNotifications(bool ignore);
 	bool getIgnoreAllNotifications();
 
+	void setIgnored(const std::string& name, bool ignored);
+	bool getIgnored(const std::string& name);
+
 	bool isVisibleByRules(LLNotificationPtr pNotification);
 	
 private:
-	// we're a singleton, so we don't have a public constructor
-	LLNotifications();
 	/*virtual*/ void initSingleton();
 	
 	void loadPersistentNotifications();
@@ -1067,15 +1084,13 @@ class LLPersistentNotificationChannel : public LLNotificationChannel
 public:
 	LLPersistentNotificationChannel() 
 		:	LLNotificationChannel("Persistent", "Visible", &notificationFilter)
-	{
-	}
+	{}
 
 	typedef std::vector<LLNotificationPtr> history_list_t;
 	history_list_t::iterator beginHistory() { sortHistory(); return mHistory.begin(); }
 	history_list_t::iterator endHistory() { return mHistory.end(); }
 
 private:
-
 	struct sortByTime
 	{
 		S32 operator ()(const LLNotificationPtr& a, const LLNotificationPtr& b)
@@ -1088,7 +1103,6 @@ private:
 	{
 		std::sort(mHistory.begin(), mHistory.end(), sortByTime());
 	}
-
 
 	// The channel gets all persistent notifications except those that have been canceled
 	static bool notificationFilter(LLNotificationPtr pNotification)

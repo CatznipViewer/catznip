@@ -115,7 +115,7 @@ void LLFloaterGodTools::refreshAll()
 
 LLFloaterGodTools::LLFloaterGodTools(const LLSD& key)
 :	LLFloater(key),
-	mCurrentHost(LLHost::invalid),
+	mCurrentHost(LLHost()),
 	mUpdateTimer()
 {
 	mFactoryMap["grid"] = LLCallbackMap(createPanelGrid, this);
@@ -180,7 +180,7 @@ void LLFloaterGodTools::updatePopup(LLCoordGL center, MASK mask)
 // virtual
 void LLFloaterGodTools::draw()
 {
-	if (mCurrentHost == LLHost::invalid)
+	if (mCurrentHost == LLHost())
 	{
 		if (mUpdateTimer.getElapsedTimeF32() > SECONDS_BETWEEN_UPDATE_REQUESTS)
 		{
@@ -325,7 +325,7 @@ void LLFloaterGodTools::sendRegionInfoRequest()
 {
 	if (mPanelRegionTools) mPanelRegionTools->clearAllWidgets();
 	if (mPanelObjectTools) mPanelObjectTools->clearAllWidgets();
-	mCurrentHost = LLHost::invalid;
+	mCurrentHost = LLHost();
 	mUpdateTimer.reset();
 
 	LLMessageSystem* msg = gMessageSystem;
@@ -401,14 +401,9 @@ void LLFloaterGodTools::sendGodUpdateRegionInfo()
 
 // Floats because spinners only support floats. JC
 const F32 BILLABLE_FACTOR_DEFAULT = 1;
-const F32 BILLABLE_FACTOR_MIN = 0.0f;
-const F32 BILLABLE_FACTOR_MAX = 4.f;
 
 // floats because spinners only understand floats. JC
 const F32 PRICE_PER_METER_DEFAULT = 1.f;
-const F32 PRICE_PER_METER_MIN = 0.f;
-const F32 PRICE_PER_METER_MAX = 100.f;
-
 
 LLPanelRegionTools::LLPanelRegionTools()
 : 	LLPanel()
@@ -796,7 +791,7 @@ void LLPanelRegionTools::onSwapTerrain()
 
 void LLPanelRegionTools::onSelectRegion()
 {
-	llinfos << "LLPanelRegionTools::onSelectRegion" << llendl;
+	LL_INFOS() << "LLPanelRegionTools::onSelectRegion" << LL_ENDL;
 
 	LLViewerRegion *regionp = LLWorld::getInstance()->getRegionFromPosGlobal(gAgent.getPositionGlobal());
 	if (!regionp)
@@ -832,9 +827,6 @@ void LLPanelRegionTools::onSelectRegion()
 //   |_______________________________________________|
 //      ^                                ^        ^
 //      LEFT                             R2       RIGHT
-
-const F32 HOURS_TO_RADIANS = (2.f*F_PI)/24.f;
-
 
 LLPanelGridTools::LLPanelGridTools() :
 	LLPanel()
@@ -1262,8 +1254,8 @@ void LLPanelRequestTools::sendRequest(const std::string& request,
 									  const std::string& parameter, 
 									  const LLHost& host)
 {
-	llinfos << "Sending request '" << request << "', '"
-			<< parameter << "' to " << host << llendl;
+	LL_INFOS() << "Sending request '" << request << "', '"
+			<< parameter << "' to " << host << LL_ENDL;
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessage("GodlikeMessage");
 	msg->nextBlockFast(_PREHASH_AgentData);
@@ -1316,7 +1308,7 @@ void terrain_download_done(void** data, S32 status, LLExtStat ext_status)
 
 void test_callback(const LLTSCode status)
 {
-	llinfos << "Test transfer callback returned!" << llendl;
+	LL_INFOS() << "Test transfer callback returned!" << LL_ENDL;
 }
 
 

@@ -62,18 +62,25 @@ LLInboxInventoryPanel::LLInboxInventoryPanel(const LLInboxInventoryPanel::Params
 LLInboxInventoryPanel::~LLInboxInventoryPanel()
 {}
 
-LLFolderViewFolder * LLInboxInventoryPanel::createFolderViewFolder(LLInvFVBridge * bridge)
+void LLInboxInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
+{
+	LLInventoryPanel::initFromParams(params);
+	getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+}
+
+LLFolderViewFolder * LLInboxInventoryPanel::createFolderViewFolder(LLInvFVBridge * bridge, bool allow_drop)
 {
 	LLUIColor item_color = LLUIColorTable::instance().getColor("MenuItemEnabledColor", DEFAULT_WHITE);
 
 	LLInboxFolderViewFolder::Params params;
 	
 	params.name = bridge->getDisplayName();
-	params.root = mFolderRoot;
+	params.root = mFolderRoot.get();
 	params.listener = bridge;
 	params.tool_tip = params.name;
 	params.font_color = item_color;
 	params.font_highlight_color = item_color;
+    params.allow_drop = allow_drop;
 	
 	return LLUICtrlFactory::create<LLInboxFolderViewFolder>(params);
 }
@@ -86,7 +93,7 @@ LLFolderViewItem * LLInboxInventoryPanel::createFolderViewItem(LLInvFVBridge * b
 
 	params.name = bridge->getDisplayName();
 	params.creation_date = bridge->getCreationDate();
-	params.root = mFolderRoot;
+	params.root = mFolderRoot.get();
 	params.listener = bridge;
 	params.rect = LLRect (0, 0, 0, 0);
 	params.tool_tip = params.name;
@@ -129,28 +136,26 @@ void LLInboxFolderViewFolder::addItem(LLFolderViewItem* item)
 // virtual
 void LLInboxFolderViewFolder::draw()
 {
-	if (!badgeHasParent())
+	if (!hasBadgeHolderParent())
 	{
-		addBadgeToParentPanel();
+		addBadgeToParentHolder();
 	}
-	
+
 	setBadgeVisibility(mFresh);
 
 	LLFolderViewFolder::draw();
 }
 
-void LLInboxFolderViewFolder::selectItem()
+BOOL LLInboxFolderViewFolder::handleMouseDown( S32 x, S32 y, MASK mask )
 {
 	deFreshify();
-
-	LLFolderViewFolder::selectItem();
+	return LLFolderViewFolder::handleMouseDown(x, y, mask);
 }
 
-void LLInboxFolderViewFolder::toggleOpen()
+BOOL LLInboxFolderViewFolder::handleDoubleClick( S32 x, S32 y, MASK mask )
 {
 	deFreshify();
-
-	LLFolderViewFolder::toggleOpen();
+	return LLFolderViewFolder::handleDoubleClick(x, y, mask);
 }
 
 void LLInboxFolderViewFolder::computeFreshness()
@@ -164,7 +169,7 @@ void LLInboxFolderViewFolder::computeFreshness()
 #if DEBUGGING_FRESHNESS
 		if (mFresh)
 		{
-			llinfos << "Item is fresh! -- creation " << mCreationDate << ", saved_freshness_date " << last_expansion_utc << llendl;
+			LL_INFOS() << "Item is fresh! -- creation " << mCreationDate << ", saved_freshness_date " << last_expansion_utc << LL_ENDL;
 		}
 #endif
 	}
@@ -214,9 +219,9 @@ BOOL LLInboxFolderViewItem::handleDoubleClick(S32 x, S32 y, MASK mask)
 // virtual
 void LLInboxFolderViewItem::draw()
 {
-	if (!badgeHasParent())
+	if (!hasBadgeHolderParent())
 	{
-		addBadgeToParentPanel();
+		addBadgeToParentHolder();
 	}
 
 	setBadgeVisibility(mFresh);
@@ -242,7 +247,7 @@ void LLInboxFolderViewItem::computeFreshness()
 #if DEBUGGING_FRESHNESS
 		if (mFresh)
 		{
-			llinfos << "Item is fresh! -- creation " << mCreationDate << ", saved_freshness_date " << last_expansion_utc << llendl;
+			LL_INFOS() << "Item is fresh! -- creation " << mCreationDate << ", saved_freshness_date " << last_expansion_utc << LL_ENDL;
 		}
 #endif
 	}

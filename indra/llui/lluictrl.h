@@ -220,7 +220,6 @@ public:
 	BOOL	focusNextItem(BOOL text_entry_only);
 	BOOL	focusPrevItem(BOOL text_entry_only);
 	BOOL 	focusFirstItem(BOOL prefer_text_fields = FALSE, BOOL focus_flash = TRUE );
-	BOOL	focusLastItem(BOOL prefer_text_fields = FALSE);
 
 	// Non Virtuals
 	LLHandle<LLUICtrl> getHandle() const { return getDerivedHandle<LLUICtrl>(); }
@@ -259,18 +258,25 @@ public:
 
 	class LLTextInputFilter : public LLQueryFilter, public LLSingleton<LLTextInputFilter>
 	{
+		LLSINGLETON_EMPTY_CTOR(LLTextInputFilter);
 		/*virtual*/ filterResult_t operator() (const LLView* const view, const viewList_t & children) const 
 		{
 			return filterResult_t(view->isCtrl() && static_cast<const LLUICtrl *>(view)->acceptsTextInput(), TRUE);
 		}
 	};
-	
+
 	template <typename F, typename DERIVED> class CallbackRegistry : public LLRegistrySingleton<std::string, F, DERIVED >
 	{};	
 
-	class CommitCallbackRegistry : public CallbackRegistry<commit_callback_t, CommitCallbackRegistry>{};
+	class CommitCallbackRegistry : public CallbackRegistry<commit_callback_t, CommitCallbackRegistry>
+	{
+		LLSINGLETON_EMPTY_CTOR(CommitCallbackRegistry);
+	};
 	// the enable callback registry is also used for visiblity callbacks
-	class EnableCallbackRegistry : public CallbackRegistry<enable_callback_t, EnableCallbackRegistry>{};
+	class EnableCallbackRegistry : public CallbackRegistry<enable_callback_t, EnableCallbackRegistry>
+	{
+		LLSINGLETON_EMPTY_CTOR(EnableCallbackRegistry);
+	};
 		
 protected:
 
@@ -315,8 +321,6 @@ private:
 	BOOL			mTentative;
 
 	ETypeTransparency mTransparencyType;
-
-	class DefaultTabGroupFirstSorter;
 };
 
 // Build time optimization, generate once in .cpp file

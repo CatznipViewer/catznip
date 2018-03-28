@@ -34,6 +34,7 @@
 #include "llpointer.h"
 #include "llrefcount.h"
 #include "v2math.h"
+#include "llunits.h"
 
 #include "llrender.h"
 class LLTextureAtlas ;
@@ -41,7 +42,7 @@ class LLTextureAtlas ;
 #define MEGA_BYTES_TO_BYTES(x) ((x) << 20)
 
 //============================================================================
-class LLImageGL : public LLRefCount
+class LLImageGL : public LLRefCount, public LLTrace::MemTrackable<LLImageGL>
 {
 	friend class LLTexUnit;
 public:
@@ -55,7 +56,7 @@ public:
 	static S32 dataFormatBytes(S32 dataformat, S32 width, S32 height);
 	static S32 dataFormatComponents(S32 dataformat);
 
-	BOOL updateBindStats(S32 tex_mem) const ;
+	BOOL updateBindStats(S32Bytes tex_mem) const ;
 	F32 getTimePassedSinceLastBound();
 	void forceUpdateBindStats(void) const;
 
@@ -68,7 +69,7 @@ public:
 	static void dirtyTexOptions();
 
 	// Sometimes called externally for textures not using LLImageGL (should go away...)	
-	static S32 updateBoundTexMem(const S32 mem, const S32 ncomponents, S32 category) ;
+	static S32 updateBoundTexMem(const S32Bytes mem, const S32 ncomponents, S32 category) ;
 	
 	static bool checkSize(S32 width, S32 height);
 
@@ -91,9 +92,9 @@ protected:
 	void calcAlphaChannelOffsetAndStride();
 
 public:
-	virtual void dump();	// debugging info to llinfos
+	virtual void dump();	// debugging info to LL_INFOS()
 	
-	void setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level = -1);
+	bool setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level = -1);
 	void setComponents(S32 ncomponents) { mComponents = (S8)ncomponents ;}
 	void setAllowCompression(bool allow) { mAllowCompression = allow; }
 
@@ -104,7 +105,7 @@ public:
 		S32 category = sMaxCategories-1);
 	BOOL createGLTexture(S32 discard_level, const U8* data, BOOL data_hasmips = FALSE, S32 usename = 0);
 	void setImage(const LLImageRaw* imageraw);
-	void setImage(const U8* data_in, BOOL data_hasmips = FALSE);
+	BOOL setImage(const U8* data_in, BOOL data_hasmips = FALSE);
 	BOOL setSubImage(const LLImageRaw* imageraw, S32 x_pos, S32 y_pos, S32 width, S32 height, BOOL force_fast_update = FALSE);
 	BOOL setSubImage(const U8* datap, S32 data_width, S32 data_height, S32 x_pos, S32 y_pos, S32 width, S32 height, BOOL force_fast_update = FALSE);
 	BOOL setSubImageFromFrameBuffer(S32 fb_x, S32 fb_y, S32 x_pos, S32 y_pos, S32 width, S32 height);
@@ -181,10 +182,13 @@ public:
 
 public:
 	// Various GL/Rendering options
-	S32 mTextureMemory;
+	S32Bytes mTextureMemory;
 	mutable F32  mLastBindTime;	// last time this was bound, by discard level
 	
 private:
+	U32 createPickMask(S32 pWidth, S32 pHeight);
+	void freePickMask();
+
 	LLPointer<LLImageRaw> mSaveData; // used for destroyGL/restoreGL
 	U8* mPickMask;  //downsampled bitmap approximation of alpha channel.  NULL if no alpha channel
 	U16 mPickMaskWidth;
@@ -238,9 +242,9 @@ public:
 	static F32 sLastFrameTime;
 
 	// Global memory statistics
-	static S32 sGlobalTextureMemoryInBytes;		// Tracks main memory texmem
-	static S32 sBoundTextureMemoryInBytes;	// Tracks bound texmem for last completed frame
-	static S32 sCurBoundTextureMemory;		// Tracks bound texmem for current frame
+	static S32Bytes sGlobalTextureMemory;	// Tracks main memory texmem
+	static S32Bytes sBoundTextureMemory;	// Tracks bound texmem for last completed frame
+	static S32Bytes sCurBoundTextureMemory;		// Tracks bound texmem for current frame
 	static U32 sBindCount;					// Tracks number of texture binds for current frame
 	static U32 sUniqueCount;				// Tracks number of unique texture binds for current frame
 	static BOOL sGlobalUseAnisotropic;

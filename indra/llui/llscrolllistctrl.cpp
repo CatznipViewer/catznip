@@ -320,7 +320,9 @@ LLScrollListCtrl::~LLScrollListCtrl()
 	delete mSortCallback;
 
 	std::for_each(mItemList.begin(), mItemList.end(), DeletePointer());
+	mItemList.clear();
 	std::for_each(mColumns.begin(), mColumns.end(), DeletePairedPointer());
+	mColumns.clear();
 }
 
 
@@ -341,6 +343,21 @@ S32 LLScrollListCtrl::isEmpty() const
 S32 LLScrollListCtrl::getItemCount() const
 {
 	return mItemList.size();
+}
+
+BOOL LLScrollListCtrl::hasSelectedItem() const
+{
+	item_list::iterator iter;
+	for (iter = mItemList.begin(); iter < mItemList.end(); )
+	{
+		LLScrollListItem* itemp = *iter;
+		if (itemp && itemp->getSelected())
+		{
+			return TRUE;
+		}
+		iter++;
+	}
+	return FALSE;
 }
 
 // virtual LLScrolListInterface function (was deleteAllItems)
@@ -646,7 +663,7 @@ bool LLScrollListCtrl::updateColumnWidths()
 		S32 new_width = 0;
 		if (column->mRelWidth >= 0)
 		{
-			new_width = (S32)llround(column->mRelWidth*mItemListRect.getWidth());
+			new_width = (S32)ll_round(column->mRelWidth*mItemListRect.getWidth());
 		}
 		else if (column->mDynamicWidth)
 		{
@@ -1447,7 +1464,7 @@ void LLScrollListCtrl::drawItems()
 
 		LLColor4 highlight_color = LLColor4::white;
 		static LLUICachedControl<F32> type_ahead_timeout ("TypeAheadTimeout", 0);
-		highlight_color.mV[VALPHA] = clamp_rescale(mSearchTimer.getElapsedTimeF32(), type_ahead_timeout * 0.7f, type_ahead_timeout, 0.4f, 0.f);
+		highlight_color.mV[VALPHA] = clamp_rescale(mSearchTimer.getElapsedTimeF32(), type_ahead_timeout * 0.7f, type_ahead_timeout(), 0.4f, 0.f);
 
 		S32 first_line = mScrollLines;
 		S32 last_line = llmin((S32)mItemList.size() - 1, mScrollLines + getLinesPerPage());
@@ -1467,8 +1484,6 @@ void LLScrollListCtrl::drawItems()
 				mItemListRect.getWidth(),
 				mLineHeight );
 			item->setRect(item_rect);
-
-			//llinfos << item_rect.getWidth() << llendl;
 
 			max_columns = llmax(max_columns, item->getNumColumns());
 
@@ -1808,6 +1823,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 			registrar.add("Url.ShowProfile", boost::bind(&LLScrollListCtrl::showProfile, id, is_group));
 			registrar.add("Url.SendIM", boost::bind(&LLScrollListCtrl::sendIM, id));
 			registrar.add("Url.AddFriend", boost::bind(&LLScrollListCtrl::addFriend, id));
+			registrar.add("Url.RemoveFriend", boost::bind(&LLScrollListCtrl::removeFriend, id));
 			registrar.add("Url.Execute", boost::bind(&LLScrollListCtrl::showNameDetails, id, is_group));
 			registrar.add("Url.CopyLabel", boost::bind(&LLScrollListCtrl::copyNameToClipboard, id, is_group));
 			registrar.add("Url.CopyUrl", boost::bind(&LLScrollListCtrl::copySLURLToClipboard, id, is_group));
@@ -1815,6 +1831,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 			// create the context menu from the XUI file and display it
 			std::string menu_name = is_group ? "menu_url_group.xml" : "menu_url_agent.xml";
 			delete mPopupMenu;
+			llassert(LLMenuGL::sMenuContainer != NULL);
 			mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(
 				menu_name, LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
 			if (mPopupMenu)
@@ -1824,6 +1841,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 				return TRUE;
 			}
 		}
+		return LLUICtrl::handleRightMouseDown(x, y, mask);
 	}
 	return FALSE;
 }
@@ -1850,12 +1868,18 @@ void LLScrollListCtrl::addFriend(std::string id)
 	LLUrlAction::addFriend(slurl);
 }
 
+void LLScrollListCtrl::removeFriend(std::string id)
+{
+	std::string slurl = "secondlife:///app/agent/" + id + "/about";
+	LLUrlAction::removeFriend(slurl);
+}
+
 void LLScrollListCtrl::showNameDetails(std::string id, bool is_group)
 {
 	// open the resident's details or the group details
 	std::string sltype = is_group ? "group" : "agent";
 	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
-	LLUrlAction::clickAction(slurl);
+	LLUrlAction::clickAction(slurl, true);
 }
 
 void LLScrollListCtrl::copyNameToClipboard(std::string id, bool is_group)
@@ -2094,9 +2118,6 @@ BOOL LLScrollListCtrl::handleKeyHere(KEY key,MASK mask )
 	// not called from parent means we have keyboard focus or a child does
 	if (mCanSelect) 
 	{
-		// Ignore capslock
-		mask = mask;
-
 		if (mask == MASK_NONE)
 		{
 			switch(key)
@@ -2681,7 +2702,7 @@ void LLScrollListCtrl::addColumn(const LLScrollListColumn::Params& column_params
 			}
 			if (new_column->mRelWidth >= 0)
 			{
-				new_column->setWidth((S32)llround(new_column->mRelWidth*mItemListRect.getWidth()));
+				new_column->setWidth((S32)ll_round(new_column->mRelWidth*mItemListRect.getWidth()));
 			}
 			else if(new_column->mDynamicWidth)
 			{
@@ -2842,10 +2863,10 @@ LLScrollListColumn* LLScrollListCtrl::getColumn(const std::string& name)
 	return NULL;
 }
 
-LLFastTimer::DeclareTimer FTM_ADD_SCROLLLIST_ELEMENT("Add Scroll List Item");
+LLTrace::BlockTimerStatHandle FTM_ADD_SCROLLLIST_ELEMENT("Add Scroll List Item");
 LLScrollListItem* LLScrollListCtrl::addElement(const LLSD& element, EAddPosition pos, void* userdata)
 {
-	LLFastTimer _(FTM_ADD_SCROLLLIST_ELEMENT);
+	LL_RECORD_BLOCK_TIME(FTM_ADD_SCROLLLIST_ELEMENT);
 	LLScrollListItem::Params item_params;
 	LLParamSDParser parser;
 	parser.readSD(element, item_params);
@@ -2855,14 +2876,14 @@ LLScrollListItem* LLScrollListCtrl::addElement(const LLSD& element, EAddPosition
 
 LLScrollListItem* LLScrollListCtrl::addRow(const LLScrollListItem::Params& item_p, EAddPosition pos)
 {
-	LLFastTimer _(FTM_ADD_SCROLLLIST_ELEMENT);
+	LL_RECORD_BLOCK_TIME(FTM_ADD_SCROLLLIST_ELEMENT);
 	LLScrollListItem *new_item = new LLScrollListItem(item_p);
 	return addRow(new_item, item_p, pos);
 }
 
 LLScrollListItem* LLScrollListCtrl::addRow(LLScrollListItem *new_item, const LLScrollListItem::Params& item_p, EAddPosition pos)
 {
-	LLFastTimer _(FTM_ADD_SCROLLLIST_ELEMENT);
+	LL_RECORD_BLOCK_TIME(FTM_ADD_SCROLLLIST_ELEMENT);
 	if (!item_p.validateBlock() || !new_item) return NULL;
 	new_item->setNumColumns(mColumns.size());
 

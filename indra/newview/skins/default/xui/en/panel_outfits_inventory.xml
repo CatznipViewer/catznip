@@ -26,12 +26,24 @@
      layout="topleft"
      left="5"
      name="appearance_tabs"
-     tab_min_width="150"
+     tab_min_width="100"
      tab_height="30"
      tab_position="top"
      halign="center"
+     hide_scroll_arrows="true"
      top="8"
      width="315">
+         <panel
+           class="outfit_gallery"
+           filename="panel_outfit_gallery.xml"
+           height="520"
+           name="outfit_gallery_tab"
+           background_visible="true"
+           help_topic="outfit_gallery_tab"
+           follows="all"
+           label="OUTFIT GALLERY"
+           layout="topleft"
+           width="315" />
          <panel
            class="outfits_list"
            filename="panel_outfits_list.xml"

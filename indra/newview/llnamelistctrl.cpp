@@ -65,21 +65,21 @@ LLNameListCtrl::LLNameListCtrl(const LLNameListCtrl::Params& p)
 	mNameColumn(p.name_column.column_name),
 	mAllowCallingCardDrop(p.allow_calling_card_drop),
 	mShortNames(p.short_names),
-	mAvatarNameCacheConnection()
+	mPendingLookupsRemaining(0)
 {}
 
 // public
 LLScrollListItem* LLNameListCtrl::addNameItem(const LLUUID& agent_id, EAddPosition pos,
-								 BOOL enabled, const std::string& suffix)
+								 BOOL enabled, const std::string& suffix, const std::string& prefix)
 {
-	//llinfos << "LLNameListCtrl::addNameItem " << agent_id << llendl;
+	//LL_INFOS() << "LLNameListCtrl::addNameItem " << agent_id << LL_ENDL;
 
 	NameItem item;
 	item.value = agent_id;
 	item.enabled = enabled;
 	item.target = INDIVIDUAL;
 
-	return addNameItemRow(item, pos, suffix);
+	return addNameItemRow(item, pos, suffix, prefix);
 }
 
 // virtual, public
@@ -125,13 +125,19 @@ BOOL LLNameListCtrl::handleDragAndDrop(
 	}
 
 	handled = TRUE;
-	lldebugst(LLERR_USER_INPUT) << "dragAndDrop handled by LLNameListCtrl " << getName() << llendl;
+	LL_DEBUGS("UserInput") << "dragAndDrop handled by LLNameListCtrl " << getName() << LL_ENDL;
 
 	return handled;
 }
 
-void LLNameListCtrl::showInspector(const LLUUID& avatar_id, bool is_group)
+void LLNameListCtrl::showInspector(const LLUUID& avatar_id, bool is_group, bool is_experience)
 {
+	if(is_experience)
+	{
+		LLFloaterReg::showInstance("experience_profile", avatar_id, true);
+		return;
+	}
+
 	if (is_group)
 		LLFloaterReg::showInstance("inspect_group", LLSD().with("group_id", avatar_id));
 	else
@@ -178,7 +184,7 @@ void	LLNameListCtrl::mouseOverHighlightNthItem( S32 target_index )
 			}
 			else
 			{
-				llwarns << "highlighted name list item is NULL" << llendl;
+				LL_WARNS() << "highlighted name list item is NULL" << LL_ENDL;
 			}
 		}
 		if(target_index != -1)
@@ -192,7 +198,7 @@ void	LLNameListCtrl::mouseOverHighlightNthItem( S32 target_index )
 			}
 			else
 			{
-				llwarns << "target name item is NULL" << llendl;
+				LL_WARNS() << "target name item is NULL" << LL_ENDL;
 			}
 		}
 	}
@@ -230,10 +236,11 @@ BOOL LLNameListCtrl::handleToolTip(S32 x, S32 y, MASK mask)
 
 				// Should we show a group or an avatar inspector?
 				bool is_group = hit_item->isGroup();
+				bool is_experience = hit_item->isExperience();
 
 				LLToolTip::Params params;
 				params.background_visible( false );
-				params.click_callback( boost::bind(&LLNameListCtrl::showInspector, this, avatar_id, is_group) );
+				params.click_callback( boost::bind(&LLNameListCtrl::showInspector, this, avatar_id, is_group, is_experience) );
 				params.delay_time(0.0f);		// spawn instantly on hover
 				params.image( icon );
 				params.message("");
@@ -291,10 +298,11 @@ LLScrollListItem* LLNameListCtrl::addElement(const LLSD& element, EAddPosition p
 LLScrollListItem* LLNameListCtrl::addNameItemRow(
 	const LLNameListCtrl::NameItem& name_item,
 	EAddPosition pos,
-	const std::string& suffix)
+	const std::string& suffix,
+	const std::string& prefix)
 {
 	LLUUID id = name_item.value().asUUID();
-	LLNameListItem* item = new LLNameListItem(name_item,name_item.target() == GROUP);
+	LLNameListItem* item = new LLNameListItem(name_item,name_item.target() == GROUP, name_item.target() == EXPERIENCE);
 
 	if (!item) return NULL;
 
@@ -328,16 +336,32 @@ LLScrollListItem* LLNameListCtrl::addNameItemRow(
 			else
 			{
 				// ...schedule a callback
-				// This is not correct and will likely lead to partially populated lists in cases where avatar names are not cached.
-				// *TODO : Change this to have 2 callbacks : one callback per list item and one for the whole list.
-				if (mAvatarNameCacheConnection.connected())
+				avatar_name_cache_connection_map_t::iterator it = mAvatarNameCacheConnections.find(id);
+				if (it != mAvatarNameCacheConnections.end())
 				{
-					mAvatarNameCacheConnection.disconnect();
+					if (it->second.connected())
+					{
+						it->second.disconnect();
+					}
+					mAvatarNameCacheConnections.erase(it);
 				}
-				mAvatarNameCacheConnection = LLAvatarNameCache::get(id,boost::bind(&LLNameListCtrl::onAvatarNameCache,this, _1, _2, item->getHandle()));
+				mAvatarNameCacheConnections[id] = LLAvatarNameCache::get(id,boost::bind(&LLNameListCtrl::onAvatarNameCache,this, _1, _2, suffix, prefix, item->getHandle()));
+
+				if(mPendingLookupsRemaining <= 0)
+				{
+					// BAKER TODO:
+					// We might get into a state where mPendingLookupsRemaining might
+					//	go negative.  So just reset it right now and figure out if it's
+					//	possible later :)
+					mPendingLookupsRemaining = 0;
+					mNameListCompleteSignal(false);
+				}
+				mPendingLookupsRemaining++;
 			}
 			break;
 		}
+	case EXPERIENCE:
+		// just use supplied name
 	default:
 		break;
 	}
@@ -351,7 +375,7 @@ LLScrollListItem* LLNameListCtrl::addNameItemRow(
 	LLScrollListCell* cell = item->getColumn(mNameColumnIndex);
 	if (cell)
 	{
-		cell->setValue(fullname);
+		cell->setValue(prefix + fullname);
 	}
 
 	dirtyColumns();
@@ -386,20 +410,43 @@ void LLNameListCtrl::removeNameItem(const LLUUID& agent_id)
 	{
 		selectNthItem(idx); // not sure whether this is needed, taken from previous implementation
 		deleteSingleItem(idx);
+
+		mPendingLookupsRemaining--;
 	}
 }
 
 void LLNameListCtrl::onAvatarNameCache(const LLUUID& agent_id,
 									   const LLAvatarName& av_name,
+									   std::string suffix,
+									   std::string prefix,
 									   LLHandle<LLNameListItem> item)
 {
-	mAvatarNameCacheConnection.disconnect();
+	avatar_name_cache_connection_map_t::iterator it = mAvatarNameCacheConnections.find(agent_id);
+	if (it != mAvatarNameCacheConnections.end())
+	{
+		if (it->second.connected())
+		{
+			it->second.disconnect();
+		}
+		mAvatarNameCacheConnections.erase(it);
+	}
 
 	std::string name;
 	if (mShortNames)
 		name = av_name.getDisplayName();
 	else
 		name = av_name.getCompleteName();
+
+	// Append optional suffix.
+	if (!suffix.empty())
+	{
+		name.append(suffix);
+	}
+
+	if (!prefix.empty())
+	{
+	    name.insert(0, prefix);
+	}
 
 	LLNameListItem* list_item = item.get();
 	if (list_item && list_item->getUUID() == agent_id)
@@ -412,6 +459,23 @@ void LLNameListCtrl::onAvatarNameCache(const LLUUID& agent_id,
 		}
 	}
 	
+	//////////////////////////////////////////////////////////////////////////
+	// BAKER - FIX NameListCtrl
+ 	//if (mPendingLookupsRemaining <= 0)
+ 	{
+ 		// We might get into a state where mPendingLookupsRemaining might
+ 		//	go negative.  So just reset it right now and figure out if it's
+ 		//	possible later :)
+ 		//mPendingLookupsRemaining = 0;
+		
+ 		mNameListCompleteSignal(true);
+ 	}
+ 	//else
+ 	{
+ 	//	mPendingLookupsRemaining--;
+ 	}
+	//////////////////////////////////////////////////////////////////////////
+
 	dirtyColumns();
 }
 

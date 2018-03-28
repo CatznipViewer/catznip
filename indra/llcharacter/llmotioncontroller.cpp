@@ -30,13 +30,15 @@
 #include "linden_common.h"
 
 #include "llmotioncontroller.h"
+#include "llfasttimer.h"
 #include "llkeyframemotion.h"
 #include "llmath.h"
 #include "lltimer.h"
 #include "llanimationstates.h"
 #include "llstl.h"
 
-const S32 NUM_JOINT_SIGNATURE_STRIDES = LL_CHARACTER_MAX_JOINTS / 4;
+// This is why LL_CHARACTER_MAX_ANIMATED_JOINTS needs to be a multiple of 4.
+const S32 NUM_JOINT_SIGNATURE_STRIDES = LL_CHARACTER_MAX_ANIMATED_JOINTS / 4;
 const U32 MAX_MOTION_INSTANCES = 32;
 
 //-----------------------------------------------------------------------------
@@ -76,7 +78,7 @@ LLMotionRegistry::~LLMotionRegistry()
 //-----------------------------------------------------------------------------
 BOOL LLMotionRegistry::registerMotion( const LLUUID& id, LLMotionConstructor constructor )
 {
-	//	llinfos << "Registering motion: " << name << llendl;
+	//	LL_INFOS() << "Registering motion: " << name << LL_ENDL;
 	if (!is_in_map(mMotionTable, id))
 	{
 		mMotionTable[id] = constructor;
@@ -137,7 +139,8 @@ LLMotionController::LLMotionController()
 	  mTimeStep(0.f),
 	  mTimeStepCount(0),
 	  mLastInterp(0.f),
-	  mIsSelf(FALSE)
+	  mIsSelf(FALSE),
+	  mLastCountAfterPurge(0)
 {
 }
 
@@ -171,6 +174,13 @@ void LLMotionController::deleteAllMotions()
 
 	for_each(mAllMotions.begin(), mAllMotions.end(), DeletePairedPointer());
 	mAllMotions.clear();
+
+	// stinson 05/12/20014 : Ownership of the LLMotion pointers is transferred from
+	// mAllMotions to mDeprecatedMotions in method
+	// LLMotionController::deprecateMotionInstance().  Thus, we should also clean
+	// up the mDeprecatedMotions list as well.
+	for_each(mDeprecatedMotions.begin(), mDeprecatedMotions.end(), DeletePointer());
+	mDeprecatedMotions.clear();
 }
 
 //-----------------------------------------------------------------------------
@@ -229,10 +239,12 @@ void LLMotionController::purgeExcessMotions()
 		}
 	}
 
-	if (mLoadedMotions.size() > 2*MAX_MOTION_INSTANCES)
+	U32 loaded_count = mLoadedMotions.size();
+	if (loaded_count > (2 * MAX_MOTION_INSTANCES) && loaded_count > mLastCountAfterPurge)
 	{
-		LL_WARNS_ONCE("Animation") << "> " << 2*MAX_MOTION_INSTANCES << " Loaded Motions" << llendl;
+		LL_WARNS_ONCE("Animation") << loaded_count << " Loaded Motions. Amount of motions is over limit." << LL_ENDL;
 	}
+	mLastCountAfterPurge = loaded_count;
 }
 
 //-----------------------------------------------------------------------------
@@ -359,7 +371,7 @@ LLMotion* LLMotionController::createMotion( const LLUUID &id )
 		switch(stat)
 		{
 		case LLMotion::STATUS_FAILURE:
-			llinfos << "Motion " << id << " init failed." << llendl;
+			LL_INFOS() << "Motion " << id << " init failed." << LL_ENDL;
 			sRegistry.markBad(id);
 			delete motion;
 			return NULL;
@@ -371,7 +383,7 @@ LLMotion* LLMotionController::createMotion( const LLUUID &id )
 		    mLoadedMotions.insert(motion);
 			break;
 		default:
-			llerrs << "Invalid initialization status" << llendl;
+			LL_ERRS() << "Invalid initialization status" << LL_ENDL;
 			break;
 		}
 
@@ -417,7 +429,7 @@ BOOL LLMotionController::startMotion(const LLUUID &id, F32 start_offset)
 		return TRUE;
 	}
 
-//	llinfos << "Starting motion " << name << llendl;
+//	LL_INFOS() << "Starting motion " << name << LL_ENDL;
 	return activateMotionInstance(motion, mAnimTime - start_offset);
 }
 
@@ -480,8 +492,8 @@ void LLMotionController::updateAdditiveMotions()
 //-----------------------------------------------------------------------------
 void LLMotionController::resetJointSignatures()
 {
-	memset(&mJointSignature[0][0], 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
-	memset(&mJointSignature[1][0], 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
+	memset(&mJointSignature[0][0], 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
+	memset(&mJointSignature[1][0], 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
 }
 
 //-----------------------------------------------------------------------------
@@ -540,14 +552,14 @@ void LLMotionController::updateIdleActiveMotions()
 //-----------------------------------------------------------------------------
 // updateMotionsByType()
 //-----------------------------------------------------------------------------
-static LLFastTimer::DeclareTimer FTM_MOTION_ON_UPDATE("Motion onUpdate");
+static LLTrace::BlockTimerStatHandle FTM_MOTION_ON_UPDATE("Motion onUpdate");
 
 void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_type)
 {
 	BOOL update_result = TRUE;
-	U8 last_joint_signature[LL_CHARACTER_MAX_JOINTS];
+	U8 last_joint_signature[LL_CHARACTER_MAX_ANIMATED_JOINTS];
 
-	memset(&last_joint_signature, 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
+	memset(&last_joint_signature, 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
 
 	// iterate through active motions in chronological order
 	for (motion_list_t::iterator iter = mActiveMotions.begin();
@@ -568,7 +580,6 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 		}
 		else
 		{
-			// NUM_JOINT_SIGNATURE_STRIDES should be multiple of 4
 			for (S32 i = 0; i < NUM_JOINT_SIGNATURE_STRIDES; i++)
 			{
 		 		U32 *current_signature = (U32*)&(mJointSignature[0][i * 4]);
@@ -700,7 +711,7 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 
 			// perform motion update
 			{
-				LLFastTimer t(FTM_MOTION_ON_UPDATE);
+				LL_RECORD_BLOCK_TIME(FTM_MOTION_ON_UPDATE);
 				update_result = motionp->onUpdate(mAnimTime - motionp->mActivationTimestamp, last_joint_signature);
 			}
 		}
@@ -780,7 +791,7 @@ void LLMotionController::updateLoadingMotions()
 		}
 		else if (status == LLMotion::STATUS_FAILURE)
 		{
-			llinfos << "Motion " << motionp->getID() << " init failed." << llendl;
+			LL_INFOS() << "Motion " << motionp->getID() << " init failed." << LL_ENDL;
 			sRegistry.markBad(motionp->getID());
 			mLoadingMotions.erase(curiter);
 			motion_set_t::iterator found_it = mDeprecatedMotions.find(motionp);
@@ -882,7 +893,7 @@ void LLMotionController::updateMotions(bool force_update)
 	}
 
 	mHasRunOnce = TRUE;
-//	llinfos << "Motion controller time " << motionTimer.getElapsedTimeF32() << llendl;
+//	LL_INFOS() << "Motion controller time " << motionTimer.getElapsedTimeF32() << LL_ENDL;
 }
 
 //-----------------------------------------------------------------------------
@@ -1038,7 +1049,7 @@ LLMotion* LLMotionController::findMotion(const LLUUID& id) const
 //-----------------------------------------------------------------------------
 void LLMotionController::dumpMotions()
 {
-	llinfos << "=====================================" << llendl;
+	LL_INFOS() << "=====================================" << LL_ENDL;
 	for (motion_map_t::iterator iter = mAllMotions.begin();
 		 iter != mAllMotions.end(); iter++)
 	{
@@ -1053,7 +1064,7 @@ void LLMotionController::dumpMotions()
 			state_string += std::string("A");
 		if (mDeprecatedMotions.find(motion) != mDeprecatedMotions.end())
 			state_string += std::string("D");
-		llinfos << gAnimLibrary.animationName(id) << " " << state_string << llendl;
+		LL_INFOS() << gAnimLibrary.animationName(id) << " " << state_string << LL_ENDL;
 		
 	}
 }
@@ -1112,7 +1123,7 @@ void LLMotionController::pauseAllMotions()
 {
 	if (!mPaused)
 	{
-		//llinfos << "Pausing animations..." << llendl;
+		//LL_INFOS() << "Pausing animations..." << LL_ENDL;
 		mPaused = TRUE;
 	}
 	
@@ -1125,7 +1136,7 @@ void LLMotionController::unpauseAllMotions()
 {
 	if (mPaused)
 	{
-		//llinfos << "Unpausing animations..." << llendl;
+		//LL_INFOS() << "Unpausing animations..." << LL_ENDL;
 		mPaused = FALSE;
 	}
 }

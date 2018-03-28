@@ -27,9 +27,16 @@
 #ifndef LL_LLEVENTPOLL_H
 #define LL_LLEVENTPOLL_H
 
-#include "llhttpclient.h"
 
 class LLHost;
+
+namespace LLEventPolling
+{
+namespace Details
+{
+    class LLEventPollImpl;
+}
+}
 
 
 class LLEventPoll
@@ -40,11 +47,11 @@ public:
 		///< Start polling the URL.
 
 	virtual ~LLEventPoll();
-		///< will stop polling, cancelling any poll in progress.
+		///< will stop polling, canceling any poll in progress.
 
 
 private:
-	LLHTTPClient::ResponderPtr mImpl;
+    boost::shared_ptr<LLEventPolling::Details::LLEventPollImpl>  mImpl;
 };
 
 

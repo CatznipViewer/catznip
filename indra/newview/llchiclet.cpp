@@ -35,6 +35,7 @@
 #include "llscriptfloater.h"
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
+#include "llfloaternotificationstabbed.h"
 
 static LLDefaultChildRegistry::Register<LLChicletPanel> t1("chiclet_panel");
 static LLDefaultChildRegistry::Register<LLNotificationChiclet> t2("chiclet_notification");
@@ -165,7 +166,7 @@ LLNotificationChiclet::LLNotificationChiclet(const Params& p)
 	mNotificationChannel.reset(new ChicletNotificationChannel(this));
 	// ensure that notification well window exists, to synchronously
 	// handle toast add/delete events.
-	LLNotificationWellWindow::getInstance()->setSysWellChiclet(this);
+	LLFloaterNotificationsTabbed::getInstance()->setSysWellChiclet(this);
 }
 
 void LLNotificationChiclet::onMenuItemClicked(const LLSD& user_data)
@@ -173,7 +174,7 @@ void LLNotificationChiclet::onMenuItemClicked(const LLSD& user_data)
 	std::string action = user_data.asString();
 	if("close all" == action)
 	{
-		LLNotificationWellWindow::getInstance()->closeAll();
+		LLFloaterNotificationsTabbed::getInstance()->closeAll();
 		LLIMWellWindow::getInstance()->closeAll();
 	}
 }
@@ -192,7 +193,7 @@ void LLNotificationChiclet::createMenu()
 {
 	if(mContextMenu)
 	{
-		llwarns << "Menu already exists" << llendl;
+		LL_WARNS() << "Menu already exists" << LL_ENDL;
 		return;
 	}
 
@@ -204,6 +205,7 @@ void LLNotificationChiclet::createMenu()
 	enable_registrar.add("NotificationWellChicletMenu.EnableItem",
 		boost::bind(&LLNotificationChiclet::enableMenuItem, this, _2));
 
+	llassert(LLMenuGL::sMenuContainer != NULL);
 	mContextMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
 		("menu_notification_well_button.xml",
 		 LLMenuGL::sMenuContainer,
@@ -223,7 +225,8 @@ bool LLNotificationChiclet::ChicletNotificationChannel::filterNotification( LLNo
 	bool displayNotification;
 	if (   (notification->getName() == "ScriptDialog") // special case for scripts
 		// if there is no toast window for the notification, filter it
-		|| (!LLNotificationWellWindow::getInstance()->findItemByID(notification->getID()))
+		//|| (!LLNotificationWellWindow::getInstance()->findItemByID(notification->getID()))
+        || (!LLFloaterNotificationsTabbed::getInstance()->findItemByID(notification->getID(), notification->getName()))
 		)
 	{
 		displayNotification = false;
@@ -375,11 +378,19 @@ BOOL LLIMChiclet::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	return TRUE;
 }
 
+void LLIMChiclet::hidePopupMenu()
+{
+	if (mPopupMenu)
+	{
+		mPopupMenu->setVisible(FALSE);
+	}
+}
+
 bool LLIMChiclet::canCreateMenu()
 {
 	if(mPopupMenu)
 	{
-		llwarns << "Menu already exists" << llendl;
+		LL_WARNS() << "Menu already exists" << LL_ENDL;
 		return false;
 	}
 	if(getSessionId().isNull())
@@ -725,7 +736,7 @@ void LLChicletPanel::setChicletToggleState(const LLUUID& session_id, bool toggle
 {
 	if(session_id.isNull())
 	{
-		llwarns << "Null Session ID" << llendl;
+		LL_WARNS() << "Null Session ID" << LL_ENDL;
 	}
 
 	// toggle off all chiclets, except specified

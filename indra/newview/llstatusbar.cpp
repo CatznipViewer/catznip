@@ -37,8 +37,8 @@
 #include "llviewercontrol.h"
 #include "llfloaterbuycurrency.h"
 #include "llbuycurrencyhtml.h"
-#include "llfloaterlagmeter.h"
 #include "llpanelnearbymedia.h"
+#include "llpanelpresetspulldown.h"
 #include "llpanelvolumepulldown.h"
 #include "llfloaterregioninfo.h"
 #include "llfloaterscriptdebug.h"
@@ -73,7 +73,6 @@
 #include "lltrans.h"
 
 // library includes
-#include "imageids.h"
 #include "llfloaterreg.h"
 #include "llfontgl.h"
 #include "llrect.h"
@@ -96,16 +95,11 @@ extern S32 MENU_BAR_HEIGHT;
 
 
 // TODO: these values ought to be in the XML too
-const S32 MENU_PARCEL_SPACING = 1;	// Distance from right of menu item to parcel information
 const S32 SIM_STAT_WIDTH = 8;
-const F32 SIM_WARN_FRACTION = 0.75f;
-const F32 SIM_FULL_FRACTION = 0.98f;
 const LLColor4 SIM_OK_COLOR(0.f, 1.f, 0.f, 1.f);
 const LLColor4 SIM_WARN_COLOR(1.f, 1.f, 0.f, 1.f);
 const LLColor4 SIM_FULL_COLOR(1.f, 0.f, 0.f, 1.f);
 const F32 ICON_TIMER_EXPIRY		= 3.f; // How long the balance and health icons should flash after a change.
-const F32 ICON_FLASH_FREQUENCY	= 2.f;
-const S32 TEXT_HEIGHT = 18;
 
 static void onClickVolume(void*);
 
@@ -170,12 +164,15 @@ BOOL LLStatusBar::postBuild()
 	getChild<LLUICtrl>("buyL")->setCommitCallback(
 		boost::bind(&LLStatusBar::onClickBuyCurrency, this));
 
-	getChild<LLUICtrl>("goShop")->setCommitCallback(boost::bind(&LLWeb::loadURLExternal, gSavedSettings.getString("MarketplaceURL")));
+    getChild<LLUICtrl>("goShop")->setCommitCallback(boost::bind(&LLWeb::loadURL, gSavedSettings.getString("MarketplaceURL"), LLStringUtil::null, LLStringUtil::null));
 
 	mBoxBalance = getChild<LLTextBox>("balance");
 	mBoxBalance->setClickedCallback( &LLStatusBar::onClickBalance, this );
 	
 	mBtnStats = getChildView("stat_btn");
+
+	mIconPresets = getChild<LLIconCtrl>( "presets_icon" );
+	mIconPresets->setMouseEnterCallback(boost::bind(&LLStatusBar::onMouseEnterPresets, this));
 
 	mBtnVolume = getChild<LLButton>( "volume_btn" );
 	mBtnVolume->setClickedCallback( onClickVolume, this );
@@ -199,10 +196,11 @@ BOOL LLStatusBar::postBuild()
 	sgp.rect(r);
 	sgp.follows.flags(FOLLOWS_BOTTOM | FOLLOWS_RIGHT);
 	sgp.mouse_opaque(false);
+	sgp.stat.count_stat_float(&LLStatViewer::ACTIVE_MESSAGE_DATA_RECEIVED);
+	sgp.units("Kbps");
+	sgp.precision(0);
+	sgp.per_sec(true);
 	mSGBandwidth = LLUICtrlFactory::create<LLStatGraph>(sgp);
-	mSGBandwidth->setStat(&LLViewerStats::getInstance()->mKBitStat);
-	mSGBandwidth->setUnits("Kbps");
-	mSGBandwidth->setPrecision(0);
 	addChild(mSGBandwidth);
 	x -= SIM_STAT_WIDTH + 2;
 
@@ -213,18 +211,26 @@ BOOL LLStatusBar::postBuild()
 	pgp.rect(r);
 	pgp.follows.flags(FOLLOWS_BOTTOM | FOLLOWS_RIGHT);
 	pgp.mouse_opaque(false);
+	pgp.stat.sample_stat_float(&LLStatViewer::PACKETS_LOST_PERCENT);
+	pgp.units("%");
+	pgp.min(0.f);
+	pgp.max(5.f);
+	pgp.precision(1);
+	pgp.per_sec(false);
+	LLStatGraph::Thresholds thresholds;
+	thresholds.threshold.add(LLStatGraph::ThresholdParams().value(0.1).color(LLColor4::green))
+						.add(LLStatGraph::ThresholdParams().value(0.25f).color(LLColor4::yellow))
+						.add(LLStatGraph::ThresholdParams().value(0.6f).color(LLColor4::red));
+
+	pgp.thresholds(thresholds);
 
 	mSGPacketLoss = LLUICtrlFactory::create<LLStatGraph>(pgp);
-	mSGPacketLoss->setStat(&LLViewerStats::getInstance()->mPacketsLostPercentStat);
-	mSGPacketLoss->setUnits("%");
-	mSGPacketLoss->setMin(0.f);
-	mSGPacketLoss->setMax(5.f);
-	mSGPacketLoss->setThreshold(0, 0.5f);
-	mSGPacketLoss->setThreshold(1, 1.f);
-	mSGPacketLoss->setThreshold(2, 3.f);
-	mSGPacketLoss->setPrecision(1);
-	mSGPacketLoss->mPerSec = FALSE;
 	addChild(mSGPacketLoss);
+
+	mPanelPresetsPulldown = new LLPanelPresetsPulldown();
+	addChild(mPanelPresetsPulldown);
+	mPanelPresetsPulldown->setFollows(FOLLOWS_TOP|FOLLOWS_RIGHT);
+	mPanelPresetsPulldown->setVisible(FALSE);
 
 	mPanelVolumePulldown = new LLPanelVolumePulldown();
 	addChild(mPanelVolumePulldown);
@@ -253,9 +259,9 @@ void LLStatusBar::refresh()
 		F32 bwtotal = gViewerThrottle.getMaxBandwidth() / 1000.f;
 		mSGBandwidth->setMin(0.f);
 		mSGBandwidth->setMax(bwtotal*1.25f);
-		mSGBandwidth->setThreshold(0, bwtotal*0.75f);
-		mSGBandwidth->setThreshold(1, bwtotal);
-		mSGBandwidth->setThreshold(2, bwtotal);
+		//mSGBandwidth->setThreshold(0, bwtotal*0.75f);
+		//mSGBandwidth->setThreshold(1, bwtotal);
+		//mSGBandwidth->setThreshold(2, bwtotal);
 	}
 	
 	// update clock every 10 seconds
@@ -303,7 +309,7 @@ void LLStatusBar::refresh()
 						  (LLViewerMedia::hasInWorldMedia() || LLViewerMedia::hasParcelMedia() || LLViewerMedia::hasParcelAudio());
 	mMediaToggle->setEnabled(button_enabled);
 	// Note the "sense" of the toggle is opposite whether media is playing or not
-	bool any_media_playing = (LLViewerMedia::isAnyMediaShowing() || 
+	bool any_media_playing = (LLViewerMedia::isAnyMediaPlaying() || 
 							  LLViewerMedia::isParcelMediaPlaying() ||
 							  LLViewerMedia::isParcelAudioPlaying());
 	mMediaToggle->setValue(!any_media_playing);
@@ -319,6 +325,7 @@ void LLStatusBar::setVisibleForMouselook(bool visible)
 	mSGBandwidth->setVisible(visible);
 	mSGPacketLoss->setVisible(visible);
 	setBackgroundVisible(visible);
+	mIconPresets->setVisible(visible);
 }
 
 void LLStatusBar::debitBalance(S32 debit)
@@ -390,7 +397,7 @@ void LLStatusBar::sendMoneyBalanceRequest()
 
 void LLStatusBar::setHealth(S32 health)
 {
-	//llinfos << "Setting health to: " << buffer << llendl;
+	//LL_INFOS() << "Setting health to: " << buffer << LL_ENDL;
 	if( mHealth > health )
 	{
 		if (mHealth > (health + gSavedSettings.getF32("UISndHealthReductionThreshold")))
@@ -463,8 +470,32 @@ void LLStatusBar::onClickBuyCurrency()
 	LLFirstUse::receiveLindens(false);
 }
 
+void LLStatusBar::onMouseEnterPresets()
+{
+	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
+	LLIconCtrl* icon =  getChild<LLIconCtrl>( "presets_icon" );
+	LLRect icon_rect = icon->getRect();
+	LLRect pulldown_rect = mPanelPresetsPulldown->getRect();
+	pulldown_rect.setLeftTopAndSize(icon_rect.mLeft -
+	     (pulldown_rect.getWidth() - icon_rect.getWidth()),
+			       icon_rect.mBottom,
+			       pulldown_rect.getWidth(),
+			       pulldown_rect.getHeight());
+
+	pulldown_rect.translate(popup_holder->getRect().getWidth() - pulldown_rect.mRight, 0);
+	mPanelPresetsPulldown->setShape(pulldown_rect);
+
+	// show the master presets pull-down
+	LLUI::clearPopups();
+	LLUI::addPopup(mPanelPresetsPulldown);
+	mPanelNearByMedia->setVisible(FALSE);
+	mPanelVolumePulldown->setVisible(FALSE);
+	mPanelPresetsPulldown->setVisible(TRUE);
+}
+
 void LLStatusBar::onMouseEnterVolume()
 {
+	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
 	LLButton* volbtn =  getChild<LLButton>( "volume_btn" );
 	LLRect vol_btn_rect = volbtn->getRect();
 	LLRect volume_pulldown_rect = mPanelVolumePulldown->getRect();
@@ -474,12 +505,14 @@ void LLStatusBar::onMouseEnterVolume()
 			       volume_pulldown_rect.getWidth(),
 			       volume_pulldown_rect.getHeight());
 
+	volume_pulldown_rect.translate(popup_holder->getRect().getWidth() - volume_pulldown_rect.mRight, 0);
 	mPanelVolumePulldown->setShape(volume_pulldown_rect);
 
 
 	// show the master volume pull-down
 	LLUI::clearPopups();
 	LLUI::addPopup(mPanelVolumePulldown);
+	mPanelPresetsPulldown->setVisible(FALSE);
 	mPanelNearByMedia->setVisible(FALSE);
 	mPanelVolumePulldown->setVisible(TRUE);
 }
@@ -503,6 +536,7 @@ void LLStatusBar::onMouseEnterNearbyMedia()
 	LLUI::clearPopups();
 	LLUI::addPopup(mPanelNearByMedia);
 
+	mPanelPresetsPulldown->setVisible(FALSE);
 	mPanelVolumePulldown->setVisible(FALSE);
 	mPanelNearByMedia->setVisible(TRUE);
 }
@@ -528,8 +562,8 @@ void LLStatusBar::onClickMediaToggle(void* data)
 {
 	LLStatusBar *status_bar = (LLStatusBar*)data;
 	// "Selected" means it was showing the "play" icon (so media was playing), and now it shows "pause", so turn off media
-	bool enable = ! status_bar->mMediaToggle->getValue();
-	LLViewerMedia::setAllMediaEnabled(enable);
+	bool pause = status_bar->mMediaToggle->getValue();
+	LLViewerMedia::setAllMediaPaused(pause);
 }
 
 BOOL can_afford_transaction(S32 cost)

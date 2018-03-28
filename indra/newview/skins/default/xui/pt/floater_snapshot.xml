@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="Snapshot" title="VISUALIZAR FOTO">
+<floater name="Snapshot" title="FOTO">
 	<floater.string name="unknown">
 		desconhecido
 	</floater.string>
@@ -39,17 +39,8 @@
 	<string name="local_failed_str">
 		Falha ao salvar no computador.
 	</string>
-	<button name="advanced_options_btn" tool_tip="Opções avançadas"/>
-	<text name="image_res_text">
-		[WIDTH] x [HEIGHT] px
-	</text>
-	<text name="file_size_label">
-		[TAMANHO] KB
-	</text>
+	<button label="ATUALIZAR" name="new_snapshot_btn"/>
 	<panel name="advanced_options_panel">
-		<text name="advanced_options_label">
-			OPÇÕES AVANÇADAS
-		</text>
 		<text name="layer_type_label">
 			Capturar:
 		</text>
@@ -61,5 +52,17 @@
 		<check_box label="HUDs" name="hud_check"/>
 		<check_box label="Gerar quadro (tela inteira)" name="freeze_frame_check"/>
 		<check_box label="Atualização automática" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			Filtro:
+		</text>
+		<combo_box name="filters_combobox" tool_tip="Filtros de imagem">
+			<combo_box.item label="Sem filtro" name="NoFilter"/>
+		</combo_box>
 	</panel>
+	<text name="image_res_text">
+		[WIDTH]px (largura) x [HEIGHT]px (altura)
+	</text>
+	<text name="file_size_label">
+		[TAMANHO] KB
+	</text>
 </floater>

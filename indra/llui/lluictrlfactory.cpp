@@ -44,9 +44,9 @@
 // this library includes
 #include "llpanel.h"
 
-LLFastTimer::DeclareTimer FTM_WIDGET_CONSTRUCTION("Widget Construction");
-LLFastTimer::DeclareTimer FTM_INIT_FROM_PARAMS("Widget InitFromParams");
-LLFastTimer::DeclareTimer FTM_WIDGET_SETUP("Widget Setup");
+LLTrace::BlockTimerStatHandle FTM_WIDGET_CONSTRUCTION("Widget Construction");
+LLTrace::BlockTimerStatHandle FTM_INIT_FROM_PARAMS("Widget InitFromParams");
+LLTrace::BlockTimerStatHandle FTM_WIDGET_SETUP("Widget Setup");
 
 //-----------------------------------------------------------------------------
 
@@ -92,25 +92,37 @@ void LLUICtrlFactory::loadWidgetTemplate(const std::string& widget_tag, LLInitPa
 {
 	std::string filename = gDirUtilp->add("widgets", widget_tag + ".xml");
 	LLXMLNodePtr root_node;
+	std::vector<std::string> search_paths =
+		gDirUtilp->findSkinnedFilenames(LLDir::XUI, filename);
 
-	// Here we're looking for the "en" version, the default-language version
-	// of the file, rather than the localized version.
-	std::string full_filename = gDirUtilp->findSkinnedFilenameBaseLang(LLDir::XUI, filename);
-	if (!full_filename.empty())
+	if (search_paths.empty())
 	{
-		LLUICtrlFactory::instance().pushFileName(full_filename);
-		LLSimpleXUIParser parser;
-		parser.readXUI(full_filename, block);
+		return;
+	}
+
+	// "en" version, the default-language version of the file.
+	std::string base_filename = search_paths.front();
+	if (!base_filename.empty())
+	{
+		LLUICtrlFactory::instance().pushFileName(base_filename);
+
+		if (!LLXMLNode::getLayeredXMLNode(root_node, search_paths))
+		{
+			LL_WARNS() << "Couldn't parse widget from: " << base_filename << LL_ENDL;
+			return;
+		}
+		LLXUIParser parser;
+		parser.readXUI(root_node, block, base_filename);
 		LLUICtrlFactory::instance().popFileName();
 	}
 }
 
-static LLFastTimer::DeclareTimer FTM_CREATE_CHILDREN("Create XUI Children");
+static LLTrace::BlockTimerStatHandle FTM_CREATE_CHILDREN("Create XUI Children");
 
 //static 
 void LLUICtrlFactory::createChildren(LLView* viewp, LLXMLNodePtr node, const widget_registry_t& registry, LLXMLNodePtr output_node)
 {
-	LLFastTimer ft(FTM_CREATE_CHILDREN);
+	LL_RECORD_BLOCK_TIME(FTM_CREATE_CHILDREN);
 	if (node.isNull()) return;
 
 	for (LLXMLNodePtr child_node = node->getFirstChild(); child_node.notNull(); child_node = child_node->getNextSibling())
@@ -131,11 +143,11 @@ void LLUICtrlFactory::createChildren(LLView* viewp, LLXMLNodePtr node, const wid
 				// for the child widget
 				// You might need to add something like:
 				// static ParentWidgetRegistry::Register<ChildWidgetType> register("child_widget_name");
-				llwarns << child_name << " is not a valid child of " << node->getName()->mString << llendl;
+				LL_WARNS() << child_name << " is not a valid child of " << node->getName()->mString << LL_ENDL;
 			}
 			else
 			{
-				llwarns << "Could not create widget named " << child_node->getName()->mString << llendl;
+				LL_WARNS() << "Could not create widget named " << child_node->getName()->mString << LL_ENDL;
 			}
 		}
 
@@ -147,14 +159,14 @@ void LLUICtrlFactory::createChildren(LLView* viewp, LLXMLNodePtr node, const wid
 
 }
 
-static LLFastTimer::DeclareTimer FTM_XML_PARSE("XML Reading/Parsing");
+static LLTrace::BlockTimerStatHandle FTM_XML_PARSE("XML Reading/Parsing");
 //-----------------------------------------------------------------------------
 // getLayeredXMLNode()
 //-----------------------------------------------------------------------------
 bool LLUICtrlFactory::getLayeredXMLNode(const std::string &xui_filename, LLXMLNodePtr& root,
                                         LLDir::ESkinConstraint constraint)
 {
-	LLFastTimer timer(FTM_XML_PARSE);
+	LL_RECORD_BLOCK_TIME(FTM_XML_PARSE);
 	std::vector<std::string> paths =
 		gDirUtilp->findSkinnedFilenames(LLDir::XUI, xui_filename, constraint);
 
@@ -179,11 +191,11 @@ S32 LLUICtrlFactory::saveToXML(LLView* viewp, const std::string& filename)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-static LLFastTimer::DeclareTimer FTM_CREATE_FROM_XML("Create child widget");
+static LLTrace::BlockTimerStatHandle FTM_CREATE_FROM_XML("Create child widget");
 
 LLView *LLUICtrlFactory::createFromXML(LLXMLNodePtr node, LLView* parent, const std::string& filename, const widget_registry_t& registry, LLXMLNodePtr output_node)
 {
-	LLFastTimer timer(FTM_CREATE_FROM_XML);
+	LL_RECORD_BLOCK_TIME(FTM_CREATE_FROM_XML);
 	std::string ctrl_type = node->getName()->mString;
 	LLStringUtil::toLower(ctrl_type);
 

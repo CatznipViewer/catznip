@@ -49,6 +49,10 @@
 #include "llviewerregion.h"
 #include "llviewerwindow.h"
 #include "llnotificationsutil.h"
+#include "lluriparser.h"
+#include "uriparser/Uri.h"
+
+#include <boost/regex.hpp>
 
 bool on_load_url_external_response(const LLSD& notification, const LLSD& response, bool async );
 
@@ -87,7 +91,8 @@ void LLWeb::loadURL(const std::string& url, const std::string& target, const std
 		// Force load in the internal browser, as if with a blank target.
 		loadURLInternal(url, "", uuid);
 	}
-	else if (gSavedSettings.getBOOL("UseExternalBrowser") || (target == "_external"))
+
+	else if (useExternalBrowser(url) || (target == "_external"))
 	{
 		loadURLExternal(url);
 	}
@@ -99,10 +104,10 @@ void LLWeb::loadURL(const std::string& url, const std::string& target, const std
 
 // static
 // Explicitly open a Web URL using the Web content floater
-void LLWeb::loadURLInternal(const std::string &url, const std::string& target, const std::string& uuid)
+void LLWeb::loadURLInternal(const std::string &url, const std::string& target, const std::string& uuid, bool dev_mode)
 {
 	LLFloaterWebContent::Params p;
-	p.url(url).target(target).id(uuid);
+	p.url(url).target(target).id(uuid).dev_mode(dev_mode);
 	LLFloaterReg::showInstance("web_content", p);
 }
 
@@ -121,7 +126,7 @@ void LLWeb::loadURLExternal(const std::string& url, bool async, const std::strin
 	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
 	{
 		// Don't open an external browser under any circumstances.
-		llwarns << "Blocked attempt to open external browser." << llendl;
+		LL_WARNS() << "Blocked attempt to open external browser." << LL_ENDL;
 		return;
 	}
 	
@@ -187,7 +192,7 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 	substitution["CHANNEL"] = LLVersionInfo::getChannel();
 	substitution["GRID"] = LLGridManager::getInstance()->getGridId();
 	substitution["GRID_LOWERCASE"] = utf8str_tolower(LLGridManager::getInstance()->getGridId());
-	substitution["OS"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	substitution["OS"] = LLOSInfo::instance().getOSStringSimple();
 	substitution["SESSION_ID"] = gAgent.getSessionID();
 	substitution["FIRST_LOGIN"] = gAgent.isFirstLogin();
 
@@ -219,9 +224,50 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 	}
 	substitution["PARCEL_ID"] = llformat("%d", parcel_id);
 
+	// find the grid
+	std::string current_grid = LLGridManager::getInstance()->getGridId();
+	std::transform(current_grid.begin(), current_grid.end(), current_grid.begin(), ::tolower);
+	if (current_grid == "agni")
+	{
+		substitution["GRID"] = "secondlife.com";
+	}
+	else if (current_grid == "damballah")
+	{
+		// Staging grid has its own naming scheme.
+		substitution["GRID"] = "secondlife-staging.com";
+	}
+	else
+	{
+		substitution["GRID"] = llformat("%s.lindenlab.com", current_grid.c_str());
+	}
 	// expand all of the substitution strings and escape the url
 	std::string expanded_url = url;
 	LLStringUtil::format(expanded_url, substitution);
 
 	return LLWeb::escapeURL(expanded_url);
+}
+
+//static
+bool LLWeb::useExternalBrowser(const std::string &url)
+{
+#ifdef EXTERNAL_TOS
+	return true;
+#else
+	if (gSavedSettings.getU32("PreferredBrowserBehavior") == BROWSER_EXTERNAL_ONLY)
+	{
+		return true;
+	}
+	else if (gSavedSettings.getU32("PreferredBrowserBehavior") == BROWSER_INT_LL_EXT_OTHERS)
+	{
+		LLUriParser up(url);
+		up.normalize();
+		up.extractParts();
+		std::string uri_string = up.host();
+
+		boost::regex pattern = boost::regex("\\b(lindenlab.com|secondlife.com)$", boost::regex::perl|boost::regex::icase);
+		boost::match_results<std::string::const_iterator> matches;
+		return !(boost::regex_search(uri_string, matches, pattern));
+	}
+	return false;
+#endif
 }

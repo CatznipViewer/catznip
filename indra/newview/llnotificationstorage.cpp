@@ -45,9 +45,10 @@ typedef boost::function<LLNotificationResponderInterface * (const LLSD& pParams)
 
 class LLResponderRegistry : public LLRegistrySingleton<std::string, responder_constructor_t, LLResponderRegistry>
 {
-    public:
-        template<typename RESPONDER_TYPE> static LLNotificationResponderInterface * create(const LLSD& pParams);
-        LLNotificationResponderInterface * createResponder(const std::string& pNotificationName, const LLSD& pParams);
+    LLSINGLETON_EMPTY_CTOR(LLResponderRegistry);
+public:
+    template<typename RESPONDER_TYPE> static LLNotificationResponderInterface * create(const LLSD& pParams);
+    LLNotificationResponderInterface * createResponder(const std::string& pNotificationName, const LLSD& pParams);
 };
 
 template<typename RESPONDER_TYPE> LLNotificationResponderInterface * LLResponderRegistry::create(const LLSD& pParams)
@@ -103,32 +104,50 @@ bool LLNotificationStorage::writeNotifications(const LLSD& pNotificationData) co
 	return didFileOpen;
 }
 
-bool LLNotificationStorage::readNotifications(LLSD& pNotificationData) const
+bool LLNotificationStorage::readNotifications(LLSD& pNotificationData, bool is_new_filename) const
 {
-	LL_INFOS("LLNotificationStorage") << "starting read '" << mFileName << "'" << LL_ENDL;
+	std::string filename = is_new_filename? mFileName : mOldFileName;
+
+	LL_INFOS("LLNotificationStorage") << "starting read '" << filename << "'" << LL_ENDL;
 
 	bool didFileRead;
 
 	pNotificationData.clear();
 
-	llifstream notifyFile(mFileName.c_str());
+	llifstream notifyFile(filename.c_str());
 	didFileRead = notifyFile.is_open();
 	if (!didFileRead)
 	{
-		LL_WARNS("LLNotificationStorage") << "Failed to open file '" << mFileName << "'" << LL_ENDL;
+		LL_WARNS("LLNotificationStorage") << "Failed to open file '" << filename << "'" << LL_ENDL;
 	}
 	else
 	{
 		LLPointer<LLSDParser> parser = new LLSDXMLParser();
 		didFileRead = (parser->parse(notifyFile, pNotificationData, LLSDSerialize::SIZE_UNLIMITED) >= 0);
+        notifyFile.close();
+
 		if (!didFileRead)
 		{
 			LL_WARNS("LLNotificationStorage") << "Failed to parse open notifications from file '" << mFileName 
-				<< "'" << LL_ENDL;
+                                              << "'" << LL_ENDL;
+            LLFile::remove(filename);
+			LL_WARNS("LLNotificationStorage") << "Removed invalid open notifications file '" << mFileName 
+                                              << "'" << LL_ENDL;
 		}
 	}
-
-	LL_INFOS("LLNotificationStorage") << "ending read '" << mFileName << "'" << LL_ENDL;
+    
+	if (!didFileRead)
+	{
+		if(is_new_filename)
+		{
+			didFileRead = readNotifications(pNotificationData, false);
+			if(didFileRead)
+			{
+				writeNotifications(pNotificationData);
+				LLFile::remove(mOldFileName);
+			}
+		}
+	}
 
 	return didFileRead;
 }

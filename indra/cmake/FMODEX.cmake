@@ -4,17 +4,17 @@
 # When building using proprietary binaries though (i.e. having access to LL private servers),
 # we always build with FMODEX.
 # Open source devs should use the -DFMODEX:BOOL=ON then if they want to build with FMOD, whether
-# they are using STANDALONE or not.
+# they are using USESYSTEMLIBS or not.
 if (INSTALL_PROPRIETARY)
   set(FMODEX ON CACHE BOOL "Using FMOD Ex sound library.")
 endif (INSTALL_PROPRIETARY)
 
 if (FMODEX)
-  if (STANDALONE)
+  if (USESYSTEMLIBS)
     # In that case, we use the version of the library installed on the system
     set(FMODEX_FIND_REQUIRED ON)
     include(FindFMODEX)
-  else (STANDALONE)
+  else (USESYSTEMLIBS)
     if (FMODEX_LIBRARY AND FMODEX_INCLUDE_DIR)
       # If the path have been specified in the arguments, use that
       set(FMODEX_LIBRARIES ${FMODEX_LIBRARY})
@@ -26,9 +26,15 @@ if (FMODEX)
       include(Prebuilt)
       use_prebuilt_binary(fmodex)    
       if (WINDOWS)
-        set(FMODEX_LIBRARY 
-            debug fmodexL_vc
-            optimized fmodex_vc)
+        if (ADDRESS_SIZE EQUAL 32)
+            set(FMODEX_LIBRARY
+                debug fmodexL_vc
+                optimized fmodex_vc)
+        else (ADDRESS_SIZE EQUAL 64)
+            set(FMODEX_LIBRARY
+                debug fmodexL64_vc
+                optimized fmodex64_vc)
+        endif (ADDRESS_SIZE EQUAL 32)
       elseif (DARWIN)
         set(FMODEX_LIBRARY 
             debug fmodexL
@@ -41,6 +47,6 @@ if (FMODEX)
       set(FMODEX_LIBRARIES ${FMODEX_LIBRARY})
       set(FMODEX_INCLUDE_DIR ${LIBS_PREBUILT_DIR}/include/fmodex)
     endif (FMODEX_LIBRARY AND FMODEX_INCLUDE_DIR)
-  endif (STANDALONE)
+  endif (USESYSTEMLIBS)
 endif (FMODEX)
 

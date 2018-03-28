@@ -169,7 +169,9 @@ public:
 	virtual ~LLScriptHandler();
 
 	virtual void onDelete(LLNotificationPtr p);
+	virtual void onChange(LLNotificationPtr p);
 	virtual bool processNotification(const LLNotificationPtr& p);
+	virtual void addToastWithNotification(const LLNotificationPtr& p);
 
 protected:
 	virtual void onDeleteToast(LLToast* toast);
@@ -275,22 +277,6 @@ protected:
 	virtual void initChannel() {};
 };
 	
-/**
- * Handler for outbox notifications
- */
-class LLOutboxNotification : public LLSystemNotificationHandler
-{
-public:
-	LLOutboxNotification();
-	virtual ~LLOutboxNotification() {};
-	virtual void onChange(LLNotificationPtr p) { }
-	virtual void onDelete(LLNotificationPtr p);
-	virtual bool processNotification(const LLNotificationPtr& p);
-
-protected:
-	virtual void initChannel() {};
-};
-	
 class LLHandlerUtil
 {
 public:
@@ -335,6 +321,8 @@ public:
 	 * @param notification - Notification which substitution's name will be returned.
 	 */
 	static std::string getSubstitutionName(const LLNotificationPtr& notification);
+
+	static std::string getSubstitutionOriginalName(const LLNotificationPtr& notification);
 
 	/**
 	 * Adds notification panel to the IM floater.

@@ -143,14 +143,17 @@ protected:
 	void 	onCommitShinyColor(const LLSD& data);
 	void 	onCommitAlpha(const LLSD& data);
 	void 	onCancelColor(const LLSD& data);
+	void 	onCancelShinyColor(const LLSD& data);
 	void 	onSelectColor(const LLSD& data);
+	void 	onSelectShinyColor(const LLSD& data);
 
 	void 	onCloseTexturePicker(const LLSD& data);
 
 	// Make UI reflect state of currently selected material (refresh)
 	// and UI mode (e.g. editing normal map v diffuse map)
 	//
-	void updateUI();
+	// @param force_set_values forces spinners to set value even if they are focused
+	void updateUI(bool force_set_values = false);
 
 	// Convenience func to determine if all faces in selection have
 	// identical planar texgen settings during edits
@@ -159,13 +162,24 @@ protected:
 
 	// Callback funcs for individual controls
 	//
-	static void		onCommitTextureInfo( 	LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureInfo(LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureScaleX(LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureScaleY(LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureRot(LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureOffsetX(LLUICtrl* ctrl, void* userdata);
+	static void		onCommitTextureOffsetY(LLUICtrl* ctrl, void* userdata);
 
 	static void		onCommitMaterialBumpyScaleX(	LLUICtrl* ctrl, void* userdata);
 	static void		onCommitMaterialBumpyScaleY(	LLUICtrl* ctrl, void* userdata);
 	static void		onCommitMaterialBumpyRot(		LLUICtrl* ctrl, void* userdata);
 	static void		onCommitMaterialBumpyOffsetX(	LLUICtrl* ctrl, void* userdata);
 	static void		onCommitMaterialBumpyOffsetY(	LLUICtrl* ctrl, void* userdata);
+
+	static void		syncRepeatX(LLPanelFace* self, F32 scaleU);
+	static void		syncRepeatY(LLPanelFace* self, F32 scaleV);
+	static void		syncOffsetX(LLPanelFace* self, F32 offsetU);
+	static void		syncOffsetY(LLPanelFace* self, F32 offsetV);
+	static void 	syncMaterialRot(LLPanelFace* self, F32 rot);
 
 	static void		onCommitMaterialShinyScaleX(	LLUICtrl* ctrl, void* userdata);
 	static void		onCommitMaterialShinyScaleY(	LLUICtrl* ctrl, void* userdata);
@@ -485,7 +499,7 @@ private:
 	{
 	public:
 
-		static void getFace(LLFace*& face_to_return, bool& identical_face);
+		static void getFace(class LLFace*& face_to_return, bool& identical_face);
 		static void getImageFormat(LLGLenum& image_format_to_return, bool& identical_face);
 		static void getTexId(LLUUID& id, bool& identical);
 		static void getObjectScaleS(F32& scale_s, bool& identical);

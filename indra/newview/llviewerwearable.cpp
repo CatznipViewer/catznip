@@ -30,6 +30,7 @@
 #include "llagentcamera.h"
 #include "llagentwearables.h"
 #include "llfloatersidepanelcontainer.h"
+#include "lllocaltextureobject.h"
 #include "llnotificationsutil.h"
 #include "llsidepanelappearance.h"
 #include "lltextureentry.h"
@@ -69,17 +70,19 @@ private:
 };
 
 // Private local functions
-static std::string asset_id_to_filename(const LLUUID &asset_id);
+static std::string asset_id_to_filename(const LLUUID &asset_id, const ELLPath dir_spec);
 
 LLViewerWearable::LLViewerWearable(const LLTransactionID& transaction_id) :
-	LLWearable()
+	LLWearable(),
+	mVolatile(FALSE)
 {
 	mTransactionID = transaction_id;
 	mAssetID = mTransactionID.makeAssetID(gAgent.getSecureSessionID());
 }
 
 LLViewerWearable::LLViewerWearable(const LLAssetID& asset_id) :
-	LLWearable()
+	LLWearable(),
+	mVolatile(FALSE)
 {
 	mAssetID = asset_id;
 	mTransactionID.setNull();
@@ -103,7 +106,7 @@ LLWearable::EImportResult LLViewerWearable::importStream( std::istream& input_st
 	{
 		// Shouldn't really log the asset id for security reasons, but
 		// we need it in this case.
-		llwarns << "Bad Wearable asset header: " << mAssetID << llendl;
+		LL_WARNS() << "Bad Wearable asset header: " << mAssetID << LL_ENDL;
 		//gVFS->dumpMap();
 		return result;
 	}
@@ -143,7 +146,7 @@ BOOL LLViewerWearable::isOldVersion() const
 
 	if( LLWearable::sCurrentDefinitionVersion < mDefinitionVersion )
 	{
-		llwarns << "Wearable asset has newer version (" << mDefinitionVersion << ") than XML (" << LLWearable::sCurrentDefinitionVersion << ")" << llendl;
+		LL_WARNS() << "Wearable asset has newer version (" << mDefinitionVersion << ") than XML (" << LLWearable::sCurrentDefinitionVersion << ")" << LL_ENDL;
 		llassert(0);
 	}
 
@@ -264,7 +267,7 @@ void LLViewerWearable::setParamsToDefaults()
 	{
 		if( (((LLViewerVisualParam*)param)->getWearableType() == mType ) && (param->isTweakable() ) )
 		{
-			setVisualParamWeight(param->getID(),param->getDefaultWeight(), FALSE);
+			setVisualParamWeight(param->getID(),param->getDefaultWeight());
 		}
 	}
 }
@@ -320,16 +323,6 @@ void LLViewerWearable::writeToAvatar(LLAvatarAppearance *avatarp)
 
 	if (!viewer_avatar->isValid()) return;
 
-#if 0
-	// FIXME DRANO - kludgy way to avoid overwriting avatar state from wearables.
-	// Ideally would avoid calling this func in the first place.
-	if (viewer_avatar->isUsingServerBakes() &&
-		!viewer_avatar->isUsingLocalAppearance())
-	{
-		return;
-	}
-#endif
-
 	ESex old_sex = avatarp->getSex();
 
 	LLWearable::writeToAvatar(avatarp);
@@ -359,19 +352,14 @@ void LLViewerWearable::writeToAvatar(LLAvatarAppearance *avatarp)
 	ESex new_sex = avatarp->getSex();
 	if( old_sex != new_sex )
 	{
-		viewer_avatar->updateSexDependentLayerSets( FALSE );
+		viewer_avatar->updateSexDependentLayerSets();
 	}	
-	
-//	if( upload_bake )
-//	{
-//		gAgent.sendAgentSetAppearance();
-//	}
 }
 
 
 // Updates the user's avatar's appearance, replacing this wearables' parameters and textures with default values.
 // static 
-void LLViewerWearable::removeFromAvatar( LLWearableType::EType type, BOOL upload_bake )
+void LLViewerWearable::removeFromAvatar( LLWearableType::EType type)
 {
 	if (!isAgentAvatarValid()) return;
 
@@ -390,7 +378,7 @@ void LLViewerWearable::removeFromAvatar( LLWearableType::EType type, BOOL upload
 		if( (((LLViewerVisualParam*)param)->getWearableType() == type) && (param->isTweakable() ) )
 		{
 			S32 param_id = param->getID();
-			gAgentAvatarp->setVisualParamWeight( param_id, param->getDefaultWeight(), upload_bake );
+			gAgentAvatarp->setVisualParamWeight( param_id, param->getDefaultWeight());
 		}
 	}
 
@@ -400,12 +388,7 @@ void LLViewerWearable::removeFromAvatar( LLWearableType::EType type, BOOL upload
 	}
 
 	gAgentAvatarp->updateVisualParams();
-	gAgentAvatarp->wearableUpdated(type, FALSE);
-
-//	if( upload_bake )
-//	{
-//		gAgent.sendAgentSetAppearance();
-//	}
+	gAgentAvatarp->wearableUpdated(type);
 }
 
 // Does not copy mAssetID.
@@ -468,7 +451,7 @@ void LLViewerWearable::copyDataFrom(const LLViewerWearable* src)
 
 	// Probably reduntant, but ensure that the newly created wearable is not dirty by setting current value of params in new wearable
 	// to be the same as the saved values (which were loaded from src at param->cloneParam(this))
-	revertValues();
+	revertValuesWithoutUpdate();
 }
 
 void LLViewerWearable::setItemID(const LLUUID& item_id)
@@ -478,13 +461,6 @@ void LLViewerWearable::setItemID(const LLUUID& item_id)
 
 void LLViewerWearable::revertValues()
 {
-#if 0
-	// DRANO avoid overwrite when not in local appearance
-	if (isAgentAvatarValid() && gAgentAvatarp->isUsingServerBakes() && !gAgentAvatarp->isUsingLocalAppearance())
-	{
-		return;
-	}
-#endif
 	LLWearable::revertValues();
 
 
@@ -493,6 +469,11 @@ void LLViewerWearable::revertValues()
 	{
 		panel->updateScrollingPanelList();
 	}
+}
+
+void LLViewerWearable::revertValuesWithoutUpdate()
+{
+	LLWearable::revertValues();
 }
 
 void LLViewerWearable::saveValues()
@@ -522,13 +503,6 @@ void LLViewerWearable::refreshName()
 	}
 }
 
-// virtual
-void LLViewerWearable::addToBakedTextureHash(LLMD5& hash) const
-{
-	LLUUID asset_id = getAssetID();
-	hash.update((const unsigned char*)asset_id.mData, UUID_BYTES);
-}
-
 struct LLWearableSaveData
 {
 	LLWearableType::EType mType;
@@ -536,31 +510,26 @@ struct LLWearableSaveData
 
 void LLViewerWearable::saveNewAsset() const
 {
-//	llinfos << "LLViewerWearable::saveNewAsset() type: " << getTypeName() << llendl;
-	//llinfos << *this << llendl;
+//	LL_INFOS() << "LLViewerWearable::saveNewAsset() type: " << getTypeName() << LL_ENDL;
+	//LL_INFOS() << *this << LL_ENDL;
 
-	const std::string filename = asset_id_to_filename(mAssetID);
-	LLFILE* fp = LLFile::fopen(filename, "wb");		/* Flawfinder: ignore */
-	BOOL successful_save = FALSE;
-	if(fp && exportFile(fp))
-	{
-		successful_save = TRUE;
-	}
-	if(fp)
-	{
-		fclose(fp);
-		fp = NULL;
-	}
-	if(!successful_save)
+	const std::string filename = asset_id_to_filename(mAssetID, LL_PATH_CACHE);
+	if(! exportFile(filename))
 	{
 		std::string buffer = llformat("Unable to save '%s' to wearable file.", mName.c_str());
-		llwarns << buffer << llendl;
+		LL_WARNS() << buffer << LL_ENDL;
 		
 		LLSD args;
 		args["NAME"] = mName;
 		LLNotificationsUtil::add("CannotSaveWearableOutOfSpace", args);
 		return;
 	}
+
+    if (gSavedSettings.getBOOL("LogWearableAssetSave"))
+    {
+        const std::string log_filename = asset_id_to_filename(mAssetID, LL_PATH_LOGS);
+        exportFile(log_filename);
+    }
 
 	// save it out to database
 	if( gAssetStorage )
@@ -569,7 +538,7 @@ void LLViewerWearable::saveNewAsset() const
 		std::string url = gAgent.getRegion()->getCapability("NewAgentInventory");
 		if (!url.empty())
 		{
-			llinfos << "Update Agent Inventory via capability" << llendl;
+			LL_INFOS() << "Update Agent Inventory via capability" << LL_ENDL;
 			LLSD body;
 			body["folder_id"] = gInventory.findCategoryUUIDForType(LLFolderType::assetToFolderType(getAssetType()));
 			body["asset_type"] = LLAssetType::lookup(getAssetType());
@@ -598,19 +567,19 @@ void LLViewerWearable::onSaveNewAssetComplete(const LLUUID& new_asset_id, void* 
 	if(0 == status)
 	{
 		// Success
-		llinfos << "Saved wearable " << type_name << llendl;
+		LL_INFOS() << "Saved wearable " << type_name << LL_ENDL;
 	}
 	else
 	{
 		std::string buffer = llformat("Unable to save %s to central asset store.", type_name.c_str());
-		llwarns << buffer << " Status: " << status << llendl;
+		LL_WARNS() << buffer << " Status: " << status << LL_ENDL;
 		LLSD args;
 		args["NAME"] = type_name;
 		LLNotificationsUtil::add("CannotSaveToAssetStore", args);
 	}
 
 	// Delete temp file
-	const std::string src_filename = asset_id_to_filename(new_asset_id);
+	const std::string src_filename = asset_id_to_filename(new_asset_id, LL_PATH_CACHE);
 	LLFile::remove(src_filename);
 
 	// delete the context data
@@ -647,10 +616,10 @@ std::ostream& operator<<(std::ostream &s, const LLViewerWearable &w)
 	return s;
 }
 
-std::string asset_id_to_filename(const LLUUID &asset_id)
+std::string asset_id_to_filename(const LLUUID &asset_id, const ELLPath dir_spec)
 {
 	std::string asset_id_string;
 	asset_id.toString(asset_id_string);
-	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_CACHE,asset_id_string) + ".wbl";	
+	std::string filename = gDirUtilp->getExpandedFilename(dir_spec,asset_id_string) + ".wbl";	
 	return filename;
 }

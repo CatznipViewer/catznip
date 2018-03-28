@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="Snapshot" title="APERÇU DE LA PHOTO">
+<floater name="Snapshot" title="PHOTO">
 	<floater.string name="unknown">
 		inconnu
 	</floater.string>
@@ -39,17 +39,8 @@
 	<string name="local_failed_str">
 		Échec d&apos;enregistrement sur l&apos;ordinateur.
 	</string>
-	<button name="advanced_options_btn" tool_tip="Options avancées"/>
-	<text name="image_res_text">
-		[WIDTH] x [HEIGHT] px
-	</text>
-	<text name="file_size_label">
-		[SIZE] Ko
-	</text>
+	<button label="ACTUALISER" name="new_snapshot_btn"/>
 	<panel name="advanced_options_panel">
-		<text name="advanced_options_label">
-			OPTIONS AVANCÉES
-		</text>
 		<text name="layer_type_label">
 			Capturer :
 		</text>
@@ -61,5 +52,17 @@
 		<check_box label="HUD" name="hud_check"/>
 		<check_box label="Arrêt sur image (plein écran)" name="freeze_frame_check"/>
 		<check_box label="Actualisation automatique" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			Filtre :
+		</text>
+		<combo_box name="filters_combobox" tool_tip="Filtres d&apos;image">
+			<combo_box.item label="Aucun filtre" name="NoFilter"/>
+		</combo_box>
 	</panel>
+	<text name="image_res_text">
+		[WIDTH] px (largeur) x [HEIGHT] px (hauteur)
+	</text>
+	<text name="file_size_label">
+		[SIZE] Ko
+	</text>
 </floater>

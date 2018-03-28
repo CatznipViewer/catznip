@@ -52,7 +52,19 @@ public:
 		FILTERTYPE_UUID	= 0x1 << 2,		// find the object with UUID and any links to it
 		FILTERTYPE_DATE = 0x1 << 3,		// search by date range
 		FILTERTYPE_WEARABLE = 0x1 << 4,	// search by wearable type
-		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5		// pass if folder is not a system   folder to be hidden if
+		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5,		// pass if folder is not a system folder to be hidden if empty
+        FILTERTYPE_MARKETPLACE_ACTIVE = 0x1 << 6,		// pass if folder is a marketplace active folder
+        FILTERTYPE_MARKETPLACE_INACTIVE = 0x1 << 7,		// pass if folder is a marketplace inactive folder
+        FILTERTYPE_MARKETPLACE_UNASSOCIATED = 0x1 << 8,	// pass if folder is a marketplace non associated (no market ID) folder
+        FILTERTYPE_MARKETPLACE_LISTING_FOLDER = 0x1 << 9,	// pass iff folder is a listing folder
+        FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10,         // pass iff folder is not under the marketplace
+        FILTERTYPE_WORN = 0x1 << 11,     // pass if item is worn
+	};
+
+	enum EFilterDateDirection
+	{
+		FILTERDATEDIRECTION_NEWER,
+		FILTERDATEDIRECTION_OLDER
 	};
 
 	enum EFilterLink
@@ -67,7 +79,23 @@ public:
 		SO_NAME = 0,						// Sort inventory by name
 		SO_DATE = 0x1,						// Sort inventory by date
 		SO_FOLDERS_BY_NAME = 0x1 << 1,		// Force folder sort by name
-		SO_SYSTEM_FOLDERS_TO_TOP = 0x1 << 2	// Force system folders to be on top
+		SO_SYSTEM_FOLDERS_TO_TOP = 0x1 << 2,// Force system folders to be on top
+		SO_FOLDERS_BY_WEIGHT = 0x1 << 3,    // Force folder sort by weight, usually, amount of some elements in their descendents
+	};
+
+	enum ESearchType
+	{
+		SEARCHTYPE_NAME,
+		SEARCHTYPE_DESCRIPTION,
+		SEARCHTYPE_CREATOR,
+		SEARCHTYPE_UUID
+	};
+
+	enum EFilterCreatorType
+	{
+		FILTERCREATOR_ALL,
+		FILTERCREATOR_SELF,
+		FILTERCREATOR_OTHERS
 	};
 
 	struct FilterOps
@@ -94,7 +122,8 @@ public:
 			Optional<EFilterLink>		links;
 			Optional<LLUUID>			uuid;
 			Optional<DateRange>			date_range;
-			Optional<S32>				hours_ago;
+			Optional<U32>				hours_ago;
+			Optional<U32>				date_search_direction;
 			Optional<EFolderShow>		show_folder_state;
 			Optional<PermissionMask>	permissions;
 
@@ -107,6 +136,7 @@ public:
 				uuid("uuid"),
 				date_range("date_range"),
 				hours_ago("hours_ago", 0),
+				date_search_direction("date_search_direction", FILTERDATEDIRECTION_NEWER),
 				show_folder_state("show_folder_state", SHOW_NON_EMPTY_FOLDERS),
 				permissions("permissions", PERM_NONE)
 			{}
@@ -124,6 +154,7 @@ public:
 		time_t			mMinDate,
 						mMaxDate;
 		U32				mHoursAgo;
+		U32				mDateSearchDirection;
 
 		EFolderShow		mShowFolderState;
 		PermissionMask	mPermissions;
@@ -151,6 +182,7 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Parameters
 	// +-------------------------------------------------------------------+
+	U64 				getFilterTypes() const;
 	U64 				getFilterObjectTypes() const;
 	U64					getFilterCategoryTypes() const;
 	U64					getFilterWearableTypes() const;
@@ -160,7 +192,17 @@ public:
 	void 				setFilterUUID(const LLUUID &object_id);
 	void				setFilterWearableTypes(U64 types);
 	void				setFilterEmptySystemFolders();
+	void				setFilterWorn();
+	void				setFilterMarketplaceActiveFolders();
+	void				setFilterMarketplaceInactiveFolders();
+	void				setFilterMarketplaceUnassociatedFolders();
+    void                setFilterMarketplaceListingFolders(bool select_only_listing_folders);
+    void                setFilterNoMarketplaceFolder();
 	void				updateFilterTypes(U64 types, U64& current_types);
+	void 				setSearchType(ESearchType type);
+	ESearchType			getSearchType() { return mSearchType; }
+	void 				setFilterCreator(EFilterCreatorType type);
+	EFilterCreatorType		getFilterCreator() { return mFilterCreatorType; }
 
 	void 				setFilterSubString(const std::string& string);
 	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
@@ -177,9 +219,14 @@ public:
 
 	void 				setHoursAgo(U32 hours);
 	U32 				getHoursAgo() const;
+	void				setDateSearchDirection(U32 direction);
+	U32					getDateSearchDirection() const;
 
 	void 				setFilterLinks(U64 filter_link);
 	U64					getFilterLinks() const;
+
+	// sets params for Link-only search and backs up search settings for future restoration
+	void				setFindAllLinksMode(const std::string &search_name, const LLUUID& search_id);
 
 	// +-------------------------------------------------------------------+
 	// + Execution And Results
@@ -251,13 +298,16 @@ private:
 	bool 				checkAgainstPermissions(const class LLFolderViewModelItemInventory* listener) const;
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
+	bool 				checkAgainstCreator(const class LLFolderViewModelItemInventory* listener) const;
 	bool				checkAgainstClipboard(const LLUUID& object_id) const;
 
 	FilterOps				mFilterOps;
 	FilterOps				mDefaultFilterOps;
+	FilterOps				mBackupFilterOps; // for backup purposes when leaving 'search link' mode
 
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+	std::string				mUsername;
 	const std::string		mName;
 
 	S32						mCurrentGeneration;
@@ -272,6 +322,9 @@ private:
     
 	std::string 			mFilterText;
 	std::string 			mEmptyLookupMessage;
+
+	ESearchType 			mSearchType;
+	EFilterCreatorType		mFilterCreatorType;
 };
 
 #endif

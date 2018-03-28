@@ -32,13 +32,10 @@
 
 #include "llcallingcard.h"
 
-#include <vector>
 #include <algorithm>
-//#include <iterator>
 
 #include "indra_constants.h"
-#include "llavatarnamecache.h"
-#include "llcachename.h"
+//#include "llcachename.h"
 #include "llstl.h"
 #include "lltimer.h"
 #include "lluuid.h"
@@ -46,19 +43,14 @@
 
 #include "llagent.h"
 #include "llavatarnamecache.h"
-#include "llbutton.h"
 #include "llinventoryobserver.h"
 #include "llinventorymodel.h"
 #include "llnotifications.h"
-#include "llnotificationsutil.h"
-#include "llresmgr.h"
 #include "llslurl.h"
 #include "llimview.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
-#include "llviewernetwork.h"
 #include "llviewerobjectlist.h"
-#include "llviewerwindow.h"
 #include "llvoavatar.h"
 #include "llavataractions.h"
 
@@ -105,9 +97,8 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 LLAvatarTracker::LLAvatarTracker() :
 	mTrackingData(NULL),
 	mTrackedAgentValid(false),
-	//mInventory(NULL),
-	//mInventoryObserver(NULL),
-	mModifyMask(0x0)	
+	mModifyMask(0x0),
+	mIsNotifyObservers(FALSE)
 {
 }
 
@@ -115,7 +106,9 @@ LLAvatarTracker::~LLAvatarTracker()
 {
 	deleteTrackingData();
 	std::for_each(mObservers.begin(), mObservers.end(), DeletePointer());
+	mObservers.clear();
 	std::for_each(mBuddyInfo.begin(), mBuddyInfo.end(), DeletePairedPointer());
+	mBuddyInfo.clear();
 }
 
 void LLAvatarTracker::track(const LLUUID& avatar_id, const std::string& name)
@@ -250,7 +243,6 @@ S32 LLAvatarTracker::addBuddyList(const LLAvatarTracker::buddy_map_t& buds)
 	using namespace std;
 
 	U32 new_buddy_count = 0;
-	std::string full_name;
 	LLUUID agent_id;
 	for(buddy_map_t::const_iterator itr = buds.begin(); itr != buds.end(); ++itr)
 	{
@@ -260,27 +252,30 @@ S32 LLAvatarTracker::addBuddyList(const LLAvatarTracker::buddy_map_t& buds)
 		{
 			++new_buddy_count;
 			mBuddyInfo[agent_id] = (*itr).second;
-			// IDEVO: is this necessary?  name is unused?
-			gCacheName->getFullName(agent_id, full_name);
+
+			// pre-request name for notifications?
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(agent_id, &av_name);
+
 			addChangedMask(LLFriendObserver::ADD, agent_id);
-			lldebugs << "Added buddy " << agent_id
+			LL_DEBUGS() << "Added buddy " << agent_id
 					<< ", " << (mBuddyInfo[agent_id]->isOnline() ? "Online" : "Offline")
 					<< ", TO: " << mBuddyInfo[agent_id]->getRightsGrantedTo()
 					<< ", FROM: " << mBuddyInfo[agent_id]->getRightsGrantedFrom()
-					<< llendl;
+					<< LL_ENDL;
 		}
 		else
 		{
 			LLRelationship* e_r = (*existing_buddy).second;
 			LLRelationship* n_r = (*itr).second;
-			llwarns << "!! Add buddy for existing buddy: " << agent_id
+			LL_WARNS() << "!! Add buddy for existing buddy: " << agent_id
 					<< " [" << (e_r->isOnline() ? "Online" : "Offline") << "->" << (n_r->isOnline() ? "Online" : "Offline")
 					<< ", " <<  e_r->getRightsGrantedTo() << "->" << n_r->getRightsGrantedTo()
 					<< ", " <<  e_r->getRightsGrantedTo() << "->" << n_r->getRightsGrantedTo()
-					<< "]" << llendl;
+					<< "]" << LL_ENDL;
 		}
 	}
-	notifyObservers();
+	// do not notify observers here - list can be large so let it be done on idle.
 	
 	return new_buddy_count;
 }
@@ -298,7 +293,7 @@ void LLAvatarTracker::copyBuddyList(buddy_map_t& buddies) const
 
 void LLAvatarTracker::terminateBuddy(const LLUUID& id)
 {
-	lldebugs << "LLAvatarTracker::terminateBuddy()" << llendl;
+	LL_DEBUGS() << "LLAvatarTracker::terminateBuddy()" << LL_ENDL;
 	LLRelationship* buddy = get_ptr_in_map(mBuddyInfo, id);
 	if(!buddy) return;
 	mBuddyInfo.erase(id);
@@ -336,12 +331,12 @@ void LLAvatarTracker::setBuddyOnline(const LLUUID& id, bool is_online)
 	{
 		info->online(is_online);
 		addChangedMask(LLFriendObserver::ONLINE, id);
-		lldebugs << "Set buddy " << id << (is_online ? " Online" : " Offline") << llendl;
+		LL_DEBUGS() << "Set buddy " << id << (is_online ? " Online" : " Offline") << LL_ENDL;
 	}
 	else
 	{
-		llwarns << "!! No buddy info found for " << id 
-				<< ", setting to " << (is_online ? "Online" : "Offline") << llendl;
+		LL_WARNS() << "!! No buddy info found for " << id 
+				<< ", setting to " << (is_online ? "Online" : "Offline") << LL_ENDL;
 	}
 }
 
@@ -388,7 +383,7 @@ void LLAvatarTracker::empower(const LLUUID& id, bool grant)
 
 void LLAvatarTracker::empowerList(const buddy_map_t& list, bool grant)
 {
-	llwarns << "LLAvatarTracker::empowerList() not implemented." << llendl;
+	LL_WARNS() << "LLAvatarTracker::empowerList() not implemented." << LL_ENDL;
 /*
 	LLMessageSystem* msg = gMessageSystem;
 	const char* message_name;
@@ -481,8 +476,25 @@ void LLAvatarTracker::removeObserver(LLFriendObserver* observer)
 		mObservers.end());
 }
 
+void LLAvatarTracker::idleNotifyObservers()
+{
+	if (mModifyMask == LLFriendObserver::NONE && mChangedBuddyIDs.size() == 0)
+	{
+		return;
+	}
+	notifyObservers();
+}
+
 void LLAvatarTracker::notifyObservers()
 {
+	if (mIsNotifyObservers)
+	{
+		// Don't allow multiple calls.
+		// new masks and ids will be processed later from idle.
+		return;
+	}
+	mIsNotifyObservers = TRUE;
+
 	observer_list_t observers(mObservers);
 	observer_list_t::iterator it = observers.begin();
 	observer_list_t::iterator end = observers.end();
@@ -498,6 +510,7 @@ void LLAvatarTracker::notifyObservers()
 
 	mModifyMask = LLFriendObserver::NONE;
 	mChangedBuddyIDs.clear();
+	mIsNotifyObservers = FALSE;
 }
 
 void LLAvatarTracker::addParticularFriendObserver(const LLUUID& buddy_id, LLFriendObserver* observer)
@@ -539,7 +552,7 @@ void LLAvatarTracker::notifyParticularFriendObservers(const LLUUID& buddy_id)
 // store flag for change
 // and id of object change applies to
 void LLAvatarTracker::addChangedMask(U32 mask, const LLUUID& referent)
-{ 
+{
 	mModifyMask |= mask; 
 	if (referent.notNull())
 	{
@@ -600,14 +613,14 @@ void LLAvatarTracker::agentFound(const LLUUID& prey,
 // 	static
 void LLAvatarTracker::processOnlineNotification(LLMessageSystem* msg, void**)
 {
-	lldebugs << "LLAvatarTracker::processOnlineNotification()" << llendl;
+	LL_DEBUGS() << "LLAvatarTracker::processOnlineNotification()" << LL_ENDL;
 	instance().processNotify(msg, true);
 }
 
 // 	static
 void LLAvatarTracker::processOfflineNotification(LLMessageSystem* msg, void**)
 {
-	lldebugs << "LLAvatarTracker::processOfflineNotification()" << llendl;
+	LL_DEBUGS() << "LLAvatarTracker::processOfflineNotification()" << LL_ENDL;
 	instance().processNotify(msg, false);
 }
 
@@ -641,11 +654,11 @@ void LLAvatarTracker::processChange(LLMessageSystem* msg)
 					payload["from_id"] = agent_id;
 					if(LLRelationship::GRANT_MODIFY_OBJECTS & new_rights)
 					{
-						LLNotificationsUtil::add("GrantedModifyRights",args, payload);
+						LLNotifications::instance().add("GrantedModifyRights",args, payload);
 					}
 					else
 					{
-						LLNotificationsUtil::add("RevokedModifyRights",args, payload);
+						LLNotifications::instance().add("RevokedModifyRights",args, payload);
 					}
 				}
 				(mBuddyInfo[agent_id])->setRightsFrom(new_rights);
@@ -659,7 +672,7 @@ void LLAvatarTracker::processChange(LLMessageSystem* msg)
 
 void LLAvatarTracker::processChangeUserRights(LLMessageSystem* msg, void**)
 {
-	lldebugs << "LLAvatarTracker::processChangeUserRights()" << llendl;
+	LL_DEBUGS() << "LLAvatarTracker::processChangeUserRights()" << LL_ENDL;
 	instance().processChange(msg);
 }
 
@@ -668,7 +681,7 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 	S32 count = msg->getNumberOfBlocksFast(_PREHASH_AgentBlock);
 	BOOL chat_notify = gSavedSettings.getBOOL("ChatOnlineNotification");
 
-	lldebugs << "Received " << count << " online notifications **** " << llendl;
+	LL_DEBUGS() << "Received " << count << " online notifications **** " << LL_ENDL;
 	if(count > 0)
 	{
 		LLUUID agent_id;
@@ -690,8 +703,8 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 			}
 			else
 			{
-				llwarns << "Received online notification for unknown buddy: " 
-					<< agent_id << " is " << (online ? "ONLINE" : "OFFLINE") << llendl;
+				LL_WARNS() << "Received online notification for unknown buddy: " 
+					<< agent_id << " is " << (online ? "ONLINE" : "OFFLINE") << LL_ENDL;
 			}
 
 			if(tracking_id == agent_id)
@@ -729,7 +742,7 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	if (online)
 	{
 		notification =
-			LLNotificationsUtil::add("FriendOnlineOffline",
+			LLNotifications::instance().add("FriendOnlineOffline",
 									 args,
 									 payload.with("respond_on_mousedown", TRUE),
 									 boost::bind(&LLAvatarActions::startIM, agent_id));
@@ -737,7 +750,7 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	else
 	{
 		notification =
-			LLNotificationsUtil::add("FriendOnlineOffline", args, payload);
+			LLNotifications::instance().add("FriendOnlineOffline", args, payload);
 	}
 
 	// If there's an open IM session with this agent, send a notification there too.
@@ -803,8 +816,8 @@ void LLTrackingData::agentFound(const LLUUID& prey,
 {
 	if(prey != mAvatarID)
 	{
-		llwarns << "LLTrackingData::agentFound() - found " << prey
-				<< " but looking for " << mAvatarID << llendl;
+		LL_WARNS() << "LLTrackingData::agentFound() - found " << prey
+				<< " but looking for " << mAvatarID << LL_ENDL;
 	}
 	mHaveInfo = true;
 	mAgentGone.setTimerExpirySec(OFFLINE_SECONDS);
@@ -868,7 +881,7 @@ bool LLCollectMappableBuddies::operator()(const LLUUID& buddy_id, LLRelationship
 {
 	LLAvatarName av_name;
 	LLAvatarNameCache::get( buddy_id, &av_name);
-	buddy_map_t::value_type value(av_name.getDisplayName(), buddy_id);
+	buddy_map_t::value_type value(buddy_id, av_name.getDisplayName());
 	if(buddy->isOnline() && buddy->isRightGrantedFrom(LLRelationship::GRANT_MAP_LOCATION))
 	{
 		mMappable.insert(value);
@@ -878,8 +891,10 @@ bool LLCollectMappableBuddies::operator()(const LLUUID& buddy_id, LLRelationship
 
 bool LLCollectOnlineBuddies::operator()(const LLUUID& buddy_id, LLRelationship* buddy)
 {
-	gCacheName->getFullName(buddy_id, mFullName);
-	buddy_map_t::value_type value(mFullName, buddy_id);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(buddy_id, &av_name);
+	mFullName = av_name.getUserName();
+	buddy_map_t::value_type value(buddy_id, mFullName);
 	if(buddy->isOnline())
 	{
 		mOnline.insert(value);
@@ -891,8 +906,8 @@ bool LLCollectAllBuddies::operator()(const LLUUID& buddy_id, LLRelationship* bud
 {
 	LLAvatarName av_name;
 	LLAvatarNameCache::get(buddy_id, &av_name);
-	mFullName = av_name.getDisplayName();
-	buddy_map_t::value_type value(mFullName, buddy_id);
+	mFullName = av_name.getCompleteName();
+	buddy_map_t::value_type value(buddy_id, mFullName);
 	if(buddy->isOnline())
 	{
 		mOnline.insert(value);

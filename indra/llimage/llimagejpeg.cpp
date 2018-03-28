@@ -32,8 +32,7 @@
 
 jmp_buf	LLImageJPEG::sSetjmpBuffer ;
 LLImageJPEG::LLImageJPEG(S32 quality) 
-	:
-	LLImageFormatted(IMG_CODEC_JPEG),
+:	LLImageFormatted(IMG_CODEC_JPEG),
 	mOutputBuffer( NULL ),
 	mOutputBufferSize( 0 ),
 	mEncodeQuality( quality ) // on a scale from 1 to 100
@@ -46,7 +45,7 @@ LLImageJPEG::~LLImageJPEG()
 	delete[] mOutputBuffer;
 }
 
-BOOL LLImageJPEG::updateData()
+bool LLImageJPEG::updateData()
 {
 	resetLastError();
 
@@ -54,7 +53,7 @@ BOOL LLImageJPEG::updateData()
 	if (!getData() || (0 == getDataSize()))
 	{
 		setLastError("Uninitialized instance of LLImageJPEG");
-		return FALSE;
+		return false;
 	}
 
 	////////////////////////////////////////
@@ -80,7 +79,7 @@ BOOL LLImageJPEG::updateData()
 	if(setjmp(sSetjmpBuffer))
 	{
 		jpeg_destroy_decompress(&cinfo);
-		return FALSE;
+		return false;
 	}
 	try
 	{
@@ -107,7 +106,7 @@ BOOL LLImageJPEG::updateData()
 		
 		////////////////////////////////////////
 		// Step 3: read file parameters with jpeg_read_header()
-		jpeg_read_header( &cinfo, TRUE );
+		jpeg_read_header( &cinfo, true );
 
 		// Data set by jpeg_read_header
 		setSize(cinfo.image_width, cinfo.image_height, 3); // Force to 3 components (RGB)
@@ -116,13 +115,13 @@ BOOL LLImageJPEG::updateData()
 		// More data set by jpeg_read_header
 		cinfo.num_components;
 		cinfo.jpeg_color_space;	// Colorspace of image
-		cinfo.saw_JFIF_marker;		// TRUE if a JFIF APP0 marker was seen
+		cinfo.saw_JFIF_marker;		// true if a JFIF APP0 marker was seen
 		cinfo.JFIF_major_version;	// Version information from JFIF marker
 		cinfo.JFIF_minor_version;  //
 		cinfo.density_unit;		// Resolution data from JFIF marker
 		cinfo.X_density;
 		cinfo.Y_density;
-		cinfo.saw_Adobe_marker;	// TRUE if an Adobe APP14 marker was seen
+		cinfo.saw_Adobe_marker;	// true if an Adobe APP14 marker was seen
 		cinfo.Adobe_transform;     // Color transform code from Adobe marker
 		*/
 	}
@@ -130,13 +129,13 @@ BOOL LLImageJPEG::updateData()
 	{
 		jpeg_destroy_decompress(&cinfo);
 
-		return FALSE;
+		return false;
 	}
 	////////////////////////////////////////
 	// Step 4: Release JPEG decompression object 
 	jpeg_destroy_decompress(&cinfo);
 
-	return TRUE;
+	return true;
 }
 
 // Initialize source --- called by jpeg_read_header
@@ -155,7 +154,7 @@ boolean LLImageJPEG::decodeFillInputBuffer( j_decompress_ptr cinfo )
 	// Should never get here, since we provide the entire buffer up front.
 	ERREXIT(cinfo, JERR_INPUT_EMPTY);
 
-	return TRUE;
+	return true;
 }
 
 // Skip data --- used to skip over a potentially large amount of
@@ -183,7 +182,7 @@ void LLImageJPEG::decodeTermSource (j_decompress_ptr cinfo)
 
 
 // Returns true when done, whether or not decode was successful.
-BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
+bool LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 {
 	llassert_always(raw_image);
 	
@@ -193,7 +192,7 @@ BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 	if (!getData() || (0 == getDataSize()))
 	{
 		setLastError("LLImageJPEG trying to decode an image with no data!");
-		return TRUE;  // done
+		return true;  // done
 	}
 	
 	S32 row_stride = 0;
@@ -221,7 +220,7 @@ BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 	if(setjmp(sSetjmpBuffer))
 	{
 		jpeg_destroy_decompress(&cinfo);
-		return TRUE; // done
+		return true; // done
 	}
 	try
 	{
@@ -248,11 +247,11 @@ BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 		////////////////////////////////////////
 		// Step 3: read file parameters with jpeg_read_header()
 		
-		jpeg_read_header(&cinfo, TRUE);
+		jpeg_read_header(&cinfo, true);
 
 		// We can ignore the return value from jpeg_read_header since
 		//   (a) suspension is not possible with our data source, and
-		//   (b) we passed TRUE to reject a tables-only JPEG file as an error.
+		//   (b) we passed true to reject a tables-only JPEG file as an error.
 		// See libjpeg.doc for more info.
 
 		setSize(cinfo.image_width, cinfo.image_height, 3); // Force to 3 components (RGB)
@@ -315,7 +314,7 @@ BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 	catch (int)
 	{
 		jpeg_destroy_decompress(&cinfo);
-		return TRUE; // done
+		return true; // done
 	}
 
 	// Check to see whether any corrupt-data warnings occurred
@@ -323,10 +322,10 @@ BOOL LLImageJPEG::decode(LLImageRaw* raw_image, F32 decode_time)
 	{
 		// TODO: extract the warning to find out what went wrong.
 		setLastError( "Unable to decode JPEG image.");
-		return TRUE; // done
+		return true; // done
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -345,11 +344,11 @@ void LLImageJPEG::encodeInitDestination ( j_compress_ptr cinfo )
 // 
 //  In typical applications, this should write the entire output buffer
 //  (ignoring the current state of next_output_byte & free_in_buffer),
-//  reset the pointer & count to the start of the buffer, and return TRUE
+//  reset the pointer & count to the start of the buffer, and return true
 //  indicating that the buffer has been dumped.
 // 
 //  In applications that need to be able to suspend compression due to output
-//  overrun, a FALSE return indicates that the buffer cannot be emptied now.
+//  overrun, a false return indicates that the buffer cannot be emptied now.
 //  In this situation, the compressor will return to its caller (possibly with
 //  an indication that it has not accepted all the supplied scanlines).  The
 //  application should resume compression after it has made more room in the
@@ -358,7 +357,7 @@ void LLImageJPEG::encodeInitDestination ( j_compress_ptr cinfo )
 // 
 //  When suspending, the compressor will back up to a convenient restart point
 //  (typically the start of the current MCU). next_output_byte & free_in_buffer
-//  indicate where the restart point will be if the current call returns FALSE.
+//  indicate where the restart point will be if the current call returns false.
 //  Data beyond this point will be regenerated after resumption, so do not
 //  write it out when emptying the buffer externally.
 
@@ -374,8 +373,8 @@ boolean LLImageJPEG::encodeEmptyOutputBuffer( j_compress_ptr cinfo )
   U8* new_buffer = new U8[ new_buffer_size ];
   if (!new_buffer)
   {
-  	llerrs << "Out of memory in LLImageJPEG::encodeEmptyOutputBuffer( j_compress_ptr cinfo )" << llendl;
-  	return FALSE;
+  	LL_ERRS() << "Out of memory in LLImageJPEG::encodeEmptyOutputBuffer( j_compress_ptr cinfo )" << LL_ENDL;
+  	return false;
   }
   memcpy( new_buffer, self->mOutputBuffer, self->mOutputBufferSize );	/* Flawfinder: ignore */
   delete[] self->mOutputBuffer;
@@ -383,9 +382,11 @@ boolean LLImageJPEG::encodeEmptyOutputBuffer( j_compress_ptr cinfo )
 
   cinfo->dest->next_output_byte = self->mOutputBuffer + self->mOutputBufferSize;
   cinfo->dest->free_in_buffer = self->mOutputBufferSize;
+  self->disclaimMem(self->mOutputBufferSize);
   self->mOutputBufferSize = new_buffer_size;
+  self->claimMem(new_buffer_size);
 
-  return TRUE;
+  return true;
 }
 
 //  Terminate destination --- called by jpeg_finish_compress
@@ -464,11 +465,11 @@ void LLImageJPEG::errorOutputMessage( j_common_ptr cinfo )
 	std::string error = buffer ;
 	LLImage::setLastError(error);
 
-	BOOL is_decode = (cinfo->is_decompressor != 0);
-	llwarns << "LLImageJPEG " << (is_decode ? "decode " : "encode ") << " failed: " << buffer << llendl;
+	bool is_decode = (cinfo->is_decompressor != 0);
+	LL_WARNS() << "LLImageJPEG " << (is_decode ? "decode " : "encode ") << " failed: " << buffer << LL_ENDL;
 }
 
-BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
+bool LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 {
 	llassert_always(raw_image);
 	
@@ -481,7 +482,7 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 		break;
 	default:
 		setLastError("Unable to encode a JPEG image that doesn't have 1 or 3 components.");
-		return FALSE;
+		return false;
 	}
 
 	setSize(raw_image->getWidth(), raw_image->getHeight(), raw_image->getComponents());
@@ -489,7 +490,9 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 	// Allocate a temporary buffer big enough to hold the entire compressed image (and then some)
 	// (Note: we make it bigger in emptyOutputBuffer() if we need to)
 	delete[] mOutputBuffer;
+	disclaimMem(mOutputBufferSize);
 	mOutputBufferSize = getWidth() * getHeight() * getComponents() + 1024;
+	claimMem(mOutputBufferSize);
 	mOutputBuffer = new U8[ mOutputBufferSize ];
 
 	const U8* raw_image_data = NULL;
@@ -526,8 +529,9 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 		jpeg_destroy_compress(&cinfo);
 		delete[] mOutputBuffer;
 		mOutputBuffer = NULL;
+		disclaimMem(mOutputBufferSize);
 		mOutputBufferSize = 0;
-		return FALSE;
+		return false;
 	}
 
 	try
@@ -572,7 +576,7 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 			break;
 		default:
 			setLastError("Unable to encode a JPEG image that doesn't have 1 or 3 components.");
-			return FALSE;
+			return false;
 		}
 
 		// Now use the library's routine to set default compression parameters.
@@ -581,15 +585,15 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 		jpeg_set_defaults(&cinfo);
 
 		// Now you can set any non-default parameters you wish to.
-		jpeg_set_quality(&cinfo, mEncodeQuality, TRUE );  // limit to baseline-JPEG values
+		jpeg_set_quality(&cinfo, mEncodeQuality, true );  // limit to baseline-JPEG values
 
 		////////////////////////////////////////
 		// Step 4: Start compressor 
 		//
-		// TRUE ensures that we will write a complete interchange-JPEG file.
-		// Pass TRUE unless you are very sure of what you're doing.
+		// true ensures that we will write a complete interchange-JPEG file.
+		// Pass true unless you are very sure of what you're doing.
    
-		jpeg_start_compress(&cinfo, TRUE);
+		jpeg_start_compress(&cinfo, true);
 
 		////////////////////////////////////////
 		// Step 5: while (scan lines remain to be written) 
@@ -628,6 +632,7 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 		// After finish_compress, we can release the temp output buffer. 
 		delete[] mOutputBuffer;
 		mOutputBuffer = NULL;
+		disclaimMem(mOutputBufferSize);
 		mOutputBufferSize = 0;
 
 		////////////////////////////////////////
@@ -640,9 +645,10 @@ BOOL LLImageJPEG::encode( const LLImageRaw* raw_image, F32 encode_time )
 		jpeg_destroy_compress(&cinfo);
 		delete[] mOutputBuffer;
 		mOutputBuffer = NULL;
+		disclaimMem(mOutputBufferSize);
 		mOutputBufferSize = 0;
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }

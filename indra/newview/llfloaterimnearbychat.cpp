@@ -87,9 +87,13 @@ static LLChatTypeTrigger sChatTypeTriggers[] = {
 	{ "/shout"	, CHAT_TYPE_SHOUT}
 };
 
+bool cb_do_nothing()
+{
+	return false;
+}
 
 LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
-:	LLFloaterIMSessionTab(llsd),
+:	LLFloaterIMSessionTab(LLSD(LLUUID::null)),
 	//mOutputMonitor(NULL),
 	mSpeakerMgr(NULL),
 	mExpandedHeight(COLLAPSED_HEIGHT + EXPANDED_HEIGHT)
@@ -97,7 +101,12 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
     mIsP2PChat = false;
 	mIsNearbyChat = true;
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
-	mSessionID = LLUUID();
+
+	// Required by LLFloaterIMSessionTab::mGearBtn
+	// But nearby floater has no 'per agent' menu items, 
+	mEnableCallbackRegistrar.add("Avatar.EnableGearItem", boost::bind(&cb_do_nothing));
+	mCommitCallbackRegistrar.add("Avatar.GearDoToSelected", boost::bind(&cb_do_nothing));
+	mEnableCallbackRegistrar.add("Avatar.CheckGearItem", boost::bind(&cb_do_nothing));
 }
 
 //static
@@ -219,7 +228,7 @@ void LLFloaterIMNearbyChat::loadHistory()
 		else
  		{
 			std::string legacy_name = gCacheName->buildLegacyName(from);
- 			gCacheName->getUUID(legacy_name, from_id);
+			from_id = LLAvatarNameCache::findIdByName(legacy_name);
  		}
 
 		LLChat chat;
@@ -283,7 +292,7 @@ void LLFloaterIMNearbyChat::onTearOffClicked()
 	LLFloaterIMSessionTab::onTearOffClicked();
 
 	// see CHUI-170: Save torn-off state of the nearby chat between sessions
-	BOOL in_the_multifloater = (BOOL)getHost();
+	bool in_the_multifloater(getHost());
 	gSavedPerAccountSettings.setBOOL("NearbyChatIsNotTornOff", in_the_multifloater);
 }
 
@@ -305,6 +314,13 @@ void LLFloaterIMNearbyChat::onClose(bool app_quitting)
 {
 	// Override LLFloaterIMSessionTab::onClose() so that Nearby Chat is not removed from the conversation floater
 	LLFloaterIMSessionTab::restoreFloater();
+	if (app_quitting)
+	{
+		// We are starting and closing floater in "expanded" state
+		// Update expanded (restored) rect and position for use in next session
+		forceReshape();
+		storeRectControl();
+	}
 }
 
 // virtual
@@ -331,7 +347,7 @@ void LLFloaterIMNearbyChat::onChatFontChange(LLFontGL* fontp)
 void LLFloaterIMNearbyChat::show()
 {
 		openFloater(getKey());
-	}
+}
 
 bool LLFloaterIMNearbyChat::isChatVisible() const
 {
@@ -479,7 +495,8 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 	KEY key = gKeyboard->currentKey();
 
 	// Ignore "special" keys, like backspace, arrows, etc.
-	if (length > 1 
+	if (gSavedSettings.getBOOL("ChatAutocompleteGestures")
+		&& length > 1
 		&& raw_text[0] == '/'
 		&& key < KEY_SPECIAL)
 	{
@@ -507,10 +524,10 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 			mInputEditor->endOfDoc();
 		}
 
-		//llinfos << "GESTUREDEBUG " << trigger 
+		//LL_INFOS() << "GESTUREDEBUG " << trigger 
 		//	<< " len " << length
 		//	<< " outlen " << out_str.getLength()
-		//	<< llendl;
+		//	<< LL_ENDL;
 	}
 }
 
@@ -697,22 +714,22 @@ void LLFloaterIMNearbyChat::sendChatFromViewer(const LLWString &wtext, EChatType
 	{
 		if (type == CHAT_TYPE_WHISPER)
 		{
-			lldebugs << "You whisper " << utf8_text << llendl;
+			LL_DEBUGS() << "You whisper " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_WHISPER, ANIM_REQUEST_START);
 		}
 		else if (type == CHAT_TYPE_NORMAL)
 		{
-			lldebugs << "You say " << utf8_text << llendl;
+			LL_DEBUGS() << "You say " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_TALK, ANIM_REQUEST_START);
 		}
 		else if (type == CHAT_TYPE_SHOUT)
 		{
-			lldebugs << "You shout " << utf8_text << llendl;
+			LL_DEBUGS() << "You shout " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_SHOUT, ANIM_REQUEST_START);
 		}
 		else
 		{
-			llinfos << "send_chat_from_viewer() - invalid volume" << llendl;
+			LL_INFOS() << "send_chat_from_viewer() - invalid volume" << LL_ENDL;
 			return;
 		}
 	}
@@ -720,7 +737,7 @@ void LLFloaterIMNearbyChat::sendChatFromViewer(const LLWString &wtext, EChatType
 	{
 		if (type != CHAT_TYPE_START && type != CHAT_TYPE_STOP)
 		{
-			lldebugs << "Channel chat: " << utf8_text << llendl;
+			LL_DEBUGS() << "Channel chat: " << utf8_text << LL_ENDL;
 		}
 	}
 
@@ -799,7 +816,8 @@ LLWString LLFloaterIMNearbyChat::stripChannelNumber(const LLWString &mesg, S32* 
 	}
 	else if (mesg[0] == '/'
 			 && mesg[1]
-			 && LLStringOps::isDigit(mesg[1]))
+			 && (LLStringOps::isDigit(mesg[1])
+				 || (mesg[1] == '-' && mesg[2] && LLStringOps::isDigit(mesg[2]))))
 	{
 		// This a special "/20" speak on a channel
 		S32 pos = 0;
@@ -813,7 +831,7 @@ LLWString LLFloaterIMNearbyChat::stripChannelNumber(const LLWString &mesg, S32* 
 			channel_string.push_back(c);
 			pos++;
 		}
-		while(c && pos < 64 && LLStringOps::isDigit(c));
+		while(c && pos < 64 && (LLStringOps::isDigit(c) || (pos==1 && c =='-')));
 		
 		// Move the pointer forward to the first non-whitespace char
 		// Check isspace before looping, so we can handle "/33foo"
@@ -838,19 +856,36 @@ LLWString LLFloaterIMNearbyChat::stripChannelNumber(const LLWString &mesg, S32* 
 
 void send_chat_from_viewer(const std::string& utf8_out_text, EChatType type, S32 channel)
 {
-	LLMessageSystem* msg = gMessageSystem;
-	msg->newMessageFast(_PREHASH_ChatFromViewer);
-	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-	msg->nextBlockFast(_PREHASH_ChatData);
-	msg->addStringFast(_PREHASH_Message, utf8_out_text);
-	msg->addU8Fast(_PREHASH_Type, type);
-	msg->addS32("Channel", channel);
+    LLMessageSystem* msg = gMessageSystem;
 
-	gAgent.sendReliableMessage();
+    if (channel >= 0)
+    {
+        msg->newMessageFast(_PREHASH_ChatFromViewer);
+        msg->nextBlockFast(_PREHASH_AgentData);
+        msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+        msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+        msg->nextBlockFast(_PREHASH_ChatData);
+        msg->addStringFast(_PREHASH_Message, utf8_out_text);
+        msg->addU8Fast(_PREHASH_Type, type);
+        msg->addS32("Channel", channel);
 
-	LLViewerStats::getInstance()->incStat(LLViewerStats::ST_CHAT_COUNT);
+    }
+    else
+    {
+        // Hack: ChatFromViewer doesn't allow negative channels
+        msg->newMessage("ScriptDialogReply");
+        msg->nextBlock("AgentData");
+        msg->addUUID("AgentID", gAgentID);
+        msg->addUUID("SessionID", gAgentSessionID);
+        msg->nextBlock("Data");
+        msg->addUUID("ObjectID", gAgentID);
+        msg->addS32("ChatChannel", channel);
+        msg->addS32("ButtonIndex", 0);
+        msg->addString("ButtonLabel", utf8_out_text);
+    }
+
+    gAgent.sendReliableMessage();
+    add(LLStatViewer::CHAT_COUNT, 1);
 }
 
 class LLChatCommandHandler : public LLCommandHandler

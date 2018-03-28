@@ -30,9 +30,16 @@
 #include <boost/tokenizer.hpp>
 
 #include "llstl.h"
-#include "lliohttpserver.h" // for string constants
+#include "llhttpconstants.h"
+#include "llexception.h"
 
-static const std::string CONTEXT_WILDCARD("wildcard");
+const std::string CONTEXT_HEADERS("headers");
+const std::string CONTEXT_PATH("path");
+const std::string CONTEXT_QUERY_STRING("query-string");
+const std::string CONTEXT_REQUEST("request");
+const std::string CONTEXT_RESPONSE("response");
+const std::string CONTEXT_VERB("verb");
+const std::string CONTEXT_WILDCARD("wildcard");
 
 /**
  * LLHTTPNode
@@ -76,8 +83,8 @@ LLHTTPNode::LLHTTPNode()
 // virtual
 LLHTTPNode::~LLHTTPNode()
 {
-	std::for_each(impl.mNamedChildren.begin(), impl.mNamedChildren.end(),
-		DeletePairedPointer());
+	std::for_each(impl.mNamedChildren.begin(), impl.mNamedChildren.end(), DeletePairedPointer());
+	impl.mNamedChildren.clear();
 
 	delete impl.mWildcardChild;
 	
@@ -86,27 +93,28 @@ LLHTTPNode::~LLHTTPNode()
 
 
 namespace {
-	class NotImplemented
+	struct NotImplemented: public LLException
 	{
+		NotImplemented(): LLException("LLHTTPNode::NotImplemented") {}
 	};
 }
 
 // virtual
 LLSD LLHTTPNode::simpleGet() const
 {
-	throw NotImplemented();
+	LLTHROW(NotImplemented());
 }
 
 // virtual
 LLSD LLHTTPNode::simplePut(const LLSD& input) const
 {
-	throw NotImplemented();
+	LLTHROW(NotImplemented());
 }
 
 // virtual
 LLSD LLHTTPNode::simplePost(const LLSD& input) const
 {
-	throw NotImplemented();
+	LLTHROW(NotImplemented());
 }
 
 
@@ -166,28 +174,30 @@ void LLHTTPNode::del(LLHTTPNode::ResponsePtr response, const LLSD& context) cons
 // virtual
 LLSD LLHTTPNode::simpleDel(const LLSD&) const
 {
-	throw NotImplemented();
+	LLTHROW(NotImplemented());
 }
 
 // virtual
 void  LLHTTPNode::options(ResponsePtr response, const LLSD& context) const
 {
-	//llinfos << "options context: " << context << llendl;
+	//LL_INFOS() << "options context: " << context << LL_ENDL;
+	LL_DEBUGS("LLHTTPNode") << "context: " << context << LL_ENDL;
 
 	// default implementation constructs an url to the documentation.
+	// *TODO: Check for 'Host' header instead of 'host' header?
 	std::string host(
-		context[CONTEXT_REQUEST][CONTEXT_HEADERS]["host"].asString());
+		context[CONTEXT_REQUEST][CONTEXT_HEADERS][HTTP_IN_HEADER_HOST].asString());
 	if(host.empty())
 	{
-		response->status(400, "Bad Request -- need Host header");
+		response->status(HTTP_BAD_REQUEST, "Bad Request -- need Host header");
 		return;
 	}
 	std::ostringstream ostr;
 	ostr << "http://" << host << "/web/server/api";
-	ostr << context[CONTEXT_REQUEST]["path"].asString();
+	ostr << context[CONTEXT_REQUEST][CONTEXT_PATH].asString();
 	static const std::string DOC_HEADER("X-Documentation-URL");
 	response->addHeader(DOC_HEADER, ostr.str());
-	response->status(200, "OK");
+	response->status(HTTP_OK, "OK");
 }
 
 
@@ -238,10 +248,10 @@ const LLHTTPNode* LLHTTPNode::traverse(
 		LLHTTPNode* child = node->getChild(*iter, context);
 		if(!child) 
 		{
-			lldebugs << "LLHTTPNode::traverse: Couldn't find '" << *iter << "'" << llendl;
+			LL_DEBUGS() << "LLHTTPNode::traverse: Couldn't find '" << *iter << "'" << LL_ENDL;
 			break; 
 		}
-		lldebugs << "LLHTTPNode::traverse: Found '" << *iter << "'" << llendl;
+		LL_DEBUGS() << "LLHTTPNode::traverse: Found '" << *iter << "'" << LL_ENDL;
 
 		node = child;
 	}
@@ -275,8 +285,8 @@ void LLHTTPNode::addNode(const std::string& path, LLHTTPNode* nodeToAdd)
 	
 	if (iter == end)
 	{
-		llwarns << "LLHTTPNode::addNode: already a node that handles "
-			<< path << llendl;
+		LL_WARNS() << "LLHTTPNode::addNode: already a node that handles "
+			<< path << LL_ENDL;
 		return;
 	}
 	
@@ -389,17 +399,17 @@ void LLHTTPNode::Response::statusUnknownError(S32 code)
 
 void LLHTTPNode::Response::notFound(const std::string& message)
 {
-	status(404, message);
+	status(HTTP_NOT_FOUND, message);
 }
 
 void LLHTTPNode::Response::notFound()
 {
-	status(404, "Not Found");
+	status(HTTP_NOT_FOUND, "Not Found");
 }
 
 void LLHTTPNode::Response::methodNotAllowed()
 {
-	status(405, "Method Not Allowed");
+	status(HTTP_METHOD_NOT_ALLOWED, "Method Not Allowed");
 }
 
 void LLHTTPNode::Response::addHeader(
@@ -467,12 +477,17 @@ LLSimpleResponse::~LLSimpleResponse()
 
 void LLSimpleResponse::result(const LLSD& result)
 {
-	status(200, "OK");
+	status(HTTP_OK, "OK");
 }
 
 void LLSimpleResponse::extendedResult(S32 code, const std::string& body, const LLSD& headers)
 {
 	status(code,body);
+}
+
+void LLSimpleResponse::extendedResult(S32 code, const LLSD& r, const LLSD& headers)
+{
+	status(code,"(LLSD)");
 }
 
 void LLSimpleResponse::status(S32 code, const std::string& message)

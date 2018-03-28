@@ -40,8 +40,8 @@
 #include "llfloaterpreference.h"
 #include "llsliderctrl.h"
 
-/* static */ const F32 LLPanelVolumePulldown::sAutoCloseFadeStartTimeSec = 4.0f;
-/* static */ const F32 LLPanelVolumePulldown::sAutoCloseTotalTimeSec = 5.0f;
+/* static */ const F32 LLPanelVolumePulldown::sAutoCloseFadeStartTimeSec = 2.0f;
+/* static */ const F32 LLPanelVolumePulldown::sAutoCloseTotalTimeSec = 3.0f;
 
 ///----------------------------------------------------------------------------
 /// Class LLPanelVolumePulldown
@@ -87,7 +87,7 @@ void LLPanelVolumePulldown::onMouseLeave(S32 x, S32 y, MASK mask)
 }
 
 /*virtual*/ 
-void LLPanelVolumePulldown::handleVisibilityChange ( BOOL new_visibility )
+void LLPanelVolumePulldown::onVisibilityChange ( BOOL new_visibility )
 {
 	if (new_visibility)	
 	{

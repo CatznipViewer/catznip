@@ -39,19 +39,18 @@
 #include "indra_constants.h"
 
 #include <OpenGL/OpenGL.h>
+#include <Carbon/Carbon.h>
 #include <CoreServices/CoreServices.h>
 
 extern BOOL gDebugWindowProc;
 
-// culled from winuser.h
-//const S32	WHEEL_DELTA = 120;     /* Value for rolling one detent */
-// On the Mac, the scroll wheel reports a delta of 1 for each detent.
-// There's also acceleration for faster scrolling, based on a slider in the system preferences.
-const S32	WHEEL_DELTA = 1;     /* Value for rolling one detent */
 const S32	BITS_PER_PIXEL = 32;
 const S32	MAX_NUM_RESOLUTIONS = 32;
 
-
+namespace
+{
+    NSKeyEventRef mRawKeyEvent = NULL;
+}
 //
 // LLWindowMacOSX
 //
@@ -199,14 +198,20 @@ LLWindowMacOSX::LLWindowMacOSX(LLWindowCallbacks* callbacks,
 // These functions are used as wrappers for our internal event handling callbacks.
 // It's a good idea to wrap these to avoid reworking more code than we need to within LLWindow.
 
-bool callKeyUp(unsigned short key, unsigned int mask)
+bool callKeyUp(NSKeyEventRef event, unsigned short key, unsigned int mask)
 {
-	return gKeyboard->handleKeyUp(key, mask);
+    mRawKeyEvent = event;
+	bool retVal = gKeyboard->handleKeyUp(key, mask);
+    mRawKeyEvent = NULL;
+    return retVal;
 }
 
-bool callKeyDown(unsigned short key, unsigned int mask)
+bool callKeyDown(NSKeyEventRef event, unsigned short key, unsigned int mask)
 {
-	return gKeyboard->handleKeyDown(key, mask);
+    mRawKeyEvent = event;
+	bool retVal = gKeyboard->handleKeyDown(key, mask);
+    mRawKeyEvent = NULL;
+    return retVal;
 }
 
 void callResetKeys()
@@ -216,7 +221,23 @@ void callResetKeys()
 
 bool callUnicodeCallback(wchar_t character, unsigned int mask)
 {
-	return gWindowImplementation->getCallbacks()->handleUnicodeChar(character, mask);
+    NativeKeyEventData eventData;
+    
+    memset(&eventData, 0, sizeof(NativeKeyEventData));
+    
+    eventData.mKeyEvent = NativeKeyEventData::KEYCHAR;
+    eventData.mEventType = 0;
+    eventData.mEventModifiers = mask;
+    eventData.mEventKeyCode = 0;
+    eventData.mEventChars = character;
+    eventData.mEventUnmodChars = character;
+    eventData.mEventRepeat = false;
+    
+    mRawKeyEvent = &eventData;
+    
+    bool result = gWindowImplementation->getCallbacks()->handleUnicodeChar(character, mask);
+    mRawKeyEvent = NULL;
+    return result;
 }
 
 void callFocus()
@@ -229,7 +250,10 @@ void callFocus()
 
 void callFocusLost()
 {
-	gWindowImplementation->getCallbacks()->handleFocusLost(gWindowImplementation);
+	if (gWindowImplementation)
+	{
+		gWindowImplementation->getCallbacks()->handleFocusLost(gWindowImplementation);
+	}
 }
 
 void callRightMouseDown(float *pos, MASK mask)
@@ -240,8 +264,8 @@ void callRightMouseDown(float *pos, MASK mask)
     }
     
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	gWindowImplementation->getCallbacks()->handleRightMouseDown(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 }
 
@@ -253,8 +277,8 @@ void callRightMouseUp(float *pos, MASK mask)
     }
     
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	gWindowImplementation->getCallbacks()->handleRightMouseUp(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 }
 
@@ -266,8 +290,8 @@ void callLeftMouseDown(float *pos, MASK mask)
     }
     
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	gWindowImplementation->getCallbacks()->handleMouseDown(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 }
 
@@ -279,8 +303,8 @@ void callLeftMouseUp(float *pos, MASK mask)
     }
     
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	gWindowImplementation->getCallbacks()->handleMouseUp(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 	
 }
@@ -293,8 +317,8 @@ void callDoubleClick(float *pos, MASK mask)
     }
     
 	LLCoordGL	outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	gWindowImplementation->getCallbacks()->handleDoubleClick(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 }
 
@@ -309,14 +333,26 @@ void callResize(unsigned int width, unsigned int height)
 void callMouseMoved(float *pos, MASK mask)
 {
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	float deltas[2];
 	gWindowImplementation->getMouseDeltas(deltas);
 	outCoords.mX += deltas[0];
 	outCoords.mY += deltas[1];
 	gWindowImplementation->getCallbacks()->handleMouseMove(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 	//gWindowImplementation->getCallbacks()->handleScrollWheel(gWindowImplementation, 0);
+}
+
+void callMouseDragged(float *pos, MASK mask)
+{
+    LLCoordGL		outCoords;
+    outCoords.mX = ll_round(pos[0]);
+    outCoords.mY = ll_round(pos[1]);
+    float deltas[2];
+    gWindowImplementation->getMouseDeltas(deltas);
+    outCoords.mX += deltas[0];
+    outCoords.mY += deltas[1];
+    gWindowImplementation->getCallbacks()->handleMouseDragged(gWindowImplementation, outCoords, gKeyboard->currentMask(TRUE));
 }
 
 void callScrollMoved(float delta)
@@ -348,6 +384,22 @@ void callWindowUnfocus()
 	gWindowImplementation->getCallbacks()->handleFocusLost(gWindowImplementation);
 }
 
+void callWindowHide()
+{	
+	if ( gWindowImplementation && gWindowImplementation->getCallbacks() )
+	{
+		gWindowImplementation->getCallbacks()->handleActivate(gWindowImplementation, false);
+	}
+}
+
+void callWindowUnhide()
+{	
+	if ( gWindowImplementation && gWindowImplementation->getCallbacks() )
+	{
+		gWindowImplementation->getCallbacks()->handleActivate(gWindowImplementation, true);
+	}
+}
+
 void callDeltaUpdate(float *delta, MASK mask)
 {
 	gWindowImplementation->updateMouseDeltas(delta);
@@ -356,8 +408,8 @@ void callDeltaUpdate(float *delta, MASK mask)
 void callMiddleMouseDown(float *pos, MASK mask)
 {
 	LLCoordGL		outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	float deltas[2];
 	gWindowImplementation->getMouseDeltas(deltas);
 	outCoords.mX += deltas[0];
@@ -368,8 +420,8 @@ void callMiddleMouseDown(float *pos, MASK mask)
 void callMiddleMouseUp(float *pos, MASK mask)
 {
 	LLCoordGL outCoords;
-	outCoords.mX = llround(pos[0]);
-	outCoords.mY = llround(pos[1]);
+	outCoords.mX = ll_round(pos[0]);
+	outCoords.mY = ll_round(pos[1]);
 	float deltas[2];
 	gWindowImplementation->getMouseDeltas(deltas);
 	outCoords.mX += deltas[0];
@@ -492,7 +544,7 @@ void getPreeditLocation(float *location, unsigned int length)
 		
 		preeditor->getPreeditLocation(length, &coord, &rect, NULL);
 		
-		float c[4] = {coord.mX, coord.mY, 0, 0};
+		float c[4] = {float(coord.mX), float(coord.mY), 0, 0};
 		
 		convertRectToScreen(gWindowImplementation->getWindow(), c);
 		
@@ -505,8 +557,8 @@ void LLWindowMacOSX::updateMouseDeltas(float* deltas)
 {
 	if (mCursorDecoupled)
 	{
-		mCursorLastEventDeltaX = llround(deltas[0]);
-		mCursorLastEventDeltaY = llround(-deltas[1]);
+		mCursorLastEventDeltaX = ll_round(deltas[0]);
+		mCursorLastEventDeltaY = ll_round(-deltas[1]);
 		
 		if (mCursorIgnoreNextDelta)
 		{
@@ -785,7 +837,7 @@ BOOL LLWindowMacOSX::getPosition(LLCoordScreen *position)
 	}
 	else
 	{
-		llerrs << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << llendl;
+		LL_ERRS() << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << LL_ENDL;
 	}
 
 	return (err == noErr);
@@ -811,7 +863,7 @@ BOOL LLWindowMacOSX::getSize(LLCoordScreen *size)
 	}
 	else
 	{
-		llerrs << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << llendl;
+		LL_ERRS() << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << LL_ENDL;
 	}
 
 	return (err == noErr);
@@ -837,7 +889,7 @@ BOOL LLWindowMacOSX::getSize(LLCoordWindow *size)
 	}
 	else
 	{
-		llerrs << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << llendl;
+		LL_ERRS() << "LLWindowMacOSX::getPosition(): no window and not fullscreen!" << LL_ENDL;
 	}
 	
 	return (err == noErr);
@@ -847,7 +899,7 @@ BOOL LLWindowMacOSX::setPosition(const LLCoordScreen position)
 {
 	if(mWindow)
 	{
-		float pos[2] = {position.mX, position.mY};
+		float pos[2] = {float(position.mX), float(position.mY)};
 		setWindowPos(mWindow, pos);
 	}
 
@@ -882,6 +934,11 @@ BOOL LLWindowMacOSX::setSizeImpl(const LLCoordWindow size)
 void LLWindowMacOSX::swapBuffers()
 {
 	CGLFlushDrawable(mContext);
+}
+
+void LLWindowMacOSX::restoreGLContext()
+{
+    CGLSetCurrentContext(mContext);
 }
 
 F32 LLWindowMacOSX::getGamma()
@@ -998,11 +1055,11 @@ void LLWindowMacOSX::setMouseClipping( BOOL b )
 
 	if(b)
 	{
-		//		llinfos << "setMouseClipping(TRUE)" << llendl;
+		//		LL_INFOS() << "setMouseClipping(TRUE)" << LL_ENDL;
 	}
 	else
 	{
-		//		llinfos << "setMouseClipping(FALSE)" << llendl;
+		//		LL_INFOS() << "setMouseClipping(FALSE)" << LL_ENDL;
 	}
 
 	adjustCursorDecouple();
@@ -1020,7 +1077,7 @@ BOOL LLWindowMacOSX::setCursorPosition(const LLCoordWindow position)
 
 	CGPoint newPosition;
 
-	//	llinfos << "setCursorPosition(" << screen_pos.mX << ", " << screen_pos.mY << ")" << llendl;
+	//	LL_INFOS() << "setCursorPosition(" << screen_pos.mX << ", " << screen_pos.mY << ")" << LL_ENDL;
 
 	newPosition.x = screen_pos.mX;
 	newPosition.y = screen_pos.mY;
@@ -1082,7 +1139,7 @@ void LLWindowMacOSX::adjustCursorDecouple(bool warpingMouse)
 			// The cursor should be decoupled.  Make sure it is.
 			if(!mCursorDecoupled)
 			{
-				//			llinfos << "adjustCursorDecouple: decoupling cursor" << llendl;
+				//			LL_INFOS() << "adjustCursorDecouple: decoupling cursor" << LL_ENDL;
 				CGAssociateMouseAndMouseCursorPosition(false);
 				mCursorDecoupled = true;
 				mCursorIgnoreNextDelta = TRUE;
@@ -1094,7 +1151,7 @@ void LLWindowMacOSX::adjustCursorDecouple(bool warpingMouse)
 		// The cursor should not be decoupled.  Make sure it isn't.
 		if(mCursorDecoupled)
 		{
-			//			llinfos << "adjustCursorDecouple: recoupling cursor" << llendl;
+			//			LL_INFOS() << "adjustCursorDecouple: recoupling cursor" << LL_ENDL;
 			CGAssociateMouseAndMouseCursorPosition(true);
 			mCursorDecoupled = false;
 		}
@@ -1138,6 +1195,8 @@ void LLWindowMacOSX::beforeDialog()
 
 void LLWindowMacOSX::afterDialog()
 {
+    //For fix problem with Core Flow view on OSX
+    restoreGLContext();
 }
 
 
@@ -1359,7 +1418,7 @@ const char* cursorIDToName(int id)
 		case UI_CURSOR_TOOLNO:							return "UI_CURSOR_NO";
 	}
 
-	llerrs << "cursorIDToName: unknown cursor id" << id << llendl;
+	LL_ERRS() << "cursorIDToName: unknown cursor id" << id << LL_ENDL;
 
 	return "UI_CURSOR_ARROW";
 }
@@ -1398,8 +1457,15 @@ void LLWindowMacOSX::updateCursor()
 		mNextCursor = UI_CURSOR_WORKING;
 	}
 	
-	if(mCurrentCursor == mNextCursor)
-		return;
+    if(mCurrentCursor == mNextCursor)
+    {
+        if(mCursorHidden && mHideCursorPermanent && isCGCursorVisible())
+        {
+            hideNSCursor();            
+            adjustCursorDecouple();
+        }
+        return;
+    }
 
 	// RN: replace multi-drag cursors with single versions
 	if (mNextCursor == UI_CURSOR_ARROWDRAGMULTI)
@@ -1542,14 +1608,14 @@ void LLWindowMacOSX::hideCursor()
 {
 	if(!mCursorHidden)
 	{
-		//		llinfos << "hideCursor: hiding" << llendl;
+		//		LL_INFOS() << "hideCursor: hiding" << LL_ENDL;
 		mCursorHidden = TRUE;
 		mHideCursorPermanent = TRUE;
 		hideNSCursor();
 	}
 	else
 	{
-		//		llinfos << "hideCursor: already hidden" << llendl;
+		//		LL_INFOS() << "hideCursor: already hidden" << LL_ENDL;
 	}
 
 	adjustCursorDecouple();
@@ -1559,14 +1625,14 @@ void LLWindowMacOSX::showCursor()
 {
 	if(mCursorHidden)
 	{
-		//		llinfos << "showCursor: showing" << llendl;
+		//		LL_INFOS() << "showCursor: showing" << LL_ENDL;
 		mCursorHidden = FALSE;
 		mHideCursorPermanent = FALSE;
 		showNSCursor();
 	}
 	else
 	{
-		//		llinfos << "showCursor: already visible" << llendl;
+		//		LL_INFOS() << "showCursor: already visible" << LL_ENDL;
 	}
 
 	adjustCursorDecouple();
@@ -1651,14 +1717,14 @@ void LLWindowMacOSX::spawnWebBrowser(const std::string& escaped_url, bool async)
 
 	if (!found)
 	{
-		llwarns << "spawn_web_browser called for url with protocol not on whitelist: " << escaped_url << llendl;
+		LL_WARNS() << "spawn_web_browser called for url with protocol not on whitelist: " << escaped_url << LL_ENDL;
 		return;
 	}
 
 	S32 result = 0;
 	CFURLRef urlRef = NULL;
 
-	llinfos << "Opening URL " << escaped_url << llendl;
+	LL_INFOS() << "Opening URL " << escaped_url << LL_ENDL;
 
 	CFStringRef	stringRef = CFStringCreateWithCString(NULL, escaped_url.c_str(), kCFStringEncodingUTF8);
 	if (stringRef)
@@ -1678,80 +1744,63 @@ void LLWindowMacOSX::spawnWebBrowser(const std::string& escaped_url, bool async)
 
 		if (result != noErr)
 		{
-			llinfos << "Error " << result << " on open." << llendl;
+			LL_INFOS() << "Error " << result << " on open." << LL_ENDL;
 		}
 
 		CFRelease(urlRef);
 	}
 	else
 	{
-		llinfos << "Error: couldn't create URL." << llendl;
+		LL_INFOS() << "Error: couldn't create URL." << LL_ENDL;
 	}
 }
 
 LLSD LLWindowMacOSX::getNativeKeyData()
 {
 	LLSD result = LLSD::emptyMap();
-#if 0
+
 	if(mRawKeyEvent)
 	{
-		char char_code = 0;
-		UInt32 key_code = 0;
-		UInt32 modifiers = 0;
-		UInt32 keyboard_type = 0;
-
-		GetEventParameter (mRawKeyEvent, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(char), NULL, &char_code);
-		GetEventParameter (mRawKeyEvent, kEventParamKeyCode, typeUInt32, NULL, sizeof(UInt32), NULL, &key_code);
-		GetEventParameter (mRawKeyEvent, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(UInt32), NULL, &modifiers);
-		GetEventParameter (mRawKeyEvent, kEventParamKeyboardType, typeUInt32, NULL, sizeof(UInt32), NULL, &keyboard_type);
-
-		result["char_code"] = (S32)char_code;
-		result["key_code"] = (S32)key_code;
-		result["modifiers"] = (S32)modifiers;
-		result["keyboard_type"] = (S32)keyboard_type;
-
-#if 0
-		// This causes trouble for control characters -- apparently character codes less than 32 (escape, control-A, etc)
-		// cause llsd serialization to create XML that the llsd deserializer won't parse!
-		std::string unicode;
-		S32 err = noErr;
-		EventParamType actualType = typeUTF8Text;
-		UInt32 actualSize = 0;
-		char *buffer = NULL;
-
-		err = GetEventParameter (mRawKeyEvent, kEventParamKeyUnicodes, typeUTF8Text, &actualType, 0, &actualSize, NULL);
-		if(err == noErr)
-		{
-			// allocate a buffer and get the actual data.
-			buffer = new char[actualSize];
-			err = GetEventParameter (mRawKeyEvent, kEventParamKeyUnicodes, typeUTF8Text, &actualType, actualSize, &actualSize, buffer);
-			if(err == noErr)
-			{
-				unicode.assign(buffer, actualSize);
-			}
-			delete[] buffer;
-		}
-
-		result["unicode"] = unicode;
-#endif
-
+        result["event_type"] = LLSD::Integer(mRawKeyEvent->mEventType);
+        result["event_modifiers"] = LLSD::Integer(mRawKeyEvent->mEventModifiers);
+        result["event_keycode"] = LLSD::Integer(mRawKeyEvent->mEventKeyCode);
+        result["event_chars"] = (mRawKeyEvent->mEventChars) ? LLSD(LLSD::Integer(mRawKeyEvent->mEventChars)) : LLSD();
+        result["event_umodchars"] = (mRawKeyEvent->mEventUnmodChars) ? LLSD(LLSD::Integer(mRawKeyEvent->mEventUnmodChars)) : LLSD();
+        result["event_isrepeat"] = LLSD::Boolean(mRawKeyEvent->mEventRepeat);
 	}
-#endif
 
-	lldebugs << "native key data is: " << result << llendl;
+	LL_DEBUGS() << "native key data is: " << result << LL_ENDL;
 
 	return result;
 }
 
-
 BOOL LLWindowMacOSX::dialogColorPicker( F32 *r, F32 *g, F32 *b)
 {
-	// Is this even used anywhere?  Do we really need an OS color picker?
 	BOOL	retval = FALSE;
-	//S32		error = 0;
+	OSErr	error = noErr;
+	NColorPickerInfo	info;
+	
+	memset(&info, 0, sizeof(info));
+	info.theColor.color.rgb.red = (UInt16)(*r * 65535.f);
+	info.theColor.color.rgb.green = (UInt16)(*g * 65535.f);
+	info.theColor.color.rgb.blue = (UInt16)(*b * 65535.f);
+	info.placeWhere = kCenterOnMainScreen;
+
+	error = NPickColor(&info);
+	
+	if (error == noErr)
+	{
+		retval = info.newColorChosen;
+		if (info.newColorChosen)
+		{
+			*r = ((float) info.theColor.color.rgb.red) / 65535.0;
+			*g = ((float) info.theColor.color.rgb.green) / 65535.0;
+			*b = ((float) info.theColor.color.rgb.blue) / 65535.0;
+		}
+	}
+
 	return (retval);
 }
-
 
 void *LLWindowMacOSX::getPlatformWindow()
 {
@@ -1786,8 +1835,6 @@ static long getDictLong (CFDictionaryRef refDict, CFStringRef key)
 
 void LLWindowMacOSX::allowLanguageTextInput(LLPreeditor *preeditor, BOOL b)
 {
-    allowDirectMarkedTextInput(b, mGLView);
-	
 	if (preeditor != mPreeditor && !b)
 	{
 		// This condition may occur by a call to
@@ -1817,6 +1864,7 @@ void LLWindowMacOSX::allowLanguageTextInput(LLPreeditor *preeditor, BOOL b)
 		return;
 	}
 	mLanguageTextInputAllowed = b;
+    allowDirectMarkedTextInput(b, mGLView); // mLanguageTextInputAllowed and mMarkedTextAllowed should be updated at once (by Pell Smit
 }
 
 void LLWindowMacOSX::interruptLanguageTextInput()
@@ -1849,7 +1897,7 @@ S16 LLWindowMacOSX::dragTrackingHandler(DragTrackingMessage message, WindowRef t
 	S16 result = 0;
 	LLWindowMacOSX *self = (LLWindowMacOSX*)handlerRefCon;
 
-	lldebugs << "drag tracking handler, message = " << message << llendl;
+	LL_DEBUGS() << "drag tracking handler, message = " << message << LL_ENDL;
 
 	switch(message)
 	{

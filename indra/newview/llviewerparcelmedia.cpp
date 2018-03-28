@@ -43,6 +43,7 @@
 //#include "llfirstuse.h"
 #include "llpluginclassmedia.h"
 #include "llviewertexture.h"
+#include "llcorehttputil.h"
 
 // Static Variables
 
@@ -99,7 +100,7 @@ void LLViewerParcelMedia::update(LLParcel* parcel)
 			std::string mediaCurrentUrl = std::string( parcel->getMediaCurrentURL());
 
 			// if we have a current (link sharing) url, use it instead
-			if (mediaCurrentUrl != "" && parcel->getMediaType() == "text/html")
+			if (mediaCurrentUrl != "" && parcel->getMediaType() == HTTP_CONTENT_TEXT_HTML)
 			{
 				mediaUrl = mediaCurrentUrl;
 			}
@@ -159,7 +160,7 @@ void LLViewerParcelMedia::update(LLParcel* parcel)
 // static
 void LLViewerParcelMedia::play(LLParcel* parcel)
 {
-	lldebugs << "LLViewerParcelMedia::play" << llendl;
+	LL_DEBUGS() << "LLViewerParcelMedia::play" << LL_ENDL;
 
 	if (!parcel) return;
 
@@ -457,9 +458,10 @@ void LLViewerParcelMedia::processParcelMediaUpdate( LLMessageSystem *msg, void *
 }
 // Static
 /////////////////////////////////////////////////////////////////////////////////////////
+// *TODO: I can not find any active code where this method is called...
 void LLViewerParcelMedia::sendMediaNavigateMessage(const std::string& url)
 {
-	std::string region_url = gAgent.getRegion()->getCapability("ParcelNavigateMedia");
+	std::string region_url = gAgent.getRegionCapability("ParcelNavigateMedia");
 	if (!region_url.empty())
 	{
 		// send navigate event to sim for link sharing
@@ -467,11 +469,13 @@ void LLViewerParcelMedia::sendMediaNavigateMessage(const std::string& url)
 		body["agent-id"] = gAgent.getID();
 		body["local-id"] = LLViewerParcelMgr::getInstance()->getAgentParcel()->getLocalID();
 		body["url"] = url;
-		LLHTTPClient::post(region_url, body, new LLHTTPClient::Responder);
+
+        LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(region_url, body,
+            "Media Navigation sent to sim.", "Media Navigation failed to send to sim.");
 	}
 	else
 	{
-		llwarns << "can't get ParcelNavigateMedia capability" << llendl;
+		LL_WARNS() << "can't get ParcelNavigateMedia capability" << LL_ENDL;
 	}
 
 }
@@ -590,7 +594,13 @@ void LLViewerParcelMedia::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent
 			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_PICK_FILE_REQUEST" << LL_ENDL;
 		}
 		break;
-
+		
+		case MEDIA_EVENT_FILE_DOWNLOAD:
+		{
+			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_FILE_DOWNLOAD" << LL_ENDL;
+		}
+		break;
+		
 		case MEDIA_EVENT_GEOMETRY_CHANGE:
 		{
 			LL_DEBUGS("Media") << "Media event:  MEDIA_EVENT_GEOMETRY_CHANGE, uuid is " << self->getClickUUID() << LL_ENDL;

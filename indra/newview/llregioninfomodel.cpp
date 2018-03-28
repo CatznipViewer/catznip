@@ -40,6 +40,7 @@ void LLRegionInfoModel::reset()
 {
 	mSimAccess			= 0;
 	mAgentLimit			= 0;
+	mHardAgentLimit		= 100;
 
 	mRegionFlags		= 0;
 	mEstateID			= 0;
@@ -143,6 +144,7 @@ void LLRegionInfoModel::update(LLMessageSystem* msg)
 	msg->getU32Fast(_PREHASH_RegionInfo, _PREHASH_ParentEstateID, mParentEstateID);
 	msg->getU8Fast(_PREHASH_RegionInfo, _PREHASH_SimAccess, mSimAccess);
 	msg->getU8Fast(_PREHASH_RegionInfo, _PREHASH_MaxAgents, mAgentLimit);
+
 	msg->getF32Fast(_PREHASH_RegionInfo, _PREHASH_ObjectBonusFactor, mObjectBonusFactor);
 	msg->getF32Fast(_PREHASH_RegionInfo, _PREHASH_BillableFactor, mBillableFactor);
 	msg->getF32Fast(_PREHASH_RegionInfo, _PREHASH_WaterHeight, mWaterHeight);
@@ -157,6 +159,8 @@ void LLRegionInfoModel::update(LLMessageSystem* msg)
 	// actually the "last set" sun hour, not the current sun hour. JC
 	msg->getF32(_PREHASH_RegionInfo, _PREHASH_SunHour, mSunHour);
 	LL_DEBUGS("Windlight Sync") << "Got region sun hour: " << mSunHour << LL_ENDL;
+
+	msg->getS32Fast(_PREHASH_RegionInfo2, _PREHASH_HardMaxAgents, mHardAgentLimit);
 
 	if (msg->has(_PREHASH_RegionInfo3))
 	{
@@ -192,11 +196,11 @@ void LLRegionInfoModel::sendEstateOwnerMessage(
 
 	if (!cur_region)
 	{
-		llwarns << "Agent region not set" << llendl;
+		LL_WARNS() << "Agent region not set" << LL_ENDL;
 		return;
 	}
 
-	llinfos << "Sending estate request '" << request << "'" << llendl;
+	LL_INFOS() << "Sending estate request '" << request << "'" << LL_ENDL;
 	msg->newMessage("EstateOwnerMessage");
 	msg->nextBlockFast(_PREHASH_AgentData);
 	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
@@ -217,7 +221,7 @@ void LLRegionInfoModel::sendEstateOwnerMessage(
 		std::vector<std::string>::const_iterator end = strings.end();
 		for (unsigned i = 0; it != end; ++it, ++i)
 		{
-			lldebugs << "- [" << i << "] " << (*it) << llendl;
+			LL_DEBUGS() << "- [" << i << "] " << (*it) << LL_ENDL;
 			msg->nextBlock("ParamList");
 			msg->addString("Parameter", *it);
 		}

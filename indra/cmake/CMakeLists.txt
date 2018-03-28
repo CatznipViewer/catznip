@@ -13,7 +13,8 @@ set(cmake_SOURCE_FILES
     BerkeleyDB.cmake
     Boost.cmake
     BuildVersion.cmake
-    CARes.cmake
+    CEFPlugin.cmake
+    CEFPlugin.cmake
     CMakeCopyIfDifferent.cmake
     ConfigurePkgConfig.cmake
     CURL.cmake
@@ -23,20 +24,18 @@ set(cmake_SOURCE_FILES
     DirectX.cmake
     DragDrop.cmake
     EXPAT.cmake
-    ExamplePlugin.cmake
     FindAPR.cmake
     FindAutobuild.cmake
     FindBerkeleyDB.cmake
-    FindCARes.cmake
     FindFMODEX.cmake
     FindGLH.cmake
     FindGoogleBreakpad.cmake
-    FindGooglePerfTools.cmake
     FindHUNSPELL.cmake
     FindJsonCpp.cmake
     FindNDOF.cmake
     FindOpenJPEG.cmake
     FindSCP.cmake
+    FindURIPARSER.cmake
     FindXmlRpcEpi.cmake
     FindZLIB.cmake
     FMODEX.cmake
@@ -44,20 +43,15 @@ set(cmake_SOURCE_FILES
     GLEXT.cmake
     GLH.cmake
     GLOD.cmake
-    GStreamer010Plugin.cmake
-    GetPrerequisites_2_8.cmake
-    Glui.cmake
-    Glut.cmake
+##  GStreamer010Plugin.cmake
     GoogleBreakpad.cmake
     GoogleMock.cmake
-    GooglePerfTools.cmake
     Havok.cmake
     Hunspell.cmake
     JPEG.cmake
     JsonCpp.cmake
     LLAddBuildTest.cmake
     LLAppearance.cmake
-    LLAppearanceUtility.cmake
     LLAudio.cmake
     LLCharacter.cmake
     LLCommon.cmake
@@ -79,7 +73,6 @@ set(cmake_SOURCE_FILES
     LLVFS.cmake
     LLWindow.cmake
     LLXML.cmake
-    LScript.cmake
     Linking.cmake
     MediaPluginBase.cmake
     NDOF.cmake
@@ -92,15 +85,15 @@ set(cmake_SOURCE_FILES
     Prebuilt.cmake
     PulseAudio.cmake
     Python.cmake
-    QuickTimePlugin.cmake
     TemplateCheck.cmake
     Tut.cmake
     UI.cmake
     UnixInstall.cmake
+    URIPARSER.cmake
     Variables.cmake
     ViewerMiscLibs.cmake
     VisualLeakDetector.cmake
-    WebKitLibPlugin.cmake
+    LibVLCPlugin.cmake
     XmlRpcEpi.cmake
     ZLIB.cmake
     )

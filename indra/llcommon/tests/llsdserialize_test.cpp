@@ -46,9 +46,10 @@ typedef U32 uint32_t;
 #include "boost/range.hpp"
 #include "boost/foreach.hpp"
 #include "boost/function.hpp"
-#include "boost/lambda/lambda.hpp"
-#include "boost/lambda/bind.hpp"
-namespace lambda = boost::lambda;
+#include "boost/bind.hpp"
+#include "boost/phoenix/bind/bind_function.hpp"
+#include "boost/phoenix/core/argument.hpp"
+using namespace boost::phoenix;
 
 #include "../llsd.h"
 #include "../llsdserialize.h"
@@ -56,11 +57,8 @@ namespace lambda = boost::lambda;
 #include "../llformat.h"
 
 #include "../test/lltut.h"
-#include "../test/manageapr.h"
 #include "../test/namedtempfile.h"
 #include "stringize.h"
-
-static ManageAPR manager;
 
 std::vector<U8> string_to_vector(const std::string& str)
 {
@@ -268,7 +266,7 @@ namespace tut
 	{
 		std::stringstream stream;	
 		mFormatter->format(v, stream);
-		//llinfos << "checkRoundTrip: length " << stream.str().length() << llendl;
+		//LL_INFOS() << "checkRoundTrip: length " << stream.str().length() << LL_ENDL;
 		LLSD w;
 		mParser->reset();	// reset() call is needed since test code re-uses mParser
 		mParser->parse(stream, w, stream.str().size());
@@ -1520,10 +1518,7 @@ namespace tut
             // scanner.
             import_llsd("import os.path\n"
                         "import sys\n"
-                        "sys.path.insert(0,\n"
-                        "    os.path.join(os.path.dirname(r'" __FILE__ "'),\n"
-                        "                 os.pardir, os.pardir, 'lib', 'python'))\n"
-                        "from indra.base import llsd\n")
+                        "from llbase import llsd\n")
         {}
         ~TestPythonCompatible() {}
 
@@ -1558,7 +1553,7 @@ namespace tut
             params.executable = PYTHON;
             params.args.add(scriptfile.getName());
             LLProcessPtr py(LLProcess::create(params));
-            ensure(STRINGIZE("Couldn't launch " << desc << " script"), py);
+            ensure(STRINGIZE("Couldn't launch " << desc << " script"), bool(py));
             // Implementing timeout would mean messing with alarm() and
             // catching SIGALRM... later maybe...
             int status(0);
@@ -1615,6 +1610,20 @@ namespace tut
                "print 'Running on', sys.platform\n");
     }
 
+    // helper for test<3>
+    static void writeLLSDArray(std::ostream& out, const LLSD& array)
+    {
+        BOOST_FOREACH(LLSD item, llsd::inArray(array))
+        {
+            LLSDSerialize::toNotation(item, out);
+            // It's important to separate with newlines because Python's llsd
+            // module doesn't support parsing from a file stream, only from a
+            // string, so we have to know how much of the file to read into a
+            // string.
+            out << '\n';
+        }
+    }
+
     template<> template<>
     void TestPythonCompatibleObject::test<3>()
     {
@@ -1642,26 +1651,16 @@ namespace tut
             "        assert False, 'Too many data items'\n";
 
         // Create an llsdXXXXXX file containing 'data' serialized to
-        // notation. It's important to separate with newlines because Python's
-        // llsd module doesn't support parsing from a file stream, only from a
-        // string, so we have to know how much of the file to read into a
-        // string.
+        // notation.
         NamedTempFile file("llsd",
                            // NamedTempFile's boost::function constructor
                            // takes a callable. To this callable it passes the
                            // std::ostream with which it's writing the
-                           // NamedTempFile. This lambda-based expression
-                           // first calls LLSD::Serialize() with that ostream,
-                           // then streams a newline to it, etc.
-                           (lambda::bind(LLSDSerialize::toNotation, cdata[0], lambda::_1),
-                            lambda::_1 << '\n',
-                            lambda::bind(LLSDSerialize::toNotation, cdata[1], lambda::_1),
-                            lambda::_1 << '\n',
-                            lambda::bind(LLSDSerialize::toNotation, cdata[2], lambda::_1),
-                            lambda::_1 << '\n'));
+                           // NamedTempFile.
+                           boost::bind(writeLLSDArray, _1, cdata));
 
         python("read C++ notation",
-               lambda::_1 <<
+               placeholders::arg1 <<
                import_llsd <<
                "def parse_each(iterable):\n"
                "    for item in iterable:\n"
@@ -1682,7 +1681,7 @@ namespace tut
         NamedTempFile file("llsd", "");
 
         python("write Python notation",
-               lambda::_1 <<
+               placeholders::arg1 <<
                "from __future__ import with_statement\n" <<
                import_llsd <<
                "DATA = [\n"
@@ -1723,5 +1722,6 @@ namespace tut
                       "This string\n"
                       "has several\n"
                       "lines.");
+        
     }
 }

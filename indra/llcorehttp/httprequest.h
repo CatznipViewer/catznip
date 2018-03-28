@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2014, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,8 @@
 #include "httpcommon.h"
 #include "httphandler.h"
 
+#include "httpheaders.h"
+#include "httpoptions.h"
 
 namespace LLCore
 {
@@ -38,8 +40,6 @@ namespace LLCore
 class HttpRequestQueue;
 class HttpReplyQueue;
 class HttpService;
-class HttpOptions;
-class HttpHeaders;
 class HttpOperation;
 class BufferArray;
 
@@ -56,6 +56,9 @@ class BufferArray;
 /// The class supports the current HTTP request operations:
 ///
 /// - requestGetByteRange:  GET with Range header for a single range of bytes
+/// - requestGet:
+/// - requestPost:
+/// - requestPut:
 ///
 /// Policy Classes
 ///
@@ -94,15 +97,34 @@ public:
 	typedef unsigned int policy_t;
 	typedef unsigned int priority_t;
 	
+	typedef boost::shared_ptr<HttpRequest> ptr_t;
+    typedef boost::weak_ptr<HttpRequest>   wptr_t;
 public:
 	/// @name PolicyMethods
 	/// @{
 
 	/// Represents a default, catch-all policy class that guarantees
 	/// eventual service for any HTTP request.
-	static const int DEFAULT_POLICY_ID = 0;
+	static const policy_t DEFAULT_POLICY_ID = 0;
+	static const policy_t INVALID_POLICY_ID = 0xFFFFFFFFU;
+	static const policy_t GLOBAL_POLICY_ID = 0xFFFFFFFEU;
 
-	enum EGlobalPolicy
+	/// Create a new policy class into which requests can be made.
+	///
+	/// All class creation must occur before threads are started and
+	/// transport begins.  Policy classes are limited to a small value.
+	/// Currently that limit is the default class + 1.
+	///
+	/// @return			If positive, the policy_id used to reference
+	///					the class in other methods.  If 0, requests
+	///					for classes have exceeded internal limits
+	///					or caller has tried to create a class after
+	///					threads have been started.  Caller must fallback
+	///					and recover.
+	///
+	static policy_t createPolicyClass();
+
+	enum EPolicyOption
 	{
 		/// Maximum number of connections the library will use to
 		/// perform operations.  This is somewhat soft as the underlying
@@ -113,24 +135,40 @@ public:
 		/// a somewhat soft value.  There may be an additional five
 		/// connections per policy class depending upon runtime
 		/// behavior.
-		GP_CONNECTION_LIMIT,
+		///
+		/// Both global and per-class
+		PO_CONNECTION_LIMIT,
+
+		/// Limits the number of connections used for a single
+		/// literal address/port pair within the class.
+		///
+		/// Per-class only
+		PO_PER_HOST_CONNECTION_LIMIT,
 
 		/// String containing a system-appropriate directory name
 		/// where SSL certs are stored.
-		GP_CA_PATH,
+		///
+		/// Global only
+		PO_CA_PATH,
 
 		/// String giving a full path to a file containing SSL certs.
-		GP_CA_FILE,
+		///
+		/// Global only
+		PO_CA_FILE,
 
 		/// String of host/port to use as simple HTTP proxy.  This is
 		/// going to change in the future into something more elaborate
 		/// that may support richer schemes.
-		GP_HTTP_PROXY,
+		///
+		/// Global only
+		PO_HTTP_PROXY,
 
 		/// Long value that if non-zero enables the use of the
 		/// traditional LLProxy code for http/socks5 support.  If
 		/// enabled, has priority over GP_HTTP_PROXY.
-		GP_LLPROXY,
+		///
+		/// Global only
+		PO_LLPROXY,
 
 		/// Long value setting the logging trace level for the
 		/// library.  Possible values are:
@@ -143,50 +181,98 @@ public:
 		/// These values are also used in the trace modes for
 		/// individual requests in HttpOptions.  Also be aware that
 		/// tracing tends to impact performance of the viewer.
-		GP_TRACE
+		///
+		/// Global only
+		PO_TRACE,
+
+		/// If greater than 1, suitable requests are allowed to
+		/// pipeline on their connections when they ask for it.
+		/// Value gives the maximum number of outstanding requests
+		/// on a connection.
+		///
+		/// There is some interaction between PO_CONNECTION_LIMIT,
+		/// PO_PER_HOST_CONNECTION_LIMIT, and PO_PIPELINING_DEPTH.
+		/// When PIPELINING_DEPTH is 0 or 1 (no pipelining), this
+		/// library manages connection lifecycle and honors the
+		/// PO_CONNECTION_LIMIT setting as the maximum in-flight
+		/// request limit.  Libcurl itself may be caching additional
+		/// connections under its connection cache policy.
+		///
+		/// When PIPELINING_DEPTH is 2 or more, libcurl performs
+		/// connection management and both PO_CONNECTION_LIMIT and
+		/// PO_PER_HOST_CONNECTION_LIMIT should be set and non-zero.
+		/// In this case (as of libcurl 7.37.0), libcurl will
+		/// open new connections in preference to pipelining, up
+		/// to the above limits at which time pipelining begins.
+		/// And as usual, an additional cache of open but inactive
+		/// connections may still be maintained within libcurl.
+		/// For SL, a good rule-of-thumb is to set
+		/// PO_PER_HOST_CONNECTION_LIMIT to the user-visible
+		/// concurrency value and PO_CONNECTION_LIMIT to twice
+		/// that for baked texture loads and region crossings where
+		/// additional connection load will be tolerated.  If
+		/// either limit is 0, libcurl will prefer pipelining
+		/// over connection creation, which is still interesting,
+		/// but won't be pursued at this time.
+		///
+		/// Per-class only
+		PO_PIPELINING_DEPTH,
+
+		/// Controls whether client-side throttling should be
+		/// performed on this policy class.  Positive values
+		/// enable throttling and specify the request rate
+		/// (requests per second) that should be targeted.
+		/// A value of zero, the default, specifies no throttling.
+		///
+		/// Per-class only
+		PO_THROTTLE_RATE,
+		
+		/// Controls the callback function used to control SSL CTX 
+		/// certificate verification.
+		///
+		/// Global only
+		PO_SSL_VERIFY_CALLBACK,
+
+		PO_LAST  // Always at end
 	};
 
-	/// Set a parameter on a global policy option.  Calls
-	/// made after the start of the servicing thread are
-	/// not honored and return an error status.
+	/// Prototype for policy based callbacks.  The callback methods will be executed
+	/// on the worker thread so no modifications should be made to the HttpHandler object.
+    typedef boost::function<HttpStatus(const std::string &, const HttpHandler::ptr_t &, void *)> policyCallback_t;
+
+	/// Set a policy option for a global or class parameter at
+	/// startup time (prior to thread start).
 	///
-	/// @param opt		Enum of option to be set.
-	/// @param value	Desired value of option.
-	/// @return			Standard status code.
-	static HttpStatus setPolicyGlobalOption(EGlobalPolicy opt, long value);
-	static HttpStatus setPolicyGlobalOption(EGlobalPolicy opt, const std::string & value);
+	/// @param opt			Enum of option to be set.
+	/// @param pclass		For class-based options, the policy class ID to
+	///					    be changed.  For globals, specify GLOBAL_POLICY_ID.
+	/// @param value		Desired value of option.
+	/// @param ret_value	Pointer to receive effective set value
+	///						if successful.  May be NULL if effective
+	///						value not wanted.
+	/// @return				Standard status code.
+	static HttpStatus setStaticPolicyOption(EPolicyOption opt, policy_t pclass,
+											long value, long * ret_value);
+	static HttpStatus setStaticPolicyOption(EPolicyOption opt, policy_t pclass,
+											const std::string & value, std::string * ret_value);
+	static HttpStatus setStaticPolicyOption(EPolicyOption opt, policy_t pclass,
+											policyCallback_t value, policyCallback_t * ret_value);;
 
-	/// Create a new policy class into which requests can be made.
-	///
-	/// @return			If positive, the policy_id used to reference
-	///					the class in other methods.  If 0, an error
-	///					occurred and @see getStatus() may provide more
-	///					detail on the reason.
-	static policy_t createPolicyClass();
-
-	enum EClassPolicy
-	{
-		/// Limits the number of connections used for the class.
-		CP_CONNECTION_LIMIT,
-
-		/// Limits the number of connections used for a single
-		/// literal address/port pair within the class.
-		CP_PER_HOST_CONNECTION_LIMIT,
-
-		/// Suitable requests are allowed to pipeline on their
-		/// connections when they ask for it.
-		CP_ENABLE_PIPELINING
-	};
-	
 	/// Set a parameter on a class-based policy option.  Calls
 	/// made after the start of the servicing thread are
 	/// not honored and return an error status.
 	///
-	/// @param policy_id		ID of class as returned by @see createPolicyClass().
-	/// @param opt				Enum of option to be set.
-	/// @param value			Desired value of option.
-	/// @return					Standard status code.
-	static HttpStatus setPolicyClassOption(policy_t policy_id, EClassPolicy opt, long value);
+	/// @param opt			Enum of option to be set.
+	/// @param pclass		For class-based options, the policy class ID to
+	///					    be changed.  Ignored for globals but recommend
+	///					    using INVALID_POLICY_ID in this case.
+	/// @param value		Desired value of option.
+	/// @return				Handle of dynamic request.  Use @see getStatus() if
+	///						the returned handle is invalid.
+	HttpHandle setPolicyOption(EPolicyOption opt, policy_t pclass, long value,
+							   HttpHandler::ptr_t handler);
+	HttpHandle setPolicyOption(EPolicyOption opt, policy_t pclass, const std::string & value,
+							   HttpHandler::ptr_t handler);
 
 	/// @}
 
@@ -262,9 +348,9 @@ public:
 	HttpHandle requestGet(policy_t policy_id,
 						  priority_t priority,
 						  const std::string & url,
-						  HttpOptions * options,
-						  HttpHeaders * headers,
-						  HttpHandler * handler);
+                          const HttpOptions::ptr_t & options,
+						  const HttpHeaders::ptr_t & headers,
+						  HttpHandler::ptr_t handler);
 
 
 	/// Queue a full HTTP GET request to be issued with a 'Range' header.
@@ -305,9 +391,9 @@ public:
 								   const std::string & url,
 								   size_t offset,
 								   size_t len,
-								   HttpOptions * options,
-								   HttpHeaders * headers,
-								   HttpHandler * handler);
+                                   const HttpOptions::ptr_t & options,
+								   const HttpHeaders::ptr_t & headers,
+								   HttpHandler::ptr_t handler);
 
 
 	/// Queue a full HTTP POST.  Query arguments and body may
@@ -346,9 +432,9 @@ public:
 						   priority_t priority,
 						   const std::string & url,
 						   BufferArray * body,
-						   HttpOptions * options,
-						   HttpHeaders * headers,
-						   HttpHandler * handler);
+                           const HttpOptions::ptr_t & options,
+						   const HttpHeaders::ptr_t & headers,
+						   HttpHandler::ptr_t handler);
 
 
 	/// Queue a full HTTP PUT.  Query arguments and body may
@@ -387,12 +473,92 @@ public:
 						  priority_t priority,
 						  const std::string & url,
 						  BufferArray * body,
-						  HttpOptions * options,
-						  HttpHeaders * headers,
-						  HttpHandler * handler);
+                          const HttpOptions::ptr_t & options,
+						  const HttpHeaders::ptr_t & headers,
+						  HttpHandler::ptr_t handler);
 
 
-	/// Queue a NoOp request.
+    /// Queue a full HTTP DELETE.  Query arguments and body may
+    /// be provided.  Caller is responsible for escaping and
+    /// encoding and communicating the content types.
+    ///
+    /// @param	policy_id		@see requestGet()
+    /// @param	priority		"
+    /// @param	url				"
+    /// @param	options			@see requestGet()K(optional)
+    /// @param	headers			"
+    /// @param	handler			"
+    /// @return					"
+    ///
+    HttpHandle requestDelete(policy_t policy_id,
+            priority_t priority,
+            const std::string & url,
+            const HttpOptions::ptr_t & options,
+            const HttpHeaders::ptr_t & headers,
+            HttpHandler::ptr_t user_handler);
+
+    /// Queue a full HTTP PATCH.  Query arguments and body may
+    /// be provided.  Caller is responsible for escaping and
+    /// encoding and communicating the content types.
+    ///
+    /// @param	policy_id		@see requestGet()
+    /// @param	priority		"
+    /// @param	url				"
+    /// @param	body			Byte stream to be sent as the body.  No
+    ///							further encoding or escaping will be done
+    ///							to the content.
+    /// @param	options			@see requestGet()K(optional)
+    /// @param	headers			"
+    /// @param	handler			"
+    /// @return					"
+    ///
+    HttpHandle requestPatch(policy_t policy_id,
+            priority_t priority,
+            const std::string & url,
+            BufferArray * body,
+            const HttpOptions::ptr_t & options,
+            const HttpHeaders::ptr_t & headers,
+            HttpHandler::ptr_t user_handler);
+
+    /// Queue a full HTTP COPY.  Query arguments and body may
+    /// be provided.  Caller is responsible for escaping and
+    /// encoding and communicating the content types.
+    ///
+    /// @param	policy_id		@see requestGet()
+    /// @param	priority		"
+    /// @param	url				"
+    /// @param	options			@see requestGet()K(optional)
+    /// @param	headers			"
+    /// @param	handler			"
+    /// @return					"
+    ///
+    HttpHandle requestCopy(policy_t policy_id,
+            priority_t priority,
+            const std::string & url,
+            const HttpOptions::ptr_t & options,
+            const HttpHeaders::ptr_t & headers,
+            HttpHandler::ptr_t user_handler);
+
+    /// Queue a full HTTP MOVE.  Query arguments and body may
+    /// be provided.  Caller is responsible for escaping and
+    /// encoding and communicating the content types.
+    ///
+    /// @param	policy_id		@see requestGet()
+    /// @param	priority		"
+    /// @param	url				"
+    /// @param	options			@see requestGet()K(optional)
+    /// @param	headers			"
+    /// @param	handler			"
+    /// @return					"
+    ///
+    HttpHandle requestMove(policy_t policy_id,
+            priority_t priority,
+            const std::string & url,
+            const HttpOptions::ptr_t & options,
+            const HttpHeaders::ptr_t & headers,
+            HttpHandler::ptr_t user_handler);
+
+    /// Queue a NoOp request.
 	/// The request is queued and serviced by the working thread which
 	/// immediately processes it and returns the request to the reply
 	/// queue.
@@ -400,7 +566,7 @@ public:
 	/// @param	handler			@see requestGet()
 	/// @return					"
 	///
-	HttpHandle requestNoOp(HttpHandler * handler);
+	HttpHandle requestNoOp(HttpHandler::ptr_t handler);
 
 	/// While all the heavy work is done by the worker thread, notifications
 	/// must be performed in the context of the application thread.  These
@@ -425,7 +591,7 @@ public:
 	///
 	/// @{
 	
-	HttpHandle requestCancel(HttpHandle request, HttpHandler *);
+	HttpHandle requestCancel(HttpHandle request, HttpHandler::ptr_t);
 
 	/// Request that a previously-issued request be reprioritized.
 	/// The status of whether the change itself succeeded arrives
@@ -437,7 +603,7 @@ public:
 	/// @param	handler			@see requestGet()
 	/// @return					"
 	///
-	HttpHandle requestSetPriority(HttpHandle request, priority_t priority, HttpHandler * handler);
+	HttpHandle requestSetPriority(HttpHandle request, priority_t priority, HttpHandler::ptr_t handler);
 
 	/// @}
 
@@ -475,7 +641,7 @@ public:
 	///							As the request cannot be cancelled, the handle
 	///							is generally not useful.
 	///
-	HttpHandle requestStopThread(HttpHandler * handler);
+	HttpHandle requestStopThread(HttpHandler::ptr_t handler);
 
 	/// Queue a Spin request.
 	/// DEBUG/TESTING ONLY.  This puts the worker into a CPU spin for
@@ -488,25 +654,16 @@ public:
 
 	/// @}
 	
-	/// @name DynamicPolicyMethods
-	///
-	/// @{
-
-	/// Request that a running transport pick up a new proxy setting.
-	/// An empty string will indicate no proxy is to be used.
-	HttpHandle requestSetHttpProxy(const std::string & proxy, HttpHandler * handler);
-
-    /// @}
-
 protected:
-	void generateNotification(HttpOperation * op);
 
 private:
+    typedef boost::shared_ptr<HttpReplyQueue> HttpReplyQueuePtr_t;
+
 	/// @name InstanceData
 	///
 	/// @{
 	HttpStatus			mLastReqStatus;
-	HttpReplyQueue *	mReplyQueue;
+    HttpReplyQueuePtr_t	mReplyQueue;
 	HttpRequestQueue *	mRequestQueue;
 	
 	/// @}
@@ -519,12 +676,11 @@ private:
 	/// Must be established before any threading is allowed to
 	/// start.
 	///
-	static policy_t		sNextPolicyID;
 	
 	/// @}
 	// End Global State
 	// ====================================
-	
+
 };  // end class HttpRequest
 
 

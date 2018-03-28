@@ -95,7 +95,8 @@ LLPanelPrimMediaControls::LLPanelPrimMediaControls() :
 	mVolumeSliderVisible(0),
 	mWindowShade(NULL),
 	mHideImmediately(false),
-    mSecureURL(false)
+    mSecureURL(false),
+	mMediaPlaySliderCtrlMouseDownValue(0.0)
 {
 	mCommitCallbackRegistrar.add("MediaCtrl.Close",		boost::bind(&LLPanelPrimMediaControls::onClickClose, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.Back",		boost::bind(&LLPanelPrimMediaControls::onClickBack, this));
@@ -109,7 +110,8 @@ LLPanelPrimMediaControls::LLPanelPrimMediaControls() :
 	mCommitCallbackRegistrar.add("MediaCtrl.Open",		boost::bind(&LLPanelPrimMediaControls::onClickOpen, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.Zoom",		boost::bind(&LLPanelPrimMediaControls::onClickZoom, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.CommitURL",	boost::bind(&LLPanelPrimMediaControls::onCommitURL, this));
-	mCommitCallbackRegistrar.add("MediaCtrl.JumpProgress",		boost::bind(&LLPanelPrimMediaControls::onCommitSlider, this));
+	mCommitCallbackRegistrar.add("MediaCtrl.MouseDown", boost::bind(&LLPanelPrimMediaControls::onMediaPlaySliderCtrlMouseDown, this));
+	mCommitCallbackRegistrar.add("MediaCtrl.MouseUp", boost::bind(&LLPanelPrimMediaControls::onMediaPlaySliderCtrlMouseUp, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.CommitVolumeUp",	boost::bind(&LLPanelPrimMediaControls::onCommitVolumeUp, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.CommitVolumeDown",	boost::bind(&LLPanelPrimMediaControls::onCommitVolumeDown, this));
 	mCommitCallbackRegistrar.add("MediaCtrl.Volume",	boost::bind(&LLPanelPrimMediaControls::onCommitVolumeSlider, this));
@@ -314,12 +316,14 @@ void LLPanelPrimMediaControls::updateShape()
 
 	if (objectp)
 	{
+		bool hasPermsControl = true;
 		bool mini_controls = false;
 		LLMediaEntry *media_data = objectp->getTE(mTargetObjectFace)->getMediaData();
 		if (media_data && NULL != dynamic_cast<LLVOVolume*>(objectp))
 		{
 			// Don't show the media controls if we do not have permissions
 			enabled = dynamic_cast<LLVOVolume*>(objectp)->hasMediaPermission(media_data, LLVOVolume::MEDIA_PERM_CONTROL);
+			hasPermsControl = dynamic_cast<LLVOVolume*>(objectp)->hasMediaPermission(media_data, LLVOVolume::MEDIA_PERM_CONTROL);
 			mini_controls = (LLMediaEntry::MINI == media_data->getControls());
 		}
 		const bool is_hud = objectp->isHUDAttachment();
@@ -562,7 +566,37 @@ void LLPanelPrimMediaControls::updateShape()
 			}
 		}
 		
-		setVisible(enabled);
+		// Web plugins and HUD may have media controls invisible for user, but still need scroll mouse events.
+		// LLView checks for visibleEnabledAndContains() and won't pass events to invisible panel, so instead
+		// of hiding whole panel hide each control instead (if user has no perms).
+		// Note: It might be beneficial to keep panel visible for all plugins to make behavior consistent, but 
+		// for now limiting change to cases that need events.
+
+		if (!is_hud && (!media_plugin || media_plugin->pluginSupportsMediaTime()))
+		{
+			setVisible(enabled);
+		}
+		else
+		{
+			if( !hasPermsControl )
+			{
+				mBackCtrl->setVisible(false);
+				mFwdCtrl->setVisible(false);
+				mReloadCtrl->setVisible(false);
+				mStopCtrl->setVisible(false);
+				mHomeCtrl->setVisible(false);
+				mZoomCtrl->setVisible(false);
+				mUnzoomCtrl->setVisible(false);
+				mOpenCtrl->setVisible(false);
+				mMediaAddressCtrl->setVisible(false);
+				mMediaPlaySliderPanel->setVisible(false);
+				mVolumeCtrl->setVisible(false);
+				mMediaProgressPanel->setVisible(false);
+				mVolumeSliderCtrl->setVisible(false);
+			}
+
+			setVisible(true);
+		}
 		
 		//
 		// Calculate position and shape of the controls
@@ -630,12 +664,12 @@ void LLPanelPrimMediaControls::updateShape()
 		// convert screenspace bbox to pixels (in screen coords)
 		LLRect window_rect = gViewerWindow->getWorldViewRectScaled();
 		LLCoordGL screen_min;
-		screen_min.mX = llround((F32)window_rect.mLeft + (F32)window_rect.getWidth() * (min.mV[VX] + 1.f) * 0.5f);
-		screen_min.mY = llround((F32)window_rect.mBottom + (F32)window_rect.getHeight() * (min.mV[VY] + 1.f) * 0.5f);
+		screen_min.mX = ll_round((F32)window_rect.mLeft + (F32)window_rect.getWidth() * (min.mV[VX] + 1.f) * 0.5f);
+		screen_min.mY = ll_round((F32)window_rect.mBottom + (F32)window_rect.getHeight() * (min.mV[VY] + 1.f) * 0.5f);
 		
 		LLCoordGL screen_max;
-		screen_max.mX = llround((F32)window_rect.mLeft + (F32)window_rect.getWidth() * (max.mV[VX] + 1.f) * 0.5f);
-		screen_max.mY = llround((F32)window_rect.mBottom + (F32)window_rect.getHeight() * (max.mV[VY] + 1.f) * 0.5f);
+		screen_max.mX = ll_round((F32)window_rect.mLeft + (F32)window_rect.getWidth() * (max.mV[VX] + 1.f) * 0.5f);
+		screen_max.mY = ll_round((F32)window_rect.mBottom + (F32)window_rect.getHeight() * (max.mV[VY] + 1.f) * 0.5f);
 		
 		// grow panel so that screenspace bounding box fits inside "media_region" element of panel
 		LLRect media_panel_rect;
@@ -767,10 +801,18 @@ void LLPanelPrimMediaControls::draw()
 	
 	// ignore space from right bookend padding
 	controls_bg_area.mRight -= mRightBookend->getRect().getWidth() - space - 2;
-		
+
 	// draw control background UI image
-	mBackgroundImage->draw( controls_bg_area, UI_VERTEX_COLOR % alpha);
 	
+	LLViewerObject* objectp = getTargetObject();
+	LLMediaEntry *media_data(0);
+
+	if( objectp )
+		media_data = objectp->getTE(mTargetObjectFace)->getMediaData();
+
+	if( !dynamic_cast<LLVOVolume*>(objectp) || !media_data || dynamic_cast<LLVOVolume*>(objectp)->hasMediaPermission(media_data, LLVOVolume::MEDIA_PERM_CONTROL) )
+		mBackgroundImage->draw( controls_bg_area, UI_VERTEX_COLOR % alpha);
+
 	// draw volume slider background UI image
 	if (mVolumeSliderCtrl->getVisible())
 	{
@@ -830,7 +872,7 @@ bool LLPanelPrimMediaControls::isMouseOver()
 			if(hit_child && hit_child->getVisible())
 			{
 				// This was useful for debugging both coordinate translation and view hieararchy problems...
-				// llinfos << "mouse coords: " << x << ", " << y << " hit child " << hit_child->getName() << llendl;
+				// LL_INFOS() << "mouse coords: " << x << ", " << y << " hit child " << hit_child->getName() << LL_ENDL;
 
 				// This will be a direct child of the LLLayoutStack, which should be a layout_panel.
 				// These may not shown/hidden by the logic in updateShape(), so we need to do another hit test on the children of the layout panel,
@@ -841,7 +883,7 @@ bool LLPanelPrimMediaControls::isMouseOver()
 				if(hit_child_2 && hit_child_2->getVisible())
 				{
 					// This was useful for debugging both coordinate translation and view hieararchy problems...
-					// llinfos << "    mouse coords: " << x << ", " << y << " hit child 2 " << hit_child_2->getName() << llendl;
+					// LL_INFOS() << "    mouse coords: " << x << ", " << y << " hit child 2 " << hit_child_2->getName() << LL_ENDL;
 					result = true;
 				}
 			}
@@ -1211,26 +1253,38 @@ void LLPanelPrimMediaControls::setCurrentURL()
 #endif	// USE_COMBO_BOX_FOR_MEDIA_URL
 }
 
-void LLPanelPrimMediaControls::onCommitSlider()
-{
-	focusOnTarget();
 
-	LLViewerMediaImpl* media_impl = getTargetMediaImpl();
-	if (media_impl) 
+void LLPanelPrimMediaControls::onMediaPlaySliderCtrlMouseDown()
+{
+	mMediaPlaySliderCtrlMouseDownValue = mMediaPlaySliderCtrl->getValue().asReal();
+
+	mUpdateSlider = false;
+}
+
+void LLPanelPrimMediaControls::onMediaPlaySliderCtrlMouseUp()
+{
+	F64 cur_value = mMediaPlaySliderCtrl->getValue().asReal();
+
+	if (mMediaPlaySliderCtrlMouseDownValue != cur_value)
 	{
-		// get slider value
-		F64 slider_value = mMediaPlaySliderCtrl->getValue().asReal();
-		if(slider_value <= 0.0)
-		{	
-			media_impl->stop();
-		}
-		else 
+		focusOnTarget();
+
+		LLViewerMediaImpl* media_impl = getTargetMediaImpl();
+		if (media_impl)
 		{
-			media_impl->seek(slider_value*mMovieDuration);
-			//mUpdateSlider= false;
+			if (cur_value <= 0.0)
+			{
+				media_impl->stop();
+			}
+			else
+			{
+				media_impl->seek(cur_value * mMovieDuration);
+			}
 		}
+
+		mUpdateSlider = true;
 	}
-}		
+}
 
 void LLPanelPrimMediaControls::onCommitVolumeUp()
 {

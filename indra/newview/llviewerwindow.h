@@ -45,12 +45,13 @@
 #include "llnotifications.h"
 #include "llhandle.h"
 #include "llinitparam.h"
+#include "lltrace.h"
+#include "llsnapshotmodel.h"
 
 #include <boost/function.hpp>
 #include <boost/signals2.hpp>
 #include <boost/scoped_ptr.hpp>
 
-class LLStat;
 class LLView;
 class LLViewerObject;
 class LLUUID;
@@ -89,8 +90,10 @@ public:
 	LLPickInfo(const LLCoordGL& mouse_pos, 
 		MASK keyboard_mask, 
 		BOOL pick_transparent,
+		BOOL pick_rigged,
 		BOOL pick_particle,
 		BOOL pick_surface_info,
+		BOOL pick_unselectable,
 		void (*pick_callback)(const LLPickInfo& pick_info));
 
 	void fetchResults();
@@ -122,7 +125,9 @@ public:
 	LLVector4		mTangent;
 	LLVector3		mBinormal;
 	BOOL			mPickTransparent;
+	BOOL			mPickRigged;
 	BOOL			mPickParticle;
+	BOOL			mPickUnselectable;
 	void		    getSurfaceInfo();
 
 private:
@@ -151,7 +156,8 @@ public:
 									min_width,
 									min_height;
 		Optional<bool>				fullscreen,
-									ignore_pixel_depth;
+									ignore_pixel_depth,
+									first_run;
 
 		Params();
 	};
@@ -189,6 +195,7 @@ public:
 	/*virtual*/ BOOL handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
 				void handleMouseMove(LLWindow *window,  LLCoordGL pos, MASK mask);
+                void handleMouseDragged(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ void handleMouseLeave(LLWindow *window);
 	/*virtual*/ void handleResize(LLWindow *window,  S32 x,  S32 y);
 	/*virtual*/ void handleFocus(LLWindow *window);
@@ -204,6 +211,7 @@ public:
 	/*virtual*/ void handleDataCopy(LLWindow *window, S32 data_type, void *data);
 	/*virtual*/ BOOL handleTimerEvent(LLWindow *window);
 	/*virtual*/ BOOL handleDeviceChange(LLWindow *window);
+	/*virtual*/ BOOL handleDPIChanged(LLWindow *window, F32 ui_scale_factor, S32 window_width, S32 window_height);
 
 	/*virtual*/ void handlePingWatchdog(LLWindow *window, const char * msg);
 	/*virtual*/ void handlePauseWatchdog(LLWindow *window);
@@ -257,7 +265,7 @@ public:
 	S32				getCurrentMouseDX()		const	{ return mCurrentMouseDelta.mX; }
 	S32				getCurrentMouseDY()		const	{ return mCurrentMouseDelta.mY; }
 	LLCoordGL		getCurrentMouseDelta()	const	{ return mCurrentMouseDelta; }
-	LLStat*			getMouseVelocityStat()		{ return mMouseVelocityStat; }
+	static LLTrace::SampleStatHandle<>*	getMouseVelocityStat()		{ return &sMouseVelocityStat; }
 	BOOL			getLeftMouseDown()	const	{ return mLeftMouseDown; }
 	BOOL			getMiddleMouseDown()	const	{ return mMiddleMouseDown; }
 	BOOL			getRightMouseDown()	const	{ return mRightMouseDown; }
@@ -312,6 +320,7 @@ public:
 	LLView*			getHintHolder() { return mHintHolder.get(); }
 	LLView*			getLoginPanelHolder() { return mLoginPanelHolder.get(); }
 	BOOL			handleKey(KEY key, MASK mask);
+	BOOL			handleKeyUp(KEY key, MASK mask);
 	void			handleScrollWheel	(S32 clicks);
 
 	// add and remove views from "popup" layer
@@ -336,18 +345,14 @@ public:
 
 	// snapshot functionality.
 	// perhaps some of this should move to llfloatershapshot?  -MG
-	typedef enum
-	{
-		SNAPSHOT_TYPE_COLOR,
-		SNAPSHOT_TYPE_DEPTH
-	} ESnapshotType;
-	BOOL			saveSnapshot(const std::string&  filename, S32 image_width, S32 image_height, BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, ESnapshotType type = SNAPSHOT_TYPE_COLOR);
+
+	BOOL			saveSnapshot(const std::string&  filename, S32 image_width, S32 image_height, BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, LLSnapshotModel::ESnapshotLayerType type = LLSnapshotModel::SNAPSHOT_TYPE_COLOR);
 	BOOL			rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_height, BOOL keep_window_aspect = TRUE, BOOL is_texture = FALSE,
-								BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, ESnapshotType type = SNAPSHOT_TYPE_COLOR, S32 max_size = MAX_SNAPSHOT_IMAGE_SIZE );
-	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, ESnapshotType type) ;
+		BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, LLSnapshotModel::ESnapshotLayerType type = LLSnapshotModel::SNAPSHOT_TYPE_COLOR, S32 max_size = MAX_SNAPSHOT_IMAGE_SIZE);
+	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type);
 	BOOL			isSnapshotLocSet() const { return ! sSnapshotDir.empty(); }
 	void			resetSnapshotLoc() const { sSnapshotDir.clear(); }
-	BOOL		    saveImageNumbered(LLImageFormatted *image, bool force_picker = false);
+	BOOL			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory);
 
 	// Reset the directory where snapshots are saved.
 	// Client will open directory picker on next snapshot save.
@@ -360,8 +365,14 @@ public:
 	void			performPick();
 	void			returnEmptyPicks();
 
-	void			pickAsync(S32 x, S32 y_from_bot, MASK mask, void (*callback)(const LLPickInfo& pick_info), BOOL pick_transparent = FALSE);
-	LLPickInfo		pickImmediate(S32 x, S32 y, BOOL pick_transparent, BOOL pick_particle = FALSE);
+	void			pickAsync(	S32 x,
+								S32 y_from_bot,
+								MASK mask,
+								void (*callback)(const LLPickInfo& pick_info),
+								BOOL pick_transparent = FALSE,
+								BOOL pick_rigged = FALSE,
+								BOOL pick_unselectable = FALSE);
+	LLPickInfo		pickImmediate(S32 x, S32 y, BOOL pick_transparent, BOOL pick_rigged = FALSE, BOOL pick_particle = FALSE);
 	LLHUDIcon* cursorIntersectIcon(S32 mouse_x, S32 mouse_y, F32 depth,
 										   LLVector4a* intersection);
 
@@ -369,6 +380,7 @@ public:
 									LLViewerObject *this_object = NULL,
 									S32 this_face = -1,
 									BOOL pick_transparent = FALSE,
+									BOOL pick_rigged = FALSE,
 									S32* face_hit = NULL,
 									LLVector4a *intersection = NULL,
 									LLVector2 *uv = NULL,
@@ -386,7 +398,7 @@ public:
 	//const LLVector3d& lastNonFloraObjectHitOffset();
 
 	// mousePointOnLand() returns true if found point
-	BOOL			mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d *land_pos_global);
+	BOOL			mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d *land_pos_global, BOOL ignore_distance = FALSE);
 	BOOL			mousePointOnPlaneGlobal(LLVector3d& point, const S32 x, const S32 y, const LLVector3d &plane_point, const LLVector3 &plane_normal);
 	LLVector3d		clickPointInWorldGlobal(const S32 x, const S32 y_from_bot, LLViewerObject* clicked_object) const;
 	BOOL			clickPointOnSurfaceGlobal(const S32 x, const S32 y, LLViewerObject *objectp, LLVector3d &point_global) const;
@@ -405,6 +417,10 @@ public:
 	void			calcDisplayScale();
 	static LLRect 	calcScaledRect(const LLRect & rect, const LLVector2& display_scale);
 
+	bool getSystemUIScaleFactorChanged() { return mSystemUIScaleFactorChanged; }
+	static void showSystemUIScaleFactorChanged();
+	static std::string getLastSnapshotDir() { return sSnapshotDir; }
+
 private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
 
@@ -418,6 +434,7 @@ private:
 	S32				getChatConsoleBottomPad(); // Vertical padding for child console rect, varied by bottom clutter
 	LLRect			getChatConsoleRect(); // Get optimal cosole rect.
 
+	static bool onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response);
 private:
 	LLWindow*		mWindow;						// graphical window object
 	bool			mActive;
@@ -438,7 +455,6 @@ private:
 	LLCoordGL		mCurrentMousePoint;			// last mouse position in GL coords
 	LLCoordGL		mLastMousePoint;		// Mouse point at last frame.
 	LLCoordGL		mCurrentMouseDelta;		//amount mouse moved this frame
-	LLStat*			mMouseVelocityStat;
 	BOOL			mLeftMouseDown;
 	BOOL			mMiddleMouseDown;
 	BOOL			mRightMouseDown;
@@ -452,6 +468,8 @@ private:
 
 	BOOL			mMouseInWindow;				// True if the mouse is over our window or if we have captured the mouse.
 	BOOL			mFocusCycleMode;
+    BOOL            mAllowMouseDragging;
+    LLFrameTimer    mMouseDownTimer;
 	typedef std::set<LLHandle<LLView> > view_handle_set_t;
 	view_handle_set_t mMouseHoverViews;
 
@@ -493,6 +511,9 @@ private:
 	
 	// Object temporarily hovered over while dragging
 	LLPointer<LLViewerObject>	mDragHoveredObject;
+
+	static LLTrace::SampleStatHandle<>	sMouseVelocityStat;
+	bool mSystemUIScaleFactorChanged; // system UI scale factor changed from last run
 };
 
 //

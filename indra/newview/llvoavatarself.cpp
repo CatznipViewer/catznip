@@ -38,11 +38,13 @@
 #include "pipeline.h"
 
 #include "llagent.h" //  Get state values from here
+#include "llattachmentsmgr.h"
 #include "llagentcamera.h"
 #include "llagentwearables.h"
 #include "llhudeffecttrail.h"
 #include "llhudmanager.h"
 #include "llinventoryfunctions.h"
+#include "lllocaltextureobject.h"
 #include "llnotificationsutil.h"
 #include "llselectmgr.h"
 #include "lltoolgrab.h"	// for needsRenderBeam
@@ -63,6 +65,8 @@
 #include "llsdutil.h"
 #include "llstartup.h"
 #include "llsdserialize.h"
+#include "llcallstack.h"
+#include "llcorehttputil.h"
 
 #if LL_MSVC
 // disable boost::lexical_cast warning
@@ -104,6 +108,9 @@ void selfClearPhases()
 
 using namespace LLAvatarAppearanceDefines;
 
+
+LLSD summarize_by_buckets(std::vector<LLSD> in_records, std::vector<std::string> by_fields, std::string val_field);
+
 /*********************************************************************************
  **                                                                             **
  ** Begin private LLVOAvatarSelf Support classes
@@ -141,9 +148,8 @@ struct LocalTextureData
 //-----------------------------------------------------------------------------
 // Static Data
 //-----------------------------------------------------------------------------
-S32 LLVOAvatarSelf::sScratchTexBytes = 0;
-LLMap< LLGLenum, LLGLuint*> LLVOAvatarSelf::sScratchTexNames;
-LLMap< LLGLenum, F32*> LLVOAvatarSelf::sScratchTexLastBindTime;
+S32Bytes LLVOAvatarSelf::sScratchTexBytes(0);
+std::map< LLGLenum, LLGLuint*> LLVOAvatarSelf::sScratchTexNames;
 
 
 /*********************************************************************************
@@ -159,13 +165,15 @@ LLVOAvatarSelf::LLVOAvatarSelf(const LLUUID& id,
 	mScreenp(NULL),
 	mLastRegionHandle(0),
 	mRegionCrossingCount(0),
-	mInitialBakesLoaded(false)
+	// Value outside legal range, so will always be a mismatch the
+	// first time through.
+	mLastHoverOffsetSent(LLVector3(0.0f, 0.0f, -999.0f)),
+    mInitialMetric(true),
+    mMetricSequence(0)
 {
-	gAgentWearables.setAvatarObject(this);
-
 	mMotionController.mIsSelf = TRUE;
 
-	lldebugs << "Marking avatar as self " << id << llendl;
+	LL_DEBUGS() << "Marking avatar as self " << id << LL_ENDL;
 }
 
 // Called periodically for diagnostics, return true when done.
@@ -185,15 +193,7 @@ bool update_avatar_rez_metrics()
 		return true;
 	
 	gAgentAvatarp->updateAvatarRezMetrics(false);
-	return false;
-}
 
-bool check_for_unsupported_baked_appearance()
-{
-	if (!isAgentAvatarValid())
-		return true;
-
-	gAgentAvatarp->checkForUnsupportedServerBakeAppearance();
 	return false;
 }
 
@@ -206,7 +206,7 @@ void LLVOAvatarSelf::initInstance()
 	// adds attachment points to mScreen among other things
 	LLVOAvatar::initInstance();
 
-	llinfos << "Self avatar object created. Starting timer." << llendl;
+	LL_INFOS() << "Self avatar object created. Starting timer." << LL_ENDL;
 	mDebugSelfLoadTimer.reset();
 	// clear all times to -1 for debugging
 	for (U32 i =0; i < LLAvatarAppearanceDefines::TEX_NUM_INDICES; ++i)
@@ -221,19 +221,73 @@ void LLVOAvatarSelf::initInstance()
 	{
 		mDebugBakedTextureTimes[i][0] = -1.0f;
 		mDebugBakedTextureTimes[i][1] = -1.0f;
-		mInitialBakeIDs[i] = LLUUID::null;
 	}
 
 	status &= buildMenus();
 	if (!status)
 	{
-		llerrs << "Unable to load user's avatar" << llendl;
+		LL_ERRS() << "Unable to load user's avatar" << LL_ENDL;
 		return;
 	}
 
+	setHoverIfRegionEnabled();
+
 	//doPeriodically(output_self_av_texture_diagnostics, 30.0);
 	doPeriodically(update_avatar_rez_metrics, 5.0);
-	doPeriodically(check_for_unsupported_baked_appearance, 120.0);
+	doPeriodically(boost::bind(&LLVOAvatarSelf::checkStuckAppearance, this), 30.0);
+}
+
+void LLVOAvatarSelf::setHoverIfRegionEnabled()
+{
+	if (getRegion() && getRegion()->simulatorFeaturesReceived())
+	{
+		if (getRegion()->avatarHoverHeightEnabled())
+		{
+			F32 hover_z = gSavedPerAccountSettings.getF32("AvatarHoverOffsetZ");
+			setHoverOffset(LLVector3(0.0, 0.0, llclamp(hover_z,MIN_HOVER_Z,MAX_HOVER_Z)));
+			LL_INFOS("Avatar") << avString() << " set hover height from debug setting " << hover_z << LL_ENDL;
+		}
+		else 
+		{
+			setHoverOffset(LLVector3(0.0, 0.0, 0.0));
+			LL_INFOS("Avatar") << avString() << " zeroing hover height, region does not support" << LL_ENDL;
+		}
+	}
+	else
+	{
+		LL_INFOS("Avatar") << avString() << " region or simulator features not known, no change on hover" << LL_ENDL;
+		if (getRegion())
+		{
+			getRegion()->setSimulatorFeaturesReceivedCallback(boost::bind(&LLVOAvatarSelf::onSimulatorFeaturesReceived,this,_1));
+		}
+
+	}
+}
+
+bool LLVOAvatarSelf::checkStuckAppearance()
+{
+	const F32 CONDITIONAL_UNSTICK_INTERVAL = 300.0;
+	const F32 UNCONDITIONAL_UNSTICK_INTERVAL = 600.0;
+	
+	if (gAgentWearables.isCOFChangeInProgress())
+	{
+		LL_DEBUGS("Avatar") << "checking for stuck appearance" << LL_ENDL;
+		F32 change_time = gAgentWearables.getCOFChangeTime();
+		LL_DEBUGS("Avatar") << "change in progress for " << change_time << " seconds" << LL_ENDL;
+		S32 active_hp = LLAppearanceMgr::instance().countActiveHoldingPatterns();
+		LL_DEBUGS("Avatar") << "active holding patterns " << active_hp << " seconds" << LL_ENDL;
+		S32 active_copies = LLAppearanceMgr::instance().getActiveCopyOperations();
+		LL_DEBUGS("Avatar") << "active copy operations " << active_copies << LL_ENDL;
+
+		if ((change_time > CONDITIONAL_UNSTICK_INTERVAL && active_copies == 0) ||
+			(change_time > UNCONDITIONAL_UNSTICK_INTERVAL))
+		{
+			gAgentWearables.notifyLoadingFinished();
+		}
+	}
+
+	// Return false to continue running check periodically.
+	return LLApp::isExiting();
 }
 
 // virtual
@@ -247,7 +301,7 @@ void LLVOAvatarSelf::markDead()
 {
 	BOOL success = LLVOAvatar::loadAvatar();
 
-	// set all parameters sotred directly in the avatar to have
+	// set all parameters stored directly in the avatar to have
 	// the isSelfParam to be TRUE - this is used to prevent
 	// them from being animated or trigger accidental rebakes
 	// when we copy params from the wearable to the base avatar.
@@ -271,7 +325,7 @@ BOOL LLVOAvatarSelf::loadAvatarSelf()
 	// avatar_skeleton.xml
 	if (!buildSkeletonSelf(sAvatarSkeletonInfo))
 	{
-		llwarns << "avatar file: buildSkeleton() failed" << llendl;
+		LL_WARNS() << "avatar file: buildSkeleton() failed" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -287,6 +341,7 @@ BOOL LLVOAvatarSelf::buildSkeletonSelf(const LLAvatarSkeletonInfo *info)
 	F32 aspect = LLViewerCamera::getInstance()->getAspect();
 	LLVector3 scale(1.f, aspect, 1.f);
 	mScreenp->setScale(scale);
+	// SL-315
 	mScreenp->setWorldPosition(LLVector3::zero);
 	// need to update screen agressively when sidebar opens/closes, for example
 	mScreenp->mUpdateXform = TRUE;
@@ -328,6 +383,10 @@ BOOL LLVOAvatarSelf::buildMenus()
 	params.name(params.label);
 	gAttachBodyPartPieMenus[7] = LLUICtrlFactory::create<LLContextMenu> (params);
 
+	params.label(LLTrans::getString("BodyPartsEnhancedSkeleton"));
+	params.name(params.label);
+	gAttachBodyPartPieMenus[8] = LLUICtrlFactory::create<LLContextMenu>(params);
+
 	gDetachBodyPartPieMenus[0] = NULL;
 
 	params.label(LLTrans::getString("BodyPartsRightArm"));
@@ -356,7 +415,11 @@ BOOL LLVOAvatarSelf::buildMenus()
 	params.name(params.label);
 	gDetachBodyPartPieMenus[7] = LLUICtrlFactory::create<LLContextMenu> (params);
 
-	for (S32 i = 0; i < 8; i++)
+	params.label(LLTrans::getString("BodyPartsEnhancedSkeleton"));
+	params.name(params.label);
+	gDetachBodyPartPieMenus[8] = LLUICtrlFactory::create<LLContextMenu>(params);
+
+	for (S32 i = 0; i < 9; i++)
 	{
 		if (gAttachBodyPartPieMenus[i])
 		{
@@ -369,7 +432,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 				 ++iter)
 			{
 				LLViewerJointAttachment* attachment = iter->second;
-				if (attachment->getGroup() == i)
+				if (attachment && attachment->getGroup() == i)
 				{
 					LLMenuItemCallGL::Params item_params;
 						
@@ -408,7 +471,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 				 ++iter)
 			{
 				LLViewerJointAttachment* attachment = iter->second;
-				if (attachment->getGroup() == i)
+				if (attachment && attachment->getGroup() == i)
 				{
 					LLMenuItemCallGL::Params item_params;
 					std::string sub_piemenu_name = attachment->getName();
@@ -441,7 +504,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 		 ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
-		if (attachment->getGroup() == 8)
+		if (attachment->getGroup() == 9)
 		{
 			LLMenuItemCallGL::Params item_params;
 			std::string sub_piemenu_name = attachment->getName();
@@ -527,7 +590,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 		}
 	}
 
-	for (S32 group = 0; group < 8; group++)
+	for (S32 group = 0; group < 9; group++)
 	{
 		// skip over groups that don't have sub menus
 		if (!gAttachBodyPartPieMenus[group] || !gDetachBodyPartPieMenus[group])
@@ -543,7 +606,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 			 ++iter)
 		{
 			LLViewerJointAttachment* attachment = iter->second;
-			if(attachment->getGroup() == group)
+			if(attachment && attachment->getGroup() == group)
 			{
 				// use multimap to provide a partial order off of the pie slice key
 				S32 pie_index = attachment->getPieSlice();
@@ -602,7 +665,7 @@ LLVOAvatarSelf::~LLVOAvatarSelf()
  **                                                                             **
  *********************************************************************************/
 
-//virtual
+// virtual
 BOOL LLVOAvatarSelf::updateCharacter(LLAgent &agent)
 {
 	// update screen joint size
@@ -625,11 +688,11 @@ BOOL LLVOAvatarSelf::isValid() const
 }
 
 // virtual
-void LLVOAvatarSelf::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
+void LLVOAvatarSelf::idleUpdate(LLAgent &agent, const F64 &time)
 {
 	if (isValid())
 	{
-		LLVOAvatar::idleUpdate(agent, world, time);
+		LLVOAvatar::idleUpdate(agent, time);
 		idleUpdateTractorBeam();
 	}
 }
@@ -637,61 +700,58 @@ void LLVOAvatarSelf::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
 // virtual
 LLJoint *LLVOAvatarSelf::getJoint(const std::string &name)
 {
-	if (mScreenp)
+    LLJoint *jointp = NULL;
+    jointp = LLVOAvatar::getJoint(name);
+	if (!jointp && mScreenp)
 	{
-		LLJoint* jointp = mScreenp->findJoint(name);
-		if (jointp) return jointp;
+		jointp = mScreenp->findJoint(name);
+        if (jointp)
+        {
+            mJointMap[name] = jointp;
+        }
 	}
-	return LLVOAvatar::getJoint(name);
+    if (jointp && jointp != mScreenp && jointp != mRoot)
+    {
+        llassert(LLVOAvatar::getJoint((S32)jointp->getJointNum())==jointp);
+    }
+    return jointp;
 }
-//virtual
-void LLVOAvatarSelf::resetJointPositions( void )
-{
-	return LLVOAvatar::resetJointPositions();
-}
+
 // virtual
-BOOL LLVOAvatarSelf::setVisualParamWeight(const LLVisualParam *which_param, F32 weight, BOOL upload_bake )
+BOOL LLVOAvatarSelf::setVisualParamWeight(const LLVisualParam *which_param, F32 weight)
 {
 	if (!which_param)
 	{
 		return FALSE;
 	}
 	LLViewerVisualParam *param = (LLViewerVisualParam*) LLCharacter::getVisualParam(which_param->getID());
-	return setParamWeight(param,weight,upload_bake);
+	return setParamWeight(param,weight);
 }
 
 // virtual
-BOOL LLVOAvatarSelf::setVisualParamWeight(const char* param_name, F32 weight, BOOL upload_bake )
+BOOL LLVOAvatarSelf::setVisualParamWeight(const char* param_name, F32 weight)
 {
 	if (!param_name)
 	{
 		return FALSE;
 	}
 	LLViewerVisualParam *param = (LLViewerVisualParam*) LLCharacter::getVisualParam(param_name);
-	return setParamWeight(param,weight,upload_bake);
+	return setParamWeight(param,weight);
 }
 
 // virtual
-BOOL LLVOAvatarSelf::setVisualParamWeight(S32 index, F32 weight, BOOL upload_bake )
+BOOL LLVOAvatarSelf::setVisualParamWeight(S32 index, F32 weight)
 {
 	LLViewerVisualParam *param = (LLViewerVisualParam*) LLCharacter::getVisualParam(index);
-	return setParamWeight(param,weight,upload_bake);
+	return setParamWeight(param,weight);
 }
 
-BOOL LLVOAvatarSelf::setParamWeight(const LLViewerVisualParam *param, F32 weight, BOOL upload_bake )
+BOOL LLVOAvatarSelf::setParamWeight(const LLViewerVisualParam *param, F32 weight)
 {
 	if (!param)
 	{
 		return FALSE;
 	}
-
-#if 0
-	// FIXME DRANO - kludgy way to avoid overwriting avatar state from wearables.
-	if (isUsingServerBakes() && !isUsingLocalAppearance())
-	{
-		return FALSE;
-	}
-#endif
 
 	if (param->getCrossWearable())
 	{
@@ -702,12 +762,12 @@ BOOL LLVOAvatarSelf::setParamWeight(const LLViewerVisualParam *param, F32 weight
 			LLViewerWearable *wearable = gAgentWearables.getViewerWearable(type,count);
 			if (wearable)
 			{
-				wearable->setVisualParamWeight(param->getID(), weight, upload_bake);
+				wearable->setVisualParamWeight(param->getID(), weight);
 			}
 		}
 	}
 
-	return LLCharacter::setVisualParamWeight(param,weight,upload_bake);
+	return LLCharacter::setVisualParamWeight(param,weight);
 }
 
 /*virtual*/ 
@@ -716,13 +776,8 @@ void LLVOAvatarSelf::updateVisualParams()
 	LLVOAvatar::updateVisualParams();
 }
 
-/*virtual*/
-void LLVOAvatarSelf::idleUpdateAppearanceAnimation()
+void LLVOAvatarSelf::writeWearablesToAvatar()
 {
-	// Animate all top-level wearable visual parameters
-	gAgentWearables.animateAllWearableParams(calcMorphAmount(), FALSE);
-
-	// apply wearable visual params to avatar
 	for (U32 type = 0; type < LLWearableType::WT_COUNT; type++)
 	{
 		LLWearable *wearable = gAgentWearables.getTopWearable((LLWearableType::EType)type);
@@ -731,6 +786,17 @@ void LLVOAvatarSelf::idleUpdateAppearanceAnimation()
 			wearable->writeToAvatar(this);
 		}
 	}
+
+}
+
+/*virtual*/
+void LLVOAvatarSelf::idleUpdateAppearanceAnimation()
+{
+	// Animate all top-level wearable visual parameters
+	gAgentWearables.animateAllWearableParams(calcMorphAmount());
+
+	// Apply wearable visual params to avatar
+	writeWearablesToAvatar();
 
 	//allow avatar to process updates
 	LLVOAvatar::idleUpdateAppearanceAnimation();
@@ -747,6 +813,13 @@ void LLVOAvatarSelf::requestStopMotion(LLMotion* motion)
 }
 
 // virtual
+bool LLVOAvatarSelf::hasMotionFromSource(const LLUUID& source_id)
+{
+	AnimSourceIterator motion_it = mAnimationSources.find(source_id);
+	return motion_it != mAnimationSources.end();
+}
+
+// virtual
 void LLVOAvatarSelf::stopMotionFromSource(const LLUUID& source_id)
 {
 	for (AnimSourceIterator motion_it = mAnimationSources.find(source_id); motion_it != mAnimationSources.end(); )
@@ -755,60 +828,13 @@ void LLVOAvatarSelf::stopMotionFromSource(const LLUUID& source_id)
 		mAnimationSources.erase(motion_it++);
 	}
 
+
 	LLViewerObject* object = gObjectList.findObject(source_id);
 	if (object)
 	{
 		object->setFlagsWithoutUpdate(FLAGS_ANIM_SOURCE, FALSE);
 	}
 }
-
-//virtual
-U32  LLVOAvatarSelf::processUpdateMessage(LLMessageSystem *mesgsys,
-													 void **user_data,
-													 U32 block_num,
-													 const EObjectUpdateType update_type,
-													 LLDataPacker *dp)
-{
-	U32 retval = LLVOAvatar::processUpdateMessage(mesgsys,user_data,block_num,update_type,dp);
-
-#if 0
-	// DRANO - it's not clear this does anything useful. If we wait
-	// until an appearance message has been received, we already have
-	// the texture ids. If we don't wait, we don't yet know where to
-	// look for baked textures, because we haven't received the
-	// appearance version data from the appearance message. This looks
-	// like an old optimization that's incompatible with server-side
-	// texture baking.
-	
-	// FIXME DRANO - skipping in the case of !mFirstAppearanceMessageReceived prevents us from trying to
-	// load textures before we know where they come from (ie, from baking service or not);
-	// unknown impact on performance.
-	if (mInitialBakesLoaded == false && retval == 0x0 && mFirstAppearanceMessageReceived)
-	{
-		// call update textures to force the images to be created
-		updateMeshTextures();
-
-		// unpack the texture UUIDs to the texture slots
-		retval = unpackTEMessage(mesgsys, _PREHASH_ObjectData, (S32) block_num);
-
-		// need to trigger a few operations to get the avatar to use the new bakes
-		for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
-		{
-			const LLAvatarAppearanceDefines::ETextureIndex te = mBakedTextureDatas[i].mTextureIndex;
-			LLUUID texture_id = getTEImage(te)->getID();
-			setNewBakedTexture(te, texture_id);
-			mInitialBakeIDs[i] = texture_id;
-		}
-
-		onFirstTEMessageReceived();
-
-		mInitialBakesLoaded = true;
-	}
-#endif
-
-	return retval;
-}
-
 
 void LLVOAvatarSelf::setLocalTextureTE(U8 te, LLViewerTexture* image, U32 index)
 {
@@ -847,7 +873,7 @@ void LLVOAvatarSelf::removeMissingBakedTextures()
 		if (!tex || tex->isMissingAsset())
 		{
 			LLViewerTexture *imagep = LLViewerTextureManager::getFetchedTexture(IMG_DEFAULT_AVATAR);
-			if (imagep)
+			if (imagep && imagep != tex)
 			{
 				setTEImage(te, imagep);
 				removed = TRUE;
@@ -861,14 +887,16 @@ void LLVOAvatarSelf::removeMissingBakedTextures()
 		{
 			LLViewerTexLayerSet *layerset = getTexLayerSet(i);
 			layerset->setUpdatesEnabled(TRUE);
-			invalidateComposite(layerset, FALSE);
+			invalidateComposite(layerset);
 		}
 		updateMeshTextures();
-		if (getRegion() && !getRegion()->getCentralBakeVersion())
-		{
-		requestLayerSetUploads();
 	}
 }
+
+void LLVOAvatarSelf::onSimulatorFeaturesReceived(const LLUUID& region_id)
+{
+	LL_INFOS("Avatar") << "simulator features received, setting hover based on region props" << LL_ENDL;
+	setHoverIfRegionEnabled();
 }
 
 //virtual
@@ -886,9 +914,20 @@ void LLVOAvatarSelf::updateRegion(LLViewerRegion *regionp)
 
 		// Diagnostic info
 		//LLVector3d pos_from_new_region = getPositionGlobal();
-		//llinfos << "pos_from_old_region is " << global_pos_from_old_region
+		//LL_INFOS() << "pos_from_old_region is " << global_pos_from_old_region
 		//	<< " while pos_from_new_region is " << pos_from_new_region
-		//	<< llendl;
+		//	<< LL_ENDL;
+
+		// Update hover height, or schedule callback, based on whether
+		// it's supported in this region.
+		if (regionp->simulatorFeaturesReceived())
+		{
+			setHoverIfRegionEnabled();
+		}
+		else
+		{
+			regionp->setSimulatorFeaturesReceivedCallback(boost::bind(&LLVOAvatarSelf::onSimulatorFeaturesReceived,this,_1));
+		}
 	}
 
 	if (!regionp || (regionp->getHandle() != mLastRegionHandle))
@@ -896,17 +935,11 @@ void LLVOAvatarSelf::updateRegion(LLViewerRegion *regionp)
 		if (mLastRegionHandle != 0)
 		{
 			++mRegionCrossingCount;
-			F64 delta = (F64)mRegionCrossingTimer.getElapsedTimeF32();
-			F64 avg = (mRegionCrossingCount == 1) ? 0 : LLViewerStats::getInstance()->getStat(LLViewerStats::ST_CROSSING_AVG);
-			F64 delta_avg = (delta + avg*(mRegionCrossingCount-1)) / mRegionCrossingCount;
-			LLViewerStats::getInstance()->setStat(LLViewerStats::ST_CROSSING_AVG, delta_avg);
-			
-			F64 max = (mRegionCrossingCount == 1) ? 0 : LLViewerStats::getInstance()->getStat(LLViewerStats::ST_CROSSING_MAX);
-			max = llmax(delta, max);
-			LLViewerStats::getInstance()->setStat(LLViewerStats::ST_CROSSING_MAX, max);
+			F64Seconds delta(mRegionCrossingTimer.getElapsedTimeF32());
+			record(LLStatViewer::REGION_CROSSING_TIME, delta);
 
 			// Diagnostics
-			llinfos << "Region crossing took " << (F32)(delta * 1000.0) << " ms " << llendl;
+			LL_INFOS() << "Region crossing took " << (F32)(delta * 1000.0).value() << " ms " << LL_ENDL;
 		}
 		if (regionp)
 		{
@@ -990,7 +1023,7 @@ void LLVOAvatarSelf::idleUpdateTractorBeam()
 // virtual
 void LLVOAvatarSelf::restoreMeshData()
 {
-	//llinfos << "Restoring" << llendl;
+	//LL_INFOS() << "Restoring" << LL_ENDL;
 	mMeshValid = TRUE;
 	updateJointLODs();
 	updateAttachmentVisibility(gAgentCamera.getCameraMode());
@@ -1042,7 +1075,7 @@ void LLVOAvatarSelf::updateAttachmentVisibility(U32 camera_mode)
 // forces an update to any baked textures relevant to type.
 // will force an upload of the resulting bake if the second parameter is TRUE
 //-----------------------------------------------------------------------------
-void LLVOAvatarSelf::wearableUpdated( LLWearableType::EType type, BOOL upload_result )
+void LLVOAvatarSelf::wearableUpdated(LLWearableType::EType type)
 {
 	for (LLAvatarAppearanceDictionary::BakedTextures::const_iterator baked_iter = LLAvatarAppearanceDictionary::getInstance()->getBakedTextures().begin();
 		 baked_iter != LLAvatarAppearanceDictionary::getInstance()->getBakedTextures().end();
@@ -1064,20 +1097,13 @@ void LLVOAvatarSelf::wearableUpdated( LLWearableType::EType type, BOOL upload_re
 					if (layerset)
 					{
 						layerset->setUpdatesEnabled(true);
-						invalidateComposite(layerset, upload_result);
+						invalidateComposite(layerset);
 					}
 					break;
 				}
 			}
 		}
 	}
-	
-	// Physics type has no associated baked textures, but change of params needs to be sent to
-	// other avatars.
-	if (type == LLWearableType::WT_PHYSICS)
-	  {
-	    gAgent.sendAgentSetAppearance();
-	  }
 }
 
 //-----------------------------------------------------------------------------
@@ -1100,44 +1126,6 @@ BOOL LLVOAvatarSelf::isWearingAttachment(const LLUUID& inv_item_id) const
 }
 
 //-----------------------------------------------------------------------------
-BOOL LLVOAvatarSelf::attachmentWasRequested(const LLUUID& inv_item_id) const
-{
-	const F32 REQUEST_EXPIRATION_SECONDS = 5.0;  // any request older than this is ignored/removed.
-	std::map<LLUUID,LLTimer>::iterator it = mAttachmentRequests.find(inv_item_id);
-	if (it != mAttachmentRequests.end())
-	{
-		const LLTimer& request_time = it->second;
-		F32 request_time_elapsed = request_time.getElapsedTimeF32();
-		if (request_time_elapsed > REQUEST_EXPIRATION_SECONDS)
-		{
-			mAttachmentRequests.erase(it);
-			return FALSE;
-		}
-		else
-		{
-			return TRUE;
-		}
-	}
-	else
-	{
-		return FALSE;
-	}
-}
-
-//-----------------------------------------------------------------------------
-void LLVOAvatarSelf::addAttachmentRequest(const LLUUID& inv_item_id)
-{
-	LLTimer current_time;
-	mAttachmentRequests[inv_item_id] = current_time;
-}
-
-//-----------------------------------------------------------------------------
-void LLVOAvatarSelf::removeAttachmentRequest(const LLUUID& inv_item_id)
-{
-	mAttachmentRequests.erase(inv_item_id);
-}
-
-//-----------------------------------------------------------------------------
 // getWornAttachment()
 //-----------------------------------------------------------------------------
 LLViewerObject* LLVOAvatarSelf::getWornAttachment(const LLUUID& inv_item_id)
@@ -1156,9 +1144,19 @@ LLViewerObject* LLVOAvatarSelf::getWornAttachment(const LLUUID& inv_item_id)
 	return NULL;
 }
 
-const std::string LLVOAvatarSelf::getAttachedPointName(const LLUUID& inv_item_id) const
+bool LLVOAvatarSelf::getAttachedPointName(const LLUUID& inv_item_id, std::string& name) const
 {
+	if (!gInventory.getItem(inv_item_id))
+	{
+		name = "ATTACHMENT_MISSING_ITEM";
+		return false;
+	}
 	const LLUUID& base_inv_item_id = gInventory.getLinkedItemID(inv_item_id);
+	if (!gInventory.getItem(base_inv_item_id))
+	{
+		name = "ATTACHMENT_MISSING_BASE_ITEM";
+		return false;
+	}
 	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(); 
 		 iter != mAttachmentPoints.end(); 
 		 ++iter)
@@ -1166,11 +1164,13 @@ const std::string LLVOAvatarSelf::getAttachedPointName(const LLUUID& inv_item_id
 		const LLViewerJointAttachment* attachment = iter->second;
 		if (attachment->getAttachedObject(base_inv_item_id))
 		{
-			return attachment->getName();
+			name = attachment->getName();
+			return true;
 		}
 	}
 
-	return LLStringUtil::null;
+	name = "ATTACHMENT_NOT_ATTACHED";
+	return false;
 }
 
 //virtual
@@ -1191,8 +1191,6 @@ const LLViewerJointAttachment *LLVOAvatarSelf::attachObject(LLViewerObject *view
 	{
 		const LLUUID& attachment_id = viewer_object->getAttachmentItemID();
 		LLAppearanceMgr::instance().registerAttachment(attachment_id);
-		// Clear any pending requests once the attachment arrives.
-		removeAttachmentRequest(attachment_id);
 		updateLODRiggedAttachments();		
 	}
 
@@ -1205,8 +1203,6 @@ BOOL LLVOAvatarSelf::detachObject(LLViewerObject *viewer_object)
 	const LLUUID attachment_id = viewer_object->getAttachmentItemID();
 	if ( LLVOAvatar::detachObject(viewer_object) )
 	{
-		LLVOAvatar::cleanupAttachedMesh( viewer_object );
-		
 		// the simulator should automatically handle permission revocation
 		
 		stopMotionFromSource(attachment_id);
@@ -1230,7 +1226,7 @@ BOOL LLVOAvatarSelf::detachObject(LLViewerObject *viewer_object)
 		// Update COF contents, don't trigger appearance update.
 		if (!isValid())
 		{
-			llinfos << "removeItemLinks skipped, avatar is under destruction" << llendl;
+			LL_INFOS() << "removeItemLinks skipped, avatar is under destruction" << LL_ENDL;
 		}
 		else
 		{
@@ -1310,7 +1306,7 @@ void LLVOAvatarSelf::localTextureLoaded(BOOL success, LLViewerFetchedTexture *sr
 			discard_level < local_tex_obj->getDiscard())
 		{
 			local_tex_obj->setDiscard(discard_level);
-				requestLayerSetUpdate(index);
+			requestLayerSetUpdate(index);
 			if (isEditingAppearance())
 			{
 				LLVisualParamHint::requestHintUpdates();
@@ -1489,15 +1485,6 @@ BOOL LLVOAvatarSelf::isAllLocalTextureDataFinal() const
 	return TRUE;
 }
 
-BOOL LLVOAvatarSelf::isBakedTextureFinal(const LLAvatarAppearanceDefines::EBakedTextureIndex index) const
-{
-	const LLViewerTexLayerSet *layerset = getLayerSet(index);
-	if (!layerset) return FALSE;
-	const LLViewerTexLayerSetBuffer *layerset_buffer = layerset->getViewerComposite();
-	if (!layerset_buffer) return FALSE;
-	return !layerset_buffer->uploadNeeded();
-}
-
 BOOL LLVOAvatarSelf::isTextureDefined(LLAvatarAppearanceDefines::ETextureIndex type, U32 index) const
 {
 	LLUUID id;
@@ -1551,73 +1538,34 @@ BOOL LLVOAvatarSelf::isTextureVisible(LLAvatarAppearanceDefines::ETextureIndex t
 		return LLVOAvatar::isTextureVisible(type);
 	}
 
-	U32 index = gAgentWearables.getWearableIndex(wearable);
-	return isTextureVisible(type,index);
-}
-
-
-//-----------------------------------------------------------------------------
-// requestLayerSetUploads()
-//-----------------------------------------------------------------------------
-void LLVOAvatarSelf::requestLayerSetUploads()
-{
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	U32 index;
+	if (gAgentWearables.getWearableIndex(wearable,index))
 	{
-		requestLayerSetUpload((EBakedTextureIndex)i);
+		return isTextureVisible(type,index);
 	}
-}
-
-void LLVOAvatarSelf::requestLayerSetUpload(LLAvatarAppearanceDefines::EBakedTextureIndex i)
-{
-	ETextureIndex tex_index = mBakedTextureDatas[i].mTextureIndex;
-	const BOOL layer_baked = isTextureDefined(tex_index, gAgentWearables.getWearableCount(tex_index));
-	LLViewerTexLayerSet *layerset = getLayerSet(i);
-	if (!layer_baked && layerset)
+	else
 	{
-		layerset->requestUpload();
+		LL_WARNS() << "Wearable not found" << LL_ENDL;
+		return FALSE;
 	}
 }
 
 bool LLVOAvatarSelf::areTexturesCurrent() const
 {
-	return !hasPendingBakedUploads() && gAgentWearables.areWearablesLoaded();
+	return gAgentWearables.areWearablesLoaded();
 }
 
-// virtual
-bool LLVOAvatarSelf::hasPendingBakedUploads() const
-{
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
-	{
-		LLViewerTexLayerSet* layerset = getTexLayerSet(i);
-		if (layerset && layerset->getViewerComposite() && layerset->getViewerComposite()->uploadPending())
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-void LLVOAvatarSelf::invalidateComposite( LLTexLayerSet* layerset, BOOL upload_result )
+void LLVOAvatarSelf::invalidateComposite( LLTexLayerSet* layerset)
 {
 	LLViewerTexLayerSet *layer_set = dynamic_cast<LLViewerTexLayerSet*>(layerset);
 	if( !layer_set || !layer_set->getUpdatesEnabled() )
 	{
 		return;
 	}
-	// llinfos << "LLVOAvatar::invalidComposite() " << layerset->getBodyRegionName() << llendl;
+	// LL_INFOS() << "LLVOAvatar::invalidComposite() " << layerset->getBodyRegionName() << LL_ENDL;
 
 	layer_set->requestUpdate();
 	layer_set->invalidateMorphMasks();
-
-	if( upload_result  && (getRegion() && !getRegion()->getCentralBakeVersion()))
-	{
-		llassert(isSelf());
-
-		ETextureIndex baked_te = getBakedTE( layer_set );
-		setTEImage( baked_te, LLViewerTextureManager::getFetchedTexture(IMG_DEFAULT_AVATAR) );
-		layer_set->requestUpload();
-		updateMeshTextures();
-	}
 }
 
 void LLVOAvatarSelf::invalidateAll()
@@ -1625,7 +1573,7 @@ void LLVOAvatarSelf::invalidateAll()
 	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
 	{
 		LLViewerTexLayerSet *layerset = getTexLayerSet(i);
-		invalidateComposite(layerset, TRUE);
+		invalidateComposite(layerset);
 	}
 	//mDebugSelfLoadTimer.reset();
 }
@@ -1757,7 +1705,7 @@ void LLVOAvatarSelf::setLocalTexture(ETextureIndex type, LLViewerTexture* src_te
 	{
 		if (type >= TEX_NUM_INDICES)
 		{
-			llerrs << "Tried to set local texture with invalid type: (" << (U32) type << ", " << index << ")" << llendl;
+			LL_ERRS() << "Tried to set local texture with invalid type: (" << (U32) type << ", " << index << ")" << LL_ENDL;
 			return;
 		}
 		LLWearableType::EType wearable_type = LLAvatarAppearanceDictionary::getInstance()->getTEWearableType(type);
@@ -1770,7 +1718,7 @@ void LLVOAvatarSelf::setLocalTexture(ETextureIndex type, LLViewerTexture* src_te
 		local_tex_obj = getLocalTextureObject(type,index);
 		if (!local_tex_obj)
 		{
-			llerrs << "Unable to create LocalTextureObject for wearable type & index: (" << (U32) wearable_type << ", " << index << ")" << llendl;
+			LL_ERRS() << "Unable to create LocalTextureObject for wearable type & index: (" << (U32) wearable_type << ", " << index << ")" << LL_ENDL;
 			return;
 		}
 		
@@ -1799,10 +1747,10 @@ void LLVOAvatarSelf::setLocalTexture(ETextureIndex type, LLViewerTexture* src_te
 					{
 						requestLayerSetUpdate(type);
 						if (isEditingAppearance())
-					{
-						LLVisualParamHint::requestHintUpdates();
+						{
+							LLVisualParamHint::requestHintUpdates();
+						}
 					}
-				}
 				}
 				else
 				{					
@@ -1832,7 +1780,7 @@ void LLVOAvatarSelf::setBakedReady(LLAvatarAppearanceDefines::ETextureIndex type
 // virtual
 void LLVOAvatarSelf::dumpLocalTextures() const
 {
-	llinfos << "Local Textures:" << llendl;
+	LL_INFOS() << "Local Textures:" << LL_ENDL;
 
 	/* ETextureIndex baked_equiv[] = {
 	   TEX_UPPER_BAKED,
@@ -1856,22 +1804,22 @@ void LLVOAvatarSelf::dumpLocalTextures() const
 #if LL_RELEASE_FOR_DOWNLOAD
 			// End users don't get to trivially see avatar texture IDs, makes textures
 			// easier to steal. JC
-			llinfos << "LocTex " << name << ": Baked " << llendl;
+			LL_INFOS() << "LocTex " << name << ": Baked " << LL_ENDL;
 #else
-			llinfos << "LocTex " << name << ": Baked " << getTEImage(baked_equiv)->getID() << llendl;
+			LL_INFOS() << "LocTex " << name << ": Baked " << getTEImage(baked_equiv)->getID() << LL_ENDL;
 #endif
 		}
 		else if (local_tex_obj && local_tex_obj->getImage() != NULL)
 		{
 			if (local_tex_obj->getImage()->getID() == IMG_DEFAULT_AVATAR)
 			{
-				llinfos << "LocTex " << name << ": None" << llendl;
+				LL_INFOS() << "LocTex " << name << ": None" << LL_ENDL;
 			}
 			else
 			{
 				const LLViewerFetchedTexture* image = dynamic_cast<LLViewerFetchedTexture*>( local_tex_obj->getImage() );
 
-				llinfos << "LocTex " << name << ": "
+				LL_INFOS() << "LocTex " << name << ": "
 						<< "Discard " << image->getDiscardLevel() << ", "
 						<< "(" << image->getWidth() << ", " << image->getHeight() << ") " 
 #if !LL_RELEASE_FOR_DOWNLOAD
@@ -1880,12 +1828,12 @@ void LLVOAvatarSelf::dumpLocalTextures() const
 						<< image->getID() << " "
 #endif
 						<< "Priority: " << image->getDecodePriority()
-						<< llendl;
+						<< LL_ENDL;
 			}
 		}
 		else
 		{
-			llinfos << "LocTex " << name << ": No LLViewerTexture" << llendl;
+			LL_INFOS() << "LocTex " << name << ": No LLViewerTexture" << LL_ENDL;
 		}
 	}
 }
@@ -1941,10 +1889,10 @@ void LLVOAvatarSelf::dumpTotalLocalTextureByteCount()
 {
 	S32 gl_bytes = 0;
 	gAgentAvatarp->getLocalTextureByteCount(&gl_bytes);
-	llinfos << "Total Avatar LocTex GL:" << (gl_bytes/1024) << "KB" << llendl;
+	LL_INFOS() << "Total Avatar LocTex GL:" << (gl_bytes/1024) << "KB" << LL_ENDL;
 }
 
-BOOL LLVOAvatarSelf::getIsCloud() const
+bool LLVOAvatarSelf::getIsCloud() const
 {
 	// Let people know why they're clouded without spamming them into oblivion.
 	bool do_warn = false;
@@ -1965,23 +1913,23 @@ BOOL LLVOAvatarSelf::getIsCloud() const
 	{
 		if (do_warn)
 		{
-			llinfos << "Self is clouded due to missing one or more required body parts: "
+			LL_INFOS() << "Self is clouded due to missing one or more required body parts: "
 					<< (shape_count ? "" : "SHAPE ")
 					<< (hair_count ? "" : "HAIR ")
 					<< (eye_count ? "" : "EYES ")
 					<< (skin_count ? "" : "SKIN ")
-					<< llendl;
+					<< LL_ENDL;
 		}
-		return TRUE;
+		return true;
 	}
 
 	if (!isTextureDefined(TEX_HAIR, 0))
 	{
 		if (do_warn)
 		{
-			llinfos << "Self is clouded because of no hair texture" << llendl;
+			LL_INFOS() << "Self is clouded because of no hair texture" << LL_ENDL;
 		}
-		return TRUE;
+		return true;
 	}
 
 	if (!mPreviousFullyLoaded)
@@ -1991,9 +1939,9 @@ BOOL LLVOAvatarSelf::getIsCloud() const
 		{
 			if (do_warn)
 			{
-				llinfos << "Self is clouded because lower textures not baked" << llendl;
+				LL_INFOS() << "Self is clouded because lower textures not baked" << LL_ENDL;
 			}
-			return TRUE;
+			return true;
 		}
 
 		if (!isLocalTextureDataAvailable(getLayerSet(BAKED_UPPER)) &&
@@ -2001,9 +1949,9 @@ BOOL LLVOAvatarSelf::getIsCloud() const
 		{
 			if (do_warn)
 			{
-				llinfos << "Self is clouded because upper textures not baked" << llendl;
+				LL_INFOS() << "Self is clouded because upper textures not baked" << LL_ENDL;
 			}
-			return TRUE;
+			return true;
 		}
 
 		for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
@@ -2021,22 +1969,25 @@ BOOL LLVOAvatarSelf::getIsCloud() const
 			{
 				if (do_warn)
 				{
-					llinfos << "Self is clouded because texture at index " << i
-							<< " (texture index is " << texture_data.mTextureIndex << ") is not loaded" << llendl;
+					LL_INFOS() << "Self is clouded because texture at index " << i
+							<< " (texture index is " << texture_data.mTextureIndex << ") is not loaded" << LL_ENDL;
 				}
-				return TRUE;
+				return true;
 			}
 		}
 
-		lldebugs << "Avatar de-clouded" << llendl;
+		LL_DEBUGS() << "Avatar de-clouded" << LL_ENDL;
 	}
-	return FALSE;
+	return false;
 }
 
 /*static*/
 void LLVOAvatarSelf::debugOnTimingLocalTexLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata)
 {
-	gAgentAvatarp->debugTimingLocalTexLoaded(success, src_vi, src, aux_src, discard_level, final, userdata);
+	if (gAgentAvatarp.notNull())
+	{
+		gAgentAvatarp->debugTimingLocalTexLoaded(success, src_vi, src, aux_src, discard_level, final, userdata);
+	}
 }
 
 void LLVOAvatarSelf::debugTimingLocalTexLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata)
@@ -2149,7 +2100,7 @@ void LLVOAvatarSelf::dumpAllTextures() const
 		if (!layerset_buffer) continue;
 		vd_text += verboseDebugDumpLocalTextureDataInfo(layerset);
 	}
-	LL_DEBUGS("Avatar") << vd_text << llendl;
+	LL_DEBUGS("Avatar") << vd_text << LL_ENDL;
 }
 
 const std::string LLVOAvatarSelf::debugDumpLocalTextureDataInfo(const LLViewerTexLayerSet* layerset) const
@@ -2220,74 +2171,84 @@ const std::string LLVOAvatarSelf::debugDumpAllLocalTextureDataInfo() const
 	return text;
 }
 
-
-#if 0
-// Dump avatar metrics data.
-LLSD LLVOAvatarSelf::metricsData()
+void LLVOAvatarSelf::appearanceChangeMetricsCoro(std::string url)
 {
-	// runway - add region info
-	LLSD result;
-	result["rez_status"] = LLVOAvatar::rezStatusToString(getRezzedStatus());
-	result["timers"]["debug_existence"] = mDebugExistenceTimer.getElapsedTimeF32();
-	result["timers"]["ruth_debug"] = mRuthDebugTimer.getElapsedTimeF32();
-	result["timers"]["ruth"] = mRuthTimer.getElapsedTimeF32();
-	result["timers"]["invisible"] = mInvisibleTimer.getElapsedTimeF32();
-	result["timers"]["fully_loaded"] = mFullyLoadedTimer.getElapsedTimeF32();
-	result["startup"] = LLStartUp::getPhases().dumpPhases();
-	
-	return result;
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("appearanceChangeMetrics", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts = LLCore::HttpOptions::ptr_t(new LLCore::HttpOptions);
+
+    S32 currentSequence = mMetricSequence;
+    if (S32_MAX == ++mMetricSequence)
+        mMetricSequence = 0;
+
+    LLSD msg;
+    msg["message"] = "ViewerAppearanceChangeMetrics";
+    msg["session_id"] = gAgentSessionID;
+    msg["agent_id"] = gAgentID;
+    msg["sequence"] = currentSequence;
+    msg["initial"] = mInitialMetric;
+    msg["break"] = false;
+    msg["duration"] = mTimeSinceLastRezMessage.getElapsedTimeF32();
+
+    // Status of our own rezzing.
+    msg["rez_status"] = LLVOAvatar::rezStatusToString(getRezzedStatus());
+
+    // Status of all nearby avs including ourself.
+    msg["nearby"] = LLSD::emptyArray();
+    std::vector<S32> rez_counts;
+    LLVOAvatar::getNearbyRezzedStats(rez_counts);
+    for (S32 rez_stat = 0; rez_stat < rez_counts.size(); ++rez_stat)
+    {
+        std::string rez_status_name = LLVOAvatar::rezStatusToString(rez_stat);
+        msg["nearby"][rez_status_name] = rez_counts[rez_stat];
+    }
+
+    //	std::vector<std::string> bucket_fields("timer_name","is_self","grid_x","grid_y","is_using_server_bake");
+    std::vector<std::string> by_fields;
+    by_fields.push_back("timer_name");
+    by_fields.push_back("completed");
+    by_fields.push_back("grid_x");
+    by_fields.push_back("grid_y");
+    by_fields.push_back("is_using_server_bakes");
+    by_fields.push_back("is_self");
+    by_fields.push_back("central_bake_version");
+    LLSD summary = summarize_by_buckets(mPendingTimerRecords, by_fields, std::string("elapsed"));
+    msg["timers"] = summary;
+
+    mPendingTimerRecords.clear();
+
+    LL_DEBUGS("Avatar") << avString() << "message: " << ll_pretty_print_sd(msg) << LL_ENDL;
+
+    gPendingMetricsUploads++;
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, msg);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    gPendingMetricsUploads--;
+
+    if (!status)
+    {
+        LL_WARNS("Avatar") << "Unable to upload statistics" << LL_ENDL;
+        return;
+    }
+    else
+    {
+        LL_INFOS("Avatar") << "Statistics upload OK" << LL_ENDL;
+        mInitialMetric = false;
+    }
 }
-#endif
-
-class ViewerAppearanceChangeMetricsResponder: public LLCurl::Responder
-{
-public:
-	ViewerAppearanceChangeMetricsResponder( S32 expected_sequence,
-											volatile const S32 & live_sequence,
-											volatile bool & reporting_started):
-		mExpectedSequence(expected_sequence),
-		mLiveSequence(live_sequence),
-		mReportingStarted(reporting_started)
-	{
-	}
-
-	virtual void completed(U32 status,
-						   const std::string& reason,
-						   const LLSD& content)
-	{
-		gPendingMetricsUploads--; // if we add retry, this should be moved to the isGoodStatus case.
-		if (isGoodStatus(status))
-		{
-			LL_DEBUGS("Avatar") << "OK" << LL_ENDL;
-			result(content);
-		}
-		else
-		{
-			LL_WARNS("Avatar") << "Failed " << status << " reason " << reason << LL_ENDL;
-			errorWithContent(status,reason,content);
-		}
-	}
-
-	// virtual
-	void result(const LLSD & content)
-	{
-		if (mLiveSequence == mExpectedSequence)
-		{
-			mReportingStarted = true;
-		}
-	}
-
-private:
-	S32 mExpectedSequence;
-	volatile const S32 & mLiveSequence;
-	volatile bool & mReportingStarted;
-};
 
 bool LLVOAvatarSelf::updateAvatarRezMetrics(bool force_send)
 {
 	const F32 AV_METRICS_INTERVAL_QA = 30.0;
 	F32 send_period = 300.0;
-	if (gSavedSettings.getBOOL("QAModeMetrics"))
+
+	static LLCachedControl<bool> qa_mode_metrics(gSavedSettings,"QAModeMetrics");
+	if (qa_mode_metrics)
 	{
 		send_period = AV_METRICS_INTERVAL_QA;
 	}
@@ -2351,7 +2312,7 @@ LLSD summarize_by_buckets(std::vector<LLSD> in_records,
 		 accum_it != accum.end(); ++accum_it)
 	{
 		LLSD out_record = accum_it->first;
-		out_record["stats"] = accum_it->second.getData();
+		out_record["stats"] = accum_it->second.asLLSD();
 		result.append(out_record);
 	}
 	return result;
@@ -2359,52 +2320,7 @@ LLSD summarize_by_buckets(std::vector<LLSD> in_records,
 
 void LLVOAvatarSelf::sendViewerAppearanceChangeMetrics()
 {
-	// gAgentAvatarp->stopAllPhases();
-	static volatile bool reporting_started(false);
-	static volatile S32 report_sequence(0);
-
-	LLSD msg; // = metricsData();
-	msg["message"] = "ViewerAppearanceChangeMetrics";
-	msg["session_id"] = gAgentSessionID;
-	msg["agent_id"] = gAgentID;
-	msg["sequence"] = report_sequence;
-	msg["initial"] = !reporting_started;
-	msg["break"] = false;
-	msg["duration"] = mTimeSinceLastRezMessage.getElapsedTimeF32();
-
-	// Status of our own rezzing.
-	msg["rez_status"] = LLVOAvatar::rezStatusToString(getRezzedStatus());
-
-	// Status of all nearby avs including ourself.
-	msg["nearby"] = LLSD::emptyArray();
-	std::vector<S32> rez_counts;
-	LLVOAvatar::getNearbyRezzedStats(rez_counts);
-	for (S32 rez_stat=0; rez_stat < rez_counts.size(); ++rez_stat)
-	{
-		std::string rez_status_name = LLVOAvatar::rezStatusToString(rez_stat);
-		msg["nearby"][rez_status_name] = rez_counts[rez_stat];
-	}
-
-	//	std::vector<std::string> bucket_fields("timer_name","is_self","grid_x","grid_y","is_using_server_bake");
-	std::vector<std::string> by_fields;
-	by_fields.push_back("timer_name");
-	by_fields.push_back("completed");
-	by_fields.push_back("grid_x");
-	by_fields.push_back("grid_y");
-	by_fields.push_back("is_using_server_bakes");
-	by_fields.push_back("is_self");
-	by_fields.push_back("central_bake_version");
-	LLSD summary = summarize_by_buckets(mPendingTimerRecords, by_fields, std::string("elapsed"));
-	msg["timers"] = summary;
-
-	mPendingTimerRecords.clear();
-
-	// Update sequence number
-	if (S32_MAX == ++report_sequence)
-		report_sequence = 0;
-
-	LL_DEBUGS("Avatar") << avString() << "message: " << ll_pretty_print_sd(msg) << LL_ENDL;
-	std::string	caps_url;
+    std::string	caps_url;
 	if (getRegion())
 	{
 		// runway - change here to activate.
@@ -2412,72 +2328,11 @@ void LLVOAvatarSelf::sendViewerAppearanceChangeMetrics()
 	}
 	if (!caps_url.empty())
 	{
-		gPendingMetricsUploads++;
-		LLCurlRequest::headers_t headers;
-		LLHTTPClient::post(caps_url,
-						   msg,
-						   new ViewerAppearanceChangeMetricsResponder(report_sequence,
-																	  report_sequence,
-																	  reporting_started));
+
+        LLCoros::instance().launch("LLVOAvatarSelf::appearanceChangeMetricsCoro",
+            boost::bind(&LLVOAvatarSelf::appearanceChangeMetricsCoro, this, caps_url));
 		mTimeSinceLastRezMessage.reset();
 	}
-}
-
-class CheckAgentAppearanceServiceResponder: public LLHTTPClient::Responder
-{
-public:
-	CheckAgentAppearanceServiceResponder()
-	{
-	}
-	
-	virtual ~CheckAgentAppearanceServiceResponder()
-	{
-	}
-
-	/* virtual */ void result(const LLSD& content)
-	{
-		LL_DEBUGS("Avatar") << "status OK" << llendl;
-	}
-
-	// Error
-	/*virtual*/ void errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-	{
-		if (isAgentAvatarValid())
-		{
-			LL_DEBUGS("Avatar") << "failed, will rebake [status:"
-					<< status << "]: " << content << llendl;
-			forceAppearanceUpdate();
-		}
-	}	
-
-	static void forceAppearanceUpdate()
-	{
-		// Trying to rebake immediately after crossing region boundary
-		// seems to be failure prone; adding a delay factor. Yes, this
-		// fix is ad-hoc and not guaranteed to work in all cases.
-		doAfterInterval(boost::bind(&LLVOAvatarSelf::forceBakeAllTextures,
-									gAgentAvatarp.get(), true), 5.0);
-	}
-};
-
-void LLVOAvatarSelf::checkForUnsupportedServerBakeAppearance()
-{
-	// Need to check only if we have a server baked appearance and are
-	// in a non-baking region.
-	if (!gAgentAvatarp->isUsingServerBakes())
-		return;
-	if (!gAgent.getRegion() || gAgent.getRegion()->getCentralBakeVersion()!=0)
-		return;
-
-	// if baked image service is unknown, need to refresh.
-	if (LLAppearanceMgr::instance().getAppearanceServiceURL().empty())
-	{
-		CheckAgentAppearanceServiceResponder::forceAppearanceUpdate();
-	}
-	// query baked image service to check status.
-	std::string image_url = gAgentAvatarp->getImageURL(TEX_HEAD_BAKED,
-													   getTE(TEX_HEAD_BAKED)->getID());
-	LLHTTPClient::head(image_url, new CheckAgentAppearanceServiceResponder);
 }
 
 const LLUUID& LLVOAvatarSelf::grabBakedTexture(EBakedTextureIndex baked_index) const
@@ -2504,7 +2359,7 @@ BOOL LLVOAvatarSelf::canGrabBakedTexture(EBakedTextureIndex baked_index) const
 	// Check if the texture hasn't been baked yet.
 	if (!isTextureDefined(tex_index, 0))
 	{
-		lldebugs << "getTEImage( " << (U32) tex_index << " )->getID() == IMG_DEFAULT_AVATAR" << llendl;
+		LL_DEBUGS() << "getTEImage( " << (U32) tex_index << " )->getID() == IMG_DEFAULT_AVATAR" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -2523,7 +2378,7 @@ BOOL LLVOAvatarSelf::canGrabBakedTexture(EBakedTextureIndex baked_index) const
 		const ETextureIndex t_index = (*iter);
 		LLWearableType::EType wearable_type = LLAvatarAppearanceDictionary::getTEWearableType(t_index);
 		U32 count = gAgentWearables.getWearableCount(wearable_type);
-		lldebugs << "Checking index " << (U32) t_index << " count: " << count << llendl;
+		LL_DEBUGS() << "Checking index " << (U32) t_index << " count: " << count << LL_ENDL;
 		
 		for (U32 wearable_index = 0; wearable_index < count; ++wearable_index)
 		{
@@ -2545,11 +2400,11 @@ BOOL LLVOAvatarSelf::canGrabBakedTexture(EBakedTextureIndex baked_index) const
 													asset_id_matches);
 
 					BOOL can_grab = FALSE;
-					lldebugs << "item count for asset " << texture_id << ": " << items.count() << llendl;
-					if (items.count())
+					LL_DEBUGS() << "item count for asset " << texture_id << ": " << items.size() << LL_ENDL;
+					if (items.size())
 					{
 						// search for full permissions version
-						for (S32 i = 0; i < items.count(); i++)
+						for (S32 i = 0; i < items.size(); i++)
 						{
 							LLViewerInventoryItem* itemp = items[i];
 												if (itemp->getIsFullPerm())
@@ -2580,24 +2435,24 @@ void LLVOAvatarSelf::addLocalTextureStats( ETextureIndex type, LLViewerFetchedTe
 	//if (!covered_by_baked)
 	{
 		if (imagep->getID() != IMG_DEFAULT_AVATAR)
-	{
+		{
 			imagep->setNoDelete();
 			if (imagep->getDiscardLevel() != 0)
-		{
-			F32 desired_pixels;
-			desired_pixels = llmin(mPixelArea, (F32)getTexImageArea());
-
-			imagep->setBoostLevel(getAvatarBoostLevel());
-				imagep->setAdditionalDecodePriority(SELF_ADDITIONAL_PRI) ;
-			imagep->resetTextureStats();
-			imagep->setMaxVirtualSizeResetInterval(MAX_TEXTURE_VIRTURE_SIZE_RESET_INTERVAL);
-			imagep->addTextureStats( desired_pixels / texel_area_ratio );
-			imagep->forceUpdateBindStats() ;
-			if (imagep->getDiscardLevel() < 0)
 			{
-				mHasGrey = TRUE; // for statistics gathering
+				F32 desired_pixels;
+				desired_pixels = llmin(mPixelArea, (F32)getTexImageArea());
+				
+				imagep->setBoostLevel(getAvatarBoostLevel());
+				imagep->setAdditionalDecodePriority(SELF_ADDITIONAL_PRI) ;
+				imagep->resetTextureStats();
+				imagep->setMaxVirtualSizeResetInterval(MAX_TEXTURE_VIRTUAL_SIZE_RESET_INTERVAL);
+				imagep->addTextureStats( desired_pixels / texel_area_ratio );
+				imagep->forceUpdateBindStats() ;
+				if (imagep->getDiscardLevel() < 0)
+				{
+					mHasGrey = TRUE; // for statistics gathering
+				}
 			}
-		}
 		}
 		else
 		{
@@ -2636,82 +2491,6 @@ ETextureIndex LLVOAvatarSelf::getBakedTE( const LLViewerTexLayerSet* layerset ) 
 	return TEX_HEAD_BAKED;
 }
 
-
-void LLVOAvatarSelf::setNewBakedTexture(LLAvatarAppearanceDefines::EBakedTextureIndex i, const LLUUID &uuid)
-{
-	ETextureIndex index = LLAvatarAppearanceDictionary::bakedToLocalTextureIndex(i);
-	setNewBakedTexture(index, uuid);
-}
-
-
-//-----------------------------------------------------------------------------
-// setNewBakedTexture()
-// A new baked texture has been successfully uploaded and we can start using it now.
-//-----------------------------------------------------------------------------
-void LLVOAvatarSelf::setNewBakedTexture( ETextureIndex te, const LLUUID& uuid )
-{
-	// Baked textures live on other sims.
-	LLHost target_host = getObjectHost();	
-	setTEImage( te, LLViewerTextureManager::getFetchedTextureFromHost( uuid, FTT_HOST_BAKE, target_host ) );
-	updateMeshTextures();
-	dirtyMesh();
-
-	LLVOAvatar::cullAvatarsByPixelArea();
-
-	/* switch(te)
-		case TEX_HEAD_BAKED:
-			llinfos << "New baked texture: HEAD" << llendl; */
-	const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture(te);
-	if (texture_dict->mIsBakedTexture)
-	{
-		debugBakedTextureUpload(texture_dict->mBakedTextureIndex, TRUE); // FALSE for start of upload, TRUE for finish.
-		llinfos << "New baked texture: " << texture_dict->mName << " UUID: " << uuid <<llendl;
-	}
-	else
-	{
-		llwarns << "New baked texture: unknown te " << te << llendl;
-	}
-	
-	//	dumpAvatarTEs( "setNewBakedTexture() send" );
-	// RN: throttle uploads
-	if (!hasPendingBakedUploads())
-	{
-		gAgent.sendAgentSetAppearance();
-
-		if (gSavedSettings.getBOOL("DebugAvatarRezTime"))
-		{
-			LLSD args;
-			args["EXISTENCE"] = llformat("%d",(U32)mDebugExistenceTimer.getElapsedTimeF32());
-			args["TIME"] = llformat("%d",(U32)mDebugSelfLoadTimer.getElapsedTimeF32());
-			if (isAllLocalTextureDataFinal())
-			{
-				LLNotificationsUtil::add("AvatarRezSelfBakedDoneNotification",args);
-				LL_DEBUGS("Avatar") << "REZTIME: [ " << (U32)mDebugExistenceTimer.getElapsedTimeF32()
-						<< "sec ]"
-						<< avString() 
-						<< "RuthTimer " << (U32)mRuthDebugTimer.getElapsedTimeF32()
-						<< " SelfLoadTimer " << (U32)mDebugSelfLoadTimer.getElapsedTimeF32()
-						<< " Notification " << "AvatarRezSelfBakedDoneNotification"
-						<< llendl;
-			}
-			else
-			{
-				args["STATUS"] = debugDumpAllLocalTextureDataInfo();
-				LLNotificationsUtil::add("AvatarRezSelfBakedUpdateNotification",args);
-				LL_DEBUGS("Avatar") << "REZTIME: [ " << (U32)mDebugExistenceTimer.getElapsedTimeF32()
-						<< "sec ]"
-						<< avString() 
-						<< "RuthTimer " << (U32)mRuthDebugTimer.getElapsedTimeF32()
-						<< " SelfLoadTimer " << (U32)mDebugSelfLoadTimer.getElapsedTimeF32()
-						<< " Notification " << "AvatarRezSelfBakedUpdateNotification"
-						<< llendl;
-			}
-		}
-
-		outputRezDiagnostics();
-	}
-}
-
 // FIXME: This is not called consistently. Something may be broken.
 void LLVOAvatarSelf::outputRezDiagnostics() const
 {
@@ -2721,11 +2500,11 @@ void LLVOAvatarSelf::outputRezDiagnostics() const
 	}
 
 	const F32 final_time = mDebugSelfLoadTimer.getElapsedTimeF32();
-	LL_DEBUGS("Avatar") << "REZTIME: Myself rez stats:" << llendl;
-	LL_DEBUGS("Avatar") << "\t Time from avatar creation to load wearables: " << (S32)mDebugTimeWearablesLoaded << llendl;
-	LL_DEBUGS("Avatar") << "\t Time from avatar creation to de-cloud: " << (S32)mDebugTimeAvatarVisible << llendl;
-	LL_DEBUGS("Avatar") << "\t Time from avatar creation to de-cloud for others: " << (S32)final_time << llendl;
-	LL_DEBUGS("Avatar") << "\t Load time for each texture: " << llendl;
+	LL_DEBUGS("Avatar") << "REZTIME: Myself rez stats:" << LL_ENDL;
+	LL_DEBUGS("Avatar") << "\t Time from avatar creation to load wearables: " << (S32)mDebugTimeWearablesLoaded << LL_ENDL;
+	LL_DEBUGS("Avatar") << "\t Time from avatar creation to de-cloud: " << (S32)mDebugTimeAvatarVisible << LL_ENDL;
+	LL_DEBUGS("Avatar") << "\t Time from avatar creation to de-cloud for others: " << (S32)final_time << LL_ENDL;
+	LL_DEBUGS("Avatar") << "\t Load time for each texture: " << LL_ENDL;
 	for (U32 i = 0; i < LLAvatarAppearanceDefines::TEX_NUM_INDICES; ++i)
 	{
 		std::stringstream out;
@@ -2753,10 +2532,10 @@ void LLVOAvatarSelf::outputRezDiagnostics() const
 			LL_DEBUGS("Avatar") << out.str() << LL_ENDL;
 		}
 	}
-	LL_DEBUGS("Avatar") << "\t Time points for each upload (start / finish)" << llendl;
+	LL_DEBUGS("Avatar") << "\t Time points for each upload (start / finish)" << LL_ENDL;
 	for (U32 i = 0; i < LLAvatarAppearanceDefines::BAKED_NUM_INDICES; ++i)
 	{
-		LL_DEBUGS("Avatar") << "\t\t (" << i << ") \t" << (S32)mDebugBakedTextureTimes[i][0] << " / " << (S32)mDebugBakedTextureTimes[i][1] << llendl;
+		LL_DEBUGS("Avatar") << "\t\t (" << i << ") \t" << (S32)mDebugBakedTextureTimes[i][0] << " / " << (S32)mDebugBakedTextureTimes[i][1] << LL_ENDL;
 	}
 
 	for (LLAvatarAppearanceDefines::LLAvatarAppearanceDictionary::BakedTextures::const_iterator baked_iter = LLAvatarAppearanceDefines::LLAvatarAppearanceDictionary::getInstance()->getBakedTextures().begin();
@@ -2768,7 +2547,7 @@ void LLVOAvatarSelf::outputRezDiagnostics() const
 		if (!layerset) continue;
 		const LLViewerTexLayerSetBuffer *layerset_buffer = layerset->getViewerComposite();
 		if (!layerset_buffer) continue;
-		LL_DEBUGS("Avatar") << layerset_buffer->dumpTextureInfo() << llendl;
+		LL_DEBUGS("Avatar") << layerset_buffer->dumpTextureInfo() << LL_ENDL;
 	}
 
 	dumpAllTextures();
@@ -2787,92 +2566,10 @@ void LLVOAvatarSelf::reportAvatarRezTime() const
 	// TODO: report mDebugSelfLoadTimer.getElapsedTimeF32() somehow.
 }
 
-//-----------------------------------------------------------------------------
-// setCachedBakedTexture()
-// A baked texture id was received from a cache query, make it active
-//-----------------------------------------------------------------------------
-void LLVOAvatarSelf::setCachedBakedTexture( ETextureIndex te, const LLUUID& uuid )
-{
-	setTETexture( te, uuid );
-
-	/* switch(te)
-		case TEX_HEAD_BAKED:
-			if( mHeadLayerSet )
-				mHeadLayerSet->cancelUpload(); */
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
-	{
-		LLViewerTexLayerSet *layerset = getTexLayerSet(i);
-		if ( mBakedTextureDatas[i].mTextureIndex == te && layerset)
-		{
-			if (mInitialBakeIDs[i] != LLUUID::null)
-			{
-				if (mInitialBakeIDs[i] == uuid)
-				{
-					llinfos << "baked texture correctly loaded at login! " << i << llendl;
-				}
-				else
-				{
-					llwarns << "baked texture does not match id loaded at login!" << i << llendl;
-				}
-				mInitialBakeIDs[i] = LLUUID::null;
-			}
-			layerset->cancelUpload();
-		}
-	}
-}
-
-// static
-void LLVOAvatarSelf::processRebakeAvatarTextures(LLMessageSystem* msg, void**)
-{
-	LLUUID texture_id;
-	msg->getUUID("TextureData", "TextureID", texture_id);
-	if (!isAgentAvatarValid()) return;
-
-	// If this is a texture corresponding to one of our baked entries, 
-	// just rebake that layer set.
-	BOOL found = FALSE;
-
-	/* ETextureIndex baked_texture_indices[BAKED_NUM_INDICES] =
-			TEX_HEAD_BAKED,
-			TEX_UPPER_BAKED, */
-	for (LLAvatarAppearanceDictionary::Textures::const_iterator iter = LLAvatarAppearanceDictionary::getInstance()->getTextures().begin();
-		 iter != LLAvatarAppearanceDictionary::getInstance()->getTextures().end();
-		 ++iter)
-	{
-		const ETextureIndex index = iter->first;
-		const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = iter->second;
-		if (texture_dict->mIsBakedTexture)
-		{
-			if (texture_id == gAgentAvatarp->getTEImage(index)->getID())
-			{
-				LLViewerTexLayerSet* layer_set = gAgentAvatarp->getLayerSet(index);
-				if (layer_set)
-				{
-					llinfos << "TAT: rebake - matched entry " << (S32)index << llendl;
-					gAgentAvatarp->invalidateComposite(layer_set, TRUE);
-					found = TRUE;
-					LLViewerStats::getInstance()->incStat(LLViewerStats::ST_TEX_REBAKES);
-				}
-			}
-		}
-	}
-
-	// If texture not found, rebake all entries.
-	if (!found)
-	{
-		gAgentAvatarp->forceBakeAllTextures();
-	}
-	else
-	{
-		// Not sure if this is necessary, but forceBakeAllTextures() does it.
-		gAgentAvatarp->updateMeshTextures();
-	}
-}
-
-
+// SUNSHINE CLEANUP - not clear we need any of this, may be sufficient to request server appearance in llviewermenu.cpp:handle_rebake_textures()
 void LLVOAvatarSelf::forceBakeAllTextures(bool slam_for_debug)
 {
-	llinfos << "TAT: forced full rebake. " << llendl;
+	LL_INFOS() << "TAT: forced full rebake. " << LL_ENDL;
 
 	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
 	{
@@ -2883,15 +2580,14 @@ void LLVOAvatarSelf::forceBakeAllTextures(bool slam_for_debug)
 			if (slam_for_debug)
 			{
 				layer_set->setUpdatesEnabled(TRUE);
-				layer_set->cancelUpload();
 			}
 
-			invalidateComposite(layer_set, TRUE);
-			LLViewerStats::getInstance()->incStat(LLViewerStats::ST_TEX_REBAKES);
+			invalidateComposite(layer_set);
+			add(LLStatViewer::TEX_REBAKES, 1);
 		}
 		else
 		{
-			llwarns << "TAT: NO LAYER SET FOR " << (S32)baked_index << llendl;
+			LL_WARNS() << "TAT: NO LAYER SET FOR " << (S32)baked_index << LL_ENDL;
 		}
 	}
 
@@ -2921,17 +2617,17 @@ void LLVOAvatarSelf::requestLayerSetUpdate(ETextureIndex index )
 
 LLViewerTexLayerSet* LLVOAvatarSelf::getLayerSet(ETextureIndex index) const
 {
-	/* switch(index)
-		case TEX_HEAD_BAKED:
-		case TEX_HEAD_BODYPAINT:
-			return mHeadLayerSet; */
+       /* switch(index)
+               case TEX_HEAD_BAKED:
+               case TEX_HEAD_BODYPAINT:
+                       return mHeadLayerSet; */
        const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture(index);
-	if (texture_dict->mIsUsedByBakedTexture)
-	{
-		const EBakedTextureIndex baked_index = texture_dict->mBakedTextureIndex;
+       if (texture_dict->mIsUsedByBakedTexture)
+       {
+               const EBakedTextureIndex baked_index = texture_dict->mBakedTextureIndex;
                return getLayerSet(baked_index);
-	}
-	return NULL;
+       }
+       return NULL;
 }
 
 LLViewerTexLayerSet* LLVOAvatarSelf::getLayerSet(EBakedTextureIndex baked_index) const
@@ -2955,11 +2651,16 @@ void LLVOAvatarSelf::onCustomizeStart(bool disable_camera_switch)
 {
 	if (isAgentAvatarValid())
 	{
+		if (!gAgentAvatarp->mEndCustomizeCallback.get())
+		{
+			gAgentAvatarp->mEndCustomizeCallback = new LLUpdateAppearanceOnDestroy;
+		}
+		
 		gAgentAvatarp->mIsEditingAppearance = true;
 		gAgentAvatarp->mUseLocalAppearance = true;
 
 		if (gSavedSettings.getBOOL("AppearanceCameraMovement") && !disable_camera_switch)
-{
+		{
 			gAgentCamera.changeCameraToCustomizeAvatar();
 		}
 
@@ -2981,12 +2682,6 @@ void LLVOAvatarSelf::onCustomizeEnd(bool disable_camera_switch)
 	if (isAgentAvatarValid())
 	{
 		gAgentAvatarp->mIsEditingAppearance = false;
-		if (gAgentAvatarp->getRegion() && !gAgentAvatarp->getRegion()->getCentralBakeVersion())
-		{
-			// FIXME DRANO - move to sendAgentSetAppearance, make conditional on upload complete.
-			gAgentAvatarp->mUseLocalAppearance = false;
-		}
-
 		gAgentAvatarp->invalidateAll();
 
 		if (gSavedSettings.getBOOL("AppearanceCameraMovement") && !disable_camera_switch)
@@ -2994,8 +2689,11 @@ void LLVOAvatarSelf::onCustomizeEnd(bool disable_camera_switch)
 			gAgentCamera.changeCameraToDefault();
 			gAgentCamera.resetView();
 		}
-	
-		LLAppearanceMgr::instance().updateAppearanceFromCOF();	
+
+		// Dereferencing the previous callback will cause
+		// updateAppearanceFromCOF to be called, whenever all refs
+		// have resolved.
+		gAgentAvatarp->mEndCustomizeCallback = NULL;
 	}
 }
 
@@ -3041,6 +2739,43 @@ bool LLVOAvatarSelf::sendAppearanceMessage(LLMessageSystem *mesgsys) const
 	return success;
 }
 
+//------------------------------------------------------------------------
+// sendHoverHeight()
+//------------------------------------------------------------------------
+void LLVOAvatarSelf::sendHoverHeight() const
+{
+	std::string url = gAgent.getRegionCapability("AgentPreferences");
+
+	if (!url.empty())
+	{
+		LLSD update = LLSD::emptyMap();
+		const LLVector3& hover_offset = getHoverOffset();
+		update["hover_height"] = hover_offset[2];
+
+		LL_DEBUGS("Avatar") << avString() << "sending hover height value " << hover_offset[2] << LL_ENDL;
+
+        // *TODO: - this class doesn't really do anything, could just use a base
+        // class responder if nothing else gets added. 
+        // (comment from removed Responder)
+        LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, update, 
+            "Hover hight sent to sim", "Hover hight not sent to sim");
+		mLastHoverOffsetSent = hover_offset;
+	}
+}
+
+void LLVOAvatarSelf::setHoverOffset(const LLVector3& hover_offset, bool send_update)
+{
+	if (getHoverOffset() != hover_offset)
+	{
+		LL_INFOS("Avatar") << avString() << " setting hover due to change " << hover_offset[2] << LL_ENDL;
+		LLVOAvatar::setHoverOffset(hover_offset, send_update);
+	}
+	if (send_update && (hover_offset != mLastHoverOffsetSent))
+	{
+		LL_INFOS("Avatar") << avString() << " sending hover due to change " << hover_offset[2] << LL_ENDL;
+		sendHoverHeight();
+	}
+}
 
 //------------------------------------------------------------------------
 // needsRenderBeam()
@@ -3062,29 +2797,28 @@ BOOL LLVOAvatarSelf::needsRenderBeam()
 // static
 void LLVOAvatarSelf::deleteScratchTextures()
 {
-	for( LLGLuint* namep = sScratchTexNames.getFirstData(); 
-		 namep; 
-		 namep = sScratchTexNames.getNextData() )
+	for(std::map< LLGLenum, LLGLuint*>::iterator it = sScratchTexNames.begin(), end_it = sScratchTexNames.end();
+		it != end_it;
+		++it)
 	{
-		LLImageGL::deleteTextures(1, (U32 *)namep );
+		LLImageGL::deleteTextures(1, (U32 *)it->second );
 		stop_glerror();
 	}
 
-	if( sScratchTexBytes )
+	if( sScratchTexBytes.value() )
 	{
-		lldebugs << "Clearing Scratch Textures " << (sScratchTexBytes/1024) << "KB" << llendl;
+		LL_DEBUGS() << "Clearing Scratch Textures " << (S32Kilobytes)sScratchTexBytes << LL_ENDL;
 
-		sScratchTexNames.deleteAllData();
-		sScratchTexLastBindTime.deleteAllData();
-		LLImageGL::sGlobalTextureMemoryInBytes -= sScratchTexBytes;
-		sScratchTexBytes = 0;
+		delete_and_clear(sScratchTexNames);
+		LLImageGL::sGlobalTextureMemory -= sScratchTexBytes;
+		sScratchTexBytes = S32Bytes(0);
 	}
 }
 
 // static 
 void LLVOAvatarSelf::dumpScratchTextureByteCount()
 {
-	llinfos << "Scratch Texture GL: " << (sScratchTexBytes/1024) << "KB" << llendl;
+	LL_INFOS() << "Scratch Texture GL: " << (sScratchTexBytes/1024) << "KB" << LL_ENDL;
 }
 
 void LLVOAvatarSelf::dumpWearableInfo(LLAPRFile& outfile)

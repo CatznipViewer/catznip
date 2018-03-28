@@ -34,6 +34,7 @@
 #include "llinventoryobserver.h"
 #include "llinventorymodel.h"
 #include "llviewerinventory.h"
+#include "llinitdestroyclass.h"
 
 class LLMenuItemCallGL;
 class LLToggleableMenu;
@@ -105,8 +106,10 @@ protected:
 	bool mUpdateDropDownItems;
 	bool mRestoreOverflowMenu;
 
-	LLUUID mSelectedItemID;
+	bool mGetPrevItems;
 
+	LLUUID mSelectedItemID;
+	LLFrameTimer mItemsChangedTimer;
 	LLUIImage* mImageDragIndication;
 
 private:
@@ -162,19 +165,7 @@ private:
 
 	boost::signals2::connection mEndDragConnection;
 };
-/*
-class AddFavoriteLandmarkCallback : public LLInventoryCallback
-{
-public:
-	AddFavoriteLandmarkCallback() : mTargetLandmarkId(LLUUID::null) {}
-	void setTargetLandmarkId(const LLUUID& target_uuid) { mTargetLandmarkId = target_uuid; }
 
-private:
-	void fire(const LLUUID& inv_item);
-
-	LLUUID mTargetLandmarkId;
-};
-*/
 /**
  * Class to store sorting order of favorites landmarks in a local file. EXT-3985.
  * It replaced previously implemented solution to store sort index in landmark's name as a "<N>@" prefix.
@@ -183,6 +174,7 @@ private:
 class LLFavoritesOrderStorage : public LLSingleton<LLFavoritesOrderStorage>
 	, public LLDestroyClass<LLFavoritesOrderStorage>
 {
+	LLSINGLETON(LLFavoritesOrderStorage);
 	LOG_CLASS(LLFavoritesOrderStorage);
 public:
 	/**
@@ -203,6 +195,8 @@ public:
 	// Is used to save order for Favorites folder.
 	void saveItemsOrder(const LLInventoryModel::item_array_t& items);
 
+	void saveOrder();
+
 	void rearrangeFavoriteLandmarks(const LLUUID& source_item_id, const LLUUID& target_item_id);
 
 	/**
@@ -214,13 +208,21 @@ public:
 	 * @see cleanup()
 	 */
 	static void destroyClass();
+	static std::string getStoredFavoritesFilename();
+	static std::string getSavedOrderFileName();
+
+	BOOL saveFavoritesRecord(bool pref_changed = false);
+	void showFavoritesOnLoginChanged(BOOL show);
+
+	LLInventoryModel::item_array_t mPrevFavorites;
+
 
 	const static S32 NO_INDEX;
-private:
-	friend class LLSingleton<LLFavoritesOrderStorage>;
-	LLFavoritesOrderStorage() : mIsDirty(false) { load(); }
-	~LLFavoritesOrderStorage() { save(); }
+	static bool mSaveOnExit;
+	bool mUpdateRequired;
+	std::map<LLUUID,std::string> mFavoriteNames;
 
+private:
 	/**
 	 * Removes sort indexes for items which are not in Favorites bar for now.
 	 */
@@ -229,9 +231,6 @@ private:
 	const static std::string SORTING_DATA_FILE_NAME;
 
 	void load();
-	void save();
-
-	void saveFavoritesSLURLs();
 
 	// Remove record of current user's favorites from file on disk.
 	void removeFavoritesRecordOfUser();
@@ -244,7 +243,7 @@ private:
 
 	typedef std::map<LLUUID, std::string> slurls_map_t;
 	slurls_map_t mSLURLs;
-
+	std::set<LLUUID> mMissingSLURLs;
 	bool mIsDirty;
 
 	struct IsNotInFavorites
@@ -273,4 +272,10 @@ private:
 	};
 
 };
+
+inline
+LLFavoritesOrderStorage::LLFavoritesOrderStorage() :
+	mIsDirty(false), mUpdateRequired(false)
+{ load(); }
+
 #endif // LL_LLFAVORITESBARCTRL_H

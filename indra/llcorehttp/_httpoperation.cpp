@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2014, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,6 +38,14 @@
 #include "lltimer.h"
 
 
+namespace
+{
+
+static const char * const LOG_CORE("CoreHttp");
+
+} // end anonymous namespace
+
+
 namespace LLCore
 {
 
@@ -45,15 +53,18 @@ namespace LLCore
 // ==================================
 // HttpOperation
 // ==================================
+/*static*/ 
+HttpOperation::handleMap_t  HttpOperation::mHandleMap;
+LLCoreInt::HttpMutex	    HttpOperation::mOpMutex;
 
-
-HttpOperation::HttpOperation()
-	: LLCoreInt::RefCounted(true),
-	  mReplyQueue(NULL),
-	  mUserHandler(NULL),
-	  mReqPolicy(HttpRequest::DEFAULT_POLICY_ID),
-	  mReqPriority(0U),
-	  mTracing(0)
+HttpOperation::HttpOperation():
+    boost::enable_shared_from_this<HttpOperation>(),
+    mReplyQueue(),
+    mUserHandler(),
+    mReqPolicy(HttpRequest::DEFAULT_POLICY_ID),
+    mReqPriority(0U),
+    mTracing(HTTP_TRACE_OFF),
+    mMyHandle(LLCORE_HTTP_HANDLE_INVALID)
 {
 	mMetricCreated = totalTime();
 }
@@ -61,30 +72,17 @@ HttpOperation::HttpOperation()
 
 HttpOperation::~HttpOperation()
 {
-	setReplyPath(NULL, NULL);
+    destroyHandle();
+    mReplyQueue.reset();
+    mUserHandler.reset();
 }
 
 
-void HttpOperation::setReplyPath(HttpReplyQueue * reply_queue,
-								 HttpHandler * user_handler)
+void HttpOperation::setReplyPath(HttpReplyQueue::ptr_t reply_queue,
+								 HttpHandler::ptr_t user_handler)
 {
-	if (reply_queue != mReplyQueue)
-	{
-		if (mReplyQueue)
-		{
-			mReplyQueue->release();
-		}
-
-		if (reply_queue)
-		{
-			reply_queue->addRef();
-		}
-
-		mReplyQueue = reply_queue;
-	}
-
-	// Not refcounted
-	mUserHandler = user_handler;
+    mReplyQueue.swap(reply_queue);
+	mUserHandler.swap(user_handler);
 }
 
 
@@ -94,8 +92,8 @@ void HttpOperation::stageFromRequest(HttpService *)
 	// Default implementation should never be called.  This
 	// indicates an operation making a transition that isn't
 	// defined.
-	LL_ERRS("HttpCore") << "Default stageFromRequest method may not be called."
-						<< LL_ENDL;
+	LL_ERRS(LOG_CORE) << "Default stageFromRequest method may not be called."
+					  << LL_ENDL;
 }
 
 
@@ -104,8 +102,8 @@ void HttpOperation::stageFromReady(HttpService *)
 	// Default implementation should never be called.  This
 	// indicates an operation making a transition that isn't
 	// defined.
-	LL_ERRS("HttpCore") << "Default stageFromReady method may not be called."
-						<< LL_ENDL;
+	LL_ERRS(LOG_CORE) << "Default stageFromReady method may not be called."
+					  << LL_ENDL;
 }
 
 
@@ -114,8 +112,8 @@ void HttpOperation::stageFromActive(HttpService *)
 	// Default implementation should never be called.  This
 	// indicates an operation making a transition that isn't
 	// defined.
-	LL_ERRS("HttpCore") << "Default stageFromActive method may not be called."
-						<< LL_ENDL;
+	LL_ERRS(LOG_CORE) << "Default stageFromActive method may not be called."
+					  << LL_ENDL;
 }
 
 
@@ -126,7 +124,7 @@ void HttpOperation::visitNotifier(HttpRequest *)
 		HttpResponse * response = new HttpResponse();
 
 		response->setStatus(mStatus);
-		mUserHandler->onCompleted(static_cast<HttpHandle>(this), response);
+		mUserHandler->onCompleted(getHandle(), response);
 
 		response->release();
 	}
@@ -140,20 +138,83 @@ HttpStatus HttpOperation::cancel()
 	return status;
 }
 
+// Handle methods
+HttpHandle HttpOperation::getHandle()
+{
+    if (mMyHandle == LLCORE_HTTP_HANDLE_INVALID)
+        return createHandle();
+
+    return mMyHandle;
+}
+
+HttpHandle HttpOperation::createHandle()
+{
+    HttpHandle handle = static_cast<HttpHandle>(this);
+
+    {
+        LLCoreInt::HttpScopedLock lock(mOpMutex);
+
+        mHandleMap[handle] = shared_from_this();
+        mMyHandle = handle;
+    }
+
+    return mMyHandle;
+}
+
+void HttpOperation::destroyHandle()
+{
+    if (mMyHandle == LLCORE_HTTP_HANDLE_INVALID)
+        return;
+    {
+        LLCoreInt::HttpScopedLock lock(mOpMutex);
+
+        handleMap_t::iterator it = mHandleMap.find(mMyHandle);
+        if (it != mHandleMap.end())
+            mHandleMap.erase(it);
+    }
+}
+
+/*static*/
+HttpOperation::ptr_t HttpOperation::findByHandle(HttpHandle handle)
+{
+    wptr_t weak;
+
+    if (!handle)
+        return ptr_t();
+
+    {
+        LLCoreInt::HttpScopedLock lock(mOpMutex);
+
+        handleMap_t::iterator it = mHandleMap.find(handle);
+        if (it == mHandleMap.end())
+        {
+            LL_WARNS("LLCore::HTTP") << "Could not find operation for handle " << handle << LL_ENDL;
+            return ptr_t();
+        }
+
+        weak = (*it).second;
+    }
+
+    if (!weak.expired())
+        return weak.lock();
+    
+    return ptr_t();
+}
+
 
 void HttpOperation::addAsReply()
 {
 	if (mTracing > HTTP_TRACE_OFF)
 	{
-		LL_INFOS("CoreHttp") << "TRACE, ToReplyQueue, Handle:  "
-							 << static_cast<HttpHandle>(this)
-							 << LL_ENDL;
+		LL_INFOS(LOG_CORE) << "TRACE, ToReplyQueue, Handle:  "
+						   << getHandle()
+						   << LL_ENDL;
 	}
 	
 	if (mReplyQueue)
 	{
-		addRef();
-		mReplyQueue->addOp(this);
+        HttpOperation::ptr_t op = shared_from_this();
+		mReplyQueue->addOp(op);
 	}
 }
 
@@ -236,11 +297,8 @@ void HttpOpSpin::stageFromRequest(HttpService * service)
 	else
 	{
 		ms_sleep(1);			// backoff interlock plumbing a bit
-		this->addRef();
-		if (! service->getRequestQueue().addOp(this))
-		{
-			this->release();
-		}
+        HttpOperation::ptr_t opptr = shared_from_this();
+        service->getRequestQueue().addOp(opptr);
 	}
 }
 

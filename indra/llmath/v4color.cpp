@@ -122,13 +122,13 @@ LLColor4 LLColor4::cyan6(0.2f, 0.6f, 0.6f, 1.0f);
 //////////////////////////////////////////////////////////////////////////////
 
 // conversion
-LLColor4::operator const LLColor4U() const
+LLColor4::operator LLColor4U() const
 {
 	return LLColor4U(
-		(U8)llclampb(llround(mV[VRED]*255.f)),
-		(U8)llclampb(llround(mV[VGREEN]*255.f)),
-		(U8)llclampb(llround(mV[VBLUE]*255.f)),
-		(U8)llclampb(llround(mV[VALPHA]*255.f)));
+		(U8)llclampb(ll_round(mV[VRED]*255.f)),
+		(U8)llclampb(ll_round(mV[VGREEN]*255.f)),
+		(U8)llclampb(ll_round(mV[VBLUE]*255.f)),
+		(U8)llclampb(ll_round(mV[VALPHA]*255.f)));
 }
 
 LLColor4::LLColor4(const LLColor3 &vec, F32 a)
@@ -245,7 +245,7 @@ void LLColor4::setValue(const LLSD& sd)
 
 	if (out_of_range)
 	{
-		llwarns << "LLSD color value out of range!" << llendl;
+		LL_WARNS() << "LLSD color value out of range!" << LL_ENDL;
 	}
 #else
 	mV[0] = (F32) sd[0].asReal();
@@ -417,7 +417,7 @@ BOOL LLColor4::parseColor(const std::string& buf, LLColor4* color)
 		if (token_iter == tokens.end())
 		{
 			// This is a malformed vector.
-			llwarns << "LLColor4::parseColor() malformed color " << buf << llendl;
+			LL_WARNS() << "LLColor4::parseColor() malformed color " << buf << LL_ENDL;
 		}
 		else
 		{
@@ -704,7 +704,7 @@ BOOL LLColor4::parseColor(const std::string& buf, LLColor4* color)
 		}
 		else
 		{
-			llwarns << "invalid color " << color_name << llendl;
+			LL_WARNS() << "invalid color " << color_name << LL_ENDL;
 		}
 	}
 

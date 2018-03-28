@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2013, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,15 +37,14 @@
 #include "lltextureinfo.h"
 #include "llapr.h"
 #include "llimageworker.h"
-#include "llstat.h"
-#include "llcurl.h"
-#include "llstat.h"
 #include "httprequest.h"
 #include "httpoptions.h"
 #include "httpheaders.h"
 #include "httphandler.h"
+#include "lltrace.h"
 #include "llviewertexture.h"
 
+class LLViewerTexture;
 class LLTextureFetchWorker;
 class LLImageDecodeThread;
 class LLHost;
@@ -95,7 +94,8 @@ public:
 
 	// Threads:  T*
 	bool getRequestFinished(const LLUUID& id, S32& discard_level,
-							LLPointer<LLImageRaw>& raw, LLPointer<LLImageRaw>& aux);
+							LLPointer<LLImageRaw>& raw, LLPointer<LLImageRaw>& aux,
+							LLCore::HttpStatus& last_http_get_status);
 
 	// Threads:  T*
 	bool updateRequestPriority(const LLUUID& id, F32 priority);
@@ -160,7 +160,7 @@ public:
 	void commandSendMetrics(const std::string & caps_url,
 							const LLUUID & session_id,
 							const LLUUID & agent_id,
-							LLViewerAssetStats * main_stats);
+							LLSD& stats_sd);
 
 	// Threads:  T*
 	void commandDataBreak();
@@ -176,7 +176,10 @@ public:
 	// to do that to hold a reference for any length of time.
 	//
 	// Threads:  T*
-	LLCore::HttpHeaders * getMetricsHeaders() const	{ return mHttpMetricsHeaders; }
+	LLCore::HttpHeaders::ptr_t getMetricsHeaders() const	{ return mHttpMetricsHeaders; }
+
+	// Threads:  T*
+	LLCore::HttpRequest::policy_t getMetricsPolicyClass() const { return mHttpMetricsPolicyClass; }
 
 	bool isQAMode() const				{ return mQAMode; }
 
@@ -234,7 +237,7 @@ protected:
 
 	// XXX possible delete
     // Threads:  T*
-	void removeFromHTTPQueue(const LLUUID& id, S32 received_size);
+	void removeFromHTTPQueue(const LLUUID& id, S32Bytes received_size);
 
 	// Identical to @deleteRequest but with different arguments
 	// (caller already has the worker pointer).
@@ -309,8 +312,8 @@ private:
 	LLMutex mQueueMutex;        //to protect mRequestMap and mCommands only
 	LLMutex mNetworkQueueMutex; //to protect mNetworkQueue, mHTTPTextureQueue and mCancelQueue.
 
-	static LLStat sCacheHitRate;
-	static LLStat sCacheReadLatency;
+	static LLTrace::EventStatHandle<LLUnit<F32, LLUnits::Percent> > sCacheHitRate;
+	static LLTrace::EventStatHandle<F64Milliseconds > sCacheReadLatency;
 
 	LLTextureCache* mTextureCache;
 	LLImageDecodeThread* mImageDecodeThread;
@@ -328,9 +331,10 @@ private:
 	F32 mTextureBandwidth;												// <none>
 	F32 mMaxBandwidth;													// Mfnq
 	LLTextureInfo mTextureInfo;
+	LLTextureInfo mTextureInfoMainThread;
 
 	// XXX possible delete
-	U32 mHTTPTextureBits;												// Mfnq
+	U32Bits mHTTPTextureBits;												// Mfnq
 
 	// XXX possible delete
 	//debug use
@@ -350,11 +354,15 @@ private:
 	// to make our HTTP requests.  These replace the various
 	// LLCurl interfaces used in the past.
 	LLCore::HttpRequest *				mHttpRequest;					// Ttf
-	LLCore::HttpOptions *				mHttpOptions;					// Ttf
-	LLCore::HttpHeaders *				mHttpHeaders;					// Ttf
-	LLCore::HttpHeaders *				mHttpMetricsHeaders;			// Ttf
+	LLCore::HttpOptions::ptr_t			mHttpOptions;					// Ttf
+	LLCore::HttpOptions::ptr_t			mHttpOptionsWithHeaders;		// Ttf
+	LLCore::HttpHeaders::ptr_t			mHttpHeaders;					// Ttf
 	LLCore::HttpRequest::policy_t		mHttpPolicyClass;				// T*
-
+	LLCore::HttpHeaders::ptr_t			mHttpMetricsHeaders;			// Ttf
+	LLCore::HttpRequest::policy_t		mHttpMetricsPolicyClass;		// T*
+	S32									mHttpHighWater;					// Ttf
+	S32									mHttpLowWater;					// Ttf
+	
 	// We use a resource semaphore to keep HTTP requests in
 	// WAIT_HTTP_RESOURCE2 if there aren't sufficient slots in the
 	// transport.  This keeps them near where they can be cheaply
@@ -362,7 +370,11 @@ private:
 	// where it's more expensive to get at them.  Requests in either
 	// SEND_HTTP_REQ or WAIT_HTTP_REQ charge against the semaphore
 	// and tracking state transitions is critical to liveness.
-	LLAtomicS32							mHttpSemaphore;					// Ttf + Tmain
+	//
+	// Originally implemented as a traditional semaphore (heading towards
+	// zero), it now is an outstanding request count that is allowed to
+	// exceed the high water level (but not go below zero).
+	LLAtomicS32							mHttpSemaphore;					// Ttf
 	
 	typedef std::set<LLUUID> wait_http_res_queue_t;
 	wait_http_res_queue_t				mHttpWaitResource;				// Mfnq
@@ -395,6 +407,9 @@ private:
 	e_tex_source mFetchSource;
 	e_tex_source mOriginFetchSource;
 
+	// Retry logic
+	//LLAdaptiveRetryPolicy mFetchRetryPolicy;
+	
 public:
 	//debug use
 	LLTextureFetchDebugger* getFetchDebugger() { return mFetchDebugger;}
@@ -474,8 +489,9 @@ private:
 
 	typedef std::map<LLCore::HttpHandle, S32> handle_fetch_map_t;
 	handle_fetch_map_t mHandleToFetchIndex;
-	
-	e_debug_state mState;
+
+	void setDebuggerState(e_debug_state new_state) { mDebuggerState = new_state; }
+	e_debug_state mDebuggerState;
 	
 	F32 mCacheReadTime;
 	F32 mCacheWriteTime;
@@ -494,7 +510,7 @@ private:
 	LLTextureFetch* mFetcher;
 	LLTextureCache* mTextureCache;
 	LLImageDecodeThread* mImageDecodeThread;
-	LLCore::HttpHeaders* mHttpHeaders;
+	LLCore::HttpHeaders::ptr_t mHttpHeaders;
 	LLCore::HttpRequest::policy_t mHttpPolicyClass;
 	
 	S32 mNumFetchedTextures;
@@ -523,7 +539,7 @@ private:
 	S32 mNbCurlRequests;
 	S32 mNbCurlCompleted;
 
-	std::map< LLPointer<LLViewerFetchedTexture>, std::vector<S32> > mRefetchList;
+	std::map< LLPointer<LLViewerFetchedTexture>, std::vector<S32> > mRefetchList; // treats UI textures as normal textures
 	std::vector< LLPointer<LLViewerFetchedTexture> > mTempTexList;
 	S32 mTempIndex;
 	S32 mHistoryListIndex;
@@ -548,7 +564,7 @@ public:
 	void callbackDecoded(S32 id, bool success, LLImageRaw* raw, LLImageRaw* aux);
 	void callbackHTTP(FetchEntry & fetch, LLCore::HttpResponse * response);
 
-	e_debug_state getState()             {return mState;}
+	e_debug_state getState()             {return mDebuggerState;}
 	S32  getNumFetchedTextures()         {return mNumFetchedTextures;}
 	S32  getNumFetchingRequests()        {return mFetchingHistory.size();}
 	S32  getNumCacheHits()               {return mNumCacheHits;}

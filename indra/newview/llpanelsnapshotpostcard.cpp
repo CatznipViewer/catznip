@@ -38,8 +38,10 @@
 #include "llfloatersnapshot.h" // FIXME: replace with a snapshot storage model
 #include "llpanelsnapshot.h"
 #include "llpostcard.h"
+#include "llsnapshotlivepreview.h"
 #include "llviewercontrol.h" // gSavedSettings
 #include "llviewerwindow.h"
+#include "llviewerregion.h"
 
 #include <boost/regex.hpp>
 
@@ -55,7 +57,6 @@ public:
 	LLPanelSnapshotPostcard();
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
-	/*virtual*/ S32	notify(const LLSD& info);
 
 private:
 	/*virtual*/ std::string getWidthSpinnerName() const		{ return "postcard_snapshot_width"; }
@@ -63,44 +64,35 @@ private:
 	/*virtual*/ std::string getAspectRatioCBName() const	{ return "postcard_keep_aspect_check"; }
 	/*virtual*/ std::string getImageSizeComboName() const	{ return "postcard_size_combo"; }
 	/*virtual*/ std::string getImageSizePanelName() const	{ return "postcard_image_size_lp"; }
-	/*virtual*/ LLFloaterSnapshot::ESnapshotFormat getImageFormat() const { return LLFloaterSnapshot::SNAPSHOT_FORMAT_JPEG; }
+	/*virtual*/ LLSnapshotModel::ESnapshotFormat getImageFormat() const { return LLSnapshotModel::SNAPSHOT_FORMAT_JPEG; }
+	/*virtual*/ LLSnapshotModel::ESnapshotType getSnapshotType();
 	/*virtual*/ void updateControls(const LLSD& info);
 
 	bool missingSubjMsgAlertCallback(const LLSD& notification, const LLSD& response);
+	static void sendPostcardFinished(LLSD result);
 	void sendPostcard();
 
 	void onMsgFormFocusRecieved();
 	void onFormatComboCommit(LLUICtrl* ctrl);
 	void onQualitySliderCommit(LLUICtrl* ctrl);
-	void onTabButtonPress(S32 btn_idx);
 	void onSend();
 
 	bool mHasFirstMsgFocus;
-	std::string mAgentEmail;
 };
 
-static LLRegisterPanelClassWrapper<LLPanelSnapshotPostcard> panel_class("llpanelsnapshotpostcard");
+static LLPanelInjector<LLPanelSnapshotPostcard> panel_class("llpanelsnapshotpostcard");
 
 LLPanelSnapshotPostcard::LLPanelSnapshotPostcard()
 :	mHasFirstMsgFocus(false)
 {
 	mCommitCallbackRegistrar.add("Postcard.Send",		boost::bind(&LLPanelSnapshotPostcard::onSend,	this));
 	mCommitCallbackRegistrar.add("Postcard.Cancel",		boost::bind(&LLPanelSnapshotPostcard::cancel,	this));
-	mCommitCallbackRegistrar.add("Postcard.Message",	boost::bind(&LLPanelSnapshotPostcard::onTabButtonPress,	this, 0));
-	mCommitCallbackRegistrar.add("Postcard.Settings",	boost::bind(&LLPanelSnapshotPostcard::onTabButtonPress,	this, 1));
 
 }
 
 // virtual
 BOOL LLPanelSnapshotPostcard::postBuild()
 {
-	// pick up the user's up-to-date email address
-	gAgent.sendAgentUserInfoRequest();
-
-	std::string name_string;
-	LLAgentUI::buildFullname(name_string);
-	getChild<LLUICtrl>("name_form")->setValue(LLSD(name_string));
-
 	// For the first time a user focuses to .the msg box, all text will be selected.
 	getChild<LLUICtrl>("msg_form")->setFocusChangedCallback(boost::bind(&LLPanelSnapshotPostcard::onMsgFormFocusRecieved, this));
 
@@ -108,32 +100,21 @@ BOOL LLPanelSnapshotPostcard::postBuild()
 
 	getChild<LLUICtrl>("image_quality_slider")->setCommitCallback(boost::bind(&LLPanelSnapshotPostcard::onQualitySliderCommit, this, _1));
 
-	getChild<LLButton>("message_btn")->setToggleState(TRUE);
-
 	return LLPanelSnapshot::postBuild();
 }
 
 // virtual
 void LLPanelSnapshotPostcard::onOpen(const LLSD& key)
 {
+	LLUICtrl* name_form = getChild<LLUICtrl>("name_form");
+	if (name_form && name_form->getValue().asString().empty())
+	{
+		std::string name_string;
+		LLAgentUI::buildFullname(name_string);
+		getChild<LLUICtrl>("name_form")->setValue(LLSD(name_string));
+	}
+
 	LLPanelSnapshot::onOpen(key);
-}
-
-// virtual
-S32 LLPanelSnapshotPostcard::notify(const LLSD& info)
-{
-	if (!info.has("agent-email"))
-	{
-		llassert(info.has("agent-email"));
-		return 0;
-	}
-
-	if (mAgentEmail.empty())
-	{
-		mAgentEmail = info["agent-email"].asString();
-	}
-
-	return 1;
 }
 
 // virtual
@@ -171,24 +152,45 @@ bool LLPanelSnapshotPostcard::missingSubjMsgAlertCallback(const LLSD& notificati
 }
 
 
+void LLPanelSnapshotPostcard::sendPostcardFinished(LLSD result)
+{
+    LL_WARNS() << result << LL_ENDL;
+
+    std::string state = result["state"].asString();
+
+    LLPostCard::reportPostResult((state == "complete"));
+}
+
+
 void LLPanelSnapshotPostcard::sendPostcard()
 {
-	std::string to(getChild<LLUICtrl>("to_form")->getValue().asString());
-	std::string subject(getChild<LLUICtrl>("subject_form")->getValue().asString());
+    if (!gAgent.getRegion()) return;
 
-	LLSD postcard = LLSD::emptyMap();
-	postcard["pos-global"] = LLFloaterSnapshot::getPosTakenGlobal().getValue();
-	postcard["to"] = to;
-	postcard["from"] = mAgentEmail;
-	postcard["name"] = getChild<LLUICtrl>("name_form")->getValue().asString();
-	postcard["subject"] = subject;
-	postcard["msg"] = getChild<LLUICtrl>("msg_form")->getValue().asString();
-	LLPostCard::send(LLFloaterSnapshot::getImageData(), postcard);
+    // upload the image
+    std::string url = gAgent.getRegion()->getCapability("SendPostcard");
+    if (!url.empty())
+    {
+        LLResourceUploadInfo::ptr_t uploadInfo(new LLPostcardUploadInfo(
+            getChild<LLUICtrl>("name_form")->getValue().asString(),
+            getChild<LLUICtrl>("to_form")->getValue().asString(),
+            getChild<LLUICtrl>("subject_form")->getValue().asString(),
+            getChild<LLUICtrl>("msg_form")->getValue().asString(),
+            mSnapshotFloater->getPosTakenGlobal(),
+            mSnapshotFloater->getImageData(),
+            boost::bind(&LLPanelSnapshotPostcard::sendPostcardFinished, _4)));
 
-	// Give user feedback of the event.
-	gViewerWindow->playSnapshotAnimAndSound();
+        LLViewerAssetUpload::EnqueueInventoryUpload(url, uploadInfo);
+    }
+    else
+    {
+        LL_WARNS() << "Postcards unavailable in this region." << LL_ENDL;
+    }
 
-	LLFloaterSnapshot::postSave();
+
+    // Give user feedback of the event.
+    gViewerWindow->playSnapshotAnimAndSound();
+
+    mSnapshotFloater->postSave();
 }
 
 void LLPanelSnapshotPostcard::onMsgFormFocusRecieved()
@@ -218,27 +220,6 @@ void LLPanelSnapshotPostcard::onQualitySliderCommit(LLUICtrl* ctrl)
 	LLFloaterSnapshot::getInstance()->notify(info); // updates the "SnapshotQuality" setting
 }
 
-void LLPanelSnapshotPostcard::onTabButtonPress(S32 btn_idx)
-{
-	LLButton* buttons[2] = {
-			getChild<LLButton>("message_btn"),
-			getChild<LLButton>("settings_btn"),
-	};
-
-	// Switch between Message and Settings tabs.
-	LLButton* clicked_btn = buttons[btn_idx];
-	LLButton* other_btn = buttons[!btn_idx];
-	LLSideTrayPanelContainer* container =
-		getChild<LLSideTrayPanelContainer>("postcard_panel_container");
-
-	container->selectTab(clicked_btn->getToggleState() ? btn_idx : !btn_idx);
-	//clicked_btn->setEnabled(FALSE);
-	other_btn->toggleState();
-	//other_btn->setEnabled(TRUE);
-
-	lldebugs << "Button #" << btn_idx << " (" << clicked_btn->getName() << ") clicked" << llendl;
-}
-
 void LLPanelSnapshotPostcard::onSend()
 {
 	// Validate input.
@@ -252,12 +233,6 @@ void LLPanelSnapshotPostcard::onSend()
 		return;
 	}
 
-	if (mAgentEmail.empty() || !boost::regex_match(mAgentEmail, email_format))
-	{
-		LLNotificationsUtil::add("PromptSelfEmail");
-		return;
-	}
-
 	std::string subject(getChild<LLUICtrl>("subject_form")->getValue().asString());
 	if(subject.empty() || !mHasFirstMsgFocus)
 	{
@@ -267,4 +242,9 @@ void LLPanelSnapshotPostcard::onSend()
 
 	// Send postcard.
 	sendPostcard();
+}
+
+LLSnapshotModel::ESnapshotType LLPanelSnapshotPostcard::getSnapshotType()
+{
+    return LLSnapshotModel::SNAPSHOT_POSTCARD;
 }

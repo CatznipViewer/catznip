@@ -145,7 +145,7 @@ void LLPanelLandInfo::refresh()
 						&& ((gAgent.getID() == auth_buyer_id)
 							|| (auth_buyer_id.isNull())));
 			
-		if (is_public)
+		if (is_public && !LLViewerParcelMgr::getInstance()->getParcelSelection()->getMultipleOwners())
 		{
 			getChildView("button buy land")->setEnabled(TRUE);
 		}
@@ -187,7 +187,7 @@ void LLPanelLandInfo::refresh()
 		}
 		else
 		{
-			lldebugs << "Invalid selection for joining land" << llendl;
+			LL_DEBUGS() << "Invalid selection for joining land" << LL_ENDL;
 			getChildView("button join land")->setEnabled(FALSE);
 		}
 

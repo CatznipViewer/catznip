@@ -17,12 +17,11 @@
 // std headers
 // external library headers
 #include <boost/assign/list_of.hpp>
-#include <boost/lambda/lambda.hpp>
+#include <boost/phoenix/core/argument.hpp>
 #include <boost/foreach.hpp>
 // other Linden headers
 #include "../test/lltut.h"
 #include "../test/namedtempfile.h"
-#include "../test/manageapr.h"
 #include "../test/catch_and_store_what_in.h"
 #include "wrapllerrs.h"
 #include "llevents.h"
@@ -33,32 +32,21 @@
 
 using boost::assign::list_of;
 
-static ManageAPR manager;
-
 StringVec sv(const StringVec& listof) { return listof; }
 
 #if defined(LL_WINDOWS)
 #define sleep(secs) _sleep((secs) * 1000)
-#endif
 
-#if ! LL_WINDOWS
+// WOLF-300: It appears that driving a megabyte of data through an LLLeap pipe
+// causes Windows abdominal pain such that it later fails code-signing in some
+// mysterious way. Entirely suppressing these LLLeap tests pushes the failure
+// rate MUCH lower. Can we re-enable them with a smaller data size on Windows?
+const size_t BUFFERED_LENGTH =  100*1024;
+
+#else // not Windows
 const size_t BUFFERED_LENGTH = 1023*1024; // try wrangling just under a megabyte of data
-#else
-// "Then there's Windows... sigh." The "very large message" test is flaky in a
-// way that seems to point to either the OS (nonblocking writes to pipes) or
-// possibly the apr_file_write() function. Poring over log messages reveals
-// that at some point along the way apr_file_write() returns 11 (Resource
-// temporarily unavailable, i.e. EAGAIN) and says it wrote 0 bytes -- even
-// though it did write the chunk! Our next write attempt retries the same
-// chunk, resulting in the chunk being duplicated at the child end, corrupting
-// the data stream. Much as I would love to be able to fix it for real, such a
-// fix would appear to require distinguishing bogus EAGAIN returns from real
-// ones -- how?? Empirically this behavior is only observed when writing a
-// "very large message". To be able to move forward at all, try to bypass this
-// particular failure by adjusting the size of a "very large message" on
-// Windows.
-const size_t BUFFERED_LENGTH = 65336;
-#endif  // LL_WINDOWS
+
+#endif
 
 void waitfor(const std::vector<LLLeap*>& instances, int timeout=60)
 {
@@ -112,7 +100,7 @@ namespace tut
         llleap_data():
             reader(".py",
                    // This logic is adapted from vita.viewerclient.receiveEvent()
-                   boost::lambda::_1 <<
+                   boost::phoenix::placeholders::arg1 <<
                    "import re\n"
                    "import os\n"
                    "import sys\n"
@@ -122,10 +110,7 @@ namespace tut
                    // finding indra/lib/python. Use our __FILE__, with
                    // raw-string syntax to deal with Windows pathnames.
                    "mydir = os.path.dirname(r'" << __FILE__ << "')\n"
-                   // We expect mydir to be .../indra/llcommon/tests.
-                   "sys.path.insert(0,\n"
-                   "    os.path.join(mydir, os.pardir, os.pardir, 'lib', 'python'))\n"
-                   "from indra.base import llsd\n"
+                   "from llbase import llsd\n"
                    "\n"
                    "class ProtocolError(Exception):\n"
                    "    def __init__(self, msg, data):\n"
@@ -406,7 +391,7 @@ namespace tut
         AckAPI api;
         Result result;
         NamedTempFile script("py",
-                             boost::lambda::_1 <<
+                             boost::phoenix::placeholders::arg1 <<
                              "from " << reader_module << " import *\n"
                              // make a request on our little API
                              "request(pump='" << api.getName() << "', data={})\n"
@@ -444,7 +429,7 @@ namespace tut
         ReqIDAPI api;
         Result result;
         NamedTempFile script("py",
-                             boost::lambda::_1 <<
+                             boost::phoenix::placeholders::arg1 <<
                              "import sys\n"
                              "from " << reader_module << " import *\n"
                              // Note that since reader imports llsd, this
@@ -487,7 +472,7 @@ namespace tut
         ReqIDAPI api;
         Result result;
         NamedTempFile script("py",
-                             boost::lambda::_1 <<
+                             boost::phoenix::placeholders::arg1 <<
                              "import sys\n"
                              "from " << reader_module << " import *\n"
                              // Generate a very large string value.

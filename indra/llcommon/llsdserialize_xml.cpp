@@ -35,7 +35,7 @@
 
 extern "C"
 {
-#ifdef LL_STANDALONE
+#ifdef LL_USESYSTEMLIBS
 # include <expat.h>
 #else
 # include "expat/expat.h"
@@ -168,8 +168,8 @@ S32 LLSDXMLFormatter::format_impl(const LLSD& data, std::ostream& ostr, U32 opti
 		break;
 
 	case LLSD::TypeString:
-		if(data.asString().empty()) ostr << pre << "<string />" << post;
-		else ostr << pre << "<string>" << escapeString(data.asString()) <<"</string>" << post;
+		if(data.asStringRef().empty()) ostr << pre << "<string />" << post;
+		else ostr << pre << "<string>" << escapeString(data.asStringRef()) <<"</string>" << post;
 		break;
 
 	case LLSD::TypeDate:
@@ -182,7 +182,7 @@ S32 LLSDXMLFormatter::format_impl(const LLSD& data, std::ostream& ostr, U32 opti
 
 	case LLSD::TypeBinary:
 	{
-		LLSD::Binary buffer = data.asBinary();
+		const LLSD::Binary& buffer = data.asBinary();
 		if(buffer.empty())
 		{
 			ostr << pre << "<binary />" << post;
@@ -375,13 +375,10 @@ S32 LLSDXMLParser::Impl::parse(std::istream& input, LLSD& data)
 		{
 			break;
 		}
+		count = get_till_eol(input, (char *)buffer, BUFFER_SIZE);
+		if (!count)
 		{
-		
-			count = get_till_eol(input, (char *)buffer, BUFFER_SIZE);
-			if (!count)
-			{
-				break;
-			}
+			break;
 		}
 		status = XML_ParseBuffer(mParser, count, false);
 
@@ -406,7 +403,7 @@ S32 LLSDXMLParser::Impl::parse(std::istream& input, LLSD& data)
 		}
 		if (mEmitErrors)
 		{
-		llinfos << "LLSDXMLParser::Impl::parse: XML_STATUS_ERROR parsing:" << (char*) buffer << llendl;
+		LL_INFOS() << "LLSDXMLParser::Impl::parse: XML_STATUS_ERROR parsing:" << (char*) buffer << LL_ENDL;
 		}
 		data = LLSD();
 		return LLSDParser::PARSE_FAILURE;
@@ -487,7 +484,7 @@ S32 LLSDXMLParser::Impl::parseLines(std::istream& input, LLSD& data)
 	{
 		if (mEmitErrors)
 		{
-		llinfos << "LLSDXMLParser::Impl::parseLines: XML_STATUS_ERROR" << llendl;
+		LL_INFOS() << "LLSDXMLParser::Impl::parseLines: XML_STATUS_ERROR" << LL_ENDL;
 		}
 		return LLSDParser::PARSE_FAILURE;
 	}
@@ -549,7 +546,7 @@ void LLSDXMLParser::Impl::parsePart(const char* buf, int len)
 		XML_Status status = XML_Parse(mParser, buf, len, false);
 		if (status == XML_STATUS_ERROR)
 		{
-			llinfos << "Unexpected XML parsing error at start" << llendl;
+			LL_INFOS() << "Unexpected XML parsing error at start" << LL_ENDL;
 		}
 	}
 }

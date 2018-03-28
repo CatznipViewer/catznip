@@ -27,7 +27,8 @@
 #ifndef LL_LLSNAPSHOTLIVEPREVIEW_H
 #define LL_LLSNAPSHOTLIVEPREVIEW_H
 
-#include "llpanelsnapshot.h"
+#include "llsnapshotmodel.h"
+#include "llviewertexture.h"
 #include "llviewerwindow.h"
 
 class LLImageJPEG;
@@ -39,15 +40,8 @@ class LLSnapshotLivePreview : public LLView
 {
 	LOG_CLASS(LLSnapshotLivePreview);
 public:
-	enum ESnapshotType
-	{
-		SNAPSHOT_POSTCARD,
-		SNAPSHOT_TEXTURE,
-		SNAPSHOT_LOCAL,
-		SNAPSHOT_WEB
-	};
 
-
+	static BOOL saveLocal(LLPointer<LLImageFormatted>);
 	struct Params : public LLInitParam::Block<Params, LLView::Params>
 	{
 		Params()
@@ -61,6 +55,8 @@ public:
 	LLSnapshotLivePreview(const LLSnapshotLivePreview::Params& p);
 	~LLSnapshotLivePreview();
 
+    void setContainer(LLView* container) { mViewContainer = container; }
+
 	/*virtual*/ void draw();
 	/*virtual*/ void reshape(S32 width, S32 height, BOOL called_from_parent);
 
@@ -70,12 +66,15 @@ public:
 	void getSize(S32& w, S32& h) const;
 	S32 getWidth() const { return mWidth[mCurImageIndex]; }
 	S32 getHeight() const { return mHeight[mCurImageIndex]; }
+    S32 getEncodedImageWidth() const;
+    S32 getEncodedImageHeight() const;
+    void estimateDataSize();
 	S32 getDataSize() const { return mDataSize; }
 	void setMaxImageSize(S32 size) ;
 	S32  getMaxImageSize() {return mMaxImageSize ;}
 
-	ESnapshotType getSnapshotType() const { return mSnapshotType; }
-	LLFloaterSnapshot::ESnapshotFormat getSnapshotFormat() const { return mSnapshotFormat; }
+    LLSnapshotModel::ESnapshotType getSnapshotType() const { return mSnapshotType; }
+    LLSnapshotModel::ESnapshotFormat getSnapshotFormat() const { return mSnapshotFormat; }
 	BOOL getSnapshotUpToDate() const { return mSnapshotUpToDate; }
 	BOOL isSnapshotActive() { return mSnapshotActive; }
 	LLViewerTexture* getThumbnailImage() const { return mThumbnailImage ; }
@@ -83,40 +82,48 @@ public:
 	S32  getThumbnailHeight() const { return mThumbnailHeight ; }
 	BOOL getThumbnailLock() const { return mThumbnailUpdateLock ; }
 	BOOL getThumbnailUpToDate() const { return mThumbnailUpToDate ;}
+    void setThumbnailSubsampled(BOOL subsampled) { mThumbnailSubsampled = subsampled; }
+
 	LLViewerTexture* getCurrentImage();
 	F32 getImageAspect();
-	F32 getAspect() ;
 	const LLRect& getImageRect() const { return mImageRect[mCurImageIndex]; }
 	BOOL isImageScaled() const { return mImageScaled[mCurImageIndex]; }
 	void setImageScaled(BOOL scaled) { mImageScaled[mCurImageIndex] = scaled; }
 	const LLVector3d& getPosTakenGlobal() const { return mPosTakenGlobal; }
 
-	void setSnapshotType(ESnapshotType type) { mSnapshotType = type; }
-	void setSnapshotFormat(LLFloaterSnapshot::ESnapshotFormat type) { mSnapshotFormat = type; }
-	void setSnapshotQuality(S32 quality);
-	void setSnapshotBufferType(LLViewerWindow::ESnapshotType type) { mSnapshotBufferType = type; }
+    void setSnapshotType(LLSnapshotModel::ESnapshotType type) { mSnapshotType = type; }
+    void setSnapshotFormat(LLSnapshotModel::ESnapshotFormat format);
+	bool setSnapshotQuality(S32 quality, bool set_by_user = true);
+	void setSnapshotBufferType(LLSnapshotModel::ESnapshotLayerType type) { mSnapshotBufferType = type; }
+    void setAllowRenderUI(BOOL allow) { mAllowRenderUI = allow; }
+    void setAllowFullScreenPreview(BOOL allow) { mAllowFullScreenPreview = allow; }
+    void setFilter(std::string filter_name) { mFilterName = filter_name; }
+    std::string  getFilter() const { return mFilterName; }
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
-	void saveWeb();
-	void saveTexture();
+    void saveTexture(BOOL outfit_snapshot = FALSE, std::string name = "");
 	BOOL saveLocal();
 
-	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
-	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
+	LLPointer<LLImageFormatted>	getFormattedImage();
+	LLPointer<LLImageRaw>		getEncodedImage();
 
-	/// Sets size of preview thumbnail image and thhe surrounding rect.
+	/// Sets size of preview thumbnail image and the surrounding rect.
 	void setThumbnailPlaceholderRect(const LLRect& rect) {mThumbnailPlaceholderRect = rect; }
 	BOOL setThumbnailImageSize() ;
 	void generateThumbnailImage(BOOL force_update = FALSE) ;
 	void resetThumbnailImage() { mThumbnailImage = NULL ; }
 	void drawPreviewRect(S32 offset_x, S32 offset_y) ;
+	void prepareFreezeFrame();
+    
+	LLViewerTexture* getBigThumbnailImage();
+	S32  getBigThumbnailWidth() const { return mBigThumbnailWidth ; }
+	S32  getBigThumbnailHeight() const { return mBigThumbnailHeight ; }
 
 	// Returns TRUE when snapshot generated, FALSE otherwise.
 	static BOOL onIdle( void* snapshot_preview );
 
-	// callback for region name resolve
-	void regionNameCallback(LLImageJPEG* snapshot, LLSD& metadata, const std::string& name, S32 x, S32 y, S32 z);
-
 private:
+    LLView*                     mViewContainer;
+    
 	LLColor4					mColor;
 	LLPointer<LLViewerTexture>	mViewerImage[2]; //used to represent the scene when the frame is frozen.
 	LLRect						mImageRect[2];
@@ -133,11 +140,20 @@ private:
 	BOOL                        mThumbnailUpdateLock ;
 	BOOL                        mThumbnailUpToDate ;
 	LLRect                      mThumbnailPlaceholderRect;
+    BOOL                        mThumbnailSubsampled; // TRUE if the thumbnail is a subsampled version of the mPreviewImage
+    
+	LLPointer<LLViewerTexture>	mBigThumbnailImage ;
+    S32                         mBigThumbnailWidth;
+    S32                         mBigThumbnailHeight;
+    BOOL                        mBigThumbnailUpToDate;
 
 	S32							mCurImageIndex;
+    // The logic is mPreviewImage (raw frame) -> mFormattedImage (formatted / filtered) -> mPreviewImageEncoded (decoded back, to show artifacts)
 	LLPointer<LLImageRaw>		mPreviewImage;
 	LLPointer<LLImageRaw>		mPreviewImageEncoded;
 	LLPointer<LLImageFormatted>	mFormattedImage;
+    BOOL                        mAllowRenderUI;
+    BOOL                        mAllowFullScreenPreview;
 	LLFrameTimer				mSnapshotDelayTimer;
 	S32							mShineCountdown;
 	LLFrameTimer				mShineAnimTimer;
@@ -146,18 +162,20 @@ private:
 	LLVector3d					mPosTakenGlobal;
 	S32							mSnapshotQuality;
 	S32							mDataSize;
-	ESnapshotType				mSnapshotType;
-	LLFloaterSnapshot::ESnapshotFormat	mSnapshotFormat;
+    LLSnapshotModel::ESnapshotType				mSnapshotType;
+    LLSnapshotModel::ESnapshotFormat	mSnapshotFormat;
 	BOOL						mSnapshotUpToDate;
 	LLFrameTimer				mFallAnimTimer;
 	LLVector3					mCameraPos;
 	LLQuaternion				mCameraRot;
 	BOOL						mSnapshotActive;
-	LLViewerWindow::ESnapshotType mSnapshotBufferType;
+	LLSnapshotModel::ESnapshotLayerType mSnapshotBufferType;
+    std::string                 mFilterName;
 
 public:
 	static std::set<LLSnapshotLivePreview*> sList;
 	BOOL                        mKeepAspectRatio ;
+	BOOL						mForceUpdateSnapshot;
 };
 
 #endif // LL_LLSNAPSHOTLIVEPREVIEW_H

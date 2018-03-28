@@ -28,11 +28,9 @@
 
 #include "llvosky.h"
 
-#include "imageids.h"
 #include "llfeaturemanager.h"
 #include "llviewercontrol.h"
 #include "llframetimer.h"
-#include "timing.h"
 
 #include "llagent.h"
 #include "llagentcamera.h"
@@ -64,8 +62,6 @@ static const S32 NUM_TILES = NUM_TILES_X * NUM_TILES_Y;
 static const F32 SUN_DISK_RADIUS	= 0.5f;
 static const F32 MOON_DISK_RADIUS	= SUN_DISK_RADIUS * 0.9f;
 static const F32 SUN_INTENSITY = 1e5;
-static const F32 SUN_DISK_INTENSITY = 24.f;
-
 
 // Texture coordinates:
 static const LLVector2 TEX00 = LLVector2(0.f, 0.f);
@@ -287,7 +283,7 @@ void LLSkyTex::create(const F32 brightness)
 			S32 offset = basic_offset * sComponents;
 			U32* pix = (U32*)(data + offset);
 			LLColor4U temp = LLColor4U(mSkyData[basic_offset]);
-			*pix = temp.mAll;
+			*pix = temp.asRGBA();
 		}
 	}
 	createGLImage(sCurrent);
@@ -619,21 +615,6 @@ static inline void componentMultBy(LLColor3 & left, LLColor3 const & right)
 static inline LLColor3 colorMix(LLColor3 const & left, LLColor3 const & right, F32 amount)
 {
 	return (left + ((right - left) * amount));
-}
-
-static inline F32 texture2D(LLPointer<LLImageRaw> const & tex, LLVector2 const & uv)
-{
-	U16 w = tex->getWidth();
-	U16 h = tex->getHeight();
-
-	U16 r = U16(uv[0] * w) % w;
-	U16 c = U16(uv[1] * h) % h;
-
-	U8 const * imageBuffer = tex->getData();
-
-	U8 sample = imageBuffer[r * w + c];
-
-	return sample / 255.f;
 }
 
 static inline LLColor3 smear(F32 val)
@@ -1052,7 +1033,7 @@ void LLVOSky::calcAtmospherics(void)
 	mFadeColor.setAlpha(0);
 }
 
-void LLVOSky::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
+void LLVOSky::idleUpdate(LLAgent &agent, const F64 &time)
 {
 }
 
@@ -1245,7 +1226,7 @@ void LLVOSky::createDummyVertexBuffer()
 	}
 }
 
-static LLFastTimer::DeclareTimer FTM_RENDER_FAKE_VBO_UPDATE("Fake VBO Update");
+static LLTrace::BlockTimerStatHandle FTM_RENDER_FAKE_VBO_UPDATE("Fake VBO Update");
 
 void LLVOSky::updateDummyVertexBuffer()
 {	
@@ -1258,7 +1239,7 @@ void LLVOSky::updateDummyVertexBuffer()
 		return ;
 	}
 
-	LLFastTimer t(FTM_RENDER_FAKE_VBO_UPDATE) ;
+	LL_RECORD_BLOCK_TIME(FTM_RENDER_FAKE_VBO_UPDATE) ;
 
 	if(!mFace[FACE_DUMMY] || !mFace[FACE_DUMMY]->getVertexBuffer())
 		createDummyVertexBuffer() ;
@@ -1271,11 +1252,11 @@ void LLVOSky::updateDummyVertexBuffer()
 //----------------------------------
 //end of fake vertex buffer updating
 //----------------------------------
-static LLFastTimer::DeclareTimer FTM_GEO_SKY("Sky Geometry");
+static LLTrace::BlockTimerStatHandle FTM_GEO_SKY("Sky Geometry");
 
 BOOL LLVOSky::updateGeometry(LLDrawable *drawable)
 {
-	LLFastTimer ftm(FTM_GEO_SKY);
+	LL_RECORD_BLOCK_TIME(FTM_GEO_SKY);
 	if (mFace[FACE_REFLECTION] == NULL)
 	{
 		LLDrawPoolWater *poolp = (LLDrawPoolWater*) gPipeline.getPool(LLDrawPool::POOL_WATER);
@@ -1481,7 +1462,12 @@ BOOL LLVOSky::updateHeavenlyBodyGeometry(LLDrawable *drawable, const S32 f, cons
 	{
 		facep->setSize(4, 6);	
 		LLVertexBuffer* buff = new LLVertexBuffer(LLDrawPoolSky::VERTEX_DATA_MASK, GL_STREAM_DRAW_ARB);
-		buff->allocateBuffer(facep->getGeomCount(), facep->getIndicesCount(), TRUE);
+		if (!buff->allocateBuffer(facep->getGeomCount(), facep->getIndicesCount(), TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer for vosky to "
+				<< facep->getGeomCount() << " vertices and "
+				<< facep->getIndicesCount() << " indices" << LL_ENDL;
+		}
 		facep->setGeomIndex(0);
 		facep->setIndicesIndex(0);
 		facep->setVertexBuffer(buff);
@@ -1888,7 +1874,12 @@ void LLVOSky::updateReflectionGeometry(LLDrawable *drawable, F32 H,
 	{
 		face->setSize(quads * 4, quads * 6);
 		LLVertexBuffer* buff = new LLVertexBuffer(LLDrawPoolWater::VERTEX_DATA_MASK, GL_STREAM_DRAW_ARB);
-		buff->allocateBuffer(face->getGeomCount(), face->getIndicesCount(), TRUE);
+		if (!buff->allocateBuffer(face->getGeomCount(), face->getIndicesCount(), TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer for vosky to "
+				<< face->getGeomCount() << " vertices and "
+				<< face->getIndicesCount() << " indices" << LL_ENDL;
+		}
 		face->setIndicesIndex(0);
 		face->setGeomIndex(0);
 		face->setVertexBuffer(buff);
@@ -2146,7 +2137,7 @@ void LLVOSky::updateFog(const F32 distance)
 		
 		// get the water param manager variables
 		float water_fog_density = LLWaterParamManager::getInstance()->getFogDensity();
-		LLColor4 water_fog_color = LLDrawPoolWater::sWaterFogColor.mV;
+		LLColor4 water_fog_color(LLDrawPoolWater::sWaterFogColor.mV);
 		
 		// adjust the color based on depth.  We're doing linear approximations
 		float depth_scale = gSavedSettings.getF32("WaterGLFogDepthScale");

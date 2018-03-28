@@ -48,6 +48,87 @@ public:
 	} EScope;
 };
 
+struct LLWLParamKey : LLEnvKey
+{
+public:
+	// scope and source of a param set (WL sky preset)
+	std::string name;
+	EScope scope;
+
+	// for conversion from LLSD
+	static const int NAME_IDX = 0;
+	static const int SCOPE_IDX = 1;
+
+	inline LLWLParamKey(const std::string& n, EScope s)
+		: name(n), scope(s)
+	{
+	}
+
+	inline LLWLParamKey(LLSD llsd)
+		: name(llsd[NAME_IDX].asString()), scope(EScope(llsd[SCOPE_IDX].asInteger()))
+	{
+	}
+
+	inline LLWLParamKey() // NOT really valid, just so std::maps can return a default of some sort
+		: name(""), scope(SCOPE_LOCAL)
+	{
+	}
+
+	inline LLWLParamKey(std::string& stringVal)
+	{
+		size_t len = stringVal.length();
+		if (len > 0)
+		{
+			name = stringVal.substr(0, len - 1);
+			scope = (EScope) atoi(stringVal.substr(len - 1, len).c_str());
+		}
+	}
+
+	inline std::string toStringVal() const
+	{
+		std::stringstream str;
+		str << name << scope;
+		return str.str();
+	}
+
+	inline LLSD toLLSD() const
+	{
+		LLSD llsd = LLSD::emptyArray();
+		llsd.append(LLSD(name));
+		llsd.append(LLSD(scope));
+		return llsd;
+	}
+
+	inline void fromLLSD(const LLSD& llsd)
+	{
+		name = llsd[NAME_IDX].asString();
+		scope = EScope(llsd[SCOPE_IDX].asInteger());
+	}
+
+	inline bool operator <(const LLWLParamKey other) const
+	{
+		if (name < other.name)
+		{	
+			return true;
+		}
+		else if (name > other.name)
+		{
+			return false;
+		}
+		else
+		{
+			return scope < other.scope;
+		}
+	}
+
+	inline bool operator ==(const LLWLParamKey other) const
+	{
+		return (name == other.name) && (scope == other.scope);
+	}
+
+	std::string toString() const;
+};
+
 class LLEnvironmentSettings
 {
 public:
@@ -162,14 +243,12 @@ public:
  */
 class LLEnvManagerNew : public LLSingleton<LLEnvManagerNew>
 {
+	LLSINGLETON(LLEnvManagerNew);
 	LOG_CLASS(LLEnvManagerNew);
 public:
 	typedef boost::signals2::signal<void()> prefs_change_signal_t;
 	typedef boost::signals2::signal<void()> region_settings_change_signal_t;
-	typedef boost::signals2::signal<void()> region_change_signal_t;
 	typedef boost::signals2::signal<void(bool)> region_settings_applied_signal_t;
-
-	LLEnvManagerNew();
 
 	// getters to access user env. preferences
 	bool getUseRegionSettings() const;
@@ -222,20 +301,16 @@ public:
 	bool sendRegionSettings(const LLEnvironmentSettings& new_settings);
 	boost::signals2::connection setPreferencesChangeCallback(const prefs_change_signal_t::slot_type& cb);
 	boost::signals2::connection setRegionSettingsChangeCallback(const region_settings_change_signal_t::slot_type& cb);
-	boost::signals2::connection setRegionChangeCallback(const region_change_signal_t::slot_type& cb);
 	boost::signals2::connection setRegionSettingsAppliedCallback(const region_settings_applied_signal_t::slot_type& cb);
 
 	static bool canEditRegionSettings(); /// @return true if we have access to editing region environment
 	static const std::string getScopeString(LLEnvKey::EScope scope);
 
 	// Public callbacks.
-	void onRegionCrossing();
-	void onTeleport();
 	void onRegionSettingsResponse(const LLSD& content);
 	void onRegionSettingsApplyResponse(bool ok);
 
 private:
-	friend class LLSingleton<LLEnvManagerNew>;
 	/*virtual*/ void initSingleton();
 
 	void loadUserPrefs();
@@ -251,16 +326,13 @@ private:
 	bool useDefaultSky();
 	bool useDefaultWater();
 
-	void onRegionChange(bool interpolate);
+	void onRegionChange();
 
 	/// Emitted when user environment preferences change.
 	prefs_change_signal_t mUsePrefsChangeSignal;
 
 	/// Emitted when region environment settings update comes.
 	region_settings_change_signal_t	mRegionSettingsChangeSignal;
-
-	/// Emitted when agent region changes. Move to LLAgent?
-	region_change_signal_t	mRegionChangeSignal;
 
 	/// Emitted when agent region changes. Move to LLAgent?
 	region_settings_applied_signal_t mRegionSettingsAppliedSignal;

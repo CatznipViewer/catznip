@@ -33,18 +33,7 @@
 #include "llsdtraits.h"
 #include "llstring.h"
 
-#if LL_WINDOWS
-#include <float.h>
-namespace
-{
-	int fpclassify(double x)
-	{
-		return _fpclass(x);
-	}
-}
-#else
 using std::fpclassify;
-#endif
 
 namespace tut
 {
@@ -93,6 +82,18 @@ namespace tut
 			ensure(			s + " type",	traits.checkType(actual));
 			ensure_equals(	s + " value",	traits.get(actual), expectedValue);
 		}
+
+		template<class T>
+		static void ensureTypeAndRefValue(const char* msg, const LLSD& actual,
+			const T& expectedValue)
+		{
+			LLSDTraits<const T&> traits;
+			
+			std::string s(msg);
+			
+			ensure(			s + " type",	traits.checkType(actual));
+			ensure_equals(	s + " value",	traits.get(actual), expectedValue);
+		}
 	};
 	
 	typedef test_group<SDTestData>	SDTestGroup;
@@ -100,15 +101,15 @@ namespace tut
 
 	SDTestGroup sdTestGroup("LLSD(new)");
 	
-	template<> template<>
-	void SDTestObject::test<1>()
-		// construction and test of undefined
-	{
-		SDCleanupCheck check;
+	// template<> template<>
+	// void SDTestObject::test<1>()
+	// 	// construction and test of undefined
+	// {
+	// 	SDCleanupCheck check;
 		
-		LLSD u;
-		ensure("is undefined", u.isUndefined());
-	}
+	// 	LLSD u;
+	// 	ensure("is undefined", u.isUndefined());
+	// }
 	
 	template<> template<>
 	void SDTestObject::test<2>()
@@ -162,7 +163,7 @@ namespace tut
 		std::vector<U8> data;
 		copy(&source[0], &source[sizeof(source)], back_inserter(data));
 		
-		v = data;		ensureTypeAndValue("set to data", v, data);
+		v = data;		ensureTypeAndRefValue("set to data", v, data);
 		
 		v.clear();
 		ensure("reset to undefined", v.type() == LLSD::TypeUndefined);
@@ -213,8 +214,8 @@ namespace tut
 		const char source[] = "once in a blue moon";
 		std::vector<U8> data;
 		copy(&source[0], &source[sizeof(source)], back_inserter(data));
-		LLSD x1(data);	ensureTypeAndValue("construct vector<U8>", x1, data);
-		LLSD x2 = data;	ensureTypeAndValue("initialize vector<U8>", x2, data);
+		LLSD x1(data);	ensureTypeAndRefValue("construct vector<U8>", x1, data);
+		LLSD x2 = data;	ensureTypeAndRefValue("initialize vector<U8>", x2, data);
 	}
 	
 	void checkConversions(const char* msg, const LLSD& v,
@@ -265,8 +266,18 @@ namespace tut
 		v = 0.5;		checkConversions("point5", v, true, 0, 0.5, "0.5");
 		v = 0.9;		checkConversions("point9", v, true, 0, 0.9, "0.9");
 		v = -3.9;		checkConversions("neg3dot9", v, true, -3, -3.9, "-3.9");
-		v = sqrt(-1.0);	checkConversions("NaN", v, false, 0, sqrt(-1.0), "nan");
-		
+		// Get rid of NaN test. First, some libraries don't reliably return
+		// NaN for sqrt(-1.0) -- meaning that I don't even know how to
+		// portably, reliably produce a NaN value. Second, we observe failures
+		// on different platforms in the asString() test. But LLSD's
+		// ImplReal::asString() does not itself recognize NaN! It merely
+		// passes the value through to llformat(), which passes it through to
+		// the library vsnprintf(). That is, even when we do produce NaN,
+		// we're not testing any LLSD code: we're testing the local library's
+		// vsnprintf() function, which (empirically) produces idiosyncratic
+		// results. This is just not a good test case.
+//		v = sqrt(-1.0);	checkConversions("NaN", v, false, 0, sqrt(-1.0), "nan");
+
 		v = "";			checkConversions("empty", v, false, 0, 0.0, "");
 		v = "0";		checkConversions("digit0", v, true, 0, 0.0, "0");
 		v = "10";		checkConversions("digit10", v, true, 10, 10.0, "10");
@@ -757,42 +768,6 @@ namespace tut
 		{
 			SDAllocationCheck check("shared values test for threaded work", 9);
 
-			//U32 start_llsd_count = llsd::outstandingCount();
-
-			LLSD m = LLSD::emptyMap();
-
-			m["one"] = 1;
-			m["two"] = 2;
-			m["one_copy"] = m["one"];			// 3 (m, "one" and "two")
-
-			m["undef_one"] = LLSD();
-			m["undef_two"] = LLSD();
-			m["undef_one_copy"] = m["undef_one"];
-
-			{	// Ensure first_array gets freed to avoid counting it
-				LLSD first_array = LLSD::emptyArray();
-				first_array.append(1.0f);
-				first_array.append(2.0f);			
-				first_array.append(3.0f);			// 7
-
-				m["array"] = first_array;
-				m["array_clone"] = first_array;
-				m["array_copy"] = m["array"];		// 7
-			}
-
-			m["string_one"] = "string one value";
-			m["string_two"] = "string two value";
-			m["string_one_copy"] = m["string_one"];		// 9
-
-			//U32 llsd_object_count = llsd::outstandingCount();
-			//std::cout << "Using " << (llsd_object_count - start_llsd_count) << " LLSD objects" << std::endl;
-
-			//m.dumpStats();
-		}
-
-		{
-			SDAllocationCheck check("shared values test for threaded work", 9);
-
 			//U32 start_llsd_count = LLSD::outstandingCount();
 
 			LLSD m = LLSD::emptyMap();
@@ -852,3 +827,4 @@ namespace tut
 		test serializations
 	*/
 }
+

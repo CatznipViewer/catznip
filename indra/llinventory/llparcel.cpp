@@ -40,6 +40,8 @@
 #include "llsdutil_math.h"
 #include "message.h"
 #include "u64.h"
+#include "llregionflags.h"
+#include <boost/range/adaptor/map.hpp>
 
 static const F32 SOME_BIG_NUMBER = 1000.0f;
 static const F32 SOME_BIG_NEG_NUMBER = -1000.0f;
@@ -136,7 +138,7 @@ LLParcel::LLParcel(const LLUUID &owner_id,
 // virtual
 LLParcel::~LLParcel()
 {
-    // user list cleaned up by LLDynamicArray destructor.
+    // user list cleaned up by std::vector destructor.
 }
 
 void LLParcel::init(const LLUUID &owner_id,
@@ -470,8 +472,8 @@ BOOL LLParcel::importAccessEntry(std::istream& input_stream, LLAccessEntry* entr
         }
         else
         {
-            llwarns << "Unknown keyword in parcel access entry section: <" 
-            << keyword << ">" << llendl;
+            LL_WARNS() << "Unknown keyword in parcel access entry section: <" 
+            << keyword << ">" << LL_ENDL;
         }
     }
     return input_stream.good();
@@ -627,8 +629,8 @@ void LLParcel::unpackMessage(LLMessageSystem* msg)
 void LLParcel::packAccessEntries(LLMessageSystem* msg,
 								 const std::map<LLUUID,LLAccessEntry>& list)
 {
-    access_map_const_iterator cit = list.begin();
-    access_map_const_iterator end = list.end();
+    LLAccessEntry::map::const_iterator cit = list.begin();
+    LLAccessEntry::map::const_iterator end = list.end();
     
     if (cit == end)
     {
@@ -679,9 +681,28 @@ void LLParcel::unpackAccessEntries(LLMessageSystem* msg,
 }
 
 
+void LLParcel::unpackExperienceEntries( LLMessageSystem* msg, U32 type )
+{
+	LLUUID id;
+
+	S32 i;
+	S32 count = msg->getNumberOfBlocksFast(_PREHASH_List);
+	for (i = 0; i < count; i++)
+	{
+		msg->getUUIDFast(_PREHASH_List, _PREHASH_ID, id, i);
+
+		if (id.notNull())
+		{
+			mExperienceKeys[id]=type;
+		}
+	}
+}
+
+
+
 void LLParcel::expirePasses(S32 now)
 {
-    access_map_iterator itor = mAccessList.begin();
+    LLAccessEntry::map::iterator itor = mAccessList.begin();
     while (itor != mAccessList.end())
     {
         const LLAccessEntry& entry = (*itor).second;
@@ -771,7 +792,7 @@ BOOL LLParcel::addToAccessList(const LLUUID& agent_id, S32 time)
 		// Can't add owner to these lists
 		return FALSE;
 	}
-	access_map_iterator itor = mAccessList.begin();
+	LLAccessEntry::map::iterator itor = mAccessList.begin();
 	while (itor != mAccessList.end())
 	{
 		const LLAccessEntry& entry = (*itor).second;
@@ -792,8 +813,6 @@ BOOL LLParcel::addToAccessList(const LLUUID& agent_id, S32 time)
 			++itor;
 		}
 	}
-    
-    removeFromBanList(agent_id);
     
     LLAccessEntry new_entry;
     new_entry.mID			 = agent_id;
@@ -816,7 +835,7 @@ BOOL LLParcel::addToBanList(const LLUUID& agent_id, S32 time)
 		return FALSE;
 	}
     
-    access_map_iterator itor = mBanList.begin();
+    LLAccessEntry::map::iterator itor = mBanList.begin();
     while (itor != mBanList.end())
     {
         const LLAccessEntry& entry = (*itor).second;
@@ -838,8 +857,6 @@ BOOL LLParcel::addToBanList(const LLUUID& agent_id, S32 time)
         }
     }
     
-    removeFromAccessList(agent_id);
-    
     LLAccessEntry new_entry;
     new_entry.mID			 = agent_id;
     new_entry.mTime	 = time;
@@ -852,7 +869,7 @@ BOOL remove_from_access_array(std::map<LLUUID,LLAccessEntry>* list,
                               const LLUUID& agent_id)
 {
     BOOL removed = FALSE;
-    access_map_iterator itor = list->begin();
+    LLAccessEntry::map::iterator itor = list->begin();
     while (itor != list->end())
     {
         const LLAccessEntry& entry = (*itor).second;
@@ -971,7 +988,7 @@ void LLParcel::startSale(const LLUUID& buyer_id, BOOL is_buyer_group)
 		mGroupID.setNull();
 	}
 	mSaleTimerExpires.start();
-	mSaleTimerExpires.setTimerExpirySec(DEFAULT_USEC_SALE_TIMEOUT / SEC_TO_MICROSEC);
+	mSaleTimerExpires.setTimerExpirySec(U64Microseconds(DEFAULT_USEC_SALE_TIMEOUT));
 	mStatus = OS_LEASE_PENDING;
 	mClaimDate = time(NULL);
 	setAuctionID(0);
@@ -1096,9 +1113,9 @@ void LLParcel::clearParcel()
 
 void LLParcel::dump()
 {
-    llinfos << "parcel " << mLocalID << " area " << mArea << llendl;
-    llinfos << "	 name <" << mName << ">" << llendl;
-    llinfos << "	 desc <" << mDesc << ">" << llendl;
+    LL_INFOS() << "parcel " << mLocalID << " area " << mArea << LL_ENDL;
+    LL_INFOS() << "	 name <" << mName << ">" << LL_ENDL;
+    LL_INFOS() << "	 desc <" << mDesc << ">" << LL_ENDL;
 }
 
 const std::string& ownership_status_to_string(LLParcel::EOwnershipStatus status)
@@ -1178,7 +1195,7 @@ LLParcel::ECategory category_string_to_category(const std::string& s)
             return (LLParcel::ECategory)i;
         }
     }
-    llwarns << "Parcel category outside of possibilities " << s << llendl;
+    LL_WARNS() << "Parcel category outside of possibilities " << s << LL_ENDL;
     return LLParcel::C_NONE;
 }
 
@@ -1194,4 +1211,59 @@ LLParcel::ECategory category_ui_string_to_category(const std::string& s)
     // "Any" is a valid category for searches, and
     // is a distinct option from "None" and "Other"
     return LLParcel::C_ANY;
+}
+
+LLAccessEntry::map LLParcel::getExperienceKeysByType( U32 type ) const
+{
+	LLAccessEntry::map access;
+	LLAccessEntry entry;
+	xp_type_map_t::const_iterator it = mExperienceKeys.begin();
+	for(/**/; it != mExperienceKeys.end(); ++it)
+	{
+		if(it->second == type)
+		{
+			entry.mID = it->first;
+			access[entry.mID] = entry;
+		}
+	}
+	return access;
+}
+
+void LLParcel::clearExperienceKeysByType( U32 type )
+{
+	xp_type_map_t::iterator it = mExperienceKeys.begin();
+	while(it != mExperienceKeys.end())
+	{
+		if(it->second == type)
+		{
+			mExperienceKeys.erase(it++);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void LLParcel::setExperienceKeyType( const LLUUID& experience_key, U32 type )
+{
+	if(type == EXPERIENCE_KEY_TYPE_NONE)
+	{
+		mExperienceKeys.erase(experience_key);
+	}
+	else
+	{
+		if(countExperienceKeyType(type) < PARCEL_MAX_EXPERIENCE_LIST)
+		{
+			mExperienceKeys[experience_key] = type;
+		}
+	}
+}
+
+U32 LLParcel::countExperienceKeyType( U32 type )
+{
+	return std::count_if(
+		boost::begin(mExperienceKeys | boost::adaptors::map_values), 
+		boost::end(mExperienceKeys | boost::adaptors::map_values), 
+		std::bind2nd(std::equal_to<U32>(), type));
 }

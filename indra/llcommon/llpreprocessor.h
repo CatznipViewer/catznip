@@ -101,6 +101,11 @@
 
 #endif
 
+#if LL_WINDOWS
+# define LL_THREAD_LOCAL __declspec(thread)
+#else
+# define LL_THREAD_LOCAL __thread
+#endif
 
 // Static linking with apr on windows needs to be declared.
 #if LL_WINDOWS && !LL_COMMON_LINK_SHARED
@@ -133,6 +138,12 @@
 #pragma warning( 3      :  4266 )	// 'function' : no override available for virtual member function from base 'type'; function is hidden
 #pragma warning (disable : 4180)	// qualifier applied to function type has no meaning; ignored
 //#pragma warning( disable : 4284 )	// silly MS warning deep inside their <map> include file
+
+#if ADDRESS_SIZE == 64
+// That one is all over the place for x64 builds.
+#pragma warning( disable : 4267 )   // 'var' : conversion from 'size_t' to 'type', possible loss of data)
+#endif
+
 #pragma warning( disable : 4503 )	// 'decorated name length exceeded, name was truncated'. Does not seem to affect compilation.
 #pragma warning( disable : 4800 )	// 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning( disable : 4996 )	// warning: deprecated
@@ -180,5 +191,22 @@
 #else // LL_COMMON_LINK_SHARED
 # define LL_COMMON_API
 #endif // LL_COMMON_LINK_SHARED
+
+// With C++11, decltype() is standard. We no longer need a platform-dependent
+// macro to get the type of an expression.
+#define LL_TYPEOF(expr) decltype(expr)
+
+#define LL_TO_STRING_HELPER(x) #x
+#define LL_TO_STRING(x) LL_TO_STRING_HELPER(x)
+#define LL_FILE_LINENO_MSG(msg) __FILE__ "(" LL_TO_STRING(__LINE__) ") : " msg
+#define LL_GLUE_IMPL(x, y) x##y
+#define LL_GLUE_TOKENS(x, y) LL_GLUE_IMPL(x, y)
+
+#if LL_WINDOWS
+#define LL_COMPILE_TIME_MESSAGE(msg) __pragma(message(LL_FILE_LINENO_MSG(msg)))
+#else
+// no way to get gcc 4.2 to print a user-defined diagnostic message only when a macro is used
+#define LL_COMPILE_TIME_MESSAGE(msg)
+#endif
 
 #endif	//	not LL_LINDEN_PREPROCESSOR_H

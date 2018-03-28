@@ -27,9 +27,7 @@
 
 // We can't use WIN32_LEAN_AND_MEAN here, needs lots of includes.
 #if LL_WINDOWS
-#undef WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
+#include "llwin32headers.h"
 // ugh, this is ugly.  We need to straighten out our linking for this library
 #pragma comment(lib, "IPHLPAPI.lib")
 #include <iphlpapi.h>
@@ -85,7 +83,7 @@ unsigned int decode( char const * fiveChars ) throw( bad_input_data )
 unsigned int ret = 0;
 for( int ix = 0; ix < 5; ++ix ) {
 char * s = strchr( encodeTable, fiveChars[ ix ] );
-if( s == 0 ) throw bad_input_data();
+if( s == 0 ) LLTHROW(bad_input_data());
 ret = ret * 85 + (s-encodeTable);
 }
 return ret;
@@ -234,7 +232,7 @@ BOOL LLUUID::set(const std::string& in_string, BOOL emit)
 		{
 			if(emit)
 			{
-				llwarns << "Warning! Using broken UUID string format" << llendl;
+				LL_WARNS() << "Warning! Using broken UUID string format" << LL_ENDL;
 			}
 			broken_format = TRUE;
 		}
@@ -244,7 +242,7 @@ BOOL LLUUID::set(const std::string& in_string, BOOL emit)
 			if(emit)
 			{
 				//don't spam the logs because a resident can't spell.
-				llwarns << "Bad UUID string: " << in_string << llendl;
+				LL_WARNS() << "Bad UUID string: " << in_string << LL_ENDL;
 			}
 			setNull();
 			return FALSE;
@@ -283,7 +281,7 @@ BOOL LLUUID::set(const std::string& in_string, BOOL emit)
 		{
 			if(emit)
 			{							
-				llwarns << "Invalid UUID string character" << llendl;
+				LL_WARNS() << "Invalid UUID string character" << LL_ENDL;
 			}
 			setNull();
 			return FALSE;
@@ -308,7 +306,7 @@ BOOL LLUUID::set(const std::string& in_string, BOOL emit)
 		{
 			if(emit)
 			{
-				llwarns << "Invalid UUID string character" << llendl;
+				LL_WARNS() << "Invalid UUID string character" << LL_ENDL;
 			}
 			setNull();
 			return FALSE;

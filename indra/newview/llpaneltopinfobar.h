@@ -28,6 +28,7 @@
 #define LLPANELTOPINFOBAR_H_
 
 #include "llpanel.h"
+#include "llinitdestroyclass.h"
 
 class LLButton;
 class LLTextBox;
@@ -36,15 +37,14 @@ class LLParcelChangeObserver;
 
 class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
 {
+	LLSINGLETON(LLPanelTopInfoBar);
+	~LLPanelTopInfoBar();
 	LOG_CLASS(LLPanelTopInfoBar);
 
 	friend class LLDestroyClass<LLPanelTopInfoBar>;
 
 public:
 	typedef boost::signals2::signal<void ()> resize_signal_t;
-
-	LLPanelTopInfoBar();
-	~LLPanelTopInfoBar();
 
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
@@ -57,7 +57,7 @@ public:
 	/**
 	 * Called when the top info bar gets shown or hidden
 	 */
-	void onVisibilityChange(const LLSD& show);
+	void onVisibilityChanged(const LLSD& show);
 
 	boost::signals2::connection setResizeCallback( const resize_signal_t::slot_type& cb );
 

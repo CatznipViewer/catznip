@@ -44,7 +44,7 @@ public:
 	void initialize();
 	void cleanup();
 
-	/*virtual*/ void handleVisibilityChange ( BOOL new_visibility );
+	/*virtual*/ void onVisibilityChange ( BOOL new_visibility );
 
 	void setUseTuningMode(bool use) { mUseTuningMode = use; };
 	
@@ -53,6 +53,8 @@ protected:
 
 	void onCommitInputDevice();
 	void onCommitOutputDevice();
+	void onOutputDevicesClicked();
+	void onInputDevicesClicked();
 
 	F32 mMicVolume;
 	std::string mInputDevice;

@@ -47,9 +47,27 @@ BOOL LLFocusableElement::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 }
 
 // virtual
+BOOL LLFocusableElement::handleKeyUp(KEY key, MASK mask, BOOL called_from_parent)
+{
+	return FALSE;
+}
+
+// virtual
 BOOL LLFocusableElement::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
 {
 	return FALSE;
+}
+
+// virtual 
+bool LLFocusableElement::wantsKeyUpKeyDown() const
+{
+    return false;
+}
+
+//virtual 
+bool LLFocusableElement::wantsReturnKey() const
+{
+    return false;
 }
 
 // virtual
@@ -167,7 +185,6 @@ void LLFocusMgr::releaseFocusIfNeeded( LLView* view )
 
 	LLUI::removePopup(view);
 }
-
 
 void LLFocusMgr::setKeyboardFocus(LLFocusableElement* new_focus, BOOL lock, BOOL keystrokes_only)
 {
@@ -358,11 +375,11 @@ void LLFocusMgr::setMouseCapture( LLMouseHandler* new_captor )
 		{
 			if (new_captor)
 			{
-				llinfos << "New mouse captor: " << new_captor->getName() << llendl;
+				LL_INFOS() << "New mouse captor: " << new_captor->getName() << LL_ENDL;
 			}
 			else
 			{
-				llinfos << "New mouse captor: NULL" << llendl;
+				LL_INFOS() << "New mouse captor: NULL" << LL_ENDL;
 			}
 		}
 			

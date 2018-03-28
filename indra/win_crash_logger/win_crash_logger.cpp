@@ -29,25 +29,42 @@
 #include <stdlib.h>
 #include "llcrashloggerwindows.h"
 
+#ifdef _UNICODE
+int APIENTRY wWinMain(HINSTANCE hInstance,
+                      HINSTANCE hPrevInstance,
+                      LPWSTR    lpCmdLine,
+                      int       nCmdShow)
+#else
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPSTR     lpCmdLine,
                      int       nCmdShow)
+#endif //_UNICODE
 {
-	llinfos << "Starting crash reporter." << llendl;
-
+	LL_INFOS() << "Starting crash reporter with args" << &lpCmdLine << LL_ENDL;
 	LLCrashLoggerWindows app;
 	app.setHandle(hInstance);
+#ifdef _UNICODE
+	app.parseCommandOptions(__argc, __wargv);
+#else
 	app.parseCommandOptions(__argc, __argv);
+#endif //_UNICODE
 
+	LLSD options = LLApp::instance()->getOptionData(
+                   LLApp::PRIORITY_COMMAND_LINE);
+    if (!(options.has("pid") && options.has("dumpdir")))
+    {
+        LL_WARNS() << "Insufficient parameters to crash report." << LL_ENDL; 
+    }
 	if (! app.init())
 	{
-		llwarns << "Unable to initialize application." << llendl;
+		LL_WARNS() << "Unable to initialize application." << LL_ENDL;
 		return -1;
 	}
 
-	app.mainLoop();
+	app.processingLoop();
+	app.frame();
 	app.cleanup();
-	llinfos << "Crash reporter finished normally." << llendl;
+	LL_INFOS() << "Crash reporter finished normally." << LL_ENDL;
 	return 0;
 }

@@ -45,12 +45,17 @@ void send_ObjectGrab_message(LLViewerObject* object, const LLPickInfo & pick, co
 void send_ObjectDeGrab_message(LLViewerObject* object, const LLPickInfo & pick);
 
 
-
-class LLToolGrab : public LLTool, public LLSingleton<LLToolGrab>
+/**
+ * LLToolGrabBase contains most of the semantics of LLToolGrab. It's just that
+ * LLToolGrab is an LLSingleton, but we also explicitly instantiate
+ * LLToolGrabBase as part of LLToolCompGun. You can't just make an extra
+ * instance of an LLSingleton!
+ */
+class LLToolGrabBase : public LLTool
 {
 public:
-	LLToolGrab( LLToolComposite* composite = NULL );
-	~LLToolGrab();
+	LLToolGrabBase(LLToolComposite* composite=NULL);
+	~LLToolGrabBase();
 
 	/*virtual*/ BOOL	handleHover(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL	handleMouseDown(S32 x, S32 y, MASK mask);
@@ -77,6 +82,8 @@ public:
 
 	// Certain grabs should not highlight the "Build" toolbar button
 	BOOL getHideBuildHighlight() { return mHideBuildHighlight; }
+
+	void setClickedInMouselook(BOOL is_clickedInMouselook) {mClickedInMouselook = is_clickedInMouselook;}
 
 	static void		pickCallback(const LLPickInfo& pick_info);
 private:
@@ -119,6 +126,7 @@ private:
 	BOOL			mHasMoved;		// has mouse moved off center at all?
 	BOOL			mOutsideSlop;	// has mouse moved outside center 5 pixels?
 	BOOL			mDeselectedThisClick;
+	BOOL			mValidSelection;
 
 	S32             mLastFace;
 	LLVector2       mLastUVCoords;
@@ -133,6 +141,14 @@ private:
 	LLQuaternion	mSpinRotation;
 
 	BOOL			mHideBuildHighlight;
+
+	BOOL			mClickedInMouselook;
+};
+
+/// This is the LLSingleton instance of LLToolGrab.
+class LLToolGrab : public LLToolGrabBase, public LLSingleton<LLToolGrab>
+{
+	LLSINGLETON_EMPTY_CTOR(LLToolGrab);
 };
 
 extern BOOL gGrabBtnVertical;
@@ -140,5 +156,3 @@ extern BOOL gGrabBtnSpin;
 extern LLTool* gGrabTransientTool;
 
 #endif  // LL_TOOLGRAB_H
-
-

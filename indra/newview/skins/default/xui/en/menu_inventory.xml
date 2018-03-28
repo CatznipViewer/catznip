@@ -4,6 +4,81 @@
  layout="topleft"
  name="Popup"
  visible="false">
+	<menu_item_call
+        label="Create listing"
+        layout="topleft"
+        name="Marketplace Create Listing">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_create_listing" />
+	</menu_item_call>
+	<menu_item_call
+        label="Associate listing"
+        layout="topleft"
+        name="Marketplace Associate Listing">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_associate_listing" />
+	</menu_item_call>
+	<menu_item_call
+        label="Get (Refresh) listing"
+        layout="topleft"
+        name="Marketplace Get Listing">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_get_listing" />
+	</menu_item_call>
+	<menu_item_call
+        label="Check for errors"
+        layout="topleft"
+        name="Marketplace Check Listing">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_check_listing" />
+	</menu_item_call>
+	<menu_item_call
+        label="Edit listing"
+        layout="topleft"
+        name="Marketplace Edit Listing">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_edit_listing" />
+	</menu_item_call>
+	<menu_item_call
+        label="List"
+        layout="topleft"
+        name="Marketplace List">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_list" />
+	</menu_item_call>
+	<menu_item_call
+        label="Unlist"
+        layout="topleft"
+        name="Marketplace Unlist">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_unlist" />
+	</menu_item_call>
+	<menu_item_call
+        label="Activate"
+        layout="topleft"
+        name="Marketplace Activate">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_activate" />
+	</menu_item_call>
+	<menu_item_call
+        label="Deactivate"
+        layout="topleft"
+        name="Marketplace Deactivate">
+		<menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="marketplace_deactivate" />
+	</menu_item_call>
+	<menu_item_separator
+    layout="topleft"
+    name="Marketplace Listings Separator" />
     <menu_item_call
      label="Share"
      layout="topleft"
@@ -247,6 +322,43 @@
         </menu_item_call>
     </menu>
     <menu
+     label="Use as default for"
+     layout="topleft"
+     name="upload_def">
+      <menu_item_call
+       label="Image uploads"
+       layout="topleft"
+       name="Image uploads">
+        <menu_item_call.on_click
+         function="Inventory.FileUploadLocation"
+         parameter="texture" />
+      </menu_item_call>
+      <menu_item_call
+       label="Sound uploads"
+       layout="topleft"
+       name="Sound uploads">
+        <menu_item_call.on_click
+         function="Inventory.FileUploadLocation"
+         parameter="sound" />
+      </menu_item_call>
+      <menu_item_call
+       label="Animation uploads"
+       layout="topleft"
+       name="Animation uploads">
+        <menu_item_call.on_click
+         function="Inventory.FileUploadLocation"
+         parameter="animation" />
+      </menu_item_call>
+      <menu_item_call
+       label="Model uploads"
+       layout="topleft"
+       name="Model uploads">
+        <menu_item_call.on_click
+         function="Inventory.FileUploadLocation"
+         parameter="model" />
+      </menu_item_call>
+    </menu>
+    <menu
      label="Change Type"
      layout="topleft"
      name="Change Type">
@@ -382,6 +494,14 @@
          function="Inventory.DoToSelected"
          parameter="removefromoutfit" />
     </menu_item_call>
+    <menu_item_call
+     label="Copy outfit list to clipboard"
+     layout="topleft"
+     name="Copy outfit list to clipboard">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="copyoutfittoclipboard" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft"
      name="Outfit Separator" />
@@ -399,7 +519,7 @@
      name="Purge Item">
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
-         parameter="purge" />
+         parameter="purge"/>
     </menu_item_call>
     <menu_item_call
      label="Restore Item"
@@ -449,6 +569,14 @@
          function="Inventory.DoToSelected"
          parameter="copy_uuid" />
     </menu_item_call>
+    <menu_item_call
+     label="Show in Main Panel"
+     layout="topleft"
+     name="Show in Main Panel">
+       <menu_item_call.on_click
+        function="Inventory.DoToSelected"
+        parameter="show_in_main_panel" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft" 
      name="Copy Separator" />
@@ -484,17 +612,17 @@
          function="Inventory.DoToSelected"
          parameter="paste_link" />
     </menu_item_call>
+    <menu_item_call
+     label="Replace Links"
+     layout="topleft"
+     name="Replace Links">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="replace_links" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft" 
      name="Paste Separator" />
-    <menu_item_call
-     label="Delete"
-     layout="topleft"
-     name="Remove Link">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="delete" />
-    </menu_item_call>
     <menu_item_call
      label="Delete"
      layout="topleft"
@@ -531,7 +659,7 @@
      name="Sound Play">
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
-         parameter="open" />
+         parameter="sound_play" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft"
@@ -551,6 +679,14 @@
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
          parameter="about" />
+    </menu_item_call>
+   <menu_item_call
+     label="Show on Map"
+     layout="topleft"
+     name="show_on_map">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="show_on_map" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft" 
@@ -702,20 +838,20 @@
 	 layout="topleft"
 	 name="Marketplace Separator" />
 	<menu_item_call
-	 label="Copy to Merchant Outbox"
-	 layout="topleft"
-	 name="Merchant Copy">
+        label="Copy to Marketplace Listings"
+        layout="topleft"
+        name="Marketplace Copy">
 		<menu_item_call.on_click
-		 function="Inventory.DoToSelected"
-		 parameter="copy_to_outbox" />
+        function="Inventory.DoToSelected"
+        parameter="copy_to_marketplace_listings" />
 	</menu_item_call>
 	<menu_item_call
-	 label="Send to Marketplace"
-	 layout="topleft"
-	 name="Marketplace Send">
+        label="Move to Marketplace Listings"
+        layout="topleft"
+        name="Marketplace Move">
 		<menu_item_call.on_click
-		 function="Inventory.DoToSelected"
-		 parameter="send_to_marketplace" />
+        function="Inventory.DoToSelected"
+        parameter="move_to_marketplace_listings" />
 	</menu_item_call>
 	<menu_item_call
      label="--no options--"

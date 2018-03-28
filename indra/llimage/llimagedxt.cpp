@@ -52,7 +52,7 @@ S32 LLImageDXT::formatBits(EFileFormat format)
 	  case FORMAT_RGB8:		return 24;
 	  case FORMAT_RGBA8:	return 32;
 	  default:
-		llerrs << "LLImageDXT::Unknown format: " << format << llendl;
+		LL_ERRS() << "LLImageDXT::Unknown format: " << format << LL_ENDL;
 		return 0;
 	}
 };
@@ -82,7 +82,7 @@ S32 LLImageDXT::formatComponents(EFileFormat format)
 	  case FORMAT_RGB8:		return 3;
 	  case FORMAT_RGBA8:	return 4;
 	  default:
-		llerrs << "LLImageDXT::Unknown format: " << format << llendl;
+		LL_ERRS() << "LLImageDXT::Unknown format: " << format << LL_ENDL;
 		return 0;
 	}
 };
@@ -172,7 +172,7 @@ LLImageDXT::~LLImageDXT()
 }
 
 // virtual
-BOOL LLImageDXT::updateData()
+bool LLImageDXT::updateData()
 {
 	resetLastError();
 
@@ -182,7 +182,7 @@ BOOL LLImageDXT::updateData()
 	if (!data || !data_size)
 	{
 		setLastError("LLImageDXT uninitialized");
-		return FALSE;
+		return false;
 	}
 
 	S32 width, height, miplevelmax;
@@ -207,7 +207,7 @@ BOOL LLImageDXT::updateData()
 
 	if (data_size < mHeaderSize)
 	{
-		llerrs << "LLImageDXT: not enough data" << llendl;
+		LL_ERRS() << "LLImageDXT: not enough data" << LL_ENDL;
 	}
 	S32 ncomponents = formatComponents(mFileFormat);
 	setSize(width, height, ncomponents);
@@ -216,7 +216,7 @@ BOOL LLImageDXT::updateData()
 	discard = llmin(discard, miplevelmax);
 	setDiscardLevel(discard);
 
-	return TRUE;
+	return true;
 }
 
 // discard: 0 = largest (last) mip
@@ -224,7 +224,7 @@ S32 LLImageDXT::getMipOffset(S32 discard)
 {
 	if (mFileFormat >= FORMAT_DXT1 && mFileFormat <= FORMAT_DXT5)
 	{
-		llerrs << "getMipOffset called with old (unsupported) format" << llendl;
+		LL_ERRS() << "getMipOffset called with old (unsupported) format" << LL_ENDL;
 	}
 	S32 width = getWidth(), height = getHeight();
 	S32 num_mips = calcNumMips(width, height);
@@ -251,13 +251,13 @@ void LLImageDXT::setFormat()
 	{
 	  case 3: mFileFormat = FORMAT_DXR1; break;
 	  case 4: mFileFormat = FORMAT_DXR3; break;
-	  default: llerrs << "LLImageDXT::setFormat called with ncomponents = " << ncomponents << llendl;
+	  default: LL_ERRS() << "LLImageDXT::setFormat called with ncomponents = " << ncomponents << LL_ENDL;
 	}
 	mHeaderSize = calcHeaderSize();
 }
 		
 // virtual
-BOOL LLImageDXT::decode(LLImageRaw* raw_image, F32 time)
+bool LLImageDXT::decode(LLImageRaw* raw_image, F32 time)
 {
 	// *TODO: Test! This has been tweaked since its intial inception,
 	//  but we don't use it any more!
@@ -265,8 +265,8 @@ BOOL LLImageDXT::decode(LLImageRaw* raw_image, F32 time)
 	
 	if (mFileFormat >= FORMAT_DXT1 && mFileFormat <= FORMAT_DXR5)
 	{
-		llwarns << "Attempt to decode compressed LLImageDXT to Raw (unsupported)" << llendl;
-		return FALSE;
+		LL_WARNS() << "Attempt to decode compressed LLImageDXT to Raw (unsupported)" << LL_ENDL;
+		return false;
 	}
 	
 	S32 width = getWidth(), height = getHeight();
@@ -286,16 +286,16 @@ BOOL LLImageDXT::decode(LLImageRaw* raw_image, F32 time)
 	if ((!getData()) || (data + image_size > getData() + getDataSize()))
 	{
 		setLastError("LLImageDXT trying to decode an image with not enough data!");
-		return FALSE;
+		return false;
 	}
 
 	raw_image->resize(width, height, ncomponents);
 	memcpy(raw_image->getData(), data, image_size);	/* Flawfinder: ignore */
 
-	return TRUE;
+	return true;
 }
 
-BOOL LLImageDXT::getMipData(LLPointer<LLImageRaw>& raw, S32 discard)
+bool LLImageDXT::getMipData(LLPointer<LLImageRaw>& raw, S32 discard)
 {
 	if (discard < 0)
 	{
@@ -303,17 +303,17 @@ BOOL LLImageDXT::getMipData(LLPointer<LLImageRaw>& raw, S32 discard)
 	}
 	else if (discard < mDiscardLevel)
 	{
-		llerrs << "Request for invalid discard level" << llendl;
+		LL_ERRS() << "Request for invalid discard level" << LL_ENDL;
 	}
 	U8* data = getData() + getMipOffset(discard);
 	S32 width = 0;
 	S32 height = 0;
 	calcDiscardWidthHeight(discard, mFileFormat, width, height);
 	raw = new LLImageRaw(data, width, height, getComponents());
-	return TRUE;
+	return true;
 }
 
-BOOL LLImageDXT::encodeDXT(const LLImageRaw* raw_image, F32 time, bool explicit_mips)
+bool LLImageDXT::encodeDXT(const LLImageRaw* raw_image, F32 time, bool explicit_mips)
 {
 	llassert_always(raw_image);
 	
@@ -331,7 +331,7 @@ BOOL LLImageDXT::encodeDXT(const LLImageRaw* raw_image, F32 time, bool explicit_
 		format = FORMAT_RGBA8;
 		break;
 	  default:
-		llerrs << "LLImageDXT::encode: Unhandled channel number: " << ncomponents << llendl;
+		LL_ERRS() << "LLImageDXT::encode: Unhandled channel number: " << ncomponents << LL_ENDL;
 		return 0;
 	}
 
@@ -395,11 +395,11 @@ BOOL LLImageDXT::encodeDXT(const LLImageRaw* raw_image, F32 time, bool explicit_
 		prev_mipdata = mipdata;
 	}
 	
-	return TRUE;
+	return true;
 }
 
 // virtual
-BOOL LLImageDXT::encode(const LLImageRaw* raw_image, F32 time)
+bool LLImageDXT::encode(const LLImageRaw* raw_image, F32 time)
 {
 	return encodeDXT(raw_image, time, false);
 }
@@ -422,7 +422,7 @@ bool LLImageDXT::convertToDXR()
 	  case FORMAT_DXT4: newformat = FORMAT_DXR4; break;
 	  case FORMAT_DXT5: newformat = FORMAT_DXR5; break;
 	  default:
-		llwarns << "convertToDXR: can not convert format: " << llformat("0x%08x",getFourCC(mFileFormat)) << llendl;
+		LL_WARNS() << "convertToDXR: can not convert format: " << llformat("0x%08x",getFourCC(mFileFormat)) << LL_ENDL;
 		return false;
 	}
 	mFileFormat = newformat;
@@ -433,7 +433,7 @@ bool LLImageDXT::convertToDXR()
 	U8* newdata = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), total_bytes);
 	if (!newdata)
 	{
-		llerrs << "Out of memory in LLImageDXT::convertToDXR()" << llendl;
+		LL_ERRS() << "Out of memory in LLImageDXT::convertToDXR()" << LL_ENDL;
 		return false;
 	}
 	llassert(total_bytes > 0);
@@ -466,7 +466,7 @@ S32 LLImageDXT::calcDataSize(S32 discard_level)
 {
 	if (mFileFormat == FORMAT_UNKNOWN)
 	{
-		llerrs << "calcDataSize called with unloaded LLImageDXT" << llendl;
+		LL_ERRS() << "calcDataSize called with unloaded LLImageDXT" << LL_ENDL;
 		return 0;
 	}
 	if (discard_level < 0)

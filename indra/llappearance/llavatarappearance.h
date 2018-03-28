@@ -66,7 +66,8 @@ public:
 	LLAvatarAppearance(LLWearableData* wearable_data);
 	virtual ~LLAvatarAppearance();
 
-	static void			initClass(); // initializes static members
+	static void			initClass(const std::string& avatar_file_name, const std::string& skeleton_file_name); // initializes static members
+	static void			initClass();
 	static void			cleanupClass();	// Cleanup data that's only init'd once per class.
 	virtual void 		initInstance(); // Called after construction to initialize the instance.
 	virtual BOOL		loadSkeletonNode();
@@ -107,7 +108,6 @@ public:
 public:
 	virtual bool 	isSelf() const { return false; } // True if this avatar is for this viewer's agent
 	virtual BOOL	isValid() const;
-	virtual BOOL	isUsingServerBakes() const = 0;
 	virtual BOOL	isUsingLocalAppearance() const = 0;
 	virtual BOOL	isEditingAppearance() const = 0;
 
@@ -125,8 +125,11 @@ public:
 
 protected:
 	virtual LLAvatarJoint*	createAvatarJoint() = 0;
-	virtual LLAvatarJoint*	createAvatarJoint(S32 joint_num) = 0;
+    virtual LLAvatarJoint*  createAvatarJoint(S32 joint_num) = 0;
 	virtual LLAvatarJointMesh*	createAvatarJointMesh() = 0;
+    void makeJointAliases(LLAvatarBoneInfo *bone_info);
+
+
 public:
 	F32					getPelvisToFoot() const { return mPelvisToFoot; }
 	/*virtual*/ LLJoint*	getRootJoint() { return mRoot; }
@@ -136,29 +139,45 @@ public:
 
 	typedef std::map<std::string, LLJoint*> joint_map_t;
 	joint_map_t			mJointMap;
-	
-	void				computeBodySize();
+
+    typedef std::map<std::string, LLVector3> joint_state_map_t;
+    joint_state_map_t mLastBodySizeState;
+    joint_state_map_t mCurrBodySizeState;
+    void compareJointStateMaps(joint_state_map_t& last_state,
+                               joint_state_map_t& curr_state);
+	void		computeBodySize();
+
+public:
+	typedef std::vector<LLAvatarJoint*> avatar_joint_list_t;
+    const avatar_joint_list_t& getSkeleton() { return mSkeleton; }
+    typedef std::map<std::string, std::string> joint_alias_map_t;
+    const joint_alias_map_t& getJointAliases();
 
 
 protected:
 	static BOOL			parseSkeletonFile(const std::string& filename);
 	virtual void		buildCharacter();
 	virtual BOOL		loadAvatar();
-	virtual void		bodySizeChanged() = 0;
 
 	BOOL				setupBone(const LLAvatarBoneInfo* info, LLJoint* parent, S32 &current_volume_num, S32 &current_joint_num);
 	BOOL				allocateCharacterJoints(U32 num);
 	BOOL				buildSkeleton(const LLAvatarSkeletonInfo *info);
-protected:
+
 	void				clearSkeleton();
 	BOOL				mIsBuilt; // state of deferred character building
-	typedef std::vector<LLAvatarJoint*> avatar_joint_list_t;
 	avatar_joint_list_t	mSkeleton;
-	
+	LLVector3OverrideMap	mPelvisFixups;
+    joint_alias_map_t   mJointAliasMap;
+
 	//--------------------------------------------------------------------
 	// Pelvis height adjustment members.
 	//--------------------------------------------------------------------
 public:
+	void				addPelvisFixup( F32 fixup, const LLUUID& mesh_id );
+	void 				removePelvisFixup( const LLUUID& mesh_id );
+	bool 				hasPelvisFixup( F32& fixup, LLUUID& mesh_id ) const;
+	bool 				hasPelvisFixup( F32& fixup ) const;
+	
 	LLVector3			mBodySize;
 	LLVector3			mAvatarOffset;
 protected:
@@ -225,7 +244,7 @@ public:
 	// Composites
 	//--------------------------------------------------------------------
 public:
-	virtual void	invalidateComposite(LLTexLayerSet* layerset, BOOL upload_result) = 0;
+	virtual void	invalidateComposite(LLTexLayerSet* layerset) = 0;
 
 /********************************************************************************
  **                                                                            **
@@ -256,7 +275,7 @@ protected:
 	// Clothing colors (convenience functions to access visual parameters)
 	//--------------------------------------------------------------------
 public:
-	void			setClothesColor(LLAvatarAppearanceDefines::ETextureIndex te, const LLColor4& new_color, BOOL upload_bake);
+	void			setClothesColor(LLAvatarAppearanceDefines::ETextureIndex te, const LLColor4& new_color);
 	LLColor4		getClothesColor(LLAvatarAppearanceDefines::ETextureIndex te);
 	static BOOL		teToColorParams(LLAvatarAppearanceDefines::ETextureIndex te, U32 *param_name);
 
@@ -265,7 +284,7 @@ public:
 	//--------------------------------------------------------------------
 public:
 	LLColor4		getGlobalColor(const std::string& color_name ) const;
-	virtual void	onGlobalColorChanged(const LLTexGlobalColor* global_color, BOOL upload_bake) = 0;
+	virtual void	onGlobalColorChanged(const LLTexGlobalColor* global_color) = 0;
 protected:
 	LLTexGlobalColor* mTexSkinColor;
 	LLTexGlobalColor* mTexHairColor;
@@ -331,6 +350,7 @@ protected:
 	// Collision volumes
 	//--------------------------------------------------------------------
 public:
+    S32			mNumBones;
   	S32			mNumCollisionVolumes;
 	LLAvatarJointCollisionVolume* mCollisionVolumes;
 protected:

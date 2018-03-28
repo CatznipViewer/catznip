@@ -35,15 +35,16 @@
 #include "llavatarappearance.h"
 #include "llavatarappearancedefines.h"
 #include "llavatarjointmesh.h"
-#include "imageids.h"
+#include "llstl.h"
 #include "lldir.h"
-#include "lldeleteutils.h"
 #include "llpolymorph.h"
 #include "llpolymesh.h"
 #include "llpolyskeletaldistortion.h"
 #include "llstl.h"
 #include "lltexglobalcolor.h"
 #include "llwearabledata.h"
+#include "boost/bind.hpp"
+#include "boost/tokenizer.hpp"
 
 
 #if LL_MSVC
@@ -81,13 +82,17 @@ public:
 	~LLAvatarBoneInfo()
 	{
 		std::for_each(mChildList.begin(), mChildList.end(), DeletePointer());
+		mChildList.clear();
 	}
 	BOOL parseXml(LLXmlTreeNode* node);
 	
 private:
 	std::string mName;
+    std::string mSupport;
+    std::string mAliases;
 	BOOL mIsJoint;
 	LLVector3 mPos;
+    LLVector3 mEnd;
 	LLVector3 mRot;
 	LLVector3 mScale;
 	LLVector3 mPivot;
@@ -108,6 +113,7 @@ public:
 	~LLAvatarSkeletonInfo()
 	{
 		std::for_each(mBoneInfoList.begin(), mBoneInfoList.end(), DeletePointer());
+		mBoneInfoList.clear();
 	}
 	BOOL parseXml(LLXmlTreeNode* node);
 	S32 getNumBones() const { return mNumBones; }
@@ -116,6 +122,7 @@ public:
 private:
 	S32 mNumBones;
 	S32 mNumCollisionVolumes;
+    LLAvatarAppearance::joint_alias_map_t mJointAliasMap;
 	typedef std::vector<LLAvatarBoneInfo*> bone_info_list_t;
 	bone_info_list_t mBoneInfoList;
 };
@@ -132,14 +139,26 @@ LLAvatarAppearance::LLAvatarXmlInfo::LLAvatarXmlInfo()
 LLAvatarAppearance::LLAvatarXmlInfo::~LLAvatarXmlInfo()
 {
 	std::for_each(mMeshInfoList.begin(), mMeshInfoList.end(), DeletePointer());
+	mMeshInfoList.clear();
+
 	std::for_each(mSkeletalDistortionInfoList.begin(), mSkeletalDistortionInfoList.end(), DeletePointer());		
+	mSkeletalDistortionInfoList.clear();
+
 	std::for_each(mAttachmentInfoList.begin(), mAttachmentInfoList.end(), DeletePointer());
-	deleteAndClear(mTexSkinColorInfo);
-	deleteAndClear(mTexHairColorInfo);
-	deleteAndClear(mTexEyeColorInfo);
+	mAttachmentInfoList.clear();
+
+	delete_and_clear(mTexSkinColorInfo);
+	delete_and_clear(mTexHairColorInfo);
+	delete_and_clear(mTexEyeColorInfo);
+
 	std::for_each(mLayerInfoList.begin(), mLayerInfoList.end(), DeletePointer());		
+	mLayerInfoList.clear();
+
 	std::for_each(mDriverInfoList.begin(), mDriverInfoList.end(), DeletePointer());
+	mDriverInfoList.clear();
+
 	std::for_each(mMorphMaskInfoList.begin(), mMorphMaskInfoList.end(), DeletePointer());
+	mMorphMaskInfoList.clear();
 }
 
 
@@ -167,7 +186,11 @@ LLAvatarAppearance::LLAvatarAppearance(LLWearableData* wearable_data) :
 	mPelvisToFoot(0.f),
 	mHeadOffset(),
 	mRoot(NULL),
-	mWearableData(wearable_data)
+	mWearableData(wearable_data),
+    mNumBones(0),
+    mNumCollisionVolumes(0),
+    mCollisionVolumes(NULL),
+    mIsBuilt(FALSE)
 {
 	llassert_always(mWearableData);
 	mBakedTextureDatas.resize(LLAvatarAppearanceDefines::BAKED_NUM_INDICES);
@@ -180,11 +203,6 @@ LLAvatarAppearance::LLAvatarAppearance(LLWearableData* wearable_data) :
 		mBakedTextureDatas[i].mMaskTexName = 0;
 		mBakedTextureDatas[i].mTextureIndex = LLAvatarAppearanceDefines::LLAvatarAppearanceDictionary::bakedToLocalTextureIndex((LLAvatarAppearanceDefines::EBakedTextureIndex)i);
 	}
-
-	mIsBuilt = FALSE;
-
-	mNumCollisionVolumes = 0;
-	mCollisionVolumes = NULL;
 }
 
 // virtual
@@ -221,7 +239,7 @@ void LLAvatarAppearance::initInstance()
 			mesh->setMeshID(mesh_index);
 			mesh->setPickName(mesh_dict->mPickName);
 			mesh->setIsTransparent(FALSE);
-			switch((int)mesh_index)
+			switch((S32)mesh_index)
 			{
 				case MESH_ID_HAIR:
 					mesh->setIsTransparent(TRUE);
@@ -257,7 +275,7 @@ void LLAvatarAppearance::initInstance()
 			 ++iter)
 		{
 			LLAvatarJointMesh* mesh = (*iter);
-			mBakedTextureDatas[(int)baked_texture_index].mJointMeshes.push_back(mesh);
+			mBakedTextureDatas[(S32)baked_texture_index].mJointMeshes.push_back(mesh);
 		}
 	}
 
@@ -268,13 +286,13 @@ void LLAvatarAppearance::initInstance()
 // virtual
 LLAvatarAppearance::~LLAvatarAppearance()
 {
-	deleteAndClear(mTexSkinColor);
-	deleteAndClear(mTexHairColor);
-	deleteAndClear(mTexEyeColor);
+	delete_and_clear(mTexSkinColor);
+	delete_and_clear(mTexHairColor);
+	delete_and_clear(mTexEyeColor);
 
 	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
 	{
-		deleteAndClear(mBakedTextureDatas[i].mTexLayerSet);
+		delete_and_clear(mBakedTextureDatas[i].mTexLayerSet);
 		mBakedTextureDatas[i].mJointMeshes.clear();
 
 		for (morph_list_t::iterator iter2 = mBakedTextureDatas[i].mMaskedMorphs.begin();
@@ -289,11 +307,7 @@ LLAvatarAppearance::~LLAvatarAppearance()
 	mJointMap.clear();
 
 	clearSkeleton();
-	deleteAndClearArray(mCollisionVolumes);
-
-	deleteAndClear(mTexSkinColor);
-	deleteAndClear(mTexHairColor);
-	deleteAndClear(mTexEyeColor);
+	delete_and_clear_array(mCollisionVolumes);
 
 	std::for_each(mPolyMeshes.begin(), mPolyMeshes.end(), DeletePairedPointer());
 	mPolyMeshes.clear();
@@ -313,36 +327,49 @@ LLAvatarAppearance::~LLAvatarAppearance()
 //static
 void LLAvatarAppearance::initClass()
 {
-	std::string xmlFile;
+    initClass("","");
+}
 
-	xmlFile = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,AVATAR_DEFAULT_CHAR) + "_lad.xml";
-	BOOL success = sXMLTree.parseFile( xmlFile, FALSE );
+//static
+void LLAvatarAppearance::initClass(const std::string& avatar_file_name_arg, const std::string& skeleton_file_name_arg)
+{
+	std::string avatar_file_name;
+
+    if (!avatar_file_name_arg.empty())
+    {
+        avatar_file_name = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,avatar_file_name_arg);
+    }
+    else
+    {
+        avatar_file_name = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,AVATAR_DEFAULT_CHAR + "_lad.xml");
+    }
+	BOOL success = sXMLTree.parseFile( avatar_file_name, FALSE );
 	if (!success)
 	{
-		llerrs << "Problem reading avatar configuration file:" << xmlFile << llendl;
+		LL_ERRS() << "Problem reading avatar configuration file:" << avatar_file_name << LL_ENDL;
 	}
 
 	// now sanity check xml file
 	LLXmlTreeNode* root = sXMLTree.getRoot();
 	if (!root) 
 	{
-		llerrs << "No root node found in avatar configuration file: " << xmlFile << llendl;
+		LL_ERRS() << "No root node found in avatar configuration file: " << avatar_file_name << LL_ENDL;
 		return;
 	}
 
 	//-------------------------------------------------------------------------
-	// <linden_avatar version="1.0"> (root)
+	// <linden_avatar version="2.0"> (root)
 	//-------------------------------------------------------------------------
 	if( !root->hasName( "linden_avatar" ) )
 	{
-		llerrs << "Invalid avatar file header: " << xmlFile << llendl;
+		LL_ERRS() << "Invalid avatar file header: " << avatar_file_name << LL_ENDL;
 	}
 	
 	std::string version;
 	static LLStdStringHandle version_string = LLXmlTree::addAttributeString("version");
-	if( !root->getFastAttributeString( version_string, version ) || (version != "1.0") )
+	if( !root->getFastAttributeString( version_string, version ) || ((version != "1.0") && (version != "2.0")))
 	{
-		llerrs << "Invalid avatar file version: " << version << " in file: " << xmlFile << llendl;
+		LL_ERRS() << "Invalid avatar file version: " << version << " in file: " << avatar_file_name << LL_ENDL;
 	}
 
 	S32 wearable_def_version = 1;
@@ -355,22 +382,25 @@ void LLAvatarAppearance::initClass()
 	LLXmlTreeNode* skeleton_node = root->getChildByName( "skeleton" );
 	if (!skeleton_node)
 	{
-		llerrs << "No skeleton in avatar configuration file: " << xmlFile << llendl;
+		LL_ERRS() << "No skeleton in avatar configuration file: " << avatar_file_name << LL_ENDL;
 		return;
 	}
-	
-	std::string skeleton_file_name;
-	static LLStdStringHandle file_name_string = LLXmlTree::addAttributeString("file_name");
-	if (!skeleton_node->getFastAttributeString(file_name_string, skeleton_file_name))
-	{
-		llerrs << "No file name in skeleton node in avatar config file: " << xmlFile << llendl;
-	}
+
+    std::string skeleton_file_name = skeleton_file_name_arg;
+    if (skeleton_file_name.empty())
+    {
+        static LLStdStringHandle file_name_string = LLXmlTree::addAttributeString("file_name");
+        if (!skeleton_node->getFastAttributeString(file_name_string, skeleton_file_name))
+        {
+            LL_ERRS() << "No file name in skeleton node in avatar config file: " << avatar_file_name << LL_ENDL;
+        }
+    }
 	
 	std::string skeleton_path;
 	skeleton_path = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,skeleton_file_name);
 	if (!parseSkeletonFile(skeleton_path))
 	{
-		llerrs << "Error parsing skeleton file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton file: " << skeleton_path << LL_ENDL;
 	}
 
 	// Process XML data
@@ -383,43 +413,43 @@ void LLAvatarAppearance::initClass()
 	sAvatarSkeletonInfo = new LLAvatarSkeletonInfo;
 	if (!sAvatarSkeletonInfo->parseXml(sSkeletonXMLTree.getRoot()))
 	{
-		llerrs << "Error parsing skeleton XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton XML file: " << skeleton_path << LL_ENDL;
 	}
 	// parse avatar_lad.xml
 	if (sAvatarXmlInfo)
 	{ //this can happen if a login attempt failed
-		deleteAndClear(sAvatarXmlInfo);
+		delete_and_clear(sAvatarXmlInfo);
 	}
 	sAvatarXmlInfo = new LLAvatarXmlInfo;
 	if (!sAvatarXmlInfo->parseXmlSkeletonNode(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 	if (!sAvatarXmlInfo->parseXmlMeshNodes(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 	if (!sAvatarXmlInfo->parseXmlColorNodes(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 	if (!sAvatarXmlInfo->parseXmlLayerNodes(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 	if (!sAvatarXmlInfo->parseXmlDriverNodes(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 	if (!sAvatarXmlInfo->parseXmlMorphNodes(root))
 	{
-		llerrs << "Error parsing skeleton node in avatar XML file: " << skeleton_path << llendl;
+		LL_ERRS() << "Error parsing skeleton node in avatar XML file: " << skeleton_path << LL_ENDL;
 	}
 }
 
 void LLAvatarAppearance::cleanupClass()
 {
-	deleteAndClear(sAvatarXmlInfo);
+	delete_and_clear(sAvatarXmlInfo);
 	// *TODO: What about sAvatarSkeletonInfo ???
 	sSkeletonXMLTree.cleanup();
 	sXMLTree.cleanup();
@@ -427,11 +457,56 @@ void LLAvatarAppearance::cleanupClass()
 
 using namespace LLAvatarAppearanceDefines;
 
+void LLAvatarAppearance::compareJointStateMaps(joint_state_map_t& last_state,
+                                               joint_state_map_t& curr_state)
+{
+    if (!last_state.empty() && (last_state != curr_state))
+    {
+        S32 diff_count = 0;
+        joint_state_map_t::iterator it;
+        for (it=last_state.begin(); it != last_state.end(); ++it)
+        {
+            const std::string& key = it->first;
+            if (last_state[key] != curr_state[key])
+            {
+                LL_DEBUGS("AvatarBodySize") << "BodySize change " << key << " " << last_state[key] << "->" << curr_state[key] << LL_ENDL;
+                diff_count++;
+            }
+        }
+        if (diff_count > 0)
+        {
+            LL_DEBUGS("AvatarBodySize") << "Total of BodySize changes " << diff_count << LL_ENDL;
+        }
+        
+    }
+}
+
 //------------------------------------------------------------------------
 // The viewer can only suggest a good size for the agent,
 // the simulator will keep it inside a reasonable range.
 void LLAvatarAppearance::computeBodySize() 
 {
+    mLastBodySizeState = mCurrBodySizeState;
+
+    mCurrBodySizeState["mPelvis scale"] = mPelvisp->getScale();
+    mCurrBodySizeState["mSkull pos"] = mSkullp->getPosition();
+    mCurrBodySizeState["mSkull scale"] = mSkullp->getScale();
+    mCurrBodySizeState["mNeck pos"] = mNeckp->getPosition();
+    mCurrBodySizeState["mNeck scale"] = mNeckp->getScale();
+    mCurrBodySizeState["mChest pos"] = mChestp->getPosition();
+    mCurrBodySizeState["mChest scale"] = mChestp->getScale();
+    mCurrBodySizeState["mHead pos"] = mHeadp->getPosition();
+    mCurrBodySizeState["mHead scale"] = mHeadp->getScale();
+    mCurrBodySizeState["mTorso pos"] = mTorsop->getPosition();
+    mCurrBodySizeState["mTorso scale"] = mTorsop->getScale();
+    mCurrBodySizeState["mHipLeft pos"] = mHipLeftp->getPosition();
+    mCurrBodySizeState["mHipLeft scale"] = mHipLeftp->getScale();
+    mCurrBodySizeState["mKneeLeft pos"] = mKneeLeftp->getPosition();
+    mCurrBodySizeState["mKneeLeft scale"] = mKneeLeftp->getScale();
+    mCurrBodySizeState["mAnkleLeft pos"] = mAnkleLeftp->getPosition();
+    mCurrBodySizeState["mAnkleLeft scale"] = mAnkleLeftp->getScale();
+    mCurrBodySizeState["mFootLeft pos"] = mFootLeftp->getPosition();
+
 	LLVector3 pelvis_scale = mPelvisp->getScale();
 
 	// some of the joints have not been cached
@@ -488,29 +563,11 @@ void LLAvatarAppearance::computeBodySize()
 	mAvatarOffset.mV[VX] = 0.0f;
 	mAvatarOffset.mV[VY] = 0.0f;
 
-	// Certain configurations of avatars can force the overall height (with offset) to go negative.
-	// Enforce a constraint to make sure we don't go below 0.1 meters.
-	// Camera positioning and other things start to break down when your avatar is "walking" while being fully underground
-	if (new_body_size.mV[VZ] + mAvatarOffset.mV[VZ] < 0.1f) 
-	{
-		mAvatarOffset.mV[VZ] = -(new_body_size.mV[VZ] - 0.11f); // avoid floating point rounding making the above check continue to fail.
-
-		llassert(new_body_size.mV[VZ] + mAvatarOffset.mV[VZ] >= 0.1f);
-
-		if (mWearableData && isSelf()) 
-		{
-			LLWearable* shape = mWearableData->getWearable(LLWearableType::WT_SHAPE, 0);
-			if (shape) 
-			{
-				shape->setVisualParamWeight(AVATAR_HOVER, mAvatarOffset.mV[VZ], false);
-			}
-		}
-	}
-
 	if (new_body_size != mBodySize || old_offset != mAvatarOffset.mV[VZ])
 	{
 		mBodySize = new_body_size;
-		bodySizeChanged();
+
+        compareJointStateMaps(mLastBodySizeState, mCurrBodySizeState);
 	}
 }
 
@@ -526,7 +583,7 @@ BOOL LLAvatarAppearance::parseSkeletonFile(const std::string& filename)
 
 	if (!parsesuccess)
 	{
-		llerrs << "Can't parse skeleton file: " << filename << llendl;
+		LL_ERRS() << "Can't parse skeleton file: " << filename << LL_ENDL;
 		return FALSE;
 	}
 
@@ -534,21 +591,21 @@ BOOL LLAvatarAppearance::parseSkeletonFile(const std::string& filename)
 	LLXmlTreeNode* root = sSkeletonXMLTree.getRoot();
 	if (!root) 
 	{
-		llerrs << "No root node found in avatar skeleton file: " << filename << llendl;
+		LL_ERRS() << "No root node found in avatar skeleton file: " << filename << LL_ENDL;
 		return FALSE;
 	}
 
 	if( !root->hasName( "linden_skeleton" ) )
 	{
-		llerrs << "Invalid avatar skeleton file header: " << filename << llendl;
+		LL_ERRS() << "Invalid avatar skeleton file header: " << filename << LL_ENDL;
 		return FALSE;
 	}
 
 	std::string version;
 	static LLStdStringHandle version_string = LLXmlTree::addAttributeString("version");
-	if( !root->getFastAttributeString( version_string, version ) || (version != "1.0") )
+	if( !root->getFastAttributeString( version_string, version ) || ((version != "1.0") && (version != "2.0")))
 	{
-		llerrs << "Invalid avatar skeleton file version: " << version << " in file: " << filename << llendl;
+		LL_ERRS() << "Invalid avatar skeleton file version: " << version << " in file: " << filename << LL_ENDL;
 		return FALSE;
 	}
 
@@ -562,12 +619,18 @@ BOOL LLAvatarAppearance::setupBone(const LLAvatarBoneInfo* info, LLJoint* parent
 {
 	LLJoint* joint = NULL;
 
+    LL_DEBUGS("BVH") << "bone info: name " << info->mName
+                     << " isJoint " << info->mIsJoint
+                     << " volume_num " << volume_num
+                     << " joint_num " << joint_num
+                     << LL_ENDL;
+
 	if (info->mIsJoint)
 	{
 		joint = getCharacterJoint(joint_num);
 		if (!joint)
 		{
-			llwarns << "Too many bones" << llendl;
+			LL_WARNS() << "Too many bones" << LL_ENDL;
 			return FALSE;
 		}
 		joint->setName( info->mName );
@@ -576,7 +639,7 @@ BOOL LLAvatarAppearance::setupBone(const LLAvatarBoneInfo* info, LLJoint* parent
 	{
 		if (volume_num >= (S32)mNumCollisionVolumes)
 		{
-			llwarns << "Too many bones" << llendl;
+			LL_WARNS() << "Too many collision volumes" << LL_ENDL;
 			return FALSE;
 		}
 		joint = (&mCollisionVolumes[volume_num]);
@@ -584,27 +647,33 @@ BOOL LLAvatarAppearance::setupBone(const LLAvatarBoneInfo* info, LLJoint* parent
 	}
 
 	// add to parent
-	if (parent)
+	if (parent && (joint->getParent()!=parent))
 	{
 		parent->addChild( joint );
 	}
 
+	// SL-315
 	joint->setPosition(info->mPos);
+    joint->setDefaultPosition(info->mPos);
 	joint->setRotation(mayaQ(info->mRot.mV[VX], info->mRot.mV[VY],
 							 info->mRot.mV[VZ], LLQuaternion::XYZ));
 	joint->setScale(info->mScale);
+	joint->setDefaultScale(info->mScale);
+    joint->setSupport(info->mSupport);
+	joint->setEnd(info->mEnd);
 
-	joint->setDefaultFromCurrentXform();
-	
 	if (info->mIsJoint)
 	{
 		joint->setSkinOffset( info->mPivot );
+        joint->setJointNum(joint_num);
 		joint_num++;
 	}
 	else // collision volume
 	{
+        joint->setJointNum(mNumBones+volume_num);
 		volume_num++;
 	}
+
 
 	// setup children
 	LLAvatarBoneInfo::child_list_t::const_iterator iter;
@@ -625,12 +694,12 @@ BOOL LLAvatarAppearance::setupBone(const LLAvatarBoneInfo* info, LLJoint* parent
 //-----------------------------------------------------------------------------
 BOOL LLAvatarAppearance::allocateCharacterJoints( U32 num )
 {
-	clearSkeleton();
-
-	for(S32 joint_num = 0; joint_num < (S32)num; joint_num++)
-	{
-		mSkeleton.push_back(createAvatarJoint(joint_num));
-	}
+    if (mSkeleton.size() != num)
+    {
+        clearSkeleton();
+        mSkeleton = avatar_joint_list_t(num,NULL);
+        mNumBones = num;
+    }
 
 	return TRUE;
 }
@@ -641,23 +710,21 @@ BOOL LLAvatarAppearance::allocateCharacterJoints( U32 num )
 //-----------------------------------------------------------------------------
 BOOL LLAvatarAppearance::buildSkeleton(const LLAvatarSkeletonInfo *info)
 {
-	//-------------------------------------------------------------------------
+    LL_DEBUGS("BVH") << "numBones " << info->mNumBones << " numCollisionVolumes " << info->mNumCollisionVolumes << LL_ENDL;
+
 	// allocate joints
-	//-------------------------------------------------------------------------
 	if (!allocateCharacterJoints(info->mNumBones))
 	{
-		llerrs << "Can't allocate " << info->mNumBones << " joints" << llendl;
+		LL_ERRS() << "Can't allocate " << info->mNumBones << " joints" << LL_ENDL;
 		return FALSE;
 	}
 	
-	//-------------------------------------------------------------------------
 	// allocate volumes
-	//-------------------------------------------------------------------------
 	if (info->mNumCollisionVolumes)
 	{
 		if (!allocateCollisionVolumes(info->mNumCollisionVolumes))
 		{
-			llerrs << "Can't allocate " << info->mNumCollisionVolumes << " collision volumes" << llendl;
+			LL_ERRS() << "Can't allocate " << info->mNumCollisionVolumes << " collision volumes" << LL_ENDL;
 			return FALSE;
 		}
 	}
@@ -667,10 +734,10 @@ BOOL LLAvatarAppearance::buildSkeleton(const LLAvatarSkeletonInfo *info)
 	LLAvatarSkeletonInfo::bone_info_list_t::const_iterator iter;
 	for (iter = info->mBoneInfoList.begin(); iter != info->mBoneInfoList.end(); ++iter)
 	{
-		LLAvatarBoneInfo *info = *iter;
-		if (!setupBone(info, NULL, current_volume_num, current_joint_num))
+		LLAvatarBoneInfo *bone_info = *iter;
+		if (!setupBone(bone_info, NULL, current_volume_num, current_joint_num))
 		{
-			llerrs << "Error parsing bone in skeleton file" << llendl;
+			LL_ERRS() << "Error parsing bone in skeleton file" << LL_ENDL;
 			return FALSE;
 		}
 	}
@@ -687,6 +754,42 @@ void LLAvatarAppearance::clearSkeleton()
 	mSkeleton.clear();
 }
 
+//------------------------------------------------------------------------
+// addPelvisFixup
+//------------------------------------------------------------------------
+void LLAvatarAppearance::addPelvisFixup( F32 fixup, const LLUUID& mesh_id ) 
+{
+	LLVector3 pos(0.0,0.0,fixup);
+	mPelvisFixups.add(mesh_id,pos);
+}
+
+//------------------------------------------------------------------------
+// addPelvisFixup
+//------------------------------------------------------------------------
+void LLAvatarAppearance::removePelvisFixup( const LLUUID& mesh_id )
+{
+	mPelvisFixups.remove(mesh_id);
+}
+
+//------------------------------------------------------------------------
+// hasPelvisFixup
+//------------------------------------------------------------------------
+bool LLAvatarAppearance::hasPelvisFixup( F32& fixup, LLUUID& mesh_id ) const
+{
+	LLVector3 pos;
+	if (mPelvisFixups.findActiveOverride(mesh_id,pos))
+	{
+		fixup = pos[2];
+		return true;
+	}
+	return false;
+}
+
+bool LLAvatarAppearance::hasPelvisFixup( F32& fixup ) const
+{
+	LLUUID mesh_id;
+	return hasPelvisFixup( fixup, mesh_id );
+}
 //-----------------------------------------------------------------------------
 // LLAvatarAppearance::buildCharacter()
 // Deferred initialization and rebuild of the avatar.
@@ -730,17 +833,17 @@ void LLAvatarAppearance::buildCharacter()
 	stop_glerror();
 
 // 	gPrintMessagesThisFrame = TRUE;
-	lldebugs << "Avatar load took " << timer.getElapsedTimeF32() << " seconds." << llendl;
+	LL_DEBUGS() << "Avatar load took " << timer.getElapsedTimeF32() << " seconds." << LL_ENDL;
 
 	if (!status)
 	{
 		if (isSelf())
 		{
-			llerrs << "Unable to load user's avatar" << llendl;
+			LL_ERRS() << "Unable to load user's avatar" << LL_ENDL;
 		}
 		else
 		{
-			llwarns << "Unable to load other's avatar" << llendl;
+			LL_WARNS() << "Unable to load other's avatar" << LL_ENDL;
 		}
 		return;
 	}
@@ -789,13 +892,14 @@ void LLAvatarAppearance::buildCharacter()
 		  mEyeLeftp &&
 		  mEyeRightp))
 	{
-		llerrs << "Failed to create avatar." << llendl;
+		LL_ERRS() << "Failed to create avatar." << LL_ENDL;
 		return;
 	}
 
 	//-------------------------------------------------------------------------
 	// initialize the pelvis
 	//-------------------------------------------------------------------------
+	// SL-315
 	mPelvisp->setPosition( LLVector3(0.0f, 0.0f, 0.0f) );
 
 	mIsBuilt = TRUE;
@@ -805,26 +909,26 @@ void LLAvatarAppearance::buildCharacter()
 
 BOOL LLAvatarAppearance::loadAvatar()
 {
-// 	LLFastTimer t(FTM_LOAD_AVATAR);
+// 	LL_RECORD_BLOCK_TIME(FTM_LOAD_AVATAR);
 	
 	// avatar_skeleton.xml
 	if( !buildSkeleton(sAvatarSkeletonInfo) )
 	{
-		llwarns << "avatar file: buildSkeleton() failed" << llendl;
+		LL_ERRS() << "avatar file: buildSkeleton() failed" << LL_ENDL;
 		return FALSE;
 	}
 
 	// avatar_lad.xml : <skeleton>
 	if( !loadSkeletonNode() )
 	{
-		llwarns << "avatar file: loadNodeSkeleton() failed" << llendl;
+		LL_ERRS() << "avatar file: loadNodeSkeleton() failed" << LL_ENDL;
 		return FALSE;
 	}
 	
 	// avatar_lad.xml : <mesh>
 	if( !loadMeshNodes() )
 	{
-		llwarns << "avatar file: loadNodeMesh() failed" << llendl;
+		LL_ERRS() << "avatar file: loadNodeMesh() failed" << LL_ENDL;
 		return FALSE;
 	}
 	
@@ -834,13 +938,13 @@ BOOL LLAvatarAppearance::loadAvatar()
 		mTexSkinColor = new LLTexGlobalColor( this );
 		if( !mTexSkinColor->setInfo( sAvatarXmlInfo->mTexSkinColorInfo ) )
 		{
-			llwarns << "avatar file: mTexSkinColor->setInfo() failed" << llendl;
+			LL_ERRS() << "avatar file: mTexSkinColor->setInfo() failed" << LL_ENDL;
 			return FALSE;
 		}
 	}
 	else
 	{
-		llwarns << "<global_color> name=\"skin_color\" not found" << llendl;
+		LL_ERRS() << "<global_color> name=\"skin_color\" not found" << LL_ENDL;
 		return FALSE;
 	}
 	if( sAvatarXmlInfo->mTexHairColorInfo )
@@ -848,13 +952,13 @@ BOOL LLAvatarAppearance::loadAvatar()
 		mTexHairColor = new LLTexGlobalColor( this );
 		if( !mTexHairColor->setInfo( sAvatarXmlInfo->mTexHairColorInfo ) )
 		{
-			llwarns << "avatar file: mTexHairColor->setInfo() failed" << llendl;
+			LL_ERRS() << "avatar file: mTexHairColor->setInfo() failed" << LL_ENDL;
 			return FALSE;
 		}
 	}
 	else
 	{
-		llwarns << "<global_color> name=\"hair_color\" not found" << llendl;
+		LL_ERRS() << "<global_color> name=\"hair_color\" not found" << LL_ENDL;
 		return FALSE;
 	}
 	if( sAvatarXmlInfo->mTexEyeColorInfo )
@@ -862,26 +966,26 @@ BOOL LLAvatarAppearance::loadAvatar()
 		mTexEyeColor = new LLTexGlobalColor( this );
 		if( !mTexEyeColor->setInfo( sAvatarXmlInfo->mTexEyeColorInfo ) )
 		{
-			llwarns << "avatar file: mTexEyeColor->setInfo() failed" << llendl;
+			LL_ERRS() << "avatar file: mTexEyeColor->setInfo() failed" << LL_ENDL;
 			return FALSE;
 		}
 	}
 	else
 	{
-		llwarns << "<global_color> name=\"eye_color\" not found" << llendl;
+		LL_ERRS() << "<global_color> name=\"eye_color\" not found" << LL_ENDL;
 		return FALSE;
 	}
 	
 	// avatar_lad.xml : <layer_set>
 	if (sAvatarXmlInfo->mLayerInfoList.empty())
 	{
-		llwarns << "avatar file: missing <layer_set> node" << llendl;
+		LL_ERRS() << "avatar file: missing <layer_set> node" << LL_ENDL;
 		return FALSE;
 	}
 
 	if (sAvatarXmlInfo->mMorphMaskInfoList.empty())
 	{
-		llwarns << "avatar file: missing <morph_masks> node" << llendl;
+		LL_ERRS() << "avatar file: missing <morph_masks> node" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -923,14 +1027,14 @@ BOOL LLAvatarAppearance::loadAvatar()
 			LLVisualParam*(LLAvatarAppearance::*avatar_function)(S32)const = &LLAvatarAppearance::getVisualParam; 
 			if( !driver_param->linkDrivenParams(boost::bind(avatar_function,(LLAvatarAppearance*)this,_1 ), false))
 			{
-				llwarns << "could not link driven params for avatar " << getID().asString() << " param id: " << driver_param->getID() << llendl;
+				LL_WARNS() << "could not link driven params for avatar " << getID().asString() << " param id: " << driver_param->getID() << LL_ENDL;
 				continue;
 			}
 		}
 		else
 		{
 			delete driver_param;
-			llwarns << "avatar file: driver_param->parseData() failed" << llendl;
+			LL_WARNS() << "avatar file: driver_param->parseData() failed" << LL_ENDL;
 			return FALSE;
 		}
 	}
@@ -1050,17 +1154,17 @@ BOOL LLAvatarAppearance::loadMeshNodes()
 			}
 			else
 			{
-				llwarns << "Avatar file: <mesh> has invalid lod setting " << lod << llendl;
+				LL_WARNS() << "Avatar file: <mesh> has invalid lod setting " << lod << LL_ENDL;
 				return FALSE;
 			}
 		}
 		else 
 		{
-			llwarns << "Ignoring unrecognized mesh type: " << type << llendl;
+			LL_WARNS() << "Ignoring unrecognized mesh type: " << type << LL_ENDL;
 			return FALSE;
 		}
 
-		//	llinfos << "Parsing mesh data for " << type << "..." << llendl;
+		//	LL_INFOS() << "Parsing mesh data for " << type << "..." << LL_ENDL;
 
 		// If this isn't set to white (1.0), avatars will *ALWAYS* be darker than their surroundings.
 		// Do not touch!!!
@@ -1080,6 +1184,7 @@ BOOL LLAvatarAppearance::loadMeshNodes()
 			{
 				// This should never happen
 				LL_WARNS("Avatar") << "Could not find avatar mesh: " << info->mReferenceMeshName << LL_ENDL;
+                return FALSE;
 			}
 		}
 		else
@@ -1090,7 +1195,7 @@ BOOL LLAvatarAppearance::loadMeshNodes()
 
 		if( !poly_mesh )
 		{
-			llwarns << "Failed to load mesh of type " << type << llendl;
+			LL_WARNS() << "Failed to load mesh of type " << type << LL_ENDL;
 			return FALSE;
 		}
 
@@ -1150,7 +1255,7 @@ BOOL LLAvatarAppearance::loadLayersets()
 			{
 				stop_glerror();
 				delete layer_set;
-				llwarns << "avatar file: layer_set->setInfo() failed" << llendl;
+				LL_WARNS() << "avatar file: layer_set->setInfo() failed" << LL_ENDL;
 				return FALSE;
 			}
 
@@ -1173,7 +1278,7 @@ BOOL LLAvatarAppearance::loadLayersets()
 			// if no baked texture was found, warn and cleanup
 			if (baked_index == BAKED_NUM_INDICES)
 			{
-				llwarns << "<layer_set> has invalid body_region attribute" << llendl;
+				LL_WARNS() << "<layer_set> has invalid body_region attribute" << LL_ENDL;
 				delete layer_set;
 				return FALSE;
 			}
@@ -1191,7 +1296,7 @@ BOOL LLAvatarAppearance::loadLayersets()
 				}
 				else
 				{
-					llwarns << "Could not find layer named " << morph->mLayer << " to set morph flag" << llendl;
+					LL_WARNS() << "Could not find layer named " << morph->mLayer << " to set morph flag" << LL_ENDL;
 					success = FALSE;
 				}
 			}
@@ -1216,6 +1321,10 @@ LLJoint *LLAvatarAppearance::getCharacterJoint( U32 num )
 	{
 		return NULL;
 	}
+    if (!mSkeleton[num])
+    {
+        mSkeleton[num] = createAvatarJoint();
+    }
 	return mSkeleton[num];
 }
 
@@ -1287,7 +1396,7 @@ BOOL LLAvatarAppearance::isValid() const
 	// This should only be called on ourself.
 	if (!isSelf())
 	{
-		llerrs << "Called LLAvatarAppearance::isValid() on when isSelf() == false" << llendl;
+		LL_ERRS() << "Called LLAvatarAppearance::isValid() on when isSelf() == false" << LL_ENDL;
 	}
 	return TRUE;
 }
@@ -1380,14 +1489,14 @@ BOOL LLAvatarAppearance::teToColorParams( ETextureIndex te, U32 *param_name )
 	return TRUE;
 }
 
-void LLAvatarAppearance::setClothesColor( ETextureIndex te, const LLColor4& new_color, BOOL upload_bake )
+void LLAvatarAppearance::setClothesColor( ETextureIndex te, const LLColor4& new_color)
 {
 	U32 param_name[3];
 	if( teToColorParams( te, param_name ) )
 	{
-		setVisualParamWeight( param_name[0], new_color.mV[VX], upload_bake );
-		setVisualParamWeight( param_name[1], new_color.mV[VY], upload_bake );
-		setVisualParamWeight( param_name[2], new_color.mV[VZ], upload_bake );
+		setVisualParamWeight( param_name[0], new_color.mV[VX]);
+		setVisualParamWeight( param_name[1], new_color.mV[VY]);
+		setVisualParamWeight( param_name[2], new_color.mV[VZ]);
 	}
 }
 
@@ -1452,16 +1561,19 @@ LLTexLayerSet* LLAvatarAppearance::getAvatarLayerSet(EBakedTextureIndex baked_in
 //-----------------------------------------------------------------------------
 BOOL LLAvatarAppearance::allocateCollisionVolumes( U32 num )
 {
-	deleteAndClearArray(mCollisionVolumes);
-	mNumCollisionVolumes = 0;
+    if (mNumCollisionVolumes !=num)
+    {
+        delete_and_clear_array(mCollisionVolumes);
+        mNumCollisionVolumes = 0;
 
-	mCollisionVolumes = new LLAvatarJointCollisionVolume[num];
-	if (!mCollisionVolumes)
-	{
-		return FALSE;
-	}
-
-	mNumCollisionVolumes = num;
+        mCollisionVolumes = new LLAvatarJointCollisionVolume[num];
+        if (!mCollisionVolumes)
+        {
+            return FALSE;
+        }
+        
+        mNumCollisionVolumes = num;
+    }
 	return TRUE;
 }
 
@@ -1476,9 +1588,12 @@ BOOL LLAvatarBoneInfo::parseXml(LLXmlTreeNode* node)
 		static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 		if (!node->getFastAttributeString(name_string, mName))
 		{
-			llwarns << "Bone without name" << llendl;
+			LL_WARNS() << "Bone without name" << LL_ENDL;
 			return FALSE;
 		}
+        
+        static LLStdStringHandle aliases_string = LLXmlTree::addAttributeString("aliases");
+        node->getFastAttributeString(aliases_string, mAliases ); //Aliases are not required.
 	}
 	else if (node->hasName("collision_volume"))
 	{
@@ -1491,37 +1606,51 @@ BOOL LLAvatarBoneInfo::parseXml(LLXmlTreeNode* node)
 	}
 	else
 	{
-		llwarns << "Invalid node " << node->getName() << llendl;
+		LL_WARNS() << "Invalid node " << node->getName() << LL_ENDL;
 		return FALSE;
 	}
 
 	static LLStdStringHandle pos_string = LLXmlTree::addAttributeString("pos");
 	if (!node->getFastAttributeVector3(pos_string, mPos))
 	{
-		llwarns << "Bone without position" << llendl;
+		LL_WARNS() << "Bone without position" << LL_ENDL;
 		return FALSE;
 	}
 
 	static LLStdStringHandle rot_string = LLXmlTree::addAttributeString("rot");
 	if (!node->getFastAttributeVector3(rot_string, mRot))
 	{
-		llwarns << "Bone without rotation" << llendl;
+		LL_WARNS() << "Bone without rotation" << LL_ENDL;
 		return FALSE;
 	}
 	
 	static LLStdStringHandle scale_string = LLXmlTree::addAttributeString("scale");
 	if (!node->getFastAttributeVector3(scale_string, mScale))
 	{
-		llwarns << "Bone without scale" << llendl;
+		LL_WARNS() << "Bone without scale" << LL_ENDL;
 		return FALSE;
 	}
+
+	static LLStdStringHandle end_string = LLXmlTree::addAttributeString("end");
+	if (!node->getFastAttributeVector3(end_string, mEnd))
+	{
+		LL_WARNS() << "Bone without end " << mName << LL_ENDL;
+        mEnd = LLVector3(0.0f, 0.0f, 0.0f);
+	}
+
+	static LLStdStringHandle support_string = LLXmlTree::addAttributeString("support");
+    if (!node->getFastAttributeString(support_string,mSupport))
+    {
+        LL_WARNS() << "Bone without support " << mName << LL_ENDL;
+        mSupport = "base";
+    }
 
 	if (mIsJoint)
 	{
 		static LLStdStringHandle pivot_string = LLXmlTree::addAttributeString("pivot");
 		if (!node->getFastAttributeVector3(pivot_string, mPivot))
 		{
-			llwarns << "Bone without pivot" << llendl;
+			LL_WARNS() << "Bone without pivot" << LL_ENDL;
 			return FALSE;
 		}
 	}
@@ -1549,7 +1678,7 @@ BOOL LLAvatarSkeletonInfo::parseXml(LLXmlTreeNode* node)
 	static LLStdStringHandle num_bones_string = LLXmlTree::addAttributeString("num_bones");
 	if (!node->getFastAttributeS32(num_bones_string, mNumBones))
 	{
-		llwarns << "Couldn't find number of bones." << llendl;
+		LL_WARNS() << "Couldn't find number of bones." << LL_ENDL;
 		return FALSE;
 	}
 
@@ -1563,13 +1692,61 @@ BOOL LLAvatarSkeletonInfo::parseXml(LLXmlTreeNode* node)
 		if (!info->parseXml(child))
 		{
 			delete info;
-			llwarns << "Error parsing bone in skeleton file" << llendl;
+			LL_WARNS() << "Error parsing bone in skeleton file" << LL_ENDL;
 			return FALSE;
 		}
 		mBoneInfoList.push_back(info);
 	}
 	return TRUE;
 }
+
+//Make aliases for joint and push to map.
+void LLAvatarAppearance::makeJointAliases(LLAvatarBoneInfo *bone_info)
+{
+    if (! bone_info->mIsJoint )
+    {
+        return;
+    }
+    
+    std::string bone_name = bone_info->mName;
+    mJointAliasMap[bone_name] = bone_name; //Actual name is a valid alias.
+    
+    std::string aliases = bone_info->mAliases;
+    
+    boost::char_separator<char> sep(" ");
+    boost::tokenizer<boost::char_separator<char> > tok(aliases, sep);
+    for(boost::tokenizer<boost::char_separator<char> >::iterator i = tok.begin(); i != tok.end(); ++i)
+    {
+        if ( mJointAliasMap.find(*i) != mJointAliasMap.end() )
+        {
+            LL_WARNS() << "avatar skeleton:  Joint alias \"" << *i << "\" remapped from " << mJointAliasMap[*i] << " to " << bone_name << LL_ENDL;
+        }
+        mJointAliasMap[*i] = bone_name;
+    }
+    
+    LLAvatarBoneInfo::child_list_t::const_iterator iter;
+    for (iter = bone_info->mChildList.begin(); iter != bone_info->mChildList.end(); ++iter)
+    {
+        makeJointAliases( *iter );
+    }
+}
+
+const LLAvatarAppearance::joint_alias_map_t& LLAvatarAppearance::getJointAliases ()
+{
+    LLAvatarAppearance::joint_alias_map_t alias_map;
+    if (mJointAliasMap.empty())
+    {
+        
+        LLAvatarSkeletonInfo::bone_info_list_t::const_iterator iter;
+        for (iter = sAvatarSkeletonInfo->mBoneInfoList.begin(); iter != sAvatarSkeletonInfo->mBoneInfoList.end(); ++iter)
+        {
+            //LLAvatarBoneInfo *bone_info = *iter;
+            makeJointAliases( *iter );
+        }
+    }
+    
+    return mJointAliasMap;
+} 
 
 
 //-----------------------------------------------------------------------------
@@ -1580,7 +1757,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlSkeletonNode(LLXmlTreeNode* ro
 	LLXmlTreeNode* node = root->getChildByName( "skeleton" );
 	if( !node )
 	{
-		llwarns << "avatar file: missing <skeleton>" << llendl;
+		LL_WARNS() << "avatar file: missing <skeleton>" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -1595,13 +1772,13 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlSkeletonNode(LLXmlTreeNode* ro
 		{
 			if (child->getChildByName("param_morph"))
 			{
-				llwarns << "Can't specify morph param in skeleton definition." << llendl;
+				LL_WARNS() << "Can't specify morph param in skeleton definition." << LL_ENDL;
 			}
 			else
 			{
-				llwarns << "Unknown param type." << llendl;
+				LL_WARNS() << "Unknown param type." << LL_ENDL;
 			}
-			continue;
+            return FALSE;
 		}
 		
 		LLPolySkeletalDistortionInfo *info = new LLPolySkeletalDistortionInfo;
@@ -1624,17 +1801,17 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlSkeletonNode(LLXmlTreeNode* ro
 		static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 		if (!child->getFastAttributeString(name_string, info->mName))
 		{
-			llwarns << "No name supplied for attachment point." << llendl;
+			LL_WARNS() << "No name supplied for attachment point." << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		static LLStdStringHandle joint_string = LLXmlTree::addAttributeString("joint");
 		if (!child->getFastAttributeString(joint_string, info->mJointName))
 		{
-			llwarns << "No bone declared in attachment point " << info->mName << llendl;
+			LL_WARNS() << "No bone declared in attachment point " << info->mName << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		static LLStdStringHandle position_string = LLXmlTree::addAttributeString("position");
@@ -1658,9 +1835,9 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlSkeletonNode(LLXmlTreeNode* ro
 		static LLStdStringHandle id_string = LLXmlTree::addAttributeString("id");
 		if (!child->getFastAttributeS32(id_string, info->mAttachmentID))
 		{
-			llwarns << "No id supplied for attachment point " << info->mName << llendl;
+			LL_WARNS() << "No id supplied for attachment point " << info->mName << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		static LLStdStringHandle slot_string = LLXmlTree::addAttributeString("pie_slice");
@@ -1693,7 +1870,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlMeshNodes(LLXmlTreeNode* root)
 		static LLStdStringHandle type_string = LLXmlTree::addAttributeString("type");
 		if( !node->getFastAttributeString( type_string, info->mType ) )
 		{
-			llwarns << "Avatar file: <mesh> is missing type attribute.  Ignoring element. " << llendl;
+			LL_WARNS() << "Avatar file: <mesh> is missing type attribute.  Ignoring element. " << LL_ENDL;
 			delete info;
 			return FALSE;  // Ignore this element
 		}
@@ -1701,7 +1878,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlMeshNodes(LLXmlTreeNode* root)
 		static LLStdStringHandle lod_string = LLXmlTree::addAttributeString("lod");
 		if (!node->getFastAttributeS32( lod_string, info->mLOD ))
 		{
-			llwarns << "Avatar file: <mesh> is missing lod attribute.  Ignoring element. " << llendl;
+			LL_WARNS() << "Avatar file: <mesh> is missing lod attribute.  Ignoring element. " << LL_ENDL;
 			delete info;
 			return FALSE;  // Ignore this element
 		}
@@ -1709,7 +1886,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlMeshNodes(LLXmlTreeNode* root)
 		static LLStdStringHandle file_name_string = LLXmlTree::addAttributeString("file_name");
 		if( !node->getFastAttributeString( file_name_string, info->mMeshFileName ) )
 		{
-			llwarns << "Avatar file: <mesh> is missing file_name attribute.  Ignoring: " << info->mType << llendl;
+			LL_WARNS() << "Avatar file: <mesh> is missing file_name attribute.  Ignoring: " << info->mType << LL_ENDL;
 			delete info;
 			return FALSE;  // Ignore this element
 		}
@@ -1740,13 +1917,13 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlMeshNodes(LLXmlTreeNode* root)
 			{
 				if (child->getChildByName("param_skeleton"))
 				{
-					llwarns << "Can't specify skeleton param in a mesh definition." << llendl;
+					LL_WARNS() << "Can't specify skeleton param in a mesh definition." << LL_ENDL;
 				}
 				else
 				{
-					llwarns << "Unknown param type." << llendl;
+					LL_WARNS() << "Unknown param type." << LL_ENDL;
 				}
-				continue;
+                return FALSE;
 			}
 
 			LLPolyMorphTargetInfo *morphinfo = new LLPolyMorphTargetInfo();
@@ -1785,14 +1962,14 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlColorNodes(LLXmlTreeNode* root
 			{
 				if (mTexSkinColorInfo)
 				{
-					llwarns << "avatar file: multiple instances of skin_color" << llendl;
+					LL_WARNS() << "avatar file: multiple instances of skin_color" << LL_ENDL;
 					return FALSE;
 				}
 				mTexSkinColorInfo = new LLTexGlobalColorInfo;
 				if( !mTexSkinColorInfo->parseXml( color_node ) )
 				{
-					deleteAndClear(mTexSkinColorInfo);
-					llwarns << "avatar file: mTexSkinColor->parseXml() failed" << llendl;
+					delete_and_clear(mTexSkinColorInfo);
+					LL_WARNS() << "avatar file: mTexSkinColor->parseXml() failed" << LL_ENDL;
 					return FALSE;
 				}
 			}
@@ -1800,14 +1977,14 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlColorNodes(LLXmlTreeNode* root
 			{
 				if (mTexHairColorInfo)
 				{
-					llwarns << "avatar file: multiple instances of hair_color" << llendl;
+					LL_WARNS() << "avatar file: multiple instances of hair_color" << LL_ENDL;
 					return FALSE;
 				}
 				mTexHairColorInfo = new LLTexGlobalColorInfo;
 				if( !mTexHairColorInfo->parseXml( color_node ) )
 				{
-					deleteAndClear(mTexHairColorInfo);
-					llwarns << "avatar file: mTexHairColor->parseXml() failed" << llendl;
+					delete_and_clear(mTexHairColorInfo);
+					LL_WARNS() << "avatar file: mTexHairColor->parseXml() failed" << LL_ENDL;
 					return FALSE;
 				}
 			}
@@ -1815,13 +1992,13 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlColorNodes(LLXmlTreeNode* root
 			{
 				if (mTexEyeColorInfo)
 				{
-					llwarns << "avatar file: multiple instances of eye_color" << llendl;
+					LL_WARNS() << "avatar file: multiple instances of eye_color" << LL_ENDL;
 					return FALSE;
 				}
 				mTexEyeColorInfo = new LLTexGlobalColorInfo;
 				if( !mTexEyeColorInfo->parseXml( color_node ) )
 				{
-					llwarns << "avatar file: mTexEyeColor->parseXml() failed" << llendl;
+					LL_WARNS() << "avatar file: mTexEyeColor->parseXml() failed" << LL_ENDL;
 					return FALSE;
 				}
 			}
@@ -1847,7 +2024,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlLayerNodes(LLXmlTreeNode* root
 		else
 		{
 			delete layer_info;
-			llwarns << "avatar file: layer_set->parseXml() failed" << llendl;
+			LL_WARNS() << "avatar file: layer_set->parseXml() failed" << LL_ENDL;
 			return FALSE;
 		}
 	}
@@ -1876,7 +2053,7 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlDriverNodes(LLXmlTreeNode* roo
 				else
 				{
 					delete driver_info;
-					llwarns << "avatar file: driver_param->parseXml() failed" << llendl;
+					LL_WARNS() << "avatar file: driver_param->parseXml() failed" << LL_ENDL;
 					return FALSE;
 				}
 			}
@@ -1905,25 +2082,25 @@ BOOL LLAvatarAppearance::LLAvatarXmlInfo::parseXmlMorphNodes(LLXmlTreeNode* root
 		static LLStdStringHandle name_string = LLXmlTree::addAttributeString("morph_name");
 		if (!grand_child->getFastAttributeString(name_string, info->mName))
 		{
-			llwarns << "No name supplied for morph mask." << llendl;
+			LL_WARNS() << "No name supplied for morph mask." << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		static LLStdStringHandle region_string = LLXmlTree::addAttributeString("body_region");
 		if (!grand_child->getFastAttributeString(region_string, info->mRegion))
 		{
-			llwarns << "No region supplied for morph mask." << llendl;
+			LL_WARNS() << "No region supplied for morph mask." << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		static LLStdStringHandle layer_string = LLXmlTree::addAttributeString("layer");
 		if (!grand_child->getFastAttributeString(layer_string, info->mLayer))
 		{
-			llwarns << "No layer supplied for morph mask." << llendl;
+			LL_WARNS() << "No layer supplied for morph mask." << LL_ENDL;
 			delete info;
-			continue;
+            return FALSE;
 		}
 
 		// optional parameter. don't throw a warning if not present.
@@ -1948,6 +2125,3 @@ LLAvatarAppearance::LLMaskedMorph::LLMaskedMorph(LLVisualParam *morph_target, BO
 		target->addPendingMorphMask();
 	}
 }
-
-
-

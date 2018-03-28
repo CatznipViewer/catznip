@@ -65,6 +65,9 @@ extern LLControlGroup gSavedSettings;
 static const LLUUID PARCEL_MEDIA_LIST_ITEM_UUID = LLUUID("CAB5920F-E484-4233-8621-384CF373A321");
 static const LLUUID PARCEL_AUDIO_LIST_ITEM_UUID = LLUUID("DF4B020D-8A24-4B95-AB5D-CA970D694822");
 
+const F32 AUTO_CLOSE_FADE_TIME_START= 2.0f;
+const F32 AUTO_CLOSE_FADE_TIME_END = 3.0f;
+
 //
 // LLPanelNearByMedia
 //
@@ -202,7 +205,7 @@ void LLPanelNearByMedia::onTopLost()
 
 
 /*virtual*/ 
-void LLPanelNearByMedia::handleVisibilityChange ( BOOL new_visibility )
+void LLPanelNearByMedia::onVisibilityChange ( BOOL new_visibility )
 {
 	if (new_visibility)	
 	{
@@ -226,9 +229,6 @@ void LLPanelNearByMedia::reshape(S32 width, S32 height, BOOL called_from_parent)
 	}
 
 }
-
-const F32 AUTO_CLOSE_FADE_TIME_START= 4.0f;
-const F32 AUTO_CLOSE_FADE_TIME_END = 5.0f;
 
 /*virtual*/
 void LLPanelNearByMedia::draw()
@@ -876,7 +876,10 @@ void LLPanelNearByMedia::onClickParcelAudioPlay()
 	// playing and updated as they cross to other parcels etc.
 	mParcelAudioAutoStart = true;
 	if (!gAudiop)
+	{
+		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
 		return;
+	}
 
 	if (LLAudioEngine::AUDIO_PAUSED == gAudiop->isInternetStreamPlaying())
 	{
@@ -896,7 +899,10 @@ void LLPanelNearByMedia::onClickParcelAudioStop()
 	// they explicitly start it again.
 	mParcelAudioAutoStart = false;
 	if (!gAudiop)
+	{
+		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
 		return;
+	}
 
 	LLViewerAudio::getInstance()->stopInternetStreamWithAutoFade();
 }
@@ -904,7 +910,10 @@ void LLPanelNearByMedia::onClickParcelAudioStop()
 void LLPanelNearByMedia::onClickParcelAudioPause()
 {
 	if (!gAudiop)
+	{
+		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
 		return;
+	}
 
 	// 'true' means pause
 	gAudiop->pauseInternetStream(true);

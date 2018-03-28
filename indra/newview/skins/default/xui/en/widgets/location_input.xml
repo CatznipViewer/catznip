@@ -133,7 +133,7 @@
     name="damage_text"
 	width="35"
 	height="18"
-	top="17"
+	top="18"
     follows="right|top"
 	halign="right"
 	font="SansSerifSmall"
@@ -150,7 +150,6 @@
   <combo_button
 		name="Location History"
                 label=""
-                image_hover_unselected="ComboButton_Hovered"
                 pad_right="0"/>
   <combo_list
 	      bg_writeable_color="MenuDefaultBgColor"

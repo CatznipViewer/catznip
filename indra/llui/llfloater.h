@@ -32,6 +32,7 @@
 #define LL_FLOATER_H
 
 #include "llpanel.h"
+#include "lltoolbar.h"
 #include "lluuid.h"
 //#include "llnotificationsutil.h"
 #include <set>
@@ -307,10 +308,10 @@ public:
 	virtual BOOL	canClose() { return TRUE; }
 
 	/*virtual*/ void setVisible(BOOL visible); // do not override
-	/*virtual*/ void handleVisibilityChange ( BOOL new_visibility ); // do not override
+	/*virtual*/ void onVisibilityChange ( BOOL new_visibility ); // do not override
 	
-	void			setFrontmost(BOOL take_focus = TRUE);
-    virtual void	setVisibleAndFrontmost(BOOL take_focus=TRUE, const LLSD& key = LLSD());    
+	void			setFrontmost(BOOL take_focus = TRUE, BOOL restore = TRUE);
+     virtual void	setVisibleAndFrontmost(BOOL take_focus=TRUE, const LLSD& key = LLSD());
 	
 	// Defaults to false.
 	virtual BOOL	canSaveAs() const { return FALSE; }
@@ -514,6 +515,8 @@ private:
 // LLFloaterView
 // Parent of all floating panels
 
+const S32 FLOATER_MIN_VISIBLE_PIXELS = 16;
+
 class LLFloaterView : public LLUICtrl
 {
 public:
@@ -544,7 +547,7 @@ public:
 
 	void			setCycleMode(BOOL mode) { mFocusCycleMode = mode; }
 	BOOL			getCycleMode() const { return mFocusCycleMode; }
-	void			bringToFront( LLFloater* child, BOOL give_focus = TRUE );
+	void			bringToFront( LLFloater* child, BOOL give_focus = TRUE, BOOL restore = TRUE );
 	void			highlightFocusedFloater();
 	void			unhighlightFocusedFloater();
 	void			focusFrontFloater();
@@ -572,10 +575,15 @@ public:
 	void setFloaterSnapView(LLHandle<LLView> snap_view) {mSnapView = snap_view; }
 	LLFloater* getFrontmostClosableFloater(); 
 
+	void setToolbarRect(LLToolBarEnums::EToolBarLocation tb, const LLRect& toolbar_rect);
+
 private:
 	void hiddenFloaterClosed(LLFloater* floater);
 
 	LLRect				mLastSnapRect;
+	LLRect				mToolbarLeftRect;
+	LLRect				mToolbarBottomRect;
+	LLRect				mToolbarRightRect;
 	LLHandle<LLView>	mSnapView;
 	BOOL			mFocusCycleMode;
 	S32				mSnapOffsetBottom;

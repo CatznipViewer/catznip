@@ -10,13 +10,13 @@
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
 	<floater.string name="Minutes">
-		[MINUTES] Minuten
+		[MINUTES] Min.
 	</floater.string>
 	<floater.string name="Minute">
-		Minute
+		Min.
 	</floater.string>
 	<floater.string name="Seconds">
-		[SECONDS] Sekunden
+		[SECONDS] Sek.
 	</floater.string>
 	<floater.string name="Remaining">
 		Restzeit
@@ -309,9 +309,6 @@ Nur große Parzellen können in der Suche aufgeführt werden.
 			<panel.string name="push_restrict_region_text">
 				Kein Stoßen (regional)
 			</panel.string>
-			<panel.string name="see_avs_text">
-				Avatare auf anderen Parzellen können
-			</panel.string>
 			<text name="allow_label">
 				Anderen Einwohnern gestatten:
 			</text>
@@ -337,22 +334,6 @@ Nur große Parzellen können in der Suche aufgeführt werden.
 			<check_box label="Sicher (kein Schaden)" name="check safe" tool_tip="Falls aktiviert, wird Land auf Option „Sicher“ eingestellt, Kampfschäden sind deaktiviert. Ansonsten sind Kampfschäden aktiviert."/>
 			<check_box label="Kein Stoßen" name="PushRestrictCheck" tool_tip="Verhindert Stoßen durch Skripte. Durch Aktivieren dieser Option verhindern Sie störendes Verhalten auf Ihrem Land."/>
 			<check_box label="Ort in Suche anzeigen (30 L$/Woche)" name="ShowDirectoryCheck" tool_tip="Diese Parzelle in Suchergebnissen anzeigen."/>
-			<combo_box name="land category with adult">
-				<combo_box.item label="Alle Kategorien" name="item0"/>
-				<combo_box.item label="Lindenort" name="item1"/>
-				<combo_box.item label="Adult" name="item2"/>
-				<combo_box.item label="Kunst &amp; Kultur" name="item3"/>
-				<combo_box.item label="Business" name="item4"/>
-				<combo_box.item label="Bildung" name="item5"/>
-				<combo_box.item label="Spielen" name="item6"/>
-				<combo_box.item label="Treffpunkt" name="item7"/>
-				<combo_box.item label="Anfängergerecht" name="item8"/>
-				<combo_box.item label="Parks und Natur" name="item9"/>
-				<combo_box.item label="Wohngebiet" name="item10"/>
-				<combo_box.item label="Shopping" name="item11"/>
-				<combo_box.item label="Vermietung" name="item13"/>
-				<combo_box.item label="Sonstige" name="item12"/>
-			</combo_box>
 			<combo_box name="land category">
 				<combo_box.item label="Alle Kategorien" name="item0"/>
 				<combo_box.item label="Lindenort" name="item1"/>
@@ -449,22 +430,13 @@ Nur große Parzellen können in der Suche aufgeführt werden.
 			<panel.string name="access_estate_defined">
 				(Durch Grundbesitz festgelegt)
 			</panel.string>
-			<panel.string name="allow_public_access">
-				Öffentlichen Zugang erlauben ([MATURITY]) (Hinweis: Bei Deaktivierung dieser Option werden Bannlinien generiert)
-			</panel.string>
 			<panel.string name="estate_override">
 				Eine oder mehrere dieser Optionen gelten auf Grundbesitzebene
 			</panel.string>
-			<text name="Limit access to this parcel to:">
-				Zugang zu dieser Parzelle
-			</text>
-			<check_box label="Öffentlichen Zugang gestatten (bei Deaktivierung dieser Option werden Bannlinien generiert)" name="public_access"/>
-			<text name="Only Allow" width="400">
-				Zugang nur Einwohnern gestatten, die:
-			</text>
-			<check_box label="Zahlungsinformationen hinterlegt haben [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Um diese Parzelle besuchen zu können, müssen Einwohner Zahlungsinformationen hinterlegt haben. Weitere Informationen finden Sie auf [SUPPORT_SITE]."/>
-			<check_box label="Sind mindestens 18 Jahre alt [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Nur Einwohner, die mindestens 18 Jahre alt sind, können diese Parzelle betreten. Weitere Informationen finden Sie unter [SUPPORT_SITE]."/>
-			<check_box label="Gruppenzugang erlauben: [GROUP]" name="GroupCheck" tool_tip="Gruppe im Register „Allgemein“ festlegen."/>
+			<check_box label="Alle Besucher sind zugelassen (Bei Deaktivierung dieser Option werden Bannlinien generiert)" name="public_access"/>
+			<check_box label="Muss 18+ sein [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Nur Einwohner, die mindestens 18 Jahre alt sind, können diese Parzelle betreten. Weitere Informationen finden Sie unter [SUPPORT_SITE]."/>
+			<check_box label="Muss über Zahlungsinfo in Datei [ESTATE_PAYMENT_LIMIT] verfügen" name="limit_payment" tool_tip="Um diese Parzelle besuchen zu können, müssen Einwohner Zahlungsinformationen hinterlegt haben. Weitere Informationen finden Sie auf [SUPPORT_SITE]."/>
+			<check_box label="Gruppe [GROUP] ohne Beschränkungen zulassen" name="GroupCheck" tool_tip="Gruppe im Register „Allgemein“ festlegen."/>
 			<check_box label="Pässe verkaufen an:" name="PassCheck" tool_tip="Ermöglicht befristeten Zugang zu dieser Parzelle"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="Jeden" name="Anyone"/>
@@ -472,9 +444,12 @@ Nur große Parzellen können in der Suche aufgeführt werden.
 			</combo_box>
 			<spinner label="Preis in L$:" name="PriceSpin"/>
 			<spinner label="Online-Zeit:" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(Der Grundbesitzer kann diese Auswahl eingeschränkt haben)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Immer erlauben" name="AllowedText">
-					Zulässige Einwohner
+					Immer zulässig ([COUNT], max. [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] aufgeführt, [MAX] max)"/>
 				<button label="Hinzufügen" name="add_allowed"/>
@@ -482,12 +457,13 @@ Nur große Parzellen können in der Suche aufgeführt werden.
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Verbannen" name="BanCheck">
-					Verbannte Einwohner
+					Immer verbannt ([COUNT], max. [MAX])
 				</text>
 				<name_list name="BannedList" tool_tip="([LISTED] aufgeführt, [MAX] max)"/>
 				<button label="Hinzufügen" name="add_banned"/>
 				<button label="Entfernen" label_selected="Entfernen" name="remove_banned"/>
 			</panel>
 		</panel>
+		<panel label="ERLEBNISSE" name="land_experiences_panel"/>
 	</tab_container>
 </floater>

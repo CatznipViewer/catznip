@@ -53,26 +53,26 @@ private:
 	bool mShrunk;
 	S32 mMaxWidth, mMinWidth;
 
-	F32 mClientFrameTimeCritical;
-	F32 mClientFrameTimeWarning;
-	LLButton * mClientButton;
-	LLTextBox * mClientText;
-	LLTextBox * mClientCause;
+	F32Milliseconds mClientFrameTimeCritical;
+	F32Milliseconds mClientFrameTimeWarning;
+	LLButton*		mClientButton;
+	LLTextBox*		mClientText;
+	LLTextBox*		mClientCause;
 
-	F32 mNetworkPacketLossCritical;
-	F32 mNetworkPacketLossWarning;
-	F32 mNetworkPingCritical;
-	F32 mNetworkPingWarning;
-	LLButton * mNetworkButton;
-	LLTextBox * mNetworkText;
-	LLTextBox * mNetworkCause;
+	F32Percent		mNetworkPacketLossCritical;
+	F32Percent		mNetworkPacketLossWarning;
+	F32Milliseconds mNetworkPingCritical;
+	F32Milliseconds mNetworkPingWarning;
+	LLButton*       mNetworkButton;
+	LLTextBox*      mNetworkText;
+	LLTextBox*      mNetworkCause;
 
-	F32 mServerFrameTimeCritical;
-	F32 mServerFrameTimeWarning;
-	F32 mServerSingleProcessMaxTime;
-	LLButton * mServerButton;
-	LLTextBox * mServerText;
-	LLTextBox * mServerCause;
+	F32Milliseconds mServerFrameTimeCritical;
+	F32Milliseconds mServerFrameTimeWarning;
+	F32Milliseconds mServerSingleProcessMaxTime;
+	LLButton*       mServerButton;
+	LLTextBox*      mServerText;
+	LLTextBox*      mServerCause;
 
 	LLStringUtil::format_map_t mStringArgs;
 };

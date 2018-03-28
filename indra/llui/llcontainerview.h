@@ -35,7 +35,9 @@
 class LLScrollContainer;
 
 struct ContainerViewRegistry : public LLChildRegistry<ContainerViewRegistry>
-{};
+{
+	LLSINGLETON_EMPTY_CTOR(ContainerViewRegistry);
+};
 
 class LLContainerView : public LLView
 {
@@ -66,6 +68,7 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ bool addChild(LLView* view, S32 tab_group = 0);
 	
+	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL handleMouseDown(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL handleMouseUp(S32 x, S32 y, MASK mask);
 
@@ -87,8 +90,5 @@ public:
 protected:
 	BOOL mDisplayChildren;
 	std::string mLabel;
-public:
-	BOOL mCollapsible;
-
 };
 #endif // LL_CONTAINERVIEW_

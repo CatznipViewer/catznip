@@ -54,6 +54,7 @@ public:
 	/*virtual*/ void setValue(const LLSD& value);
 
 	/*virtual*/ BOOL postBuild();
+	/*virtual*/ BOOL handleMouseDown(S32 x, S32 y, MASK mask);
 
 	LLSD getPayload() { return mPayload; }
 
@@ -179,6 +180,18 @@ BOOL LLRadioGroup::setSelectedIndex(S32 index, BOOL from_event)
 		return FALSE;
 	}
 
+    if (index < -1)
+    {
+        // less then minimum value
+        return FALSE;
+    }
+
+    if (index < 0 && mSelectedIndex >= 0 && !mAllowDeselect)
+    {
+        // -1 is "nothing selected"
+        return FALSE;
+    }
+
 	if (mSelectedIndex >= 0)
 	{
 		LLRadioCtrl* old_radio_item = mRadioButtons[mSelectedIndex];
@@ -210,6 +223,22 @@ BOOL LLRadioGroup::setSelectedIndex(S32 index, BOOL from_event)
 	}
 
 	return TRUE;
+}
+
+void LLRadioGroup::focusSelectedRadioBtn()
+{
+    if (mSelectedIndex >= 0)
+    {
+        LLRadioCtrl* radio_item = mRadioButtons[mSelectedIndex];
+        if (radio_item->hasTabStop() && radio_item->getEnabled())
+        {
+            radio_item->focusFirstItem(FALSE, FALSE);
+        }
+    }
+    else if (mRadioButtons[0]->hasTabStop() || hasTabStop())
+    {
+        focusFirstItem(FALSE, FALSE);
+    }
 }
 
 BOOL LLRadioGroup::handleKeyHere(KEY key, MASK mask)
@@ -271,25 +300,12 @@ BOOL LLRadioGroup::handleKeyHere(KEY key, MASK mask)
 	return handled;
 }
 
-BOOL LLRadioGroup::handleMouseDown(S32 x, S32 y, MASK mask)
-{
-	// grab focus preemptively, before child button takes mousecapture
-	// 
-	if (hasTabStop())
-	{
-		focusFirstItem(FALSE, FALSE);
-	}
-
-	return LLUICtrl::handleMouseDown(x, y, mask);
-}
-
-
 // Handle one button being clicked.  All child buttons must have this
 // function as their callback function.
 
 void LLRadioGroup::onClickButton(LLUICtrl* ctrl)
 {
-	// llinfos << "LLRadioGroup::onClickButton" << llendl;
+	// LL_INFOS() << "LLRadioGroup::onClickButton" << LL_ENDL;
 	LLRadioCtrl* clicked_radio = dynamic_cast<LLRadioCtrl*>(ctrl);
 	if (!clicked_radio)
 	    return;
@@ -319,7 +335,7 @@ void LLRadioGroup::onClickButton(LLUICtrl* ctrl)
 		index++;
 	}
 
-	llwarns << "LLRadioGroup::onClickButton - clicked button that isn't a child" << llendl;
+	LL_WARNS() << "LLRadioGroup::onClickButton - clicked button that isn't a child" << LL_ENDL;
 }
 
 void LLRadioGroup::setValue( const LLSD& value )
@@ -452,6 +468,29 @@ BOOL LLRadioCtrl::postBuild()
 		setLabel(value);
 	}
 	return TRUE;
+}
+
+BOOL LLRadioCtrl::handleMouseDown(S32 x, S32 y, MASK mask)
+{
+    // Grab focus preemptively, before button takes mousecapture
+    if (hasTabStop() && getEnabled())
+    {
+        focusFirstItem(FALSE, FALSE);
+    }
+    else
+    {
+        // Only currently selected item in group has tab stop as result it is
+        // unclear how focus should behave on click, just let the group handle
+        // focus and LLRadioGroup::onClickButton() will set correct state later
+        // if needed
+        LLRadioGroup* parent = (LLRadioGroup*)getParent();
+        if (parent)
+        {
+            parent->focusSelectedRadioBtn();
+        }
+    }
+
+    return LLCheckBoxCtrl::handleMouseDown(x, y, mask);
 }
 
 LLRadioCtrl::~LLRadioCtrl()

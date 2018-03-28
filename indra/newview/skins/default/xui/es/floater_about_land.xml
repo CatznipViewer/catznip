@@ -10,13 +10,13 @@
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
 	<floater.string name="Minutes">
-		[MINUTES] minutos
+		[MINUTES] min.
 	</floater.string>
 	<floater.string name="Minute">
-		minuto
+		min.
 	</floater.string>
 	<floater.string name="Seconds">
-		[SECONDS] segundos
+		[SECONDS] seg.
 	</floater.string>
 	<floater.string name="Remaining">
 		restantes
@@ -308,9 +308,6 @@ Sólo las parcelas más grandes pueden listarse en la búsqueda.
 			<panel.string name="push_restrict_region_text">
 				Sin &apos;empujones&apos; (prevalece lo marcado en la región)
 			</panel.string>
-			<panel.string name="see_avs_text">
-				Los avatares de otras parcelas pueden ver
-			</panel.string>
 			<text name="allow_label">
 				Permitir a otros Residentes:
 			</text>
@@ -336,22 +333,6 @@ Sólo las parcelas más grandes pueden listarse en la búsqueda.
 			<check_box label="Seguro (sin daño)" name="check safe" tool_tip="Si se marca, convierte el terreno en &apos;seguro&apos;, desactivando el daño en combate. Si no, se activa el daño en combate."/>
 			<check_box label="Sin &apos;empujones&apos;" name="PushRestrictCheck" tool_tip="Previene scripts que empujen. Marcando esta opción prevendrá que en su terreno haya comportamientos destructivos."/>
 			<check_box label="Mostrar el sitio en la búsqueda (30 L$/semana)" name="ShowDirectoryCheck" tool_tip="Let people see this parcel in search results"/>
-			<combo_box name="land category with adult">
-				<combo_box.item label="Cualquier categoría" name="item0"/>
-				<combo_box.item label="Localización Linden" name="item1"/>
-				<combo_box.item label="Adulto" name="item2"/>
-				<combo_box.item label="Arte y Cultura" name="item3"/>
-				<combo_box.item label="Negocios" name="item4"/>
-				<combo_box.item label="Educativo" name="item5"/>
-				<combo_box.item label="Juegos de azar" name="item6"/>
-				<combo_box.item label="Entretenimiento" name="item7"/>
-				<combo_box.item label="Para recién llegados" name="item8"/>
-				<combo_box.item label="Parques y Naturaleza" name="item9"/>
-				<combo_box.item label="Residencial" name="item10"/>
-				<combo_box.item label="Compras" name="item11"/>
-				<combo_box.item label="Terreno en alquiler" name="item13"/>
-				<combo_box.item label="Otra" name="item12"/>
-			</combo_box>
 			<combo_box name="land category">
 				<combo_box.item label="Cualquier categoría" name="item0"/>
 				<combo_box.item label="Localización Linden" name="item1"/>
@@ -372,10 +353,10 @@ Sólo las parcelas más grandes pueden listarse en la búsqueda.
 				Foto:
 			</text>
 			<texture_picker label="" name="snapshot_ctrl" tool_tip="Pulse para elegir una imagen"/>
-			<text name="allow_label5">
+			<text name="allow_label5" top="170">
 				Los avatares de otras parcelas pueden ver a los avatares de esta parcela y chatear con ellos
 			</text>
-			<check_box label="Ver los avatares" name="SeeAvatarsCheck" tool_tip="Permite que los avatares de otras parcelas vean a los avatares de ésta y chateen con ellos, y también que tú puedas verles y chatear con ellos."/>
+			<check_box label="Ver los avatares" name="SeeAvatarsCheck" tool_tip="Permite que los avatares de otras parcelas vean a los avatares de ésta y chateen con ellos, y también que tú puedas verles y chatear con ellos." top="170"/>
 			<text name="landing_point">
 				Punto de llegada: [LANDING]
 			</text>
@@ -451,22 +432,13 @@ los media:
 			<panel.string name="access_estate_defined">
 				(Definido por el Estado)
 			</panel.string>
-			<panel.string name="allow_public_access">
-				Permitir el acceso público ([MATURITY]) (Nota: Si no seleccionas esta opción, se crearán líneas de prohibición)
-			</panel.string>
 			<panel.string name="estate_override">
 				Una o más de esta opciones está configurada a nivel del estado
 			</panel.string>
-			<text name="Limit access to this parcel to:">
-				Acceso a esta parcela
-			</text>
-			<check_box label="Permitir el acceso público (si no seleccionas esta opción, se crearán líneas de prohibición)" name="public_access"/>
-			<text name="Only Allow">
-				Permitir únicamente el acceso a los Residentes que:
-			</text>
-			<check_box label="Han aportado información de pago [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Para poder acceder a esta parcela los Residentes deben haber aportado información de pago en su cuenta. Para más información, ver [SUPPORT_SITE]."/>
-			<check_box label="Son mayores de 18 años [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Para poder acceder a esta parcela los Residentes deben ser mayores de 18 años. Para más información, consulta [SUPPORT_SITE]."/>
-			<check_box label="Acceso permitido al grupo: [GROUP]" name="GroupCheck" tool_tip="Elija el grupo en la pestaña General."/>
+			<check_box label="Cualquiera puede visitar (Si no seleccionas esta opción, se crearán líneas de prohibición)" name="public_access"/>
+			<check_box label="Debe ser mayor de 18 [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Para poder acceder a esta parcela los Residentes deben ser mayores de 18 años. Para más información, consulta [SUPPORT_SITE]."/>
+			<check_box label="Debe haber información archivada sobre el pago [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Para poder acceder a esta parcela los Residentes deben haber aportado información de pago en su cuenta. Para más información, ver [SUPPORT_SITE]."/>
+			<check_box label="Permitir grupo [GROUP] sin restricciones" name="GroupCheck" tool_tip="Elija el grupo en la pestaña General."/>
 			<check_box label="Vender pases a:" name="PassCheck" tool_tip="Permitir acceso temporal a esta parcela"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="Cualquiera" name="Anyone"/>
@@ -474,9 +446,12 @@ los media:
 			</combo_box>
 			<spinner label="Precio en L$:" name="PriceSpin"/>
 			<spinner label="Horas de acceso:" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(El propietario del Estado puede haber restringido estas opciones)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Always Allow" name="AllowedText">
-					Residentes autorizados
+					Siempre permitido ([COUNT], max [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] listados de un máx. de [MAX])"/>
 				<button label="Añadir" name="add_allowed"/>
@@ -484,12 +459,13 @@ los media:
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Ban" name="BanCheck">
-					Residentes con el acceso prohibido
+					Siempre prohibido ([COUNT], max [MAX])
 				</text>
 				<name_list name="BannedList" tool_tip="([LISTED] listados de un máx. de [MAX])"/>
 				<button label="Añadir" name="add_banned"/>
 				<button label="Quitar" label_selected="Quitar" name="remove_banned"/>
 			</panel>
 		</panel>
+		<panel label="EXPERIENCIAS" name="land_experiences_panel"/>
 	</tab_container>
 </floater>

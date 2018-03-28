@@ -33,7 +33,6 @@
 #include "lltransactiontypes.h"
 #include "lluuid.h"
 #include "message.h"
-#include "stdenums.h"
 #include "llnotifications.h"
 #include "llextendedstatus.h"
 
@@ -211,6 +210,7 @@ void set_dad_inbox_object(const LLUUID& object_id);
 
 class LLViewerMessage : public  LLSingleton<LLViewerMessage>
 {
+	LLSINGLETON_EMPTY_CTOR(LLViewerMessage);
 public:
 	typedef boost::function<void()> teleport_started_callback_t;
 	typedef boost::signals2::signal<void()> teleport_started_signal_t;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="Snapshot" title="快照預覽">
+<floater name="Snapshot" title="快照">
 	<floater.string name="unknown">
 		未知
 	</floater.string>
@@ -39,17 +39,8 @@
 	<string name="local_failed_str">
 		無法儲入電腦。
 	</string>
-	<button name="advanced_options_btn" tool_tip="進階選項"/>
-	<text name="image_res_text">
-		[WIDTH] x [HEIGHT] 像素
-	</text>
-	<text name="file_size_label">
-		[SIZE] KB
-	</text>
+	<button label="刷新" name="new_snapshot_btn"/>
 	<panel name="advanced_options_panel">
-		<text name="advanced_options_label">
-			進階選項
-		</text>
 		<text name="layer_type_label">
 			擷取快照：
 		</text>
@@ -61,5 +52,17 @@
 		<check_box label="擡頭顯示" name="hud_check"/>
 		<check_box label="將幀凍結（全螢幕）" name="freeze_frame_check"/>
 		<check_box label="自動刷新" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			濾鏡：
+		</text>
+		<combo_box name="filters_combobox" tool_tip="圖像濾鏡">
+			<combo_box.item label="不用濾鏡" name="NoFilter"/>
+		</combo_box>
 	</panel>
+	<text name="image_res_text">
+		[WIDTH] 像素（寬） x [HEIGHT] 像素（高）
+	</text>
+	<text name="file_size_label">
+		[SIZE] KB
+	</text>
 </floater>

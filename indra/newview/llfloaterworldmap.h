@@ -32,7 +32,6 @@
 #ifndef LL_LLFLOATERWORLDMAP_H
 #define LL_LLFLOATERWORLDMAP_H
 
-#include "lldarray.h"
 #include "llfloater.h"
 #include "llhudtext.h"
 #include "llmapimagetype.h"
@@ -69,6 +68,8 @@ public:
 	/*virtual*/ BOOL handleScrollWheel(S32 x, S32 y, S32 clicks);
 	/*virtual*/ void draw();
 
+	/*virtual*/ void onFocusLost();
+
 	// methods for dealing with inventory. The observe() method is
 	// called during program startup. inventoryUpdated() will be
 	// called by a helper object when an interesting change has
@@ -93,7 +94,7 @@ public:
 	// A z_attenuation of 0.0f collapses the distance into the X-Y plane
 	F32				getDistanceToDestination(const LLVector3d& pos_global, F32 z_attenuation = 0.5f) const;
 
-	void			clearLocationSelection(BOOL clear_ui = FALSE);
+	void			clearLocationSelection(BOOL clear_ui = FALSE, BOOL dest_reached = FALSE);
 	void			clearAvatarSelection(BOOL clear_ui = FALSE);
 	void			clearLandmarkSelection(BOOL clear_ui = FALSE);
 
@@ -166,8 +167,8 @@ private:
 	// enable/disable teleport destination coordinates 
 	void enableTeleportCoordsDisplay( bool enabled );
 
-	LLDynamicArray<LLUUID>	mLandmarkAssetIDList;
-	LLDynamicArray<LLUUID>	mLandmarkItemIDList;
+	std::vector<LLUUID>	mLandmarkAssetIDList;
+	std::vector<LLUUID>	mLandmarkItemIDList;
 
 	static const LLUUID	sHomeID;
 

@@ -51,11 +51,15 @@ LLSceneView::LLSceneView(const LLRect& rect)
 	setCanClose(true);
 }
 
-void LLSceneView::onClickCloseBtn(bool)
+void LLSceneView::onClose(bool)
 {
 	setVisible(false);
 }
 
+void LLSceneView::onClickCloseBtn(bool)
+{
+	setVisible(false);
+}
 
 void LLSceneView::draw()
 {

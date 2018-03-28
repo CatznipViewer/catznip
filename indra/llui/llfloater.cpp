@@ -64,8 +64,6 @@
 // use this to control "jumping" behavior when Ctrl-Tabbing
 const S32 TABBED_FLOATER_OFFSET = 0;
 
-extern LLControlGroup gSavedSettings;
-
 namespace LLInitParam
 {
 	void TypeValues<LLFloaterEnums::EOpenPositioning>::declareValues()
@@ -133,7 +131,7 @@ bool LLFloater::KeyCompare::compare(const LLSD& a, const LLSD& b)
 {
 	if (a.type() != b.type())
 	{
-		//llerrs << "Mismatched LLSD types: (" << a << ") mismatches (" << b << ")" << llendl;
+		//LL_ERRS() << "Mismatched LLSD types: (" << a << ") mismatches (" << b << ")" << LL_ENDL;
 		return false;
 	}
 	else if (a.isUndefined())
@@ -509,8 +507,8 @@ LLFloater::~LLFloater()
 	
 	if( gFocusMgr.childHasKeyboardFocus(this))
 	{
-	// Just in case we might still have focus here, release it.
-	releaseFocus();
+		// Just in case we might still have focus here, release it.
+		releaseFocus();
 	}
 
 	// This is important so that floaters with persistent rects (i.e., those
@@ -528,7 +526,6 @@ LLFloater::~LLFloater()
 	setVisible(false); // We're not visible if we're destroyed
 	storeVisibilityControl();
 	storeDockStateControl();
-
 	delete mMinimizeSignal;
 }
 
@@ -587,7 +584,7 @@ LLControlGroup*	LLFloater::getControlGroup()
 
 void LLFloater::setVisible( BOOL visible )
 {
-	LLPanel::setVisible(visible); // calls handleVisibilityChange()
+	LLPanel::setVisible(visible); // calls onVisibilityChange()
 	if( visible && mFirstLook )
 	{
 		mFirstLook = FALSE;
@@ -630,37 +627,31 @@ void LLFloater::setIsSingleInstance(BOOL is_single_instance)
 
 
 // virtual
-void LLFloater::handleVisibilityChange ( BOOL new_visibility )
+void LLFloater::onVisibilityChange ( BOOL new_visibility )
 {
 	if (new_visibility)
 	{
 		if (getHost())
 			getHost()->setFloaterFlashing(this, FALSE);
 	}
-	LLPanel::handleVisibilityChange ( new_visibility );
+	LLPanel::onVisibilityChange ( new_visibility );
 }
 
 void LLFloater::openFloater(const LLSD& key)
 {
-    llinfos << "Opening floater " << getName() << " full path: " << getPathname() << llendl;
+    LL_INFOS() << "Opening floater " << getName() << " full path: " << getPathname() << LL_ENDL;
 
 	LLViewerEventRecorder::instance().logVisibilityChange( getPathname(), getName(), true,"floater"); // Last param is event subtype or empty string
 
 	mKey = key; // in case we need to open ourselves again
-
+	
 	if (getSoundFlags() != SILENT 
 	// don't play open sound for hosted (tabbed) windows
 		&& !getHost() 
 		&& !getFloaterHost()
 		&& (!getVisible() || isMinimized()))
 	{
-        //Don't play a sound for incoming voice call based upon chat preference setting
-        bool playSound = !(getName() == "incoming call" && gSavedSettings.getBOOL("PlaySoundIncomingVoiceCall") == FALSE);
-
-        if(playSound)
-        {
-            make_ui_sound("UISndWindowOpen");
-        }
+		make_ui_sound("UISndWindowOpen");
 	}
 
 	//RN: for now, we don't allow rehosting from one multifloater to another
@@ -698,7 +689,7 @@ void LLFloater::openFloater(const LLSD& key)
 
 void LLFloater::closeFloater(bool app_quitting)
 {
-	llinfos << "Closing floater " << getName() << llendl;
+	LL_INFOS() << "Closing floater " << getName() << LL_ENDL;
 	LLViewerEventRecorder::instance().logVisibilityChange( getPathname(), getName(), false,"floater"); // Last param is event subtype or empty string
 	if (app_quitting)
 	{
@@ -796,7 +787,7 @@ void LLFloater::closeFloater(bool app_quitting)
 		}
 		else
 		{
-			setVisible(FALSE); // hide before destroying (so handleVisibilityChange() gets called)
+			setVisible(FALSE); // hide before destroying (so onVisibilityChange() gets called)
 			if (!mReuseInstance)
 			{
 				destroy();
@@ -1095,7 +1086,7 @@ BOOL LLFloater::canSnapTo(const LLView* other_view)
 {
 	if (NULL == other_view)
 	{
-		llwarns << "other_view is NULL" << llendl;
+		LL_WARNS() << "other_view is NULL" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -1138,7 +1129,11 @@ void LLFloater::handleReshape(const LLRect& new_rect, bool by_user)
 
 	if (by_user && !getHost())
 	{
-		static_cast<LLFloaterView*>(getParent())->adjustToFitScreen(this, !isMinimized());
+		LLFloaterView * floaterVp = dynamic_cast<LLFloaterView*>(getParent());
+		if (floaterVp)
+		{
+			floaterVp->adjustToFitScreen(this, !isMinimized());
+		}
 	}
 
 	// if not minimized, adjust all snapped dependents to new shape
@@ -1150,11 +1145,11 @@ void LLFloater::handleReshape(const LLRect& new_rect, bool by_user)
 			{
 				setDocked( false, false);
 			}
-			storeRectControl();
-			mPositioning = LLFloaterEnums::POSITIONING_RELATIVE;
-			LLRect screen_rect = calcScreenRect();
-			mPosition = LLCoordGL(screen_rect.getCenterX(), screen_rect.getCenterY()).convert();
+		mPositioning = LLFloaterEnums::POSITIONING_RELATIVE;
+		LLRect screen_rect = calcScreenRect();
+		mPosition = LLCoordGL(screen_rect.getCenterX(), screen_rect.getCenterY()).convert();
 		}
+		storeRectControl();
 
 		// gather all snapped dependents
 		for(handle_set_iter_t dependent_it = mDependents.begin();
@@ -1323,7 +1318,7 @@ void LLFloater::setMinimized(BOOL minimize)
 		}
 		
 		mMinimized = FALSE;
-
+		setFrontmost();
 		// Reshape *after* setting mMinimized
 		reshape( mExpandedRect.getWidth(), mExpandedRect.getHeight(), TRUE );
 	}
@@ -1349,7 +1344,8 @@ void LLFloater::setFocus( BOOL b )
 	if (b)
 	{
 		// only push focused floaters to front of stack if not in midst of ctrl-tab cycle
-		if (!getHost() && !((LLFloaterView*)getParent())->getCycleMode())
+		LLFloaterView * parent = dynamic_cast<LLFloaterView *>(getParent());
+		if (!getHost() && parent && !parent->getCycleMode())
 		{
 			if (!isFrontmost())
 			{
@@ -1549,7 +1545,7 @@ BOOL LLFloater::handleScrollWheel(S32 x, S32 y, S32 clicks)
 // virtual
 BOOL LLFloater::handleMouseUp(S32 x, S32 y, MASK mask)
 {
-	lldebugs << "LLFloater::handleMouseUp calling LLPanel (really LLView)'s handleMouseUp (first initialized xui to: " << getPathname() << " )" << llendl;
+	LL_DEBUGS() << "LLFloater::handleMouseUp calling LLPanel (really LLView)'s handleMouseUp (first initialized xui to: " << getPathname() << " )" << LL_ENDL;
 	BOOL handled = LLPanel::handleMouseUp(x,y,mask); // Not implemented in LLPanel so this actually calls LLView
 	if (handled) {
 		LLViewerEventRecorder::instance().updateMouseEventInfo(x,y,-55,-55,getPathname());
@@ -1571,6 +1567,7 @@ BOOL LLFloater::handleMouseDown(S32 x, S32 y, MASK mask)
 		if(offerClickToButton(x, y, mask, BUTTON_TEAR_OFF)) return TRUE;
 		if(offerClickToButton(x, y, mask, BUTTON_DOCK)) return TRUE;
 
+		setFrontmost(TRUE, FALSE);
 		// Otherwise pass to drag handle for movement
 		return mDragHandle->handleMouseDown(x, y, mask);
 	}
@@ -1619,7 +1616,7 @@ void LLFloater::bringToFront( S32 x, S32 y )
 		}
 		else
 		{
-			LLFloaterView* parent = (LLFloaterView*) getParent();
+			LLFloaterView* parent = dynamic_cast<LLFloaterView*>( getParent() );
 			if (parent)
 			{
 				parent->bringToFront( this );
@@ -1630,7 +1627,7 @@ void LLFloater::bringToFront( S32 x, S32 y )
 
 
 // virtual
-void LLFloater::setVisibleAndFrontmost(BOOL take_focus, const LLSD& key)
+void LLFloater::setVisibleAndFrontmost(BOOL take_focus,const LLSD& key)
 {
 	LLMultiFloater* hostp = getHost();
 	if (hostp)
@@ -1645,7 +1642,7 @@ void LLFloater::setVisibleAndFrontmost(BOOL take_focus, const LLSD& key)
 	}
 }
 
-void LLFloater::setFrontmost(BOOL take_focus)
+void LLFloater::setFrontmost(BOOL take_focus, BOOL restore)
 {
 	LLMultiFloater* hostp = getHost();
 	if (hostp)
@@ -1658,7 +1655,11 @@ void LLFloater::setFrontmost(BOOL take_focus)
 	{
 		// there are more than one floater view
 		// so we need to query our parent directly
-		((LLFloaterView*)getParent())->bringToFront(this, take_focus);
+		LLFloaterView * parent = dynamic_cast<LLFloaterView*>( getParent() );
+		if (parent)
+		{
+			parent->bringToFront(this, take_focus, restore);
+		}
 
 		// Make sure to set the appropriate transparency type (STORM-732).
 		updateTransparency(hasFocus() || getIsChrome() ? TT_ACTIVE : TT_INACTIVE);
@@ -1946,11 +1947,12 @@ void	LLFloater::drawShadow(LLPanel* panel)
 	}
 	gl_drop_shadow(left, top, right, bottom, 
 		shadow_color % getCurrentTransparency(),
-		llround(shadow_offset));
+		ll_round(shadow_offset));
 }
 
 void LLFloater::updateTransparency(LLView* view, ETypeTransparency transparency_type)
 {
+	if (!view) return;
 	child_list_t children = *view->getChildList();
 	child_list_t::iterator it = children.begin();
 
@@ -2073,16 +2075,16 @@ void LLFloater::updateTitleButtons()
 				btn_rect.setLeftTopAndSize(
 					LLPANEL_BORDER_WIDTH,
 					getRect().getHeight() - close_box_from_top - (floater_close_box_size + 1) * button_count,
-					llround((F32)floater_close_box_size * mButtonScale),
-					llround((F32)floater_close_box_size * mButtonScale));
+					ll_round((F32)floater_close_box_size * mButtonScale),
+					ll_round((F32)floater_close_box_size * mButtonScale));
 			}
 			else
 			{
 				btn_rect.setLeftTopAndSize(
 					getRect().getWidth() - LLPANEL_BORDER_WIDTH - (floater_close_box_size + 1) * button_count,
 					getRect().getHeight() - close_box_from_top,
-					llround((F32)floater_close_box_size * mButtonScale),
-					llround((F32)floater_close_box_size * mButtonScale));
+					ll_round((F32)floater_close_box_size * mButtonScale),
+					ll_round((F32)floater_close_box_size * mButtonScale));
 			}
 
 			// first time here, init 'buttons_rect'
@@ -2133,16 +2135,16 @@ void LLFloater::buildButtons(const Params& floater_params)
 			btn_rect.setLeftTopAndSize(
 				LLPANEL_BORDER_WIDTH,
 				getRect().getHeight() - close_box_from_top - (floater_close_box_size + 1) * (i + 1),
-				llround(floater_close_box_size * mButtonScale),
-				llround(floater_close_box_size * mButtonScale));
+				ll_round(floater_close_box_size * mButtonScale),
+				ll_round(floater_close_box_size * mButtonScale));
 		}
 		else
 		{
 			btn_rect.setLeftTopAndSize(
 				getRect().getWidth() - LLPANEL_BORDER_WIDTH - (floater_close_box_size + 1) * (i + 1),
 				getRect().getHeight() - close_box_from_top,
-				llround(floater_close_box_size * mButtonScale),
-				llround(floater_close_box_size * mButtonScale));
+				ll_round(floater_close_box_size * mButtonScale),
+				ll_round(floater_close_box_size * mButtonScale));
 		}
 
 		LLButton::Params p;
@@ -2253,7 +2255,7 @@ void LLFloaterView::reshape(S32 width, S32 height, BOOL called_from_parent)
 	for ( child_list_const_iter_t child_it = getChildList()->begin(); child_it != getChildList()->end(); ++child_it)
 	{
 		LLView* viewp = *child_it;
-		LLFloater* floaterp = (LLFloater*)viewp;
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(viewp);
 		if (floaterp->isDependent())
 		{
 			// dependents are moved with their "dependee"
@@ -2308,10 +2310,14 @@ void LLFloaterView::reshape(S32 width, S32 height, BOOL called_from_parent)
 void LLFloaterView::restoreAll()
 {
 	// make sure all subwindows aren't minimized
-	for ( child_list_const_iter_t child_it = getChildList()->begin(); child_it != getChildList()->end(); ++child_it)
+	child_list_t child_list = *(getChildList());
+	for (child_list_const_iter_t child_it = child_list.begin(); child_it != child_list.end(); ++child_it)
 	{
-		LLFloater* floaterp = (LLFloater*)*child_it;
-		floaterp->setMinimized(FALSE);
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(*child_it);
+		if (floaterp)
+		{
+			floaterp->setMinimized(FALSE);
+		}
 	}
 
 	// *FIX: make sure dependents are restored
@@ -2385,8 +2391,11 @@ LLRect LLFloaterView::findNeighboringPosition( LLFloater* reference_floater, LLF
 }
 
 
-void LLFloaterView::bringToFront(LLFloater* child, BOOL give_focus)
+void LLFloaterView::bringToFront(LLFloater* child, BOOL give_focus, BOOL restore)
 {
+	if (!child)
+		return;
+
 	if (mFrontChild == child)
 	{
 		if (give_focus && !gFocusMgr.childHasKeyboardFocus(child))
@@ -2466,7 +2475,12 @@ void LLFloaterView::bringToFront(LLFloater* child, BOOL give_focus)
 	{
 		sendChildToFront(child);
 	}
-	child->setMinimized(FALSE);
+
+	if(restore)
+	{
+		child->setMinimized(FALSE);
+	}
+
 	if (give_focus && !gFocusMgr.childHasKeyboardFocus(child))
 	{
 		child->setFocus(TRUE);
@@ -2579,7 +2593,7 @@ void LLFloaterView::getMinimizePosition(S32 *left, S32 *bottom)
 				++child_it) //loop floaters
 			{
 				// Examine minimized children.
-				LLFloater* floater = (LLFloater*)((LLView*)*child_it);
+				LLFloater* floater = dynamic_cast<LLFloater*>(*child_it);
 				if(floater->isMinimized()) 
 				{
 					LLRect r = floater->getRect();
@@ -2632,7 +2646,7 @@ void LLFloaterView::closeAllChildren(bool app_quitting)
 			continue;
 		}
 
-		LLFloater* floaterp = (LLFloater*)viewp;
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(viewp);
 
 		// Attempt to close floater.  This will cause the "do you want to save"
 		// dialogs to appear.
@@ -2698,8 +2712,7 @@ BOOL LLFloaterView::allChildrenClosed()
 	// by setting themselves invisible)
 	for (child_list_const_iter_t it = getChildList()->begin(); it != getChildList()->end(); ++it)
 	{
-		LLView* viewp = *it;
-		LLFloater* floaterp = (LLFloater*)viewp;
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(*it);
 
 		if (floaterp->getVisible() && !floaterp->isDead() && floaterp->isCloseable())
 		{
@@ -2741,8 +2754,6 @@ void LLFloaterView::refresh()
 		}
 	}
 }
-
-const S32 FLOATER_MIN_VISIBLE_PIXELS = 16;
 
 void LLFloaterView::adjustToFitScreen(LLFloater* floater, BOOL allow_partial_outside, BOOL snap_in_toolbars/* = false*/)
 {
@@ -2796,10 +2807,28 @@ void LLFloaterView::adjustToFitScreen(LLFloater* floater, BOOL allow_partial_out
 		}
 	}
 
+	const LLRect& floater_rect = floater->getRect();
+
+	S32 delta_left = mToolbarLeftRect.notEmpty() ? mToolbarLeftRect.mRight - floater_rect.mRight : 0;
+	S32 delta_bottom = mToolbarBottomRect.notEmpty() ? mToolbarBottomRect.mTop - floater_rect.mTop : 0;
+	S32 delta_right = mToolbarRightRect.notEmpty() ? mToolbarRightRect.mLeft - floater_rect.mLeft : 0;
+
 	// move window fully onscreen
 	if (floater->translateIntoRect( snap_in_toolbars ? getSnapRect() : gFloaterView->getRect(), allow_partial_outside ? FLOATER_MIN_VISIBLE_PIXELS : S32_MAX ))
 	{
 		floater->clearSnapTarget();
+	}
+	else if (delta_left > 0 && floater_rect.mTop < mToolbarLeftRect.mTop && floater_rect.mBottom > mToolbarLeftRect.mBottom)
+	{
+		floater->translate(delta_left, 0);
+	}
+	else if (delta_bottom > 0 && floater_rect.mLeft > mToolbarBottomRect.mLeft && floater_rect.mRight < mToolbarBottomRect.mRight)
+	{
+		floater->translate(0, delta_bottom);
+	}
+	else if (delta_right < 0 && floater_rect.mTop < mToolbarRightRect.mTop	&& floater_rect.mBottom > mToolbarRightRect.mBottom)
+	{
+		floater->translate(delta_right, 0);
 	}
 }
 
@@ -2846,10 +2875,13 @@ LLFloater *LLFloaterView::getFocusedFloater() const
 {
 	for ( child_list_const_iter_t child_it = getChildList()->begin(); child_it != getChildList()->end(); ++child_it)
 	{
-		LLUICtrl* ctrlp = (*child_it)->isCtrl() ? static_cast<LLUICtrl*>(*child_it) : NULL;
-		if ( ctrlp && ctrlp->hasFocus() )
+		if ((*child_it)->isCtrl())
 		{
-			return static_cast<LLFloater *>(ctrlp);
+			LLFloater* ctrlp = dynamic_cast<LLFloater*>(*child_it);
+			if ( ctrlp && ctrlp->hasFocus() )
+			{
+				return ctrlp;
+			}
 		}
 	}
 	return NULL;
@@ -2916,20 +2948,13 @@ void LLFloaterView::syncFloaterTabOrder()
 		// otherwise, make sure the focused floater is in the front of the child list
 		for ( child_list_const_reverse_iter_t child_it = getChildList()->rbegin(); child_it != getChildList()->rend(); ++child_it)
 		{
-			LLFloater* floaterp = (LLFloater*)*child_it;
+			LLFloater* floaterp = dynamic_cast<LLFloater*>(*child_it);
 			if (gFocusMgr.childHasKeyboardFocus(floaterp))
 			{
 				bringToFront(floaterp, FALSE);
 				break;
 			}
 		}
-	}
-
-	// sync draw order to tab order
-	for ( child_list_const_reverse_iter_t child_it = getChildList()->rbegin(); child_it != getChildList()->rend(); ++child_it)
-	{
-		LLFloater* floaterp = (LLFloater*)*child_it;
-		moveChildToFrontOfTabGroup(floaterp);
 	}
 }
 
@@ -2945,7 +2970,7 @@ LLFloater*	LLFloaterView::getParentFloater(LLView* viewp) const
 
 	if (parentp == this)
 	{
-		return (LLFloater*)viewp;
+		return dynamic_cast<LLFloater*>(viewp);
 	}
 
 	return NULL;
@@ -2998,6 +3023,25 @@ void LLFloaterView::popVisibleAll(const skip_list_t& skip_list)
 	}
 
 	LLFloaterReg::blockShowFloaters(false);
+}
+
+void LLFloaterView::setToolbarRect(LLToolBarEnums::EToolBarLocation tb, const LLRect& toolbar_rect)
+{
+	switch (tb)
+	{
+	case LLToolBarEnums::TOOLBAR_LEFT:
+		mToolbarLeftRect = toolbar_rect;
+		break;
+	case LLToolBarEnums::TOOLBAR_BOTTOM:
+		mToolbarBottomRect = toolbar_rect;
+		break;
+	case LLToolBarEnums::TOOLBAR_RIGHT:
+		mToolbarRightRect = toolbar_rect;
+		break;
+	default:
+		LL_WARNS() << "setToolbarRect() passed odd toolbar number " << (S32) tb << LL_ENDL;
+		break;
+	}
 }
 
 void LLFloater::setInstanceName(const std::string& name)
@@ -3133,8 +3177,8 @@ boost::signals2::connection LLFloater::setCloseCallback( const commit_signal_t::
 	return mCloseSignal.connect(cb);
 }
 
-LLFastTimer::DeclareTimer POST_BUILD("Floater Post Build");
-static LLFastTimer::DeclareTimer FTM_EXTERNAL_FLOATER_LOAD("Load Extern Floater Reference");
+LLTrace::BlockTimerStatHandle POST_BUILD("Floater Post Build");
+static LLTrace::BlockTimerStatHandle FTM_EXTERNAL_FLOATER_LOAD("Load Extern Floater Reference");
 
 bool LLFloater::initFloaterXML(LLXMLNodePtr node, LLView *parent, const std::string& filename, LLXMLNodePtr output_node)
 {
@@ -3158,16 +3202,16 @@ bool LLFloater::initFloaterXML(LLXMLNodePtr node, LLView *parent, const std::str
 			parser.readXUI(node, output_params, LLUICtrlFactory::getInstance()->getCurFileName());
 			setupParamsForExport(output_params, parent);
 			output_node->setName(node->getName()->mString);
-			parser.writeXUI(output_node, output_params, &default_params);
+			parser.writeXUI(output_node, output_params, LLInitParam::default_parse_rules(), &default_params);
 			return TRUE;
 		}
 
 		LLUICtrlFactory::instance().pushFileName(xml_filename);
 
-		LLFastTimer _(FTM_EXTERNAL_FLOATER_LOAD);
+		LL_RECORD_BLOCK_TIME(FTM_EXTERNAL_FLOATER_LOAD);
 		if (!LLUICtrlFactory::getLayeredXMLNode(xml_filename, referenced_xml))
 		{
-			llwarns << "Couldn't parse panel from: " << xml_filename << llendl;
+			LL_WARNS() << "Couldn't parse panel from: " << xml_filename << LL_ENDL;
 
 			return FALSE;
 		}
@@ -3188,9 +3232,8 @@ bool LLFloater::initFloaterXML(LLXMLNodePtr node, LLView *parent, const std::str
 	{
 		Params output_params(params);
 		setupParamsForExport(output_params, parent);
-        Params default_params(LLUICtrlFactory::getDefaultParams<LLFloater>());
 		output_node->setName(node->getName()->mString);
-		parser.writeXUI(output_node, output_params, &default_params);
+		parser.writeXUI(output_node, output_params, LLInitParam::default_parse_rules(), &default_params);
 	}
 
 	// Default floater position to top-left corner of screen
@@ -3242,14 +3285,14 @@ bool LLFloater::initFloaterXML(LLXMLNodePtr node, LLView *parent, const std::str
 
 	BOOL result;
 	{
-		LLFastTimer ft(POST_BUILD);
+		LL_RECORD_BLOCK_TIME(POST_BUILD);
 
 		result = postBuild();
 	}
 
 	if (!result)
 	{
-		llerrs << "Failed to construct floater " << getName() << llendl;
+		LL_ERRS() << "Failed to construct floater " << getName() << LL_ENDL;
 	}
 
 	applyRectControl(); // If we have a saved rect control, apply it
@@ -3290,29 +3333,29 @@ bool LLFloater::isVisible(const LLFloater* floater)
     return floater && floater->getVisible();
 }
 
-static LLFastTimer::DeclareTimer FTM_BUILD_FLOATERS("Build Floaters");
+static LLTrace::BlockTimerStatHandle FTM_BUILD_FLOATERS("Build Floaters");
 
 bool LLFloater::buildFromFile(const std::string& filename)
 {
-	LLFastTimer timer(FTM_BUILD_FLOATERS);
+	LL_RECORD_BLOCK_TIME(FTM_BUILD_FLOATERS);
 	LLXMLNodePtr root;
 
 	if (!LLUICtrlFactory::getLayeredXMLNode(filename, root))
 	{
-		llwarns << "Couldn't find (or parse) floater from: " << filename << llendl;
+		LL_WARNS() << "Couldn't find (or parse) floater from: " << filename << LL_ENDL;
 		return false;
 	}
 	
 	// root must be called floater
 	if( !(root->hasName("floater") || root->hasName("multi_floater")) )
 	{
-		llwarns << "Root node should be named floater in: " << filename << llendl;
+		LL_WARNS() << "Root node should be named floater in: " << filename << LL_ENDL;
 		return false;
 	}
 	
 	bool res = true;
 	
-	lldebugs << "Building floater " << filename << llendl;
+	LL_DEBUGS() << "Building floater " << filename << LL_ENDL;
 	LLUICtrlFactory::instance().pushFileName(filename);
 	{
 		if (!getFactoryMap().empty())
@@ -3424,28 +3467,28 @@ LLCoordCommon LL_COORD_FLOATER::convertToCommon() const
 	LLCoordCommon out;
 	if (self.mX < -0.5f)
 	{
-		out.mX = llround(rescale(self.mX, -1.f, -0.5f, snap_rect.mLeft - (floater_width - FLOATER_MIN_VISIBLE_PIXELS), snap_rect.mLeft));
+		out.mX = ll_round(rescale(self.mX, -1.f, -0.5f, snap_rect.mLeft - (floater_width - FLOATER_MIN_VISIBLE_PIXELS), snap_rect.mLeft));
 	}
 	else if (self.mX > 0.5f)
 	{
-		out.mX = llround(rescale(self.mX, 0.5f, 1.f, snap_rect.mRight - floater_width, snap_rect.mRight - FLOATER_MIN_VISIBLE_PIXELS));
+		out.mX = ll_round(rescale(self.mX, 0.5f, 1.f, snap_rect.mRight - floater_width, snap_rect.mRight - FLOATER_MIN_VISIBLE_PIXELS));
 	}
 	else
 	{
-		out.mX = llround(rescale(self.mX, -0.5f, 0.5f, snap_rect.mLeft, snap_rect.mRight - floater_width));
+		out.mX = ll_round(rescale(self.mX, -0.5f, 0.5f, snap_rect.mLeft, snap_rect.mRight - floater_width));
 	}
 
 	if (self.mY < -0.5f)
 	{
-		out.mY = llround(rescale(self.mY, -1.f, -0.5f, snap_rect.mBottom - (floater_height - FLOATER_MIN_VISIBLE_PIXELS), snap_rect.mBottom));
+		out.mY = ll_round(rescale(self.mY, -1.f, -0.5f, snap_rect.mBottom - (floater_height - FLOATER_MIN_VISIBLE_PIXELS), snap_rect.mBottom));
 	}
 	else if (self.mY > 0.5f)
 	{
-		out.mY = llround(rescale(self.mY, 0.5f, 1.f, snap_rect.mTop - floater_height, snap_rect.mTop - FLOATER_MIN_VISIBLE_PIXELS));
+		out.mY = ll_round(rescale(self.mY, 0.5f, 1.f, snap_rect.mTop - floater_height, snap_rect.mTop - FLOATER_MIN_VISIBLE_PIXELS));
 	}
 	else
 	{
-		out.mY = llround(rescale(self.mY, -0.5f, 0.5f, snap_rect.mBottom, snap_rect.mTop - floater_height));
+		out.mY = ll_round(rescale(self.mY, -0.5f, 0.5f, snap_rect.mBottom, snap_rect.mTop - floater_height));
 	}
 
 	// return center point instead of lower left

@@ -28,6 +28,64 @@
 	<string name="StartupRequireDriverUpdate">
 		Falha na inicialização dos gráficos. Atualize seu driver gráfico!
 	</string>
+	<string name="AboutHeader">
+		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) ([CHANNEL])
+[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
+	</string>
+	<string name="BuildConfig">
+		Configuração do corpo [BUILD_CONFIG]
+	</string>
+	<string name="AboutPosition">
+		Você está em [POSITION_LOCAL_0,number,1], [POSITION_LOCAL_1,number,1], [POSITION_LOCAL_2,number,1] em [REGION] localizado em &lt;nolink&gt;[HOSTNAME]&lt;/nolink&gt; ([HOSTIP])
+SLURL: &lt;nolink&gt;[SLURL]&lt;/nolink&gt;
+(coordenadas globais [POSITION_0,number,1], [POSITION_1,number,1], [POSITION_2,number,1])
+[SERVER_VERSION]
+[SERVER_RELEASE_NOTES_URL]
+	</string>
+	<string name="AboutSystem">
+		CPU: [CPU]
+Memória: [MEMORY_MB] MBs
+Versão OS: [OS_VERSION]
+Placa de vídeo: [GRAPHICS_CARD_VENDOR]
+Placa gráfica: [GRAPHICS_CARD]
+	</string>
+	<string name="AboutDriver">
+		Versão do driver de vídeo Windows: [GRAPHICS_CARD_VENDOR]
+	</string>
+	<string name="AboutOGL">
+		Versão do OpenGL: [OPENGL_VERSION]
+	</string>
+	<string name="AboutSettings">
+		Tamanho da janela: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+Ajuste do tamanho de fonte: [FONT_SIZE_ADJUSTMENT]pt
+Escala de interface: [UI_SCALE]
+Dist. máxima: [DRAW_DISTANCE]m
+Largura de banda: [NET_BANDWITH]kbit/s
+Fator LOD: [LOD_FACTOR]
+Qualidade de renderização: [RENDER_QUALITY] / 7
+Modelo de iluminação avançado: [GPU_SHADERS]
+Memória de textura: [TEXTURE_MEMORY]MB
+Tempo de criação de VFS (cache): [VFS_TIME]
+	</string>
+	<string name="AboutLibs">
+		Versão do J2C Decoder: [J2C_VERSION]
+Versão do driver de áudio: [AUDIO_DRIVER_VERSION]
+Versão de CEF: [LIBCEF_VERSION]
+Versão da LibVLC: [LIBVLC_VERSION]
+Versão do servidor de voz: [VOICE_VERSION]
+	</string>
+	<string name="AboutTraffic">
+		Packets Lost: [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
+	</string>
+	<string name="AboutTime">
+		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
+	</string>
+	<string name="ErrorFetchingServerReleaseNotesURL">
+		Erro ao obter URL de notas de versão do servidor.
+	</string>
+	<string name="BuildConfiguration">
+		Configuração do corpo
+	</string>
 	<string name="ProgressRestoring">
 		Restaurando...
 	</string>
@@ -130,6 +188,12 @@
 	<string name="create_account_url">
 		http://join.secondlife.com/?sourceid=[sourceid]
 	</string>
+	<string name="AgniGridLabel">
+		Grade principal do Second Life (Agni)
+	</string>
+	<string name="AditiGridLabel">
+		Grade de teste beta do Second Life (Aditi)
+	</string>
 	<string name="ViewerDownloadURL">
 		http://secondlife.com/download
 	</string>
@@ -171,7 +235,8 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		Sua conta não está disponível para acesso até [TIME], horário do Pacífico nos EUA (GMT-08).
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		Não é possível concluir a solicitação neste momento. Para obter mais ajuda, conte o suporte em http://secondlife.com/support. Caso você não possa mudar sua senha, ligue para (866) 476-9763.
+		Não é possível concluir a solicitação neste momento. 
+Entre em contato com o suporte do Second Life para obter ajuda em http://support.secondlife.com.
 	</string>
 	<string name="LoginFailedTransformError">
 		Dados discrepantes detectados durante o login.  Contate support@secondlife.com.
@@ -248,6 +313,75 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="TestingDisconnect">
 		Teste de desconexão
 	</string>
+	<string name="SocialFlickrConnecting">
+		Conectando ao Flickr...
+	</string>
+	<string name="SocialFlickrPosting">
+		Publicando...
+	</string>
+	<string name="SocialFlickrDisconnecting">
+		Desconectando do Flickr...
+	</string>
+	<string name="SocialFlickrErrorConnecting">
+		Problema ao conectar ao Flickr
+	</string>
+	<string name="SocialFlickrErrorPosting">
+		Problema ao publicar no Flickr
+	</string>
+	<string name="SocialFlickrErrorDisconnecting">
+		Problema ao desconectar do Flickr
+	</string>
+	<string name="SocialTwitterConnecting">
+		Conectando ao Twitter...
+	</string>
+	<string name="SocialTwitterPosting">
+		Publicando...
+	</string>
+	<string name="SocialTwitterDisconnecting">
+		Desconectando do Twitter...
+	</string>
+	<string name="SocialTwitterErrorConnecting">
+		Problema ao conectar ao Twitter
+	</string>
+	<string name="SocialTwitterErrorPosting">
+		Problema ao publicar no Twitter
+	</string>
+	<string name="SocialTwitterErrorDisconnecting">
+		Problema ao desconectar do Twitter
+	</string>
+	<string name="BlackAndWhite">
+		Preto e branco
+	</string>
+	<string name="Colors1970">
+		Cores dos anos 1970
+	</string>
+	<string name="Intense">
+		Intenso
+	</string>
+	<string name="Newspaper">
+		Retícula
+	</string>
+	<string name="Sepia">
+		Sépia
+	</string>
+	<string name="Spotlight">
+		Destaque
+	</string>
+	<string name="Video">
+		Vídeo
+	</string>
+	<string name="Autocontrast">
+		Autocontraste
+	</string>
+	<string name="LensFlare">
+		Reflexo de flash
+	</string>
+	<string name="Miniature">
+		Miniatura
+	</string>
+	<string name="Toycamera">
+		Câmera de brinquedo
+	</string>
 	<string name="TooltipPerson">
 		Pessoa
 	</string>
@@ -293,30 +427,54 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="TooltipMustSingleDrop">
 		Apenas um item único pode ser arrastado para este local
 	</string>
+	<string name="TooltipTooManyWearables">
+		Você não pode usar uma pasta que contenha mais de [AMOUNT] itens.  Você pode mudar esse limite em Avançado &gt; Mostrar configurações de depuração &gt; WearFolderLimit.
+	</string>
 	<string name="TooltipPrice" value="L$[AMOUNT]"/>
+	<string name="TooltipSLIcon">
+		Isso contém um link para uma página no domínio oficial do SecondLife.com ou LindenLab.com.
+	</string>
 	<string name="TooltipOutboxDragToWorld">
-		Não é possível fazer rez do itens em sua caixa de saída do lojista
-	</string>
-	<string name="TooltipOutboxNoTransfer">
-		Um ou mais destes objetos não podem ser vendidos ou transferidos.
-	</string>
-	<string name="TooltipOutboxNotInInventory">
-		Sua caixa de saída do lojista aceita apenas itens direto do seu inventário
+		Não é possível fazer rez de itens da pasta Listagens do Marketplace
 	</string>
 	<string name="TooltipOutboxWorn">
-		Você não pode colocar os itens que está vestindo na sua caixa de saída do lojista
-	</string>
-	<string name="TooltipOutboxCallingCard">
-		Não é possível colocar cartões de visita em sua caixa de saída do lojista
+		Não é possível colocar itens que você estiver usando na pasta Listagens do Marketplace
 	</string>
 	<string name="TooltipOutboxFolderLevels">
-		A profundidade das pastas aninhadas excede 3
+		A profundidade das pastas aninhadas excede [AMOUNT]. Diminua a profundidade das pastas dentro de pastas. Agrupe os itens se necessário.
 	</string>
 	<string name="TooltipOutboxTooManyFolders">
-		A contagem de subpastas na pasta de nível superior excede 20
+		O número de subpastas excede [AMOUNT]. Diminua a o número de pastas em sua listagem. Agrupe os itens se necessário.
 	</string>
 	<string name="TooltipOutboxTooManyObjects">
-		A contagem de itens na pasta de nível superior excede 200
+		O número de itens excede [AMOUNT]. Para vender mais que [AMOUNT] itens em uma listagem, você deve agrupar alguns deles.
+	</string>
+	<string name="TooltipOutboxTooManyStockItems">
+		O número de itens de estoque excede [AMOUNT].
+	</string>
+	<string name="TooltipOutboxCannotDropOnRoot">
+		Você pode soltar somente itens ou pastas na aba TUDO ou NÃO ASSOCIADOS. Selecione uma dessas abas e mova seus itens ou pastas novamente.
+	</string>
+	<string name="TooltipOutboxNoTransfer">
+		Um ou mais objetos não podem ser vendidos ou transferidos
+	</string>
+	<string name="TooltipOutboxNotInInventory">
+		É possível colocar somente itens do seu inventário no Marketplace
+	</string>
+	<string name="TooltipOutboxLinked">
+		Não é possível colocar itens ou pastas vinculadas no Marketplace
+	</string>
+	<string name="TooltipOutboxCallingCard">
+		Não é possível colocar cartões de visitas no Marketplace
+	</string>
+	<string name="TooltipOutboxDragActive">
+		Não é possível mover uma listagem publicada
+	</string>
+	<string name="TooltipOutboxCannotMoveRoot">
+		Não é possível mover a pasta raiz das listagens do Marketplace
+	</string>
+	<string name="TooltipOutboxMixedStock">
+		Todos os itens em uma pasta de estoque têm o mesmo tipo e permissão
 	</string>
 	<string name="TooltipDragOntoOwnChild">
 		Não é possível mover uma pasta para seu filho
@@ -379,6 +537,9 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		Clique para ativar no secondlife:// comando
 	</string>
 	<string name="CurrentURL" value="URL atual: [CurrentURL]"/>
+	<string name="TooltipEmail">
+		Clique para escrever um email
+	</string>
 	<string name="SLurlLabelTeleport">
 		Teletransportar para
 	</string>
@@ -492,6 +653,19 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Status desconhecido
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		Serviço não disponível.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		O servidor está enfrentando dificuldades inesperadas.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		Serviço não disponível ou o tempo final para upload foi atingido.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Erro na solicitação de upload. Acesso 
+http://secondlife.com/support para ajuda ao resolver este problema.
 	</string>
 	<string name="texture">
 		textura
@@ -796,6 +970,12 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="use_texture">
 		Usar textura
 	</string>
+	<string name="manip_hint1">
+		Mova o cursor do mouse sobre a regra
+	</string>
+	<string name="manip_hint2">
+		para ajustar à grade
+	</string>
 	<string name="texture_loading">
 		Carregando...
 	</string>
@@ -886,15 +1066,16 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="ControlYourCamera">
 		Controle sua camera
 	</string>
-	<string name="AgentNameSubst">
-		(Você)
-	</string>
 	<string name="TeleportYourAgent">
 		Teletransportá-lo
 	</string>
-	<string name="JoinAnExperience">
-		Participar de uma experiência
+	<string name="ForceSitAvatar">
+		Forçar o avatar a sentar
 	</string>
+	<string name="AgentNameSubst">
+		(Você)
+	</string>
+	<string name="JoinAnExperience"/>
 	<string name="SilentlyManageEstateAccess">
 		Suprimir alertas ao gerenciar listas de acesso ao terreno
 	</string>
@@ -960,6 +1141,12 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="bitmap_image_files">
 		Imagens Bitmap
+	</string>
+	<string name="png_image_files">
+		Imagens PNG
+	</string>
+	<string name="save_texture_image_files">
+		Imagens targa ou PNG
 	</string>
 	<string name="avi_movie_file">
 		Arquivo de vídeo AVI
@@ -1189,6 +1376,9 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="BodyPartsRightLeg">
 		Perna direita
 	</string>
+	<string name="BodyPartsEnhancedSkeleton">
+		Esqueleto aprimorado
+	</string>
 	<string name="GraphicsQualityLow">
 		Baixo
 	</string>
@@ -1209,6 +1399,9 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="FavoritesNoMatchingItems">
 		Arraste um marco para adicioná-lo aos seus favoritos.
+	</string>
+	<string name="MarketplaceNoMatchingItems">
+		Nenhum item correspondente encontrado. Verifique a ortografia de sua cadeia de pesquisa e tente novamente.
 	</string>
 	<string name="InventoryNoTexture">
 		Você não possui uma cópia desta textura no seu inventário
@@ -1245,32 +1438,114 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="InventoryOutboxNoItems">
 		Arraste as pastas para estas áreas e então clique em &quot;Enviar para Mercado&quot; para listar os itens para venda no [[MARKETPLACE_DASHBOARD_URL] Mercado].
 	</string>
+	<string name="InventoryOutboxInitializingTitle">
+		Inicializando o Marketplace.
+	</string>
+	<string name="InventoryOutboxInitializing">
+		Estamos acessando sua conta na [loja [MARKETPLACE_CREATE_STORE_URL] do Marketplace].
+	</string>
+	<string name="InventoryOutboxErrorTitle">
+		Erros do Marketplace.
+	</string>
+	<string name="InventoryOutboxError">
+		A loja [[MARKETPLACE_CREATE_STORE_URL] no Marketplace] está retornando erros.
+	</string>
+	<string name="InventoryMarketplaceError">
+		Erro ao abrir as listagens do Marketplace.
+Se você continuar a receber essa mensagem, entre em contato com o suporte do Second Life para obter ajuda em http://support.secondlife.com
+	</string>
+	<string name="InventoryMarketplaceListingsNoItemsTitle">
+		Sua pasta Listagens do Marketplace está vazia.
+	</string>
+	<string name="InventoryMarketplaceListingsNoItems">
+		Arraste pastas para esta área para listá-las para venda no [Marketplace [MARKETPLACE_DASHBOARD_URL]].
+	</string>
+	<string name="Marketplace Validation Warning Stock">
+		a pasta de estoque deve estar em uma pasta de versões
+	</string>
+	<string name="Marketplace Validation Error Mixed Stock">
+		: Erro: todos os itens em uma pasta de estoque devem ser de cópia proibida e todos do mesmo tipo
+	</string>
+	<string name="Marketplace Validation Error Subfolder In Stock">
+		: Erro: a pasta de estoque não pode ter subpastas
+	</string>
+	<string name="Marketplace Validation Warning Empty">
+		: Aviso: a pasta não contém itens
+	</string>
+	<string name="Marketplace Validation Warning Create Stock">
+		: Aviso: criando pasta de estoque
+	</string>
+	<string name="Marketplace Validation Warning Create Version">
+		: Aviso: criando pasta de versões
+	</string>
+	<string name="Marketplace Validation Warning Move">
+		: Aviso: movendo itens
+	</string>
+	<string name="Marketplace Validation Warning Delete">
+		: Aviso: conteúdo da pasta transferido para pasta de estoque, removendo pasta vazia
+	</string>
+	<string name="Marketplace Validation Error Stock Item">
+		: Erro: itens de cópia proibida devem estar em uma pasta de estoque
+	</string>
+	<string name="Marketplace Validation Warning Unwrapped Item">
+		: Aviso: os itens devem estar em uma pasta de versões
+	</string>
+	<string name="Marketplace Validation Error">
+		: Erro:
+	</string>
+	<string name="Marketplace Validation Warning">
+		: Aviso:
+	</string>
+	<string name="Marketplace Validation Error Empty Version">
+		: Aviso: a pasta de versões deve conter pelo menos 1 item
+	</string>
+	<string name="Marketplace Validation Error Empty Stock">
+		: Aviso: a pasta de estoque deve conter pelo menos 1 item
+	</string>
+	<string name="Marketplace Validation No Error">
+		Não há erros ou avisos
+	</string>
 	<string name="Marketplace Error None">
 		Sem erros
 	</string>
+	<string name="Marketplace Error Prefix">
+		Erro:
+	</string>
 	<string name="Marketplace Error Not Merchant">
-		Erro: antes de enviar os itens para o Mercado, é necessário que você se defina como um lojista (sem custos).
+		antes de enviar os itens para o Marketplace, é necessário que você se defina como um lojista (sem custos).
 	</string>
-	<string name="Marketplace Error Empty Folder">
-		Erro: esta pasta está vazia.
-	</string>
-	<string name="Marketplace Error Unassociated Products">
-		Erro: ocorreu uma falha ao enviar este item, pois sua conta de lojista tem muitos itens não associados a produtos.  Para corrigir esse erro, faça o login no site do mercado e reduza a contagem de itens não associados.
-	</string>
-	<string name="Marketplace Error Object Limit">
-		Erro: este item contém muitos objetos. Corrija esse erro unindo os objetos em caixa para reduzir a contagem total a menos de 200.
-	</string>
-	<string name="Marketplace Error Folder Depth">
-		Erro: este item contém muitos níveis de pastas aninhadas. Reorganize-o em até 3 níveis de pastas aninhadas, no máximo.
+	<string name="Marketplace Error Not Accepted">
+		Não é possível mover o item nessa pasta.
 	</string>
 	<string name="Marketplace Error Unsellable Item">
-		Erro: este item não pode ser vendido no mercado.
+		Este item não pode ser vendido no Marketplace.
 	</string>
-	<string name="Marketplace Error Internal Import">
-		Erro: ocorreu um problema com este item. Tente novamente mais tarde.
+	<string name="MarketplaceNoID">
+		no Mkt ID
+	</string>
+	<string name="MarketplaceLive">
+		publicada
+	</string>
+	<string name="MarketplaceActive">
+		ativo
+	</string>
+	<string name="MarketplaceMax">
+		máx
+	</string>
+	<string name="MarketplaceStock">
+		estoque
+	</string>
+	<string name="MarketplaceNoStock">
+		esgotado
+	</string>
+	<string name="MarketplaceUpdating">
+		atualizando...
 	</string>
 	<string name="Open landmarks">
 		Marcos abertos
+	</string>
+	<string name="Unconstrained">
+		Sem limites
 	</string>
 	<string name="no_transfer" value="(não transferível)"/>
 	<string name="no_modify" value="(não modificável)"/>
@@ -1285,6 +1560,7 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		Nenhum conteúdo
 	</string>
 	<string name="WornOnAttachmentPoint" value="(vestido em [ATTACHMENT_POINT])"/>
+	<string name="AttachmentErrorMessage" value="([ATTACHMENT_ERROR])"/>
 	<string name="ActiveGesture" value="[GESLABEL] (ativado)"/>
 	<string name="Chat Message" value="Bate-papo:"/>
 	<string name="Sound" value="Som"/>
@@ -1546,8 +1822,62 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="Avatar Center">
 		Centro do avatar
 	</string>
+	<string name="Left Ring Finger">
+		Anelar esquerdo
+	</string>
+	<string name="Right Ring Finger">
+		Anelar direito
+	</string>
+	<string name="Tail Base">
+		Base do rabo
+	</string>
+	<string name="Tail Tip">
+		Ponta do rabo
+	</string>
+	<string name="Left Wing">
+		Asa esquerda
+	</string>
+	<string name="Right Wing">
+		Asa direita
+	</string>
+	<string name="Jaw">
+		Maxilar
+	</string>
+	<string name="Alt Left Ear">
+		Orelha esquerda alt.
+	</string>
+	<string name="Alt Right Ear">
+		Orelha direita alt.
+	</string>
+	<string name="Alt Left Eye">
+		Olho esquerdo alt.
+	</string>
+	<string name="Alt Right Eye">
+		Olho direito alt.
+	</string>
+	<string name="Tongue">
+		Língua
+	</string>
+	<string name="Groin">
+		Virilha
+	</string>
+	<string name="Left Hind Foot">
+		Pata esq. traseira
+	</string>
+	<string name="Right Hind Foot">
+		Pata dir. traseira
+	</string>
 	<string name="Invalid Attachment">
 		Ponto de encaixe inválido
+	</string>
+	<string name="ATTACHMENT_MISSING_ITEM">
+		Erro: item ausente
+	</string>
+	<string name="ATTACHMENT_MISSING_BASE_ITEM">
+		Erro: item base ausente
+	</string>
+	<string name="ATTACHMENT_NOT_ATTACHED">
+		Erro: o objeto está no look atual, mas não foi anexado
 	</string>
 	<string name="YearsMonthsOld">
 		[AGEYEARS] [AGEMONTHS] de idade
@@ -1566,6 +1896,42 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="TodayOld">
 		Cadastrado hoje
+	</string>
+	<string name="av_render_everyone_now">
+		Agora, todos podem te ver.
+	</string>
+	<string name="av_render_not_everyone">
+		Sua renderização pode não acontecer para todos ao seu redor.
+	</string>
+	<string name="av_render_over_half">
+		Sua renderização pode não acontecer para metade das pessoas ao seu redor.
+	</string>
+	<string name="av_render_most_of">
+		Sua renderização pode não acontecer para a maioria das pessoas ao seu redor.
+	</string>
+	<string name="av_render_anyone">
+		Sua renderização pode não acontecer para ninguém ao seu redor.
+	</string>
+	<string name="hud_description_total">
+		Seu HUD
+	</string>
+	<string name="hud_name_with_joint">
+		[OBJ_NAME] (vestido em [JNT_NAME])
+	</string>
+	<string name="hud_render_memory_warning">
+		[HUD_DETAILS] usa muita memória de textura
+	</string>
+	<string name="hud_render_cost_warning">
+		[HUD_DETAILS] contém muitos objetos e texturas que utilizam o máximo de recursos
+	</string>
+	<string name="hud_render_heavy_textures_warning">
+		[HUD_DETAILS] contém muitas texturas grandes
+	</string>
+	<string name="hud_render_cramped_warning">
+		[HUD_DETAILS] contém muitos objetos
+	</string>
+	<string name="hud_render_textures_warning">
+		[HUD_DETAILS] contém muitas texturas
 	</string>
 	<string name="AgeYearsA">
 		[COUNT] ano
@@ -1666,6 +2032,9 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="CompileQueueDownloadedCompiling">
 		Baixado, agora compilando
 	</string>
+	<string name="CompileQueueServiceUnavailable">
+		Serviço de compilação de scripts não disponível
+	</string>
 	<string name="CompileQueueScriptNotFound">
 		Script não encontrado no servidor.
 	</string>
@@ -1680,6 +2049,9 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="CompileQueueUnknownFailure">
 		Falha desconhecida para download
+	</string>
+	<string name="CompileNoExperiencePerm">
+		Pulando script [SCRIPT] com experiência [EXPERIENCE]
 	</string>
 	<string name="CompileQueueTitle">
 		Progresso do recompilamento
@@ -1714,8 +2086,14 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="SaveComplete">
 		Salvo.
 	</string>
+	<string name="UploadFailed">
+		Falha ao carregar arquivo:
+	</string>
 	<string name="ObjectOutOfRange">
 		Script (objeto fora de alcance)
+	</string>
+	<string name="ScriptWasDeleted">
+		Script (excluído do inventário)
 	</string>
 	<string name="GodToolsObjectOwnedBy">
 		Objeto [OBJECT] de propriedade de [OWNER]
@@ -1774,10 +2152,19 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		todas as propriedades que você gerencia para [OWNER]
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Residentes autorizados: ([ALLOWEDAGENTS], max [MAXACCESS])
+		Sempre permitido: ([ALLOWEDAGENTS], máx [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Grupos permitidos: ([ALLOWEDGROUPS], max [MAXACCESS])
+		Grupos sempre permitidos: ([ALLOWEDGROUPS], máx [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Grupos banidos: ([BANNEDAGENTS], máx [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Sempre permitido
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Sempre banido
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Memória de scripts no lote
@@ -1902,11 +2289,11 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="ATTACH_BELLY">
 		Barriga
 	</string>
-	<string name="ATTACH_RPEC">
-		Peitorais D
-	</string>
-	<string name="ATTACH_LPEC">
+	<string name="ATTACH_LEFT_PEC">
 		Peitorais E
+	</string>
+	<string name="ATTACH_RIGHT_PEC">
+		Peitorais D
 	</string>
 	<string name="ATTACH_HUD_CENTER_2">
 		HUD Central 2
@@ -1937,6 +2324,51 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	</string>
 	<string name="ATTACH_AVATAR_CENTER">
 		Centro do avatar
+	</string>
+	<string name="ATTACH_LHAND_RING1">
+		Anelar esquerdo
+	</string>
+	<string name="ATTACH_RHAND_RING1">
+		Anelar direito
+	</string>
+	<string name="ATTACH_TAIL_BASE">
+		Base do rabo
+	</string>
+	<string name="ATTACH_TAIL_TIP">
+		Ponta do rabo
+	</string>
+	<string name="ATTACH_LWING">
+		Asa esquerda
+	</string>
+	<string name="ATTACH_RWING">
+		Asa direita
+	</string>
+	<string name="ATTACH_FACE_JAW">
+		Maxilar
+	</string>
+	<string name="ATTACH_FACE_LEAR">
+		Orelha esquerda alt.
+	</string>
+	<string name="ATTACH_FACE_REAR">
+		Orelha direita alt.
+	</string>
+	<string name="ATTACH_FACE_LEYE">
+		Olho esquerdo alt.
+	</string>
+	<string name="ATTACH_FACE_REYE">
+		Olho direito alt.
+	</string>
+	<string name="ATTACH_FACE_TONGUE">
+		Língua
+	</string>
+	<string name="ATTACH_GROIN">
+		Virilha
+	</string>
+	<string name="ATTACH_HIND_LFOOT">
+		Pata esq. traseira
+	</string>
+	<string name="ATTACH_HIND_RFOOT">
+		Pata dir. traseira
 	</string>
 	<string name="CursorPos">
 		Linha [LINE], Coluna [COLUMN]
@@ -2241,6 +2673,15 @@ Expected .wav, .tga, .bmp, .jpg, .jpeg, or .bvh
 	</string>
 	<string name="Play Media">
 		Tocar/Pausar mídia
+	</string>
+	<string name="IntelDriverPage">
+		http://www.intel.com/p/en_US/support/detect/graphics
+	</string>
+	<string name="NvidiaDriverPage">
+		http://www.nvidia.com.br/Download/index.aspx?lang=br
+	</string>
+	<string name="AMDDriverPage">
+		http://support.amd.com/us/Pages/AMDSupportHub.aspx
 	</string>
 	<string name="MBCmdLineError">
 		Um erro foi encontrado analisando a linha de comando.
@@ -3863,6 +4304,12 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 	<string name="OfflineStatus">
 		Desconectado
 	</string>
+	<string name="not_online_msg">
+		O usuário não está online. As mensagens serão armazenadas e enviadas mais tarde.
+	</string>
+	<string name="not_online_inventory">
+		O usuário não está online. O inventário foi salvo.
+	</string>
 	<string name="answered_call">
 		Ligação atendida
 	</string>
@@ -3894,7 +4341,16 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 		Conversa com [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Oferta de item de inventário
+		Item do inventário &apos;[ITEM_NAME]&apos; oferecido
+	</string>
+	<string name="inventory_folder_offered-im">
+		Pasta do inventário &apos;[ITEM_NAME]&apos; oferecida
+	</string>
+	<string name="flickr_post_success">
+		Você publicou no Flickr.
+	</string>
+	<string name="twitter_post_success">
+		Você publicou no Twitter.
 	</string>
 	<string name="no_session_message">
 		(Sessão de MI inexistente)
@@ -3972,16 +4428,25 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 		Posição inicial definida.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] lhe pagou L$ [AMOUNT] [REASON].
+	</string>
+	<string name="paid_you_ldollars_gift">
+		[NAME] lhe pagou L$ [AMOUNT]: [REASON]
 	</string>
 	<string name="paid_you_ldollars_no_reason">
 		[NAME] lhe pagou L$ [AMOUNT]
 	</string>
 	<string name="you_paid_ldollars">
 		Você pagou L$[AMOUNT] por [REASON] a [NAME].
+	</string>
+	<string name="you_paid_ldollars_gift">
+		Você pagou L$[AMOUNT] a [NAME]: [REASON]
 	</string>
 	<string name="you_paid_ldollars_no_info">
 		Você acaba de pagar L$[AMOUNT].
@@ -3994,6 +4459,9 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 	</string>
 	<string name="you_paid_failure_ldollars">
 		Você não pagou L$[AMOUNT] a [NAME] referentes a [REASON].
+	</string>
+	<string name="you_paid_failure_ldollars_gift">
+		Você não pagou L$[AMOUNT] a [NAME]: [REASON]
 	</string>
 	<string name="you_paid_failure_ldollars_no_info">
 		Você não pagou L$[AMOUNT].
@@ -4321,11 +4789,20 @@ Denunciar abuso
 	<string name="texture_load_dimensions_error">
 		A imagem excede o limite [WIDTH]*[HEIGHT]
 	</string>
+	<string name="outfit_photo_load_dimensions_error">
+		O tamanho máx. do look é [WIDTH]*[HEIGHT]. Redimensione ou use outra imagem
+	</string>
+	<string name="outfit_photo_select_dimensions_error">
+		O tamanho máx. do look é [WIDTH]*[HEIGHT]. Selecione outra textura
+	</string>
+	<string name="outfit_photo_verify_dimensions_error">
+		Não foi possível confirmar as dimensões da foto. Aguarde até que o tamanho da foto seja exibido no seletor
+	</string>
 	<string name="words_separator" value=","/>
 	<string name="server_is_down">
 		Aconteceu algo inesperado, apesar de termos tentado impedir isso.
 
-	Cheque secondlifegrid.net para saber se foi detectado um problema com o serviço.
+Visite http://status.secondlifegrid.net para saber se foi detectado um problema com o serviço.
         Se o problema persistir, cheque a configuração da sua rede e firewall.
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -4351,6 +4828,9 @@ Denunciar abuso
 	</string>
 	<string name="LocalEstimateUSD">
 		US$ [AMOUNT]
+	</string>
+	<string name="Group Ban">
+		Banimento do grupo
 	</string>
 	<string name="Membership">
 		Plano
@@ -4774,8 +5254,17 @@ Tente colocar o caminho do editor entre aspas.
 	<string name="Command_Destinations_Label">
 		Destinos
 	</string>
+	<string name="Command_Facebook_Label">
+		Facebook
+	</string>
+	<string name="Command_Flickr_Label">
+		Flickr
+	</string>
 	<string name="Command_Gestures_Label">
 		Gestos
+	</string>
+	<string name="Command_Grid_Status_Label">
+		Status da grade
 	</string>
 	<string name="Command_HowTo_Label">
 		Como
@@ -4788,6 +5277,9 @@ Tente colocar o caminho do editor entre aspas.
 	</string>
 	<string name="Command_Marketplace_Label">
 		Mercado
+	</string>
+	<string name="Command_MarketplaceListings_Label">
+		Marketplace
 	</string>
 	<string name="Command_MiniMap_Label">
 		Mini Mapa
@@ -4813,6 +5305,9 @@ Tente colocar o caminho do editor entre aspas.
 	<string name="Command_Profile_Label">
 		Perfil
 	</string>
+	<string name="Command_Report_Abuse_Label">
+		Relatar abuso
+	</string>
 	<string name="Command_Search_Label">
 		Buscar
 	</string>
@@ -4821,6 +5316,9 @@ Tente colocar o caminho do editor entre aspas.
 	</string>
 	<string name="Command_Speak_Label">
 		Falar
+	</string>
+	<string name="Command_Twitter_Label">
+		Twitter
 	</string>
 	<string name="Command_View_Label">
 		Controles da câmera
@@ -4852,8 +5350,17 @@ Tente colocar o caminho do editor entre aspas.
 	<string name="Command_Destinations_Tooltip">
 		Destinos de interesse
 	</string>
+	<string name="Command_Facebook_Tooltip">
+		Publicar no Facebook
+	</string>
+	<string name="Command_Flickr_Tooltip">
+		Carregar no Flickr
+	</string>
 	<string name="Command_Gestures_Tooltip">
 		Gestos para seu avatar
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Mostrar status da grade atual
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Como executar tarefas comuns
@@ -4866,6 +5373,9 @@ Tente colocar o caminho do editor entre aspas.
 	</string>
 	<string name="Command_Marketplace_Tooltip">
 		Faça compras
+	</string>
+	<string name="Command_MarketplaceListings_Tooltip">
+		Venda suas criações
 	</string>
 	<string name="Command_MiniMap_Tooltip">
 		Mostrar quem está aqui
@@ -4891,6 +5401,9 @@ Tente colocar o caminho do editor entre aspas.
 	<string name="Command_Profile_Tooltip">
 		Edite ou visualize seu perfil
 	</string>
+	<string name="Command_Report_Abuse_Tooltip">
+		Relatar abuso
+	</string>
 	<string name="Command_Search_Tooltip">
 		Encontre lugares, eventos, pessoas
 	</string>
@@ -4899,6 +5412,9 @@ Tente colocar o caminho do editor entre aspas.
 	</string>
 	<string name="Command_Speak_Tooltip">
 		Fale com pessoas próximas usando seu microfone
+	</string>
+	<string name="Command_Twitter_Tooltip">
+		Twitter
 	</string>
 	<string name="Command_View_Tooltip">
 		Alterar o ângulo da câmera
@@ -4975,6 +5491,87 @@ Tente colocar o caminho do editor entre aspas.
 	<string name="UserDictionary">
 		[Usuário]
 	</string>
+	<string name="experience_tools_experience">
+		Experiência
+	</string>
+	<string name="ExperienceNameNull">
+		(nenhuma experiência)
+	</string>
+	<string name="ExperienceNameUntitled">
+		(experiência sem título)
+	</string>
+	<string name="Land-Scope">
+		Dentro do terreno
+	</string>
+	<string name="Grid-Scope">
+		Dentro da grade
+	</string>
+	<string name="Allowed_Experiences_Tab">
+		PERMITIDO
+	</string>
+	<string name="Blocked_Experiences_Tab">
+		BLOQUEADO
+	</string>
+	<string name="Contrib_Experiences_Tab">
+		COLABORADOR
+	</string>
+	<string name="Admin_Experiences_Tab">
+		ADMINISTRADOR
+	</string>
+	<string name="Recent_Experiences_Tab">
+		RECENTE
+	</string>
+	<string name="Owned_Experiences_Tab">
+		PRÓPRIAS
+	</string>
+	<string name="ExperiencesCounter">
+		([EXPERIENCES], máx. [MAXEXPERIENCES])
+	</string>
+	<string name="ExperiencePermission1">
+		assumir seus controles
+	</string>
+	<string name="ExperiencePermission3">
+		acionar animações no seu avatar
+	</string>
+	<string name="ExperiencePermission4">
+		anexar ao avatar
+	</string>
+	<string name="ExperiencePermission9">
+		rastrear sua câmera
+	</string>
+	<string name="ExperiencePermission10">
+		controlar sua câmera
+	</string>
+	<string name="ExperiencePermission11">
+		teletransportar você
+	</string>
+	<string name="ExperiencePermission12">
+		aceitar automaticamente permissões de experiência
+	</string>
+	<string name="ExperiencePermissionShortUnknown">
+		realizar uma operação desconhecida: [Permission]
+	</string>
+	<string name="ExperiencePermissionShort1">
+		Assumir o controle
+	</string>
+	<string name="ExperiencePermissionShort3">
+		Acionar animações
+	</string>
+	<string name="ExperiencePermissionShort4">
+		Anexar
+	</string>
+	<string name="ExperiencePermissionShort9">
+		Rastrear câmera
+	</string>
+	<string name="ExperiencePermissionShort10">
+		Controlar câmera
+	</string>
+	<string name="ExperiencePermissionShort11">
+		Teletransportar
+	</string>
+	<string name="ExperiencePermissionShort12">
+		Autorização
+	</string>
 	<string name="logging_calls_disabled_log_empty">
 		As conversas não estão sendo registradas. Para começar a manter um registro, selecione &quot;Salvar: apenas registro&quot; ou &quot;Salvar: registro e transcrições&quot; em Preferências&gt; Bate-papo.
 	</string>
@@ -4986,5 +5583,29 @@ Tente colocar o caminho do editor entre aspas.
 	</string>
 	<string name="loading_chat_logs">
 		Carregando...
+	</string>
+	<string name="na">
+		n/d
+	</string>
+	<string name="preset_combo_label">
+		-Lista vazia-
+	</string>
+	<string name="Default">
+		Padrão
+	</string>
+	<string name="none_paren_cap">
+		(nenhum)
+	</string>
+	<string name="no_limit">
+		Sem limite
+	</string>
+	<string name="Mav_Details_MAV_FOUND_DEGENERATE_TRIANGLES">
+		A forma física contém triângulos muito pequenos. Tente simplificar o modelo físico.
+	</string>
+	<string name="Mav_Details_MAV_CONFIRMATION_DATA_MISMATCH">
+		A forma física contém dados de confirmação ruins. Tente consertar o modelo físico.
+	</string>
+	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
+		A forma física não tem a versão correta. Defina a versão correta para o modelo físico.
 	</string>
 </strings>

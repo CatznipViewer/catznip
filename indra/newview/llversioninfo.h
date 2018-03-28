@@ -66,8 +66,23 @@ public:
 	/// return the channel name, e.g. "Second Life"
 	static const std::string &getChannel();
 	
+    /// return the CMake build type
+    static const std::string &getBuildConfig();
+
 	/// reset the channel name used by the viewer.
 	static void resetChannel(const std::string& channel);
+
+    /// return the bit width of an address
+    static const S32 getAddressSize() { return ADDRESS_SIZE; }
+
+    typedef enum
+    {
+        TEST_VIEWER,
+        PROJECT_VIEWER,
+        BETA_VIEWER,
+        RELEASE_VIEWER
+    } ViewerMaturity;
+    static ViewerMaturity getViewerMaturity();
 };
 
 #endif

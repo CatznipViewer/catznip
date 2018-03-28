@@ -52,18 +52,17 @@ LLAvatarJoint::LLAvatarJoint() :
 	init();
 }
 
+LLAvatarJoint::LLAvatarJoint(S32 joint_num) :
+    LLJoint(joint_num)
+{
+    init();
+}
+    
 LLAvatarJoint::LLAvatarJoint(const std::string &name, LLJoint *parent) :
 	LLJoint(name, parent)
 {
 	init();
 }
-
-LLAvatarJoint::LLAvatarJoint(S32 joint_num) :
-	LLJoint(joint_num)
-{
-	init();
-}
-
 
 void LLAvatarJoint::init()
 {
@@ -238,7 +237,7 @@ LLAvatarJointCollisionVolume::LLAvatarJointCollisionVolume()
 /*virtual*/
 U32 LLAvatarJointCollisionVolume::render( F32 pixelArea, BOOL first_pass, BOOL is_dummy )
 {
-	llerrs << "Cannot call render() on LLAvatarJointCollisionVolume" << llendl;
+	LL_ERRS() << "Cannot call render() on LLAvatarJointCollisionVolume" << LL_ENDL;
 	return 0;
 }
 

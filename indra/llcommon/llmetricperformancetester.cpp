@@ -29,9 +29,9 @@
 #include "indra_constants.h"
 #include "llerror.h"
 #include "llsdserialize.h"
-#include "llstat.h"
 #include "lltreeiterators.h"
 #include "llmetricperformancetester.h"
+#include "llfasttimer.h"
 
 //----------------------------------------------------------------------------------------------
 // LLMetricPerformanceTesterBasic : static methods and testers management
@@ -40,7 +40,7 @@
 LLMetricPerformanceTesterBasic::name_tester_map_t LLMetricPerformanceTesterBasic::sTesterMap ;
 
 /*static*/ 
-void LLMetricPerformanceTesterBasic::cleanClass() 
+void LLMetricPerformanceTesterBasic::cleanupClass() 
 {
 	for (name_tester_map_t::iterator iter = sTesterMap.begin() ; iter != sTesterMap.end() ; ++iter)
 	{
@@ -56,7 +56,7 @@ BOOL LLMetricPerformanceTesterBasic::addTester(LLMetricPerformanceTesterBasic* t
 	std::string name = tester->getTesterName() ;
 	if (getTester(name))
 	{
-		llerrs << "Tester name is already used by some other tester : " << name << llendl ;
+		LL_ERRS() << "Tester name is already used by some other tester : " << name << LL_ENDL ;
 		return FALSE;
 	}
 
@@ -91,7 +91,7 @@ LLMetricPerformanceTesterBasic* LLMetricPerformanceTesterBasic::getTester(std::s
 // Return TRUE if this metric is requested or if the general default "catch all" metric is requested
 BOOL LLMetricPerformanceTesterBasic::isMetricLogRequested(std::string name)
 {
-	return (LLFastTimer::sMetricLog && ((LLFastTimer::sLogName == name) || (LLFastTimer::sLogName == DEFAULT_METRIC_NAME)));
+	return (LLTrace::BlockTimer::sMetricLog && ((LLTrace::BlockTimer::sLogName == name) || (LLTrace::BlockTimer::sLogName == DEFAULT_METRIC_NAME)));
 }
 
 /*static*/ 
@@ -132,11 +132,11 @@ void LLMetricPerformanceTesterBasic::doAnalysisMetrics(std::string baseline, std
 	}
 	
 	// Open baseline and current target, exit if one is inexistent
-	std::ifstream base_is(baseline.c_str());
-	std::ifstream target_is(target.c_str());
+	llifstream base_is(baseline.c_str());
+	llifstream target_is(target.c_str());
 	if (!base_is.is_open() || !target_is.is_open())
 	{
-		llwarns << "'-analyzeperformance' error : baseline or current target file inexistent" << llendl;
+		LL_WARNS() << "'-analyzeperformance' error : baseline or current target file inexistent" << LL_ENDL;
 		base_is.close();
 		target_is.close();
 		return;
@@ -151,7 +151,7 @@ void LLMetricPerformanceTesterBasic::doAnalysisMetrics(std::string baseline, std
 	target_is.close();
 	
 	//output comparision
-	std::ofstream os(output.c_str());
+	llofstream os(output.c_str());
 	
 	os << "Label, Metric, Base(B), Target(T), Diff(T-B), Percentage(100*T/B)\n"; 
 	for(LLMetricPerformanceTesterBasic::name_tester_map_t::iterator iter = LLMetricPerformanceTesterBasic::sTesterMap.begin() ; 
@@ -176,7 +176,7 @@ LLMetricPerformanceTesterBasic::LLMetricPerformanceTesterBasic(std::string name)
 {
 	if (mName == std::string())
 	{
-		llerrs << "LLMetricPerformanceTesterBasic construction invalid : Empty name passed to constructor" << llendl ;
+		LL_ERRS() << "LLMetricPerformanceTesterBasic construction invalid : Empty name passed to constructor" << LL_ENDL ;
 	}
 
 	mValidInstance = LLMetricPerformanceTesterBasic::addTester(this) ;
@@ -194,8 +194,7 @@ void LLMetricPerformanceTesterBasic::preOutputTestResults(LLSD* sd)
 
 void LLMetricPerformanceTesterBasic::postOutputTestResults(LLSD* sd)
 {
-	LLMutexLock lock(LLFastTimer::sLogLock);
-	LLFastTimer::sLogQueue.push((*sd));
+	LLTrace::BlockTimer::pushLog(*sd);
 }
 
 void LLMetricPerformanceTesterBasic::outputTestResults() 
@@ -213,7 +212,7 @@ void LLMetricPerformanceTesterBasic::addMetric(std::string str)
 }
 
 /*virtual*/ 
-void LLMetricPerformanceTesterBasic::analyzePerformance(std::ofstream* os, LLSD* base, LLSD* current) 
+void LLMetricPerformanceTesterBasic::analyzePerformance(llofstream* os, LLSD* base, LLSD* current) 
 {
 	resetCurrentCount() ;
 
@@ -242,7 +241,7 @@ void LLMetricPerformanceTesterBasic::analyzePerformance(std::ofstream* os, LLSD*
 						(F32)((*base)[label][ mMetricStrings[index] ].asReal()), (F32)((*current)[label][ mMetricStrings[index] ].asReal())) ;
 					break;
 				default:
-					llerrs << "unsupported metric " << mMetricStrings[index] << " LLSD type: " << (S32)(*current)[label][ mMetricStrings[index] ].type() << llendl ;
+					LL_ERRS() << "unsupported metric " << mMetricStrings[index] << " LLSD type: " << (S32)(*current)[label][ mMetricStrings[index] ].type() << LL_ENDL ;
 				}
 			}	
 		}
@@ -255,14 +254,14 @@ void LLMetricPerformanceTesterBasic::analyzePerformance(std::ofstream* os, LLSD*
 }
 
 /*virtual*/ 
-void LLMetricPerformanceTesterBasic::compareTestResults(std::ofstream* os, std::string metric_string, S32 v_base, S32 v_current) 
+void LLMetricPerformanceTesterBasic::compareTestResults(llofstream* os, std::string metric_string, S32 v_base, S32 v_current) 
 {
 	*os << llformat(" ,%s, %d, %d, %d, %.4f\n", metric_string.c_str(), v_base, v_current, 
 						v_current - v_base, (v_base != 0) ? 100.f * v_current / v_base : 0) ;
 }
 
 /*virtual*/ 
-void LLMetricPerformanceTesterBasic::compareTestResults(std::ofstream* os, std::string metric_string, F32 v_base, F32 v_current) 
+void LLMetricPerformanceTesterBasic::compareTestResults(llofstream* os, std::string metric_string, F32 v_base, F32 v_current) 
 {
 	*os << llformat(" ,%s, %.4f, %.4f, %.4f, %.4f\n", metric_string.c_str(), v_base, v_current,						
 						v_current - v_base, (fabs(v_base) > 0.0001f) ? 100.f * v_current / v_base : 0.f ) ;
@@ -294,7 +293,7 @@ LLMetricPerformanceTesterWithSession::~LLMetricPerformanceTesterWithSession()
 }
 
 /*virtual*/ 
-void LLMetricPerformanceTesterWithSession::analyzePerformance(std::ofstream* os, LLSD* base, LLSD* current) 
+void LLMetricPerformanceTesterWithSession::analyzePerformance(llofstream* os, LLSD* base, LLSD* current) 
 {
 	// Load the base session
 	resetCurrentCount() ;
@@ -306,7 +305,7 @@ void LLMetricPerformanceTesterWithSession::analyzePerformance(std::ofstream* os,
 
 	if (!mBaseSessionp || !mCurrentSessionp)
 	{
-		llerrs << "Error loading test sessions." << llendl ;
+		LL_ERRS() << "Error loading test sessions." << LL_ENDL ;
 	}
 
 	// Compare

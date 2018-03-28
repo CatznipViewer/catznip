@@ -33,6 +33,7 @@
 #include "lltimer.h"
 #include "lluuid.h"
 #include "llleaplistener.h"
+#include "llexception.h"
 
 #if LL_MSVC
 #pragma warning (disable : 4355) // 'this' used in initializer list: yes, intentionally
@@ -69,7 +70,7 @@ public:
         // Rule out empty vector
         if (plugin.empty())
         {
-            throw Error("no plugin command");
+            LLTHROW(Error("no plugin command"));
         }
 
         // Don't leave desc empty either, but in this case, if we weren't
@@ -112,7 +113,7 @@ public:
         // If that didn't work, no point in keeping this LLLeap object.
         if (! mChild)
         {
-            throw Error(STRINGIZE("failed to run " << mDesc));
+            LLTHROW(Error(STRINGIZE("failed to run " << mDesc)));
         }
 
         // Okay, launch apparently worked. Change our mDonePump listener.
@@ -394,7 +395,7 @@ public:
         LLProcess::WritePipe& childin(mChild->getWritePipe(LLProcess::STDIN));
         LLEventPump& mainloop(LLEventPumps::instance().obtain("mainloop"));
         LLSD nop;
-        F64 until(LLTimer::getElapsedSeconds() + 2);
+        F64 until = (LLTimer::getElapsedSeconds() + 2).value();
         while (childin.size() && LLTimer::getElapsedSeconds() < until)
         {
             mainloop.post(nop);

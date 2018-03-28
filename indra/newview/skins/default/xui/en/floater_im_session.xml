@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  background_visible="true"
- default_tab_group="1"
  height="355"
  help_topic="floater_im_box"
  layout="topleft"
@@ -210,10 +209,9 @@
                      default_tab_group="3"
                      tab_group="2"
                      name="right_part_holder"
-                     min_width="172">
+                     min_width="207">
                         <layout_stack
                          animate="true" 
-                         default_tab_group="2"
                          follows="all"
                          orientation="vertical"
                          name="translate_and_chat_stack"

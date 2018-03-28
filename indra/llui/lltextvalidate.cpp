@@ -328,6 +328,15 @@ namespace LLTextValidate
 		return rv;
 	}
 
+	bool validateASCIINoLeadingSpace(const LLWString &str)
+	{
+		if (LLStringOps::isSpace(str[0]))
+		{
+			return FALSE;
+		}
+		return validateASCII(str);
+	}
+
 	// Used for multiline text stored on the server.
 	// Example is landmark description in Places SP.
 	bool validateASCIIWithNewLine(const LLWString &str)
@@ -336,7 +345,7 @@ namespace LLTextValidate
 		S32 len = str.length();
 		while(len--)
 		{
-			if (str[len] < 0x20 && str[len] != 0xA || str[len] > 0x7f)
+			if ((str[len] < 0x20 && str[len] != 0xA) || str[len] > 0x7f)
 			{
 				rv = FALSE;
 				break;

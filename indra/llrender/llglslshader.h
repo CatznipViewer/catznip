@@ -51,6 +51,7 @@ public:
 	S32 mIndexedTextureChannels;
 	bool disableTextureIndex;
 	bool hasAlphaMask;
+	bool attachNothing;
 
 	// char numLights;
 	
@@ -80,7 +81,7 @@ public:
 	static bool sNoFixedFunction;
 
 	static void initProfile();
-	static void finishProfile();
+	static void finishProfile(bool emit_report = true);
 
 	static void startProfile();
 	static void stopProfile(U32 count, U32 mode);
@@ -114,6 +115,7 @@ public:
 	void uniform2i(const LLStaticHashedString& uniform, GLint i, GLint j);
 	void uniformMatrix2fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniformMatrix3fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
+	void uniformMatrix3x4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniformMatrix4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniform1i(const LLStaticHashedString& uniform, GLint i);
 	void uniform1f(const LLStaticHashedString& uniform, GLfloat v);
@@ -184,6 +186,7 @@ public:
 
 	//statistcis for profiling shader performance
 	U32 mTimerQuery;
+	U32 mSamplesQuery;
 	U64 mTimeElapsed;
 	static U64 sTotalTimeElapsed;
 	U32 mTrianglesDrawn;
@@ -196,7 +199,9 @@ public:
 	bool mTextureStateFetched;
 	std::vector<U32> mTextureMagFilter;
 	std::vector<U32> mTextureMinFilter;
-	
+
+private:
+	void unloadInternal();
 };
 
 //UI shader (declared here so llui_libtest will link properly)

@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012-2013, Linden Research, Inc.
+ * Copyright (C) 2012-2014, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,6 +34,14 @@
 #include "_httppolicyclass.h"
 
 #include "lltimer.h"
+#include "httpstats.h"
+
+namespace
+{
+
+static const char * const LOG_CORE("CoreHttp");
+
+} // end anonymous namespace
 
 
 namespace LLCore
@@ -41,139 +49,147 @@ namespace LLCore
 
 
 // Per-policy-class data for a running system.
-// Collection of queues, parameters, history, metrics, etc.
+// Collection of queues, options and other data
 // for a single policy class.
 //
 // Threading:  accessed only by worker thread
-struct HttpPolicy::State
+struct HttpPolicy::ClassState
 {
 public:
-	State()
-		: mConnMax(HTTP_CONNECTION_LIMIT_DEFAULT),
-		  mConnAt(HTTP_CONNECTION_LIMIT_DEFAULT),
-		  mConnMin(1),
-		  mNextSample(0),
-		  mErrorCount(0),
-		  mErrorFactor(0)
+	ClassState()
+		: mThrottleEnd(0),
+		  mThrottleLeft(0L),
+		  mRequestCount(0L),
+		  mStallStaging(false)
 		{}
 	
 	HttpReadyQueue		mReadyQueue;
 	HttpRetryQueue		mRetryQueue;
 
 	HttpPolicyClass		mOptions;
-
-	long				mConnMax;
-	long				mConnAt;
-	long				mConnMin;
-
-	HttpTime			mNextSample;
-	unsigned long		mErrorCount;
-	unsigned long		mErrorFactor;
+	HttpTime			mThrottleEnd;
+	long				mThrottleLeft;
+	long				mRequestCount;
+	bool				mStallStaging;
 };
 
 
 HttpPolicy::HttpPolicy(HttpService * service)
-	: mActiveClasses(0),
-	  mState(NULL),
-	  mService(service)
-{}
+	: mService(service)
+{
+	// Create default class
+	mClasses.push_back(new ClassState());
+}
 
 
 HttpPolicy::~HttpPolicy()
 {
 	shutdown();
+
+	for (class_list_t::iterator it(mClasses.begin()); it != mClasses.end(); ++it)
+	{
+		delete (*it);
+	}
+	mClasses.clear();
 	
 	mService = NULL;
 }
 
 
+HttpRequest::policy_t HttpPolicy::createPolicyClass()
+{
+	const HttpRequest::policy_t policy_class(mClasses.size());
+	if (policy_class >= HTTP_POLICY_CLASS_LIMIT)
+	{
+		return HttpRequest::INVALID_POLICY_ID;
+	}
+	mClasses.push_back(new ClassState());
+	return policy_class;
+}
+
+
 void HttpPolicy::shutdown()
 {
-	for (int policy_class(0); policy_class < mActiveClasses; ++policy_class)
+	for (int policy_class(0); policy_class < mClasses.size(); ++policy_class)
 	{
-		HttpRetryQueue & retryq(mState[policy_class].mRetryQueue);
+		ClassState & state(*mClasses[policy_class]);
+		
+		HttpRetryQueue & retryq(state.mRetryQueue);
 		while (! retryq.empty())
 		{
-			HttpOpRequest * op(retryq.top());
+			HttpOpRequest::ptr_t op(retryq.top());
 			retryq.pop();
 		
 			op->cancel();
-			op->release();
 		}
 
-		HttpReadyQueue & readyq(mState[policy_class].mReadyQueue);
+		HttpReadyQueue & readyq(state.mReadyQueue);
 		while (! readyq.empty())
 		{
-			HttpOpRequest * op(readyq.top());
+			HttpOpRequest::ptr_t op(readyq.top());
 			readyq.pop();
 		
 			op->cancel();
-			op->release();
 		}
 	}
-	delete [] mState;
-	mState = NULL;
-	mActiveClasses = 0;
 }
 
 
-void HttpPolicy::start(const HttpPolicyGlobal & global,
-					   const std::vector<HttpPolicyClass> & classes)
+void HttpPolicy::start()
 {
-	llassert_always(! mState);
-
-	mGlobalOptions = global;
-	mActiveClasses = classes.size();
-	mState = new State [mActiveClasses];
-	for (int i(0); i < mActiveClasses; ++i)
-	{
-		mState[i].mOptions = classes[i];
-		mState[i].mConnMax = classes[i].mConnectionLimit;
-		mState[i].mConnAt = mState[i].mConnMax;
-		mState[i].mConnMin = 2;
-	}
 }
 
 
-void HttpPolicy::addOp(HttpOpRequest * op)
+void HttpPolicy::addOp(const HttpOpRequest::ptr_t &op)
 {
 	const int policy_class(op->mReqPolicy);
 	
 	op->mPolicyRetries = 0;
-	mState[policy_class].mReadyQueue.push(op);
+	op->mPolicy503Retries = 0;
+	mClasses[policy_class]->mReadyQueue.push(op);
 }
 
 
-void HttpPolicy::retryOp(HttpOpRequest * op)
+void HttpPolicy::retryOp(const HttpOpRequest::ptr_t &op)
 {
-	static const HttpTime retry_deltas[] =
-		{
-			 250000,			// 1st retry in 0.25 S, etc...
-			 500000,
-			1000000,
-			2000000,
-			5000000				// ... to every 5.0 S.
-		};
-	static const int delta_max(int(LL_ARRAY_SIZE(retry_deltas)) - 1);
-	
+	static const HttpStatus error_503(503);
+
 	const HttpTime now(totalTime());
 	const int policy_class(op->mReqPolicy);
-	
-	const HttpTime delta(retry_deltas[llclamp(op->mPolicyRetries, 0, delta_max)]);
+
+	HttpTime delta_min = op->mPolicyMinRetryBackoff;
+	HttpTime delta_max = op->mPolicyMaxRetryBackoff;
+	// mPolicyRetries limited to 100
+	U32 delta_factor = op->mPolicyRetries <= 10 ? 1 << op->mPolicyRetries : 1024;
+	HttpTime delta = llmin(delta_min * delta_factor, delta_max);
+	bool external_delta(false);
+
+	if (op->mReplyRetryAfter > 0 && op->mReplyRetryAfter < 30)
+	{
+		delta = op->mReplyRetryAfter * U64L(1000000);
+		external_delta = true;
+	}
 	op->mPolicyRetryAt = now + delta;
 	++op->mPolicyRetries;
-	LL_WARNS("CoreHttp") << "HTTP request " << static_cast<HttpHandle>(op)
-						 << " retry " << op->mPolicyRetries
-						 << " scheduled for +" << (delta / HttpTime(1000))
-						 << " mS.  Status:  " << op->mStatus.toHex()
-						 << LL_ENDL;
-	if (op->mTracing > 0)
+	if (error_503 == op->mStatus)
 	{
-		LL_INFOS("CoreHttp") << "TRACE, ToRetryQueue, Handle:  "
-							 << static_cast<HttpHandle>(op)
-							 << LL_ENDL;
+		++op->mPolicy503Retries;
 	}
-	mState[policy_class].mRetryQueue.push(op);
+	LL_DEBUGS(LOG_CORE) << "HTTP request " << op->getHandle()
+						<< " retry " << op->mPolicyRetries
+						<< " scheduled in " << (delta / HttpTime(1000))
+						<< " mS (" << (external_delta ? "external" : "internal")
+						<< ").  Status:  " << op->mStatus.toTerseString()
+						<< LL_ENDL;
+	if (op->mTracing > HTTP_TRACE_OFF)
+	{
+		LL_INFOS(LOG_CORE) << "TRACE, ToRetryQueue, Handle:  "
+                            << op->getHandle()
+						    << ", Delta:  " << (delta / HttpTime(1000))
+						    << ", Retries:  " << op->mPolicyRetries
+						    << LL_ENDL;
+	}
+	mClasses[policy_class]->mRetryQueue.push(op);
 }
 
 
@@ -188,51 +204,122 @@ void HttpPolicy::retryOp(HttpOpRequest * op)
 // the worker thread may sleep hard otherwise will ask for
 // normal polling frequency.
 //
+// Implements a client-side request rate throttle as well.
+// This is intended to mimic and predict throttling behavior
+// of grid services but that is difficult to do with different
+// time bases.  This also represents a rigid coupling between
+// viewer and server that makes it hard to change parameters
+// and I hope we can make this go away with pipelining.
+//
 HttpService::ELoopSpeed HttpPolicy::processReadyQueue()
 {
 	const HttpTime now(totalTime());
 	HttpService::ELoopSpeed result(HttpService::REQUEST_SLEEP);
 	HttpLibcurl & transport(mService->getTransport());
 	
-	for (int policy_class(0); policy_class < mActiveClasses; ++policy_class)
+	for (int policy_class(0); policy_class < mClasses.size(); ++policy_class)
 	{
-		State & state(mState[policy_class]);
-		int active(transport.getActiveCountInClass(policy_class));
-		int needed(state.mConnAt - active);		// Expect negatives here
-
+		ClassState & state(*mClasses[policy_class]);
 		HttpRetryQueue & retryq(state.mRetryQueue);
 		HttpReadyQueue & readyq(state.mReadyQueue);
+
+		if (state.mStallStaging)
+		{
+			// Stalling but don't sleep.  Need to complete operations
+			// and get back to servicing queues.  Do this test before
+			// the retryq/readyq test or you'll get stalls until you
+			// click a setting or an asset request comes in.
+			result = HttpService::NORMAL;
+			continue;
+		}
+		if (retryq.empty() && readyq.empty())
+		{
+			continue;
+		}
 		
+		const bool throttle_enabled(state.mOptions.mThrottleRate > 0L);
+		const bool throttle_current(throttle_enabled && now < state.mThrottleEnd);
+
+		if (throttle_current && state.mThrottleLeft <= 0)
+		{
+			// Throttled condition, don't serve this class but don't sleep hard.
+			result = HttpService::NORMAL;
+			continue;
+		}
+
+		int active(transport.getActiveCountInClass(policy_class));
+		int active_limit(state.mOptions.mPipelining > 1L
+						 ? (state.mOptions.mPerHostConnectionLimit
+							* state.mOptions.mPipelining)
+						 : state.mOptions.mConnectionLimit);
+		int needed(active_limit - active);		// Expect negatives here
+
 		if (needed > 0)
 		{
 			// First see if we have any retries...
 			while (needed > 0 && ! retryq.empty())
 			{
-				HttpOpRequest * op(retryq.top());
+				HttpOpRequest::ptr_t op(retryq.top());
 				if (op->mPolicyRetryAt > now)
 					break;
 			
 				retryq.pop();
 				
 				op->stageFromReady(mService);
-				op->release();
-					
+                op.reset();
+
+				++state.mRequestCount;
 				--needed;
+				if (throttle_enabled)
+				{
+					if (now >= state.mThrottleEnd)
+					{
+						// Throttle expired, move to next window
+						LL_DEBUGS(LOG_CORE) << "Throttle expired with " << state.mThrottleLeft
+											<< " requests to go and " << state.mRequestCount
+											<< " requests issued." << LL_ENDL;
+						state.mThrottleLeft = state.mOptions.mThrottleRate;
+						state.mThrottleEnd = now + HttpTime(1000000);
+					}
+					if (--state.mThrottleLeft <= 0)
+					{
+						goto throttle_on;
+					}
+				}
 			}
-		
+			
 			// Now go on to the new requests...
 			while (needed > 0 && ! readyq.empty())
 			{
-				HttpOpRequest * op(readyq.top());
+				HttpOpRequest::ptr_t op(readyq.top());
 				readyq.pop();
 
 				op->stageFromReady(mService);
-				op->release();
+				op.reset();
 					
+				++state.mRequestCount;
 				--needed;
+				if (throttle_enabled)
+				{
+					if (now >= state.mThrottleEnd)
+					{
+						// Throttle expired, move to next window
+						LL_DEBUGS(LOG_CORE) << "Throttle expired with " << state.mThrottleLeft
+											<< " requests to go and " << state.mRequestCount
+											<< " requests issued." << LL_ENDL;
+						state.mThrottleLeft = state.mOptions.mThrottleRate;
+						state.mThrottleEnd = now + HttpTime(1000000);
+					}
+					if (--state.mThrottleLeft <= 0)
+					{
+						goto throttle_on;
+					}
+				}
 			}
 		}
-				
+
+	throttle_on:
+		
 		if (! readyq.empty() || ! retryq.empty())
 		{
 			// If anything is ready, continue looping...
@@ -246,9 +333,9 @@ HttpService::ELoopSpeed HttpPolicy::processReadyQueue()
 
 bool HttpPolicy::changePriority(HttpHandle handle, HttpRequest::priority_t priority)
 {
-	for (int policy_class(0); policy_class < mActiveClasses; ++policy_class)
+	for (int policy_class(0); policy_class < mClasses.size(); ++policy_class)
 	{
-		State & state(mState[policy_class]);
+		ClassState & state(*mClasses[policy_class]);
 		// We don't scan retry queue because a priority change there
 		// is meaningless.  The request will be issued based on retry
 		// intervals not priority value, which is now moot.
@@ -259,9 +346,9 @@ bool HttpPolicy::changePriority(HttpHandle handle, HttpRequest::priority_t prior
 		{
 			HttpReadyQueue::container_type::iterator cur(iter++);
 
-			if (static_cast<HttpHandle>(*cur) == handle)
+			if ((*cur)->getHandle() == handle)
 			{
-				HttpOpRequest * op(*cur);
+				HttpOpRequest::ptr_t op(*cur);
 				c.erase(cur);									// All iterators are now invalidated
 				op->mReqPriority = priority;
 				state.mReadyQueue.push(op);						// Re-insert using adapter class
@@ -276,9 +363,9 @@ bool HttpPolicy::changePriority(HttpHandle handle, HttpRequest::priority_t prior
 
 bool HttpPolicy::cancel(HttpHandle handle)
 {
-	for (int policy_class(0); policy_class < mActiveClasses; ++policy_class)
+	for (int policy_class(0); policy_class < mClasses.size(); ++policy_class)
 	{
-		State & state(mState[policy_class]);
+		ClassState & state(*mClasses[policy_class]);
 
 		// Scan retry queue
 		HttpRetryQueue::container_type & c1(state.mRetryQueue.get_container());
@@ -286,12 +373,11 @@ bool HttpPolicy::cancel(HttpHandle handle)
 		{
 			HttpRetryQueue::container_type::iterator cur(iter++);
 
-			if (static_cast<HttpHandle>(*cur) == handle)
+			if ((*cur)->getHandle() == handle)
 			{
-				HttpOpRequest * op(*cur);
+				HttpOpRequest::ptr_t op(*cur);
 				c1.erase(cur);									// All iterators are now invalidated
 				op->cancel();
-				op->release();
 				return true;
 			}
 		}
@@ -302,12 +388,11 @@ bool HttpPolicy::cancel(HttpHandle handle)
 		{
 			HttpReadyQueue::container_type::iterator cur(iter++);
 
-			if (static_cast<HttpHandle>(*cur) == handle)
+			if ((*cur)->getHandle() == handle)
 			{
-				HttpOpRequest * op(*cur);
+				HttpOpRequest::ptr_t op(*cur);
 				c2.erase(cur);									// All iterators are now invalidated
 				op->cancel();
-				op->release();
 				return true;
 			}
 		}
@@ -317,11 +402,23 @@ bool HttpPolicy::cancel(HttpHandle handle)
 }
 
 
-bool HttpPolicy::stageAfterCompletion(HttpOpRequest * op)
+bool HttpPolicy::stageAfterCompletion(const HttpOpRequest::ptr_t &op)
 {
 	// Retry or finalize
 	if (! op->mStatus)
 	{
+		// *DEBUG:  For "[curl:bugs] #1420" tests.  This will interfere
+		// with unit tests due to allocation retention by logging code.
+		// But you won't be checking this in enabled.
+#if 0
+		if (op->mStatus == HttpStatus(HttpStatus::EXT_CURL_EASY, CURLE_OPERATION_TIMEDOUT))
+		{
+			LL_WARNS(LOG_CORE) << "HTTP request " << op->getHandle()
+							   << " timed out."
+							   << LL_ENDL;
+		}
+#endif
+		
 		// If this failed, we might want to retry.
 		if (op->mPolicyRetries < op->mPolicyRetryLimit && op->mStatus.isRetryable())
 		{
@@ -334,33 +431,55 @@ bool HttpPolicy::stageAfterCompletion(HttpOpRequest * op)
 	// This op is done, finalize it delivering it to the reply queue...
 	if (! op->mStatus)
 	{
-		LL_WARNS("CoreHttp") << "HTTP request " << static_cast<HttpHandle>(op)
-							 << " failed after " << op->mPolicyRetries
-							 << " retries.  Reason:  " << op->mStatus.toString()
-							 << " (" << op->mStatus.toHex() << ")"
-							 << LL_ENDL;
+		LL_WARNS(LOG_CORE) << "HTTP request " << op->getHandle()
+						   << " failed after " << op->mPolicyRetries
+						   << " retries.  Reason:  " << op->mStatus.toString()
+						   << " (" << op->mStatus.toTerseString() << ")"
+						   << LL_ENDL;
 	}
 	else if (op->mPolicyRetries)
 	{
-		LL_WARNS("CoreHttp") << "HTTP request " << static_cast<HttpHandle>(op)
-							 << " succeeded on retry " << op->mPolicyRetries << "."
-							 << LL_ENDL;
+        LL_DEBUGS(LOG_CORE) << "HTTP request " << op->getHandle()
+							<< " succeeded on retry " << op->mPolicyRetries << "."
+							<< LL_ENDL;
 	}
 
 	op->stageFromActive(mService);
-	op->release();
+
+    HTTPStats::instance().recordResultCode(op->mStatus.getType());
 	return false;						// not active
+}
+
+	
+HttpPolicyClass & HttpPolicy::getClassOptions(HttpRequest::policy_t pclass)
+{
+	llassert_always(pclass >= 0 && pclass < mClasses.size());
+	
+	return mClasses[pclass]->mOptions;
 }
 
 
 int HttpPolicy::getReadyCount(HttpRequest::policy_t policy_class) const
 {
-	if (policy_class < mActiveClasses)
+	if (policy_class < mClasses.size())
 	{
-		return (mState[policy_class].mReadyQueue.size()
-				+ mState[policy_class].mRetryQueue.size());
+		return (mClasses[policy_class]->mReadyQueue.size()
+				+ mClasses[policy_class]->mRetryQueue.size());
 	}
 	return 0;
+}
+
+
+bool HttpPolicy::stallPolicy(HttpRequest::policy_t policy_class, bool stall)
+{
+	bool ret(false);
+	
+	if (policy_class < mClasses.size())
+	{
+		ret = mClasses[policy_class]->mStallStaging;
+		mClasses[policy_class]->mStallStaging = stall;
+	}
+	return ret;
 }
 
 

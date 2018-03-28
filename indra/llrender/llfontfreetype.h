@@ -74,7 +74,7 @@ struct LLFontGlyphInfo
 
 extern LLFontManager *gFontManagerp;
 
-class LLFontFreetype : public LLRefCount
+class LLFontFreetype : public LLRefCount, public LLTrace::MemTrackable<LLFontFreetype>
 {
 public:
 	LLFontFreetype();
@@ -134,7 +134,7 @@ public:
 
 	const std::string& getName() const;
 
-	const LLPointer<LLFontBitmapCache> getFontBitmapCache() const;
+	const LLFontBitmapCache* getFontBitmapCache() const;
 
 	void setStyle(U8 style);
 	U8 getStyle() const;
@@ -162,12 +162,10 @@ private:
 	BOOL mIsFallback;
 	font_vector_t mFallbackFonts; // A list of fallback fonts to look for glyphs in (for Unicode chars)
 
-	BOOL mValid;
-
 	typedef boost::unordered_map<llwchar, LLFontGlyphInfo*> char_glyph_info_map_t;
 	mutable char_glyph_info_map_t mCharGlyphInfoMap; // Information about glyph location in bitmap
 
-	mutable LLPointer<LLFontBitmapCache> mFontBitmapCachep;
+	mutable LLFontBitmapCache* mFontBitmapCachep;
 
 	mutable S32 mRenderGlyphCount;
 	mutable S32 mAddGlyphCount;

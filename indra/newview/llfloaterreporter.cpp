@@ -35,7 +35,10 @@
 #include "llassetstorage.h"
 #include "llavatarnamecache.h"
 #include "llcachename.h"
+#include "llcallbacklist.h"
+#include "llcheckboxctrl.h"
 #include "llfontgl.h"
+#include "llimagebmp.h"
 #include "llimagej2c.h"
 #include "llinventory.h"
 #include "llnotificationsutil.h"
@@ -75,15 +78,70 @@
 #include "llselectmgr.h"
 #include "llversioninfo.h"
 #include "lluictrlfactory.h"
+#include "llviewercontrol.h"
 #include "llviewernetwork.h"
 
-#include "llassetuploadresponders.h"
 #include "llagentui.h"
 
 #include "lltrans.h"
+#include "llexperiencecache.h"
 
-const U32 INCLUDE_SCREENSHOT  = 0x01 << 0;
+#include "llcorehttputil.h"
+#include "llviewerassetupload.h"
 
+const std::string SCREEN_PREV_FILENAME = "screen_report_last.bmp";
+
+//=========================================================================
+//-----------------------------------------------------------------------------
+// Support classes
+//-----------------------------------------------------------------------------
+class LLARScreenShotUploader : public LLResourceUploadInfo
+{
+public:
+    LLARScreenShotUploader(LLSD report, LLUUID assetId, LLAssetType::EType assetType);
+
+    virtual LLSD        prepareUpload();
+    virtual LLSD        generatePostBody();
+    virtual S32         getEconomyUploadCost();
+    virtual LLUUID      finishUpload(LLSD &result);
+
+    virtual bool        showInventoryPanel() const { return false; }
+    virtual std::string getDisplayName() const { return "Abuse Report"; }
+
+private:
+
+    LLSD    mReport;
+};
+
+LLARScreenShotUploader::LLARScreenShotUploader(LLSD report, LLUUID assetId, LLAssetType::EType assetType) :
+    LLResourceUploadInfo(assetId, assetType, "Abuse Report"),
+    mReport(report)
+{
+}
+
+LLSD LLARScreenShotUploader::prepareUpload()
+{
+    return LLSD().with("success", LLSD::Boolean(true));
+}
+
+LLSD LLARScreenShotUploader::generatePostBody()
+{   // The report was pregenerated and passed in the constructor.
+    return mReport;
+}
+
+S32 LLARScreenShotUploader::getEconomyUploadCost()
+{   // Abuse report screen shots do not cost anything to upload.
+    return 0;
+}
+
+LLUUID LLARScreenShotUploader::finishUpload(LLSD &result)
+{
+    /* *TODO$: Report success or failure. Carried over from previous todo on responder*/
+    return LLUUID::null;
+}
+
+
+//=========================================================================
 //-----------------------------------------------------------------------------
 // Globals
 //-----------------------------------------------------------------------------
@@ -108,14 +166,6 @@ LLFloaterReporter::LLFloaterReporter(const LLSD& key)
 {
 }
 
-// static
-void LLFloaterReporter::processRegionInfo(LLMessageSystem* msg)
-{
-	if ( LLFloaterReg::instanceVisible("reporter") )
-	{
-		LLNotificationsUtil::add("HelpReportAbuseEmailLL");
-	};
-}
 // virtual
 BOOL LLFloaterReporter::postBuild()
 {
@@ -135,11 +185,6 @@ BOOL LLFloaterReporter::postBuild()
 	}
 	setPosBox(pos);
 
-	// Take a screenshot, but don't draw this floater.
-	setVisible(FALSE);
-	takeScreenshot();
-	setVisible(TRUE);
-
 	// Default text to be blank
 	getChild<LLUICtrl>("object_name")->setValue(LLStringUtil::null);
 	getChild<LLUICtrl>("owner_name")->setValue(LLStringUtil::null);
@@ -149,16 +194,6 @@ BOOL LLFloaterReporter::postBuild()
 
 	mDefaultSummary = getChild<LLUICtrl>("details_edit")->getValue().asString();
 
-	// send a message and ask for information about this region - 
-	// result comes back in processRegionInfo(..)
-	LLMessageSystem* msg = gMessageSystem;
-	msg->newMessage("RequestRegionInfo");
-	msg->nextBlock("AgentData");
-	msg->addUUID("AgentID", gAgent.getID());
-	msg->addUUID("SessionID", gAgent.getSessionID());
-	gAgent.sendReliableMessage();
-	
-	
 	// abuser name is selected from a list
 	LLUICtrl* le = getChild<LLUICtrl>("abuser_name_edit");
 	le->setEnabled( false );
@@ -177,7 +212,7 @@ BOOL LLFloaterReporter::postBuild()
 	// grab the user's name
 	std::string reporter = LLSLURL("agent", gAgent.getID(), "inspect").getSLURLString();
 	getChild<LLUICtrl>("reporter_field")->setValue(reporter);
-	
+
 	center();
 
 	return TRUE;
@@ -209,8 +244,6 @@ LLFloaterReporter::~LLFloaterReporter()
 // virtual
 void LLFloaterReporter::draw()
 {
-	getChildView("screen_check")->setEnabled(TRUE );
-
 	LLFloater::draw();
 }
 
@@ -218,13 +251,36 @@ void LLFloaterReporter::enableControls(BOOL enable)
 {
 	getChildView("category_combo")->setEnabled(enable);
 	getChildView("chat_check")->setEnabled(enable);
-	getChildView("screen_check")->setEnabled(enable);
 	getChildView("screenshot")->setEnabled(FALSE);
 	getChildView("pick_btn")->setEnabled(enable);
 	getChildView("summary_edit")->setEnabled(enable);
 	getChildView("details_edit")->setEnabled(enable);
 	getChildView("send_btn")->setEnabled(enable);
 	getChildView("cancel_btn")->setEnabled(enable);
+}
+
+void LLFloaterReporter::getExperienceInfo(const LLUUID& experience_id)
+{
+	mExperienceID = experience_id;
+
+	if (LLUUID::null != mExperienceID)
+	{
+        const LLSD& experience = LLExperienceCache::instance().get(mExperienceID);
+		std::stringstream desc;
+
+		if(experience.isDefined())
+		{
+			setFromAvatarID(experience[LLExperienceCache::AGENT_ID]);
+			desc << "Experience id: " << mExperienceID;
+		}
+		else
+		{
+			desc << "Unable to retrieve details for id: "<< mExperienceID;
+		}
+		
+		LLUICtrl* details = getChild<LLUICtrl>("details_edit");
+		details->setValue(desc.str());
+	}
 }
 
 void LLFloaterReporter::getObjectInfo(const LLUUID& object_id)
@@ -382,28 +438,20 @@ void LLFloaterReporter::onClickSend(void *userdata)
 
 		LLUploadDialog::modalUploadDialog(LLTrans::getString("uploading_abuse_report"));
 		// *TODO don't upload image if checkbox isn't checked
-		std::string url = gAgent.getRegion()->getCapability("SendUserReport");
-		std::string sshot_url = gAgent.getRegion()->getCapability("SendUserReportWithScreenshot");
+		std::string url = gAgent.getRegionCapability("SendUserReport");
+		std::string sshot_url = gAgent.getRegionCapability("SendUserReportWithScreenshot");
 		if(!url.empty() || !sshot_url.empty())
 		{
 			self->sendReportViaCaps(url, sshot_url, self->gatherReport());
+			LLNotificationsUtil::add("HelpReportAbuseConfirm");
 			self->closeFloater();
 		}
 		else
 		{
-			if(self->getChild<LLUICtrl>("screen_check")->getValue())
-			{
-				self->getChildView("send_btn")->setEnabled(FALSE);
-				self->getChildView("cancel_btn")->setEnabled(FALSE);
-				// the callback from uploading the image calls sendReportViaLegacy()
-				self->uploadImage();
-			}
-			else
-			{
-				self->sendReportViaLegacy(self->gatherReport());
-				LLUploadDialog::modalUploadFinished();
-				self->closeFloater();
-			}
+			self->getChildView("send_btn")->setEnabled(FALSE);
+			self->getChildView("cancel_btn")->setEnabled(FALSE);
+			// the callback from uploading the image calls sendReportViaLegacy()
+			self->uploadImage();
 		}
 	}
 }
@@ -460,43 +508,69 @@ void LLFloaterReporter::showFromMenu(EReportType report_type)
 {
 	if (COMPLAINT_REPORT != report_type)
 	{
-		llwarns << "Unknown LLViewerReporter type : " << report_type << llendl;
+		LL_WARNS() << "Unknown LLViewerReporter type : " << report_type << LL_ENDL;
 		return;
 	}
-	
-	LLFloaterReporter* f = LLFloaterReg::showTypedInstance<LLFloaterReporter>("reporter", LLSD());
-	if (f)
+	LLFloaterReporter* reporter_floater = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
+	if(reporter_floater && reporter_floater->isInVisibleChain())
 	{
-		f->setReportType(report_type);
+		gSavedPerAccountSettings.setBOOL("PreviousScreenshotForReport", FALSE);
+	}
+	reporter_floater = LLFloaterReg::showTypedInstance<LLFloaterReporter>("reporter", LLSD());
+	if (reporter_floater)
+	{
+		reporter_floater->setReportType(report_type);
 	}
 }
 
 // static
-void LLFloaterReporter::show(const LLUUID& object_id, const std::string& avatar_name)
+void LLFloaterReporter::show(const LLUUID& object_id, const std::string& avatar_name, const LLUUID& experience_id)
 {
-	LLFloaterReporter* f = LLFloaterReg::showTypedInstance<LLFloaterReporter>("reporter");
-
+	LLFloaterReporter* reporter_floater = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
+	if(reporter_floater && reporter_floater->isInVisibleChain())
+	{
+		gSavedPerAccountSettings.setBOOL("PreviousScreenshotForReport", FALSE);
+	}
+	reporter_floater = LLFloaterReg::showTypedInstance<LLFloaterReporter>("reporter");
 	if (avatar_name.empty())
 	{
 		// Request info for this object
-		f->getObjectInfo(object_id);
+		reporter_floater->getObjectInfo(object_id);
 	}
 	else
 	{
-		f->setFromAvatarID(object_id);
+		reporter_floater->setFromAvatarID(object_id);
+	}
+	if(experience_id.notNull())
+	{
+		reporter_floater->getExperienceInfo(experience_id);
 	}
 
 	// Need to deselect on close
-	f->mDeselectOnClose = TRUE;
+	reporter_floater->mDeselectOnClose = TRUE;
+}
 
-	f->openFloater();
+
+
+void LLFloaterReporter::showFromExperience( const LLUUID& experience_id )
+{
+	LLFloaterReporter* reporter_floater = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
+	if(reporter_floater && reporter_floater->isInVisibleChain())
+	{
+		gSavedPerAccountSettings.setBOOL("PreviousScreenshotForReport", FALSE);
+	}
+	reporter_floater = LLFloaterReg::showTypedInstance<LLFloaterReporter>("reporter");
+	reporter_floater->getExperienceInfo(experience_id);
+
+	// Need to deselect on close
+	reporter_floater->mDeselectOnClose = TRUE;
 }
 
 
 // static
-void LLFloaterReporter::showFromObject(const LLUUID& object_id)
+void LLFloaterReporter::showFromObject(const LLUUID& object_id, const LLUUID& experience_id)
 {
-	show(object_id);
+	show(object_id, LLStringUtil::null, experience_id);
 }
 
 // static
@@ -635,10 +709,7 @@ LLSD LLFloaterReporter::gatherReport()
 	// only send a screenshot ID if we're asked to and the email is 
 	// going to LL - Estate Owners cannot see the screenshot asset
 	LLUUID screenshot_id = LLUUID::null;
-	if (getChild<LLUICtrl>("screen_check")->getValue())
-	{
-		screenshot_id = getChild<LLUICtrl>("screenshot")->getValue();
-	};
+	screenshot_id = getChild<LLUICtrl>("screenshot")->getValue();
 
 	LLSD report = LLSD::emptyMap();
 	report["report-type"] = (U8) mReportType;
@@ -684,72 +755,46 @@ void LLFloaterReporter::sendReportViaLegacy(const LLSD & report)
 	msg->sendReliable(regionp->getHost());
 }
 
-class LLUserReportScreenshotResponder : public LLAssetUploadResponder
+void LLFloaterReporter::finishedARPost(const LLSD &)
 {
-public:
-	LLUserReportScreenshotResponder(const LLSD & post_data, 
-									const LLUUID & vfile_id, 
-									LLAssetType::EType asset_type):
-	  LLAssetUploadResponder(post_data, vfile_id, asset_type)
-	{
-	}
-	void uploadFailed(const LLSD& content)
-	{
-		// *TODO pop up a dialog so the user knows their report screenshot didn't make it
-		LLUploadDialog::modalUploadFinished();
-	}
-	void uploadComplete(const LLSD& content)
-	{
-		// we don't care about what the server returns from this post, just clean up the UI
-		LLUploadDialog::modalUploadFinished();
-	}
-};
+    LLUploadDialog::modalUploadFinished();
 
-class LLUserReportResponder : public LLHTTPClient::Responder
-{
-public:
-	LLUserReportResponder(): LLHTTPClient::Responder()  {}
-
-	void errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-	{
-		// *TODO do some user messaging here
-		LLUploadDialog::modalUploadFinished();
-	}
-	void result(const LLSD& content)
-	{
-		// we don't care about what the server returns
-		LLUploadDialog::modalUploadFinished();
-	}
-};
+}
 
 void LLFloaterReporter::sendReportViaCaps(std::string url, std::string sshot_url, const LLSD& report)
 {
-	if(getChild<LLUICtrl>("screen_check")->getValue().asBoolean() && !sshot_url.empty())
-	{
+	if(!sshot_url.empty())
+    {
 		// try to upload screenshot
-		LLHTTPClient::post(sshot_url, report, new LLUserReportScreenshotResponder(report, 
-															mResourceDatap->mAssetInfo.mUuid, 
-															mResourceDatap->mAssetInfo.mType));			
+        LLResourceUploadInfo::ptr_t uploadInfo(new  LLARScreenShotUploader(report, mResourceDatap->mAssetInfo.mUuid, mResourceDatap->mAssetInfo.mType));
+        LLViewerAssetUpload::EnqueueInventoryUpload(sshot_url, uploadInfo);
 	}
 	else
 	{
-		// screenshot not wanted or we don't have screenshot cap
-		LLHTTPClient::post(url, report, new LLUserReportResponder());			
+        LLCoreHttpUtil::HttpCoroutineAdapter::completionCallback_t proc = boost::bind(&LLFloaterReporter::finishedARPost, _1);
+        LLUploadDialog::modalUploadDialog("Abuse Report");
+        LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpPost(url, report, proc, proc);
 	}
 }
 
-void LLFloaterReporter::takeScreenshot()
+void LLFloaterReporter::takeScreenshot(bool use_prev_screenshot)
 {
-	const S32 IMAGE_WIDTH = 1024;
-	const S32 IMAGE_HEIGHT = 768;
-
-	LLPointer<LLImageRaw> raw = new LLImageRaw;
-	if( !gViewerWindow->rawSnapshot(raw, IMAGE_WIDTH, IMAGE_HEIGHT, TRUE, FALSE, TRUE, FALSE))
+	gSavedPerAccountSettings.setBOOL("PreviousScreenshotForReport", TRUE);
+	if(!use_prev_screenshot)
 	{
-		llwarns << "Unable to take screenshot" << llendl;
-		return;
+		std::string screenshot_filename(gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter() + SCREEN_PREV_FILENAME);
+		LLPointer<LLImageBMP> bmp_image = new LLImageBMP;
+		if(bmp_image->encode(mImageRaw, 0.0f))
+		{
+			bmp_image->save(screenshot_filename);
+		}
 	}
-	LLPointer<LLImageJ2C> upload_data = LLViewerTextureList::convertToUploadFile(raw);
+	else
+	{
+		mImageRaw = mPrevImageRaw;
+	}
+
+	LLPointer<LLImageJ2C> upload_data = LLViewerTextureList::convertToUploadFile(mImageRaw);
 
 	// create a resource data
 	mResourceDatap->mInventoryType = LLInventoryType::IT_NONE;
@@ -765,7 +810,7 @@ void LLFloaterReporter::takeScreenshot()
 	}
 	else
 	{
-		llwarns << "Unknown LLFloaterReporter type" << llendl;
+		LL_WARNS() << "Unknown LLFloaterReporter type" << LL_ENDL;
 	}
 	mResourceDatap->mAssetInfo.mCreatorID = gAgentID;
 	mResourceDatap->mAssetInfo.setName("screenshot_name");
@@ -781,26 +826,74 @@ void LLFloaterReporter::takeScreenshot()
 	// store in the image list so it doesn't try to fetch from the server
 	LLPointer<LLViewerFetchedTexture> image_in_list = 
 		LLViewerTextureManager::getFetchedTexture(mResourceDatap->mAssetInfo.mUuid);
-	image_in_list->createGLTexture(0, raw, 0, TRUE, LLGLTexture::OTHER);
+	image_in_list->createGLTexture(0, mImageRaw, 0, TRUE, LLGLTexture::OTHER);
 	
 	// the texture picker then uses that texture
-	LLTexturePicker* texture = getChild<LLTextureCtrl>("screenshot");
+	LLTextureCtrl* texture = getChild<LLTextureCtrl>("screenshot");
 	if (texture)
 	{
 		texture->setImageAssetID(mResourceDatap->mAssetInfo.mUuid);
 		texture->setDefaultImageAssetID(mResourceDatap->mAssetInfo.mUuid);
 		texture->setCaption(getString("Screenshot"));
 	}
+}
 
+void LLFloaterReporter::takeNewSnapshot()
+{
+	childSetEnabled("send_btn", true);
+	mImageRaw = new LLImageRaw;
+	const S32 IMAGE_WIDTH = 1024;
+	const S32 IMAGE_HEIGHT = 768;
+
+	// Take a screenshot, but don't draw this floater.
+	setVisible(FALSE);
+	if( !gViewerWindow->rawSnapshot(mImageRaw, IMAGE_WIDTH, IMAGE_HEIGHT, TRUE, FALSE, TRUE, FALSE))
+	{
+		LL_WARNS() << "Unable to take screenshot" << LL_ENDL;
+		setVisible(TRUE);
+		return;
+	}
+	setVisible(TRUE);
+
+	if(gSavedPerAccountSettings.getBOOL("PreviousScreenshotForReport"))
+	{
+		std::string screenshot_filename(gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter() + SCREEN_PREV_FILENAME);
+		mPrevImageRaw = new LLImageRaw;
+		LLPointer<LLImageBMP> start_image_bmp = new LLImageBMP;
+		if(start_image_bmp->load(screenshot_filename))
+		{
+			if (start_image_bmp->decode(mPrevImageRaw, 0.0f))
+			{
+				LLNotificationsUtil::add("LoadPreviousReportScreenshot", LLSD(), LLSD(), boost::bind(&LLFloaterReporter::onLoadScreenshotDialog,this, _1, _2));
+				return;
+			}
+		}
+	}
+	takeScreenshot();
+}
+
+
+void LLFloaterReporter::onOpen(const LLSD& key)
+{
+	childSetEnabled("send_btn", false);
+	//Time delay to avoid UI artifacts. MAINT-7067
+	doAfterInterval(boost::bind(&LLFloaterReporter::takeNewSnapshot,this), gSavedSettings.getF32("AbuseReportScreenshotDelay"));
+
+}
+
+void LLFloaterReporter::onLoadScreenshotDialog(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	takeScreenshot(option == 0);
 }
 
 void LLFloaterReporter::uploadImage()
 {
-	llinfos << "*** Uploading: " << llendl;
-	llinfos << "Type: " << LLAssetType::lookup(mResourceDatap->mAssetInfo.mType) << llendl;
-	llinfos << "UUID: " << mResourceDatap->mAssetInfo.mUuid << llendl;
-	llinfos << "Name: " << mResourceDatap->mAssetInfo.getName() << llendl;
-	llinfos << "Desc: " << mResourceDatap->mAssetInfo.getDescription() << llendl;
+	LL_INFOS() << "*** Uploading: " << LL_ENDL;
+	LL_INFOS() << "Type: " << LLAssetType::lookup(mResourceDatap->mAssetInfo.mType) << LL_ENDL;
+	LL_INFOS() << "UUID: " << mResourceDatap->mAssetInfo.mUuid << LL_ENDL;
+	LL_INFOS() << "Name: " << mResourceDatap->mAssetInfo.getName() << LL_ENDL;
+	LL_INFOS() << "Desc: " << mResourceDatap->mAssetInfo.getDescription() << LL_ENDL;
 
 	gAssetStorage->storeAssetData(mResourceDatap->mAssetInfo.mTransactionID,
 									mResourceDatap->mAssetInfo.mType,
@@ -824,21 +917,22 @@ void LLFloaterReporter::uploadDoneCallback(const LLUUID &uuid, void *user_data, 
 
 		std::string err_msg("There was a problem uploading a report screenshot");
 		err_msg += " due to the following reason: " + args["REASON"].asString();
-		llwarns << err_msg << llendl;
+		LL_WARNS() << err_msg << LL_ENDL;
 		return;
 	}
 
 	if (data->mPreferredLocation != LLResourceData::INVALID_LOCATION)
 	{
-		llwarns << "Unknown report type : " << data->mPreferredLocation << llendl;
+		LL_WARNS() << "Unknown report type : " << data->mPreferredLocation << LL_ENDL;
 	}
 
 	LLFloaterReporter *self = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
 	if (self)
 	{
 		self->mScreenID = uuid;
-		llinfos << "Got screen shot " << uuid << llendl;
+		LL_INFOS() << "Got screen shot " << uuid << LL_ENDL;
 		self->sendReportViaLegacy(self->gatherReport());
+		LLNotificationsUtil::add("HelpReportAbuseConfirm");
 		self->closeFloater();
 	}
 }
@@ -853,6 +947,12 @@ void LLFloaterReporter::setPosBox(const LLVector3d &pos)
 		mPosition.mV[VZ]);
 	getChild<LLUICtrl>("pos_field")->setValue(pos_string);
 }
+
+void LLFloaterReporter::onClose(bool app_quitting)
+{
+	gSavedPerAccountSettings.setBOOL("PreviousScreenshotForReport", app_quitting);
+}
+
 
 // void LLFloaterReporter::setDescription(const std::string& description, LLMeanCollisionData *mcd)
 // {

@@ -25,8 +25,69 @@
  */
 
 #import "llopenglview-objc.h"
-#include "llwindowmacosx-objc.h"
+#import "llwindowmacosx-objc.h"
 #import "llappdelegate-objc.h"
+
+#pragma mark local functions
+
+NativeKeyEventData extractKeyDataFromKeyEvent(NSEvent* theEvent)
+{
+    NativeKeyEventData eventData;
+    eventData.mKeyEvent = NativeKeyEventData::KEYUNKNOWN;
+    eventData.mEventType = [theEvent type];
+    eventData.mEventModifiers = [theEvent modifierFlags];
+    eventData.mEventKeyCode = [theEvent keyCode];
+    NSString *strEventChars = [theEvent characters];
+    eventData.mEventChars = (strEventChars.length) ? [strEventChars characterAtIndex:0] : 0;
+    NSString *strEventUChars = [theEvent charactersIgnoringModifiers];
+    eventData.mEventUnmodChars = (strEventUChars.length) ? [strEventUChars characterAtIndex:0] : 0;
+    eventData.mEventRepeat = [theEvent isARepeat];
+    return eventData;
+}
+
+NativeKeyEventData extractKeyDataFromModifierEvent(NSEvent* theEvent)
+{
+    NativeKeyEventData eventData;
+    eventData.mKeyEvent = NativeKeyEventData::KEYUNKNOWN;
+    eventData.mEventType = [theEvent type];
+    eventData.mEventModifiers = [theEvent modifierFlags];
+    eventData.mEventKeyCode = [theEvent keyCode];
+    return eventData;
+}
+
+attributedStringInfo getSegments(NSAttributedString *str)
+{
+    attributedStringInfo segments;
+    segment_lengths seg_lengths;
+    segment_standouts seg_standouts;
+    NSRange effectiveRange;
+    NSRange limitRange = NSMakeRange(0, [str length]);
+    
+    while (limitRange.length > 0) {
+        NSNumber *attr = [str attribute:NSUnderlineStyleAttributeName atIndex:limitRange.location longestEffectiveRange:&effectiveRange inRange:limitRange];
+        limitRange = NSMakeRange(NSMaxRange(effectiveRange), NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
+        
+        if (effectiveRange.length <= 0)
+        {
+            effectiveRange.length = 1;
+        }
+        
+        if ([attr integerValue] == 2)
+        {
+            seg_lengths.push_back(effectiveRange.length);
+            seg_standouts.push_back(true);
+        } else
+        {
+            seg_lengths.push_back(effectiveRange.length);
+            seg_standouts.push_back(false);
+        }
+    }
+    segments.seg_lengths = seg_lengths;
+    segments.seg_standouts = seg_standouts;
+    return segments;
+}
+
+#pragma mark class implementations
 
 @implementation NSScreen (PointConversion)
 
@@ -41,6 +102,7 @@
     
     return screen;
 }
+
 
 - (NSPoint)convertPointToScreenCoordinates:(NSPoint)aPoint
 {
@@ -57,77 +119,83 @@
 
 @end
 
-attributedStringInfo getSegments(NSAttributedString *str)
-{
-	attributedStringInfo segments;
-	segment_lengths seg_lengths;
-	segment_standouts seg_standouts;
-	NSRange effectiveRange;
-	NSRange limitRange = NSMakeRange(0, [str length]);
-    
-	while (limitRange.length > 0) {
-		NSNumber *attr = [str attribute:NSUnderlineStyleAttributeName atIndex:limitRange.location longestEffectiveRange:&effectiveRange inRange:limitRange];
-		limitRange = NSMakeRange(NSMaxRange(effectiveRange), NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
-		
-		if (effectiveRange.length <= 0)
-		{
-			effectiveRange.length = 1;
-		}
-		
-		if ([attr integerValue] == 2)
-		{
-			seg_lengths.push_back(effectiveRange.length);
-			seg_standouts.push_back(true);
-		} else
-		{
-			seg_lengths.push_back(effectiveRange.length);
-			seg_standouts.push_back(false);
-		}
-	}
-	segments.seg_lengths = seg_lengths;
-	segments.seg_standouts = seg_standouts;
-	return segments;
-}
-
 @implementation LLOpenGLView
 
 // Force a high quality update after live resizing
 - (void) viewDidEndLiveResize
 {
-    NSSize size = [self frame].size;
-    callResize(size.width, size.height);
+    if (mOldResize)  //Maint-3135
+    {
+        NSSize size = [self frame].size;
+        callResize(size.width, size.height);
+    }
 }
 
 - (unsigned long)getVramSize
 {
     CGLRendererInfoObj info = 0;
-	GLint vram_bytes = 0;
+	GLint vram_megabytes = 0;
     int num_renderers = 0;
     CGLError the_err = CGLQueryRendererInfo (CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay), &info, &num_renderers);
     if(0 == the_err)
     {
-        CGLDescribeRenderer (info, 0, kCGLRPTextureMemory, &vram_bytes);
+        CGLDescribeRenderer (info, 0, kCGLRPTextureMemoryMegabytes, &vram_megabytes);
         CGLDestroyRendererInfo (info);
     }
     else
     {
-        vram_bytes = (256 << 20);
+        vram_megabytes = 256;
     }
     
-	return (unsigned long)vram_bytes / 1048576; // We need this in megabytes.
+	return (unsigned long)vram_megabytes; // return value is in megabytes.
 }
 
 - (void)viewDidMoveToWindow
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(windowResized:) name:NSWindowDidResizeNotification
+											   object:[self window]];    
+ 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(windowWillMiniaturize:) name:NSWindowWillMiniaturizeNotification
 											   object:[self window]];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification
+											   object:[self window]];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification
+											   object:[self window]];
+}
+
+- (void)setOldResize:(bool)oldresize
+{
+    mOldResize = oldresize;
 }
 
 - (void)windowResized:(NSNotification *)notification;
 {
-	//NSSize size = [self frame].size;
-	//callResize(size.width, size.height);
+    if (!mOldResize)  //Maint-3288
+    {
+        NSSize size = [self frame].size;
+        callResize(size.width, size.height);
+    }
+}
+
+- (void)windowWillMiniaturize:(NSNotification *)notification;
+{
+    callWindowHide();
+}
+
+- (void)windowDidDeminiaturize:(NSNotification *)notification;
+{
+    callWindowUnhide();
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)notification;
+{
+    mModifiers = [NSEvent modifierFlags];
 }
 
 - (void)dealloc
@@ -164,8 +232,8 @@ attributedStringInfo getSegments(NSAttributedString *str)
 		NSOpenGLPFADoubleBuffer,
 		NSOpenGLPFAClosestPolicy,
 		NSOpenGLPFAAccelerated,
-		NSOpenGLPFASampleBuffers, (samples > 0 ? 1 : 0),
-		NSOpenGLPFASamples, samples,
+		NSOpenGLPFASampleBuffers, static_cast<NSOpenGLPixelFormatAttribute>(samples > 0 ? 1 : 0),
+		NSOpenGLPFASamples, static_cast<NSOpenGLPixelFormatAttribute>(samples),
 		NSOpenGLPFAStencilSize, 8,
 		NSOpenGLPFADepthSize, 24,
 		NSOpenGLPFAAlphaSize, 8,
@@ -201,9 +269,15 @@ attributedStringInfo getSegments(NSAttributedString *str)
 	{
 		[glContext setValues:(const GLint*)1 forParameter:NSOpenGLCPSwapInterval];
 	} else {
-		[glContext setValues:(const GLint*)0 forParameter:NSOpenGLCPSwapInterval];
+		// supress this error after move to Xcode 7:
+		// error: null passed to a callee that requires a non-null argument [-Werror,-Wnonnull]
+		// Tried using ObjC 'nonnull' keyword as per SO article but didn't build
+		GLint swapInterval=0;
+		[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
 	}
 	
+    mOldResize = false;
+    
 	return self;
 }
 
@@ -257,14 +331,14 @@ attributedStringInfo getSegments(NSAttributedString *str)
         !([theEvent modifierFlags] & NSFunctionKeyMask) &&
         !([theEvent modifierFlags] & NSHelpKeyMask))
     {
-        callRightMouseDown(mMousePos, mModifiers);
+        callRightMouseDown(mMousePos, [theEvent modifierFlags]);
         mSimulatedRightClick = true;
     } else {
         if ([theEvent clickCount] >= 2)
         {
-            callDoubleClick(mMousePos, mModifiers);
+            callDoubleClick(mMousePos, [theEvent modifierFlags]);
         } else if ([theEvent clickCount] == 1) {
-            callLeftMouseDown(mMousePos, mModifiers);
+            callLeftMouseDown(mMousePos, [theEvent modifierFlags]);
         }
     }
 }
@@ -273,28 +347,31 @@ attributedStringInfo getSegments(NSAttributedString *str)
 {
     if (mSimulatedRightClick)
     {
-        callRightMouseUp(mMousePos, mModifiers);
+        callRightMouseUp(mMousePos, [theEvent modifierFlags]);
         mSimulatedRightClick = false;
     } else {
-        callLeftMouseUp(mMousePos, mModifiers);
+        NSPoint mPoint = [theEvent locationInWindow];
+        mMousePos[0] = mPoint.x;
+        mMousePos[1] = mPoint.y;
+        callLeftMouseUp(mMousePos, [theEvent modifierFlags]);
     }
 }
 
 - (void) rightMouseDown:(NSEvent *)theEvent
 {
-	callRightMouseDown(mMousePos, mModifiers);
+	callRightMouseDown(mMousePos, [theEvent modifierFlags]);
 }
 
 - (void) rightMouseUp:(NSEvent *)theEvent
 {
-	callRightMouseUp(mMousePos, mModifiers);
+	callRightMouseUp(mMousePos, [theEvent modifierFlags]);
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
 	float mouseDeltas[2] = {
-		[theEvent deltaX],
-		[theEvent deltaY]
+		float([theEvent deltaX]),
+		float([theEvent deltaY])
 	};
 	
 	callDeltaUpdate(mouseDeltas, 0);
@@ -314,8 +391,8 @@ attributedStringInfo getSegments(NSAttributedString *str)
 	// The old CoreGraphics APIs we previously relied on are now flagged as obsolete.
 	// NSEvent isn't obsolete, and provides us with the correct deltas.
 	float mouseDeltas[2] = {
-		[theEvent deltaX],
-		[theEvent deltaY]
+		float([theEvent deltaX]),
+		float([theEvent deltaY])
 	};
 	
 	callDeltaUpdate(mouseDeltas, 0);
@@ -323,22 +400,27 @@ attributedStringInfo getSegments(NSAttributedString *str)
 	NSPoint mPoint = [theEvent locationInWindow];
 	mMousePos[0] = mPoint.x;
 	mMousePos[1] = mPoint.y;
-	callMouseMoved(mMousePos, 0);
+	callMouseDragged(mMousePos, 0);
 }
 
 - (void) otherMouseDown:(NSEvent *)theEvent
 {
-	callMiddleMouseDown(mMousePos, mModifiers);
+	callMiddleMouseDown(mMousePos, [theEvent modifierFlags]);
 }
 
 - (void) otherMouseUp:(NSEvent *)theEvent
 {
-	callMiddleMouseUp(mMousePos, mModifiers);
+	callMiddleMouseUp(mMousePos, [theEvent modifierFlags]);
+}
+
+- (void) rightMouseDragged:(NSEvent *)theEvent
+{
+	[self mouseDragged:theEvent];
 }
 
 - (void) otherMouseDragged:(NSEvent *)theEvent
 {
-	
+	[self mouseDragged:theEvent];        
 }
 
 - (void) scrollWheel:(NSEvent *)theEvent
@@ -353,33 +435,36 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void) keyUp:(NSEvent *)theEvent
 {
-	callKeyUp([theEvent keyCode], mModifiers);
+    NativeKeyEventData eventData = extractKeyDataFromKeyEvent(theEvent);
+    eventData.mKeyEvent = NativeKeyEventData::KEYUP;
+	callKeyUp(&eventData, [theEvent keyCode], [theEvent modifierFlags]);
 }
 
 - (void) keyDown:(NSEvent *)theEvent
 {
+    NativeKeyEventData eventData = extractKeyDataFromKeyEvent(theEvent);
+    eventData.mKeyEvent = NativeKeyEventData::KEYDOWN;
+   
     uint keycode = [theEvent keyCode];
-    bool acceptsText = mHasMarkedText ? false : callKeyDown(keycode, mModifiers);
+    // We must not depend on flagsChange event to detect modifier flags changed,
+    // must depend on the modifire flags in the event parameter.
+    // Because flagsChange event handler misses event when other window is activated,
+    // e.g. OS Window for upload something or Input Window...
+    // mModifiers instance variable is for insertText: or insertText:replacementRange:  (by Pell Smit)
+	mModifiers = [theEvent modifierFlags];
+    bool acceptsText = mHasMarkedText ? false : callKeyDown(&eventData, keycode, mModifiers);
+    unichar ch;
     if (acceptsText &&
         !mMarkedTextAllowed &&
+        !(mModifiers & (NSControlKeyMask | NSCommandKeyMask)) &&  // commands don't invoke InputWindow
         ![(LLAppDelegate*)[NSApp delegate] romanScript] &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSDeleteCharacter &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSBackspaceCharacter &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSDownArrowFunctionKey &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSUpArrowFunctionKey &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSLeftArrowFunctionKey &&
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] != NSRightArrowFunctionKey)
+        (ch = [[theEvent charactersIgnoringModifiers] characterAtIndex:0]) > ' ' &&
+        ch != NSDeleteCharacter &&
+        (ch < 0xF700 || ch > 0xF8FF))  // 0xF700-0xF8FF: reserved for function keys on the keyboard(from NSEvent.h)
     {
         [(LLAppDelegate*)[NSApp delegate] showInputWindow:true withEvent:theEvent];
     } else
     {
-        [[self inputContext] handleEvent:theEvent];
-    }
-    
-    if ([[theEvent charactersIgnoringModifiers] characterAtIndex:0] == NSCarriageReturnCharacter ||
-        [[theEvent charactersIgnoringModifiers] characterAtIndex:0] == NSEnterCharacter)
-    {
-        // callKeyDown won't return the value we expect for enter or return.  Handle them as a separate case.
         [[self inputContext] handleEvent:theEvent];
     }
     
@@ -388,13 +473,44 @@ attributedStringInfo getSegments(NSAttributedString *str)
     // Since SL assumes we receive those, we fake it here.
     if (mModifiers & NSCommandKeyMask && !mHasMarkedText)
     {
-        callKeyUp([theEvent keyCode], mModifiers);
+        eventData.mKeyEvent = NativeKeyEventData::KEYUP;
+        callKeyUp(&eventData, [theEvent keyCode], mModifiers);
     }
 }
 
-- (void)flagsChanged:(NSEvent *)theEvent {
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+    NativeKeyEventData eventData = extractKeyDataFromModifierEvent(theEvent);
+ 
 	mModifiers = [theEvent modifierFlags];
 	callModifier([theEvent modifierFlags]);
+     
+    NSInteger mask = 0;
+    switch([theEvent keyCode])
+    {        
+        case 56:
+            mask = NSShiftKeyMask;
+            break;
+        case 58:
+            mask = NSAlternateKeyMask;
+            break;
+        case 59:
+            mask = NSControlKeyMask;
+            break;
+        default:
+            return;            
+    }
+    
+    if (mModifiers & mask)
+    {
+        eventData.mKeyEvent = NativeKeyEventData::KEYDOWN;
+        callKeyDown(&eventData, [theEvent keyCode], 0);
+    }
+    else
+    {
+        eventData.mKeyEvent = NativeKeyEventData::KEYUP;
+        callKeyUp(&eventData, [theEvent keyCode], 0);
+    }  
 }
 
 - (BOOL) acceptsFirstResponder
@@ -466,31 +582,58 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange
 {
-    if ([aString class] == NSClassFromString(@"NSConcreteMutableAttributedString"))
+    // Apple says aString can be either an NSString or NSAttributedString instance.
+    // But actually it's NSConcreteMutableAttributedString or __NSCFConstantString.
+    // I observed aString was __NSCFConstantString only aString was null string(zero length).
+    // Apple also says when aString is an NSString object,
+    // the receiver is expected to render the marked text with distinguishing appearance.
+    // So I tried to make attributedStringInfo, but it won't be used...   (Pell Smit)
+
+    if (mMarkedTextAllowed)
     {
-        if (mMarkedTextAllowed)
+        unsigned int selected[2] = {
+            unsigned(selectedRange.location),
+            unsigned(selectedRange.length)
+        };
+        
+        unsigned int replacement[2] = {
+            unsigned(replacementRange.location),
+            unsigned(replacementRange.length)
+        };
+        
+        int string_length = [aString length];
+        unichar text[string_length];
+        attributedStringInfo segments;
+        // I used 'respondsToSelector:@selector(string)'
+        // to judge aString is an attributed string or not.
+        if ([aString respondsToSelector:@selector(string)])
         {
-            unsigned int selected[2] = {
-                selectedRange.location,
-                selectedRange.length
-            };
-            
-            unsigned int replacement[2] = {
-                replacementRange.location,
-                replacementRange.length
-            };
-            
-            unichar text[[aString length]];
-            [[aString mutableString] getCharacters:text range:NSMakeRange(0, [aString length])];
-            attributedStringInfo segments = getSegments((NSAttributedString *)aString);
-            setMarkedText(text, selected, replacement, [aString length], segments);
+            // aString is attibuted
+            [[aString string] getCharacters:text range:NSMakeRange(0, string_length)];
+            segments = getSegments((NSAttributedString *)aString);
+        }
+        else
+        {
+            // aString is not attributed
+            [aString getCharacters:text range:NSMakeRange(0, string_length)];
+            segments.seg_lengths.push_back(string_length);
+            segments.seg_standouts.push_back(true);
+        }
+        setMarkedText(text, selected, replacement, string_length, segments);
+        if (string_length > 0)
+        {
             mHasMarkedText = TRUE;
-            mMarkedTextLength = [aString length];
-        } else {
-            if (mHasMarkedText)
-            {
-                [self unmarkText];
-            }
+            mMarkedTextLength = string_length;
+        }
+        else
+        {
+            // we must clear the marked text when aString is null.
+            [self unmarkText];
+        }
+    } else {
+        if (mHasMarkedText)
+        {
+            [self unmarkText];
         }
     }
 }
@@ -609,37 +752,63 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 @implementation LLNonInlineTextView
 
+/*  Input Window is a legacy of 20 century, so we want to remove related classes.
+    But unfortunately, Viwer web browser has no support for modern inline input,
+    we need to leave these classes...
+    We will be back to get rid of Input Window after fixing viewer web browser.
+
+    How Input Window should work:
+        1) Input Window must not be empty.
+          It must close when it become empty result of edithing.
+        2) Input Window must not close when it still has input data.
+          It must keep open user types next char before commit.         by Pell Smit
+*/
+
 - (void) setGLView:(LLOpenGLView *)view
 {
 	glview = view;
 }
 
-- (void) insertText:(id)insertString
+- (void)keyDown:(NSEvent *)theEvent
 {
-	[[self inputContext] discardMarkedText];
-    [self setString:@""];
-    [_window orderOut:_window];
-	[self insertText:insertString replacementRange:NSMakeRange(0, [insertString length])];
+    // mKeyPressed is used later to determine whethere Input Window should close or not
+    mKeyPressed = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    // setMarkedText and insertText is called indirectly from inside keyDown: method
+    [super keyDown:theEvent];
 }
 
+// setMarkedText: is called for incomplete input(on the way to conversion).
+- (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange
+{
+    [super setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    if ([aString length] == 0)      // this means Input Widow becomes empty
+    {
+        [_window orderOut:_window];     // Close this to avoid empty Input Window
+    }
+}
+
+// insertText: is called for inserting commited text.
+// There are two ways to be called here:
+//      a) explicitly commited (must close)
+//          In case of user typed commit key(usually return key) or delete key or something
+//      b) automatically commited (must not close)
+//          In case of user typed next letter after conversion
 - (void) insertText:(id)aString replacementRange:(NSRange)replacementRange
 {
-	[glview insertText:aString replacementRange:replacementRange];
-}
-
-- (void) insertNewline:(id)sender
-{
-	[[self textStorage] setValue:@""];
-	[[self inputContext] discardMarkedText];
+    [[self inputContext] discardMarkedText];
     [self setString:@""];
-}
-
-- (void)doCommandBySelector:(SEL)aSelector
-{
-	if (aSelector == @selector(insertNewline:))
-	{
-		[self insertNewline:self];
-	}
+    [glview insertText:aString replacementRange:replacementRange];
+    if (mKeyPressed == NSEnterCharacter ||
+        mKeyPressed == NSBackspaceCharacter ||
+        mKeyPressed == NSTabCharacter ||
+        mKeyPressed == NSNewlineCharacter ||
+        mKeyPressed == NSCarriageReturnCharacter ||
+        mKeyPressed == NSDeleteCharacter ||
+        (mKeyPressed >= 0xF700 && mKeyPressed <= 0xF8FF))
+    {
+        // this is case a) of above comment
+        [_window orderOut:_window];     // to avoid empty Input Window
+    }
 }
 
 @end

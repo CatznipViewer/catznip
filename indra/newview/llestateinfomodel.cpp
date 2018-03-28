@@ -29,7 +29,6 @@
 #include "llestateinfomodel.h"
 
 // libs
-#include "llhttpclient.h"
 #include "llregionflags.h"
 #include "message.h"
 
@@ -37,6 +36,8 @@
 #include "llagent.h"
 #include "llfloaterregioninfo.h" // for invoice id
 #include "llviewerregion.h"
+
+#include "llcorehttputil.h"
 
 LLEstateInfoModel::LLEstateInfoModel()
 :	mID(0)
@@ -70,14 +71,16 @@ bool LLEstateInfoModel::getIsExternallyVisible()	const {	return getFlag(REGION_F
 bool LLEstateInfoModel::getAllowDirectTeleport()	const {	return getFlag(REGION_FLAGS_ALLOW_DIRECT_TELEPORT);	}
 bool LLEstateInfoModel::getDenyAnonymous()			const {	return getFlag(REGION_FLAGS_DENY_ANONYMOUS); 		}
 bool LLEstateInfoModel::getDenyAgeUnverified()		const {	return getFlag(REGION_FLAGS_DENY_AGEUNVERIFIED);	}
-bool LLEstateInfoModel::getAllowVoiceChat()			const {	return getFlag(REGION_FLAGS_ALLOW_VOICE);			}
+bool LLEstateInfoModel::getAllowVoiceChat()			const { return getFlag(REGION_FLAGS_ALLOW_VOICE); }
+bool LLEstateInfoModel::getAllowAccessOverride()	const { return getFlag(REGION_FLAGS_ALLOW_ACCESS_OVERRIDE); }
 
 void LLEstateInfoModel::setUseFixedSun(bool val)			{ setFlag(REGION_FLAGS_SUN_FIXED, 				val);	}
 void LLEstateInfoModel::setIsExternallyVisible(bool val)	{ setFlag(REGION_FLAGS_EXTERNALLY_VISIBLE,		val);	}
 void LLEstateInfoModel::setAllowDirectTeleport(bool val)	{ setFlag(REGION_FLAGS_ALLOW_DIRECT_TELEPORT,	val);	}
 void LLEstateInfoModel::setDenyAnonymous(bool val)			{ setFlag(REGION_FLAGS_DENY_ANONYMOUS,			val);	}
 void LLEstateInfoModel::setDenyAgeUnverified(bool val)		{ setFlag(REGION_FLAGS_DENY_AGEUNVERIFIED,		val);	}
-void LLEstateInfoModel::setAllowVoiceChat(bool val)			{ setFlag(REGION_FLAGS_ALLOW_VOICE,				val);	}
+void LLEstateInfoModel::setAllowVoiceChat(bool val)		    { setFlag(REGION_FLAGS_ALLOW_VOICE,				val);	}
+void LLEstateInfoModel::setAllowAccessOverride(bool val)    { setFlag(REGION_FLAGS_ALLOW_ACCESS_OVERRIDE,   val);   }
 
 void LLEstateInfoModel::update(const strings_t& strings)
 {
@@ -93,7 +96,7 @@ void LLEstateInfoModel::update(const strings_t& strings)
 	LL_DEBUGS("Windlight Sync") << "Received estate info: "
 		<< "is_sun_fixed = " << getUseFixedSun()
 		<< ", sun_hour = " << getSunHour() << LL_ENDL;
-	lldebugs << getInfoDump() << llendl;
+	LL_DEBUGS() << getInfoDump() << LL_ENDL;
 
 	// Update region owner.
 	LLViewerRegion* regionp = gAgent.getRegion();
@@ -110,28 +113,10 @@ void LLEstateInfoModel::notifyCommit()
 
 //== PRIVATE STUFF ============================================================
 
-class LLEstateChangeInfoResponder : public LLHTTPClient::Responder
-{
-public:
-
-	// if we get a normal response, handle it here
-	virtual void result(const LLSD& content)
-	{
-		llinfos << "Committed estate info" << llendl;
-		LLEstateInfoModel::instance().notifyCommit();
-	}
-
-	// if we get an error response
-	virtual void errorWithContent(U32 status, const std::string& reason, const LLSD& content)
-	{
-		llwarns << "Failed to commit estate info [status:" << status << "]: " << content << llendl;
-	}
-};
-
 // tries to send estate info using a cap; returns true if it succeeded
 bool LLEstateInfoModel::commitEstateInfoCaps()
 {
-	std::string url = gAgent.getRegion()->getCapability("EstateChangeInfo");
+	std::string url = gAgent.getRegionCapability("EstateChangeInfo");
 
 	if (url.empty())
 	{
@@ -139,27 +124,52 @@ bool LLEstateInfoModel::commitEstateInfoCaps()
 		return false;
 	}
 
-	LLSD body;
-	body["estate_name"          ] = getName();
-	body["sun_hour"             ] = getSunHour();
+    LLCoros::instance().launch("LLEstateInfoModel::commitEstateInfoCapsCoro",
+        boost::bind(&LLEstateInfoModel::commitEstateInfoCapsCoro, this, url));
 
-	body["is_sun_fixed"         ] = getUseFixedSun();
-	body["is_externally_visible"] = getIsExternallyVisible();
-	body["allow_direct_teleport"] = getAllowDirectTeleport();
-	body["deny_anonymous"       ] = getDenyAnonymous();
-	body["deny_age_unverified"  ] = getDenyAgeUnverified();
-	body["allow_voice_chat"     ] = getAllowVoiceChat();
-
-	body["invoice"              ] = LLFloaterRegionInfo::getLastInvoice();
-
-	LL_DEBUGS("Windlight Sync") << "Sending estate caps: "
-		<< "is_sun_fixed = " << getUseFixedSun()
-		<< ", sun_hour = " << getSunHour() << LL_ENDL;
-	lldebugs << body << LL_ENDL;
-
-	// we use a responder so that we can re-get the data after committing to the database
-	LLHTTPClient::post(url, body, new LLEstateChangeInfoResponder);
     return true;
+}
+
+void LLEstateInfoModel::commitEstateInfoCapsCoro(std::string url)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("EstateChangeInfo", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+
+    LLSD body;
+    body["estate_name"] = getName();
+    body["sun_hour"] = getSunHour();
+
+    body["is_sun_fixed"] = getUseFixedSun();
+    body["is_externally_visible"] = getIsExternallyVisible();
+    body["allow_direct_teleport"] = getAllowDirectTeleport();
+    body["deny_anonymous"] = getDenyAnonymous();
+    body["deny_age_unverified"] = getDenyAgeUnverified();
+    body["allow_voice_chat"] = getAllowVoiceChat();
+    body["override_public_access"] = getAllowAccessOverride();
+
+    body["invoice"] = LLFloaterRegionInfo::getLastInvoice();
+
+    LL_DEBUGS("Windlight Sync") << "Sending estate caps: "
+        << "is_sun_fixed = " << getUseFixedSun()
+        << ", sun_hour = " << getSunHour() << LL_ENDL;
+    LL_DEBUGS() << body << LL_ENDL;
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, body);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (status)
+    {
+        LL_INFOS() << "Committed estate info" << LL_ENDL;
+        LLEstateInfoModel::instance().notifyCommit();
+    }
+    else
+    {
+        LL_WARNS() << "Failed to commit estate info " << LL_ENDL;
+    }
 }
 
 /* This is the old way of doing things, is deprecated, and should be
@@ -174,7 +184,7 @@ void LLEstateInfoModel::commitEstateInfoDataserver()
 	LL_DEBUGS("Windlight Sync") << "Sending estate info: "
 		<< "is_sun_fixed = " << getUseFixedSun()
 		<< ", sun_hour = " << getSunHour() << LL_ENDL;
-	lldebugs << getInfoDump() << LL_ENDL;
+	LL_DEBUGS() << getInfoDump() << LL_ENDL;
 
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessage("EstateOwnerMessage");
@@ -211,6 +221,7 @@ std::string LLEstateInfoModel::getInfoDump()
 	dump["deny_anonymous"       ] = getDenyAnonymous();
 	dump["deny_age_unverified"  ] = getDenyAgeUnverified();
 	dump["allow_voice_chat"     ] = getAllowVoiceChat();
+    dump["override_public_access"] = getAllowAccessOverride();
 
 	std::stringstream dump_str;
 	dump_str << dump;

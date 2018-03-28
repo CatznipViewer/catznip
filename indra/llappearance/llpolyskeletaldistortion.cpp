@@ -28,19 +28,13 @@
 // Header Files
 //-----------------------------------------------------------------------------
 #include "llpreprocessor.h"
-#include "llerrorlegacy.h"
-//#include "llcommon.h"
-//#include "llmemory.h"
+#include "llerror.h"
 #include "llavatarappearance.h"
 #include "llavatarjoint.h"
 #include "llpolymorph.h"
-//#include "llviewercontrol.h"
-//#include "llxmltree.h"
-//#include "llvoavatar.h"
 #include "llwearable.h"
-//#include "lldir.h"
-//#include "llvolume.h"
-//#include "llendianswizzle.h"
+#include "llfasttimer.h"
+#include "llcallstack.h"
 
 #include "llpolyskeletaldistortion.h"
 
@@ -62,8 +56,8 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 
         if (NULL == skeletalParam)
         {
-                llwarns << "Failed to getChildByName(\"param_skeleton\")"
-                        << llendl;
+                LL_WARNS() << "Failed to getChildByName(\"param_skeleton\")"
+                        << LL_ENDL;
                 return FALSE;
         }
 
@@ -79,14 +73,14 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
                         static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
                         if (!bone->getFastAttributeString(name_string, name))
                         {
-                                llwarns << "No bone name specified for skeletal param." << llendl;
+                                LL_WARNS() << "No bone name specified for skeletal param." << LL_ENDL;
                                 continue;
                         }
 
                         static LLStdStringHandle scale_string = LLXmlTree::addAttributeString("scale");
                         if (!bone->getFastAttributeVector3(scale_string, scale))
                         {
-                                llwarns << "No scale specified for bone " << name << "." << llendl;
+                                LL_WARNS() << "No scale specified for bone " << name << "." << LL_ENDL;
                                 continue;
                         }
 
@@ -100,7 +94,7 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
                 }
                 else
                 {
-                        llwarns << "Unrecognized element " << bone->getName() << " in skeletal distortion" << llendl;
+                        LL_WARNS() << "Unrecognized element " << bone->getName() << " in skeletal distortion" << LL_ENDL;
                         continue;
                 }
         }
@@ -111,9 +105,25 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 // LLPolySkeletalDistortion()
 //-----------------------------------------------------------------------------
 LLPolySkeletalDistortion::LLPolySkeletalDistortion(LLAvatarAppearance *avatarp)
+	: LLViewerVisualParam(),
+	mDefaultVec(),
+	mJointScales(),
+	mJointOffsets(),
+	mAvatar(avatarp)
 {
-        mAvatar = avatarp;
-        mDefaultVec.splat(0.001f);
+	mDefaultVec.splat(0.001f);
+}
+
+//-----------------------------------------------------------------------------
+// LLPolySkeletalDistortion()
+//-----------------------------------------------------------------------------
+LLPolySkeletalDistortion::LLPolySkeletalDistortion(const LLPolySkeletalDistortion &pOther)
+	: LLViewerVisualParam(pOther),
+	mDefaultVec(pOther.mDefaultVec),
+	mJointScales(pOther.mJointScales),
+	mJointOffsets(pOther.mJointOffsets),
+	mAvatar(pOther.mAvatar)
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -125,105 +135,109 @@ LLPolySkeletalDistortion::~LLPolySkeletalDistortion()
 
 BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo *info)
 {
-        llassert(mInfo == NULL);
-        if (info->mID < 0)
-                return FALSE;
-        mInfo = info;
-        mID = info->mID;
-        setWeight(getDefaultWeight(), FALSE );
+    if (info->mID < 0)
+    {
+        return FALSE;
+    }
+    mInfo = info;
+    mID = info->mID;
+    setWeight(getDefaultWeight());
 
-        LLPolySkeletalDistortionInfo::bone_info_list_t::iterator iter;
-        for (iter = getInfo()->mBoneInfoList.begin(); iter != getInfo()->mBoneInfoList.end(); iter++)
+    LLPolySkeletalDistortionInfo::bone_info_list_t::iterator iter;
+    for (iter = getInfo()->mBoneInfoList.begin(); iter != getInfo()->mBoneInfoList.end(); iter++)
+    {
+        LLPolySkeletalBoneInfo *bone_info = &(*iter);
+        LLJoint* joint = mAvatar->getJoint(bone_info->mBoneName);
+        if (!joint)
         {
-                LLPolySkeletalBoneInfo *bone_info = &(*iter);
-                LLJoint* joint = mAvatar->getJoint(bone_info->mBoneName);
-                if (!joint)
-                {
-                        llwarns << "Joint " << bone_info->mBoneName << " not found." << llendl;
-                        continue;
-                }
-
-                if (mJointScales.find(joint) != mJointScales.end())
-                {
-                        llwarns << "Scale deformation already supplied for joint " << joint->getName() << "." << llendl;
-                }
-
-                // store it
-                mJointScales[joint] = bone_info->mScaleDeformation;
-
-                // apply to children that need to inherit it
-                for (LLJoint::child_list_t::iterator iter = joint->mChildren.begin();
-                     iter != joint->mChildren.end(); ++iter)
-                {
-                        LLAvatarJoint* child_joint = (LLAvatarJoint*)(*iter);
-                        if (child_joint->inheritScale())
-                        {
-                                LLVector3 childDeformation = LLVector3(child_joint->getScale());
-                                childDeformation.scaleVec(bone_info->mScaleDeformation);
-                                mJointScales[child_joint] = childDeformation;
-                        }
-                }
-
-                if (bone_info->mHasPositionDeformation)
-                {
-                        if (mJointOffsets.find(joint) != mJointOffsets.end())
-                        {
-                                llwarns << "Offset deformation already supplied for joint " << joint->getName() << "." << llendl;
-                        }
-                        mJointOffsets[joint] = bone_info->mPositionDeformation;
-                }
+            // There's no point continuing after this error - means
+            // that either the skeleton or lad file is broken.
+            LL_WARNS() << "Joint " << bone_info->mBoneName << " not found." << LL_ENDL;
+			return FALSE;
         }
-        return TRUE;
+
+        // store it
+        mJointScales[joint] = bone_info->mScaleDeformation;
+
+        // apply to children that need to inherit it
+        for (LLJoint::child_list_t::iterator iter = joint->mChildren.begin();
+             iter != joint->mChildren.end(); ++iter)
+        {
+            LLAvatarJoint* child_joint = (LLAvatarJoint*)(*iter);
+            if (child_joint->inheritScale())
+            {
+                LLVector3 childDeformation = LLVector3(child_joint->getScale());
+                childDeformation.scaleVec(bone_info->mScaleDeformation);
+                mJointScales[child_joint] = childDeformation;
+            }
+        }
+
+        if (bone_info->mHasPositionDeformation)
+        {
+            mJointOffsets[joint] = bone_info->mPositionDeformation;
+        }
+    }
+    return TRUE;
 }
 
 /*virtual*/ LLViewerVisualParam* LLPolySkeletalDistortion::cloneParam(LLWearable* wearable) const
 {
-        LLPolySkeletalDistortion *new_param = new LLPolySkeletalDistortion(mAvatar);
-        *new_param = *this;
-        return new_param;
+	return new LLPolySkeletalDistortion(*this);
 }
 
 //-----------------------------------------------------------------------------
 // apply()
 //-----------------------------------------------------------------------------
-static LLFastTimer::DeclareTimer FTM_POLYSKELETAL_DISTORTION_APPLY("Skeletal Distortion");
+static LLTrace::BlockTimerStatHandle FTM_POLYSKELETAL_DISTORTION_APPLY("Skeletal Distortion");
 
 void LLPolySkeletalDistortion::apply( ESex avatar_sex )
 {
-	LLFastTimer t(FTM_POLYSKELETAL_DISTORTION_APPLY);
+    LL_RECORD_BLOCK_TIME(FTM_POLYSKELETAL_DISTORTION_APPLY);
 
-        F32 effective_weight = ( getSex() & avatar_sex ) ? mCurWeight : getDefaultWeight();
+    F32 effective_weight = ( getSex() & avatar_sex ) ? mCurWeight : getDefaultWeight();
 
-        LLJoint* joint;
-        joint_vec_map_t::iterator iter;
+    LLJoint* joint;
+    joint_vec_map_t::iterator iter;
 
-        for (iter = mJointScales.begin();
-             iter != mJointScales.end();
-             iter++)
-        {
-                joint = iter->first;
-                LLVector3 newScale = joint->getScale();
-                LLVector3 scaleDelta = iter->second;
-                newScale = newScale + (effective_weight * scaleDelta) - (mLastWeight * scaleDelta);
-                joint->setScale(newScale);
-        }
+    for (iter = mJointScales.begin();
+         iter != mJointScales.end();
+         iter++)
+    {
+        joint = iter->first;
+        LLVector3 newScale = joint->getScale();
+        LLVector3 scaleDelta = iter->second;
+        LLVector3 offset = (effective_weight - mLastWeight) * scaleDelta;
+        newScale = newScale + offset;
+        //An aspect of attached mesh objects (which contain joint offsets) that need to be cleaned up when detached
+        // needed? 
+        // joint->storeScaleForReset( newScale );				
 
-        for (iter = mJointOffsets.begin();
-             iter != mJointOffsets.end();
-             iter++)
-        {
-                joint = iter->first;
-                LLVector3 newPosition = joint->getPosition();
-                LLVector3 positionDelta = iter->second;
-                newPosition = newPosition + (effective_weight * positionDelta) - (mLastWeight * positionDelta);
-                joint->setPosition(newPosition);
-        }
+        // BENTO for detailed stack tracing of params.
+        std::stringstream ostr;
+        ostr << "LLPolySkeletalDistortion::apply, id " << getID() << " " << getName() << " effective wt " << effective_weight << " last wt " << mLastWeight << " scaleDelta " << scaleDelta << " offset " << offset;
+        LLScopedContextString str(ostr.str());
 
-        if (mLastWeight != mCurWeight && !mIsAnimating)
-        {
-                mAvatar->setSkeletonSerialNum(mAvatar->getSkeletonSerialNum() + 1);
-        }
-        mLastWeight = mCurWeight;
+        joint->setScale(newScale, true);
+    }
+
+    for (iter = mJointOffsets.begin();
+         iter != mJointOffsets.end();
+         iter++)
+    {
+        joint = iter->first;
+        LLVector3 newPosition = joint->getPosition();
+        LLVector3 positionDelta = iter->second;				
+        newPosition = newPosition + (effective_weight * positionDelta) - (mLastWeight * positionDelta);		
+        // SL-315
+        bool allow_attachment_pos_overrides = true;
+        joint->setPosition(newPosition, allow_attachment_pos_overrides);
+    }
+
+    if (mLastWeight != effective_weight && !mIsAnimating)
+    {
+        mAvatar->setSkeletonSerialNum(mAvatar->getSkeletonSerialNum() + 1);
+    }
+    mLastWeight = effective_weight;
 }
 
 

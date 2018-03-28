@@ -28,15 +28,15 @@
 
 #include "llstring.h"
 #include "llerror.h"
+#include "llfasttimer.h"
+#include "llsd.h"
 
 #if LL_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
+#include "llwin32headerslean.h"
 #include <winnls.h> // for WideCharToMultiByte
 #endif
 
-LLFastTimer::DeclareTimer FT_STRING_FORMAT("String Format");
+LLTrace::BlockTimerStatHandle FT_STRING_FORMAT("String Format");
 
 
 std::string ll_safe_string(const char* in)
@@ -107,10 +107,10 @@ bool iswindividual(llwchar elem)
 
 bool _read_file_into_string(std::string& str, const std::string& filename)
 {
-	llifstream ifs(filename, llifstream::binary);
+	llifstream ifs(filename.c_str(), llifstream::binary);
 	if (!ifs.is_open())
 	{
-		llinfos << "Unable to open file " << filename << llendl;
+		LL_INFOS() << "Unable to open file " << filename << LL_ENDL;
 		return false;
 	}
 
@@ -188,7 +188,7 @@ S32 wchar_to_utf8chars(llwchar in_char, char* outchars)
 	}
 	else
 	{
-		llwarns << "Invalid Unicode character " << cur_char << "!" << llendl;
+		LL_WARNS() << "Invalid Unicode character " << cur_char << "!" << LL_ENDL;
 		*outchars++ = LL_UNKNOWN_CHAR;
 	}
 	return outchars - base;
@@ -574,6 +574,33 @@ std::string utf8str_truncate(const std::string& utf8str, const S32 max_len)
 		// The byte index we're on is one we want to get rid of, so we only want to copy up to (cur_char-1) chars
 		return utf8str.substr(0, cur_char);
 	}
+}
+
+std::string utf8str_symbol_truncate(const std::string& utf8str, const S32 symbol_len)
+{
+    if (0 == symbol_len)
+    {
+        return std::string();
+    }
+    if ((S32)utf8str.length() <= symbol_len)
+    {
+        return utf8str;
+    }
+    else
+    {
+        int len = 0, byteIndex = 0;
+        const char* aStr = utf8str.c_str();
+        size_t origSize = utf8str.size();
+
+        for (byteIndex = 0; len < symbol_len && byteIndex < origSize; byteIndex++)
+        {
+            if ((aStr[byteIndex] & 0xc0) != 0x80)
+            {
+                len += 1;
+            }
+        }
+        return utf8str.substr(0, byteIndex);
+    }
 }
 
 std::string utf8str_substChar(
@@ -1195,7 +1222,7 @@ bool LLStringUtil::formatDatetime(std::string& replacement, std::string token,
 template<> 
 S32 LLStringUtil::format(std::string& s, const format_map_t& substitutions)
 {
-	LLFastTimer ft(FT_STRING_FORMAT);
+	LL_RECORD_BLOCK_TIME(FT_STRING_FORMAT);
 	S32 res = 0;
 
 	std::string output;
@@ -1268,7 +1295,7 @@ S32 LLStringUtil::format(std::string& s, const format_map_t& substitutions)
 template<> 
 S32 LLStringUtil::format(std::string& s, const LLSD& substitutions)
 {
-	LLFastTimer ft(FT_STRING_FORMAT);
+	LL_RECORD_BLOCK_TIME(FT_STRING_FORMAT);
 	S32 res = 0;
 
 	if (!substitutions.isMap()) 
@@ -1397,7 +1424,7 @@ void LLStringUtilBase<T>::testHarness()
 	
 	s2.erase( 4, 1 );
 	llassert( s2 == "hell");
-	s2.insert( 0, 'y' );
+	s2.insert( 0, "y" );
 	llassert( s2 == "yhell");
 	s2.erase( 1, 3 );
 	llassert( s2 == "yl");

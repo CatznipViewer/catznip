@@ -43,10 +43,10 @@ class LLViewerRegion;
 
 class LLToolBrushLand : public LLTool, public LLEditMenuHandler, public LLSingleton<LLToolBrushLand>
 {
+	LLSINGLETON(LLToolBrushLand);
 	typedef std::set<LLViewerRegion*> region_list_t;
 
 public:
-	LLToolBrushLand();
 	
 	// x,y in window coords, 0,0 = left,bot
 	virtual BOOL handleMouseDown( S32 x, S32 y, MASK mask );
@@ -81,10 +81,14 @@ protected:
 					   const LLVector3& pos_world);
 
 	// Does region allow terraform, or are we a god?
-	bool canTerraform(LLViewerRegion* regionp) const;
+	bool canTerraformRegion(LLViewerRegion* regionp) const;
+
+	bool canTerraformParcel(LLViewerRegion* regionp) const;
 
 	// Modal dialog that you can't terraform the region
-	void alertNoTerraform(LLViewerRegion* regionp);
+	void alertNoTerraformRegion(LLViewerRegion* regionp);
+
+	void alertNoTerraformParcel();
 
 protected:
 	F32 mStartingZ;

@@ -123,7 +123,7 @@ void LLFloaterObjectWeights::onWeightsUpdate(const SelectionCost& selection_cost
 }
 
 //virtual
-void LLFloaterObjectWeights::setErrorStatus(U32 status, const std::string& reason)
+void LLFloaterObjectWeights::setErrorStatus(S32 status, const std::string& reason)
 {
 	const std::string text = getString("nothing_selected");
 
@@ -145,6 +145,14 @@ void LLFloaterObjectWeights::updateLandImpacts(const LLParcel* parcel)
 	{
 		S32 rezzed_prims = parcel->getSimWidePrimCount();
 		S32 total_capacity = parcel->getSimWideMaxPrimCapacity();
+		// Can't have more than region max tasks, regardless of parcel
+		// object bonus factor.
+		LLViewerRegion* region = LLViewerParcelMgr::getInstance()->getSelectionRegion();
+		if (region)
+		{
+			S32 max_tasks_per_region = (S32)region->getMaxTasks();
+			total_capacity = llmin(total_capacity, max_tasks_per_region);
+		}
 
 		mRezzedOnLand->setText(llformat("%d", rezzed_prims));
 		mRemainingCapacity->setText(llformat("%d", total_capacity - rezzed_prims));
@@ -207,7 +215,7 @@ void LLFloaterObjectWeights::refresh()
 		}
 		else
 		{
-			llwarns << "Failed to get region capabilities" << llendl;
+			LL_WARNS() << "Failed to get region capabilities" << LL_ENDL;
 		}
 	}
 }

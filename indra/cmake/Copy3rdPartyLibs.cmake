@@ -20,30 +20,21 @@ if(WINDOWS)
     set(vivox_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(vivox_files
         SLVoice.exe
-        ca-bundle.crt
-        libsndfile-1.dll
-        vivoxplatform.dll
-        vivoxsdk.dll
-        ortp.dll
-        zlib1.dll
-        vivoxoal.dll
         )
+    if (ADDRESS_SIZE EQUAL 64)
+        list(APPEND vivox_files
+            vivoxsdk_x64.dll
+            ortp_x64.dll
+            )
+    else (ADDRESS_SIZE EQUAL 64)
+        list(APPEND vivox_files
+            vivoxsdk.dll
+            ortp.dll
+            )
+    endif (ADDRESS_SIZE EQUAL 64)
 
     #*******************************
     # Misc shared libs 
-
-    set(debug_src_dir "${ARCH_PREBUILT_DIRS_DEBUG}")
-    set(debug_files
-        openjpegd.dll
-        libapr-1.dll
-        libaprutil-1.dll
-        libapriconv-1.dll
-        ssleay32.dll
-        libeay32.dll
-        libcollada14dom22-d.dll
-        glod.dll    
-        libhunspell.dll
-        )
 
     set(release_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(release_files
@@ -53,140 +44,111 @@ if(WINDOWS)
         libapriconv-1.dll
         ssleay32.dll
         libeay32.dll
-        libcollada14dom22.dll
+        nghttp2.dll
         glod.dll
         libhunspell.dll
         )
 
-    if(USE_TCMALLOC)
-      set(debug_files ${debug_files} libtcmalloc_minimal-debug.dll)
-      set(release_files ${release_files} libtcmalloc_minimal.dll)
-    endif(USE_TCMALLOC)
-
     if (FMODEX)
-      set(release_files ${release_files} fmodex.dll)
+
+        if(ADDRESS_SIZE EQUAL 32)
+            set(release_files ${release_files} fmodex.dll)
+        else(ADDRESS_SIZE EQUAL 32)
+            set(release_files ${release_files} fmodex64.dll)
+        endif(ADDRESS_SIZE EQUAL 32)
     endif (FMODEX)
 
-#*******************************
-# Copy MS C runtime dlls, required for packaging.
-# *TODO - Adapt this to support VC9
-if (MSVC80)
-    FIND_PATH(debug_msvc8_redist_path msvcr80d.dll
-        PATHS
-        ${MSVC_DEBUG_REDIST_PATH}
-         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/redist/Debug_NonRedist/x86/Microsoft.VC80.DebugCRT
-        NO_DEFAULT_PATH
-        NO_DEFAULT_PATH
-        )
+    #*******************************
+    # Copy MS C runtime dlls, required for packaging.
+    # *TODO - Adapt this to support VC9
+    if (MSVC80)
+        list(APPEND LMSVC_VER 80)
+        list(APPEND LMSVC_VERDOT 8.0)
+    elseif (MSVC_VERSION EQUAL 1600) # VisualStudio 2010
+        MESSAGE(STATUS "MSVC_VERSION ${MSVC_VERSION}")
+    elseif (MSVC_VERSION EQUAL 1800) # VisualStudio 2013, which is (sigh) VS 12
+        list(APPEND LMSVC_VER 120)
+        list(APPEND LMSVC_VERDOT 12.0)
+    else (MSVC80)
+        MESSAGE(WARNING "New MSVC_VERSION ${MSVC_VERSION} of MSVC: adapt Copy3rdPartyLibs.cmake")
+    endif (MSVC80)
 
-    if(EXISTS ${debug_msvc8_redist_path})
-        set(debug_msvc8_files
-            msvcr80d.dll
-            msvcp80d.dll
-            Microsoft.VC80.DebugCRT.manifest
+    # try to copy VS2010 redist independently of system version
+    # maint-7360 CP
+    # list(APPEND LMSVC_VER 100)
+    # list(APPEND LMSVC_VERDOT 10.0)
+    
+    list(LENGTH LMSVC_VER count)
+    math(EXPR count "${count}-1")
+    foreach(i RANGE ${count})
+        list(GET LMSVC_VER ${i} MSVC_VER)
+        list(GET LMSVC_VERDOT ${i} MSVC_VERDOT)
+        MESSAGE(STATUS "Copying redist libs for VC ${MSVC_VERDOT}")
+        FIND_PATH(debug_msvc_redist_path NAME msvcr${MSVC_VER}d.dll
+            PATHS            
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${MSVC_VERDOT}\\Setup\\VC;ProductDir]/redist/Debug_NonRedist/x86/Microsoft.VC${MSVC_VER}.DebugCRT
+            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/SysWOW64
+            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/System32
+            ${MSVC_DEBUG_REDIST_PATH}
+            NO_DEFAULT_PATH
             )
 
-        copy_if_different(
-            ${debug_msvc8_redist_path}
-            "${SHARED_LIB_STAGING_DIR_DEBUG}"
-            out_targets
-            ${debug_msvc8_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
+        if(EXISTS ${debug_msvc_redist_path})
+            set(debug_msvc_files
+                msvcr${MSVC_VER}d.dll
+                msvcp${MSVC_VER}d.dll
+                )
 
-    endif (EXISTS ${debug_msvc8_redist_path})
+            copy_if_different(
+                ${debug_msvc_redist_path}
+                "${SHARED_LIB_STAGING_DIR_DEBUG}"
+                out_targets
+                ${debug_msvc_files}
+                )
+            set(third_party_targets ${third_party_targets} ${out_targets})
 
-    FIND_PATH(release_msvc8_redist_path msvcr80.dll
-        PATHS
-        ${MSVC_REDIST_PATH}
-         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/redist/x86/Microsoft.VC80.CRT
-        NO_DEFAULT_PATH
-        NO_DEFAULT_PATH
-        )
+            unset(debug_msvc_redist_path CACHE)
+        endif()
 
-    if(EXISTS ${release_msvc8_redist_path})
-        set(release_msvc8_files
-            msvcr80.dll
-            msvcp80.dll
-            Microsoft.VC80.CRT.manifest
-            )
+        if(ADDRESS_SIZE EQUAL 32)
+            # this folder contains the 32bit DLLs.. (yes really!)
+            set(registry_find_path "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/SysWOW64")
+        else(ADDRESS_SIZE EQUAL 32)
+            # this folder contains the 64bit DLLs.. (yes really!)
+            set(registry_find_path "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/System32")
+        endif(ADDRESS_SIZE EQUAL 32)
 
-        copy_if_different(
-            ${release_msvc8_redist_path}
-            "${SHARED_LIB_STAGING_DIR_RELEASE}"
-            out_targets
-            ${release_msvc8_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
-
-        copy_if_different(
-            ${release_msvc8_redist_path}
-            "${SHARED_LIB_STAGING_DIR_RELWITHDEBINFO}"
-            out_targets
-            ${release_msvc8_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
-          
-    endif (EXISTS ${release_msvc8_redist_path})
-elseif (MSVC_VERSION EQUAL 1600) # VisualStudio 2010
-    FIND_PATH(debug_msvc10_redist_path msvcr100d.dll
-        PATHS
-        ${MSVC_DEBUG_REDIST_PATH}
-         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/redist/Debug_NonRedist/x86/Microsoft.VC100.DebugCRT
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/SysWOW64
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/System32
-        NO_DEFAULT_PATH
-        )
-
-    if(EXISTS ${debug_msvc10_redist_path})
-        set(debug_msvc10_files
-            msvcr100d.dll
-            msvcp100d.dll
+        FIND_PATH(release_msvc_redist_path NAME msvcr${MSVC_VER}.dll
+            PATHS            
+            ${registry_find_path}
+            NO_DEFAULT_PATH
             )
 
-        copy_if_different(
-            ${debug_msvc10_redist_path}
-            "${SHARED_LIB_STAGING_DIR_DEBUG}"
-            out_targets
-            ${debug_msvc10_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
+        if(EXISTS ${release_msvc_redist_path})
+            set(release_msvc_files
+                msvcr${MSVC_VER}.dll
+                msvcp${MSVC_VER}.dll
+                )
 
-    endif ()
+            copy_if_different(
+                ${release_msvc_redist_path}
+                "${SHARED_LIB_STAGING_DIR_RELEASE}"
+                out_targets
+                ${release_msvc_files}
+                )
+            set(third_party_targets ${third_party_targets} ${out_targets})
 
-    FIND_PATH(release_msvc10_redist_path msvcr100.dll
-        PATHS
-        ${MSVC_REDIST_PATH}
-         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/redist/x86/Microsoft.VC100.CRT
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/SysWOW64
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Windows;Directory]/System32
-        NO_DEFAULT_PATH
-        )
+            copy_if_different(
+                ${release_msvc_redist_path}
+                "${SHARED_LIB_STAGING_DIR_RELWITHDEBINFO}"
+                out_targets
+                ${release_msvc_files}
+                )
+            set(third_party_targets ${third_party_targets} ${out_targets})
 
-    if(EXISTS ${release_msvc10_redist_path})
-        set(release_msvc10_files
-            msvcr100.dll
-            msvcp100.dll
-            )
-
-        copy_if_different(
-            ${release_msvc10_redist_path}
-            "${SHARED_LIB_STAGING_DIR_RELEASE}"
-            out_targets
-            ${release_msvc10_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
-
-        copy_if_different(
-            ${release_msvc10_redist_path}
-            "${SHARED_LIB_STAGING_DIR_RELWITHDEBINFO}"
-            out_targets
-            ${release_msvc10_files}
-            )
-        set(third_party_targets ${third_party_targets} ${out_targets})
-          
-    endif ()
-endif (MSVC80)
+            unset(release_msvc_redist_path CACHE)
+        endif()
+    endforeach()
 
 elseif(DARWIN)
     set(SHARED_LIB_STAGING_DIR_DEBUG            "${SHARED_LIB_STAGING_DIR}/Debug/Resources")
@@ -196,9 +158,6 @@ elseif(DARWIN)
     set(vivox_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(vivox_files
         SLVoice
-        ca-bundle.crt
-        libsndfile.dylib
-        libvivoxoal.dylib
         libortp.dylib
         libvivoxplatform.dylib
         libvivoxsdk.dylib
@@ -212,15 +171,13 @@ elseif(DARWIN)
         libapr-1.dylib
         libaprutil-1.0.dylib
         libaprutil-1.dylib
-        libexpat.1.5.2.dylib
-        libexpat.dylib
-        libGLOD.dylib
-        libllqtwebkit.dylib
-        libminizip.a
-        libndofdev.dylib
-        libhunspell-1.3.0.dylib
         libexception_handler.dylib
-        libcollada14dom.dylib
+        ${EXPAT_COPY}
+        libGLOD.dylib
+        libndofdev.dylib
+        libnghttp2.dylib
+        libnghttp2.14.dylib
+        libnghttp2.14.14.0.dylib
        )
 
     if (FMODEX)
@@ -243,7 +200,6 @@ elseif(LINUX)
         libvivoxplatform.so
         libvivoxsdk.so
         SLVoice
-        # ca-bundle.crt   #No cert for linux.  It is actually still 3.2SDK.
        )
     # *TODO - update this to use LIBS_PREBUILT_DIR and LL_ARCH_DIR variables
     # or ARCH_PREBUILT_DIRS
@@ -258,43 +214,25 @@ elseif(LINUX)
         libapr-1.so.0
         libaprutil-1.so.0
         libatk-1.0.so
-        libboost_context-mt.so.${BOOST_VERSION}.0
-        libboost_filesystem-mt.so.${BOOST_VERSION}.0
-        libboost_program_options-mt.so.${BOOST_VERSION}.0
-        libboost_regex-mt.so.${BOOST_VERSION}.0
-        libboost_signals-mt.so.${BOOST_VERSION}.0
-        libboost_system-mt.so.${BOOST_VERSION}.0
-        libboost_thread-mt.so.${BOOST_VERSION}.0
-        libcollada14dom.so
-        libcrypto.so.1.0.0
         libdb-5.1.so
-        libexpat.so
-        libexpat.so.1
+        ${EXPAT_COPY}
+        libfreetype.so.6.6.2
         libfreetype.so.6
         libGLOD.so
-        libgmock_main.so
-        libgmock.so.0
         libgmodule-2.0.so
         libgobject-2.0.so
-        libgtest_main.so
-        libgtest.so.0
         libhunspell-1.3.so.0.0.0
-        libminizip.so
         libopenal.so
         libopenjpeg.so
-        libssl.so
         libuuid.so.16
         libuuid.so.16.0.22
-        libssl.so.1.0.0
-        libfontconfig.so.1.4.4
+        libfontconfig.so.1.8.0
+        libfontconfig.so.1
        )
 
-    if (USE_TCMALLOC)
-      set(release_files ${release_files} "libtcmalloc_minimal.so")
-    endif (USE_TCMALLOC)
-
     if (FMODEX)
-      set(release_file ${release_files} "libfmodex.so")
+      set(debug_files ${debug_files} "libfmodexL.so")
+      set(release_files ${release_files} "libfmodex.so")
     endif (FMODEX)
 
 else(WINDOWS)
@@ -348,13 +286,13 @@ set(third_party_targets ${third_party_targets} ${out_targets})
 
 
 
-copy_if_different(
-    ${debug_src_dir}
-    "${SHARED_LIB_STAGING_DIR_DEBUG}"
-    out_targets
-    ${debug_files}
-    )
-set(third_party_targets ${third_party_targets} ${out_targets})
+#copy_if_different(
+#    ${debug_src_dir}
+#    "${SHARED_LIB_STAGING_DIR_DEBUG}"
+#    out_targets
+#    ${debug_files}
+#    )
+#set(third_party_targets ${third_party_targets} ${out_targets})
 
 copy_if_different(
     ${release_src_dir}
@@ -372,9 +310,9 @@ copy_if_different(
     )
 set(third_party_targets ${third_party_targets} ${out_targets})
 
-if(NOT STANDALONE)
+if(NOT USESYSTEMLIBS)
   add_custom_target(
       stage_third_party_libs ALL
       DEPENDS ${third_party_targets}
       )
-endif(NOT STANDALONE)
+endif(NOT USESYSTEMLIBS)

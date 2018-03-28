@@ -28,7 +28,6 @@
 #define LL_LLFACE_H
 
 #include "llstrider.h"
-
 #include "llrender.h"
 #include "v2math.h"
 #include "v3math.h"
@@ -37,7 +36,6 @@
 #include "v4coloru.h"
 #include "llquaternion.h"
 #include "xform.h"
-#include "lldarrayptr.h"
 #include "llvertexbuffer.h"
 #include "llviewertexture.h"
 #include "lldrawable.h"
@@ -49,33 +47,24 @@ class LLTextureEntry;
 class LLVertexProgram;
 class LLViewerTexture;
 class LLGeometryManager;
+class LLTextureAtlasSlot;
+class LLDrawInfo;
 
 const F32 MIN_ALPHA_SIZE = 1024.f;
 const F32 MIN_TEX_ANIM_SIZE = 512.f;
 
-class LLFace
+class LLFace : public LLTrace::MemTrackableNonVirtual<LLFace, 16>
 {
 public:
-
-	void* operator new(size_t size)
-	{
-		return ll_aligned_malloc_16(size);
-	}
-
-	void operator delete(void* ptr)
-	{
-		ll_aligned_free_16(ptr);
-	}
-
-
 	LLFace(const LLFace& rhs)
+	:	LLTrace::MemTrackableNonVirtual<LLFace, 16>("LLFace")
 	{
 		*this = rhs;
 	}
 
 	const LLFace& operator=(const LLFace& rhs)
 	{
-		llerrs << "Illegal operation!" << llendl;
+		LL_ERRS() << "Illegal operation!" << LL_ENDL;
 		return *this;
 	}
 
@@ -96,7 +85,11 @@ public:
 	static void cacheFaceInVRAM(const LLVolumeFace& vf);
 
 public:
-	LLFace(LLDrawable* drawablep, LLViewerObject* objp)   { init(drawablep, objp); }
+	LLFace(LLDrawable* drawablep, LLViewerObject* objp)
+	:	LLTrace::MemTrackableNonVirtual<LLFace, 16>("LLFace")
+	{
+		init(drawablep, objp);
+	}
 	~LLFace()  { destroy(); }
 
 	const LLMatrix4& getWorldMatrix()	const	{ return mVObjp->getWorldMatrix(mXform); }
@@ -225,7 +218,7 @@ public:
 	void        setHasMedia(bool has_media)  { mHasMedia = has_media ;}
 	BOOL        hasMedia() const ;
 
-	BOOL                  switchTexture() ;
+	BOOL		switchTexture() ;
 
 	//vertex buffer tracking
 	void setVertexBuffer(LLVertexBuffer* buffer);
@@ -237,10 +230,13 @@ public:
 
 	static U32 getRiggedDataMask(U32 type);
 
+	void	notifyAboutCreatingTexture(LLViewerTexture *texture);
+	void	notifyAboutMissingAsset(LLViewerTexture *texture);
+
 public: //aligned members
 	LLVector4a		mExtents[2];
 
-private:	
+private:
 	F32         adjustPartialOverlapPixelArea(F32 cos_angle_to_view_dir, F32 radius );
 	BOOL        calcPixelArea(F32& cos_angle_to_view_dir, F32& radius) ;
 public:

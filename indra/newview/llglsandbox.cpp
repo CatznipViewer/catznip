@@ -62,6 +62,9 @@
 #include "llresmgr.h"
 #include "pipeline.h"
 #include "llspatialpartition.h"
+#include "llviewershadermgr.h"
+
+#include <vector>
 
 // Height of the yellow selection highlight posts for land
 const F32 PARCEL_POST_HEIGHT = 0.666f;
@@ -79,10 +82,10 @@ void LLToolSelectRect::handleRectangleSelection(S32 x, S32 y, MASK mask)
 	S32 top =	llmax(y, mDragStartY);
 	S32 bottom =llmin(y, mDragStartY);
 
-	left = llround((F32) left * LLUI::getScaleFactor().mV[VX]);
-	right = llround((F32) right * LLUI::getScaleFactor().mV[VX]);
-	top = llround((F32) top * LLUI::getScaleFactor().mV[VY]);
-	bottom = llround((F32) bottom * LLUI::getScaleFactor().mV[VY]);
+	left = ll_round((F32) left * LLUI::getScaleFactor().mV[VX]);
+	right = ll_round((F32) right * LLUI::getScaleFactor().mV[VX]);
+	top = ll_round((F32) top * LLUI::getScaleFactor().mV[VY]);
+	bottom = ll_round((F32) bottom * LLUI::getScaleFactor().mV[VY]);
 
 	F32 old_far_plane = LLViewerCamera::getInstance()->getFar();
 	F32 old_near_plane = LLViewerCamera::getInstance()->getNear();
@@ -623,7 +626,8 @@ void LLViewerParcelMgr::renderCollisionSegments(U8* segments, BOOL use_pass, LLV
 	LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE);
 	LLGLDisable cull(GL_CULL_FACE);
 	
-	if (mCollisionBanned == BA_BANNED)
+	if (mCollisionBanned == BA_BANNED ||
+		regionp->getRegionFlag(REGION_FLAGS_BLOCK_FLYOVER))
 	{
 		collision_height = BAN_HEIGHT;
 	}
@@ -767,7 +771,6 @@ void draw_line_cube(F32 width, const LLVector3& center)
 	gGL.vertex3f(center.mV[VX] + width ,center.mV[VY] - width,center.mV[VZ] - width);
 }
 
-
 void LLViewerObjectList::renderObjectBeacons()
 {
 	if (mDebugBeacons.empty())
@@ -878,3 +881,270 @@ void LLViewerObjectList::renderObjectBeacons()
 }
 
 
+//-----------------------------------------------------------------------------
+// gpu_benchmark() helper classes
+//-----------------------------------------------------------------------------
+
+// This struct is used to ensure that once we call initProfile(), it will
+// definitely be matched by a corresponding call to finishProfile(). It's
+// a struct rather than a class simply because every member is public.
+struct ShaderProfileHelper
+{
+	ShaderProfileHelper()
+	{
+		LLGLSLShader::initProfile();
+	}
+	~ShaderProfileHelper()
+	{
+		LLGLSLShader::finishProfile(false);
+	}
+};
+
+// This helper class is used to ensure that each generateTextures() call
+// is matched by a corresponding deleteTextures() call. It also handles
+// the bindManual() calls using those textures.
+class TextureHolder
+{
+public:
+	TextureHolder(U32 unit, U32 size) :
+		texUnit(gGL.getTexUnit(unit)),
+		source(size)			// preallocate vector
+	{
+		// takes (count, pointer)
+		// &vector[0] gets pointer to contiguous array
+		LLImageGL::generateTextures(source.size(), &source[0]);
+	}
+
+	~TextureHolder()
+	{
+		// unbind
+		if (texUnit)
+		{
+			texUnit->unbind(LLTexUnit::TT_TEXTURE);
+		}
+		// ensure that we delete these textures regardless of how we exit
+		LLImageGL::deleteTextures(source.size(), &source[0]);
+	}
+
+	bool bind(U32 index)
+	{
+		if (texUnit) // should always be there with dummy (-1), but just in case
+		{
+			return texUnit->bindManual(LLTexUnit::TT_TEXTURE, source[index]);
+		}
+		return false;
+	}
+
+private:
+	// capture which LLTexUnit we're going to use
+	LLTexUnit* texUnit;
+
+	// use std::vector for implicit resource management
+	std::vector<U32> source;
+};
+
+class ShaderBinder
+{
+public:
+	ShaderBinder(LLGLSLShader& shader) :
+		mShader(shader)
+	{
+		mShader.bind();
+	}
+	~ShaderBinder()
+	{
+		mShader.unbind();
+	}
+
+private:
+	LLGLSLShader& mShader;
+};
+
+
+//-----------------------------------------------------------------------------
+// gpu_benchmark()
+//-----------------------------------------------------------------------------
+F32 gpu_benchmark()
+{
+#if LL_WINDOWS
+	if (gGLManager.mIsIntel
+		&& std::string::npos != LLOSInfo::instance().getOSStringSimple().find("Microsoft Windows 8")) // or 8.1
+	{ // don't run benchmark on Windows 8/8.1 based PCs with Intel GPU (MAINT-8197)
+		LL_WARNS() << "Skipping gpu_benchmark() for Intel graphics on Windows 8." << LL_ENDL;
+		return -1.f;
+	}
+#endif
+
+	if (!gGLManager.mHasShaderObjects || !gGLManager.mHasTimerQuery)
+	{ // don't bother benchmarking the fixed function
+      // or venerable drivers which don't support accurate timing anyway
+      // and are likely to be correctly identified by the GPU table already.
+		return -1.f;
+	}
+
+    if (gBenchmarkProgram.mProgramObject == 0)
+	{
+		LLViewerShaderMgr::instance()->initAttribsAndUniforms();
+
+		gBenchmarkProgram.mName = "Benchmark Shader";
+		gBenchmarkProgram.mFeatures.attachNothing = true;
+		gBenchmarkProgram.mShaderFiles.clear();
+		gBenchmarkProgram.mShaderFiles.push_back(std::make_pair("interface/benchmarkV.glsl", GL_VERTEX_SHADER_ARB));
+		gBenchmarkProgram.mShaderFiles.push_back(std::make_pair("interface/benchmarkF.glsl", GL_FRAGMENT_SHADER_ARB));
+		gBenchmarkProgram.mShaderLevel = 1;
+		if (!gBenchmarkProgram.createShader(NULL, NULL))
+		{
+			return -1.f;
+		}
+	}
+
+	LLGLDisable blend(GL_BLEND);
+	
+	//measure memory bandwidth by:
+	// - allocating a batch of textures and render targets
+	// - rendering those textures to those render targets
+	// - recording time taken
+	// - taking the median time for a given number of samples
+	
+	//resolution of textures/render targets
+	const U32 res = 1024;
+	
+	//number of textures
+	const U32 count = 32;
+
+	//number of samples to take
+	const S32 samples = 64;
+		
+	ShaderProfileHelper initProfile;
+	
+	std::vector<LLRenderTarget> dest(count);
+	TextureHolder texHolder(0, count);
+	std::vector<F32> results;
+
+	//build a random texture
+	U8* pixels = new U8[res*res*4];
+
+	for (U32 i = 0; i < res*res*4; ++i)
+	{
+		pixels[i] = (U8) ll_rand(255);
+	}
+	
+	gGL.setColorMask(true, true);
+	LLGLDepthTest depth(GL_FALSE);
+
+	for (U32 i = 0; i < count; ++i)
+	{
+		//allocate render targets and textures
+		if (!dest[i].allocate(res, res, GL_RGBA, false, false, LLTexUnit::TT_TEXTURE, true))
+		{
+			LL_WARNS() << "Failed to allocate render target." << LL_ENDL;
+			// abandon the benchmark test
+			delete[] pixels;
+			return -1.f;
+		}
+		dest[i].bindTarget();
+		dest[i].clear();
+		dest[i].flush();
+
+		if (!texHolder.bind(i))
+		{
+			// can use a dummy value mDummyTexUnit = new LLTexUnit(-1);
+			LL_WARNS() << "Failed to bind tex unit." << LL_ENDL;
+			// abandon the benchmark test
+			delete[] pixels;
+			return -1.f;
+		}
+		LLImageGL::setManualImage(GL_TEXTURE_2D, 0, GL_RGBA, res,res,GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	}
+
+    delete [] pixels;
+
+	//make a dummy triangle to draw with
+	LLPointer<LLVertexBuffer> buff = new LLVertexBuffer(LLVertexBuffer::MAP_VERTEX | LLVertexBuffer::MAP_TEXCOORD0, GL_STATIC_DRAW_ARB);
+
+	if (!buff->allocateBuffer(3, 0, true))
+	{
+		LL_WARNS() << "Failed to allocate buffer during benchmark." << LL_ENDL;
+		// abandon the benchmark test
+		return -1.f;
+	}
+
+	LLStrider<LLVector3> v;
+	LLStrider<LLVector2> tc;
+
+	if (! buff->getVertexStrider(v))
+	{
+		LL_WARNS() << "GL LLVertexBuffer::getVertexStrider() returned false, "
+				   << "buff->getMappedData() is"
+				   << (buff->getMappedData()? " not" : "")
+				   << " NULL" << LL_ENDL;
+		// abandon the benchmark test
+		return -1.f;
+	}
+
+	// generate dummy triangle
+	v[0].set(-1, 1, 0);
+	v[1].set(-1, -3, 0);
+	v[2].set(3, 1, 0);
+
+	buff->flush();
+
+	// ensure matched pair of bind() and unbind() calls
+	ShaderBinder binder(gBenchmarkProgram);
+
+	buff->setBuffer(LLVertexBuffer::MAP_VERTEX);
+	glFinish();
+
+	for (S32 c = -1; c < samples; ++c)
+	{
+		LLTimer timer;
+		timer.start();
+
+		for (U32 i = 0; i < count; ++i)
+		{
+			dest[i].bindTarget();
+			texHolder.bind(i);
+			buff->drawArrays(LLRender::TRIANGLES, 0, 3);
+			dest[i].flush();
+		}
+
+		//wait for current batch of copies to finish
+		glFinish();
+
+		F32 time = timer.getElapsedTimeF32();
+
+		if (c >= 0) // <-- ignore the first sample as it tends to be artificially slow
+		{ 
+			//store result in gigabytes per second
+			F32 gb = (F32) ((F64) (res*res*8*count))/(1000000000);
+			F32 gbps = gb/time;
+			results.push_back(gbps);
+		}
+	}
+
+	std::sort(results.begin(), results.end());
+
+	F32 gbps = results[results.size()/2];
+
+	LL_INFOS() << "Memory bandwidth is " << llformat("%.3f", gbps) << "GB/sec according to CPU timers" << LL_ENDL;
+  
+#if LL_DARWIN
+    if (gbps > 512.f)
+    { 
+        LL_WARNS() << "Memory bandwidth is improbably high and likely incorrect; discarding result." << LL_ENDL;
+        //OSX is probably lying, discard result
+        return -1.f;
+    }
+#endif
+
+	F32 ms = gBenchmarkProgram.mTimeElapsed/1000000.f;
+	F32 seconds = ms/1000.f;
+
+	F64 samples_drawn = res*res*count*samples;
+	F32 samples_sec = (samples_drawn/1000000000.0)/seconds;
+	gbps = samples_sec*8;
+
+	LL_INFOS() << "Memory bandwidth is " << llformat("%.3f", gbps) << "GB/sec according to ARB_timer_query" << LL_ENDL;
+
+	return gbps;
+}

@@ -42,6 +42,7 @@
 #include "llfloaterscriptdebug.h"
 #include "lltooltip.h"
 #include "llhudeffecttrail.h"
+#include "llhudicon.h"
 #include "llhudmanager.h"
 #include "llkeyboard.h"
 #include "llmediaentry.h"
@@ -85,7 +86,8 @@ LLToolPie::LLToolPie()
 	mBlockClickToWalk(false),
 	mClickAction(0),
 	mClickActionBuyEnabled( gSavedSettings.getBOOL("ClickActionBuyEnabled") ),
-	mClickActionPayEnabled( gSavedSettings.getBOOL("ClickActionPayEnabled") )
+	mClickActionPayEnabled( gSavedSettings.getBOOL("ClickActionPayEnabled") ),
+	mDoubleClickTimer()
 {
 }
 
@@ -101,12 +103,17 @@ BOOL LLToolPie::handleAnyMouseClick(S32 x, S32 y, MASK mask, EClickType clicktyp
 
 BOOL LLToolPie::handleMouseDown(S32 x, S32 y, MASK mask)
 {
-	mMouseOutsideSlop = FALSE;
+    if (mDoubleClickTimer.getStarted())
+    {
+        mDoubleClickTimer.stop();
+    }
+
+    mMouseOutsideSlop = FALSE;
 	mMouseDownX = x;
 	mMouseDownY = y;
 
-	//left mouse down always picks transparent
-	mPick = gViewerWindow->pickImmediate(x, y, TRUE);
+	//left mouse down always picks transparent (but see handleMouseUp)
+	mPick = gViewerWindow->pickImmediate(x, y, TRUE, FALSE);
 	mPick.mKeyMask = mask;
 
 	mMouseButtonDown = true;
@@ -121,7 +128,7 @@ BOOL LLToolPie::handleMouseDown(S32 x, S32 y, MASK mask)
 BOOL LLToolPie::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	// don't pick transparent so users can't "pay" transparent objects
-	mPick = gViewerWindow->pickImmediate(x, y, FALSE, TRUE);
+	mPick = gViewerWindow->pickImmediate(x, y, /*BOOL pick_transparent*/ FALSE, /*BOOL pick_rigged*/ TRUE, /*BOOL pick_particle*/ TRUE);
 	mPick.mKeyMask = mask;
 
 	// claim not handled so UI focus stays same
@@ -318,6 +325,7 @@ BOOL LLToolPie::handleLeftClickPick()
 	{
 		gGrabTransientTool = this;
 		mMouseButtonDown = false;
+		LLToolGrab::getInstance()->setClickedInMouselook(gAgentCamera.cameraMouselook());
 		LLToolMgr::getInstance()->getCurrentToolset()->selectTool( LLToolGrab::getInstance() );
 		return LLToolGrab::getInstance()->handleObjectHit( mPick );
 	}
@@ -330,56 +338,41 @@ BOOL LLToolPie::handleLeftClickPick()
 
 	// If left-click never selects or spawns a menu
 	// Eat the event.
-	if (!gSavedSettings.getBOOL("LeftClickShowMenu"))
+
+	// mouse already released
+	if (!mMouseButtonDown)
 	{
-		// mouse already released
-		if (!mMouseButtonDown)
-		{
-			return true;
-		}
+		return true;
+	}
 
-		while( object && object->isAttachment() && !object->flagHandleTouch())
+	while (object && object->isAttachment() && !object->flagHandleTouch())
+	{
+		// don't pick avatar through hud attachment
+		if (object->isHUDAttachment())
 		{
-			// don't pick avatar through hud attachment
-			if (object->isHUDAttachment())
-			{
-				break;
-			}
-			object = (LLViewerObject*)object->getParent();
+			break;
 		}
-		if (object && object == gAgentAvatarp && !gSavedSettings.getBOOL("ClickToWalk"))
-		{
-			// we left clicked on avatar, switch to focus mode
-			mMouseButtonDown = false;
-			LLToolMgr::getInstance()->setTransientTool(LLToolCamera::getInstance());
-			gViewerWindow->hideCursor();
-			LLToolCamera::getInstance()->setMouseCapture(TRUE);
-			LLToolCamera::getInstance()->pickCallback(mPick);
-			gAgentCamera.setFocusOnAvatar(TRUE, TRUE);
+		object = (LLViewerObject*)object->getParent();
+	}
+	if (object && object == gAgentAvatarp && !gSavedSettings.getBOOL("ClickToWalk"))
+	{
+		// we left clicked on avatar, switch to focus mode
+		mMouseButtonDown = false;
+		LLToolMgr::getInstance()->setTransientTool(LLToolCamera::getInstance());
+		gViewerWindow->hideCursor();
+		LLToolCamera::getInstance()->setMouseCapture(TRUE);
+		LLToolCamera::getInstance()->pickCallback(mPick);
+		gAgentCamera.setFocusOnAvatar(TRUE, TRUE);
 
-			return TRUE;
-		}
+		return TRUE;
+	}
 	//////////
 	//	// Could be first left-click on nothing
 	//	LLFirstUse::useLeftClickNoHit();
 	/////////
-		
-		// Eat the event
-		return LLTool::handleMouseDown(x, y, mask);
-	}
 
-	if (gAgent.leftButtonGrabbed())
-	{
-		// if the left button is grabbed, don't put up the pie menu
-		return LLTool::handleMouseDown(x, y, mask);
-	}
-
-	// Can't ignore children here.
-	LLToolSelect::handleObjectSelection(mPick, FALSE, TRUE);
-
-	// Spawn pie menu
-	LLTool::handleRightMouseDown(x, y, mask);
-	return TRUE;
+	// Eat the event
+	return LLTool::handleMouseDown(x, y, mask);
 }
 
 BOOL LLToolPie::useClickAction(MASK mask, 
@@ -438,8 +431,12 @@ ECursorType LLToolPie::cursorFromObject(LLViewerObject* object)
 		break;
 	case CLICK_ACTION_BUY:
 		if ( mClickActionBuyEnabled )
-		{
-			cursor = UI_CURSOR_TOOLBUY;
+		{ 
+			LLSelectNode* node = LLSelectMgr::getInstance()->getHoverNode();
+			if (!node || node->mSaleInfo.isForSale())
+			{
+				cursor = UI_CURSOR_TOOLBUY;
+			}
 		}
 		break;
 	case CLICK_ACTION_OPEN:
@@ -488,7 +485,8 @@ void LLToolPie::walkToClickedLocation()
 	mAutoPilotDestination->setColor(LLColor4U(170, 210, 190));
 	mAutoPilotDestination->setDuration(3.f);
 
-	handle_go_to();
+	LLVector3d pos = LLToolPie::getInstance()->getPick().mPosGlobal;
+	gAgent.startAutoPilotGlobal(pos, std::string(), NULL, NULL, NULL, 0.f, 0.03f, FALSE);
 }
 
 // When we get object properties after left-clicking on an object
@@ -540,9 +538,10 @@ void LLToolPie::selectionPropertiesReceived()
 
 BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 {
-	mHoverPick = gViewerWindow->pickImmediate(x, y, FALSE);
+	mHoverPick = gViewerWindow->pickImmediate(x, y, FALSE, FALSE);
 	LLViewerObject *parent = NULL;
 	LLViewerObject *object = mHoverPick.getObject();
+	LLSelectMgr::getInstance()->setHoverObject(object, mHoverPick.mObjectFace);
 	if (object)
 	{
 		parent = object->getRootEdit();
@@ -557,7 +556,7 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 		// could disable it here.
 		show_highlight = true;
 		// cursor set by media object
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPie (inactive)" << llendl;
+		LL_DEBUGS("UserInput") << "hover handled by LLToolPie (inactive)" << LL_ENDL;
 	}
 	else if (!mMouseOutsideSlop 
 		&& mMouseButtonDown 
@@ -585,7 +584,7 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 	else
 	{
 		// perform a separate pick that detects transparent objects since they respond to 1-click actions
-		LLPickInfo click_action_pick = gViewerWindow->pickImmediate(x, y, TRUE);
+		LLPickInfo click_action_pick = gViewerWindow->pickImmediate(x, y, TRUE, FALSE);
 
 		LLViewerObject* click_action_object = click_action_pick.getObject();
 
@@ -594,7 +593,7 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 			show_highlight = true;
 			ECursorType cursor = cursorFromObject(click_action_object);
 			gViewerWindow->setCursor(cursor);
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPie (inactive)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolPie (inactive)" << LL_ENDL;
 		}
 		
 		else if ((object && !object->isAvatar() && object->flagUsePhysics()) 
@@ -602,19 +601,19 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 		{
 			show_highlight = true;
 			gViewerWindow->setCursor(UI_CURSOR_TOOLGRAB);
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPie (inactive)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolPie (inactive)" << LL_ENDL;
 		}
 		else if ( (object && object->flagHandleTouch()) 
 				  || (parent && parent->flagHandleTouch()))
 		{
 			show_highlight = true;
 			gViewerWindow->setCursor(UI_CURSOR_HAND);
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPie (inactive)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolPie (inactive)" << LL_ENDL;
 		}
 		else
 		{
 			gViewerWindow->setCursor(UI_CURSOR_ARROW);
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPie (inactive)" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolPie (inactive)" << LL_ENDL;
 		}
 	}
 
@@ -637,7 +636,15 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 
 BOOL LLToolPie::handleMouseUp(S32 x, S32 y, MASK mask)
 {
-	LLViewerObject* obj = mPick.getObject();
+    if (!mDoubleClickTimer.getStarted())
+    {
+        mDoubleClickTimer.start();
+    }
+    else
+    {
+        mDoubleClickTimer.reset();
+    }
+    LLViewerObject* obj = mPick.getObject();
 	U8 click_action = final_click_action(obj);
 
 	// let media have first pass at click
@@ -654,30 +661,52 @@ BOOL LLToolPie::handleMouseUp(S32 x, S32 y, MASK mask)
 		&& gAgentAvatarp
 		&& !gAgentAvatarp->isSitting()
 		&& !mBlockClickToWalk							// another behavior hasn't cancelled click to walk
-		&& !mPick.mPosGlobal.isExactlyZero()			// valid coordinates for pick
-		&& (mPick.mPickType == LLPickInfo::PICK_LAND	// we clicked on land
-			|| mPick.mObjectID.notNull()))				// or on an object
+        )
 	{
-		// handle special cases of steering picks
-		LLViewerObject* avatar_object = mPick.getObject();
+        // We may be doing click to walk, but we don't want to use a target on
+        // a transparent object because the user thought they were clicking on
+        // whatever they were seeing through it, so recompute what was clicked on
+        // ignoring transparent objects
+        LLPickInfo savedPick = mPick;
+        mPick = gViewerWindow->pickImmediate(savedPick.mMousePt.mX, savedPick.mMousePt.mY,
+                                             FALSE /* ignore transparent */,
+                                             FALSE /* ignore particles */);
 
-		// get pointer to avatar
-		while (avatar_object && !avatar_object->isAvatar())
-		{
-			avatar_object = (LLViewerObject*)avatar_object->getParent();
-		}
+        if (!mPick.mPosGlobal.isExactlyZero()			// valid coordinates for pick
+            && (mPick.mPickType == LLPickInfo::PICK_LAND	// we clicked on land
+                || mPick.mObjectID.notNull()))				// or on an object
+        {
+            // handle special cases of steering picks
+            LLViewerObject* avatar_object = mPick.getObject();
 
-		if (avatar_object && ((LLVOAvatar*)avatar_object)->isSelf())
-		{
-			const F64 SELF_CLICK_WALK_DISTANCE = 3.0;
-			// pretend we picked some point a bit in front of avatar
-			mPick.mPosGlobal = gAgent.getPositionGlobal() + LLVector3d(LLViewerCamera::instance().getAtAxis()) * SELF_CLICK_WALK_DISTANCE;
-		}
-		gAgentCamera.setFocusOnAvatar(TRUE, TRUE);
-		walkToClickedLocation();
-		LLFirstUse::notMoving(false);
+            // get pointer to avatar
+            while (avatar_object && !avatar_object->isAvatar())
+            {
+                avatar_object = (LLViewerObject*)avatar_object->getParent();
+            }
 
-		return TRUE;
+            if (avatar_object && ((LLVOAvatar*)avatar_object)->isSelf())
+            {
+                const F64 SELF_CLICK_WALK_DISTANCE = 3.0;
+                // pretend we picked some point a bit in front of avatar
+                mPick.mPosGlobal = gAgent.getPositionGlobal() + LLVector3d(LLViewerCamera::instance().getAtAxis()) * SELF_CLICK_WALK_DISTANCE;
+            }
+            gAgentCamera.setFocusOnAvatar(TRUE, TRUE);
+            walkToClickedLocation();
+            LLFirstUse::notMoving(false);
+
+            return TRUE;
+        }
+        else
+        {
+            LL_DEBUGS("maint5901") << "walk target was "
+                                   << (mPick.mPosGlobal.isExactlyZero() ? "zero" : "not zero")
+                                   << ", pick type was " << (mPick.mPickType == LLPickInfo::PICK_LAND ? "land" : "not land")
+                                   << ", pick object was " << mPick.mObjectID
+                                   << LL_ENDL;
+            // we didn't click to walk, so restore the original target
+            mPick = savedPick;
+        }
 	}
 	gViewerWindow->setCursor(UI_CURSOR_ARROW);
 	if (hasMouseCapture())
@@ -706,17 +735,52 @@ BOOL LLToolPie::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
 	if (gDebugClicks)
 	{
-		llinfos << "LLToolPie handleDoubleClick (becoming mouseDown)" << llendl;
+		LL_INFOS() << "LLToolPie handleDoubleClick (becoming mouseDown)" << LL_ENDL;
 	}
+
+	if (handleMediaDblClick(mPick))
+	{
+		return TRUE;
+	}
+    
+    	if (!mDoubleClickTimer.getStarted() || (mDoubleClickTimer.getElapsedTimeF32() > 0.3f))
+	{
+		mDoubleClickTimer.stop();
+		return FALSE;
+	}
+	mDoubleClickTimer.stop();
 
 	if (gSavedSettings.getBOOL("DoubleClickAutoPilot"))
 	{
+        // We may be doing double click to walk, but we don't want to use a target on
+        // a transparent object because the user thought they were clicking on
+        // whatever they were seeing through it, so recompute what was clicked on
+        // ignoring transparent objects
+        LLPickInfo savedPick = mPick;
+        mPick = gViewerWindow->pickImmediate(savedPick.mMousePt.mX, savedPick.mMousePt.mY,
+                                             FALSE /* ignore transparent */,
+                                             FALSE /* ignore particles */);
+
+        if(mPick.mPickType == LLPickInfo::PICK_OBJECT)
+        {
+            if (mPick.getObject() && mPick.getObject()->isHUDAttachment())
+            {
+                mPick = savedPick;
+                return FALSE;
+            }
+        }
+
 		if ((mPick.mPickType == LLPickInfo::PICK_LAND && !mPick.mPosGlobal.isExactlyZero()) ||
 			(mPick.mObjectID.notNull()  && !mPick.mPosGlobal.isExactlyZero()))
 		{
 			walkToClickedLocation();
 			return TRUE;
 		}
+        else
+        {
+            // restore the original pick for any other purpose
+            mPick = savedPick;
+        }
 	}
 	else if (gSavedSettings.getBOOL("DoubleClickTeleport"))
 	{
@@ -830,14 +894,19 @@ BOOL LLToolPie::handleTooltipLand(std::string line, std::string tooltip_msg)
 				line.append(LLTrans::getString("RetrievingData"));
 			}
 		}
-		else if(gCacheName->getFullName(owner, name))
-		{
-			line.append(name);
-		}
-		else
-		{
-			line.append(LLTrans::getString("RetrievingData"));
-		}
+        else
+        {
+            LLAvatarName av_name;
+            if (LLAvatarNameCache::get(owner, &av_name))
+            {
+                name = av_name.getUserName();
+                line.append(name);
+            }
+            else
+            {
+                line.append(LLTrans::getString("RetrievingData"));
+            }
+        }
 	}
 	else
 	{
@@ -1305,7 +1374,16 @@ void LLToolPie::handleDeselect()
 	}
 	// remove temporary selection for pie menu
 	LLSelectMgr::getInstance()->setHoverObject(NULL);
-	LLSelectMgr::getInstance()->validateSelection();
+
+	// Menu may be still up during transfer to different tool.
+	// toolfocus and toolgrab should retain menu, they will clear it if needed
+	MASK override_mask = gKeyboard ? gKeyboard->currentMask(TRUE) : 0;
+	if (gMenuHolder && (!gMenuHolder->getVisible() || (override_mask & (MASK_ALT | MASK_CONTROL)) == 0))
+	{
+		// in most cases menu is useless without correct selection, so either keep both or discard both
+		gMenuHolder->hideMenus();
+		LLSelectMgr::getInstance()->validateSelection();
+	}
 }
 
 LLTool* LLToolPie::getOverrideTool(MASK mask)
@@ -1388,56 +1466,110 @@ static void handle_click_action_play()
 
 bool LLToolPie::handleMediaClick(const LLPickInfo& pick)
 {
-	//FIXME: how do we handle object in different parcel than us?
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	LLPointer<LLViewerObject> objectp = pick.getObject();
+    //FIXME: how do we handle object in different parcel than us?
+    LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+    LLPointer<LLViewerObject> objectp = pick.getObject();
 
 
-	if (!parcel ||
-		objectp.isNull() ||
-		pick.mObjectFace < 0 || 
-		pick.mObjectFace >= objectp->getNumTEs()) 
-	{
-		LLViewerMediaFocus::getInstance()->clearFocus();
+    if (!parcel ||
+        objectp.isNull() ||
+        pick.mObjectFace < 0 ||
+        pick.mObjectFace >= objectp->getNumTEs())
+    {
+        LLViewerMediaFocus::getInstance()->clearFocus();
 
-		return false;
-	}
+        return false;
+    }
 
-	// Does this face have media?
-	const LLTextureEntry* tep = objectp->getTE(pick.mObjectFace);
-	if(!tep)
-		return false;
+    // Does this face have media?
+    const LLTextureEntry* tep = objectp->getTE(pick.mObjectFace);
+    if (!tep)
+        return false;
 
-	LLMediaEntry* mep = (tep->hasMedia()) ? tep->getMediaData() : NULL;
-	if(!mep)
-		return false;
-	
-	viewer_media_t media_impl = LLViewerMedia::getMediaImplFromTextureID(mep->getMediaID());
+    LLMediaEntry* mep = (tep->hasMedia()) ? tep->getMediaData() : NULL;
+    if (!mep)
+        return false;
 
-	if (gSavedSettings.getBOOL("MediaOnAPrimUI"))
-	{
-		if (!LLViewerMediaFocus::getInstance()->isFocusedOnFace(pick.getObject(), pick.mObjectFace) || media_impl.isNull())
-		{
-			// It's okay to give this a null impl
-			LLViewerMediaFocus::getInstance()->setFocusFace(pick.getObject(), pick.mObjectFace, media_impl, pick.mNormal);
-		}
-		else
-		{
-			// Make sure keyboard focus is set to the media focus object.
-			gFocusMgr.setKeyboardFocus(LLViewerMediaFocus::getInstance());
-			LLEditMenuHandler::gEditMenuHandler = LLViewerMediaFocus::instance().getFocusedMediaImpl();
-			
-			media_impl->mouseDown(pick.mUVCoords, gKeyboard->currentMask(TRUE));
-			mMediaMouseCaptureID = mep->getMediaID();
-			setMouseCapture(TRUE);  // This object will send a mouse-up to the media when it loses capture.
-		}
+    viewer_media_t media_impl = LLViewerMedia::getMediaImplFromTextureID(mep->getMediaID());
 
-		return true;
-	}
+    if (gSavedSettings.getBOOL("MediaOnAPrimUI"))
+    {
+        if (!LLViewerMediaFocus::getInstance()->isFocusedOnFace(pick.getObject(), pick.mObjectFace) || media_impl.isNull())
+        {
+            // It's okay to give this a null impl
+            LLViewerMediaFocus::getInstance()->setFocusFace(pick.getObject(), pick.mObjectFace, media_impl, pick.mNormal);
+        }
+        else
+        {
+            // Make sure keyboard focus is set to the media focus object.
+            gFocusMgr.setKeyboardFocus(LLViewerMediaFocus::getInstance());
+            LLEditMenuHandler::gEditMenuHandler = LLViewerMediaFocus::instance().getFocusedMediaImpl();
 
-	LLViewerMediaFocus::getInstance()->clearFocus();
+            media_impl->mouseDown(pick.mUVCoords, gKeyboard->currentMask(TRUE));
+            mMediaMouseCaptureID = mep->getMediaID();
+            setMouseCapture(TRUE);  // This object will send a mouse-up to the media when it loses capture.
+        }
 
-	return false;
+        return true;
+    }
+
+    LLViewerMediaFocus::getInstance()->clearFocus();
+
+    return false;
+}
+
+bool LLToolPie::handleMediaDblClick(const LLPickInfo& pick)
+{
+    //FIXME: how do we handle object in different parcel than us?
+    LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+    LLPointer<LLViewerObject> objectp = pick.getObject();
+
+
+    if (!parcel ||
+        objectp.isNull() ||
+        pick.mObjectFace < 0 ||
+        pick.mObjectFace >= objectp->getNumTEs())
+    {
+        LLViewerMediaFocus::getInstance()->clearFocus();
+
+        return false;
+    }
+
+    // Does this face have media?
+    const LLTextureEntry* tep = objectp->getTE(pick.mObjectFace);
+    if (!tep)
+        return false;
+
+    LLMediaEntry* mep = (tep->hasMedia()) ? tep->getMediaData() : NULL;
+    if (!mep)
+        return false;
+
+    viewer_media_t media_impl = LLViewerMedia::getMediaImplFromTextureID(mep->getMediaID());
+
+    if (gSavedSettings.getBOOL("MediaOnAPrimUI"))
+    {
+        if (!LLViewerMediaFocus::getInstance()->isFocusedOnFace(pick.getObject(), pick.mObjectFace) || media_impl.isNull())
+        {
+            // It's okay to give this a null impl
+            LLViewerMediaFocus::getInstance()->setFocusFace(pick.getObject(), pick.mObjectFace, media_impl, pick.mNormal);
+        }
+        else
+        {
+            // Make sure keyboard focus is set to the media focus object.
+            gFocusMgr.setKeyboardFocus(LLViewerMediaFocus::getInstance());
+            LLEditMenuHandler::gEditMenuHandler = LLViewerMediaFocus::instance().getFocusedMediaImpl();
+
+            media_impl->mouseDoubleClick(pick.mUVCoords, gKeyboard->currentMask(TRUE));
+            mMediaMouseCaptureID = mep->getMediaID();
+            setMouseCapture(TRUE);  // This object will send a mouse-up to the media when it loses capture.
+        }
+
+        return true;
+    }
+
+    LLViewerMediaFocus::getInstance()->clearFocus();
+
+    return false;
 }
 
 bool LLToolPie::handleMediaHover(const LLPickInfo& pick)
@@ -1671,17 +1803,7 @@ BOOL LLToolPie::handleRightClickPick()
 			{
 				name = node->mName;
 			}
-			std::string mute_msg;
-			if (LLMuteList::getInstance()->isMuted(object->getID(), name))
-			{
-				mute_msg = LLTrans::getString("UnmuteObject");
-			}
-			else
-			{
-				mute_msg = LLTrans::getString("MuteObject2");
-			}
-			
-			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+
 			gMenuObject->show(x, y);
 
 			showVisualContextMenuEffect();
@@ -1693,6 +1815,12 @@ BOOL LLToolPie::handleRightClickPick()
 		{
 			gMenuMuteParticle->show(x,y);
 		}
+	}
+
+	// non UI object - put focus back "in world"
+	if (gFocusMgr.getKeyboardFocus())
+	{
+		gFocusMgr.setKeyboardFocus(NULL);
 	}
 
 	LLTool::handleRightMouseDown(x, y, mask);

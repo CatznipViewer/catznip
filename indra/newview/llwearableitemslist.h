@@ -258,7 +258,7 @@ public:
 
 		if (!wearable_item1 || !wearable_item2)
 		{
-			llwarning("item1 and item2 cannot be null", 0);
+			LL_WARNS() << "item1 and item2 cannot be null" << LL_ENDL;
 			return true;
 		}
 
@@ -310,6 +310,7 @@ public:
 		ORDER_RANK_1 = 1,
 		ORDER_RANK_2,
 		ORDER_RANK_3,
+		ORDER_RANK_4,
 		ORDER_RANK_UNKNOWN
 	};
 
@@ -382,6 +383,10 @@ class LLWearableItemCreationDateComparator : public LLWearableItemNameComparator
 {
 	LOG_CLASS(LLWearableItemCreationDateComparator);
 
+public:
+	// clang demands a default ctor here 
+	LLWearableItemCreationDateComparator() {}
+
 protected:
 	/*virtual*/ bool doCompare(const LLPanelInventoryListItemBase* item1, const LLPanelInventoryListItemBase* item2) const;
 };
@@ -406,8 +411,8 @@ public:
 	 */
 	class ContextMenu : public LLListContextMenu, public LLSingleton<ContextMenu>
 	{
+		LLSINGLETON(ContextMenu);
 	public:
-		ContextMenu();
 		/*virtual*/ void show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y);
 
 	protected:
@@ -415,7 +420,8 @@ public:
 			MASK_CLOTHING		= 0x01,
 			MASK_BODYPART		= 0x02,
 			MASK_ATTACHMENT		= 0x04,
-			MASK_UNKNOWN		= 0x08,
+			MASK_GESTURE		= 0x08,
+			MASK_UNKNOWN		= 0x10,
 		};
 
 		/* virtual */ LLContextMenu* createMenu();
@@ -425,7 +431,6 @@ public:
 		static void setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val);
 		static void updateMask(U32& mask, LLAssetType::EType at);
 		static void createNewWearable(const LLUUID& item_id);
-		static bool canAddWearables(const uuid_vec_t& item_ids);
 
 		LLWearableItemsList*	mParent;
 	};
@@ -448,7 +453,7 @@ public:
 
 	virtual ~LLWearableItemsList();
 
-	/*virtual*/ void addNewItem(LLViewerInventoryItem* item, bool rearrange = true);
+	/*virtual*/ LLPanel* createNewItem(LLViewerInventoryItem* item);
 
 	void updateList(const LLUUID& category_id);
 

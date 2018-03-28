@@ -28,34 +28,53 @@
 // Header Files
 //-----------------------------------------------------------------------------
 #include "linden_common.h"
-#include "imageids.h"
 #include "llfasttimer.h"
 #include "llrender.h"
 
 #include "llavatarjointmesh.h"
 #include "llavatarappearance.h"
-//#include "llapr.h"
-//#include "llbox.h"
-//#include "lldrawable.h"
-//#include "lldrawpoolavatar.h"
-//#include "lldrawpoolbump.h"
-//#include "lldynamictexture.h"
-//#include "llface.h"
-//#include "llgldbg.h"
-//#include "llglheaders.h"
 #include "lltexlayer.h"
-//#include "llviewercamera.h"
-//#include "llviewercontrol.h"
-//#include "llviewertexturelist.h"
-//#include "llsky.h"
-//#include "pipeline.h"
-//#include "llviewershadermgr.h"
 #include "llmath.h"
 #include "v4math.h"
 #include "m3math.h"
 #include "m4math.h"
 #include "llmatrix4a.h"
 
+
+// Utility functions added with Bento to simplify handling of extra
+// spine joints, or other new joints internal to the original
+// skeleton, and unknown to the system avatar.
+
+//-----------------------------------------------------------------------------
+// getBaseSkeletonAncestor()
+//-----------------------------------------------------------------------------
+LLAvatarJoint *getBaseSkeletonAncestor(LLAvatarJoint* joint)
+{
+    LLJoint *ancestor = joint->getParent();
+    while (ancestor->getParent() && (ancestor->getSupport() != LLJoint::SUPPORT_BASE))
+    {
+        LL_DEBUGS("Avatar") << "skipping non-base ancestor " << ancestor->getName() << LL_ENDL;
+        ancestor = ancestor->getParent();
+    }
+    return (LLAvatarJoint*) ancestor;
+}
+
+//-----------------------------------------------------------------------------
+// totalSkinOffset()
+//-----------------------------------------------------------------------------
+LLVector3 totalSkinOffset(LLAvatarJoint *joint)
+{
+    LLVector3 totalOffset;
+    while (joint)
+    {
+		if (joint->getSupport() == LLJoint::SUPPORT_BASE)
+		{
+			totalOffset += joint->getSkinOffset();
+		}
+		joint = (LLAvatarJoint*)joint->getParent();
+    }
+    return totalOffset;
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -89,22 +108,16 @@ BOOL LLSkinJoint::setupSkinJoint( LLAvatarJoint *joint)
 	mJoint = joint;
 	if ( !mJoint )
 	{
-		llinfos << "Can't find joint" << llendl;
+		LL_INFOS() << "Can't find joint" << LL_ENDL;
 	}
 
 	// compute the inverse root skin matrix
-	mRootToJointSkinOffset.clearVec();
+	mRootToJointSkinOffset = totalSkinOffset(joint);
+    mRootToJointSkinOffset = -mRootToJointSkinOffset;
 
-	LLVector3 rootSkinOffset;
-	while (joint)
-	{
-		rootSkinOffset += joint->getSkinOffset();
-		joint = (LLAvatarJoint*)joint->getParent();
-	}
-
-	mRootToJointSkinOffset = -rootSkinOffset;
-	mRootToParentJointSkinOffset = mRootToJointSkinOffset;
-	mRootToParentJointSkinOffset += mJoint->getSkinOffset();
+	//mRootToParentJointSkinOffset = totalSkinOffset((LLAvatarJoint*)joint->getParent());
+	mRootToParentJointSkinOffset = totalSkinOffset(getBaseSkeletonAncestor(joint));
+	mRootToParentJointSkinOffset = -mRootToParentJointSkinOffset;
 
 	return TRUE;
 }
@@ -117,7 +130,6 @@ BOOL LLSkinJoint::setupSkinJoint( LLAvatarJoint *joint)
 //-----------------------------------------------------------------------------
 
 BOOL LLAvatarJointMesh::sPipelineRender = FALSE;
-EAvatarRenderPass LLAvatarJointMesh::sRenderPass = AVATAR_RENDER_PASS_SINGLE;
 U32 LLAvatarJointMesh::sClothingMaskImageName = 0;
 LLColor4 LLAvatarJointMesh::sClothingInnerColor;
 
@@ -291,6 +303,7 @@ void LLAvatarJointMesh::setMesh( LLPolyMesh *mesh )
 	}
 
 	// acquire the transform from the mesh object
+    // SL-315
 	setPosition( mMesh->getPosition() );
 	setRotation( mMesh->getRotation() );
 	setScale( mMesh->getScale() );
@@ -306,7 +319,7 @@ void LLAvatarJointMesh::setMesh( LLPolyMesh *mesh )
 		U32 jn;
 		for (jn = 0; jn < numJointNames; jn++)
 		{
-			//llinfos << "Setting up joint " << jointNames[jn] << llendl;
+			//LL_INFOS() << "Setting up joint " << jointNames[jn] << LL_ENDL;
 			LLAvatarJoint* joint = (LLAvatarJoint*)(getRoot()->findJoint(jointNames[jn]) );
 			mSkinJoints[jn].setupSkinJoint( joint );
 		}
@@ -316,9 +329,9 @@ void LLAvatarJointMesh::setMesh( LLPolyMesh *mesh )
 	if (!mMesh->isLOD())
 	{
 		setupJoint((LLAvatarJoint*)getRoot());
+        LL_DEBUGS("Avatar") << getName() << " joint render entries: " << mMesh->mJointRenderData.size() << LL_ENDL;
 	}
 
-//	llinfos << "joint render entries: " << mMesh->mJointRenderData.count() << llendl;
 }
 
 //-----------------------------------------------------------------------------
@@ -326,10 +339,8 @@ void LLAvatarJointMesh::setMesh( LLPolyMesh *mesh )
 //-----------------------------------------------------------------------------
 void LLAvatarJointMesh::setupJoint(LLAvatarJoint* current_joint)
 {
-//	llinfos << "Mesh: " << getName() << llendl;
-
-//	S32 joint_count = 0;
 	U32 sj;
+
 	for (sj=0; sj<mNumSkinJoints; sj++)
 	{
 		LLSkinJoint &js = mSkinJoints[sj];
@@ -340,25 +351,30 @@ void LLAvatarJointMesh::setupJoint(LLAvatarJoint* current_joint)
 		}
 
 		// we've found a skinjoint for this joint..
+        LL_DEBUGS("Avatar") << "Mesh: " << getName() << " joint " << current_joint->getName() << " matches skinjoint " << sj << LL_ENDL;
 
 		// is the last joint in the array our parent?
-		if(mMesh->mJointRenderData.count() && mMesh->mJointRenderData[mMesh->mJointRenderData.count() - 1]->mWorldMatrix == &current_joint->getParent()->getWorldMatrix())
+
+        std::vector<LLJointRenderData*>	&jrd = mMesh->mJointRenderData;
+
+        // SL-287 - need to update this so the results are the same if
+        // additional extended-skeleton joints lie between this joint
+        // and the original parent.
+        LLJoint *ancestor = getBaseSkeletonAncestor(current_joint);
+		if(jrd.size() && jrd.back()->mWorldMatrix == &ancestor->getWorldMatrix())
 		{
 			// ...then just add ourselves
 			LLAvatarJoint* jointp = js.mJoint;
-			mMesh->mJointRenderData.put(new LLJointRenderData(&jointp->getWorldMatrix(), &js));
-//			llinfos << "joint " << joint_count << js.mJoint->getName() << llendl;
-//			joint_count++;
+			jrd.push_back(new LLJointRenderData(&jointp->getWorldMatrix(), &js));
+			LL_DEBUGS("Avatar") << "add joint[" << (jrd.size()-1) << "] = " << js.mJoint->getName() << LL_ENDL;
 		}
-		// otherwise add our parent and ourselves
+		// otherwise add our ancestor and ourselves
 		else
 		{
-			mMesh->mJointRenderData.put(new LLJointRenderData(&current_joint->getParent()->getWorldMatrix(), NULL));
-//			llinfos << "joint " << joint_count << current_joint->getParent()->getName() << llendl;
-//			joint_count++;
-			mMesh->mJointRenderData.put(new LLJointRenderData(&current_joint->getWorldMatrix(), &js));
-//			llinfos << "joint " << joint_count << current_joint->getName() << llendl;
-//			joint_count++;
+			jrd.push_back(new LLJointRenderData(&ancestor->getWorldMatrix(), NULL));
+			LL_DEBUGS("Avatar") << "add2 ancestor joint[" << (jrd.size()-1) << "] = " << ancestor->getName() << LL_ENDL;
+			jrd.push_back(new LLJointRenderData(&current_joint->getWorldMatrix(), &js));
+            LL_DEBUGS("Avatar") << "add2 joint[" << (jrd.size()-1) << "] = " << current_joint->getName() << LL_ENDL;
 		}
 	}
 

@@ -48,6 +48,8 @@
  */
 class SpeakingIndicatorManager : public LLSingleton<SpeakingIndicatorManager>, LLVoiceClientParticipantObserver
 {
+	LLSINGLETON(SpeakingIndicatorManager);
+	~SpeakingIndicatorManager();
 	LOG_CLASS(SpeakingIndicatorManager);
 public:
 
@@ -90,10 +92,6 @@ private:
 	typedef speaking_indicators_mmap_t::value_type speaking_indicator_value_t;
 	typedef speaking_indicators_mmap_t::const_iterator indicator_const_iterator;
 	typedef std::pair<indicator_const_iterator, indicator_const_iterator> indicator_range_t;
-
-	friend class LLSingleton<SpeakingIndicatorManager>;
-	SpeakingIndicatorManager();
-	~SpeakingIndicatorManager();
 
 	/**
 	 * Callback to determine when voice channel is changed.
@@ -279,7 +277,7 @@ void SpeakingIndicatorManager::ensureInstanceDoesNotExist(LLSpeakingIndicator* c
 	// So, using stored deleted pointer leads to crash. See EXT-4782.
 	if (it != mSpeakingIndicators.end())
 	{
-		llwarns << "The same instance of indicator has already been registered, removing it: " << it->first << "|"<< speaking_indicator << llendl;
+		LL_WARNS() << "The same instance of indicator has already been registered, removing it: " << it->first << "|"<< speaking_indicator << LL_ENDL;
 		llassert(it == mSpeakingIndicators.end());
 		mSpeakingIndicators.erase(it);
 	}

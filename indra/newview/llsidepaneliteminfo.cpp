@@ -32,6 +32,7 @@
 #include "llagent.h"
 #include "llavataractions.h"
 #include "llbutton.h"
+#include "llcombobox.h"
 #include "llfloaterreg.h"
 #include "llgroupactions.h"
 #include "llinventorydefines.h"
@@ -43,6 +44,9 @@
 #include "llviewercontrol.h"
 #include "llviewerinventory.h"
 #include "llviewerobjectlist.h"
+#include "llexperiencecache.h"
+#include "lltrans.h"
+#include "llviewerregion.h"
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,7 +131,7 @@ void LLObjectInventoryObserver::inventoryChanged(LLViewerObject* object,
 /// Class LLSidepanelItemInfo
 ///----------------------------------------------------------------------------
 
-static LLRegisterPanelClassWrapper<LLSidepanelItemInfo> t_item_info("sidepanel_item_info");
+static LLPanelInjector<LLSidepanelItemInfo> t_item_info("sidepanel_item_info");
 
 // Default constructor
 LLSidepanelItemInfo::LLSidepanelItemInfo(const LLPanel::Params& p)
@@ -173,6 +177,8 @@ BOOL LLSidepanelItemInfo::postBuild()
 	getChild<LLUICtrl>("CheckNextOwnerTransfer")->setCommitCallback(boost::bind(&LLSidepanelItemInfo::onCommitPermissions, this));
 	// Mark for sale or not, and sale info
 	getChild<LLUICtrl>("CheckPurchase")->setCommitCallback(boost::bind(&LLSidepanelItemInfo::onCommitSaleInfo, this));
+	// Change sale type, and sale info
+	getChild<LLUICtrl>("ComboBoxSaleType")->setCommitCallback(boost::bind(&LLSidepanelItemInfo::onCommitSaleInfo, this));
 	// "Price" label for edit
 	getChild<LLUICtrl>("Edit Cost")->setCommitCallback(boost::bind(&LLSidepanelItemInfo::onCommitSaleInfo, this));
 	refresh();
@@ -316,6 +322,21 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		is_obj_modify = object->permOwnerModify();
 	}
 
+    if(item->getInventoryType() == LLInventoryType::IT_LSL)
+    {
+        getChildView("LabelItemExperienceTitle")->setVisible(TRUE);
+        LLTextBox* tb = getChild<LLTextBox>("LabelItemExperience");
+        tb->setText(getString("loading_experience"));
+        tb->setVisible(TRUE);
+        std::string url = std::string();
+        if(object && object->getRegion())
+        {
+            url = object->getRegion()->getCapability("GetMetadata");
+        }
+        LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(), url,
+                boost::bind(&LLSidepanelItemInfo::setAssociatedExperience, getDerivedHandle<LLSidepanelItemInfo>(), _1));
+    }
+    
 	//////////////////////
 	// ITEM NAME & DESC //
 	//////////////////////
@@ -435,7 +456,7 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		"CheckNextOwnerTransfer",
 		"CheckPurchase",
 		"SaleLabel",
-		"combobox sale copy",
+		"ComboBoxSaleType",
 		"Edit Cost",
 		"TextPrice"
 	};
@@ -617,6 +638,9 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 
 	const LLSaleInfo& sale_info = item->getSaleInfo();
 	BOOL is_for_sale = sale_info.isForSale();
+	LLComboBox* combo_sale_type = getChild<LLComboBox>("ComboBoxSaleType");
+	LLUICtrl* edit_cost = getChild<LLUICtrl>("Edit Cost");
+
 	// Check for ability to change values.
 	if (is_obj_modify && can_agent_sell 
 		&& gAgent.allowOperation(PERM_TRANSFER, perm, GP_OBJECT_MANIPULATE))
@@ -630,7 +654,8 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		getChildView("CheckNextOwnerTransfer")->setEnabled((next_owner_mask & PERM_COPY) && !cannot_restrict_permissions);
 
 		getChildView("TextPrice")->setEnabled(is_complete && is_for_sale);
-		getChildView("Edit Cost")->setEnabled(is_complete && is_for_sale);
+		combo_sale_type->setEnabled(is_complete && is_for_sale);
+		edit_cost->setEnabled(is_complete && is_for_sale);
 	}
 	else
 	{
@@ -643,13 +668,12 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		getChildView("CheckNextOwnerTransfer")->setEnabled(FALSE);
 
 		getChildView("TextPrice")->setEnabled(FALSE);
-		getChildView("Edit Cost")->setEnabled(FALSE);
+		combo_sale_type->setEnabled(FALSE);
+		edit_cost->setEnabled(FALSE);
 	}
 
 	// Set values.
 	getChild<LLUICtrl>("CheckPurchase")->setValue(is_for_sale);
-	getChildView("combobox sale copy")->setEnabled(is_for_sale);
-	getChildView("Edit Cost")->setEnabled(is_for_sale);
 	getChild<LLUICtrl>("CheckNextOwnerModify")->setValue(LLSD(BOOL(next_owner_mask & PERM_MODIFY)));
 	getChild<LLUICtrl>("CheckNextOwnerCopy")->setValue(LLSD(BOOL(next_owner_mask & PERM_COPY)));
 	getChild<LLUICtrl>("CheckNextOwnerTransfer")->setValue(LLSD(BOOL(next_owner_mask & PERM_TRANSFER)));
@@ -658,13 +682,38 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 	{
 		S32 numerical_price;
 		numerical_price = sale_info.getSalePrice();
-		getChild<LLUICtrl>("Edit Cost")->setValue(llformat("%d",numerical_price));
+		edit_cost->setValue(llformat("%d",numerical_price));
+		combo_sale_type->setValue(sale_info.getSaleType());
 	}
 	else
 	{
-		getChild<LLUICtrl>("Edit Cost")->setValue(llformat("%d",0));
+		edit_cost->setValue(llformat("%d",0));
+		combo_sale_type->setValue(LLSaleInfo::FS_COPY);
 	}
 }
+
+
+void LLSidepanelItemInfo::setAssociatedExperience( LLHandle<LLSidepanelItemInfo> hInfo, const LLSD& experience )
+{
+    LLSidepanelItemInfo* info = hInfo.get();
+    if(info)
+    {
+        LLUUID id;
+        if(experience.has(LLExperienceCache::EXPERIENCE_ID))
+        {
+            id=experience[LLExperienceCache::EXPERIENCE_ID].asUUID();
+        }
+        if(id.notNull())
+        {
+            info->getChild<LLTextBox>("LabelItemExperience")->setText(LLSLURL("experience", id, "profile").getSLURLString());    
+        }
+        else
+        {
+            info->getChild<LLTextBox>("LabelItemExperience")->setText(LLTrans::getString("ExperienceNameNull"));
+        }
+    }
+}
+
 
 void LLSidepanelItemInfo::startObjectInventoryObserver()
 {
@@ -678,7 +727,7 @@ void LLSidepanelItemInfo::startObjectInventoryObserver()
 
 	if (mObjectID.isNull())
 	{
-		llwarns << "Empty object id passed to inventory observer" << llendl;
+		LL_WARNS() << "Empty object id passed to inventory observer" << LL_ENDL;
 		return;
 	}
 
@@ -721,7 +770,7 @@ void LLSidepanelItemInfo::onClickOwner()
 // static
 void LLSidepanelItemInfo::onCommitName()
 {
-	//llinfos << "LLSidepanelItemInfo::onCommitName()" << llendl;
+	//LL_INFOS() << "LLSidepanelItemInfo::onCommitName()" << LL_ENDL;
 	LLViewerInventoryItem* item = findItem();
 	if(!item)
 	{
@@ -735,29 +784,13 @@ void LLSidepanelItemInfo::onCommitName()
 	{
 		LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(item);
 		new_item->rename(labelItemName->getText());
-		if(mObjectID.isNull())
-		{
-			new_item->updateServer(FALSE);
-			gInventory.updateItem(new_item);
-			gInventory.notifyObservers();
-		}
-		else
-		{
-			LLViewerObject* object = gObjectList.findObject(mObjectID);
-			if(object)
-			{
-				object->updateInventory(
-					new_item,
-					TASK_INVENTORY_ITEM_KEY,
-					false);
-			}
-		}
+		onCommitChanges(new_item);
 	}
 }
 
 void LLSidepanelItemInfo::onCommitDescription()
 {
-	//llinfos << "LLSidepanelItemInfo::onCommitDescription()" << llendl;
+	//LL_INFOS() << "LLSidepanelItemInfo::onCommitDescription()" << LL_ENDL;
 	LLViewerInventoryItem* item = findItem();
 	if(!item) return;
 
@@ -772,66 +805,59 @@ void LLSidepanelItemInfo::onCommitDescription()
 		LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(item);
 
 		new_item->setDescription(labelItemDesc->getText());
-		if(mObjectID.isNull())
-		{
-			new_item->updateServer(FALSE);
-			gInventory.updateItem(new_item);
-			gInventory.notifyObservers();
-		}
-		else
-		{
-			LLViewerObject* object = gObjectList.findObject(mObjectID);
-			if(object)
-			{
-				object->updateInventory(
-					new_item,
-					TASK_INVENTORY_ITEM_KEY,
-					false);
-			}
-		}
+		onCommitChanges(new_item);
 	}
 }
 
 // static
 void LLSidepanelItemInfo::onCommitPermissions()
 {
-	//llinfos << "LLSidepanelItemInfo::onCommitPermissions()" << llendl;
+	//LL_INFOS() << "LLSidepanelItemInfo::onCommitPermissions()" << LL_ENDL;
 	LLViewerInventoryItem* item = findItem();
 	if(!item) return;
-	LLPermissions perm(item->getPermissions());
 
+	BOOL is_group_owned;
+	LLUUID owner_id;
+	LLUUID group_id;
+	LLPermissions perm(item->getPermissions());
+	perm.getOwnership(owner_id, is_group_owned);
+
+	if (is_group_owned && gAgent.hasPowerInGroup(owner_id, GP_OBJECT_MANIPULATE))
+	{
+		group_id = owner_id;
+	}
 
 	LLCheckBoxCtrl* CheckShareWithGroup = getChild<LLCheckBoxCtrl>("CheckShareWithGroup");
 
 	if(CheckShareWithGroup)
 	{
-		perm.setGroupBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setGroupBits(gAgent.getID(), group_id,
 						CheckShareWithGroup->get(),
 						PERM_MODIFY | PERM_MOVE | PERM_COPY);
 	}
 	LLCheckBoxCtrl* CheckEveryoneCopy = getChild<LLCheckBoxCtrl>("CheckEveryoneCopy");
 	if(CheckEveryoneCopy)
 	{
-		perm.setEveryoneBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setEveryoneBits(gAgent.getID(), group_id,
 						 CheckEveryoneCopy->get(), PERM_COPY);
 	}
 
 	LLCheckBoxCtrl* CheckNextOwnerModify = getChild<LLCheckBoxCtrl>("CheckNextOwnerModify");
 	if(CheckNextOwnerModify)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerModify->get(), PERM_MODIFY);
 	}
 	LLCheckBoxCtrl* CheckNextOwnerCopy = getChild<LLCheckBoxCtrl>("CheckNextOwnerCopy");
 	if(CheckNextOwnerCopy)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerCopy->get(), PERM_COPY);
 	}
 	LLCheckBoxCtrl* CheckNextOwnerTransfer = getChild<LLCheckBoxCtrl>("CheckNextOwnerTransfer");
 	if(CheckNextOwnerTransfer)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerTransfer->get(), PERM_TRANSFER);
 	}
 	if(perm != item->getPermissions()
@@ -864,23 +890,7 @@ void LLSidepanelItemInfo::onCommitPermissions()
 			flags |= LLInventoryItemFlags::II_FLAGS_OBJECT_PERM_OVERWRITE_GROUP;
 		}
 		new_item->setFlags(flags);
-		if(mObjectID.isNull())
-		{
-			new_item->updateServer(FALSE);
-			gInventory.updateItem(new_item);
-			gInventory.notifyObservers();
-		}
-		else
-		{
-			LLViewerObject* object = gObjectList.findObject(mObjectID);
-			if(object)
-			{
-				object->updateInventory(
-					new_item,
-					TASK_INVENTORY_ITEM_KEY,
-					false);
-			}
-		}
+		onCommitChanges(new_item);
 	}
 	else
 	{
@@ -892,14 +902,14 @@ void LLSidepanelItemInfo::onCommitPermissions()
 // static
 void LLSidepanelItemInfo::onCommitSaleInfo()
 {
-	//llinfos << "LLSidepanelItemInfo::onCommitSaleInfo()" << llendl;
+	//LL_INFOS() << "LLSidepanelItemInfo::onCommitSaleInfo()" << LL_ENDL;
 	updateSaleInfo();
 }
 
 // static
 void LLSidepanelItemInfo::onCommitSaleType()
 {
-	//llinfos << "LLSidepanelItemInfo::onCommitSaleType()" << llendl;
+	//LL_INFOS() << "LLSidepanelItemInfo::onCommitSaleType()" << LL_ENDL;
 	updateSaleInfo();
 }
 
@@ -918,24 +928,10 @@ void LLSidepanelItemInfo::updateSaleInfo()
 		// turn on sale info
 		LLSaleInfo::EForSale sale_type = LLSaleInfo::FS_COPY;
 	
-		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
-		if(RadioSaleType)
+		LLComboBox* combo_sale_type = getChild<LLComboBox>("ComboBoxSaleType");
+		if (combo_sale_type)
 		{
-			switch (RadioSaleType->getSelectedIndex())
-			{
-			case 0:
-				sale_type = LLSaleInfo::FS_ORIGINAL;
-				break;
-			case 1:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			case 2:
-				sale_type = LLSaleInfo::FS_CONTENTS;
-				break;
-			default:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			}
+			sale_type = static_cast<LLSaleInfo::EForSale>(combo_sale_type->getValue().asInteger());
 		}
 
 		if (sale_type == LLSaleInfo::FS_COPY 
@@ -978,31 +974,52 @@ void LLSidepanelItemInfo::updateSaleInfo()
 		}
 
 		new_item->setSaleInfo(sale_info);
-		if(mObjectID.isNull())
-		{
-			// This is in the agent's inventory.
-			new_item->updateServer(FALSE);
-			gInventory.updateItem(new_item);
-			gInventory.notifyObservers();
-		}
-		else
-		{
-			// This is in an object's contents.
-			LLViewerObject* object = gObjectList.findObject(mObjectID);
-			if(object)
-			{
-				object->updateInventory(
-					new_item,
-					TASK_INVENTORY_ITEM_KEY,
-					false);
-			}
-		}
+		onCommitChanges(new_item);
 	}
 	else
 	{
 		// need to make sure we don't just follow the click
 		refresh();
 	}
+}
+
+void LLSidepanelItemInfo::onCommitChanges(LLPointer<LLViewerInventoryItem> item)
+{
+    if (item.isNull())
+    {
+        return;
+    }
+
+    if (mObjectID.isNull())
+    {
+        // This is in the agent's inventory.
+        item->updateServer(FALSE);
+        gInventory.updateItem(item);
+        gInventory.notifyObservers();
+    }
+    else
+    {
+        // This is in an object's contents.
+        LLViewerObject* object = gObjectList.findObject(mObjectID);
+        if (object)
+        {
+            object->updateInventory(
+                item,
+                TASK_INVENTORY_ITEM_KEY,
+                false);
+
+            if (object->isSelected())
+            {
+                // Since object is selected (build floater is open) object will
+                // receive properties update, detect serial mismatch, dirty and
+                // reload inventory, meanwhile some other updates will refresh it.
+                // So mark dirty early, this will prevent unnecessary changes
+                // and download will be triggered by LLPanelObjectInventory - it
+                // prevents flashing in content tab and some duplicated request.
+                object->dirtyInventory();
+            }
+        }
+    }
 }
 
 LLViewerInventoryItem* LLSidepanelItemInfo::findItem() const

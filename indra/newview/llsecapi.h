@@ -28,8 +28,11 @@
 #ifndef LLSECAPI_H
 #define LLSECAPI_H
 #include <vector>
+#include "llwin32headerslean.h"
 #include <openssl/x509.h>
 #include <ostream>
+#include "llpointer.h"
+#include "llexception.h"
 
 #ifdef LL_WINDOWS
 #pragma warning(disable:4250)
@@ -114,17 +117,13 @@
 
 
 
-class LLProtectedDataException
+struct LLProtectedDataException: public LLException
 {
-public:
-	LLProtectedDataException(const char *msg) 
+	LLProtectedDataException(const std::string& msg):
+		LLException(msg)
 	{
-		LL_WARNS("SECAPI") << "Protected Data Error: " << (std::string)msg << LL_ENDL;
-		mMsg = (std::string)msg;
+		LL_WARNS("SECAPI") << "Protected Data Error: " << msg << LL_ENDL;
 	}
-	std::string getMessage() { return mMsg; }
-protected:
-	std::string mMsg;
 };
 
 // class LLCertificate
@@ -332,39 +331,37 @@ std::ostream& operator <<(std::ostream& s, const LLCredential& cred);
 
 // All error handling is via exceptions.
 
-class LLCertException
+class LLCertException: public LLException
 {
 public:
-	LLCertException(LLPointer<LLCertificate> cert, const char* msg)
+	LLCertException(const LLSD& cert_data, const std::string& msg): LLException(msg),
+        mCertData(cert_data)
 	{
-
-		mCert = cert;
-
-		LL_WARNS("SECAPI") << "Certificate Error: " << (std::string)msg << LL_ENDL;
-		mMsg = (std::string)msg;
+		LL_WARNS("SECAPI") << "Certificate Error: " << msg << LL_ENDL;
 	}
-	LLPointer<LLCertificate> getCert() { return mCert; }
-	std::string getMessage() { return mMsg; }
+	virtual ~LLCertException() throw() {}
+	LLSD getCertData() const { return mCertData; }
 protected:
-	LLPointer<LLCertificate> mCert;
-	std::string mMsg;
+	LLSD mCertData;
 };
 
 class LLInvalidCertificate : public LLCertException
 {
 public:
-	LLInvalidCertificate(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalid")
+	LLInvalidCertificate(const LLSD& cert_data) : LLCertException(cert_data, "CertInvalid")
 	{
 	}
+	virtual ~LLInvalidCertificate() throw() {}
 protected:
 };
 
 class LLCertValidationTrustException : public LLCertException
 {
 public:
-	LLCertValidationTrustException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertUntrusted")
+	LLCertValidationTrustException(const LLSD& cert_data) : LLCertException(cert_data, "CertUntrusted")
 	{
 	}
+	virtual ~LLCertValidationTrustException() throw() {}
 protected:
 };
 
@@ -372,11 +369,11 @@ class LLCertValidationHostnameException : public LLCertException
 {
 public:
 	LLCertValidationHostnameException(std::string hostname,
-									  LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalidHostname")
+									  const LLSD& cert_data) : LLCertException(cert_data, "CertInvalidHostname")
 	{
 		mHostname = hostname;
 	}
-	
+	virtual ~LLCertValidationHostnameException() throw() {}
 	std::string getHostname() { return mHostname; }
 protected:
 	std::string mHostname;
@@ -385,11 +382,12 @@ protected:
 class LLCertValidationExpirationException : public LLCertException
 {
 public:
-	LLCertValidationExpirationException(LLPointer<LLCertificate> cert,
-										LLDate current_time) : LLCertException(cert, "CertExpired")
+	LLCertValidationExpirationException(const LLSD& cert_data,
+										LLDate current_time) : LLCertException(cert_data, "CertExpired")
 	{
 		mTime = current_time;
 	}
+	virtual ~LLCertValidationExpirationException() throw() {}
 	LLDate GetTime() { return mTime; }
 protected:
 	LLDate mTime;
@@ -398,27 +396,30 @@ protected:
 class LLCertKeyUsageValidationException : public LLCertException
 {
 public:
-	LLCertKeyUsageValidationException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertKeyUsage")
+	LLCertKeyUsageValidationException(const LLSD& cert_data) : LLCertException(cert_data, "CertKeyUsage")
 	{
 	}
+	virtual ~LLCertKeyUsageValidationException() throw() {}
 protected:
 };
 
 class LLCertBasicConstraintsValidationException : public LLCertException
 {
 public:
-	LLCertBasicConstraintsValidationException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertBasicConstraints")
+	LLCertBasicConstraintsValidationException(const LLSD& cert_data) : LLCertException(cert_data, "CertBasicConstraints")
 	{
 	}
+	virtual ~LLCertBasicConstraintsValidationException() throw() {}
 protected:
 };
 
 class LLCertValidationInvalidSignatureException : public LLCertException
 {
 public:
-	LLCertValidationInvalidSignatureException(LLPointer<LLCertificate> cert) : LLCertException(cert, "CertInvalidSignature")
+	LLCertValidationInvalidSignatureException(const LLSD& cert_data) : LLCertException(cert_data, "CertInvalidSignature")
 	{
 	}
+	virtual ~LLCertValidationInvalidSignatureException() throw() {}
 protected:
 };
 
@@ -485,9 +486,6 @@ void registerSecHandler(const std::string& handler_type,
 						LLPointer<LLSecAPIHandler>& handler);
 
 extern LLPointer<LLSecAPIHandler> gSecAPIHandler;
-
-
-int secapiSSLCertVerifyCallback(X509_STORE_CTX *ctx, void *param);
 
 
 #endif // LL_SECAPI_H

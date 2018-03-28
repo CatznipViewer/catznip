@@ -34,9 +34,9 @@ class LLPickInfo;
 class LLToolCamera
 :	public LLTool, public LLSingleton<LLToolCamera>
 {
-public:
-	LLToolCamera();
+	LLSINGLETON(LLToolCamera);
 	virtual ~LLToolCamera();
+public:
 
 	virtual BOOL	handleMouseDown(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleMouseUp(S32 x, S32 y, MASK mask);
@@ -65,6 +65,7 @@ protected:
 	BOOL	mOutsideSlopX;
 	BOOL	mOutsideSlopY;
 	BOOL	mValidClickPoint;
+	BOOL	mValidSelection;
 	BOOL	mMouseSteering;
 	S32		mMouseUpX;	// needed for releaseMouse()
 	S32		mMouseUpY;

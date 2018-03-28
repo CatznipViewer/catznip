@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Cose" name="objects panel">
-	<panel label="" name="sidepanel__inventory_panel">
+	<panel label="" name="sidepanel_inventory_panel">
 		<layout_stack name="inventory_layout_stack">
 			<layout_panel name="inbox_layout_panel">
 				<panel label="" name="marketplace_inbox">
@@ -33,7 +33,7 @@
 				<layout_panel name="shop_btn_lp">
 					<button label="Acquisti" name="shop_btn" tool_tip="Apri pagina web di Marketplace"/>
 					<button label="Indossa" name="wear_btn" tool_tip="Indossa il vestiario selezionato"/>
-					<button label="Riproduci" name="play_btn"/>
+					<button label="Gioca" name="play_btn"/>
 					<button label="Teleport" name="teleport_btn" tool_tip="Teleport alla zona selezionata"/>
 				</layout_panel>
 			</layout_stack>

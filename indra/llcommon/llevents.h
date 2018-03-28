@@ -37,7 +37,6 @@
 #include <set>
 #include <vector>
 #include <deque>
-#include <stdexcept>
 #if LL_WINDOWS
 	#pragma warning (push)
 	#pragma warning (disable : 4263) // boost::signals2::expired_slot::what() has const mismatch
@@ -61,7 +60,9 @@
 #include "llsd.h"
 #include "llsingleton.h"
 #include "lldependencies.h"
-#include "ll_template_cast.h"
+#include "llstl.h"
+#include "llexception.h"
+#include "llhandle.h"
 
 /*==========================================================================*|
 // override this to allow binding free functions with more parameters
@@ -95,12 +96,32 @@ struct LLStopWhenHandled
     result_type operator()(InputIterator first, InputIterator last) const
     {
         for (InputIterator si = first; si != last; ++si)
-		{
-            if (*si)
-			{
-                return true;
-			}
-		}
+        {
+            try
+            {
+                if (*si)
+                {
+                    return true;
+                }
+            }
+            catch (const LLContinueError&)
+            {
+                // We catch LLContinueError here because an LLContinueError-
+                // based exception means the viewer as a whole should carry on
+                // to the best of our ability. Therefore subsequent listeners
+                // on the same LLEventPump should still receive this event.
+
+                // The iterator passed to a boost::signals2 Combiner is very
+                // clever, but provides no contextual information. We would
+                // very much like to be able to log the name of the LLEventPump
+                // plus the name of this particular listener, but alas.
+                LOG_UNHANDLED_EXCEPTION("LLEventPump");
+            }
+            // We do NOT catch (...) here because we might as well let it
+            // propagate out to the generic handler. If we were able to log
+            // context information here, that would be great, but we can't, so
+            // there's no point.
+        }
         return false;
     }
 };
@@ -188,10 +209,10 @@ public:
     bool operator()(const LLSD& event) const;
 
     /// exception if you try to call when empty
-    struct Empty: public std::runtime_error
+    struct Empty: public LLException
     {
         Empty(const std::string& what):
-            std::runtime_error(std::string("LLListenerOrPumpName::Empty: ") + what) {}
+            LLException(std::string("LLListenerOrPumpName::Empty: ") + what) {}
     };
 
 private:
@@ -207,9 +228,17 @@ class LLEventPump;
  * LLEventPumps is a Singleton manager through which one typically accesses
  * this subsystem.
  */
-class LL_COMMON_API LLEventPumps: public LLSingleton<LLEventPumps>
+// LLEventPumps isa LLHandleProvider only for (hopefully rare) long-lived
+// class objects that must refer to this class late in their lifespan, say in
+// the destructor. Specifically, the case that matters is a possible reference
+// after LLEventPumps::deleteSingleton(). (Lingering LLEventPump instances are
+// capable of this.) In that case, instead of calling LLEventPumps::instance()
+// again -- resurrecting the deleted LLSingleton -- store an
+// LLHandle<LLEventPumps> and test it before use.
+class LL_COMMON_API LLEventPumps: public LLSingleton<LLEventPumps>,
+                                  public LLHandleProvider<LLEventPumps>
 {
-    friend class LLSingleton<LLEventPumps>;
+    LLSINGLETON(LLEventPumps);
 public:
     /**
      * Find or create an LLEventPump instance with a specific name. We return
@@ -217,6 +246,18 @@ public:
      * an instance without conferring @em ownership.
      */
     LLEventPump& obtain(const std::string& name);
+
+    /**
+     * Find the named LLEventPump instance. If it exists post the message to it.
+     * If the pump does not exist, do nothing.
+     * 
+     * returns the result of the LLEventPump::post. If no pump exists returns false.
+     * 
+     * This is syntactically similar to LLEventPumps::instance().post(name, message),
+     * however if the pump does not already exist it will not be created.
+     */
+    bool post(const std::string&, const LLSD&);
+
     /**
      * Flush all known LLEventPump instances
      */
@@ -240,7 +281,6 @@ private:
     void unregister(const LLEventPump&);
 
 private:
-    LLEventPumps();
     ~LLEventPumps();
 
 testable:
@@ -353,16 +393,18 @@ typedef boost::signals2::trackable LLEventTrackable;
 class LL_COMMON_API LLEventPump: public LLEventTrackable
 {
 public:
+    static const std::string ANONYMOUS; // constant for anonymous listeners.
+
     /**
      * Exception thrown by LLEventPump(). You are trying to instantiate an
      * LLEventPump (subclass) using the same name as some other instance, and
      * you didn't pass <tt>tweak=true</tt> to permit it to generate a unique
      * variant.
      */
-    struct DupPumpName: public std::runtime_error
+    struct DupPumpName: public LLException
     {
         DupPumpName(const std::string& what):
-            std::runtime_error(std::string("DupPumpName: ") + what) {}
+            LLException(std::string("DupPumpName: ") + what) {}
     };
 
     /**
@@ -387,9 +429,9 @@ public:
     /// group exceptions thrown by listen(). We use exceptions because these
     /// particular errors are likely to be coding errors, found and fixed by
     /// the developer even before preliminary checkin.
-    struct ListenError: public std::runtime_error
+    struct ListenError: public LLException
     {
-        ListenError(const std::string& what): std::runtime_error(what) {}
+        ListenError(const std::string& what): LLException(what) {}
     };
     /**
      * exception thrown by listen(). You are attempting to register a
@@ -464,6 +506,12 @@ public:
      * instantiate your listener, then passing the same name on each listen()
      * call, allows us to optimize away the second and subsequent dependency
      * sorts.
+     * 
+     * If name is set to LLEventPump::ANONYMOUS listen will bypass the entire 
+     * dependency and ordering calculation. In this case, it is critical that 
+     * the result be assigned to a LLTempBoundListener or the listener is 
+     * manually disconnected when no longer needed since there will be no
+     * way to later find and disconnect this listener manually.
      *
      * If (as is typical) you pass a <tt>boost::bind()</tt> expression as @a
      * listener, listen() will inspect the components of that expression. If a
@@ -496,7 +544,7 @@ public:
         // at the boost::bind object itself before that happens.
         return LLEventDetail::visit_and_connect(name,
                                                 listener,
-                                                boost::bind(&LLEventPump::listen_impl,
+                                                boost::bind(&LLEventPump::listen_invoke,
                                                             this,
                                                             name,
                                                             _1,
@@ -541,13 +589,26 @@ private:
 
     virtual void reset();
 
+
+
 private:
-    virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
-                                        const NameList& after,
-                                        const NameList& before);
+    LLBoundListener listen_invoke(const std::string& name, const LLEventListener& listener,
+        const NameList& after,
+        const NameList& before)
+    {
+        return this->listen_impl(name, listener, after, before);
+    }
+
+    // must precede mName; see LLEventPump::LLEventPump()
+    LLHandle<LLEventPumps> mRegistry;
+
     std::string mName;
 
 protected:
+    virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
+                                        const NameList& after,
+                                        const NameList& before);
+    
     /// implement the dispatching
     boost::shared_ptr<LLStandardSignal> mSignal;
 
@@ -586,10 +647,45 @@ public:
 };
 
 /*****************************************************************************
+ *   LLEventMailDrop
+ *****************************************************************************/
+/**
+ * LLEventMailDrop is a specialization of LLEventStream. Events are posted normally, 
+ * however if no listeners return that they have handled the event it is placed in 
+ * a queue. Subsequent attaching listeners will receive stored events from the queue 
+ * until a listener indicates that the event has been handled.  In order to receive 
+ * multiple events from a mail drop the listener must disconnect and reconnect.
+ * 
+ * @NOTE: When using an LLEventMailDrop (or LLEventQueue) with a LLEventTimeout or
+ * LLEventFilter attaching the filter downstream using Timeout's constructor will
+ * cause the MailDrop to discharge any of it's stored events. The timeout should 
+ * instead be connected upstream using its listen() method.  
+ * See llcoro::suspendUntilEventOnWithTimeout() for an example.
+ */
+class LL_COMMON_API LLEventMailDrop : public LLEventStream
+{
+public:
+    LLEventMailDrop(const std::string& name, bool tweak = false) : LLEventStream(name, tweak) {}
+    virtual ~LLEventMailDrop() {}
+    
+    /// Post an event to all listeners
+    virtual bool post(const LLSD& event);
+    
+protected:
+    virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
+                                        const NameList& after,
+                                        const NameList& before);
+
+private:
+    typedef std::list<LLSD> EventList;
+    EventList mEventHistory;
+};
+
+/*****************************************************************************
 *   LLEventQueue
 *****************************************************************************/
 /**
- * LLEventQueue isa LLEventPump whose post() method defers calling registered
+ * LLEventQueue is a LLEventPump whose post() method defers calling registered
  * listeners until flush() is called.
  */
 class LL_COMMON_API LLEventQueue: public LLEventPump
@@ -733,14 +829,14 @@ public:
         mConnection(new LLBoundListener)
     {
     }
-	
+
     /// Copy constructor. Copy shared_ptrs to original instance data.
     LLListenerWrapperBase(const LLListenerWrapperBase& that):
         mName(that.mName),
         mConnection(that.mConnection)
     {
     }
-	virtual ~LLListenerWrapperBase() {}
+    virtual ~LLListenerWrapperBase() {}
 
     /// Ask LLEventPump::listen() for the listener name
     virtual void accept_name(const std::string& name) const

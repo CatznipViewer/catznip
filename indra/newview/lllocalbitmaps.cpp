@@ -48,6 +48,7 @@
 /* misc headers */
 #include "llscrolllistctrl.h"
 #include "llfilepicker.h"
+#include "lllocaltextureobject.h"
 #include "llviewertexturelist.h"
 #include "llviewerobjectlist.h"
 #include "llviewerobject.h"
@@ -60,6 +61,10 @@
 #include "llnotificationsutil.h"
 #include "pipeline.h"
 #include "llmaterialmgr.h"
+#include "llimagedimensionsinfo.h"
+#include "llviewercontrol.h"
+#include "lltrans.h"
+#include "llviewerdisplay.h"
 
 /*=======================================*/
 /*  Formal declarations, constants, etc. */
@@ -71,7 +76,6 @@ bool                        LLLocalBitmapMgr::sNeedsRebake;
 static const F32 LL_LOCAL_TIMER_HEARTBEAT   = 3.0;
 static const BOOL LL_LOCAL_USE_MIPMAPS      = true;
 static const S32 LL_LOCAL_DISCARD_LEVEL     = 0;
-static const U32 LL_LOCAL_TEXLAYER_FOR_IDX  = 0;
 static const bool LL_LOCAL_SLAM_FOR_DEBUG   = true;
 static const bool LL_LOCAL_REPLACE_ON_DEL   = true;
 static const S32 LL_LOCAL_UPDATE_RETRIES    = 5;
@@ -110,8 +114,8 @@ LLLocalBitmap::LLLocalBitmap(std::string filename)
 	}
 	else
 	{
-		llwarns << "File of no valid extension given, local bitmap creation aborted." << "\n"
-			    << "Filename: " << mFilename << llendl;
+		LL_WARNS() << "File of no valid extension given, local bitmap creation aborted." << "\n"
+			    << "Filename: " << mFilename << LL_ENDL;
 		return; // no valid extension.
 	}
 
@@ -124,14 +128,14 @@ LLLocalBitmap::LLLocalBitmap(std::string filename)
 LLLocalBitmap::~LLLocalBitmap()
 {
 	// replace IDs with defaults, if set to do so.
-	if(LL_LOCAL_REPLACE_ON_DEL && mValid) // fix for STORM-1837
+	if(LL_LOCAL_REPLACE_ON_DEL && mValid && gAgentAvatarp) // fix for STORM-1837
 	{
 		replaceIDs(mWorldID, IMG_DEFAULT);
 		LLLocalBitmapMgr::doRebake();
 	}
 
 	// delete self from gimagelist
-	LLViewerFetchedTexture* image = gTextureList.findImage(mWorldID);
+	LLViewerFetchedTexture* image = gTextureList.findImage(mWorldID, TEX_LIST_STANDARD);
 	gTextureList.deleteImage(image);
 
 	if (image)
@@ -177,7 +181,12 @@ bool LLLocalBitmap::updateSelf(EUpdateType optional_firstupdate)
 		if (gDirUtilp->fileExists(mFilename))
 		{
 			// verifying that the file has indeed been modified
+
+#ifndef LL_WINDOWS
 			const std::time_t temp_time = boost::filesystem::last_write_time(boost::filesystem::path(mFilename));
+#else
+			const std::time_t temp_time = boost::filesystem::last_write_time(boost::filesystem::path(utf8str_to_utf16str(mFilename)));
+#endif
 			LLSD new_last_modified = asctime(localtime(&temp_time));
 
 			if (mLastModified.asString() != new_last_modified.asString())
@@ -189,7 +198,7 @@ bool LLLocalBitmap::updateSelf(EUpdateType optional_firstupdate)
 				{
 					// decode is successful, we can safely proceed.
 					LLUUID old_id = LLUUID::null;
-					if (!(optional_firstupdate == UT_FIRSTUSE) && !mWorldID.isNull())
+					if ((optional_firstupdate != UT_FIRSTUSE) && !mWorldID.isNull())
 					{
 						old_id = mWorldID;
 					}
@@ -203,17 +212,20 @@ bool LLLocalBitmap::updateSelf(EUpdateType optional_firstupdate)
 					texture->setCachedRawImage(LL_LOCAL_DISCARD_LEVEL, raw_image);
 					texture->ref(); 
 
-					gTextureList.addImage(texture);
+					gTextureList.addImage(texture, TEX_LIST_STANDARD);
 			
-					if (!optional_firstupdate == UT_FIRSTUSE)
+					if (optional_firstupdate != UT_FIRSTUSE)
 					{
 						// seek out everything old_id uses and replace it with mWorldID
 						replaceIDs(old_id, mWorldID);
 
 						// remove old_id from gimagelist
-						LLViewerFetchedTexture* image = gTextureList.findImage(old_id);
-						gTextureList.deleteImage(image);
-						image->unref();
+						LLViewerFetchedTexture* image = gTextureList.findImage(old_id, TEX_LIST_STANDARD);
+						if (image != NULL)
+						{
+							gTextureList.deleteImage(image);
+							image->unref();
+						}
 					}
 
 					mUpdateRetries = LL_LOCAL_UPDATE_RETRIES;
@@ -230,10 +242,10 @@ bool LLLocalBitmap::updateSelf(EUpdateType optional_firstupdate)
 					}
 					else
 					{
-						llwarns << "During the update process the following file was found" << "\n"
+						LL_WARNS() << "During the update process the following file was found" << "\n"
 							    << "but could not be opened or decoded for " << LL_LOCAL_UPDATE_RETRIES << " attempts." << "\n"
 								<< "Filename: " << mFilename << "\n"
-								<< "Disabling further update attempts for this file." << llendl;
+								<< "Disabling further update attempts for this file." << LL_ENDL;
 
 						LLSD notif_args;
 						notif_args["FNAME"] = mFilename;
@@ -249,9 +261,9 @@ bool LLLocalBitmap::updateSelf(EUpdateType optional_firstupdate)
 
 		else
 		{
-			llwarns << "During the update process, the following file was not found." << "\n" 
+			LL_WARNS() << "During the update process, the following file was not found." << "\n" 
 			        << "Filename: " << mFilename << "\n"
-				    << "Disabling further update attempts for this file." << llendl;
+				    << "Disabling further update attempts for this file." << LL_ENDL;
 
 			LLSD notif_args;
 			notif_args["FNAME"] = mFilename;
@@ -317,13 +329,13 @@ bool LLLocalBitmap::decodeBitmap(LLPointer<LLImageRaw> rawimg)
 
 		default:
 		{
-			// separating this into -several- llwarns calls because in the extremely unlikely case that this happens
+			// separating this into -several- LL_WARNS() calls because in the extremely unlikely case that this happens
 			// accessing mFilename and any other object properties might very well crash the viewer.
 			// getting here should be impossible, or there's been a pretty serious bug.
 
-			llwarns << "During a decode attempt, the following local bitmap had no properly assigned extension." << llendl;
-			llwarns << "Filename: " << mFilename << llendl;
-		    llwarns << "Disabling further update attempts for this file." << llendl;
+			LL_WARNS() << "During a decode attempt, the following local bitmap had no properly assigned extension." << LL_ENDL;
+			LL_WARNS() << "Filename: " << mFilename << LL_ENDL;
+		    LL_WARNS() << "Disabling further update attempts for this file." << LL_ENDL;
 			mLinkStatus = LS_BROKEN;
 		}
 	}
@@ -336,8 +348,8 @@ void LLLocalBitmap::replaceIDs(LLUUID old_id, LLUUID new_id)
 	// checking for misuse.
 	if (old_id == new_id)
 	{
-		llinfos << "An attempt was made to replace a texture with itself. (matching UUIDs)" << "\n"
-			    << "Texture UUID: " << old_id.asString() << llendl;
+		LL_INFOS() << "An attempt was made to replace a texture with itself. (matching UUIDs)" << "\n"
+			    << "Texture UUID: " << old_id.asString() << LL_ENDL;
 		return;
 	}
 
@@ -377,8 +389,8 @@ void LLLocalBitmap::replaceIDs(LLUUID old_id, LLUUID new_id)
 std::vector<LLViewerObject*> LLLocalBitmap::prepUpdateObjects(LLUUID old_id, U32 channel)
 {
 	std::vector<LLViewerObject*> obj_list;
-	LLViewerFetchedTexture* old_texture = gTextureList.findImage(old_id);
-	
+	LLViewerFetchedTexture* old_texture = gTextureList.findImage(old_id, TEX_LIST_STANDARD);
+
 	for(U32 face_iterator = 0; face_iterator < old_texture->getNumFaces(channel); face_iterator++)
 	{
 		// getting an object from a face
@@ -451,7 +463,7 @@ void LLLocalBitmap::updateUserPrims(LLUUID old_id, LLUUID new_id, U32 channel)
 						switch(channel)
 						{
 							case LLRender::DIFFUSE_MAP:
-							{
+					{
                                 object->setTETexture(face_iter, new_id);
                                 update_tex = true;
 								break;
@@ -495,7 +507,7 @@ void LLLocalBitmap::updateUserPrims(LLUUID old_id, LLUUID new_id, U32 channel)
 
 void LLLocalBitmap::updateUserSculpts(LLUUID old_id, LLUUID new_id)
 {
-	LLViewerFetchedTexture* old_texture = gTextureList.findImage(old_id);
+	LLViewerFetchedTexture* old_texture = gTextureList.findImage(old_id, TEX_LIST_STANDARD);
 	for(U32 volume_iter = 0; volume_iter < old_texture->getNumVolumes(); volume_iter++)
 	{
 		LLVOVolume* volume_to_object = (*old_texture->getVolumeList())[volume_iter];
@@ -508,7 +520,7 @@ void LLLocalBitmap::updateUserSculpts(LLUUID old_id, LLUUID new_id)
 			{
 				LLSculptParams* old_params = (LLSculptParams*)object->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
 				LLSculptParams new_params(*old_params);
-				new_params.setSculptTexture(new_id);
+				new_params.setSculptTexture(new_id, (*old_params).getSculptType());
 				object->setParameterEntry(LLNetworkData::PARAMS_SCULPT, new_params, TRUE);
 			}
 		}
@@ -538,12 +550,14 @@ void LLLocalBitmap::updateUserLayers(LLUUID old_id, LLUUID new_id, LLWearableTyp
 					LLAvatarAppearanceDefines::ETextureIndex reg_texind = getTexIndex(type, baked_texind);
 					if (reg_texind != LLAvatarAppearanceDefines::TEX_NUM_INDICES)
 					{
-						U32 index = gAgentWearables.getWearableIndex(wearable);
-						gAgentAvatarp->setLocalTexture(reg_texind, gTextureList.getImage(new_id), FALSE, index);
-						gAgentAvatarp->wearableUpdated(type, FALSE);
-
-						/* telling the manager to rebake once update cycle is fully done */
-						LLLocalBitmapMgr::setNeedsRebake();
+						U32 index;
+						if (gAgentWearables.getWearableIndex(wearable,index))
+						{
+							gAgentAvatarp->setLocalTexture(reg_texind, gTextureList.getImage(new_id), FALSE, index);
+							gAgentAvatarp->wearableUpdated(type);
+							/* telling the manager to rebake once update cycle is fully done */
+							LLLocalBitmapMgr::setNeedsRebake();
+						}
 					}
 
 				}
@@ -768,11 +782,11 @@ LLAvatarAppearanceDefines::ETextureIndex LLLocalBitmap::getTexIndex(
 
 		default:
 		{
-			llwarns << "Unknown wearable type: " << (int)type << "\n"
+			LL_WARNS() << "Unknown wearable type: " << (int)type << "\n"
 				    << "Baked Texture Index: " << (int)baked_texind << "\n"
 					<< "Filename: " << mFilename << "\n"
 					<< "TrackingID: " << mTrackingID << "\n"
-					<< "InworldID: " << mWorldID << llendl;
+					<< "InworldID: " << mWorldID << LL_ENDL;
 		}
 
 	}
@@ -823,6 +837,12 @@ LLLocalBitmapMgr::~LLLocalBitmapMgr()
 {
 }
 
+void LLLocalBitmapMgr::cleanupClass()
+{
+	std::for_each(sBitmapList.begin(), sBitmapList.end(), DeletePointer());
+	sBitmapList.clear();
+}
+
 bool LLLocalBitmapMgr::addUnit()
 {
 	bool add_successful = false;
@@ -835,6 +855,12 @@ bool LLLocalBitmapMgr::addUnit()
 		std::string filename = picker.getFirstFile();
 		while(!filename.empty())
 		{
+			if(!checkTextureDimensions(filename))
+			{
+				filename = picker.getNextFile();
+				continue;
+			}
+
 			LLLocalBitmap* unit = new LLLocalBitmap(filename);
 
 			if (unit->getValid())
@@ -844,8 +870,8 @@ bool LLLocalBitmapMgr::addUnit()
 			}
 			else
 			{
-				llwarns << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
-					    << "Filename: " << filename << llendl;
+				LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
+					    << "Filename: " << filename << LL_ENDL;
 
 				LLSD notif_args;
 				notif_args["FNAME"] = filename;
@@ -862,6 +888,37 @@ bool LLLocalBitmapMgr::addUnit()
 	}
 
 	return add_successful;
+}
+
+bool LLLocalBitmapMgr::checkTextureDimensions(std::string filename)
+{
+	std::string exten = gDirUtilp->getExtension(filename);
+	U32 codec = LLImageBase::getCodecFromExtension(exten);
+	std::string mImageLoadError;
+	LLImageDimensionsInfo image_info;
+	if (!image_info.load(filename,codec))
+	{
+		return false;
+	}
+
+	S32 max_width = gSavedSettings.getS32("max_texture_dimension_X");
+	S32 max_height = gSavedSettings.getS32("max_texture_dimension_Y");
+
+	if ((image_info.getWidth() > max_width) || (image_info.getHeight() > max_height))
+	{
+		LLStringUtil::format_map_t args;
+		args["WIDTH"] = llformat("%d", max_width);
+		args["HEIGHT"] = llformat("%d", max_height);
+		mImageLoadError = LLTrans::getString("texture_load_dimensions_error", args);
+
+		LLSD notif_args;
+		notif_args["REASON"] = mImageLoadError;
+		LLNotificationsUtil::add("CannotUploadTexture", notif_args);
+
+		return false;
+	}
+
+	return true;
 }
 
 void LLLocalBitmapMgr::delUnit(LLUUID tracking_id)

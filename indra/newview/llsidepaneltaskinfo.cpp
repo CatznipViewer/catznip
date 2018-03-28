@@ -71,7 +71,7 @@
 
 LLSidepanelTaskInfo* LLSidepanelTaskInfo::sActivePanel = NULL;
 
-static LLRegisterPanelClassWrapper<LLSidepanelTaskInfo> t_task_info("sidepanel_task_info");
+static LLPanelInjector<LLSidepanelTaskInfo> t_task_info("sidepanel_task_info");
 
 // Default constructor
 LLSidepanelTaskInfo::LLSidepanelTaskInfo()
@@ -162,7 +162,7 @@ BOOL LLSidepanelTaskInfo::postBuild()
 	return TRUE;
 }
 
-/*virtual*/ void LLSidepanelTaskInfo::handleVisibilityChange ( BOOL visible )
+/*virtual*/ void LLSidepanelTaskInfo::onVisibilityChange ( BOOL visible )
 {
 	if (visible)
 	{
@@ -370,18 +370,29 @@ void LLSidepanelTaskInfo::refresh()
 	
 	// Update creator text field
 	getChildView("Creator:")->setEnabled(TRUE);
-	std::string creator_name;
-	LLSelectMgr::getInstance()->selectGetCreator(mCreatorID, creator_name);
 
-	getChild<LLUICtrl>("Creator Name")->setValue(creator_name);
-	getChildView("Creator Name")->setEnabled(TRUE);
+	std::string creator_name;
+	LLUUID creator_id;
+	LLSelectMgr::getInstance()->selectGetCreator(creator_id, creator_name);
+
+	if(creator_id != mCreatorID )
+	{
+		mDACreatorName->setValue(creator_name);
+		mCreatorID = creator_id;
+	}
+	if(mDACreatorName->getValue().asString() == LLStringUtil::null)
+	{
+	    mDACreatorName->setValue(creator_name);
+	}
+	mDACreatorName->setEnabled(TRUE);
 
 	// Update owner text field
 	getChildView("Owner:")->setEnabled(TRUE);
 
 	std::string owner_name;
-	const BOOL owners_identical = LLSelectMgr::getInstance()->selectGetOwner(mOwnerID, owner_name);
-	if (mOwnerID.isNull())
+	LLUUID owner_id;
+	const BOOL owners_identical = LLSelectMgr::getInstance()->selectGetOwner(owner_id, owner_name);
+	if (owner_id.isNull())
 	{
 		if (LLSelectMgr::getInstance()->selectIsGroupOwned())
 		{
@@ -402,7 +413,17 @@ void LLSidepanelTaskInfo::refresh()
 			}
 		}
 	}
-	getChild<LLUICtrl>("Owner Name")->setValue(owner_name);
+
+	if(owner_id.isNull() || (owner_id != mOwnerID))
+	{
+		mDAOwnerName->setValue(owner_name);
+		mOwnerID = owner_id;
+	}
+	if(mDAOwnerName->getValue().asString() == LLStringUtil::null)
+	{
+	    mDAOwnerName->setValue(owner_name);
+	}
+
 	getChildView("Owner Name")->setEnabled(TRUE);
 
 	// update group text field
@@ -499,17 +520,19 @@ void LLSidepanelTaskInfo::refresh()
 	// You own these objects.
 	else if (self_owned || (group_owned && gAgent.hasPowerInGroup(group_id,GP_OBJECT_SET_SALE)))
 	{
+		LLSpinCtrl *edit_price = getChild<LLSpinCtrl>("Edit Cost");
+
 		// If there are multiple items for sale then set text to PRICE PER UNIT.
 		if (num_for_sale > 1)
 		{
-			getChild<LLUICtrl>("Cost")->setValue(getString("Cost Per Unit"));
+			std::string label_text = is_sale_price_mixed? "Cost Mixed" :"Cost Per Unit";
+			edit_price->setLabel(getString(label_text));
 		}
 		else
 		{
-			getChild<LLUICtrl>("Cost")->setValue(getString("Cost Default"));
+			edit_price->setLabel(getString("Cost Default"));
 		}
 		
-		LLSpinCtrl *edit_price = getChild<LLSpinCtrl>("Edit Cost");
 		if (!edit_price->hasFocus())
 		{
 			// If the sale price is mixed then set the cost to MIXED, otherwise
@@ -547,16 +570,15 @@ void LLSidepanelTaskInfo::refresh()
 
 		// If multiple items are for sale, set text to TOTAL PRICE.
 		if (num_for_sale > 1)
-			getChild<LLUICtrl>("Cost")->setValue(getString("Cost Total"));
+			getChild<LLSpinCtrl>("Edit Cost")->setLabel(getString("Cost Total"));
 		else
-			getChild<LLUICtrl>("Cost")->setValue(getString("Cost Default"));
+			getChild<LLSpinCtrl>("Edit Cost")->setLabel(getString("Cost Default"));
 	}
 	// This is a public object.
 	else
 	{
 		getChildView("Cost")->setEnabled(FALSE);
-		getChild<LLUICtrl>("Cost")->setValue(getString("Cost Default"));
-		
+		getChild<LLSpinCtrl>("Edit Cost")->setLabel(getString("Cost Default"));
 		getChild<LLUICtrl>("Edit Cost")->setValue(LLStringUtil::null);
 		getChildView("Edit Cost")->setEnabled(FALSE);
 	}
@@ -945,7 +967,6 @@ static bool callback_deed_to_group(const LLSD& notification, const LLSD& respons
 		if (group_id.notNull() && groups_identical && (gAgent.hasPowerInGroup(group_id, GP_OBJECT_DEED)))
 		{
 			LLSelectMgr::getInstance()->sendOwner(LLUUID::null, group_id, FALSE);
-//			LLViewerStats::getInstance()->incStat(LLViewerStats::ST_RELEASE_COUNT);
 		}
 	}
 	return FALSE;
@@ -996,28 +1017,28 @@ void LLSidepanelTaskInfo::onCommitEveryoneCopy(LLUICtrl *ctrl, void *data)
 // static
 void LLSidepanelTaskInfo::onCommitNextOwnerModify(LLUICtrl* ctrl, void* data)
 {
-	//llinfos << "LLSidepanelTaskInfo::onCommitNextOwnerModify" << llendl;
+	//LL_INFOS() << "LLSidepanelTaskInfo::onCommitNextOwnerModify" << LL_ENDL;
 	onCommitPerm(ctrl, data, PERM_NEXT_OWNER, PERM_MODIFY);
 }
 
 // static
 void LLSidepanelTaskInfo::onCommitNextOwnerCopy(LLUICtrl* ctrl, void* data)
 {
-	//llinfos << "LLSidepanelTaskInfo::onCommitNextOwnerCopy" << llendl;
+	//LL_INFOS() << "LLSidepanelTaskInfo::onCommitNextOwnerCopy" << LL_ENDL;
 	onCommitPerm(ctrl, data, PERM_NEXT_OWNER, PERM_COPY);
 }
 
 // static
 void LLSidepanelTaskInfo::onCommitNextOwnerTransfer(LLUICtrl* ctrl, void* data)
 {
-	//llinfos << "LLSidepanelTaskInfo::onCommitNextOwnerTransfer" << llendl;
+	//LL_INFOS() << "LLSidepanelTaskInfo::onCommitNextOwnerTransfer" << LL_ENDL;
 	onCommitPerm(ctrl, data, PERM_NEXT_OWNER, PERM_TRANSFER);
 }
 
 // static
 void LLSidepanelTaskInfo::onCommitName(LLUICtrl*, void* data)
 {
-	//llinfos << "LLSidepanelTaskInfo::onCommitName()" << llendl;
+	//LL_INFOS() << "LLSidepanelTaskInfo::onCommitName()" << LL_ENDL;
 	LLSidepanelTaskInfo* self = (LLSidepanelTaskInfo*)data;
 	LLLineEditor*	tb = self->getChild<LLLineEditor>("Object Name");
 	if(tb)
@@ -1031,7 +1052,7 @@ void LLSidepanelTaskInfo::onCommitName(LLUICtrl*, void* data)
 // static
 void LLSidepanelTaskInfo::onCommitDesc(LLUICtrl*, void* data)
 {
-	//llinfos << "LLSidepanelTaskInfo::onCommitDesc()" << llendl;
+	//LL_INFOS() << "LLSidepanelTaskInfo::onCommitDesc()" << LL_ENDL;
 	LLSidepanelTaskInfo* self = (LLSidepanelTaskInfo*)data;
 	LLLineEditor*	le = self->getChild<LLLineEditor>("Object Description");
 	if(le)

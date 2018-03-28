@@ -75,7 +75,6 @@
 #include "llviewerwindow.h"
 
 // Constants
-static const S32 LANDMARK_FOLDERS_MENU_WIDTH = 250;
 static const F32 PLACE_INFO_UPDATE_INTERVAL = 3.0;
 static const std::string AGENT_INFO_TYPE			= "agent";
 static const std::string CREATE_LANDMARK_INFO_TYPE	= "create_landmark";
@@ -168,8 +167,7 @@ public:
 protected:
 	/*virtual*/ void done()
 	{
-		mPlaces->showAddedLandmarkInfo(mAdded);
-		mAdded.clear();
+		mPlaces->showAddedLandmarkInfo(gInventory.getAddedIDs());
 	}
 
 private:
@@ -217,10 +215,10 @@ public:
 			LLRemoteParcelInfoProcessor::getInstance()->sendParcelInfoRequest(parcel_id);
 		}
 	}
-	/*virtual*/ void setErrorStatus(U32 status, const std::string& reason)
+	/*virtual*/ void setErrorStatus(S32 status, const std::string& reason)
 	{
-		llerrs << "Can't complete remote parcel request. Http Status: "
-			   << status << ". Reason : " << reason << llendl;
+		LL_ERRS() << "Can't complete remote parcel request. Http Status: "
+			   << status << ". Reason : " << reason << LL_ENDL;
 	}
 
 private:
@@ -229,7 +227,7 @@ private:
 };
 
 
-static LLRegisterPanelClassWrapper<LLPanelPlaces> t_places("panel_places");
+static LLPanelInjector<LLPanelPlaces> t_places("panel_places");
 
 LLPanelPlaces::LLPanelPlaces()
 	:	LLPanel(),
@@ -251,7 +249,7 @@ LLPanelPlaces::LLPanelPlaces()
 
 	gInventory.addObserver(mInventoryObserver);
 
-	mAgentParcelChangedConnection = LLViewerParcelMgr::getInstance()->addAgentParcelChangedCallback(
+	mAgentParcelChangedConnection = gAgent.addParcelChangedCallback(
 			boost::bind(&LLPanelPlaces::updateVerbs, this));
 
 	//buildFromFile( "panel_places.xml"); // Called from LLRegisterPanelClass::defaultPanelClassBuilder()
@@ -306,15 +304,19 @@ BOOL LLPanelPlaces::postBuild()
 	enable_registrar.add("Places.OverflowMenu.Enable",  boost::bind(&LLPanelPlaces::onOverflowMenuItemEnable, this, _2));
 
 	mPlaceMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_place.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
-	if (!mPlaceMenu)
+	if (mPlaceMenu)
 	{
-		llwarns << "Error loading Place menu" << llendl;
+		mPlaceMenu->setAlwaysShowMenu(TRUE);
+	}
+	else
+	{
+		LL_WARNS() << "Error loading Place menu" << LL_ENDL;
 	}
 
 	mLandmarkMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_landmark.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	if (!mLandmarkMenu)
 	{
-		llwarns << "Error loading Landmark menu" << llendl;
+		LL_WARNS() << "Error loading Landmark menu" << LL_ENDL;
 	}
 
 	mTabContainer = getChild<LLTabContainer>("Places Tabs");
@@ -393,11 +395,16 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 			mPlaceInfoType = key_type;
 			mPosGlobal.setZero();
 			mItem = NULL;
+			mRegionId.setNull();
 			togglePlaceInfoPanel(TRUE);
 
 			if (mPlaceInfoType == AGENT_INFO_TYPE)
 			{
 				mPlaceProfile->setInfoType(LLPanelPlaceInfo::AGENT);
+				if (gAgent.getRegion())
+				{
+					mRegionId = gAgent.getRegion()->getRegionID();
+				}
 			}
 			else if (mPlaceInfoType == CREATE_LANDMARK_INFO_TYPE)
 			{
@@ -469,6 +476,8 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 	LLViewerParcelMgr* parcel_mgr = LLViewerParcelMgr::getInstance();
 	if (!parcel_mgr)
 		return;
+
+	mParcelLocalId = parcel_mgr->getAgentParcel()->getLocalID();
 
 	// Start using LLViewerParcelMgr for land selection if
 	// information about nearby land is requested.
@@ -614,7 +623,7 @@ void LLPanelPlaces::onTeleportButtonClicked()
 		{
 			if (mItem.isNull())
 			{
-				llwarns << "NULL landmark item" << llendl;
+				LL_WARNS() << "NULL landmark item" << LL_ENDL;
 				llassert(mItem.notNull());
 				return;
 			}
@@ -713,6 +722,34 @@ void LLPanelPlaces::onEditButtonClicked()
 	updateVerbs();
 }
 
+class LLUpdateLandmarkParent : public LLInventoryCallback
+{
+public:
+    LLUpdateLandmarkParent(LLPointer<LLViewerInventoryItem> item, LLUUID new_parent) :
+        mItem(item),
+        mNewParentId(new_parent)
+    {};
+    /* virtual */ void fire(const LLUUID& inv_item_id)
+    {
+        LLInventoryModel::update_list_t update;
+        LLInventoryModel::LLCategoryUpdate old_folder(mItem->getParentUUID(), -1);
+        update.push_back(old_folder);
+        LLInventoryModel::LLCategoryUpdate new_folder(mNewParentId, 1);
+        update.push_back(new_folder);
+        gInventory.accountForUpdate(update);
+
+        mItem->setParent(mNewParentId);
+        mItem->updateParentOnServer(FALSE);
+
+        gInventory.updateItem(mItem);
+        gInventory.notifyObservers();
+    }
+
+private:
+    LLPointer<LLViewerInventoryItem> mItem;
+    LLUUID mNewParentId;
+};
+
 void LLPanelPlaces::onSaveButtonClicked()
 {
 	if (!mLandmarkInfo || mItem.isNull())
@@ -728,6 +765,7 @@ void LLPanelPlaces::onSaveButtonClicked()
 
 	LLUUID item_id = mItem->getUUID();
 	LLUUID folder_id = mLandmarkInfo->getLandmarkFolder();
+	bool change_parent = folder_id != mItem->getParentUUID();
 
 	LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(mItem);
 
@@ -736,10 +774,16 @@ void LLPanelPlaces::onSaveButtonClicked()
 	{
 		new_item->rename(current_title_value);
 		new_item->setDescription(current_notes_value);
-		new_item->updateServer(FALSE);
+		LLPointer<LLInventoryCallback> cb;
+		if (change_parent)
+		{
+			cb = new LLUpdateLandmarkParent(new_item, folder_id);
+		}
+		LLInventoryModel::LLCategoryUpdate up(mItem->getParentUUID(), 0);
+		gInventory.accountForUpdate(up);
+		update_inventory_item(new_item, cb);
 	}
-
-	if(folder_id != mItem->getParentUUID())
+	else if (change_parent)
 	{
 		LLInventoryModel::update_list_t update;
 		LLInventoryModel::LLCategoryUpdate old_folder(mItem->getParentUUID(),-1);
@@ -791,10 +835,21 @@ void LLPanelPlaces::onOverflowButtonClicked()
 	{
 		menu = mPlaceMenu;
 
+		bool landmark_item_enabled = false;
+		LLViewerParcelMgr* parcel_mgr = LLViewerParcelMgr::getInstance();
+		if (is_agent_place_info_visible
+			&& gAgent.getRegion()
+			&& mRegionId == gAgent.getRegion()->getRegionID()
+			&& parcel_mgr
+			&& parcel_mgr->getAgentParcel()->getLocalID() == mParcelLocalId)
+		{
+			// Floater still shows location identical to agent's position
+			landmark_item_enabled = !LLLandmarkActions::landmarkAlreadyExists();
+		}
+
 		// Enable adding a landmark only for agent current parcel and if
 		// there is no landmark already pointing to that parcel in agent's inventory.
-		menu->getChild<LLMenuItemCallGL>("landmark")->setEnabled(is_agent_place_info_visible &&
-																 !LLLandmarkActions::landmarkAlreadyExists());
+		menu->getChild<LLMenuItemCallGL>("landmark")->setEnabled(landmark_item_enabled);
 		// STORM-411
 		// Creating landmarks for remote locations is impossible.
 		// So hide menu item "Make a Landmark" in "Teleport History Profile" panel.
@@ -902,7 +957,7 @@ void LLPanelPlaces::onOverflowMenuItemClicked(const LLSD& param)
 									favorites_id,
 									std::string(),
 									LLPointer<LLInventoryCallback>(NULL));
-				llinfos << "Copied inventory item #" << mItem->getUUID() << " to favorites." << llendl;
+				LL_INFOS() << "Copied inventory item #" << mItem->getUUID() << " to favorites." << LL_ENDL;
 			}
 		}
 	}
@@ -923,7 +978,12 @@ void LLPanelPlaces::onBackButtonClicked()
 void LLPanelPlaces::togglePickPanel(BOOL visible)
 {
 	if (mPickPanel)
+	{
 		mPickPanel->setVisible(visible);
+		mPlaceProfile->setVisible(!visible);
+		updateVerbs();
+	}
+
 }
 
 void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
@@ -968,7 +1028,7 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			 mPlaceInfoType == LANDMARK_TAB_INFO_TYPE)
 	{
 		mLandmarkInfo->setVisible(visible);
-
+		mPlaceProfile->setVisible(FALSE);
 		if (visible)
 		{
 			mLandmarkInfo->resetLocation();
@@ -976,8 +1036,6 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			LLRect rect = getRect();
 			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
 			mLandmarkInfo->reshape(new_rect.getWidth(), new_rect.getHeight());
-
-			mPlaceProfile->setVisible(FALSE);
 		}
 		else
 		{
@@ -998,9 +1056,9 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 }
 
 // virtual
-void LLPanelPlaces::handleVisibilityChange(BOOL new_visibility)
+void LLPanelPlaces::onVisibilityChange(BOOL new_visibility)
 {
-	LLPanel::handleVisibilityChange(new_visibility);
+	LLPanel::onVisibilityChange(new_visibility);
 
 	if (!new_visibility && mPlaceInfoType == AGENT_INFO_TYPE)
 	{
@@ -1100,9 +1158,9 @@ void LLPanelPlaces::changedGlobalPos(const LLVector3d &global_pos)
 	updateVerbs();
 }
 
-void LLPanelPlaces::showAddedLandmarkInfo(const uuid_vec_t& items)
+void LLPanelPlaces::showAddedLandmarkInfo(const uuid_set_t& items)
 {
-	for (uuid_vec_t::const_iterator item_iter = items.begin();
+	for (uuid_set_t::const_iterator item_iter = items.begin();
 		 item_iter != items.end();
 		 ++item_iter)
 	{
@@ -1143,16 +1201,21 @@ void LLPanelPlaces::updateVerbs()
 
 	bool is_agent_place_info_visible = mPlaceInfoType == AGENT_INFO_TYPE;
 	bool is_create_landmark_visible = mPlaceInfoType == CREATE_LANDMARK_INFO_TYPE;
+	bool is_pick_panel_visible = false;
+	if(mPickPanel)
+	{
+		is_pick_panel_visible = mPickPanel->isInVisibleChain();
+	}
 	bool have_3d_pos = ! mPosGlobal.isExactlyZero();
 
-	mTeleportBtn->setVisible(!is_create_landmark_visible && !isLandmarkEditModeOn);
-	mShowOnMapBtn->setVisible(!is_create_landmark_visible && !isLandmarkEditModeOn);
+	mTeleportBtn->setVisible(!is_create_landmark_visible && !isLandmarkEditModeOn && !is_pick_panel_visible);
+	mShowOnMapBtn->setVisible(!is_create_landmark_visible && !isLandmarkEditModeOn && !is_pick_panel_visible);
 	mOverflowBtn->setVisible(is_place_info_visible && !is_create_landmark_visible && !isLandmarkEditModeOn);
 	mEditBtn->setVisible(mPlaceInfoType == LANDMARK_INFO_TYPE && !isLandmarkEditModeOn);
 	mSaveBtn->setVisible(isLandmarkEditModeOn);
 	mCancelBtn->setVisible(isLandmarkEditModeOn);
 	mCloseBtn->setVisible(is_create_landmark_visible && !isLandmarkEditModeOn);
-	mPlaceInfoBtn->setVisible(!is_place_info_visible && !is_create_landmark_visible && !isLandmarkEditModeOn);
+	mPlaceInfoBtn->setVisible(!is_place_info_visible && !is_create_landmark_visible && !isLandmarkEditModeOn && !is_pick_panel_visible);
 
 	mPlaceInfoBtn->setEnabled(!is_create_landmark_visible && !isLandmarkEditModeOn && have_3d_pos);
 

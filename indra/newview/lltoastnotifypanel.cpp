@@ -41,11 +41,12 @@
 #include "llnotificationsutil.h"
 #include "llviewermessage.h"
 #include "llfloaterimsession.h"
+#include "llavataractions.h"
 
 const S32 BOTTOM_PAD = VPAD * 3;
 const S32 IGNORE_BTN_TOP_DELTA = 3*VPAD;//additional ignore_btn padding
 S32 BUTTON_WIDTH = 90;
-// *TODO: magic numbers(???) - copied from llnotify.cpp(250)
+// *TODO: magic numbers - copied from llnotify.cpp(250)
 const S32 MAX_LENGTH = 512 + 20 + DB_FIRST_NAME_BUF_SIZE + DB_LAST_NAME_BUF_SIZE + DB_INV_ITEM_NAME_BUF_SIZE; 
 
 
@@ -57,7 +58,7 @@ LLToastNotifyPanel::button_click_signal_t LLToastNotifyPanel::sButtonClickSignal
 
 LLToastNotifyPanel::LLToastNotifyPanel(const LLNotificationPtr& notification, const LLRect& rect, bool show_images) 
 :	LLToastPanel(notification),
-	LLInstanceTracker<LLToastNotifyPanel, LLUUID>(notification->getID())
+	LLInstanceTracker<LLToastNotifyPanel, LLUUID, LLInstanceTrackerReplaceOnCollision>(notification->getID())
 {
 	init(rect, show_images);
 }
@@ -102,7 +103,7 @@ LLButton* LLToastNotifyPanel::createButton(const LLSD& form_element, BOOL is_opt
 		p.image_color_disabled(LLUIColorTable::instance().getColor("ButtonCautionImageColor"));
 	}
 	// for the scriptdialog buttons we use fixed button size. This  is a limit!
-	if (!mIsScriptDialog && font->getWidth(form_element["text"].asString()) > BUTTON_WIDTH)
+	if (!mIsScriptDialog && font->getWidth(form_element["text"].asString()) > (BUTTON_WIDTH-2*HPAD))
 	{
 		p.rect.width = 1;
 		p.auto_resize = true;
@@ -130,6 +131,7 @@ LLToastNotifyPanel::~LLToastNotifyPanel()
 	mButtonClickConnection.disconnect();
 
 	std::for_each(mBtnCallbackData.begin(), mBtnCallbackData.end(), DeletePointer());
+	mBtnCallbackData.clear();
 	if (mIsTip)
 		{
 			LLNotifications::getInstance()->cancel(mNotification);
@@ -158,7 +160,11 @@ void LLToastNotifyPanel::updateButtonsLayout(const std::vector<index_button_pair
 		}
 		LLButton* btn = it->second;
 		LLRect btn_rect(btn->getRect());
-		if (left + btn_rect.getWidth() > max_width)// whether there is still some place for button+h_pad in the mControlPanel
+		if (buttons.size() == 1) // for the one-button forms, center that button
+		{
+			left = (max_width - btn_rect.getWidth()) / 2;
+		}
+		else if (left + btn_rect.getWidth() > max_width)// whether there is still some place for button+h_pad in the mControlPanel
 		{
 			// looks like we need to add button to the next row
 			left = 0;
@@ -268,8 +274,12 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
     // customize panel's attributes
     // is it intended for displaying a tip?
     mIsTip = mNotification->getType() == "notifytip";
+
+    std::string notif_name = mNotification->getName();
     // is it a script dialog?
-    mIsScriptDialog = (mNotification->getName() == "ScriptDialog" || mNotification->getName() == "ScriptDialogGroup");
+    mIsScriptDialog = (notif_name == "ScriptDialog" || notif_name == "ScriptDialogGroup");
+
+    bool is_content_trusted = (notif_name != "LoadWebPage");
     // is it a caution?
     //
     // caution flag can be set explicitly by specifying it in the notification payload, or it can be set implicitly if the
@@ -312,7 +322,10 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
     mTextBox->setMaxTextLength(MAX_LENGTH);
     mTextBox->setVisible(TRUE);
     mTextBox->setPlainText(!show_images);
+    mTextBox->setContentTrusted(is_content_trusted);
     mTextBox->setValue(mNotification->getMessage());
+	mTextBox->setIsFriendCallback(LLAvatarActions::isFriend);
+    mTextBox->setIsObjectBlockedCallback(boost::bind(&LLMuteList::isMuted, LLMuteList::getInstance(), _1, _2, 0));
 
     // add buttons for a script notification
     if (mIsTip)

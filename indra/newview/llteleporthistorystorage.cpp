@@ -164,10 +164,10 @@ void LLTeleportHistoryStorage::save()
 	std::string resolvedFilename = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mFilename);
 
 	// open the history file for writing
-	llofstream file (resolvedFilename);
+	llofstream file(resolvedFilename.c_str());
 	if (!file.is_open())
 	{
-		llwarns << "can't open teleport history file \"" << mFilename << "\" for writing" << llendl;
+		LL_WARNS() << "can't open teleport history file \"" << mFilename << "\" for writing" << LL_ENDL;
 		return;
 	}
 
@@ -186,10 +186,10 @@ void LLTeleportHistoryStorage::load()
 	std::string resolved_filename = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mFilename);
 
 	// open the history file for reading
-	llifstream file(resolved_filename);
+	llifstream file(resolved_filename.c_str());
 	if (!file.is_open())
 	{
-		llwarns << "can't load teleport history from file \"" << mFilename << "\"" << llendl;
+		LL_WARNS() << "can't load teleport history from file \"" << mFilename << "\"" << LL_ENDL;
 		return;
 	}
 
@@ -205,7 +205,7 @@ void LLTeleportHistoryStorage::load()
 		std::istringstream iss(line);
 		if (parser->parse(iss, s_item, line.length()) == LLSDParser::PARSE_FAILURE)
 		{
-			llinfos << "Parsing saved teleport history failed" << llendl;
+			LL_INFOS() << "Parsing saved teleport history failed" << LL_ENDL;
 			break;
 		}
 
@@ -221,7 +221,7 @@ void LLTeleportHistoryStorage::load()
 
 void LLTeleportHistoryStorage::dump() const
 {
-	llinfos << "Teleport history storage dump (" << mItems.size() << " items):" << llendl;
+	LL_INFOS() << "Teleport history storage dump (" << mItems.size() << " items):" << LL_ENDL;
 
 	for (size_t i=0; i<mItems.size(); i++)
 	{
@@ -230,7 +230,7 @@ void LLTeleportHistoryStorage::dump() const
 		line << " global pos: " << mItems[i].mGlobalPos;
 		line << " date: " << mItems[i].mDate;
 
-		llinfos << line.str() << llendl;
+		LL_INFOS() << line.str() << LL_ENDL;
 	}
 }
 
@@ -244,7 +244,7 @@ void LLTeleportHistoryStorage::goToItem(S32 idx)
 	// Validate specified index.
 	if (idx < 0 || idx >= (S32)mItems.size())
 	{
-		llwarns << "Invalid teleport history index (" << idx << ") specified" << llendl;
+		LL_WARNS() << "Invalid teleport history index (" << idx << ") specified" << LL_ENDL;
 		dump();
 		return;
 	}

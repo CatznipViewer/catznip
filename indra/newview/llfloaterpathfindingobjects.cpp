@@ -41,7 +41,6 @@
 #include "llavatarnamecache.h"
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
-#include "llenvmanager.h"
 #include "llfloater.h"
 #include "llfontgl.h"
 #include "llnotifications.h"
@@ -85,7 +84,7 @@ void LLFloaterPathfindingObjects::onOpen(const LLSD &pKey)
 
 	if (!mRegionBoundaryCrossingSlot.connected())
 	{
-		mRegionBoundaryCrossingSlot = LLEnvManagerNew::getInstance()->setRegionChangeCallback(boost::bind(&LLFloaterPathfindingObjects::onRegionBoundaryCrossed, this));
+		mRegionBoundaryCrossingSlot = gAgent.addRegionChangedCallback(boost::bind(&LLFloaterPathfindingObjects::onRegionBoundaryCrossed, this));
 	}
 
 	if (!mGodLevelChangeSlot.connected())
@@ -330,7 +329,7 @@ void LLFloaterPathfindingObjects::handleUpdateObjectList(LLPathfindingManager::r
 	}
 }
 
-void LLFloaterPathfindingObjects::rebuildObjectsScrollList()
+void LLFloaterPathfindingObjects::rebuildObjectsScrollList(bool update_if_needed)
 {
 	if (!mHasObjectsToBeSelected)
 	{
@@ -356,7 +355,14 @@ void LLFloaterPathfindingObjects::rebuildObjectsScrollList()
 	{
 		buildObjectsScrollList(mObjectList);
 
-		mObjectsScrollList->selectMultiple(mObjectsToBeSelected);
+		if(mObjectsScrollList->selectMultiple(mObjectsToBeSelected) == 0)
+		{
+			if(update_if_needed && mRefreshListButton->getEnabled())
+			{
+				requestGetObjects();
+				return;
+			}
+		}
 		if (mHasObjectsToBeSelected)
 		{
 			mObjectsScrollList->scrollToShowSelected();
@@ -407,7 +413,7 @@ void LLFloaterPathfindingObjects::addObjectToScrollList(const LLPathfindingObjec
 
 	if (pObjectPtr->hasOwner() && !pObjectPtr->hasOwnerName())
 	{
-		mMissingNameObjectsScrollListItems.insert(std::make_pair<std::string, LLScrollListItem *>(pObjectPtr->getUUID().asString(), scrollListItem));
+		mMissingNameObjectsScrollListItems.insert(scroll_list_item_map::value_type(pObjectPtr->getUUID().asString(), scrollListItem));
 		pObjectPtr->registerOwnerNameListener(boost::bind(&LLFloaterPathfindingObjects::handleObjectNameResponse, this, _1));
 	}
 }
@@ -485,7 +491,7 @@ void LLFloaterPathfindingObjects::showFloaterWithSelectionObjects()
 	}
 	else
 	{
-		rebuildObjectsScrollList();
+		rebuildObjectsScrollList(true);
 		if (isMinimized())
 		{
 			setMinimized(FALSE);

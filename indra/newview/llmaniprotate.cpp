@@ -61,14 +61,12 @@
 #include "llglheaders.h"
 #include "lltrans.h"
 #include "llvoavatarself.h"
+#include "llhudrender.h"
 
 const F32 RADIUS_PIXELS = 100.f;		// size in screen space
 const F32 SQ_RADIUS = RADIUS_PIXELS * RADIUS_PIXELS;
 const F32 WIDTH_PIXELS = 8;
 const S32 CIRCLE_STEPS = 100;
-const F32 DELTA = F_TWO_PI / CIRCLE_STEPS;
-const F32 SIN_DELTA = sin( DELTA );
-const F32 COS_DELTA = cos( DELTA );
 const F32 MAX_MANIP_SELECT_DISTANCE = 100.f;
 const F32 SNAP_ANGLE_INCREMENT = 5.625f;
 const F32 SNAP_ANGLE_DETENTE = SNAP_ANGLE_INCREMENT;
@@ -240,7 +238,7 @@ void LLManipRotate::render()
 
 		if (mManipPart == LL_ROT_Z)
 		{
-			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, SELECTED_MANIPULATOR_SCALE, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, SELECTED_MANIPULATOR_SCALE, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 			gGL.pushMatrix();
 			{
 				// selected part
@@ -251,7 +249,7 @@ void LLManipRotate::render()
 		}
 		else if (mManipPart == LL_ROT_Y)
 		{
-			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, SELECTED_MANIPULATOR_SCALE, 1.f, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, SELECTED_MANIPULATOR_SCALE, 1.f, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 			gGL.pushMatrix();
 			{
 				gGL.rotatef( 90.f, 1.f, 0.f, 0.f );
@@ -262,7 +260,7 @@ void LLManipRotate::render()
 		}
 		else if (mManipPart == LL_ROT_X)
 		{
-			mManipulatorScales = lerp(mManipulatorScales, LLVector4(SELECTED_MANIPULATOR_SCALE, 1.f, 1.f, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales = lerp(mManipulatorScales, LLVector4(SELECTED_MANIPULATOR_SCALE, 1.f, 1.f, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 			gGL.pushMatrix();
 			{
 				gGL.rotatef( 90.f, 0.f, 1.f, 0.f );
@@ -273,13 +271,13 @@ void LLManipRotate::render()
 		}
 		else if (mManipPart == LL_ROT_ROLL)
 		{
-			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, SELECTED_MANIPULATOR_SCALE), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, SELECTED_MANIPULATOR_SCALE), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 		}
 		else if (mManipPart == LL_NO_PART)
 		{
 			if (mHighlightedPart == LL_NO_PART)
 			{
-				mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+				mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 			}
 
 			LLGLEnable cull_face(GL_CULL_FACE);
@@ -294,7 +292,7 @@ void LLManipRotate::render()
 				{
 					if (mHighlightedPart == LL_ROT_Z)
 					{
-						mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, SELECTED_MANIPULATOR_SCALE, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+						mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, SELECTED_MANIPULATOR_SCALE, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 						gGL.scalef(mManipulatorScales.mV[VZ], mManipulatorScales.mV[VZ], mManipulatorScales.mV[VZ]);
 						// hovering over part
 						gl_ring( mRadiusMeters, width_meters, LLColor4( 0.f, 0.f, 1.f, 1.f ), LLColor4( 0.f, 0.f, 1.f, 0.5f ), CIRCLE_STEPS, i);
@@ -312,7 +310,7 @@ void LLManipRotate::render()
 					gGL.rotatef( 90.f, 1.f, 0.f, 0.f );
 					if (mHighlightedPart == LL_ROT_Y)
 					{
-						mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, SELECTED_MANIPULATOR_SCALE, 1.f, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+						mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, SELECTED_MANIPULATOR_SCALE, 1.f, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 						gGL.scalef(mManipulatorScales.mV[VY], mManipulatorScales.mV[VY], mManipulatorScales.mV[VY]);
 						// hovering over part
 						gl_ring( mRadiusMeters, width_meters, LLColor4( 0.f, 1.f, 0.f, 1.f ), LLColor4( 0.f, 1.f, 0.f, 0.5f ), CIRCLE_STEPS, i);
@@ -330,7 +328,7 @@ void LLManipRotate::render()
 					gGL.rotatef( 90.f, 0.f, 1.f, 0.f );
 					if (mHighlightedPart == LL_ROT_X)
 					{
-						mManipulatorScales = lerp(mManipulatorScales, LLVector4(SELECTED_MANIPULATOR_SCALE, 1.f, 1.f, 1.f), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+						mManipulatorScales = lerp(mManipulatorScales, LLVector4(SELECTED_MANIPULATOR_SCALE, 1.f, 1.f, 1.f), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 						gGL.scalef(mManipulatorScales.mV[VX], mManipulatorScales.mV[VX], mManipulatorScales.mV[VX]);
 	
 						// hovering over part
@@ -346,7 +344,7 @@ void LLManipRotate::render()
 
 				if (mHighlightedPart == LL_ROT_ROLL)
 				{
-					mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, SELECTED_MANIPULATOR_SCALE), LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+					mManipulatorScales = lerp(mManipulatorScales, LLVector4(1.f, 1.f, 1.f, SELECTED_MANIPULATOR_SCALE), LLSmoothInterpolation::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 				}
 				
 			}
@@ -367,9 +365,9 @@ void LLManipRotate::render()
 	LLQuaternion object_rot = first_object->getRotationEdit();
 	object_rot.getEulerAngles(&(euler_angles.mV[VX]), &(euler_angles.mV[VY]), &(euler_angles.mV[VZ]));
 	euler_angles *= RAD_TO_DEG;
-	euler_angles.mV[VX] = llround(fmodf(euler_angles.mV[VX] + 360.f, 360.f), 0.05f);
-	euler_angles.mV[VY] = llround(fmodf(euler_angles.mV[VY] + 360.f, 360.f), 0.05f);
-	euler_angles.mV[VZ] = llround(fmodf(euler_angles.mV[VZ] + 360.f, 360.f), 0.05f);
+	euler_angles.mV[VX] = ll_round(fmodf(euler_angles.mV[VX] + 360.f, 360.f), 0.05f);
+	euler_angles.mV[VY] = ll_round(fmodf(euler_angles.mV[VY] + 360.f, 360.f), 0.05f);
+	euler_angles.mV[VZ] = ll_round(fmodf(euler_angles.mV[VZ] + 360.f, 360.f), 0.05f);
 
 	renderXYZ(euler_angles);
 }
@@ -452,6 +450,9 @@ BOOL LLManipRotate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 	// Route future Mouse messages here preemptively.  (Release on mouse up.)
 	setMouseCapture( TRUE );
 	LLSelectMgr::getInstance()->enableSilhouette(FALSE);
+
+	mHelpTextTimer.reset();
+	sNumTimesHelpTextShown++;
 	return TRUE;
 }
 
@@ -519,12 +520,12 @@ BOOL LLManipRotate::handleHover(S32 x, S32 y, MASK mask)
 			drag(x, y);
 		}
 
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipRotate (active)" << llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by LLManipRotate (active)" << LL_ENDL;		
 	}
 	else
 	{
 		highlightManipulators(x, y);
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipRotate (inactive)" << llendl;		
+		LL_DEBUGS("UserInput") << "hover handled by LLManipRotate (inactive)" << LL_ENDL;		
 	}
 
 	gViewerWindow->setCursor(UI_CURSOR_TOOLROTATE);
@@ -745,17 +746,19 @@ void LLManipRotate::renderActiveRing( F32 radius, F32 width, const LLColor4& fro
 
 void LLManipRotate::renderSnapGuides()
 {
-	LLVector3 grid_origin;
-	LLVector3 grid_scale;
-	LLQuaternion grid_rotation;
-	LLVector3 constraint_axis = getConstraintAxis();
-
-	LLSelectMgr::getInstance()->getGrid(grid_origin, grid_rotation, grid_scale);
-
-	if (!gSavedSettings.getBOOL("SnapEnabled"))
+	static LLCachedControl<bool> snap_enabled(gSavedSettings, "SnapEnabled", true);
+	if (!snap_enabled)
 	{
 		return;
 	}
+
+	LLVector3 grid_origin;
+	LLVector3 grid_scale;
+	LLQuaternion grid_rotation;
+
+	LLSelectMgr::getInstance()->getGrid(grid_origin, grid_rotation, grid_scale, true);
+
+	LLVector3 constraint_axis = getConstraintAxis();
 
 	LLVector3 center = gAgent.getPosAgentFromGlobal( mRotationCenter );
 	LLVector3 cam_at_axis;
@@ -1111,6 +1114,31 @@ void LLManipRotate::renderSnapGuides()
 			}
 		}
 	}
+
+
+	// render help text
+	if (mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
+	{
+		if (mHelpTextTimer.getElapsedTimeF32() < sHelpTextVisibleTime + sHelpTextFadeTime && sNumTimesHelpTextShown < sMaxTimesShowHelpText)
+		{
+			LLVector3 selection_center_start = LLSelectMgr::getInstance()->getSavedBBoxOfSelection().getCenterAgent();
+
+			LLVector3 offset_dir = LLViewerCamera::getInstance()->getUpAxis();
+
+			F32 line_alpha = gSavedSettings.getF32("GridOpacity");
+
+			LLVector3 help_text_pos = selection_center_start + (mRadiusMeters * 3.f * offset_dir);
+			const LLFontGL* big_fontp = LLFontGL::getFontSansSerif();
+
+			std::string help_text =  LLTrans::getString("manip_hint1");
+			LLColor4 help_text_color = LLColor4::white;
+			help_text_color.mV[VALPHA] = clamp_rescale(mHelpTextTimer.getElapsedTimeF32(), sHelpTextVisibleTime, sHelpTextVisibleTime + sHelpTextFadeTime, line_alpha, 0.f);
+			hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, false);
+			help_text =  LLTrans::getString("manip_hint2");
+			help_text_pos -= offset_dir * mRadiusMeters * 0.4f;
+			hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, false);
+		}
+	}
 }
 
 // Returns TRUE if center of sphere is visible.  Also sets a bunch of member variables that are used later (e.g. mCenterToCam)
@@ -1129,6 +1157,9 @@ BOOL LLManipRotate::updateVisiblity()
 
 	BOOL visible = FALSE;
 
+	//Assume that UI scale factor is equivalent for X and Y axis
+	F32 ui_scale_factor = LLUI::getScaleFactor().mV[VX];
+
 	LLVector3 center = gAgent.getPosAgentFromGlobal( mRotationCenter );
 	if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 	{
@@ -1138,6 +1169,7 @@ BOOL LLManipRotate::updateVisiblity()
 
 		mRadiusMeters = RADIUS_PIXELS / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
 		mRadiusMeters /= gAgentCamera.mHUDCurZoom;
+		mRadiusMeters *= ui_scale_factor;
 
 		mCenterToProfilePlaneMag = mRadiusMeters * mRadiusMeters / mCenterToCamMag;
 		mCenterToProfilePlane = -mCenterToProfilePlaneMag * mCenterToCamNorm;
@@ -1177,6 +1209,7 @@ BOOL LLManipRotate::updateVisiblity()
 				F32 fraction_of_fov = RADIUS_PIXELS / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
 				F32 apparent_angle = fraction_of_fov * LLViewerCamera::getInstance()->getView();  // radians
 				mRadiusMeters = z_dist * tan(apparent_angle);
+				mRadiusMeters *= ui_scale_factor;
 
 				mCenterToProfilePlaneMag = mRadiusMeters * mRadiusMeters / mCenterToCamMag;
 				mCenterToProfilePlane = -mCenterToProfilePlaneMag * mCenterToCamNorm;
@@ -1211,10 +1244,10 @@ LLQuaternion LLManipRotate::dragUnconstrained( S32 x, S32 y )
 	F32 dist_from_sphere_center = sqrt(delta_x * delta_x + delta_y * delta_y);
 
 	LLVector3 axis = mMouseDown % mMouseCur;
+	F32 angle = atan2(sqrtf(axis * axis), mMouseDown * mMouseCur);
 	axis.normVec();
-	F32 angle = acos(mMouseDown * mMouseCur);
 	LLQuaternion sphere_rot( angle, axis );
-
+	
 	if (is_approx_zero(1.f - mMouseDown * mMouseCur))
 	{
 		return LLQuaternion::DEFAULT;
@@ -1265,16 +1298,16 @@ LLVector3 LLManipRotate::getConstraintAxis()
 	else
 	{
 		S32 axis_dir = mManipPart - LL_ROT_X;
-		if ((axis_dir >= 0) && (axis_dir < 3))
+		if ((axis_dir >= LL_NO_PART) && (axis_dir < LL_Z_ARROW))
 		{
 			axis.mV[axis_dir] = 1.f;
 		}
 		else
 		{
 #ifndef LL_RELEASE_FOR_DOWNLOAD
-			llerrs << "Got bogus hit part in LLManipRotate::getConstraintAxis():" << mManipPart << llendl;
+			LL_ERRS() << "Got bogus hit part in LLManipRotate::getConstraintAxis():" << mManipPart << LL_ENDL;
 #else
-			llwarns << "Got bogus hit part in LLManipRotate::getConstraintAxis():" << mManipPart << llendl;
+			LL_WARNS() << "Got bogus hit part in LLManipRotate::getConstraintAxis():" << mManipPart << LL_ENDL;
 #endif
 			axis.mV[0] = 1.f;
 		}
@@ -1495,7 +1528,6 @@ LLQuaternion LLManipRotate::dragConstrained( S32 x, S32 y )
 				F32 mouse_angle = fmodf(atan2(projected_mouse * axis1, projected_mouse * axis2) * RAD_TO_DEG + 360.f, 360.f);
 				
 				F32 relative_mouse_angle = fmodf(mouse_angle + (SNAP_ANGLE_DETENTE / 2), SNAP_ANGLE_INCREMENT);
-				//fmodf(llround(mouse_angle * RAD_TO_DEG, 7.5f) + 360.f, 360.f);
 	
 				LLVector3 object_axis;
 				getObjectAxisClosestToMouse(object_axis);
@@ -1579,7 +1611,6 @@ LLQuaternion LLManipRotate::dragConstrained( S32 x, S32 y )
 			F32 mouse_angle = fmodf(atan2(projected_mouse * axis1, projected_mouse * axis2) * RAD_TO_DEG + 360.f, 360.f);
 			
 			F32 relative_mouse_angle = fmodf(mouse_angle + (SNAP_ANGLE_DETENTE / 2), SNAP_ANGLE_INCREMENT);
-			//fmodf(llround(mouse_angle * RAD_TO_DEG, 7.5f) + 360.f, 360.f);
 
 			LLVector3 object_axis;
 			getObjectAxisClosestToMouse(object_axis);
@@ -1609,9 +1640,9 @@ LLQuaternion LLManipRotate::dragConstrained( S32 x, S32 y )
 			mInSnapRegime = FALSE;
 		}
 
-		angle = acos(mMouseCur * mMouseDown);
-
-		F32 dir = (mMouseDown % mMouseCur) * constraint_axis;  // cross product
+		LLVector3 cross_product = mMouseDown % mMouseCur;
+		angle = atan2(sqrtf(cross_product * cross_product), mMouseCur * mMouseDown);
+		F32 dir = cross_product * constraint_axis;  // cross product
 		if( dir < 0.f )
 		{
 			angle *= -1.f;

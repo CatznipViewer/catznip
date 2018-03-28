@@ -31,15 +31,18 @@
 #include <set>
 
 // common includes
-#include "llstat.h"
 #include "llstring.h"
+#include "lltrace.h"
 
 // project includes
 #include "llviewerobject.h"
+#include "lleventcoro.h"
+#include "llcoros.h"
 
 class LLCamera;
 class LLNetMap;
 class LLDebugBeacon;
+class LLVOCacheEntry;
 
 const U32 CLOSE_BIN_SIZE = 10;
 const U32 NUM_BINS = 128;
@@ -65,6 +68,7 @@ public:
 	
 	inline LLViewerObject *findObject(const LLUUID &id);
 	LLViewerObject *createObjectViewer(const LLPCode pcode, LLViewerRegion *regionp); // Create a viewer-side object
+	LLViewerObject *createObjectFromCache(const LLPCode pcode, LLViewerRegion *regionp, const LLUUID &uuid, const U32 local_id);
 	LLViewerObject *createObject(const LLPCode pcode, LLViewerRegion *regionp,
 								 const LLUUID &uuid, const U32 local_id, const LLHost &sender);
 
@@ -78,12 +82,14 @@ public:
 	void cleanDeadObjects(const BOOL use_timer = TRUE);	// Clean up the dead object list.
 
 	// Simulator and viewer side object updates...
-	void processUpdateCore(LLViewerObject* objectp, void** data, U32 block, const EObjectUpdateType update_type, LLDataPacker* dpp, BOOL justCreated);
-	void processObjectUpdate(LLMessageSystem *mesgsys, void **user_data, EObjectUpdateType update_type, bool cached=false, bool compressed=false);
+	void processUpdateCore(LLViewerObject* objectp, void** data, U32 block, const EObjectUpdateType update_type, 
+		                   LLDataPacker* dpp, bool justCreated, bool from_cache = false);
+	LLViewerObject* processObjectUpdateFromCache(LLVOCacheEntry* entry, LLViewerRegion* regionp);
+	void processObjectUpdate(LLMessageSystem *mesgsys, void **user_data, EObjectUpdateType update_type, bool compressed=false);
 	void processCompressedObjectUpdate(LLMessageSystem *mesgsys, void **user_data, EObjectUpdateType update_type);
 	void processCachedObjectUpdate(LLMessageSystem *mesgsys, void **user_data, EObjectUpdateType update_type);
 	void updateApparentAngles(LLAgent &agent);
-	void update(LLAgent &agent, LLWorld &world);
+	void update(LLAgent &agent);
 
 	void fetchObjectCosts();
 	void fetchPhysicsFlags();
@@ -166,8 +172,6 @@ public:
 
 	// Statistics data (see also LLViewerStats)
 	S32 mNumNewObjects;
-	S32 mNumSizeCulled;
-	S32 mNumVisCulled;
 
 	// if we paused in the last frame
 	// used to discount stats from this frame
@@ -194,8 +198,6 @@ protected:
 	std::vector<OrphanInfo> mOrphanChildren;	// UUID's of orphaned objects
 	S32 mNumOrphans;
 
-	static LLStat sCacheHitRate;
-
 	typedef std::vector<LLPointer<LLViewerObject> > vobj_list_t;
 
 	vobj_list_t mObjects;
@@ -203,17 +205,17 @@ protected:
 
 	vobj_list_t mMapObjects;
 
-	std::set<LLUUID> mDeadObjects;	
+    uuid_set_t   mDeadObjects;
 
 	std::map<LLUUID, LLPointer<LLViewerObject> > mUUIDObjectMap;
 
 	//set of objects that need to update their cost
-	std::set<LLUUID> mStaleObjectCost;
-	std::set<LLUUID> mPendingObjectCost;
+    uuid_set_t   mStaleObjectCost;
+    uuid_set_t   mPendingObjectCost;
 
 	//set of objects that need to update their physics flags
-	std::set<LLUUID> mStalePhysicsFlags;
-	std::set<LLUUID> mPendingPhysicsFlags;
+    uuid_set_t   mStalePhysicsFlags;
+    uuid_set_t   mPendingPhysicsFlags;
 
 	std::vector<LLDebugBeacon> mDebugBeacons;
 
@@ -227,26 +229,28 @@ protected:
 	std::set<LLViewerObject *> mSelectPickList;
 
 	friend class LLViewerObject;
+
+private:
+    static void reportObjectCostFailure(LLSD &objectList);
+    void fetchObjectCostsCoro(std::string url);
+
+    static void reportPhysicsFlagFailure(LLSD &obejectList);
+    void fetchPhisicsFlagsCoro(std::string url);
+
 };
 
 
 class LLDebugBeacon
 {
 public:
-	~LLDebugBeacon()
-	{
-		if (mHUDObject.notNull())
-		{
-			mHUDObject->markDead();
-		}
-	}
+	~LLDebugBeacon();
 
 	LLVector3 mPositionAgent;
 	std::string mString;
 	LLColor4 mColor;
 	LLColor4 mTextColor;
 	S32 mLineWidth;
-	LLPointer<LLHUDObject> mHUDObject;
+	LLPointer<class LLHUDObject> mHUDObject;
 };
 
 
@@ -278,7 +282,7 @@ inline LLViewerObject *LLViewerObjectList::getObject(const S32 index)
 	objectp = mObjects[index];
 	if (objectp->isDead())
 	{
-		//llwarns << "Dead object " << objectp->mID << " in getObject" << llendl;
+		//LL_WARNS() << "Dead object " << objectp->mID << " in getObject" << LL_ENDL;
 		return NULL;
 	}
 	return objectp;

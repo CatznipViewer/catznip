@@ -29,7 +29,6 @@
 #define LL_LLINVENTORYPANEL_H
 
 #include "llassetstorage.h"
-#include "lldarray.h"
 #include "llfolderviewitem.h"
 #include "llfolderviewmodelinventory.h"
 #include "llfloater.h"
@@ -44,6 +43,7 @@ class LLInvFVBridge;
 class LLInventoryFolderViewModelBuilder;
 class LLInvPanelComplObserver;
 class LLFolderViewModelInventory;
+class LLFolderViewGroupedItemBridge;
 
 namespace LLInitParam
 {
@@ -97,6 +97,9 @@ public:
 		Optional<StartFolder>               start_folder;
 		Optional<bool>						use_label_suffix;
 		Optional<bool>						show_empty_message;
+		Optional<bool>						show_root_folder;
+		Optional<bool>						allow_drop_on_root;
+		Optional<bool>						use_marketplace_folders;
 		Optional<LLScrollContainer::Params>	scroll;
 		Optional<bool>						accepts_drag_and_drop;
 		Optional<LLFolderView::Params>		folder_view;
@@ -111,7 +114,10 @@ public:
 			filter("filter"),
 			start_folder("start_folder"),
 			use_label_suffix("use_label_suffix", true),
-			show_empty_message("show_empty_message", true),
+            show_empty_message("show_empty_message", true),
+            show_root_folder("show_root_folder", false),
+            allow_drop_on_root("allow_drop_on_root", true),
+            use_marketplace_folders("use_marketplace_folders", false),
 			scroll("scroll"),
 			accepts_drag_and_drop("accepts_drag_and_drop"),
 			folder_view("folder_view"),
@@ -166,6 +172,7 @@ public:
 	LLInventoryFilter& getFilter();
 	const LLInventoryFilter& getFilter() const;
 	void setFilterTypes(U64 filter, LLInventoryFilter::EFilterType = LLInventoryFilter::FILTERTYPE_OBJECT);
+	void setFilterWorn();
 	U32 getFilterObjectTypes() const;
 	void setFilterPermMask(PermissionMask filter_perm_mask);
 	U32 getFilterPermMask() const;
@@ -174,16 +181,20 @@ public:
 	const std::string getFilterSubString();
 	void setSinceLogoff(BOOL sl);
 	void setHoursAgo(U32 hours);
+	void setDateSearchDirection(U32 direction);
 	BOOL getSinceLogoff();
 	void setFilterLinks(U64 filter_links);
+	void setSearchType(LLInventoryFilter::ESearchType type);
+	LLInventoryFilter::ESearchType getSearchType();
 
 	void setShowFolderState(LLInventoryFilter::EFolderShow show);
 	LLInventoryFilter::EFolderShow getShowFolderState();
 	// This method is called when something has changed about the inventory.
 	void modelChanged(U32 mask);
-	LLFolderView* getRootFolder();
+	LLFolderView* getRootFolder() { return mFolderRoot.get(); }
 	LLUUID getRootFolderID();
 	LLScrollContainer* getScrollableContainer() { return mScroller; }
+    bool getAllowDropOnRoot() { return mParams.allow_drop_on_root; }
 	
 	void onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action);
 	
@@ -193,8 +204,12 @@ public:
 	void doToSelected(const LLSD& userdata);
 	void doCreate(const LLSD& userdata);
 	bool beginIMSession();
+	void fileUploadLocation(const LLSD& userdata);
+	void purgeSelectedItems();
 	bool attachObject(const LLSD& userdata);
 	static void idle(void* user_data);
+
+	void updateFolderLabel(const LLUUID& folder_id);
 
 	// DEBUG ONLY:
 	static void dumpSelectionInformation(void* user_data);
@@ -207,8 +222,12 @@ public:
 	// Find whichever inventory panel is active / on top.
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
-	
-	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id);
+
+	static void openInventoryPanelAndSetSelection(BOOL auto_open,
+													const LLUUID& obj_id,
+													BOOL main_panel = FALSE,
+													BOOL take_keyboard_focus = TAKE_FOCUS_YES,
+													BOOL reset_filter = FALSE);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);
 	void removeItemID(const LLUUID& id);
@@ -217,8 +236,13 @@ public:
 	void setSelectionByID(const LLUUID& obj_id, BOOL take_keyboard_focus);
 	void updateSelection();
 
-	LLFolderViewModelInventory* getFolderViewModel();
-	const LLFolderViewModelInventory* getFolderViewModel() const;
+	LLFolderViewModelInventory* getFolderViewModel() { return &mInventoryViewModel; }
+	const LLFolderViewModelInventory* getFolderViewModel() const { return &mInventoryViewModel; }
+    
+    // Clean up stuff when the folder root gets deleted
+    void clearFolderRoot();
+
+    void callbackPurgeSelectedItems(const LLSD& notification, const LLSD& response);
 
 protected:
 	void openStartFolderOrMyInventory(); // open the first level of inventory
@@ -233,10 +257,13 @@ protected:
 	bool 						mShowItemLinkOverlays; // Shows link graphic over inventory item icons
 	bool						mShowEmptyMessage;
 
-	LLFolderView*				mFolderRoot;
+	LLHandle<LLFolderView>      mFolderRoot;
 	LLScrollContainer*			mScroller;
 
+	LLUUID						mPreviousSelectedFolder;
+
 	LLFolderViewModelInventory	mInventoryViewModel;
+    LLPointer<LLFolderViewGroupedItemBridge> mGroupedItemBridge;
 	Params						mParams;	// stored copy of parameter block
 
 	std::map<LLUUID, LLFolderViewItem*> mItemMap;
@@ -288,7 +315,7 @@ protected:
 	BOOL				getIsHiddenFolderType(LLFolderType::EType folder_type) const;
 	
     virtual LLFolderView * createFolderRoot(LLUUID root_id );
-	virtual LLFolderViewFolder*	createFolderViewFolder(LLInvFVBridge * bridge);
+	virtual LLFolderViewFolder*	createFolderViewFolder(LLInvFVBridge * bridge, bool allow_drop);
 	virtual LLFolderViewItem*	createFolderViewItem(LLInvFVBridge * bridge);
 private:
 	bool				mBuildDefaultHierarchy; // default inventory hierarchy should be created in postBuild()

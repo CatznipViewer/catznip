@@ -159,7 +159,7 @@ LLFloaterIMPanel::LLFloaterIMPanel(const std::string& session_label,
 		mCallBackEnabled = LLVoiceClient::getInstance()->isSessionCallBackPossible(mSessionUUID);
 		break;
 	default:
-		llwarns << "Unknown session type" << llendl;
+		LL_WARNS() << "Unknown session type" << LL_ENDL;
 		xml_filename = "floater_instant_message.xml";
 		break;
 	}
@@ -388,16 +388,17 @@ void LLFloaterIMPanel::draw()
 
 class LLSessionInviteResponder : public LLHTTPClient::Responder
 {
+	LOG_CLASS(LLSessionInviteResponder);
 public:
 	LLSessionInviteResponder(const LLUUID& session_id)
 	{
 		mSessionID = session_id;
 	}
 
-	void errorWithContent(U32 statusNum, const std::string& reason, const LLSD& content)
+protected:
+	void httpFailure()
 	{
-		llwarns << "Error inviting all agents to session [status:" 
-				<< statusNum << "]: " << content << llendl;
+		LL_WARNS() << "Error inviting all agents to session " << dumpResponse() << LL_ENDL;
 		//throw something back to the viewer here?
 	}
 
@@ -417,7 +418,7 @@ BOOL LLFloaterIMPanel::inviteToSession(const std::vector<LLUUID>& ids)
 
 	if( isInviteAllowed() && (count > 0) )
 	{
-		llinfos << "LLFloaterIMPanel::inviteToSession() - inviting participants" << llendl;
+		LL_INFOS() << "LLFloaterIMPanel::inviteToSession() - inviting participants" << LL_ENDL;
 
 		std::string url = region->getCapability("ChatSessionRequest");
 
@@ -439,9 +440,9 @@ BOOL LLFloaterIMPanel::inviteToSession(const std::vector<LLUUID>& ids)
 	}
 	else
 	{
-		llinfos << "LLFloaterIMPanel::inviteToSession -"
+		LL_INFOS() << "LLFloaterIMPanel::inviteToSession -"
 				<< " no need to invite agents for "
-				<< mDialog << llendl;
+				<< mDialog << LL_ENDL;
 		// successful add, because everyone that needed to get added
 		// was added.
 	}
@@ -778,7 +779,7 @@ void LLFloaterIMPanel::sendMsg()
 		&& (mDialog == IM_NOTHING_SPECIAL)
 		&& mOtherParticipantUUID.isNull())
 	{
-		llinfos << "Cannot send IM to everyone unless you're a god." << llendl;
+		LL_INFOS() << "Cannot send IM to everyone unless you're a god." << LL_ENDL;
 		return;
 	}
 

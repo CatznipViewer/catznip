@@ -193,7 +193,7 @@ bool LLDayCycleManager::loadPreset(const std::string& path)
 	LLSD data = LLWLDayCycle::loadDayCycleFromPath(path);
 	if (data.isUndefined())
 	{
-		llwarns << "Error loading day cycle from " << path << llendl;
+		LL_WARNS() << "Error loading day cycle from " << path << LL_ENDL;
 		return false;
 	}
 
@@ -207,7 +207,7 @@ bool LLDayCycleManager::addPreset(const std::string& name, const LLSD& data)
 {
 	if (name.empty())
 	{
-		llassert(name.empty());
+		//llassert(name.empty());
 		return false;
 	}
 

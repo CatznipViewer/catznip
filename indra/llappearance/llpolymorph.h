@@ -91,6 +91,7 @@ class LLPolyVertexMask
 {
 public:
 	LLPolyVertexMask(LLPolyMorphData* morph_data);
+	LLPolyVertexMask(const LLPolyVertexMask& pOther);
 	~LLPolyVertexMask();
 
 	void generateMask(U8 *maskData, S32 width, S32 height, S32 num_components, BOOL invert, LLVector4a *clothing_weights);
@@ -181,7 +182,21 @@ public:
 	void	applyMask(U8 *maskData, S32 width, S32 height, S32 num_components, BOOL invert);
 	void	addPendingMorphMask() { mNumMorphMasksPending++; }
 
+    void    applyVolumeChanges(F32 delta_weight); // SL-315 - for resetSkeleton()
+
+	void* operator new(size_t size)
+	{
+		return ll_aligned_malloc_16(size);
+	}
+
+	void operator delete(void* ptr)
+	{
+		ll_aligned_free_16(ptr);
+	}
+
 protected:
+	LLPolyMorphTarget(const LLPolyMorphTarget& pOther);
+
 	LLPolyMorphData*				mMorphData;
 	LLPolyMesh*						mMesh;
 	LLPolyVertexMask *				mVertMask;

@@ -27,12 +27,14 @@
 #include "linden_common.h"
 
 #include "../test/lltut.h"
+#if 0
 
 #include "../llremoteparcelrequest.h"
 
 #include "../llagent.h"
 #include "message.h"
 #include "llurlentry.h"
+#include "llpounceable.h"
 
 namespace {
 	const LLUUID TEST_PARCEL_ID("11111111-1111-1111-1111-111111111111");
@@ -40,12 +42,14 @@ namespace {
 
 LLCurl::Responder::Responder() { }
 LLCurl::Responder::~Responder() { }
-void LLCurl::Responder::error(U32,std::string const &) { }
-void LLCurl::Responder::result(LLSD const &) { }
-void LLCurl::Responder::errorWithContent(U32 status,std::string const &,LLSD const &) { }
-void LLCurl::Responder::completedRaw(U32 status, std::string const &, LLChannelDescriptors const &,boost::shared_ptr<LLBufferArray> const &) { }
-void LLCurl::Responder::completed(U32 status, std::string const &, LLSD const &) { }
-void LLCurl::Responder::completedHeader(U32 status, std::string const &, LLSD const &) { }
+void LLCurl::Responder::httpFailure() { }
+void LLCurl::Responder::httpSuccess() { }
+void LLCurl::Responder::httpCompleted() { }
+void LLCurl::Responder::failureResult(S32 status, const std::string& reason, const LLSD& content) { }
+void LLCurl::Responder::successResult(const LLSD& content) { }
+void LLCurl::Responder::completeResult(S32 status, const std::string& reason, const LLSD& content) { }
+std::string LLCurl::Responder::dumpResponse() const { return "(failure)"; }
+void LLCurl::Responder::completedRaw(LLChannelDescriptors const &,boost::shared_ptr<LLBufferArray> const &) { }
 void LLMessageSystem::getF32(char const *,char const *,F32 &,S32) { }
 void LLMessageSystem::getU8(char const *,char const *,U8 &,S32) { }
 void LLMessageSystem::getS32(char const *,char const *,S32 &,S32) { }
@@ -59,7 +63,7 @@ void LLMessageSystem::addUUID(char const *,LLUUID const &) { }
 void LLMessageSystem::addUUIDFast(char const *,LLUUID const &) { }
 void LLMessageSystem::nextBlockFast(char const *) { }
 void LLMessageSystem::newMessage(char const *) { }
-LLMessageSystem * gMessageSystem;
+LLPounceable<LLMessageSystem*, LLPounceableStatic> gMessageSystem;
 char const* const _PREHASH_AgentID = 0;   // never dereferenced during this test
 char const* const _PREHASH_AgentData = 0; // never dereferenced during this test
 LLAgent gAgent;
@@ -85,7 +89,7 @@ namespace tut
 
 		virtual void setParcelID(const LLUUID& parcel_id) { }
 
-		virtual void setErrorStatus(U32 status, const std::string& reason) { }
+		virtual void setErrorStatus(S32 status, const std::string& reason) { }
 
 		bool mProcessed;
 	};
@@ -132,3 +136,4 @@ namespace tut
 		processor.processParcelInfoReply(gMessageSystem, NULL);
 	}
 }
+#endif

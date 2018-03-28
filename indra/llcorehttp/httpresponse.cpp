@@ -4,7 +4,7 @@
  *
  * $LicenseInfo:firstyear=2012&license=viewerlgpl$
  * Second Life Viewer Source Code
- * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2012-2013, Linden Research, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,14 +39,17 @@ HttpResponse::HttpResponse()
 	  mReplyLength(0U),
 	  mReplyFullLength(0U),
 	  mBufferArray(NULL),
-	  mHeaders(NULL)
+	  mHeaders(),
+	  mRetries(0U),
+	  m503Retries(0U),
+      mRequestUrl()
 {}
 
 
 HttpResponse::~HttpResponse()
 {
 	setBody(NULL);
-	setHeaders(NULL);
+	//setHeaders();
 }
 
 
@@ -69,23 +72,14 @@ void HttpResponse::setBody(BufferArray * ba)
 }
 
 
-void HttpResponse::setHeaders(HttpHeaders * headers)
+void HttpResponse::setHeaders(HttpHeaders::ptr_t &headers)
 {
-	if (mHeaders == headers)
-		return;
-	
-	if (mHeaders)
-	{
-		mHeaders->release();
-	}
-
-	if (headers)
-	{
-		headers->addRef();
-	}
-	
-	mHeaders = headers;
+    mHeaders = headers;
 }
 
+size_t HttpResponse::getBodySize() const
+{
+	return (mBufferArray) ? mBufferArray->size() : 0;
+}
 
 }   // end namespace LLCore

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Metin Sohbeti" name="chat">
+	<check_box initial_value="true" label="Yakınlardaki sohbetlerde hareketleri otomatik olarak tamamla" name="auto_complete_gestures"/>
 	<panel name="general_chat_settings">
 		<check_box initial_value="true" label="Sohbet sırasında yazma animasyonunu oynat" name="play_typing_animation"/>
 		<check_box label="Çevrimdışı olduğunda Aİ&apos;ler e-posta ile bana gönderilsin" name="send_im_to_email"/>
@@ -89,8 +90,19 @@
 		<check_box label="Envanter teklifi" name="inventory_offer"/>
 	</panel>
 	<panel name="log_settings">
+		<text name="logging_label">
+			Kaydet:
+		</text>
+		<combo_box name="conversation_log_combo">
+			<item label="Günlük ve dökümler" name="log_and_transcripts" value="2"/>
+			<item label="Sadece günlük" name="log_only" value="1"/>
+			<item label="Günlük veya döküm yok" name="no_log_or_transcript" value="0"/>
+		</combo_box>
 		<button label="Günlüğü temizle..." name="clear_log"/>
 		<button label="Dökümleri sil..." name="delete_transcripts"/>
+		<text name="log_location_label">
+			Konum:
+		</text>
 		<button label="Gözat..." label_selected="Gözat" name="log_path_button"/>
 	</panel>
 	<button label="Çeviri..." name="ok_btn"/>

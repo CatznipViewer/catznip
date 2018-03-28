@@ -37,7 +37,6 @@ U64 LLFrameTimer::sTotalTime = 0;
 F64 LLFrameTimer::sTotalSeconds = 0.0;
 S32 LLFrameTimer::sFrameCount = 0;
 U64 LLFrameTimer::sFrameDeltaTime = 0;
-const F64 USEC_PER_SECOND = 1000000.0;
 const F64 USEC_TO_SEC_F64 = 0.000001;
 
 // static
@@ -115,10 +114,10 @@ F64 LLFrameTimer::expiresAt() const
 
 BOOL LLFrameTimer::checkExpirationAndReset(F32 expiration)
 {
-	//llinfos << "LLFrameTimer::checkExpirationAndReset()" << llendl;
-	//llinfos << "  mStartTime:" << mStartTime << llendl;
-	//llinfos << "  sFrameTime:" << sFrameTime << llendl;
-	//llinfos << "  mExpiry:   " <<  mExpiry << llendl;
+	//LL_INFOS() << "LLFrameTimer::checkExpirationAndReset()" << LL_ENDL;
+	//LL_INFOS() << "  mStartTime:" << mStartTime << LL_ENDL;
+	//LL_INFOS() << "  sFrameTime:" << sFrameTime << LL_ENDL;
+	//LL_INFOS() << "  mExpiry:   " <<  mExpiry << LL_ENDL;
 
 	if(hasExpired())
 	{

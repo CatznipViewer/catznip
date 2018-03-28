@@ -38,6 +38,7 @@
 #include "llimagetga.h"
 #include "llimagepng.h"
 #include "llinventory.h"
+#include "llinventorymodel.h"
 #include "llnotificationsutil.h"
 #include "llresmgr.h"
 #include "lltrans.h"
@@ -50,6 +51,8 @@
 #include "lluictrlfactory.h"
 #include "llviewerwindow.h"
 #include "lllineeditor.h"
+
+#include <boost/lexical_cast.hpp>
 
 const S32 CLIENT_RECT_VPAD = 4;
 
@@ -65,6 +68,7 @@ LLPreviewTexture::LLPreviewTexture(const LLSD& key)
 	  mShowKeepDiscard(FALSE),
 	  mCopyToInv(FALSE),
 	  mIsCopyable(FALSE),
+	  mIsFullPerm(FALSE),
 	  mUpdateDimensions(TRUE),
 	  mLastHeight(0),
 	  mLastWidth(0),
@@ -88,8 +92,35 @@ LLPreviewTexture::~LLPreviewTexture()
 	{
 		getWindow()->decBusyCount();
 	}
-	mImage->setBoostLevel(mImageOldBoostLevel);
-	mImage = NULL;
+
+	if (mImage.notNull())
+	{
+		mImage->setBoostLevel(mImageOldBoostLevel);
+		mImage = NULL;
+	}
+}
+
+void LLPreviewTexture::populateRatioList()
+{
+	// Fill in ratios list with common aspect ratio values
+	mRatiosList.clear();
+	mRatiosList.push_back(LLTrans::getString("Unconstrained"));
+	mRatiosList.push_back("1:1");
+	mRatiosList.push_back("4:3");
+	mRatiosList.push_back("10:7");
+	mRatiosList.push_back("3:2");
+	mRatiosList.push_back("16:10");
+	mRatiosList.push_back("16:9");
+	mRatiosList.push_back("2:1");
+	
+	// Now fill combo box with provided list
+	LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
+	combo->removeall();
+
+	for (std::vector<std::string>::const_iterator it = mRatiosList.begin(); it != mRatiosList.end(); ++it)
+	{
+		combo->add(*it);
+	}
 }
 
 // virtual
@@ -115,20 +146,28 @@ BOOL LLPreviewTexture::postBuild()
 	childSetAction("save_tex_btn", LLPreviewTexture::onSaveAsBtn, this);
 	getChildView("save_tex_btn")->setVisible( true);
 	getChildView("save_tex_btn")->setEnabled(canSaveAs());
-	
-	if (!mCopyToInv) 
-	{
-		const LLInventoryItem* item = getItem();
-		
-		if (item)
-		{
-			childSetCommitCallback("desc", LLPreview::onText, this);
-			getChild<LLUICtrl>("desc")->setValue(item->getDescription());
-			getChild<LLLineEditor>("desc")->setPrevalidate(&LLTextValidate::validateASCIIPrintableNoPipe);
-		}
-	}
-	
+
+    const LLInventoryItem* item = getItem();
+    if (item)
+    {
+        if (!mCopyToInv)
+        {
+            childSetCommitCallback("desc", LLPreview::onText, this);
+            getChild<LLUICtrl>("desc")->setValue(item->getDescription());
+            getChild<LLLineEditor>("desc")->setPrevalidate(&LLTextValidate::validateASCIIPrintableNoPipe);
+        }
+        BOOL source_library = mObjectUUID.isNull() && gInventory.isObjectDescendentOf(item->getUUID(), gInventory.getLibraryRootFolderID());
+        if (source_library)
+        {
+            getChildView("Discard")->setEnabled(false);
+        }
+    }
+
+	// Fill in ratios list and combo box with common aspect ratio values
+	populateRatioList();
+
 	childSetCommitCallback("combo_aspect_ratio", onAspectRatioCommit, this);
+
 	LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
 	combo->setCurrentByIndex(0);
 	
@@ -163,12 +202,6 @@ void LLPreviewTexture::draw()
 
 		if ( mImage.notNull() )
 		{
-			// Automatically bring up SaveAs dialog if we opened this to save the texture.
-			if (mPreviewToSave)
-			{
-				mPreviewToSave = FALSE;
-				saveAs();
-			}
 			// Draw the texture
 			gGL.diffuseColor3f( 1.f, 1.f, 1.f );
 			gl_draw_scaled_image(interior.mLeft,
@@ -250,7 +283,7 @@ void LLPreviewTexture::draw()
 // virtual
 BOOL LLPreviewTexture::canSaveAs() const
 {
-	return mIsCopyable && !mLoadingFullImage && mImage.notNull() && !mImage->isMissingAsset();
+	return mIsFullPerm && !mLoadingFullImage && mImage.notNull() && !mImage->isMissingAsset();
 }
 
 
@@ -267,6 +300,12 @@ void LLPreviewTexture::saveAs()
 		// User canceled or we failed to acquire save file.
 		return;
 	}
+	if(mPreviewToSave)
+	{
+		mPreviewToSave = FALSE;
+		LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", item->getUUID());
+	}
+
 	// remember the user-approved/edited file name.
 	mSaveFileName = file_picker.getFirstFile();
 	mLoadingFullImage = TRUE;
@@ -414,10 +453,26 @@ void LLPreviewTexture::updateDimensions()
 	{
 		return;
 	}
-	
+
+	S32 img_width = mImage->getFullWidth();
+	S32 img_height = mImage->getFullHeight();
+
+	if (mAssetStatus != PREVIEW_ASSET_LOADED
+		|| mLastWidth != img_width
+		|| mLastHeight != img_height)
+	{
+		mAssetStatus = PREVIEW_ASSET_LOADED;
+		// Asset has been fully loaded, adjust aspect ratio
+		adjustAspectRatio();
+	}
+
+
 	// Update the width/height display every time
-	getChild<LLUICtrl>("dimensions")->setTextArg("[WIDTH]",  llformat("%d", mImage->getFullWidth()));
-	getChild<LLUICtrl>("dimensions")->setTextArg("[HEIGHT]", llformat("%d", mImage->getFullHeight()));
+	getChild<LLUICtrl>("dimensions")->setTextArg("[WIDTH]",  llformat("%d", img_width));
+	getChild<LLUICtrl>("dimensions")->setTextArg("[HEIGHT]", llformat("%d", img_height));
+
+	mLastHeight = img_height;
+	mLastWidth = img_width;
 
 	// Reshape the floater only when required
 	if (mUpdateDimensions)
@@ -490,6 +545,20 @@ void LLPreviewTexture::loadAsset()
 	mUpdateDimensions = TRUE;
 	updateDimensions();
 	getChildView("save_tex_btn")->setEnabled(canSaveAs());
+	if (mObjectUUID.notNull())
+	{
+		// check that we can copy inworld items into inventory
+		getChildView("Keep")->setEnabled(mIsCopyable);
+	}
+	else
+	{
+		// check that we can remove item
+		BOOL source_library = gInventory.isObjectDescendentOf(mItemUUID, gInventory.getLibraryRootFolderID());
+		if (source_library)
+		{
+			getChildView("Discard")->setEnabled(false);
+		}
+	}
 }
 
 LLPreview::EAssetStatus LLPreviewTexture::getAssetStatus()
@@ -499,6 +568,60 @@ LLPreview::EAssetStatus LLPreviewTexture::getAssetStatus()
 		mAssetStatus = PREVIEW_ASSET_LOADED;
 	}
 	return mAssetStatus;
+}
+
+void LLPreviewTexture::adjustAspectRatio()
+{
+	S32 w = mImage->getFullWidth();
+    S32 h = mImage->getFullHeight();
+
+	// Determine aspect ratio of the image
+	S32 tmp;
+    while (h != 0)
+    {
+        tmp = w % h;
+        w = h;
+        h = tmp;
+    }
+	S32 divisor = w;
+	S32 num = mImage->getFullWidth() / divisor;
+	S32 denom = mImage->getFullHeight() / divisor;
+
+	if (setAspectRatio(num, denom))
+	{
+		// Select corresponding ratio entry in the combo list
+		LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
+		if (combo)
+		{
+			std::ostringstream ratio;
+			ratio << num << ":" << denom;
+			std::vector<std::string>::const_iterator found = std::find(mRatiosList.begin(), mRatiosList.end(), ratio.str());
+			if (found == mRatiosList.end())
+			{
+				// No existing ratio found, create an element that will show image at original ratio
+				populateRatioList(); // makes sure previous custom ratio is cleared
+				std::string ratio = boost::lexical_cast<std::string>(num)+":" + boost::lexical_cast<std::string>(denom);
+				mRatiosList.push_back(ratio);
+				combo->add(ratio);
+				combo->setCurrentByIndex(mRatiosList.size()- 1);
+			}
+			else
+			{
+				combo->setCurrentByIndex(found - mRatiosList.begin());
+			}
+		}
+	}
+	else
+	{
+		// Aspect ratio was set to unconstrained or was clamped
+		LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
+		if (combo)
+		{
+			combo->setCurrentByIndex(0); //unconstrained
+		}
+	}
+
+	mUpdateDimensions = TRUE;
 }
 
 void LLPreviewTexture::updateImageID()
@@ -514,7 +637,9 @@ void LLPreviewTexture::updateImageID()
 		mShowKeepDiscard = TRUE;
 
 		mCopyToInv = FALSE;
-		mIsCopyable = item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
+		LLPermissions perm(item->getPermissions());
+		mIsCopyable = perm.allowCopyBy(gAgent.getID(), gAgent.getGroupID()) && perm.allowTransferTo(gAgent.getID());
+		mIsFullPerm = item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
 	}
 	else // not an item, assume it's an asset id
 	{
@@ -522,6 +647,7 @@ void LLPreviewTexture::updateImageID()
 		mShowKeepDiscard = FALSE;
 		mCopyToInv = TRUE;
 		mIsCopyable = TRUE;
+		mIsFullPerm = TRUE;
 	}
 
 }
@@ -543,4 +669,5 @@ void LLPreviewTexture::setObjectID(const LLUUID& object_id)
 		mAssetStatus = PREVIEW_ASSET_UNLOADED;
 		loadAsset();
 	}
+	refreshFromItem();
 }

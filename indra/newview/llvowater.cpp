@@ -28,7 +28,6 @@
 
 #include "llvowater.h"
 
-#include "imageids.h"
 #include "llviewercontrol.h"
 
 #include "lldrawable.h"
@@ -44,21 +43,12 @@
 #include "pipeline.h"
 #include "llspatialpartition.h"
 
-const BOOL gUseRoam = FALSE;
-
-
 ///////////////////////////////////
 
 template<class T> inline T LERP(T a, T b, F32 factor)
 {
 	return a + (b - a) * factor;
 }
-
-const U32 N_RES_HALF	= (N_RES >> 1);
-
-const U32 WIDTH			= (N_RES * WAVE_STEP); //128.f //64		// width of wave tile, in meters
-const F32 WAVE_STEP_INV	= (1. / WAVE_STEP);
-
 
 LLVOWater::LLVOWater(const LLUUID &id, 
 					 const LLPCode pcode, 
@@ -100,7 +90,7 @@ void LLVOWater::updateTextures()
 }
 
 // Never gets called
-void  LLVOWater::idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time)
+void  LLVOWater::idleUpdate(LLAgent &agent, const F64 &time)
 {
 }
 
@@ -124,11 +114,11 @@ LLDrawable *LLVOWater::createDrawable(LLPipeline *pipeline)
 	return mDrawable;
 }
 
-static LLFastTimer::DeclareTimer FTM_UPDATE_WATER("Update Water");
+static LLTrace::BlockTimerStatHandle FTM_UPDATE_WATER("Update Water");
 
 BOOL LLVOWater::updateGeometry(LLDrawable *drawable)
 {
-	LLFastTimer ftm(FTM_UPDATE_WATER);
+	LL_RECORD_BLOCK_TIME(FTM_UPDATE_WATER);
 	LLFace *face;
 
 	if (drawable->getNumFaces() < 1)
@@ -165,14 +155,22 @@ BOOL LLVOWater::updateGeometry(LLDrawable *drawable)
 	if (!buff || !buff->isWriteable())
 	{
 		buff = new LLVertexBuffer(LLDrawPoolWater::VERTEX_DATA_MASK, GL_DYNAMIC_DRAW_ARB);
-		buff->allocateBuffer(face->getGeomCount(), face->getIndicesCount(), TRUE);
+		if (!buff->allocateBuffer(face->getGeomCount(), face->getIndicesCount(), TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer on water update to "
+				<< face->getGeomCount() << " vertices and "
+				<< face->getIndicesCount() << " indices" << LL_ENDL;
+		}
 		face->setIndicesIndex(0);
 		face->setGeomIndex(0);
 		face->setVertexBuffer(buff);
 	}
 	else
 	{
-		buff->resizeBuffer(face->getGeomCount(), face->getIndicesCount());
+		if (!buff->resizeBuffer(face->getGeomCount(), face->getIndicesCount()))
+		{
+			LL_WARNS() << "Failed to resize Vertex Buffer" << LL_ENDL;
+		}
 	}
 		
 	index_offset = face->getGeometry(verticesp,normalsp,texCoordsp, indicesp);
@@ -298,15 +296,15 @@ U32 LLVOVoidWater::getPartitionType() const
 	return LLViewerRegion::PARTITION_VOIDWATER;
 }
 
-LLWaterPartition::LLWaterPartition()
-: LLSpatialPartition(0, FALSE, GL_DYNAMIC_DRAW_ARB)
+LLWaterPartition::LLWaterPartition(LLViewerRegion* regionp)
+: LLSpatialPartition(0, FALSE, GL_DYNAMIC_DRAW_ARB, regionp)
 {
 	mInfiniteFarClip = TRUE;
 	mDrawableType = LLPipeline::RENDER_TYPE_WATER;
 	mPartitionType = LLViewerRegion::PARTITION_WATER;
 }
 
-LLVoidWaterPartition::LLVoidWaterPartition()
+LLVoidWaterPartition::LLVoidWaterPartition(LLViewerRegion* regionp) : LLWaterPartition(regionp)
 {
 	mOcclusionEnabled = FALSE;
 	mDrawableType = LLPipeline::RENDER_TYPE_VOIDWATER;

@@ -30,8 +30,7 @@
 #include <map>
 
 #include "llassetstorage.h"
-#include "lldarrayptr.h"
-#include "llhudicon.h"
+//#include "llhudicon.h"
 #include "llinventory.h"
 #include "llrefcount.h"
 #include "llprimitive.h"
@@ -43,33 +42,30 @@
 #include "v3math.h"
 #include "llvertexbuffer.h"
 #include "llbbox.h"
-#include "llbbox.h"
 
 class LLAgent;			// TODO: Get rid of this.
 class LLAudioSource;
 class LLAudioSourceVO;
-class LLDataPacker;
 class LLColor4;
-class LLFrameTimer;
+class LLDataPacker;
+class LLDataPackerBinaryBuffer;
 class LLDrawable;
-class LLHost;
 class LLHUDText;
-class LLWorld;
-class LLNameValue;
-class LLNetMap;
+class LLHost;
 class LLMessageSystem;
+class LLNameValue;
 class LLPartSysData;
-class LLPrimitive;
 class LLPipeline;
 class LLTextureEntry;
-class LLViewerTexture;
+class LLVOAvatar;
+class LLVOInventoryListener;
 class LLViewerInventoryItem;
 class LLViewerObject;
+class LLViewerObjectMedia;
 class LLViewerPartSourceScript;
 class LLViewerRegion;
-class LLViewerObjectMedia;
-class LLVOInventoryListener;
-class LLVOAvatar;
+class LLViewerTexture;
+class LLWorld;
 
 typedef enum e_object_update_type
 {
@@ -107,7 +103,11 @@ struct PotentialReturnableObject
 
 //============================================================================
 
-class LLViewerObject : public LLPrimitive, public LLRefCount, public LLGLUpdate
+class LLViewerObject 
+:	public LLPrimitive, 
+	public LLRefCount, 
+	public LLGLUpdate,
+	public LLTrace::MemTrackable<LLViewerObject>
 {
 protected:
 	~LLViewerObject(); // use unref()
@@ -135,6 +135,8 @@ public:
 
 	virtual LLVOAvatar* asAvatar();
 
+	LLVOAvatar* getAvatarAncestor();
+
 	static void initVOClasses();
 	static void cleanupVOClasses();
 
@@ -143,7 +145,7 @@ public:
 	LLNameValue*	getNVPair(const std::string& name) const;			// null if no name value pair by that name
 
 	// Object create and update functions
-	virtual void	idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time);
+	virtual void	idleUpdate(LLAgent &agent, const F64 &time);
 
 	// Types of media we can associate
 	enum { MEDIA_NONE = 0, MEDIA_SET = 1 };
@@ -157,6 +159,7 @@ public:
         INVALID_UPDATE = 0x80000000
     };
 
+	static  U32     extractSpatialExtents(LLDataPackerBinaryBuffer *dp, LLVector3& pos, LLVector3& scale, LLQuaternion& rot);
 	virtual U32		processUpdateMessage(LLMessageSystem *mesgsys,
 										void **user_data,
 										U32 block_num,
@@ -169,9 +172,13 @@ public:
 	void			setOnActiveList(BOOL on_active)		{ mOnActiveList = on_active; }
 
 	virtual BOOL	isAttachment() const { return FALSE; }
+	const std::string& getAttachmentItemName() const;
+
 	virtual LLVOAvatar* getAvatar() const;  //get the avatar this object is attached to, or NULL if object is not an attachment
 	virtual BOOL	isHUDAttachment() const { return FALSE; }
 	virtual BOOL	isTempAttachment() const;
+
+	virtual BOOL isHiglightedOrBeacon() const;
 
 	virtual void 	updateRadius() {};
 	virtual F32 	getVObjRadius() const; // default implemenation is mDrawable->getRadius()
@@ -263,6 +270,7 @@ public:
 	virtual BOOL lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end,
 									  S32 face = -1,                          // which face to check, -1 = ALL_SIDES
 									  BOOL pick_transparent = FALSE,
+									  BOOL pick_rigged = FALSE,
 									  S32* face_hit = NULL,                   // which face was hit
 									  LLVector4a* intersection = NULL,         // return the intersection point
 									  LLVector2* tex_coord = NULL,            // return the texture coordinates of the intersection point
@@ -305,7 +313,7 @@ public:
 	/*virtual*/ S32		setTETexture(const U8 te, const LLUUID &uuid);
 	/*virtual*/ S32		setTENormalMap(const U8 te, const LLUUID &uuid);
 	/*virtual*/ S32		setTESpecularMap(const U8 te, const LLUUID &uuid);
-	S32 setTETextureCore(const U8 te, LLViewerTexture *image);
+	S32 				setTETextureCore(const U8 te, LLViewerTexture *image);
 	S32 setTENormalMapCore(const U8 te, LLViewerTexture *image);
 	S32 setTESpecularMapCore(const U8 te, LLViewerTexture *image);
 	/*virtual*/ S32		setTEColor(const U8 te, const LLColor3 &color);
@@ -382,7 +390,7 @@ public:
 
 	 // Create if necessary
 	LLAudioSource *getAudioSource(const LLUUID& owner_id);
-	bool isAudioSource() {return mAudioSourcep != NULL;}
+	BOOL isAudioSource() const {return mAudioSourcep != NULL;}
 
 	U8 getMediaType() const;
 	void setMediaType(U8 media_type);
@@ -398,6 +406,8 @@ public:
 	void setCanSelect(BOOL canSelect);
 
 	void setDebugText(const std::string &utf8text);
+	void initHudText();
+	void restoreHudText();
 	void setIcon(LLViewerTexture* icon_image);
 	void clearIcon();
 
@@ -412,8 +422,11 @@ public:
 	void updateText(); // update text label position
 	virtual void updateDrawable(BOOL force_damped); // force updates on static objects
 
+	bool isOwnerInMuteList(LLUUID item_id = LLUUID());
+
 	void setDrawableState(U32 state, BOOL recursive = TRUE);
 	void clearDrawableState(U32 state, BOOL recursive = TRUE);
+	BOOL isDrawableState(U32 state, BOOL recursive = TRUE) const;
 
 	// Called when the drawable shifts
 	virtual void onShift(const LLVector4a &shift_vector)	{ }
@@ -428,10 +441,10 @@ public:
 	// viewer object has the inventory stored locally.
 	void registerInventoryListener(LLVOInventoryListener* listener, void* user_data);
 	void removeInventoryListener(LLVOInventoryListener* listener);
-	BOOL isInventoryPending() { return mInventoryPending; }
+	BOOL isInventoryPending();
 	void clearInventoryListeners();
+	bool hasInventoryListeners();
 	void requestInventory();
-	void fetchInventoryFromServer();
 	static void processTaskInv(LLMessageSystem* msg, void** user_data);
 	void removeInventory(const LLUUID& item_id);
 
@@ -525,6 +538,7 @@ public:
 	virtual void	updateRegion(LLViewerRegion *regionp);
 
 	void updateFlags(BOOL physics_changed = FALSE);
+	void loadFlags(U32 flags); //load flags from cache or from message
 	BOOL setFlags(U32 flag, BOOL state);
 	BOOL setFlagsWithoutUpdate(U32 flag, BOOL state);
 	void setPhysicsShapeType(U8 type);
@@ -555,8 +569,15 @@ public:
 	friend class LLViewerMediaList;
 
 public:
+	static void unpackVector3(LLDataPackerBinaryBuffer* dp, LLVector3& value, std::string name);
+	static void unpackUUID(LLDataPackerBinaryBuffer* dp, LLUUID& value, std::string name);
+	static void unpackU32(LLDataPackerBinaryBuffer* dp, U32& value, std::string name);
+	static void unpackU8(LLDataPackerBinaryBuffer* dp, U8& value, std::string name);
+	static U32 unpackParentID(LLDataPackerBinaryBuffer* dp, U32& parent_id);
+
+public:
 	//counter-translation
-	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE) ;
+	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE,  BOOL skip_avatar_child = FALSE) ;
 	//counter-rotation
 	void resetChildrenRotationAndPosition(const std::vector<LLQuaternion>& rotations, 
 											const std::vector<LLVector3>& positions) ;
@@ -575,7 +596,12 @@ private:
     U32 checkMediaURL(const std::string &media_url);
 	
 	// Motion prediction between updates
-	void interpolateLinearMotion(const F64 & time, const F32 & dt);
+	void interpolateLinearMotion(const F64SecondsImplicit & time, const F32SecondsImplicit & dt);
+
+	static void initObjectDataMap();
+
+	// forms task inventory request if none are pending
+	void fetchInventoryFromServer();
 
 public:
 	//
@@ -628,6 +654,7 @@ private:
 	// Grabbed from UPDATE_FLAGS
 	U32				mFlags;
 
+	static std::map<std::string, U32> sObjectDataMap;
 public:
 	// Sent to sim in UPDATE_FLAGS, received in ObjectPhysicsProperties
 	U8              mPhysicsShapeType;
@@ -651,7 +678,10 @@ public:
 
 	// TODO: Make all this stuff private.  JC
 	LLPointer<LLHUDText> mText;
-	LLPointer<LLHUDIcon> mIcon;
+	LLPointer<class LLHUDIcon> mIcon;
+
+	std::string mHudText;
+	LLColor4 mHudTextColor;
 
 	static			BOOL		sUseSharedDrawables;
 
@@ -689,20 +719,19 @@ protected:
 	void deleteParticleSource();
 	void setParticleSource(const LLPartSysData& particle_parameters, const LLUUID& owner_id);
 	
-public:
-		
 private:
 	void setNameValueList(const std::string& list);		// clears nv pairs and then individually adds \n separated NV pairs from \0 terminated string
 	void deleteTEImages(); // correctly deletes list of images
 	
 protected:
+
 	typedef std::map<char *, LLNameValue *> name_value_map_t;
 	name_value_map_t mNameValuePairs;	// Any name-value pairs stored by script
 
 	child_list_t	mChildList;
 	
-	F64				mLastInterpUpdateSecs;			// Last update for purposes of interpolation
-	F64				mLastMessageUpdateSecs;			// Last update from a message from the simulator
+	F64Seconds		mLastInterpUpdateSecs;			// Last update for purposes of interpolation
+	F64Seconds		mLastMessageUpdateSecs;			// Last update from a message from the simulator
 	TPACKETID		mLatestRecvPacketID;			// Latest time stamp on message from simulator
 
 	// extra data sent from the sim...currently only used for tree species info
@@ -732,9 +761,17 @@ protected:
 	callback_list_t mInventoryCallbacks;
 	S16 mInventorySerialNum;
 
+	enum EInventoryRequestState
+	{
+		INVENTORY_REQUEST_STOPPED,
+		INVENTORY_REQUEST_PENDING,
+		INVENTORY_XFER
+	};
+	EInventoryRequestState	mInvRequestState;
+	U64						mInvRequestXFerId;
+	BOOL					mInventoryDirty;
+
 	LLViewerRegion	*mRegionp;					// Region that this object belongs to.
-	BOOL			mInventoryPending;
-	BOOL			mInventoryDirty;
 	BOOL			mDead;
 	BOOL			mOrphaned;					// This is an orphaned child
 	BOOL			mUserSelected;				// Cached user select information
@@ -743,7 +780,6 @@ protected:
 	BOOL			mStatic;					// Object doesn't move.
 	S32				mNumFaces;
 
-	F32				mTimeDilation;				// Time dilation sent with the object.
 	F32				mRotTime;					// Amount (in seconds) that object has rotated according to angular velocity (llSetTargetOmega)
 	LLQuaternion	mAngularVelocityRot;		// accumulated rotation from the angular velocity computations
 	LLQuaternion	mPreviousRotation;
@@ -769,12 +805,13 @@ protected:
 
 	static			S32			sAxisArrowLength;
 
+
 	// These two caches are only correct for non-parented objects right now!
 	mutable LLVector3		mPositionRegion;
 	mutable LLVector3		mPositionAgent;
 
-	static void setPhaseOutUpdateInterpolationTime(F32 value)	{ sPhaseOutUpdateInterpolationTime = (F64) value;	}
-	static void setMaxUpdateInterpolationTime(F32 value)		{ sMaxUpdateInterpolationTime = (F64) value;	}
+	static void setPhaseOutUpdateInterpolationTime(F32 value)	{ sPhaseOutUpdateInterpolationTime = (F64Seconds) value;	}
+	static void setMaxUpdateInterpolationTime(F32 value)		{ sMaxUpdateInterpolationTime = (F64Seconds) value;	}
 
 	static void	setVelocityInterpolate(BOOL value)		{ sVelocityInterpolate = value;	}
 	static void	setPingInterpolate(BOOL value)			{ sPingInterpolate = value;	}
@@ -782,11 +819,14 @@ protected:
 private:	
 	static S32 sNumObjects;
 
-	static F64 sPhaseOutUpdateInterpolationTime;	// For motion interpolation
-	static F64 sMaxUpdateInterpolationTime;			// For motion interpolation
+	static F64Seconds sPhaseOutUpdateInterpolationTime;	// For motion interpolation
+	static F64Seconds sMaxUpdateInterpolationTime;			// For motion interpolation
 
 	static BOOL sVelocityInterpolate;
 	static BOOL sPingInterpolate;
+
+	bool mCachedOwnerInMuteList;
+	F64 mCachedMuteListUpdateTime;
 
 	//--------------------------------------------------------------------
 	// For objects that are attachments

@@ -29,6 +29,11 @@
 
 #include "llsingleton.h"
 #include "lluuid.h"
+#include "httpcommon.h"
+#include "httprequest.h"
+#include "httpoptions.h"
+#include "httpheaders.h"
+#include "httphandler.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLInventoryModelBackgroundFetch
@@ -38,11 +43,9 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class LLInventoryModelBackgroundFetch : public LLSingleton<LLInventoryModelBackgroundFetch>
 {
-	friend class LLInventoryModelFetchDescendentsResponder;
-
-public:
-	LLInventoryModelBackgroundFetch();
+	LLSINGLETON(LLInventoryModelBackgroundFetch);
 	~LLInventoryModelBackgroundFetch();
+public:
 
 	// Start and stop background breadth-first fetching of inventory contents.
 	// This gets triggered when performing a filter-search.
@@ -60,16 +63,22 @@ public:
 	bool inventoryFetchInProgress() const;
 
     void findLostItems();	
-	void incrFetchCount(S16 fetching);
-protected:
+	void incrFetchCount(S32 fetching);
+
 	bool isBulkFetchProcessingComplete() const;
+	void setAllFoldersFetched();
+
+	void addRequestAtFront(const LLUUID & id, BOOL recursive, bool is_category);
+	void addRequestAtBack(const LLUUID & id, BOOL recursive, bool is_category);
+
+protected:
 	void bulkFetch();
 
 	void backgroundFetch();
 	static void backgroundFetchCB(void*); // background fetch idle function
 
-	void setAllFoldersFetched();
 	bool fetchQueueContainsNoDescendentsOf(const LLUUID& cat_id) const;
+
 private:
  	BOOL mRecursiveInventoryFetchStarted;
 	BOOL mRecursiveLibraryFetchStarted;
@@ -77,19 +86,19 @@ private:
 
 	BOOL mBackgroundFetchActive;
 	bool mFolderFetchActive;
-	S16 mFetchCount;
-	BOOL mTimelyFetchPending;
-	S32 mNumFetchRetries;
+	S32 mFetchCount;
 
 	LLFrameTimer mFetchTimer;
 	F32 mMinTimeBetweenFetches;
-	F32 mMaxTimeBetweenFetches;
 
 	struct FetchQueueInfo
 	{
-		FetchQueueInfo(const LLUUID& id, BOOL recursive, bool is_category = true) :
-			mUUID(id), mRecursive(recursive), mIsCategory(is_category)
+		FetchQueueInfo(const LLUUID& id, BOOL recursive, bool is_category = true)
+			: mUUID(id),
+			  mIsCategory(is_category),
+			  mRecursive(recursive)
 		{}
+		
 		LLUUID mUUID;
 		bool mIsCategory;
 		BOOL mRecursive;

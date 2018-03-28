@@ -178,6 +178,12 @@ void LLFloaterBvhPreview::setAnimCallbacks()
 	getChild<LLUICtrl>("ease_out_time")->setValidateBeforeCommit( boost::bind(&LLFloaterBvhPreview::validateEaseOut, this, _1));
 }
 
+std::map <std::string, std::string> LLFloaterBvhPreview::getJointAliases()
+{
+    LLPointer<LLVOAvatar> av = (LLVOAvatar*)mAnimPreview->getDummyAvatar();
+    return av->getJointAliases();
+}
+
 //-----------------------------------------------------------------------------
 // postBuild()
 //-----------------------------------------------------------------------------
@@ -215,6 +221,8 @@ BOOL LLFloaterBvhPreview::postBuild()
 
 	getChildView("bad_animation_text")->setVisible(FALSE);
 
+    mAnimPreview = new LLPreviewAnimation(256, 256);
+    
 	std::string exten = gDirUtilp->getExtension(mFilename);
 	if (exten == "bvh")
 	{
@@ -228,7 +236,7 @@ BOOL LLFloaterBvhPreview::postBuild()
 		
 		if (!infile.getFileHandle())
 		{
-			llwarns << "Can't open BVH file:" << mFilename << llendl;	
+			LL_WARNS() << "Can't open BVH file:" << mFilename << LL_ENDL;	
 		}
 		else
 		{
@@ -239,19 +247,22 @@ BOOL LLFloaterBvhPreview::postBuild()
 			if (file_size == infile.read(file_buffer, file_size))
 			{
 				file_buffer[file_size] = '\0';
-				llinfos << "Loading BVH file " << mFilename << llendl;
+				LL_INFOS() << "Loading BVH file " << mFilename << LL_ENDL;
 				ELoadStatus load_status = E_ST_OK;
-				S32 line_number = 0; 
-				loaderp = new LLBVHLoader(file_buffer, load_status, line_number);
+				S32 line_number = 0;
+
+                std::map<std::string, std::string> joint_alias_map = getJointAliases();
+    
+				loaderp = new LLBVHLoader(file_buffer, load_status, line_number, joint_alias_map);
 				std::string status = getString(STATUS[load_status]);
 				
 				if(load_status == E_ST_NO_XLT_FILE)
 				{
-					llwarns << "NOTE: No translation table found." << llendl;
+					LL_WARNS() << "NOTE: No translation table found." << LL_ENDL;
 				}
 				else
 				{
-					llwarns << "ERROR: [line: " << line_number << "] " << status << llendl;
+					LL_WARNS() << "ERROR: [line: " << line_number << "] " << status << LL_ENDL;
 				}
 			}
 
@@ -266,8 +277,6 @@ BOOL LLFloaterBvhPreview::postBuild()
 		mTransactionID.generate();
 		mMotionID = mTransactionID.makeAssetID(gAgent.getSecureSessionID());
 
-		mAnimPreview = new LLPreviewAnimation(256, 256);
-
 		// motion will be returned, but it will be in a load-pending state, as this is a new motion
 		// this motion will not request an asset transfer until next update, so we have a chance to 
 		// load the keyframe data locally
@@ -280,9 +289,12 @@ BOOL LLFloaterBvhPreview::postBuild()
 		LLDataPackerBinaryBuffer dp(buffer, buffer_size);
 
 		// pass animation data through memory buffer
+		LL_INFOS("BVH") << "Serializing loaderp" << LL_ENDL;
 		loaderp->serialize(dp);
 		dp.reset();
-		BOOL success = motionp && motionp->deserialize(dp);
+		LL_INFOS("BVH") << "Deserializing motionp" << LL_ENDL;
+		BOOL success = motionp && motionp->deserialize(dp, mMotionID);
+		LL_INFOS("BVH") << "Done" << LL_ENDL;
 
 		delete []buffer;
 
@@ -992,24 +1004,20 @@ void LLFloaterBvhPreview::onBtnOK(void* userdata)
 			{
 				std::string name = floaterp->getChild<LLUICtrl>("name_form")->getValue().asString();
 				std::string desc = floaterp->getChild<LLUICtrl>("description_form")->getValue().asString();
-				LLAssetStorage::LLStoreAssetCallback callback = NULL;
-				S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-				void *userdata = NULL;
-				upload_new_resource(floaterp->mTransactionID, // tid
-						    LLAssetType::AT_ANIMATION,
-						    name,
-						    desc,
-						    0,
-						    LLFolderType::FT_NONE,
-						    LLInventoryType::IT_ANIMATION,
-						    LLFloaterPerms::getNextOwnerPerms(), LLFloaterPerms::getGroupPerms(), LLFloaterPerms::getEveryonePerms(),
-						    name,
-						    callback, expected_upload_cost, userdata);
+				S32 expected_upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
 
+                LLResourceUploadInfo::ptr_t assetUpdloadInfo(new LLResourceUploadInfo(
+                    floaterp->mTransactionID, LLAssetType::AT_ANIMATION,
+                    name, desc, 0,
+                    LLFolderType::FT_NONE, LLInventoryType::IT_ANIMATION,
+                    LLFloaterPerms::getNextOwnerPerms("Uploads"), LLFloaterPerms::getGroupPerms("Uploads"), LLFloaterPerms::getEveryonePerms("Uploads"),
+                    expected_upload_cost));
+
+                upload_new_resource(assetUpdloadInfo);
 			}
 			else
 			{
-				llwarns << "Failure writing animation data." << llendl;
+				LL_WARNS() << "Failure writing animation data." << LL_ENDL;
 				LLNotificationsUtil::add("WriteAnimationFail");
 			}
 		}

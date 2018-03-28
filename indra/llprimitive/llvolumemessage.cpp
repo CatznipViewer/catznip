@@ -52,13 +52,13 @@ bool LLVolumeMessage::packProfileParams(
 	tempU8 = params->getCurveType();
 	mesgsys->addU8Fast(_PREHASH_ProfileCurve, tempU8);
 
-	tempU16 = (U16) llround( params->getBegin() / CUT_QUANTA);
+	tempU16 = (U16) ll_round( params->getBegin() / CUT_QUANTA);
 	mesgsys->addU16Fast(_PREHASH_ProfileBegin, tempU16);
 
-	tempU16 = 50000 - (U16) llround(params->getEnd() / CUT_QUANTA);
+	tempU16 = 50000 - (U16) ll_round(params->getEnd() / CUT_QUANTA);
 	mesgsys->addU16Fast(_PREHASH_ProfileEnd, tempU16);
 
-	tempU16 = (U16) llround(params->getHollow() / HOLLOW_QUANTA);
+	tempU16 = (U16) ll_round(params->getHollow() / HOLLOW_QUANTA);
 	mesgsys->addU16Fast(_PREHASH_ProfileHollow, tempU16);
 
 	return true;
@@ -80,13 +80,13 @@ bool LLVolumeMessage::packProfileParams(
 	tempU8 = params->getCurveType();
 	dp.packU8(tempU8, "Curve");
 
-	tempU16 = (U16) llround( params->getBegin() / CUT_QUANTA);
+	tempU16 = (U16) ll_round( params->getBegin() / CUT_QUANTA);
 	dp.packU16(tempU16, "Begin");
 
-	tempU16 = 50000 - (U16) llround(params->getEnd() / CUT_QUANTA);
+	tempU16 = 50000 - (U16) ll_round(params->getEnd() / CUT_QUANTA);
 	dp.packU16(tempU16, "End");
 
-	tempU16 = (U16) llround(params->getHollow() / HOLLOW_QUANTA);
+	tempU16 = (U16) ll_round(params->getHollow() / HOLLOW_QUANTA);
 	dp.packU16(tempU16, "Hollow");
 	return true;
 }
@@ -109,8 +109,8 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * CUT_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile begin out of range: " << temp_f32
-			<< ". Clamping to 0.0." << llendl;
+		LL_WARNS() << "Profile begin out of range: " << temp_f32
+			<< ". Clamping to 0.0." << LL_ENDL;
 		temp_f32 = 0.f;
 		ok = false;
 	}
@@ -120,8 +120,8 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * CUT_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile end out of range: " << 1.f - temp_f32
-			<< ". Clamping to 1.0." << llendl;
+		LL_WARNS() << "Profile end out of range: " << 1.f - temp_f32
+			<< ". Clamping to 1.0." << LL_ENDL;
 		temp_f32 = 1.f;
 		ok = false;
 	}
@@ -131,19 +131,19 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * HOLLOW_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile hollow out of range: " << temp_f32
-			<< ". Clamping to 0.0." << llendl;
+		LL_WARNS() << "Profile hollow out of range: " << temp_f32
+			<< ". Clamping to 0.0." << LL_ENDL;
 		temp_f32 = 0.f;
 		ok = false;
 	}
 	params->setHollow(temp_f32);
 
 	/*
-	llinfos << "Unpacking Profile Block " << block_num << llendl;
-	llinfos << "Curve:     " << (U32)getCurve() << llendl;
-	llinfos << "Begin:     " << getBegin() << llendl;
-	llinfos << "End:     " << getEnd() << llendl;
-	llinfos << "Hollow:     " << getHollow() << llendl;
+	LL_INFOS() << "Unpacking Profile Block " << block_num << LL_ENDL;
+	LL_INFOS() << "Curve:     " << (U32)getCurve() << LL_ENDL;
+	LL_INFOS() << "Begin:     " << getBegin() << LL_ENDL;
+	LL_INFOS() << "End:     " << getEnd() << LL_ENDL;
+	LL_INFOS() << "Hollow:     " << getHollow() << LL_ENDL;
 	*/
 	return ok;
 
@@ -165,8 +165,8 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * CUT_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile begin out of range: " << temp_f32 << llendl;
-		llwarns << "Clamping to 0.0" << llendl;
+		LL_WARNS() << "Profile begin out of range: " << temp_f32 << LL_ENDL;
+		LL_WARNS() << "Clamping to 0.0" << LL_ENDL;
 		temp_f32 = 0.f;
 		ok = false;
 	}
@@ -176,8 +176,8 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * CUT_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile end out of range: " << 1.f - temp_f32 << llendl;
-		llwarns << "Clamping to 1.0" << llendl;
+		LL_WARNS() << "Profile end out of range: " << 1.f - temp_f32 << LL_ENDL;
+		LL_WARNS() << "Clamping to 1.0" << LL_ENDL;
 		temp_f32 = 1.f;
 		ok = false;
 	}
@@ -187,8 +187,8 @@ bool LLVolumeMessage::unpackProfileParams(
 	temp_f32 = temp_u16 * HOLLOW_QUANTA;
 	if (temp_f32 > 1.f)
 	{
-		llwarns << "Profile hollow out of range: " << temp_f32 << llendl;
-		llwarns << "Clamping to 0.0" << llendl;
+		LL_WARNS() << "Profile hollow out of range: " << temp_f32 << LL_ENDL;
+		LL_WARNS() << "Clamping to 0.0" << LL_ENDL;
 		temp_f32 = 0.f;
 		ok = false;
 	}
@@ -217,46 +217,46 @@ bool LLVolumeMessage::packPathParams(
 	U8 curve = params->getCurveType();
 	mesgsys->addU8Fast(_PREHASH_PathCurve, curve);
 
-	U16 begin = (U16) llround(params->getBegin() / CUT_QUANTA);
+	U16 begin = (U16) ll_round(params->getBegin() / CUT_QUANTA);
 	mesgsys->addU16Fast(_PREHASH_PathBegin, begin);
 
-	U16 end = 50000 - (U16) llround(params->getEnd() / CUT_QUANTA);
+	U16 end = 50000 - (U16) ll_round(params->getEnd() / CUT_QUANTA);
 	mesgsys->addU16Fast(_PREHASH_PathEnd, end);
 
 	// Avoid truncation problem with direct F32->U8 cast.
 	// (e.g., (U8) (0.50 / 0.01) = (U8) 49.9999999 = 49 not 50.
 
-	U8 pack_scale_x = 200 - (U8) llround(params->getScaleX() / SCALE_QUANTA);
+	U8 pack_scale_x = 200 - (U8) ll_round(params->getScaleX() / SCALE_QUANTA);
 	mesgsys->addU8Fast(_PREHASH_PathScaleX, pack_scale_x );
 
-	U8 pack_scale_y = 200 - (U8) llround(params->getScaleY() / SCALE_QUANTA);
+	U8 pack_scale_y = 200 - (U8) ll_round(params->getScaleY() / SCALE_QUANTA);
 	mesgsys->addU8Fast(_PREHASH_PathScaleY, pack_scale_y );
 
-	U8 pack_shear_x = (U8) llround(params->getShearX() / SHEAR_QUANTA);
+	U8 pack_shear_x = (U8) ll_round(params->getShearX() / SHEAR_QUANTA);
 	mesgsys->addU8Fast(_PREHASH_PathShearX, pack_shear_x );
 
-	U8 pack_shear_y = (U8) llround(params->getShearY() / SHEAR_QUANTA);
+	U8 pack_shear_y = (U8) ll_round(params->getShearY() / SHEAR_QUANTA);
 	mesgsys->addU8Fast(_PREHASH_PathShearY, pack_shear_y );
 
-	S8 twist = (S8) llround(params->getTwist() / SCALE_QUANTA);
+	S8 twist = (S8) ll_round(params->getTwist() / SCALE_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathTwist, twist);
 
-	S8 twist_begin = (S8) llround(params->getTwistBegin() / SCALE_QUANTA);
+	S8 twist_begin = (S8) ll_round(params->getTwistBegin() / SCALE_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathTwistBegin, twist_begin);
 
-	S8 radius_offset = (S8) llround(params->getRadiusOffset() / SCALE_QUANTA);
+	S8 radius_offset = (S8) ll_round(params->getRadiusOffset() / SCALE_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathRadiusOffset, radius_offset);
 
-	S8 taper_x = (S8) llround(params->getTaperX() / TAPER_QUANTA);
+	S8 taper_x = (S8) ll_round(params->getTaperX() / TAPER_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathTaperX, taper_x);
 
-	S8 taper_y = (S8) llround(params->getTaperY() / TAPER_QUANTA);
+	S8 taper_y = (S8) ll_round(params->getTaperY() / TAPER_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathTaperY, taper_y);
 
-	U8 revolutions = (U8) llround( (params->getRevolutions() - 1.0f) / REV_QUANTA);
+	U8 revolutions = (U8) ll_round( (params->getRevolutions() - 1.0f) / REV_QUANTA);
 	mesgsys->addU8Fast(_PREHASH_PathRevolutions, revolutions);
 
-	S8 skew = (S8) llround(params->getSkew() / SCALE_QUANTA);
+	S8 skew = (S8) ll_round(params->getSkew() / SCALE_QUANTA);
 	mesgsys->addS8Fast(_PREHASH_PathSkew, skew);
 
 	return true;
@@ -274,46 +274,46 @@ bool LLVolumeMessage::packPathParams(
 	U8 curve = params->getCurveType();
 	dp.packU8(curve, "Curve");
 
-	U16 begin = (U16) llround(params->getBegin() / CUT_QUANTA);
+	U16 begin = (U16) ll_round(params->getBegin() / CUT_QUANTA);
 	dp.packU16(begin, "Begin");
 
-	U16 end = 50000 - (U16) llround(params->getEnd() / CUT_QUANTA);
+	U16 end = 50000 - (U16) ll_round(params->getEnd() / CUT_QUANTA);
 	dp.packU16(end, "End");
 
 	// Avoid truncation problem with direct F32->U8 cast.
 	// (e.g., (U8) (0.50 / 0.01) = (U8) 49.9999999 = 49 not 50.
 
-	U8 pack_scale_x = 200 - (U8) llround(params->getScaleX() / SCALE_QUANTA);
+	U8 pack_scale_x = 200 - (U8) ll_round(params->getScaleX() / SCALE_QUANTA);
 	dp.packU8(pack_scale_x, "ScaleX");
 
-	U8 pack_scale_y = 200 - (U8) llround(params->getScaleY() / SCALE_QUANTA);
+	U8 pack_scale_y = 200 - (U8) ll_round(params->getScaleY() / SCALE_QUANTA);
 	dp.packU8(pack_scale_y, "ScaleY");
 
-	S8 pack_shear_x = (S8) llround(params->getShearX() / SHEAR_QUANTA);
+	S8 pack_shear_x = (S8) ll_round(params->getShearX() / SHEAR_QUANTA);
 	dp.packU8(*(U8 *)&pack_shear_x, "ShearX");
 
-	S8 pack_shear_y = (S8) llround(params->getShearY() / SHEAR_QUANTA);
+	S8 pack_shear_y = (S8) ll_round(params->getShearY() / SHEAR_QUANTA);
 	dp.packU8(*(U8 *)&pack_shear_y, "ShearY");
 
-	S8 twist = (S8) llround(params->getTwist() / SCALE_QUANTA);
+	S8 twist = (S8) ll_round(params->getTwist() / SCALE_QUANTA);
 	dp.packU8(*(U8 *)&twist, "Twist");
 	
-	S8 twist_begin = (S8) llround(params->getTwistBegin() / SCALE_QUANTA);
+	S8 twist_begin = (S8) ll_round(params->getTwistBegin() / SCALE_QUANTA);
 	dp.packU8(*(U8 *)&twist_begin, "TwistBegin");
 
-	S8 radius_offset = (S8) llround(params->getRadiusOffset() / SCALE_QUANTA);
+	S8 radius_offset = (S8) ll_round(params->getRadiusOffset() / SCALE_QUANTA);
 	dp.packU8(*(U8 *)&radius_offset, "RadiusOffset");
 
-	S8 taper_x = (S8) llround(params->getTaperX() / TAPER_QUANTA);
+	S8 taper_x = (S8) ll_round(params->getTaperX() / TAPER_QUANTA);
 	dp.packU8(*(U8 *)&taper_x, "TaperX");
 
-	S8 taper_y = (S8) llround(params->getTaperY() / TAPER_QUANTA);
+	S8 taper_y = (S8) ll_round(params->getTaperY() / TAPER_QUANTA);
 	dp.packU8(*(U8 *)&taper_y, "TaperY");
 
-	U8 revolutions = (U8) llround( (params->getRevolutions() - 1.0f) / REV_QUANTA);
+	U8 revolutions = (U8) ll_round( (params->getRevolutions() - 1.0f) / REV_QUANTA);
 	dp.packU8(*(U8 *)&revolutions, "Revolutions");
 
-	S8 skew = (S8) llround(params->getSkew() / SCALE_QUANTA);
+	S8 skew = (S8) ll_round(params->getSkew() / SCALE_QUANTA);
 	dp.packU8(*(U8 *)&skew, "Skew");
 
 	return true;
@@ -379,12 +379,12 @@ bool LLVolumeMessage::unpackPathParams(
 	params->setSkew((F32)(skew * SCALE_QUANTA));
 
 /*
-	llinfos << "Unpacking Path Block " << block_num << llendl;
-	llinfos << "Curve:     " << (U32)params->getCurve() << llendl;
-	llinfos << "Begin:     " << params->getBegin() << llendl;
-	llinfos << "End:     " << params->getEnd() << llendl;
-	llinfos << "Scale:     " << params->getScale() << llendl;
-	llinfos << "Twist:     " << params->getTwist() << llendl;
+	LL_INFOS() << "Unpacking Path Block " << block_num << LL_ENDL;
+	LL_INFOS() << "Curve:     " << (U32)params->getCurve() << LL_ENDL;
+	LL_INFOS() << "Begin:     " << params->getBegin() << LL_ENDL;
+	LL_INFOS() << "End:     " << params->getEnd() << LL_ENDL;
+	LL_INFOS() << "Scale:     " << params->getScale() << LL_ENDL;
+	LL_INFOS() << "Twist:     " << params->getTwist() << LL_ENDL;
 */
 
 	return true;
@@ -480,16 +480,16 @@ bool LLVolumeMessage::constrainVolumeParams(LLVolumeParams& params)
 	bad |= params.setSkew(params.getPathParams().getSkew()) ? 0 : 0x800;
 	if(bad)
 	{
-		llwarns << "LLVolumeMessage::constrainVolumeParams() - "
+		LL_WARNS() << "LLVolumeMessage::constrainVolumeParams() - "
 				<< "forced to constrain incoming volume params: "
-				<< llformat("0x%04x",bad) << llendl;
+				<< llformat("0x%04x",bad) << LL_ENDL;
 	}
 	return bad ? false : true;
 }
 
 bool LLVolumeMessage::packVolumeParams(const LLVolumeParams* params, LLMessageSystem *mesgsys)
 {
-	// llinfos << "pack volume" << llendl;
+	// LL_INFOS() << "pack volume" << LL_ENDL;
 	if (params)
 	{
 		packPathParams(&params->getPathParams(), mesgsys);
@@ -505,7 +505,7 @@ bool LLVolumeMessage::packVolumeParams(const LLVolumeParams* params, LLMessageSy
 
 bool LLVolumeMessage::packVolumeParams(const LLVolumeParams* params, LLDataPacker &dp)
 {
-	// llinfos << "pack volume" << llendl;
+	// LL_INFOS() << "pack volume" << LL_ENDL;
 	if (params)
 	{
 		packPathParams(&params->getPathParams(), dp);

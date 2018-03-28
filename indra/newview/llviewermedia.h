@@ -40,6 +40,9 @@
 #include "llnotificationptr.h"
 
 #include "llurl.h"
+#include "lleventcoro.h"
+#include "llcoros.h"
+#include "llcorehttputil.h"
 
 class LLViewerMediaImpl;
 class LLUUID;
@@ -102,9 +105,13 @@ public:
 	
 	// Is any media currently "showing"?  Includes Parcel Media.  Does not include media in the UI.
 	static bool isAnyMediaShowing();
+	// Shows if any media is playing, counts visible non time based media as playing. Does not include media in the UI.
+	static bool isAnyMediaPlaying();
 	// Set all media enabled or disabled, depending on val.   Does not include media in the UI.
 	static void setAllMediaEnabled(bool val);
-	
+	// Set all media paused(stopped for non time based) or playing, depending on val.   Does not include media in the UI.
+	static void setAllMediaPaused(bool val);
+
 	static void updateMedia(void* dummy_arg = NULL);
 	
 	static void initClass();
@@ -150,7 +157,7 @@ public:
 	static void removeCookie(const std::string &name, const std::string &domain, const std::string &path = std::string("/") );
 
 	static void openIDSetup(const std::string &openid_url, const std::string &openid_token);
-	static void openIDCookieResponse(const std::string &cookie);
+	static void openIDCookieResponse(const std::string& url, const std::string &cookie);
 	
 	static void proxyWindowOpened(const std::string &target, const std::string &uuid);
 	static void proxyWindowClosed(const std::string &uuid);
@@ -161,11 +168,16 @@ public:
 	static void setOnlyAudibleMediaTextureID(const LLUUID& texture_id);
 
 	static LLSD getHeaders();
+    static LLCore::HttpHeaders::ptr_t getHttpHeaders();
 	
 private:
-	static void setOpenIDCookie();
+	static bool parseRawCookie(const std::string raw_cookie, std::string& name, std::string& value, std::string& path, bool& httponly, bool& secure);
+	static void setOpenIDCookie(const std::string& url);
 	static void onTeleportFinished();
-	
+
+    static void openIDSetupCoro(std::string openidUrl, std::string openidToken);
+    static void getOpenIDCookieCoro(std::string url);
+
 	static LLPluginCookieStore *sCookieStore;
 	static LLURL sOpenIDURL;
 	static std::string sOpenIDCookie;
@@ -180,7 +192,6 @@ class LLViewerMediaImpl
 public:
 	
 	friend class LLViewerMedia;
-	friend class LLMimeDiscoveryResponder;
 	
 	LLViewerMediaImpl(
 		const LLUUID& texture_id,
@@ -225,7 +236,8 @@ public:
 	void mouseDown(const LLVector2& texture_coords, MASK mask, S32 button = 0);
 	void mouseUp(const LLVector2& texture_coords, MASK mask, S32 button = 0);
 	void mouseMove(const LLVector2& texture_coords, MASK mask);
-	void mouseDoubleClick(S32 x,S32 y, MASK mask, S32 button = 0);
+    void mouseDoubleClick(const LLVector2& texture_coords, MASK mask);
+    void mouseDoubleClick(S32 x, S32 y, MASK mask, S32 button = 0);
 	void scrollWheel(S32 x, S32 y, MASK mask);
 	void mouseCapture();
 	
@@ -234,10 +246,11 @@ public:
 	void navigateReload();
 	void navigateHome();
 	void unload();
-	void navigateTo(const std::string& url, const std::string& mime_type = "", bool rediscover_type = false, bool server_request = false);
+	void navigateTo(const std::string& url, const std::string& mime_type = "", bool rediscover_type = false, bool server_request = false, bool clean_browser = false);
 	void navigateInternal();
 	void navigateStop();
 	bool handleKeyHere(KEY key, MASK mask);
+	bool handleKeyUpHere(KEY key, MASK mask);
 	bool handleUnicodeCharHere(llwchar uni_char);
 	bool canNavigateForward();
 	bool canNavigateBack();
@@ -248,6 +261,7 @@ public:
 	void setHomeURL(const std::string& home_url, const std::string& mime_type = LLStringUtil::null) { mHomeURL = home_url; mHomeMimeType = mime_type;};
 	void clearCache();
 	void setPageZoomFactor( double factor );
+	double getPageZoomFactor() {return mZoomFactor;}
 	std::string getMimeType() { return mMimeType; }
 	void scaleMouse(S32 *mouse_x, S32 *mouse_y);
 	void scaleTextureCoords(const LLVector2& texture_coords, S32 *x, S32 *y);
@@ -289,7 +303,7 @@ public:
 	void setTarget(const std::string& target) { mTarget = target; }
 	
 	// utility function to create a ready-to-use media instance from a desired media type.
-	static LLPluginClassMedia* newSourceFromMediaType(std::string media_type, LLPluginClassMediaOwner *owner /* may be NULL */, S32 default_width, S32 default_height, const std::string target = LLStringUtil::null);
+	static LLPluginClassMedia* newSourceFromMediaType(std::string media_type, LLPluginClassMediaOwner *owner /* may be NULL */, S32 default_width, S32 default_height, F64 zoom_factor, const std::string target = LLStringUtil::null, bool clean_browser = false);
 
 	// Internally set our desired browser user agent string, including
 	// the Second Life version and skin name.  Used because we can
@@ -453,7 +467,6 @@ private:
 	S32 mProximity;
 	F64 mProximityDistance;
 	F64 mProximityCamera;
-	LLMimeDiscoveryResponder *mMimeTypeProbe;
 	bool mMediaAutoPlay;
 	std::string mMediaEntryURL;
 	bool mInNearbyMediaList;	// used by LLPanelNearbyMedia::refreshList() for performance reasons
@@ -464,10 +477,16 @@ private:
 	bool mTrustedBrowser;
 	std::string mTarget;
 	LLNotificationPtr mNotification;
+    bool mCleanBrowser;     // force the creation of a clean browsing target with full options enabled
+    static std::vector<std::string> sMimeTypesFailed;
 
 private:
 	BOOL mIsUpdated ;
 	std::list< LLVOVolume* > mObjectList ;
+
+    void mimeDiscoveryCoro(std::string url);
+    LLCoreHttpUtil::HttpCoroutineAdapter::wptr_t mMimeProbe;
+    bool mCanceling;
 
 private:
 	LLViewerMediaTexture *updatePlaceholderImage();

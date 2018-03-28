@@ -41,7 +41,6 @@ class LLVolumeFace;
 class LLVolume;
 class LLVolumeTriangle;
 
-#include "lldarray.h"
 #include "lluuid.h"
 #include "v4color.h"
 //#include "vmath.h"
@@ -191,10 +190,16 @@ const U8 LL_SCULPT_TYPE_MESH      = 5;
 const U8 LL_SCULPT_TYPE_MASK      = LL_SCULPT_TYPE_SPHERE | LL_SCULPT_TYPE_TORUS | LL_SCULPT_TYPE_PLANE |
 	LL_SCULPT_TYPE_CYLINDER | LL_SCULPT_TYPE_MESH;
 
+// for value checks, assign new value after adding new types
+const U8 LL_SCULPT_TYPE_MAX = LL_SCULPT_TYPE_MESH;
+
 const U8 LL_SCULPT_FLAG_INVERT    = 64;
 const U8 LL_SCULPT_FLAG_MIRROR    = 128;
+const U8 LL_SCULPT_FLAG_MASK = LL_SCULPT_FLAG_INVERT | LL_SCULPT_FLAG_MIRROR;
 
 const S32 LL_SCULPT_MESH_MAX_FACES = 8;
+
+extern BOOL gDebugGL;
 
 class LLProfileParams
 {
@@ -676,6 +681,8 @@ protected:
 
 class LLProfile
 {
+	friend class LLVolume;
+
 public:
 	LLProfile()
 		: mOpen(FALSE),
@@ -685,8 +692,6 @@ public:
 		  mTotal(2)
 	{
 	}
-
-	~LLProfile();
 
 	S32	 getTotal() const								{ return mTotal; }
 	S32	 getTotalOut() const							{ return mTotalOut; }	// Total number of outside points
@@ -720,6 +725,8 @@ public:
 	friend std::ostream& operator<<(std::ostream &s, const LLProfile &profile);
 
 protected:
+	~LLProfile();
+
 	static S32 getNumNGonPoints(const LLProfileParams& params, S32 sides, F32 offset=0.0f, F32 bevel = 0.0f, F32 ang_scale = 1.f, S32 split = 0);
 	void genNGon(const LLProfileParams& params, S32 sides, F32 offset=0.0f, F32 bevel = 0.0f, F32 ang_scale = 1.f, S32 split = 0);
 
@@ -896,7 +903,7 @@ public:
 	};
 
 	void optimize(F32 angle_cutoff = 2.f);
-	void cacheOptimize();
+	bool cacheOptimize();
 
 	void createOctree(F32 scaler = 0.25f, const LLVector4a& center = LLVector4a(0,0,0), const LLVector4a& size = LLVector4a(0.5f,0.5f,0.5f));
 
@@ -950,6 +957,8 @@ public:
 	// mWeights.size() should be empty or match mVertices.size()  
 	LLVector4a* mWeights;
 
+    mutable BOOL mWeightsScrubbed;
+    
 	LLOctreeNode<LLVolumeTriangle>* mOctree;
 
 	//whether or not face has been cache optimized
@@ -969,6 +978,7 @@ protected:
 	~LLVolume(); // use unref
 
 public:
+	typedef std::vector<LLVolumeFace> face_list_t;
 		
 	struct FaceParams
 	{
@@ -994,6 +1004,7 @@ public:
 	void resizePath(S32 length);
 	const LLAlignedArray<LLVector4a,64>&	getMesh() const				{ return mMesh; }
 	const LLVector4a& getMeshPt(const U32 i) const			{ return mMesh[i]; }
+	
 
 	void setDirty() { mPathp->setDirty(); mProfilep->setDirty(); }
 
@@ -1041,12 +1052,18 @@ public:
 																				// conversion if *(LLVolume*) to LLVolume&
 	const LLVolumeFace &getVolumeFace(const S32 f) const {return mVolumeFaces[f];} // DO NOT DELETE VOLUME WHILE USING THIS REFERENCE, OR HOLD A POINTER TO THIS VOLUMEFACE
 	
+	LLVolumeFace &getVolumeFace(const S32 f) {return mVolumeFaces[f];} // DO NOT DELETE VOLUME WHILE USING THIS REFERENCE, OR HOLD A POINTER TO THIS VOLUMEFACE
+
+	face_list_t& getVolumeFaces() { return mVolumeFaces; }
+
 	U32					mFaceMask;			// bit array of which faces exist in this volume
 	LLVector3			mLODScaleBias;		// vector for biasing LOD based on scale
 	
 	void sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level);
 	void copyVolumeFaces(const LLVolume* volume);
-	void cacheOptimize();
+	void copyFacesTo(std::vector<LLVolumeFace> &faces) const;
+	void copyFacesFrom(const std::vector<LLVolumeFace> &faces);
+	bool cacheOptimize();
 
 private:
 	void sculptGenerateMapVertices(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, U8 sculpt_type);
@@ -1078,7 +1095,6 @@ public:
 	
 	
 	BOOL mGenerateSingleFace;
-	typedef std::vector<LLVolumeFace> face_list_t;
 	face_list_t mVolumeFaces;
 
 public:

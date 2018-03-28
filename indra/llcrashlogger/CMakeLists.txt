@@ -3,6 +3,7 @@
 project(llcrashlogger)
 
 include(00-Common)
+include(LLCoreHttp)
 include(LLCommon)
 include(LLMath)
 include(LLMessage)
@@ -10,6 +11,7 @@ include(LLVFS)
 include(LLXML)
 
 include_directories(
+    ${LLCOREHTTP_INCLUDE_DIRS}
     ${LLCOMMON_INCLUDE_DIRS}
     ${LLMATH_INCLUDE_DIRS}
     ${LLMESSAGE_INCLUDE_DIRS}
@@ -23,12 +25,14 @@ include_directories(SYSTEM
 
 set(llcrashlogger_SOURCE_FILES
     llcrashlogger.cpp
+    llcrashlock.cpp
     )
 
 set(llcrashlogger_HEADER_FILES
     CMakeLists.txt
 
     llcrashlogger.h
+    llcrashlock.h
     )
 
 set_source_files_properties(${llcrashlogger_HEADER_FILES}

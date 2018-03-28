@@ -28,16 +28,15 @@
 #define LL_LLWEARABLE_H
 
 #include "llavatarappearancedefines.h"
-#include "llextendedstatus.h"
 #include "llpermissions.h"
 #include "llsaleinfo.h"
 #include "llwearabletype.h"
-#include "lllocaltextureobject.h"
 
 class LLMD5;
 class LLVisualParam;
 class LLTexGlobalColorInfo;
 class LLTexGlobalColor;
+class LLLocalTextureObject;
 class LLAvatarAppearance;
 
 // Abstract class.
@@ -47,6 +46,7 @@ class LLWearable
 	// Constructors and destructors
 	//--------------------------------------------------------------------
 public:
+	LLWearable();
 	virtual ~LLWearable();
 
 	//--------------------------------------------------------------------
@@ -81,8 +81,8 @@ public:
 		SUCCESS,
 		BAD_HEADER
 	};
-	BOOL				exportFile(LLFILE* file) const;
-	EImportResult		importFile(LLFILE* file, LLAvatarAppearance* avatarp );
+	BOOL				exportFile(const std::string& filename) const;
+	EImportResult		importFile(const std::string& filename, LLAvatarAppearance* avatarp );
 	virtual BOOL				exportStream( std::ostream& output_stream ) const;
 	virtual EImportResult		importStream( std::istream& input_stream, LLAvatarAppearance* avatarp );
 
@@ -95,14 +95,14 @@ public:
 
 	void				setLocalTextureObject(S32 index, LLLocalTextureObject &lto);
 	void				addVisualParam(LLVisualParam *param);
-	void 				setVisualParamWeight(S32 index, F32 value, BOOL upload_bake);
+	void 				setVisualParamWeight(S32 index, F32 value);
 	F32					getVisualParamWeight(S32 index) const;
 	LLVisualParam*		getVisualParam(S32 index) const;
 	void				getVisualParams(visual_param_vec_t &list);
-	void				animateParams(F32 delta, BOOL upload_bake);
+	void				animateParams(F32 delta);
 
 	LLColor4			getClothesColor(S32 te) const;
-	void 				setClothesColor( S32 te, const LLColor4& new_color, BOOL upload_bake );
+	void 				setClothesColor( S32 te, const LLColor4& new_color);
 
 	virtual void		revertValues();
 	virtual void		saveValues();
@@ -112,6 +112,9 @@ public:
 
 	// Update the baked texture hash.
 	virtual void		addToBakedTextureHash(LLMD5& hash) const = 0;
+
+	typedef std::map<S32, LLVisualParam *>    visual_param_index_map_t;
+	visual_param_index_map_t mVisualParamIndexMap;
 
 protected:
 	typedef std::map<S32, LLLocalTextureObject*> te_map_t;
@@ -131,9 +134,6 @@ protected:
 
 	typedef std::map<S32, F32> param_map_t;
 	param_map_t mSavedVisualParamMap; // last saved version of visual params
-
-	typedef std::map<S32, LLVisualParam *>    visual_param_index_map_t;
-	visual_param_index_map_t mVisualParamIndexMap;
 
 	te_map_t mTEMap;				// maps TE to LocalTextureObject
 	te_map_t mSavedTEMap;			// last saved version of TEMap

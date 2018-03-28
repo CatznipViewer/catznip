@@ -69,7 +69,7 @@ public:
 	void changedGlobalPos(const LLVector3d &global_pos);
 
 	// Opens landmark info panel when agent creates or receives landmark.
-	void showAddedLandmarkInfo(const uuid_vec_t& items);
+	void showAddedLandmarkInfo(const uuid_set_t& items);
 
 	void setItem(LLInventoryItem* item);
 
@@ -102,7 +102,7 @@ private:
 	void togglePickPanel(BOOL visible);
 	void togglePlaceInfoPanel(BOOL visible);
 
-	/*virtual*/ void handleVisibilityChange(BOOL new_visibility);
+	/*virtual*/ void onVisibilityChange(BOOL new_visibility);
 
 	void updateVerbs();
 
@@ -145,6 +145,10 @@ private:
 
 	// Information type currently shown in Place Information panel
 	std::string					mPlaceInfoType;
+
+	// Region and parcel ids, to detect location changes in case of AGENT_INFO_TYPE
+	LLUUID						mRegionId;
+	S32							mParcelLocalId;
 
 	bool						isLandmarkEditModeOn;
 

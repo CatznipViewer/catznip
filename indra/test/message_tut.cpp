@@ -28,11 +28,10 @@
 #include <tut/tut.hpp>
 #include "linden_common.h"
 #include "lltut.h"
-
+#include "llhttpconstants.h"
 #include "llapr.h"
 #include "llmessageconfig.h"
 #include "llsdserialize.h"
-#include "llversionserver.h"
 #include "message.h"
 #include "message_prehash.h"
 
@@ -46,6 +45,7 @@ namespace
 			mStatus = code;
 		}
 		virtual void extendedResult(S32 code, const std::string& message, const LLSD& headers) { }
+		virtual void extendedResult(S32 code, const LLSD& result, const LLSD& headers) { }
 		S32 mStatus;
 	};
 }
@@ -72,9 +72,9 @@ namespace tut
 
 			// currently test disconnected message system
 			start_messaging_system("notafile", 13035,
-								   LL_VERSION_MAJOR,
-								   LL_VERSION_MINOR,        
-								   LL_VERSION_PATCH,        
+								   1,
+								   0,        
+								   0,        
 								   FALSE,        
 								   "notasharedsecret",
 								   NULL,
@@ -103,7 +103,7 @@ namespace tut
 		~LLMessageSystemTestData()
 		{
 			// not end_messaging_system()
-			delete gMessageSystem;
+			delete static_cast<LLMessageSystem*>(gMessageSystem);
 			gMessageSystem = NULL;
 
 			// rm contents of temp dir
@@ -119,9 +119,8 @@ namespace tut
 
 		void writeConfigFile(const LLSD& config)
 		{
-			std::ostringstream ostr;
-			ostr << mTestConfigDir << mSep << "message.xml";
-			llofstream file(ostr.str());
+			std::string ostr(mTestConfigDir + mSep + "message.xml");
+			llofstream file(ostr.c_str());
 			if (file.is_open())
 			{
 				LLSDSerialize::toPrettyXML(config, file);
@@ -142,7 +141,7 @@ namespace tut
 		const LLSD message;
 		const LLPointer<Response> response = new Response();
 		gMessageSystem->dispatch(name, message, response);
-		ensure_equals(response->mStatus, 404);
+		ensure_equals(response->mStatus, HTTP_NOT_FOUND);
 	}
 }
 

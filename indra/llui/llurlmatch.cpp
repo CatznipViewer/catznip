@@ -37,20 +37,22 @@ LLUrlMatch::LLUrlMatch() :
 	mIcon(""),
 	mMenuName(""),
 	mLocation(""),
-	mUnderlineOnHoverOnly(false)
+	mUnderlineOnHoverOnly(false),
+	mTrusted(false)
 {
 }
 
-void LLUrlMatch::setValues(U32 start, U32 end, const std::string &url,
-						   const std::string &label, const std::string &tooltip,
+void LLUrlMatch::setValues(U32 start, U32 end, const std::string &url, const std::string &label,
+						   const std::string& query, const std::string &tooltip,
 						   const std::string &icon, const LLStyle::Params& style,
 						   const std::string &menu, const std::string &location,
-						   const LLUUID& id, bool underline_on_hover_only)
+						   const LLUUID& id, bool underline_on_hover_only, bool trusted)
 {
 	mStart = start;
 	mEnd = end;
 	mUrl = url;
 	mLabel = label;
+	mQuery = query;
 	mTooltip = tooltip;
 	mIcon = icon;
 	mStyle = style;
@@ -59,4 +61,5 @@ void LLUrlMatch::setValues(U32 start, U32 end, const std::string &url,
 	mLocation = location;
 	mID = id;
 	mUnderlineOnHoverOnly = underline_on_hover_only;
+	mTrusted = trusted;
 }

@@ -55,12 +55,13 @@ public:
 	const LLUUID&		getSessionID()			const	{ return mSessionID; }
 	const LLUUID&		getParticipantID()		const	{ return mParticipantID; }
 	const std::string&	getTimestamp()			const	{ return mTimestamp; }
-	const time_t&		getTime()				const	{ return mTime; }
+	const U64Seconds&
+						getTime()				const	{ return mTime; }
 	bool				hasOfflineMessages()	const	{ return mHasOfflineIMs; }
 
 	void setConversationName(std::string conv_name) { mConversationName = conv_name; }
 	void setOfflineMessages(bool new_messages) { mHasOfflineIMs = new_messages; }
-	bool isOlderThan(U32 days) const;
+	bool isOlderThan(U32Days days) const;
 
 	/*
 	 * updates last interaction time
@@ -75,7 +76,7 @@ public:
 	/*
 	 * returns string representation(in form of: mm/dd/yyyy hh:mm) of time when conversation was started
 	 */
-	static const std::string createTimestamp(const time_t& utc_time);
+	static const std::string createTimestamp(const U64Seconds& utc_time);
 
 private:
 
@@ -87,7 +88,7 @@ private:
 
 	boost::signals2::connection mIMFloaterShowedConnection;
 
-	time_t			mTime; // last interaction time
+	U64Seconds mTime; // last interaction time
 	SessionType		mConversationType;
 	std::string		mConversationName;
 	std::string		mHistoryFileName;
@@ -108,7 +109,7 @@ private:
 
 class LLConversationLog : public LLSingleton<LLConversationLog>, LLIMSessionObserver
 {
-	friend class LLSingleton<LLConversationLog>;
+	LLSINGLETON(LLConversationLog);
 public:
 
 	void removeConversation(const LLConversation& conversation);
@@ -152,10 +153,10 @@ public:
 	 * file name is conversation.log
 	 */
 	std::string getFileName();
+	LLConversation* findConversation(const LLIMModel::LLIMSession* session);
 
 private:
 
-	LLConversationLog();
 	virtual ~LLConversationLog()
 	{
 		if (mAvatarNameCacheConnection.connected())
@@ -183,7 +184,7 @@ private:
 	void updateConversationName(const LLIMModel::LLIMSession* session, const std::string& name);
 	void updateOfflineIMs(const LLIMModel::LLIMSession* session, BOOL new_messages);
 
-	LLConversation* findConversation(const LLIMModel::LLIMSession* session);
+
 
 	typedef std::vector<LLConversation> conversations_vec_t;
 	std::vector<LLConversation>				mConversations;

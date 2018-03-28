@@ -34,18 +34,19 @@ import sys
 import time
 import select
 import getopt
-from threading import Thread
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-from SocketServer import ThreadingMixIn
 
-mydir = os.path.dirname(__file__)       # expected to be .../indra/llcorehttp/tests/
-sys.path.insert(0, os.path.join(mydir, os.pardir, os.pardir, "lib", "python"))
-from indra.util.fastest_elementtree import parse as xml_parse
-from indra.base import llsd
+from llbase.fastest_elementtree import parse as xml_parse
+from llbase import llsd
+
+# we're in llcorehttp/tests ; testrunner.py is found in llmessage/tests
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir,
+                             "llmessage", "tests"))
+
 from testrunner import freeport, run, debug, VERBOSE
 
 class TestHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -69,6 +70,15 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
                            "Content-Range: bytes 0-75/2983",
                            "Content-Length: 76"
     -- '/bug2295/inv_cont_range/0/'  Generates HE_INVALID_CONTENT_RANGE error in llcorehttp.
+    - '/503/'           Generate 503 responses with various kinds
+                        of 'retry-after' headers
+    -- '/503/0/'            "Retry-After: 2"   
+    -- '/503/1/'            "Retry-After: Thu, 31 Dec 2043 23:59:59 GMT"
+    -- '/503/2/'            "Retry-After: Fri, 31 Dec 1999 23:59:59 GMT"
+    -- '/503/3/'            "Retry-After: "
+    -- '/503/4/'            "Retry-After: (*#*(@*(@(")"
+    -- '/503/5/'            "Retry-After: aklsjflajfaklsfaklfasfklasdfklasdgahsdhgasdiogaioshdgo"
+    -- '/503/6/'            "Retry-After: 1 2 3 4 5 6 7 8 9 10"
 
     Some combinations make no sense, there's no effort to protect
     you from that.
@@ -143,22 +153,40 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
         if "/sleep/" in self.path:
             time.sleep(30)
 
-        if "fail" in self.path:
-            status = data.get("status", 500)
-            # self.responses maps an int status to a (short, long) pair of
-            # strings. We want the longer string. That's why we pass a string
-            # pair to get(): the [1] will select the second string, whether it
-            # came from self.responses or from our default pair.
-            reason = data.get("reason",
-                               self.responses.get(status,
-                                                  ("fail requested",
-                                                   "Your request specified failure status %s "
-                                                   "without providing a reason" % status))[1])
-            debug("fail requested: %s: %r", status, reason)
-            self.send_error(status, reason)
+        if "/503/" in self.path:
+            # Tests for various kinds of 'Retry-After' header parsing
+            body = None
+            if "/503/0/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "2")
+            elif "/503/1/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "Thu, 31 Dec 2043 23:59:59 GMT")
+            elif "/503/2/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "Fri, 31 Dec 1999 23:59:59 GMT")
+            elif "/503/3/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "")
+            elif "/503/4/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "(*#*(@*(@(")
+            elif "/503/5/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "aklsjflajfaklsfaklfasfklasdfklasdgahsdhgasdiogaioshdgo")
+            elif "/503/6/" in self.path:
+                self.send_response(503)
+                self.send_header("retry-after", "1 2 3 4 5 6 7 8 9 10")
+            else:
+                # Unknown request
+                self.send_response(400)
+                body = "Unknown /503/ path in server"
             if "/reflect/" in self.path:
                 self.reflect_headers()
+            self.send_header("Content-type", "text/plain")
             self.end_headers()
+            if body:
+                self.wfile.write(body)
         elif "/bug2295/" in self.path:
             # Test for https://jira.secondlife.com/browse/BUG-2295
             #
@@ -194,8 +222,7 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             if body:
                 self.wfile.write(body)
-        else:
-            # Normal response path
+        elif "fail" not in self.path:
             data = data.copy()          # we're going to modify
             # Ensure there's a "reply" key in data, even if there wasn't before
             data["reply"] = data.get("reply", llsd.LLSD("success"))
@@ -210,6 +237,22 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             if withdata:
                 self.wfile.write(response)
+        else:                           # fail requested
+            status = data.get("status", 500)
+            # self.responses maps an int status to a (short, long) pair of
+            # strings. We want the longer string. That's why we pass a string
+            # pair to get(): the [1] will select the second string, whether it
+            # came from self.responses or from our default pair.
+            reason = data.get("reason",
+                               self.responses.get(status,
+                                                  ("fail requested",
+                                                   "Your request specified failure status %s "
+                                                   "without providing a reason" % status))[1])
+            debug("fail requested: %s: %r", status, reason)
+            self.send_error(status, reason)
+            if "/reflect/" in self.path:
+                self.reflect_headers()
+            self.end_headers()
 
     def reflect_headers(self):
         for name in self.headers.keys():
@@ -229,7 +272,7 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
             # Suppress error output as well
             pass
 
-class Server(ThreadingMixIn, HTTPServer):
+class Server(HTTPServer):
     # This pernicious flag is on by default in HTTPServer. But proper
     # operation of freeport() absolutely depends on it being off.
     allow_reuse_address = False
@@ -253,22 +296,26 @@ if __name__ == "__main__":
         if option == "-V" or option == "--valgrind":
             do_valgrind = True
 
-    # Instantiate a Server(TestHTTPRequestHandler) on the first free port
-    # in the specified port range. Doing this inline is better than in a
-    # daemon thread: if it blows up here, we'll get a traceback. If it blew up
-    # in some other thread, the traceback would get eaten and we'd run the
-    # subject test program anyway.
-    httpd, port = freeport(xrange(8000, 8020),
-                           lambda port: Server(('127.0.0.1', port), TestHTTPRequestHandler))
+    # function to make a server with specified port
+    make_server = lambda port: Server(('127.0.0.1', port), TestHTTPRequestHandler)
+
+    if not sys.platform.startswith("win"):
+        # Instantiate a Server(TestHTTPRequestHandler) on a port chosen by the
+        # runtime.
+        httpd = make_server(0)
+    else:
+        # "Then there's Windows"
+        # Instantiate a Server(TestHTTPRequestHandler) on the first free port
+        # in the specified port range.
+        httpd, port = freeport(xrange(8000, 8020), make_server)
 
     # Pass the selected port number to the subject test program via the
     # environment. We don't want to impose requirements on the test program's
     # command-line parsing -- and anyway, for C++ integration tests, that's
     # performed in TUT code rather than our own.
-    os.environ["LL_TEST_PORT"] = str(port)
-    debug("$LL_TEST_PORT = %s", port)
+    os.environ["LL_TEST_PORT"] = str(httpd.server_port)
+    debug("$LL_TEST_PORT = %s", httpd.server_port)
     if do_valgrind:
         args = ["valgrind", "--log-file=./valgrind.log"] + args
         path_search = True
-    sys.exit(run(server=Thread(name="httpd", target=httpd.serve_forever), use_path=path_search, *args))
-
+    sys.exit(run(server_inst=httpd, use_path=path_search, *args))

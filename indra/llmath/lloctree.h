@@ -36,6 +36,8 @@
 
 
 extern U32 gOctreeMaxCapacity;
+extern float gOctreeMinSize;
+
 /*#define LL_OCTREE_PARANOIA_CHECK 0
 #if LL_DARWIN
 #define LL_OCTREE_MAX_CAPACITY 32
@@ -106,6 +108,7 @@ public:
 	:	mParent((oct_node*)parent), 
 		mOctant(octant) 
 	{ 
+		llassert(size[0] >= gOctreeMinSize*0.5f);
 		//always keep a NULL terminated list to avoid out of bounds exceptions in debug builds
 		mData.push_back(NULL);
 		mDataEnd = &mData[0];
@@ -213,7 +216,7 @@ public:
 		F32 size = mSize[0];
 		F32 p_size = size * 2.f;
 
-		return (radius <= 0.001f && size <= 0.001f) ||
+		return (radius <= gOctreeMinSize && size <= gOctreeMinSize) ||
 				(radius <= p_size && radius > size);
 	}
 
@@ -265,12 +268,12 @@ public:
 
 				if (child->getOctant() != i)
 				{
-					llerrs << "Invalid child map, bad octant data." << llendl;
+					LL_ERRS() << "Invalid child map, bad octant data." << LL_ENDL;
 				}
 
 				if (getOctant(child->getCenter()) != child->getOctant())
 				{
-					llerrs << "Invalid child octant compared to position data." << llendl;
+					LL_ERRS() << "Invalid child octant compared to position data." << LL_ENDL;
 				}
 			}
 		}
@@ -311,7 +314,7 @@ public:
 	{
 		if (data == NULL || data->getBinIndex() != -1)
 		{
-			OCT_ERRS << "!!! INVALID ELEMENT ADDED TO OCTREE BRANCH !!!" << llendl;
+			OCT_ERRS << "!!! INVALID ELEMENT ADDED TO OCTREE BRANCH !!!" << LL_ENDL;
 			return false;
 		}
 		LLOctreeNode<T>* parent = getOctParent();
@@ -319,7 +322,7 @@ public:
 		//is it here?
 		if (isInside(data->getPositionGroup()))
 		{
-			if ((getElementCount() < gOctreeMaxCapacity && contains(data->getBinRadius()) ||
+			if ((((getElementCount() < gOctreeMaxCapacity || getSize()[0] <= gOctreeMinSize) && contains(data->getBinRadius())) ||
 				(data->getBinRadius() > getSize()[0] &&	parent && parent->getElementCount() >= gOctreeMaxCapacity))) 
 			{ //it belongs here
 				mData.push_back(NULL);
@@ -356,8 +359,9 @@ public:
 				LLVector4a val;
 				val.setSub(center, getCenter());
 				val.setAbs(val);
-								
-				S32 lt = val.lessThan(LLVector4a::getEpsilon()).getGatheredBits() & 0x7;
+				LLVector4a min_diff(gOctreeMinSize);
+
+				S32 lt = val.lessThan(min_diff).getGatheredBits() & 0x7;
 
 				if( lt == 0x7 )
 				{
@@ -374,7 +378,7 @@ public:
 				if (getChildCount() == 8)
 				{
 					//this really isn't possible, something bad has happened
-					OCT_ERRS << "Octree detected floating point error and gave up." << llendl;
+					OCT_ERRS << "Octree detected floating point error and gave up." << LL_ENDL;
 					return false;
 				}
 				
@@ -383,12 +387,13 @@ public:
 				{
 					if (mChild[i]->getCenter().equals3(center))
 					{
-						OCT_ERRS << "Octree detected duplicate child center and gave up." << llendl;
+						OCT_ERRS << "Octree detected duplicate child center and gave up." << LL_ENDL;
 						return false;
 					}
 				}
 #endif
 
+				llassert(size[0] >= gOctreeMinSize*0.5f);
 				//make the new kid
 				child = new LLOctreeNode<T>(center, size, this);
 				addChild(child);
@@ -399,7 +404,7 @@ public:
 		else 
 		{
 			//it's not in here, give it to the root
-			OCT_ERRS << "Octree insertion failed, starting over from root!" << llendl;
+			OCT_ERRS << "Octree insertion failed, starting over from root!" << LL_ENDL;
 
 			oct_node* node = this;
 
@@ -440,7 +445,7 @@ public:
 			mDataEnd = &mData[0];
 		}
 
-		notifyRemoval(data);
+		this->notifyRemoval(data);
 		checkAlive();
 	}
 
@@ -483,7 +488,7 @@ public:
 		}
 
 		//node is now root
-		llwarns << "!!! OCTREE REMOVING ELEMENT BY ADDRESS, SEVERE PERFORMANCE PENALTY |||" << llendl;
+		LL_WARNS() << "!!! OCTREE REMOVING ELEMENT BY ADDRESS, SEVERE PERFORMANCE PENALTY |||" << LL_ENDL;
 		node->removeByAddress(data);
 		llassert(data->getBinIndex() == -1);
 		return true;
@@ -496,7 +501,7 @@ public:
 			if (mData[i] == data)
 			{ //we have data
 				_remove(data, i);
-				llwarns << "FOUND!" << llendl;
+				LL_WARNS() << "FOUND!" << LL_ENDL;
 				return;
 			}
 		}
@@ -524,7 +529,7 @@ public:
 			mChild[i]->validate();
 			if (mChild[i]->getParent() != this)
 			{
-				llerrs << "Octree child has invalid parent." << llendl;
+				LL_ERRS() << "Octree child has invalid parent." << LL_ENDL;
 			}
 		}
 #endif
@@ -550,24 +555,24 @@ public:
 
 		if (child->getSize().equals3(getSize()))
 		{
-			OCT_ERRS << "Child size is same as parent size!" << llendl;
+			OCT_ERRS << "Child size is same as parent size!" << LL_ENDL;
 		}
 
 		for (U32 i = 0; i < getChildCount(); i++)
 		{
 			if(!mChild[i]->getSize().equals3(child->getSize())) 
 			{
-				OCT_ERRS <<"Invalid octree child size." << llendl;
+				OCT_ERRS <<"Invalid octree child size." << LL_ENDL;
 			}
 			if (mChild[i]->getCenter().equals3(child->getCenter()))
 			{
-				OCT_ERRS <<"Duplicate octree child position." << llendl;
+				OCT_ERRS <<"Duplicate octree child position." << LL_ENDL;
 			}
 		}
 
 		if (mChild.size() >= 8)
 		{
-			OCT_ERRS <<"Octree node has too many children... why?" << llendl;
+			OCT_ERRS <<"Octree node has too many children... why?" << LL_ENDL;
 		}
 #endif
 
@@ -641,7 +646,7 @@ public:
 			}
 		}
 
-		OCT_ERRS << "Octree failed to delete requested child." << llendl;
+		OCT_ERRS << "Octree failed to delete requested child." << LL_ENDL;
 	}
 
 protected:	
@@ -706,7 +711,7 @@ public:
 			//(don't notify listeners of addition)
 			for (U32 i = 0; i < child->getChildCount(); i++)
 			{
-				addChild(child->getChild(i), TRUE);
+				this->addChild(child->getChild(i), TRUE);
 			}
 
 			//destroy child
@@ -724,13 +729,13 @@ public:
 	{
 		if (data == NULL) 
 		{
-			OCT_ERRS << "!!! INVALID ELEMENT ADDED TO OCTREE ROOT !!!" << llendl;
+			OCT_ERRS << "!!! INVALID ELEMENT ADDED TO OCTREE ROOT !!!" << LL_ENDL;
 			return false;
 		}
 		
 		if (data->getBinRadius() > 4096.0)
 		{
-			OCT_ERRS << "!!! ELEMENT EXCEEDS MAXIMUM SIZE IN OCTREE ROOT !!!" << llendl;
+			OCT_ERRS << "!!! ELEMENT EXCEEDS MAXIMUM SIZE IN OCTREE ROOT !!!" << LL_ENDL;
 			return false;
 		}
 		
@@ -746,14 +751,14 @@ public:
 
 		if (lt != 0x7)
 		{
-			//OCT_ERRS << "!!! ELEMENT EXCEEDS RANGE OF SPATIAL PARTITION !!!" << llendl;
+			//OCT_ERRS << "!!! ELEMENT EXCEEDS RANGE OF SPATIAL PARTITION !!!" << LL_ENDL;
 			return false;
 		}
 
-		if (this->getSize()[0] > data->getBinRadius() && isInside(data->getPositionGroup()))
+		if (this->getSize()[0] > data->getBinRadius() && this->isInside(data->getPositionGroup()))
 		{
 			//we got it, just act like a branch
-			oct_node* node = getNodeAt(data);
+			oct_node* node = this->getNodeAt(data);
 			if (node == this)
 			{
 				LLOctreeNode<T>::insert(data);
@@ -766,7 +771,7 @@ public:
 		else if (this->getChildCount() == 0)
 		{
 			//first object being added, just wrap it up
-			while (!(this->getSize()[0] > data->getBinRadius() && isInside(data->getPositionGroup())))
+			while (!(this->getSize()[0] > data->getBinRadius() && this->isInside(data->getPositionGroup())))
 			{
 				LLVector4a center, size;
 				center = this->getCenter();
@@ -781,7 +786,7 @@ public:
 		}
 		else
 		{
-			while (!(this->getSize()[0] > data->getBinRadius() && isInside(data->getPositionGroup())))
+			while (!(this->getSize()[0] > data->getBinRadius() && this->isInside(data->getPositionGroup())))
 			{
 				//the data is outside the root node, we need to grow
 				LLVector4a center(this->getCenter());
@@ -796,6 +801,8 @@ public:
 				this->setSize(size2);
 				this->updateMinMax();
 
+				llassert(size[0] >= gOctreeMinSize);
+
 				//copy our children to a new branch
 				LLOctreeNode<T>* newnode = new LLOctreeNode<T>(center, size, this);
 				
@@ -807,7 +814,7 @@ public:
 
 				//clear our children and add the root copy
 				this->clearChildren();
-				addChild(newnode);
+				this->addChild(newnode);
 			}
 
 			//insert the data

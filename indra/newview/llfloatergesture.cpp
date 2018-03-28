@@ -48,6 +48,7 @@
 #include "llviewermenu.h" 
 #include "llviewerinventory.h"
 #include "llviewercontrol.h"
+#include "llfloaterperms.h"
 
 BOOL item_name_precedes( LLInventoryItem* a, LLInventoryItem* b )
 {
@@ -74,6 +75,17 @@ public:
 	void fire(const LLUUID &inv_item)
 	{
 		LLPreviewGesture::show(inv_item, LLUUID::null);
+		
+		LLInventoryItem* item = gInventory.getItem(inv_item);
+		if (item)
+		{
+			LLPermissions perm = item->getPermissions();
+			perm.setMaskNext(LLFloaterPerms::getNextOwnerPerms("Gestures"));
+			perm.setMaskEveryone(LLFloaterPerms::getEveryonePerms("Gestures"));
+			perm.setMaskGroup(LLFloaterPerms::getGroupPerms("Gestures"));
+			item->setPermissions(perm);
+			item->updateServer(FALSE);
+		}
 	}
 };
 
@@ -316,7 +328,7 @@ void LLFloaterGesture::addGesture(const LLUUID& item_id , LLMultiGesture* gestur
 		element["columns"][0]["font"]["name"] = "SANSSERIF";
 		element["columns"][0]["font"]["style"] = font_style;
 
-		std::string key_string = LLKeyboard::stringFromKey(gesture->mKey);
+		std::string key_string;
 		std::string buffer;
 
 		if (gesture->mKey == KEY_NONE)
@@ -326,6 +338,7 @@ void LLFloaterGesture::addGesture(const LLUUID& item_id , LLMultiGesture* gestur
 		}
 		else
 		{
+			key_string = LLKeyboard::stringFromKey(gesture->mKey);
 			buffer = LLKeyboard::stringFromAccelerator(gesture->mMask,
 					gesture->mKey);
 		}
@@ -400,9 +413,9 @@ bool LLFloaterGesture::isActionEnabled(const LLSD& command)
 		if(!LLClipboard::instance().hasContents())
 			return false;
 
-		LLDynamicArray<LLUUID> ids;
+		std::vector<LLUUID> ids;
 		LLClipboard::instance().pasteFromClipboard(ids);
-		for(LLDynamicArray<LLUUID>::iterator it = ids.begin(); it != ids.end(); it++)
+		for(std::vector<LLUUID>::iterator it = ids.begin(); it != ids.end(); it++)
 		{
 			LLInventoryItem* item = gInventory.getItem(*it);
 			
@@ -449,9 +462,17 @@ void LLFloaterGesture::onClickPlay()
 void LLFloaterGesture::onClickNew()
 {
 	LLPointer<LLInventoryCallback> cb = new GestureShowCallback();
-	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
-		LLUUID::null, LLTransactionID::tnull, "New Gesture", "", LLAssetType::AT_GESTURE,
-		LLInventoryType::IT_GESTURE, NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, cb);
+	create_inventory_item(gAgent.getID(),
+						  gAgent.getSessionID(),
+						  LLUUID::null,
+						  LLTransactionID::tnull,
+						  "New Gesture",
+						  "",
+						  LLAssetType::AT_GESTURE,
+						  LLInventoryType::IT_GESTURE,
+						  NOT_WEARABLE,
+						  PERM_MOVE | LLFloaterPerms::getNextOwnerPerms("Gestures"),
+						  cb);
 }
 
 void LLFloaterGesture::onActivateBtnClick()
@@ -508,13 +529,14 @@ void LLFloaterGesture::onCopyPasteAction(const LLSD& command)
 			LLInventoryItem* item = gInventory.getItem(*it);
 			if(item  && item->getInventoryType() == LLInventoryType::IT_GESTURE)
 			{
-				LLClipboard::instance().addToClipboard(item->getUUID(),LLAssetType::AT_GESTURE);
+				LLWString item_name = utf8str_to_wstring(item->getName());
+				LLClipboard::instance().addToClipboard(item_name, 0, item_name.size());
 			}
 		}
 	}
 	else if ("paste" == command_name)
 	{
-		LLDynamicArray<LLUUID> ids;
+		std::vector<LLUUID> ids;
 		LLClipboard::instance().pasteFromClipboard(ids);
 		if(ids.empty() || !gInventory.isCategoryComplete(mGestureFolderID))
 			return;
@@ -522,7 +544,7 @@ void LLFloaterGesture::onCopyPasteAction(const LLSD& command)
 		llassert(gesture_dir);
 		LLPointer<GestureCopiedCallback> cb = new GestureCopiedCallback(this);
 
-		for(LLDynamicArray<LLUUID>::iterator it = ids.begin(); it != ids.end(); it++)
+		for(std::vector<LLUUID>::iterator it = ids.begin(); it != ids.end(); it++)
 		{
 			LLInventoryItem* item = gInventory.getItem(*it);
 			if(gesture_dir && item && item->getInventoryType() == LLInventoryType::IT_GESTURE)
@@ -617,9 +639,10 @@ void LLFloaterGesture::addToCurrentOutFit()
 	uuid_vec_t ids;
 	getSelectedIds(ids);
 	LLAppearanceMgr* am = LLAppearanceMgr::getInstance();
+	LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy;
 	for(uuid_vec_t::const_iterator it = ids.begin(); it != ids.end(); it++)
 	{
-		am->addCOFItemLink(*it);
+		am->addCOFItemLink(*it, cb);
 	}
 }
 

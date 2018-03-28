@@ -126,7 +126,7 @@ public:
 		mRequestProcessed(false),
 		LLGroupMgrObserver(group_id) 
 	{
-		llinfos << "Sending new group member request for group_id: "<< group_id << llendl;
+		LL_INFOS() << "Sending new group member request for group_id: "<< group_id << LL_ENDL;
 		LLGroupMgr* mgr = LLGroupMgr::getInstance();
 		// register ourselves as an observer
 		mgr->addObserver(this);
@@ -140,8 +140,8 @@ public:
 		if (!mRequestProcessed)
 		{
 			// Request is pending
-			llwarns << "Destroying pending group member request for group_id: "
-				<< mGroupId << llendl;
+			LL_WARNS() << "Destroying pending group member request for group_id: "
+				<< mGroupId << LL_ENDL;
 		}
 		// Remove ourselves as an observer
 		LLGroupMgr::getInstance()->removeObserver(this);
@@ -149,19 +149,16 @@ public:
 
 	void changed(LLGroupChange gc)
 	{
-		if (gc == GC_MEMBER_DATA && !mRequestProcessed)
+		if (gc == GC_PROPERTIES && !mRequestProcessed)
 		{
 			LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(mGroupId);
 			if (!gdatap)
 			{
-				llwarns << "LLGroupMgr::getInstance()->getGroupData() was NULL" << llendl;
+				LL_WARNS() << "LLGroupMgr::getInstance()->getGroupData() was NULL" << LL_ENDL;
 			} 
 			else if (!gdatap->isMemberDataComplete())
 			{
-				llwarns << "LLGroupMgr::getInstance()->getGroupData()->isMemberDataComplete() was FALSE" << llendl;
-			}
-			else
-			{
+				LL_WARNS() << "LLGroupMgr::getInstance()->getGroupData()->isMemberDataComplete() was FALSE" << LL_ENDL;
 				processGroupData();
 				mRequestProcessed = true;
 			}
@@ -204,14 +201,14 @@ void LLGroupActions::startCall(const LLUUID& group_id)
 
 	if (!gAgent.getGroupData(group_id, gdata))
 	{
-		llwarns << "Error getting group data" << llendl;
+		LL_WARNS() << "Error getting group data" << LL_ENDL;
 		return;
 	}
 
 	LLUUID session_id = gIMMgr->addSession(gdata.mName, IM_SESSION_GROUP_START, group_id, true);
 	if (session_id == LLUUID::null)
 	{
-		llwarns << "Error adding session" << llendl;
+		LL_WARNS() << "Error adding session" << LL_ENDL;
 		return;
 	}
 
@@ -257,8 +254,8 @@ void LLGroupActions::join(const LLUUID& group_id)
 	}
 	else
 	{
-		llwarns << "LLGroupMgr::getInstance()->getGroupData(" << group_id 
-			<< ") was NULL" << llendl;
+		LL_WARNS() << "LLGroupMgr::getInstance()->getGroupData(" << group_id 
+			<< ") was NULL" << LL_ENDL;
 	}
 }
 

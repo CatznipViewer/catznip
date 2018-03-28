@@ -27,6 +27,8 @@
 
 #include "llviewerprecompiledheaders.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include "llfeaturemanager.h"
 #include "llviewershadermgr.h"
 
@@ -41,6 +43,8 @@
 #include "llsky.h"
 #include "llvosky.h"
 #include "llrender.h"
+#include "lljoint.h"
+#include "llskinningutil.h"
 
 #ifdef LL_RELEASE_FOR_DOWNLOAD
 #define UNIFORM_ERRS LL_WARNS_ONCE("Shader")
@@ -52,6 +56,7 @@ static LLStaticHashedString sTexture0("texture0");
 static LLStaticHashedString sTexture1("texture1");
 static LLStaticHashedString sTex0("tex0");
 static LLStaticHashedString sTex1("tex1");
+static LLStaticHashedString sDitherTex("dither_tex");
 static LLStaticHashedString sGlowMap("glowMap");
 static LLStaticHashedString sScreenMap("screenMap");
 
@@ -81,12 +86,16 @@ LLGLSLShader	gGlowCombineProgram;
 LLGLSLShader	gSplatTextureRectProgram;
 LLGLSLShader	gGlowCombineFXAAProgram;
 LLGLSLShader	gTwoTextureAddProgram;
+LLGLSLShader	gTwoTextureCompareProgram;
+LLGLSLShader	gOneTextureFilterProgram;
 LLGLSLShader	gOneTextureNoColorProgram;
 LLGLSLShader	gDebugProgram;
 LLGLSLShader	gClipProgram;
 LLGLSLShader	gDownsampleDepthProgram;
 LLGLSLShader	gDownsampleDepthRectProgram;
 LLGLSLShader	gAlphaMaskProgram;
+LLGLSLShader	gBenchmarkProgram;
+
 
 //object shaders
 LLGLSLShader		gObjectSimpleProgram;
@@ -350,6 +359,16 @@ LLViewerShaderMgr * LLViewerShaderMgr::instance()
 	return static_cast<LLViewerShaderMgr*>(sInstance);
 }
 
+// static
+void LLViewerShaderMgr::releaseInstance()
+{
+	if (sInstance != NULL)
+	{
+		delete sInstance;
+		sInstance = NULL;
+	}
+}
+
 void LLViewerShaderMgr::initAttribsAndUniforms(void)
 {
 	if (mReservedAttribs.empty())
@@ -435,7 +454,7 @@ void LLViewerShaderMgr::setShaders()
 
 	// Shaders
 	LL_INFOS("ShaderLoading") << "\n~~~~~~~~~~~~~~~~~~\n Loading Shaders:\n~~~~~~~~~~~~~~~~~~" << LL_ENDL;
-	LL_INFOS("ShaderLoading") << llformat("Using GLSL %d.%d", gGLManager.mGLSLVersionMajor, gGLManager.mGLSLVersionMinor) << llendl;
+	LL_INFOS("ShaderLoading") << llformat("Using GLSL %d.%d", gGLManager.mGLSLVersionMajor, gGLManager.mGLSLVersionMinor) << LL_ENDL;
 
 	for (S32 i = 0; i < SHADER_COUNT; i++)
 	{
@@ -681,6 +700,7 @@ void LLViewerShaderMgr::unloadShaders()
 	gClipProgram.unload();
 	gDownsampleDepthProgram.unload();
 	gDownsampleDepthRectProgram.unload();
+	gBenchmarkProgram.unload();
 	gAlphaMaskProgram.unload();
 	gUIProgram.unload();
 	gPathfindingProgram.unload();
@@ -690,6 +710,8 @@ void LLViewerShaderMgr::unloadShaders()
 	gSplatTextureRectProgram.unload();
 	gGlowCombineFXAAProgram.unload();
 	gTwoTextureAddProgram.unload();
+	gTwoTextureCompareProgram.unload();
+	gOneTextureFilterProgram.unload();
 	gOneTextureNoColorProgram.unload();
 	gSolidColorProgram.unload();
 
@@ -851,9 +873,11 @@ BOOL LLViewerShaderMgr::loadBasicShaders()
 		shaders.push_back( make_pair( "objects/indexedTextureV.glsl",			1 ) );
 	}
 	shaders.push_back( make_pair( "objects/nonindexedTextureV.glsl",		1 ) );
-	
+
 	boost::unordered_map<std::string, std::string> attribs;
-	
+	attribs["MAX_JOINTS_PER_MESH_OBJECT"] = 
+		boost::lexical_cast<std::string>(LLSkinningUtil::getMaxJointCount());
+
 	// We no longer have to bind the shaders to global glhandles, they are automatically added to a map now.
 	for (U32 i = 0; i < shaders.size(); i++)
 	{
@@ -906,7 +930,7 @@ BOOL LLViewerShaderMgr::loadBasicShaders()
 	index_channels.push_back(ch);	 shaders.push_back( make_pair( "lighting/lightFullbrightShinyF.glsl",	mVertexShaderLevel[SHADER_LIGHTING] ) );
 	index_channels.push_back(ch);	 shaders.push_back( make_pair( "lighting/lightShinyWaterF.glsl",			mVertexShaderLevel[SHADER_LIGHTING] ) );
 	index_channels.push_back(ch);	 shaders.push_back( make_pair( "lighting/lightFullbrightShinyWaterF.glsl", mVertexShaderLevel[SHADER_LIGHTING] ) );
-
+	
 	for (U32 i = 0; i < shaders.size(); i++)
 	{
 		// Note usage of GL_FRAGMENT_SHADER_ARB
@@ -1261,7 +1285,7 @@ BOOL LLViewerShaderMgr::loadShadersDeferred()
 		gDeferredBumpProgram.mShaderLevel = mVertexShaderLevel[SHADER_DEFERRED];
 		success = gDeferredBumpProgram.createShader(NULL, NULL);
 	}
-	
+
 	gDeferredMaterialProgram[1].mFeatures.hasLighting = false;
 	gDeferredMaterialProgram[5].mFeatures.hasLighting = false;
 	gDeferredMaterialProgram[9].mFeatures.hasLighting = false;
@@ -1866,7 +1890,7 @@ BOOL LLViewerShaderMgr::loadShadersDeferred()
 		gDeferredAvatarAlphaProgram.mFeatures.calculatesLighting = true;
 		gDeferredAvatarAlphaProgram.mFeatures.hasLighting = true;
 	}
-	
+
 	if (success)
 	{
 		gDeferredPostGammaCorrectProgram.mName = "Deferred Gamma Correction Post Process";
@@ -3107,6 +3131,40 @@ BOOL LLViewerShaderMgr::loadShadersInterface()
 		}
 	}
 
+#ifdef LL_WINDOWS
+	if (success)
+	{
+		gTwoTextureCompareProgram.mName = "Two Texture Compare Shader";
+		gTwoTextureCompareProgram.mShaderFiles.clear();
+		gTwoTextureCompareProgram.mShaderFiles.push_back(make_pair("interface/twotexturecompareV.glsl", GL_VERTEX_SHADER_ARB));
+		gTwoTextureCompareProgram.mShaderFiles.push_back(make_pair("interface/twotexturecompareF.glsl", GL_FRAGMENT_SHADER_ARB));
+		gTwoTextureCompareProgram.mShaderLevel = mVertexShaderLevel[SHADER_INTERFACE];
+		success = gTwoTextureCompareProgram.createShader(NULL, NULL);
+		if (success)
+		{
+			gTwoTextureCompareProgram.bind();
+			gTwoTextureCompareProgram.uniform1i(sTex0, 0);
+			gTwoTextureCompareProgram.uniform1i(sTex1, 1);
+			gTwoTextureCompareProgram.uniform1i(sDitherTex, 2);
+		}
+	}
+
+	if (success)
+	{
+		gOneTextureFilterProgram.mName = "One Texture Filter Shader";
+		gOneTextureFilterProgram.mShaderFiles.clear();
+		gOneTextureFilterProgram.mShaderFiles.push_back(make_pair("interface/onetexturefilterV.glsl", GL_VERTEX_SHADER_ARB));
+		gOneTextureFilterProgram.mShaderFiles.push_back(make_pair("interface/onetexturefilterF.glsl", GL_FRAGMENT_SHADER_ARB));
+		gOneTextureFilterProgram.mShaderLevel = mVertexShaderLevel[SHADER_INTERFACE];
+		success = gOneTextureFilterProgram.createShader(NULL, NULL);
+		if (success)
+		{
+			gOneTextureFilterProgram.bind();
+			gOneTextureFilterProgram.uniform1i(sTex0, 0);
+		}
+	}
+#endif
+
 	if (success)
 	{
 		gOneTextureNoColorProgram.mName = "One Texture No Color Shader";
@@ -3186,6 +3244,26 @@ BOOL LLViewerShaderMgr::loadShadersInterface()
 		gDownsampleDepthProgram.mShaderFiles.push_back(make_pair("interface/downsampleDepthF.glsl", GL_FRAGMENT_SHADER_ARB));
 		gDownsampleDepthProgram.mShaderLevel = mVertexShaderLevel[SHADER_INTERFACE];
 		success = gDownsampleDepthProgram.createShader(NULL, NULL);
+	}
+
+	if (success)
+	{
+		gBenchmarkProgram.mName = "Benchmark Shader";
+		gBenchmarkProgram.mShaderFiles.clear();
+		gBenchmarkProgram.mShaderFiles.push_back(make_pair("interface/benchmarkV.glsl", GL_VERTEX_SHADER_ARB));
+		gBenchmarkProgram.mShaderFiles.push_back(make_pair("interface/benchmarkF.glsl", GL_FRAGMENT_SHADER_ARB));
+		gBenchmarkProgram.mShaderLevel = mVertexShaderLevel[SHADER_INTERFACE];
+		success = gBenchmarkProgram.createShader(NULL, NULL);
+	}
+
+	if (success)
+	{
+		gDownsampleDepthRectProgram.mName = "DownsampleDepthRect Shader";
+		gDownsampleDepthRectProgram.mShaderFiles.clear();
+		gDownsampleDepthRectProgram.mShaderFiles.push_back(make_pair("interface/downsampleDepthV.glsl", GL_VERTEX_SHADER_ARB));
+		gDownsampleDepthRectProgram.mShaderFiles.push_back(make_pair("interface/downsampleDepthRectF.glsl", GL_FRAGMENT_SHADER_ARB));
+		gDownsampleDepthRectProgram.mShaderLevel = mVertexShaderLevel[SHADER_INTERFACE];
+		success = gDownsampleDepthRectProgram.createShader(NULL, NULL);
 	}
 
 	if (success)

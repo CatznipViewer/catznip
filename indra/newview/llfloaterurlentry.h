@@ -29,6 +29,8 @@
 
 #include "llfloater.h"
 #include "llpanellandmedia.h"
+#include "lleventcoro.h"
+#include "llcoros.h"
 
 class LLLineEditor;
 class LLComboBox;
@@ -40,7 +42,7 @@ public:
 	// that panel via the handle.
 	static LLHandle<LLFloater> show(LLHandle<LLPanel> panel_land_media_handle, const std::string media_url);
 	/*virtual*/	BOOL	postBuild();
-	void headerFetchComplete(U32 status, const std::string& mime_type);
+	void headerFetchComplete(S32 status, const std::string& mime_type);
 
 	bool addURLToCombobox(const std::string& media_url);
 
@@ -56,7 +58,10 @@ private:
 	static void		onBtnOK(void*);
 	static void		onBtnCancel(void*);
 	static void		onBtnClear(void*);
-	bool		callback_clear_url_list(const LLSD& notification, const LLSD& response);
+	bool		    callback_clear_url_list(const LLSD& notification, const LLSD& response);
+
+    static void     getMediaTypeCoro(std::string url, LLHandle<LLFloater> parentHandle);
+
 };
 
 #endif  // LL_LLFLOATERURLENTRY_H

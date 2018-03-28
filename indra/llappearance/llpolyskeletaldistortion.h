@@ -39,7 +39,6 @@
 //#include "llpolymorph.h"
 #include "lljoint.h"
 #include "llviewervisualparam.h"
-//#include "lldarray.h"
 
 //class LLSkinJoint;
 class LLAvatarAppearance;
@@ -73,6 +72,19 @@ public:
 	/*virtual*/ ~LLPolySkeletalDistortionInfo() {};
 	
 	/*virtual*/ BOOL parseXml(LLXmlTreeNode* node);
+
+
+
+	void* operator new(size_t size)
+	{
+		return ll_aligned_malloc_16(size);
+	}
+
+	void operator delete(void* ptr)
+	{
+		ll_aligned_free_16(ptr);
+	}
+
 
 protected:
 	typedef std::vector<LLPolySkeletalBoneInfo> bone_info_list_t;
@@ -119,6 +131,8 @@ public:
 	/*virtual*/ const LLVector4a*	getNextDistortion(U32 *index, LLPolyMesh **poly_mesh){index = 0; poly_mesh = NULL; return NULL;};
 
 protected:
+	LLPolySkeletalDistortion(const LLPolySkeletalDistortion& pOther);
+
 	LL_ALIGN_16(LLVector4a mDefaultVec);
 	typedef std::map<LLJoint*, LLVector3> joint_vec_map_t;
 	joint_vec_map_t mJointScales;

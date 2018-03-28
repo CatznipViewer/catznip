@@ -1,6 +1,18 @@
 /** 
- * @file llappviewer.h
- * @brief The LLAppViewer class declaration
+ * @mainpage
+ *
+ * This is the sources for the Second Life Viewer;
+ * information on the open source project is at 
+ * https://wiki.secondlife.com/wiki/Open_Source_Portal
+ *
+ * The Mercurial repository for the trunk version is at
+ * https://bitbucket.org/lindenlab/viewer-release
+ *
+ * @section source-license Source License
+ * @verbinclude LICENSE-source.txt
+ *
+ * @section artwork-license Artwork License
+ * @verbinclude LICENSE-logos.txt
  *
  * $LicenseInfo:firstyear=2007&license=viewerlgpl$
  * Second Life Viewer Source Code
@@ -22,6 +34,9 @@
  * 
  * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
  * $/LicenseInfo$
+ *
+ * @file llappviewer.h
+ * @brief The LLAppViewer class declaration
  */
 
 #ifndef LL_LLAPPVIEWER_H
@@ -32,7 +47,6 @@
 #include "llsys.h"			// for LLOSInfo
 #include "lltimer.h"
 #include "llappcorehttp.h"
-#include <boost/optional.hpp>
 
 class LLCommandLineParser;
 class LLFrameTimer;
@@ -41,11 +55,9 @@ class LLTextureCache;
 class LLImageDecodeThread;
 class LLTextureFetch;
 class LLWatchdogTimeout;
-class LLUpdaterService;
 class LLViewerJoystick;
 
-extern LLFastTimer::DeclareTimer FTM_FRAME;
-
+extern LLTrace::BlockTimerStatHandle FTM_FRAME;
 
 class LLAppViewer : public LLApp
 {
@@ -66,7 +78,7 @@ public:
 	//
 	virtual bool init();			// Override to do application initialization
 	virtual bool cleanup();			// Override to do application cleanup
-	virtual bool mainLoop(); // Override for the application main loop.  Needs to at least gracefully notice the QUITTING state and exit.
+	virtual bool frame(); // Override for application body logic
 
 	// Application control
 	void flushVFSIO(); // waits for vfs transfers to complete
@@ -81,17 +93,21 @@ public:
 
     bool quitRequested() { return mQuitRequested; }
     bool logoutRequestSent() { return mLogoutRequestSent; }
+	bool isSecondInstance() { return mSecondInstance; }
 
-	void writeDebugInfo();
+	void writeDebugInfo(bool isStatic=true);
 
-	const LLOSInfo& getOSInfo() const { return mSysOSInfo; }
+	void setServerReleaseNotesURL(const std::string& url) { mServerReleaseNotesURL = url; }
+	LLSD getViewerInfo() const;
+	std::string getViewerInfoString() const;
+	std::string getShortViewerInfoString() const;
 
 	// Report true if under the control of a debugger. A null-op default.
 	virtual bool beingDebugged() { return false; } 
 
 	virtual bool restoreErrorTrap() = 0; // Require platform specific override to reset error handling mechanism.
 	                                     // return false if the error trap needed restoration.
-	virtual void handleCrashReporting(bool reportFreeze = false) = 0; // What to do with crash report?
+	virtual void initCrashReporting(bool reportFreeze = false) = 0; // What to do with crash report?
 	static void handleViewerCrash(); // Hey! The viewer crashed. Do this, soon.
     void checkForCrash();
     
@@ -119,8 +135,12 @@ public:
     void loadNameCache();
     void saveNameCache();
 
-	void removeMarkerFile(bool leave_logout_marker = false);
+	void loadExperienceCache();
+	void saveExperienceCache();
+
+	void removeMarkerFiles();
 	
+	void removeDumpDir();
     // LLAppViewer testing helpers.
     // *NOTE: These will potentially crash the viewer. Only for debugging.
     virtual void forceErrorLLError();
@@ -171,6 +191,8 @@ public:
 	void addOnIdleCallback(const boost::function<void()>& cb); // add a callback to fire (once) when idle
 
 	void purgeCache(); // Clear the local cache. 
+	void purgeCacheImmediate(); //clear local cache immediately.
+	S32  updateTextureThreads(F32 max_time);
 	
 	// mute/unmute the system's master audio
 	virtual void setMasterSystemAudioMute(bool mute);
@@ -204,7 +226,6 @@ private:
 	bool initThreads(); // Initialize viewer threads, return false on failure.
 	bool initConfiguration(); // Initialize settings from the command line/config file.
 	void initStrings();       // Initialize LLTrans machinery
-	void initUpdater(); // Initialize the updater service.
 	bool initCache(); // Initialize local client cache.
 	void checkMemory() ;
 
@@ -224,12 +245,15 @@ private:
     void idle(); 
     void idleShutdown();
 	// update avatar SLID and display name caches
+	void idleExperienceCache();
 	void idleNameCache();
     void idleNetwork();
 
     void sendLogoutRequest();
     void disconnectViewer();
-	
+
+	bool onChangeFrameLimit(LLSD const & evt);
+
 	// *FIX: the app viewer class should be some sort of singleton, no?
 	// Perhaps its child class is the singleton and this should be an abstract base.
 	static LLAppViewer* sInstance; 
@@ -242,9 +266,9 @@ private:
 	std::string mLogoutMarkerFileName;
 	LLAPRFile mLogoutMarkerFile; // A file created to indicate the app is running.
 
-	
-	LLOSInfo mSysOSInfo; 
 	bool mReportedCrash;
+
+	std::string mServerReleaseNotesURL;
 
 	// Thread objects.
 	static LLTextureCache* sTextureCache; 
@@ -256,7 +280,6 @@ private:
 	std::string mSerialNumber;
 	bool mPurgeCache;
     bool mPurgeOnExit;
-	bool mMainLoopInitialized;
 	LLViewerJoystick* joystick;
 
 	bool mSavedFinalSnapshot;
@@ -266,13 +289,14 @@ private:
 
     bool mQuitRequested;				// User wants to quit, may have modified documents open.
     bool mLogoutRequestSent;			// Disconnect message sent to simulator, no longer safe to send messages to the sim.
-    S32 mYieldTime;
+	U32 mLastAgentControlFlags;
+	F32 mLastAgentForceUpdate;
 	struct SettingsFiles* mSettingsLocationList;
 
 	LLWatchdogTimeout* mMainloopTimeout;
 
 	// For performance and metric gathering
-	LLThread*	mFastTimerLogThread;
+	class LLThread*	mFastTimerLogThread;
 
 	// for tracking viewer<->region circuit death
 	bool mAgentRegionLastAlive;
@@ -281,31 +305,19 @@ private:
     LLAllocator mAlloc;
 
 	LLFrameTimer mMemCheckTimer;
-	
-	boost::scoped_ptr<LLUpdaterService> mUpdater;
 
 	// llcorehttp library init/shutdown helper
 	LLAppCoreHttp mAppCoreHttp;
 
-	//---------------------------------------------
-	//*NOTE: Mani - legacy updater stuff
-	// Still useable?
-public:
+        bool mIsFirstRun;
+	U64 mMinMicroSecPerFrame; // frame throttling
 
-	//some information for updater
-	typedef struct
-	{
-		std::string mUpdateExePath;
-		std::ostringstream mParams;
-	}LLUpdaterInfo ;
-	static LLUpdaterInfo *sUpdaterInfo ;
 
-	void launchUpdater();
-	//---------------------------------------------
 };
 
 // consts from viewer.h
 const S32 AGENT_UPDATES_PER_SECOND  = 10;
+const S32 AGENT_FORCE_UPDATES_PER_SECOND  = 1;
 
 // Globals with external linkage. From viewer.h
 // *NOTE:Mani - These will be removed as the Viewer App Cleanup project continues.
@@ -335,13 +347,12 @@ extern U32 gForegroundFrameCount;
 
 extern LLPumpIO* gServicePump;
 
-extern U64      gFrameTime;					// The timestamp of the most-recently-processed frame
-extern F32		gFrameTimeSeconds;			// Loses msec precision after ~4.5 hours...
-extern F32		gFrameIntervalSeconds;		// Elapsed time between current and previous gFrameTimeSeconds
+extern U64MicrosecondsImplicit	gStartTime;
+extern U64MicrosecondsImplicit   gFrameTime;					// The timestamp of the most-recently-processed frame
+extern F32SecondsImplicit		gFrameTimeSeconds;			// Loses msec precision after ~4.5 hours...
+extern F32SecondsImplicit		gFrameIntervalSeconds;		// Elapsed time between current and previous gFrameTimeSeconds
 extern F32		gFPSClamped;				// Frames per second, smoothed, weighted toward last frame
 extern F32		gFrameDTClamped;
-extern U64		gStartTime;
-extern U32 		gFrameStalls;
 
 extern LLTimer gRenderStartTime;
 extern LLFrameTimer gForegroundTime;
@@ -359,7 +370,8 @@ extern BOOL		gDisconnected;
 
 extern LLFrameTimer	gRestoreGLTimer;
 extern BOOL			gRestoreGL;
-extern BOOL		gUseWireframe;
+extern bool		gUseWireframe;
+extern bool		gInitialDeferredModeForWireframe;
 
 // VFS globals - gVFS is for general use
 // gStaticVFS is read-only and is shipped w/ the viewer
@@ -368,7 +380,7 @@ class LLVFS;
 extern LLVFS	*gStaticVFS;
 
 extern LLMemoryInfo gSysMemory;
-extern U64 gMemoryAllocated;
+extern U64Bytes gMemoryAllocated;
 
 extern std::string gLastVersionChannel;
 
@@ -379,6 +391,7 @@ extern BOOL gPrintMessagesThisFrame;
 
 extern LLUUID gSunTextureID;
 extern LLUUID gMoonTextureID;
+extern LLUUID gBlackSquareID;
 
 extern BOOL gRandomizeFramerate;
 extern BOOL gPeriodicSlowFrame;

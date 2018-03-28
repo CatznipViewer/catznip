@@ -3,18 +3,22 @@
 project(llui)
 
 include(00-Common)
+include(Hunspell)
 include(LLCommon)
 include(LLImage)
 include(LLInventory)
 include(LLMath)
 include(LLMessage)
+include(LLCoreHttp)
 include(LLRender)
 include(LLWindow)
+include(LLCoreHttp)
 include(LLVFS)
 include(LLXML)
 
 include_directories(
     ${LLCOMMON_INCLUDE_DIRS}
+    ${LLCOREHTTP_INCLUDE_DIRS}
     ${LLIMAGE_INCLUDE_DIRS}
     ${LLINVENTORY_INCLUDE_DIRS}
     ${LLMATH_INCLUDE_DIRS}
@@ -61,7 +65,6 @@ set(llui_SOURCE_FILES
     llfolderview.cpp
     llfolderviewitem.cpp
     llfolderviewmodel.cpp
-    llfunctorregistry.cpp
     lliconctrl.cpp
     llkeywords.cpp
     lllayoutstack.cpp
@@ -145,6 +148,7 @@ set(llui_HEADER_FILES
     llbutton.h
     llcallbackmap.h
     llchatentry.h
+    llchat.h
     llcheckboxctrl.h
     llclipboard.h
     llcombobox.h
@@ -268,16 +272,18 @@ add_library (llui ${llui_SOURCE_FILES})
 # Libraries on which this library depends, needed for Linux builds
 # Sort by high-level to low-level
 target_link_libraries(llui
-    ${LLMESSAGE_LIBRARIES}
     ${LLRENDER_LIBRARIES}
     ${LLWINDOW_LIBRARIES}
     ${LLIMAGE_LIBRARIES}
     ${LLINVENTORY_LIBRARIES}
+    ${LLMESSAGE_LIBRARIES}
+    ${LLCOREHTTP_LIBRARIES}
     ${LLVFS_LIBRARIES}    # ugh, just for LLDir
     ${LLXUIXML_LIBRARIES}
     ${LLXML_LIBRARIES}
     ${LLMATH_LIBRARIES}
     ${HUNSPELL_LIBRARY}
+    ${LLMESSAGE_LIBRARIES}
     ${LLCOMMON_LIBRARIES} # must be after llimage, llwindow, llrender
     )
 
@@ -286,7 +292,15 @@ if(LL_TESTS)
   include(LLAddBuildTest)
   SET(llui_TEST_SOURCE_FILES
       llurlmatch.cpp
-      llurlentry.cpp
       )
   LL_ADD_PROJECT_UNIT_TESTS(llui "${llui_TEST_SOURCE_FILES}")
+  # INTEGRATION TESTS
+  set(test_libs llui llmessage llcorehttp llcommon
+      ${HUNSPELL_LIBRARY}
+      ${LLCOMMON_LIBRARIES}
+      ${BOOST_COROUTINE_LIBRARY} ${BOOST_CONTEXT_LIBRARY} ${BOOST_SYSTEM_LIBRARY}
+      ${WINDOWS_LIBRARIES})
+  if(NOT LINUX)
+    LL_ADD_INTEGRATION_TEST(llurlentry llurlentry.cpp "${test_libs}")
+  endif(NOT LINUX)
 endif(LL_TESTS)

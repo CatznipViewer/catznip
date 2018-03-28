@@ -620,7 +620,7 @@ void LLPanelVolume::sendIsLight()
 	
 	BOOL value = getChild<LLUICtrl>("Light Checkbox Ctrl")->getValue();
 	volobjp->setIsLight(value);
-	llinfos << "update light sent" << llendl;
+	LL_INFOS() << "update light sent" << LL_ENDL;
 }
 
 void LLPanelVolume::sendIsFlexible()
@@ -652,7 +652,7 @@ void LLPanelVolume::sendIsFlexible()
 		LLSelectMgr::getInstance()->selectionUpdatePhantom(volobjp->flagPhantom());
 	}
 
-	llinfos << "update flexible sent" << llendl;
+	LL_INFOS() << "update flexible sent" << LL_ENDL;
 }
 
 void LLPanelVolume::sendPhysicsShapeType(LLUICtrl* ctrl, void* userdata)
@@ -710,19 +710,26 @@ void LLPanelVolume::onLightCancelColor(const LLSD& data)
 void LLPanelVolume::onLightCancelTexture(const LLSD& data)
 {
 	LLTextureCtrl* LightTextureCtrl = getChild<LLTextureCtrl>("light texture control");
-
-	if (LightTextureCtrl)
-	{
-		LightTextureCtrl->setImageAssetID(LLUUID::null);
-	}
-
 	LLVOVolume *volobjp = (LLVOVolume *) mObject.get();
-	if(volobjp)
+
+	if (volobjp && LightTextureCtrl)
 	{
 		// Cancel the light texture as requested
 		// NORSPEC-292
-		//
-		volobjp->setLightTextureID(LLUUID::null);
+        //
+        // Texture picker triggers cancel both in case of actual cancel and in case of
+        // selection of "None" texture.
+        LLUUID tex_id = LightTextureCtrl->getImageAssetID();
+        bool is_spotlight = volobjp->isLightSpotlight();
+        volobjp->setLightTextureID(tex_id); //updates spotlight
+
+        if (!is_spotlight && tex_id.notNull())
+        {
+            LLVector3 spot_params = volobjp->getSpotLightParams();
+            getChild<LLUICtrl>("Light FOV")->setValue(spot_params.mV[0]);
+            getChild<LLUICtrl>("Light Focus")->setValue(spot_params.mV[1]);
+            getChild<LLUICtrl>("Light Ambiance")->setValue(spot_params.mV[2]);
+        }
 	}
 }
 
@@ -760,7 +767,6 @@ void LLPanelVolume::onLightSelectTexture(const LLSD& data)
 	{
 		LLUUID id = LightTextureCtrl->getImageAssetID();
 		volobjp->setLightTextureID(id);
-		mLightSavedTexture = id;
 	}
 }
 
@@ -821,7 +827,12 @@ void LLPanelVolume::onCommitLight( LLUICtrl* ctrl, void* userdata )
 				self->getChild<LLUICtrl>("Light Ambiance")->setValue(spot_params.mV[2]);
 			}
 			else
-			{ //modifying existing params
+			{ //modifying existing params, this time volobjp won't change params on its own.
+                if (volobjp->getLightTextureID() != id)
+                {
+                    volobjp->setLightTextureID(id);
+                }
+
 				LLVector3 spot_params;
 				spot_params.mV[0] = (F32) self->getChild<LLUICtrl>("Light FOV")->getValue().asReal();
 				spot_params.mV[1] = (F32) self->getChild<LLUICtrl>("Light Focus")->getValue().asReal();

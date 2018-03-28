@@ -50,7 +50,7 @@ protected:
 	virtual bool initParseCommandLine(LLCommandLineParser& clp);
 
 	virtual bool restoreErrorTrap();
-	virtual void handleCrashReporting(bool reportFreeze); 
+	virtual void initCrashReporting(bool reportFreeze); 
 
 	virtual bool sendURLToOtherInstance(const std::string& url);
 
@@ -61,7 +61,8 @@ protected:
 private:
 	void disableWinErrorReporting();
 
-    std::string mCmdLine;
+	std::string mCmdLine;
+	bool mIsConsoleAllocated;
 };
 
 #endif // LL_LLAPPVIEWERWIN32_H

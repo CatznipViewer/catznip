@@ -28,7 +28,6 @@
 
 #include "llchatbar.h"
 
-#include "imageids.h"
 #include "llfontgl.h"
 #include "llrect.h"
 #include "llerror.h"
@@ -312,7 +311,8 @@ LLWString LLChatBar::stripChannelNumber(const LLWString &mesg, S32* channel)
 	}
 	else if (mesg[0] == '/'
 			 && mesg[1]
-			 && LLStringOps::isDigit(mesg[1]))
+			 && (LLStringOps::isDigit(mesg[1])
+				 || (mesg[1] == '-' && mesg[2] && LLStringOps::isDigit(mesg[2]))))
 	{
 		// This a special "/20" speak on a channel
 		S32 pos = 0;
@@ -326,7 +326,7 @@ LLWString LLChatBar::stripChannelNumber(const LLWString &mesg, S32* channel)
 			channel_string.push_back(c);
 			pos++;
 		}
-		while(c && pos < 64 && LLStringOps::isDigit(c));
+		while(c && pos < 64 && (LLStringOps::isDigit(c) || (pos == 1 && c == '-')));
 		
 		// Move the pointer forward to the first non-whitespace char
 		// Check isspace before looping, so we can handle "/33foo"
@@ -522,10 +522,10 @@ void LLChatBar::onInputEditorKeystroke( LLLineEditor* caller, void* userdata )
 			}
 		}
 
-		//llinfos << "GESTUREDEBUG " << trigger 
+		//LL_INFOS() << "GESTUREDEBUG " << trigger 
 		//	<< " len " << length
 		//	<< " outlen " << out_str.getLength()
-		//	<< llendl;
+		//	<< LL_ENDL;
 	}
 }
 
@@ -589,22 +589,22 @@ void LLChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL 
 	{
 		if (type == CHAT_TYPE_WHISPER)
 		{
-			lldebugs << "You whisper " << utf8_text << llendl;
+			LL_DEBUGS() << "You whisper " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_WHISPER, ANIM_REQUEST_START);
 		}
 		else if (type == CHAT_TYPE_NORMAL)
 		{
-			lldebugs << "You say " << utf8_text << llendl;
+			LL_DEBUGS() << "You say " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_TALK, ANIM_REQUEST_START);
 		}
 		else if (type == CHAT_TYPE_SHOUT)
 		{
-			lldebugs << "You shout " << utf8_text << llendl;
+			LL_DEBUGS() << "You shout " << utf8_text << LL_ENDL;
 			gAgent.sendAnimationRequest(ANIM_AGENT_SHOUT, ANIM_REQUEST_START);
 		}
 		else
 		{
-			llinfos << "send_chat_from_viewer() - invalid volume" << llendl;
+			LL_INFOS() << "send_chat_from_viewer() - invalid volume" << LL_ENDL;
 			return;
 		}
 	}
@@ -612,30 +612,12 @@ void LLChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL 
 	{
 		if (type != CHAT_TYPE_START && type != CHAT_TYPE_STOP)
 		{
-			lldebugs << "Channel chat: " << utf8_text << llendl;
+			LL_DEBUGS() << "Channel chat: " << utf8_text << LL_ENDL;
 		}
 	}
 
 	send_chat_from_viewer(utf8_out_text, type, channel);
 }
-/*
-void send_chat_from_viewer(const std::string& utf8_out_text, EChatType type, S32 channel)
-{
-	LLMessageSystem* msg = gMessageSystem;
-	msg->newMessageFast(_PREHASH_ChatFromViewer);
-	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-	msg->nextBlockFast(_PREHASH_ChatData);
-	msg->addStringFast(_PREHASH_Message, utf8_out_text);
-	msg->addU8Fast(_PREHASH_Type, type);
-	msg->addS32("Channel", channel);
-
-	gAgent.sendReliableMessage();
-
-	LLViewerStats::getInstance()->incStat(LLViewerStats::ST_CHAT_COUNT);
-}
-*/
 
 void LLChatBar::onCommitGesture(LLUICtrl* ctrl)
 {

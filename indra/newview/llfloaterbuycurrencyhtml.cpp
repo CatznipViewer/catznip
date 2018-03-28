@@ -27,6 +27,7 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llfloaterbuycurrencyhtml.h"
+#include "llhttpconstants.h"
 #include "llstatusbar.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,10 +83,10 @@ void LLFloaterBuyCurrencyHTML::navigateToFinalURL()
 	LLStringUtil::format( buy_currency_url, replace );
 
 	// write final URL to debug console
-	llinfos << "Buy currency HTML parsed URL is " << buy_currency_url << llendl;
+	LL_INFOS() << "Buy currency HTML parsed URL is " << buy_currency_url << LL_ENDL;
 
 	// kick off the navigation
-	mBrowser->navigateTo( buy_currency_url, "text/html" );
+	mBrowser->navigateTo( buy_currency_url, HTTP_CONTENT_TEXT_HTML );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

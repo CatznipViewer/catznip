@@ -49,16 +49,7 @@ static LLStaticHashedString sBlurWidth("blurWidth");
 
 LLPostProcess * gPostProcess = NULL;
 
-
 static const unsigned int NOISE_SIZE = 512;
-
-/// CALCULATING LUMINANCE (Using NTSC lum weights)
-/// http://en.wikipedia.org/wiki/Luma_%28video%29
-static const float LUMINANCE_R = 0.299f;
-static const float LUMINANCE_G = 0.587f;
-static const float LUMINANCE_B = 0.114f;
-
-static const char * const XML_FILENAME = "postprocesseffects.xml";
 
 LLPostProcess::LLPostProcess(void) : 
 					initialized(false),  
@@ -73,7 +64,7 @@ LLPostProcess::LLPostProcess(void) :
 					
 	/*  Do nothing.  Needs to be updated to use our current shader system, and to work with the move into llrender.
 	std::string pathName(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "windlight", XML_FILENAME));
-	LL_DEBUGS2("AppInit", "Shaders") << "Loading PostProcess Effects settings from " << pathName << LL_ENDL;
+	LL_DEBUGS("AppInit", "Shaders") << "Loading PostProcess Effects settings from " << pathName << LL_ENDL;
 
 	llifstream effectsXML(pathName);
 
@@ -160,7 +151,7 @@ void LLPostProcess::saveEffect(std::string const & effectName)
 	mAllEffects[effectName] = tweaks;
 
 	std::string pathName(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "windlight", XML_FILENAME));
-	//llinfos << "Saving PostProcess Effects settings to " << pathName << llendl;
+	//LL_INFOS() << "Saving PostProcess Effects settings to " << pathName << LL_ENDL;
 
 	llofstream effectsXML(pathName);
 

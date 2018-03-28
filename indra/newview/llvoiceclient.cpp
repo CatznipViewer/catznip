@@ -36,6 +36,7 @@
 #include "llsdserialize.h"
 #include "llui.h"
 #include "llkeyboard.h"
+#include "llagent.h"
 
 const F32 LLVoiceClient::OVERDRIVEN_POWER_LEVEL = 0.7f;
 
@@ -160,6 +161,13 @@ void LLVoiceClient::userAuthorized(const std::string& user_id, const LLUUID &age
 	mVoiceModule->userAuthorized(user_id, agentID);
 }
 
+void LLVoiceClient::setHidden(bool hidden)
+{
+    if (mVoiceModule)
+    {
+        mVoiceModule->setHidden(hidden);
+    }
+}
 
 void LLVoiceClient::terminate()
 {
@@ -192,7 +200,10 @@ void LLVoiceClient::updateSettings()
 
 	updateMicMuteLogic();
 
-	if (mVoiceModule) mVoiceModule->updateSettings();
+	if (mVoiceModule)
+    {
+        mVoiceModule->updateSettings();
+    }
 }
 
 //--------------------------------------------------
@@ -251,6 +262,18 @@ bool LLVoiceClient::deviceSettingsAvailable()
 	if (mVoiceModule) 
 	{
 		return mVoiceModule->deviceSettingsAvailable();
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool LLVoiceClient::deviceSettingsUpdated()
+{
+	if (mVoiceModule)
+	{
+		return mVoiceModule->deviceSettingsUpdated();
 	}
 	else
 	{
@@ -355,6 +378,7 @@ BOOL LLVoiceClient::isSessionCallBackPossible(const LLUUID& id)
 	}	
 }
 
+/* obsolete
 BOOL LLVoiceClient::sendTextMessage(const LLUUID& participant_id, const std::string& message)
 {
 	if (mVoiceModule) 
@@ -366,12 +390,13 @@ BOOL LLVoiceClient::sendTextMessage(const LLUUID& participant_id, const std::str
 		return FALSE;
 	}	
 }
+*/
 
 void LLVoiceClient::endUserIMSession(const LLUUID& participant_id)
 {
 	if (mVoiceModule) 
 	{
-		mVoiceModule->endUserIMSession(participant_id);
+		// mVoiceModule->endUserIMSession(participant_id);  // A SLim leftover
 	}
 }
 
@@ -394,24 +419,36 @@ void LLVoiceClient::setNonSpatialChannel(
 	const std::string &uri,
 	const std::string &credentials)
 {
-	if (mVoiceModule) mVoiceModule->setNonSpatialChannel(uri, credentials);
+	if (mVoiceModule)
+    {
+        mVoiceModule->setNonSpatialChannel(uri, credentials);
+    }
 }
 
 void LLVoiceClient::setSpatialChannel(
 	const std::string &uri,
 	const std::string &credentials)
 {
-	if (mVoiceModule) mVoiceModule->setSpatialChannel(uri, credentials);
+	if (mVoiceModule)
+    {
+        mVoiceModule->setSpatialChannel(uri, credentials);
+    }
 }
 
 void LLVoiceClient::leaveNonSpatialChannel()
 {
-	if (mVoiceModule) mVoiceModule->leaveNonSpatialChannel();
+	if (mVoiceModule)
+    {
+        mVoiceModule->leaveNonSpatialChannel();
+    }
 }
 
 void LLVoiceClient::leaveChannel(void)
 {
-	if (mVoiceModule) mVoiceModule->leaveChannel();
+	if (mVoiceModule)
+    {
+        mVoiceModule->leaveChannel();
+    }
 }
 
 std::string LLVoiceClient::getCurrentChannel()
@@ -497,7 +534,10 @@ bool LLVoiceClient::voiceEnabled()
 
 void LLVoiceClient::setVoiceEnabled(bool enabled)
 {
-	if (mVoiceModule) mVoiceModule->setVoiceEnabled(enabled);
+	if (mVoiceModule)
+    {
+        mVoiceModule->setVoiceEnabled(enabled);
+    }
 }
 
 void LLVoiceClient::updateMicMuteLogic()
@@ -635,31 +675,32 @@ void LLVoiceClient::keyDown(KEY key, MASK mask)
 		return;
 	}
 	
-	if(!mPTTIsMiddleMouse)
+	if (!mPTTIsMiddleMouse && LLAgent::isActionAllowed("speak") && (key == mPTTKey))
 	{
-		bool down = (mPTTKey != KEY_NONE)
-		&& gKeyboard->getKeyDown(mPTTKey);
-		inputUserControlState(down);
+		bool down = gKeyboard->getKeyDown(mPTTKey);
+		if (down)
+		{
+			inputUserControlState(down);
+		}
 	}
 	
 }
 void LLVoiceClient::keyUp(KEY key, MASK mask)
 {
-	if(!mPTTIsMiddleMouse)
+	if (!mPTTIsMiddleMouse && (key == mPTTKey))
 	{
-		bool down = (mPTTKey != KEY_NONE)
-		&& gKeyboard->getKeyDown(mPTTKey);
-		inputUserControlState(down);
+		bool down = gKeyboard->getKeyDown(mPTTKey);
+		if (!down)
+		{
+			inputUserControlState(down);
+		}
 	}
 }
 void LLVoiceClient::middleMouseState(bool down)
 {
-	if(mPTTIsMiddleMouse)
+	if(mPTTIsMiddleMouse && LLAgent::isActionAllowed("speak"))
 	{
-        if(mPTTIsMiddleMouse)
-        {
-			inputUserControlState(down);
-        }		
+		inputUserControlState(down);
 	}
 }
 
@@ -1019,10 +1060,15 @@ void LLSpeakerVolumeStorage::load()
 
 	LLSD settings_llsd;
 	llifstream file;
-	file.open(filename);
+	file.open(filename.c_str());
 	if (file.is_open())
 	{
-		LLSDSerialize::fromXML(settings_llsd, file);
+		if (LLSDParser::PARSE_FAILURE == LLSDSerialize::fromXML(settings_llsd, file))
+        {
+            LL_WARNS("Voice") << "failed to parse " << filename << LL_ENDL;
+            
+        }
+            
 	}
 
 	for (LLSD::map_const_iterator iter = settings_llsd.beginMap();
@@ -1057,7 +1103,7 @@ void LLSpeakerVolumeStorage::save()
 		}
 
 		llofstream file;
-		file.open(filename);
+		file.open(filename.c_str());
 		LLSDSerialize::toPrettyXML(settings_llsd, file);
 	}
 }

@@ -35,10 +35,9 @@
 #include "llscreenchannel.h"
 #include "llscriptfloater.h"
 #include "llviewermessage.h"
-
-LLPersistentNotificationStorage::LLPersistentNotificationStorage()
-	: LLSingleton<LLPersistentNotificationStorage>()
-	, LLNotificationStorage("")
+#include "llviewernetwork.h"
+LLPersistentNotificationStorage::LLPersistentNotificationStorage():
+	  LLNotificationStorage("")
 	, mLoaded(false)
 {
 }
@@ -47,11 +46,11 @@ LLPersistentNotificationStorage::~LLPersistentNotificationStorage()
 {
 }
 
-static LLFastTimer::DeclareTimer FTM_SAVE_NOTIFICATIONS("Save Notifications");
+static LLTrace::BlockTimerStatHandle FTM_SAVE_NOTIFICATIONS("Save Notifications");
 
 void LLPersistentNotificationStorage::saveNotifications()
 {
-	LLFastTimer _(FTM_SAVE_NOTIFICATIONS);
+	LL_RECORD_BLOCK_TIME(FTM_SAVE_NOTIFICATIONS);
 
 	boost::intrusive_ptr<LLPersistentNotificationChannel> history_channel = boost::dynamic_pointer_cast<LLPersistentNotificationChannel>(LLNotifications::instance().getChannel("Persistent"));
 	if (!history_channel)
@@ -79,9 +78,9 @@ void LLPersistentNotificationStorage::saveNotifications()
 		data.append(notification->asLLSD(true));
 		if (data.size() >= gSavedSettings.getS32("MaxPersistentNotifications"))
 		{
-			llwarns << "Too many persistent notifications."
+			LL_WARNS() << "Too many persistent notifications."
 					<< " Saved " << gSavedSettings.getS32("MaxPersistentNotifications") << " of " << history_channel->size()
-					<< " persistent notifications." << llendl;
+					<< " persistent notifications." << LL_ENDL;
 			break;
 		}
 
@@ -90,11 +89,11 @@ void LLPersistentNotificationStorage::saveNotifications()
 	writeNotifications(output);
 }
 
-static LLFastTimer::DeclareTimer FTM_LOAD_NOTIFICATIONS("Load Notifications");
+static LLTrace::BlockTimerStatHandle FTM_LOAD_NOTIFICATIONS("Load Notifications");
 
 void LLPersistentNotificationStorage::loadNotifications()
 {
-	LLFastTimer _(FTM_LOAD_NOTIFICATIONS);
+	LL_RECORD_BLOCK_TIME(FTM_LOAD_NOTIFICATIONS);
 
 	LL_INFOS("LLPersistentNotificationStorage") << "start loading notifications" << LL_ENDL;
 
@@ -123,9 +122,26 @@ void LLPersistentNotificationStorage::loadNotifications()
 
 	LLNotifications& instance = LLNotifications::instance();
 	S32 processed_notifications = 0;
+	std::vector<LLSD> notifications_array;
 	for (LLSD::reverse_array_iterator notification_it = data.rbeginArray();
 		notification_it != data.rendArray();
 		++notification_it)
+	{
+		LLSD notification_params = *notification_it;
+		notifications_array.push_back(notification_params);
+
+		++processed_notifications;
+		if (processed_notifications >= gSavedSettings.getS32("MaxPersistentNotifications"))
+		{
+			LL_WARNS() << "Too many persistent notifications."
+					<< " Processed " << gSavedSettings.getS32("MaxPersistentNotifications") << " of " << data.size() << " persistent notifications." << LL_ENDL;
+		    break;
+		}
+	}
+
+	for (LLSD::reverse_array_iterator notification_it = notifications_array.rbegin();
+			notification_it != notifications_array.rend();
+			++notification_it)
 	{
 		LLSD notification_params = *notification_it;
 		LLNotificationPtr notification(new LLNotification(notification_params));
@@ -143,14 +159,8 @@ void LLPersistentNotificationStorage::loadNotifications()
 			// hide saved toasts so they don't confuse the user
 			notification_channel->hideToast(notification->getID());
 		}
-		++processed_notifications;
-		if (processed_notifications >= gSavedSettings.getS32("MaxPersistentNotifications"))
-		{
-			llwarns << "Too many persistent notifications."
-					<< " Processed " << gSavedSettings.getS32("MaxPersistentNotifications") << " of " << data.size() << " persistent notifications." << llendl;
-		    break;
 	}
-	}
+
 	LLNotifications::instance().getChannel("Persistent")->
 			connectChanged(boost::bind(&LLPersistentNotificationStorage::onPersistentChannelChanged, this, _1));
 	LL_INFOS("LLPersistentNotificationStorage") << "finished loading notifications" << LL_ENDL;
@@ -158,7 +168,10 @@ void LLPersistentNotificationStorage::loadNotifications()
 
 void LLPersistentNotificationStorage::initialize()
 {
-	setFileName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "open_notifications.xml"));
+	std::string file_name = "open_notifications_" + LLGridManager::getInstance()->getGrid() + ".xml";
+	setFileName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, file_name));
+	setOldFileName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "open_notifications.xml"));
+
 	LLNotifications::instance().getChannel("Persistent")->
 		connectChanged(boost::bind(&LLPersistentNotificationStorage::onPersistentChannelChanged, this, _1));
 }

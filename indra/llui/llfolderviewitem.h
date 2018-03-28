@@ -59,7 +59,8 @@ public:
 													item_top_pad;
 
 		Optional<time_t>							creation_date;
-		Optional<bool>								allow_open;
+		Optional<bool>								allow_wear;
+		Optional<bool>								allow_drop;
 
 		Optional<LLUIColor>                         font_color;
 		Optional<LLUIColor>                         font_highlight_color;
@@ -114,12 +115,17 @@ protected:
 	F32							mControlLabelRotation;
 	LLFolderView*				mRoot;
 	bool						mHasVisibleChildren,
+								mIsFolderComplete, // indicates that some children were not loaded/added yet
 								mIsCurSelection,
 								mDragAndDropTarget,
 								mIsMouseOverTitle,
-								mAllowOpen,
-								mSelectPending;
-	
+								mAllowWear,
+                                mAllowDrop,
+								mSelectPending,
+								mIsItemCut;
+
+	S32							mCutGeneration;
+
 	LLUIColor                   mFontColor;
 	LLUIColor                   mFontHighlightColor;
 
@@ -142,6 +148,7 @@ protected:
 	virtual void addFolder(LLFolderViewFolder*) { }
 	virtual bool isHighlightAllowed();
 	virtual bool isHighlightActive();
+	virtual bool isFadeItem();
 	virtual bool isFlashing() { return false; }
 	virtual void setFlashState(bool) { }
 
@@ -210,6 +217,9 @@ public:
 
 	BOOL hasVisibleChildren() { return mHasVisibleChildren; }
 
+	// true if object can't have children
+	BOOL isFolderComplete() { return mIsFolderComplete; }
+
 	// Call through to the viewed object and return true if it can be
 	// removed. Returns true if it's removed.
 	//virtual BOOL removeRecursively(BOOL single_item);
@@ -254,6 +264,7 @@ public:
 	S32				getIndentation() { return mIndentation; }
 
 	virtual BOOL	passedFilter(S32 filter_generation = -1);
+	virtual BOOL	isPotentiallyVisible(S32 filter_generation = -1);
 
 	// refresh information from the object being viewed.
 	virtual void refresh();
@@ -453,5 +464,12 @@ public:
 	template<typename SORT_FUNC> void sortItems(const SORT_FUNC& func) { mItems.sort(func); }
 };
 
+typedef std::deque<LLFolderViewItem*> folder_view_item_deque;
+
+class LLFolderViewGroupedItemModel: public LLRefCount
+{
+public:
+    virtual void groupFilterContextMenu(folder_view_item_deque& selected_items, LLMenuGL& menu) = 0;
+};
 
 #endif  // LLFOLDERVIEWITEM_H

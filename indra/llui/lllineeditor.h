@@ -90,6 +90,7 @@ public:
 										spellcheck,
 										commit_on_focus_lost,
 										ignore_tab,
+										bg_image_always_focused,
 										is_password;
 
 		// colors
@@ -107,6 +108,9 @@ public:
 		
 		Params();
 	};
+
+	void initFromParams(const LLLineEditor::Params& params);
+
 protected:
 	LLLineEditor(const Params&);
 	friend class LLUICtrlFactory;
@@ -271,7 +275,7 @@ public:
 
 	void			setReplaceNewlinesWithSpaces(BOOL replace);
 
-	void			setContextMenu(LLContextMenu* new_context_menu);
+	void			resetContextMenu() { setContextMenu(NULL); };
 
 private:
 	// private helper methods
@@ -306,6 +310,8 @@ private:
 	virtual BOOL	getPreeditLocation(S32 query_position, LLCoordGL *coord, LLRect *bounds, LLRect *control) const;
 	virtual S32		getPreeditFontSize() const;
 	virtual LLWString getPreeditString() const { return getWText(); }
+
+	void			setContextMenu(LLContextMenu* new_context_menu);
 
 protected:
 	LLUIString		mText;					// The string being edited.
@@ -374,6 +380,8 @@ protected:
 	BOOL		mPassDelete;
 
 	BOOL		mReadOnly;
+
+	BOOL 		mShowImageFocused;
 
 	LLWString	mPreeditWString;
 	LLWString	mPreeditOverwrittenWString;

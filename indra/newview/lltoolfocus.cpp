@@ -53,6 +53,7 @@
 #include "llmorphview.h"
 #include "llfloaterreg.h"
 #include "llfloatercamera.h"
+#include "llmenugl.h"
 
 // Globals
 BOOL gCameraBtnZoom = TRUE;
@@ -60,7 +61,6 @@ BOOL gCameraBtnOrbit = FALSE;
 BOOL gCameraBtnPan = FALSE;
 
 const S32 SLOP_RANGE = 4;
-const F32 FOCUS_OFFSET_FACTOR = 1.f;
 
 //
 // Camera - shared functionality
@@ -75,6 +75,7 @@ LLToolCamera::LLToolCamera()
 	mOutsideSlopX(FALSE),
 	mOutsideSlopY(FALSE),
 	mValidClickPoint(FALSE),
+	mValidSelection(FALSE),
 	mMouseSteering(FALSE),
 	mMouseUpX(0),
 	mMouseUpY(0),
@@ -91,6 +92,8 @@ void LLToolCamera::handleSelect()
 	if (gFloaterTools)
 	{
 		gFloaterTools->setStatusText("camera");
+		// in case we start from tools floater, we count any selection as valid
+		mValidSelection = gFloaterTools->getVisible();
 	}
 }
 
@@ -98,6 +101,14 @@ void LLToolCamera::handleSelect()
 void LLToolCamera::handleDeselect()
 {
 //	gAgent.setLookingAtAvatar(FALSE);
+
+	// Make sure that temporary selection won't pass anywhere except pie tool.
+	MASK override_mask = gKeyboard ? gKeyboard->currentMask(TRUE) : 0;
+	if (!mValidSelection && (override_mask != MASK_NONE || (gFloaterTools && gFloaterTools->getVisible())))
+	{
+		LLMenuGL::sMenuContainer->hideMenus();
+		LLSelectMgr::getInstance()->validateSelection();
+	}
 }
 
 BOOL LLToolCamera::handleMouseDown(S32 x, S32 y, MASK mask)
@@ -124,7 +135,7 @@ BOOL LLToolCamera::handleMouseDown(S32 x, S32 y, MASK mask)
 
 	gViewerWindow->hideCursor();
 
-	gViewerWindow->pickAsync(x, y, mask, pickCallback);
+	gViewerWindow->pickAsync(x, y, mask, pickCallback, /*BOOL pick_transparent*/ FALSE, /*BOOL pick_rigged*/ FALSE, /*BOOL pick_unselectable*/ TRUE);
 
 	return TRUE;
 }
@@ -212,6 +223,7 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 		}
 
 		if (!(pick_info.mKeyMask & MASK_ALT) &&
+			!LLFloaterCamera::inFreeCameraMode() &&
 			gAgentCamera.cameraThirdPerson() &&
 			gViewerWindow->getLeftMouseDown() && 
 			!gSavedSettings.getBOOL("FreezeTime") &&
@@ -334,7 +346,7 @@ BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 	{
 		if (!mValidClickPoint)
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolFocus [invalid point]" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolFocus [invalid point]" << LL_ENDL;
 			gViewerWindow->setCursor(UI_CURSOR_NO);
 			gViewerWindow->showCursor();
 			return TRUE;
@@ -361,7 +373,7 @@ BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 
 				gViewerWindow->moveCursorToCenter();
 			}
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolFocus [active]" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolFocus [active]" << LL_ENDL;
 		}
 		else if (	gCameraBtnPan ||
 					mask == MASK_PAN ||
@@ -389,7 +401,7 @@ BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 
 				gViewerWindow->moveCursorToCenter();
 			}
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPan" << llendl;
+			LL_DEBUGS("UserInput") << "hover handled by LLToolPan" << LL_ENDL;
 		}
 		else if (gCameraBtnZoom)
 		{
@@ -421,7 +433,7 @@ BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 				gViewerWindow->moveCursorToCenter();
 			}
 
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolZoom" << llendl;		
+			LL_DEBUGS("UserInput") << "hover handled by LLToolZoom" << LL_ENDL;		
 		}
 	}
 

@@ -31,6 +31,7 @@
 #include "llcachename.h"
 #include "lluuid.h"
 #include "message.h"
+#include "llpounceable.h"
 
 #include <string>
 
@@ -165,9 +166,7 @@ LLFontGL* LLFontGL::getFontDefault()
 char const* const _PREHASH_AgentData = (char *)"AgentData";
 char const* const _PREHASH_AgentID = (char *)"AgentID";
 
-LLHost LLHost::invalid(INVALID_PORT,INVALID_HOST_IP_ADDRESS);
-
-LLMessageSystem* gMessageSystem = NULL;
+LLPounceable<LLMessageSystem*, LLPounceableStatic> gMessageSystem;
 
 //
 // Stub implementation for LLMessageSystem

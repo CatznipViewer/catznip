@@ -35,6 +35,7 @@
 #include "llxmltree.h"
 #include "llendianswizzle.h"
 #include "llpolymesh.h"
+#include "llfasttimer.h"
 
 //#include "../tools/imdebug/imdebug.h"
 
@@ -112,7 +113,7 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 	llendianswizzle(&numVertices, sizeof(S32), 1);
 	if (numRead != 1)
 	{
-		llwarns << "Can't read number of morph target vertices" << llendl;
+		LL_WARNS() << "Can't read number of morph target vertices" << LL_ENDL;
 		return FALSE;
 	}
 
@@ -149,13 +150,13 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 		llendianswizzle(&mVertexIndices[v], sizeof(U32), 1);
 		if (numRead != 1)
 		{
-			llwarns << "Can't read morph target vertex number" << llendl;
+			LL_WARNS() << "Can't read morph target vertex number" << LL_ENDL;
 			return FALSE;
 		}
 
 		if (mVertexIndices[v] > 10000)
 		{
-			llerrs << "Bad morph index: " << mVertexIndices[v] << llendl;
+			LL_ERRS() << "Bad morph index: " << mVertexIndices[v] << LL_ENDL;
 		}
 
 
@@ -163,7 +164,7 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 		llendianswizzle(&mCoords[v], sizeof(F32), 3);
 		if (numRead != 3)
 		{
-			llwarns << "Can't read morph target vertex coordinates" << llendl;
+			LL_WARNS() << "Can't read morph target vertex coordinates" << LL_ENDL;
 			return FALSE;
 		}
 
@@ -183,7 +184,7 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 		llendianswizzle(&mNormals[v], sizeof(F32), 3);
 		if (numRead != 3)
 		{
-			llwarns << "Can't read morph target normal" << llendl;
+			LL_WARNS() << "Can't read morph target normal" << LL_ENDL;
 			return FALSE;
 		}
 
@@ -191,7 +192,7 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 		llendianswizzle(&mBinormals[v], sizeof(F32), 3);
 		if (numRead != 3)
 		{
-			llwarns << "Can't read morph target binormal" << llendl;
+			LL_WARNS() << "Can't read morph target binormal" << LL_ENDL;
 			return FALSE;
 		}
 
@@ -200,7 +201,7 @@ BOOL LLPolyMorphData::loadBinary(LLFILE *fp, LLPolyMeshSharedData *mesh)
 		llendianswizzle(&mTexCoords[v].mV, sizeof(F32), 2);
 		if (numRead != 2)
 		{
-			llwarns << "Can't read morph target uv" << llendl;
+			LL_WARNS() << "Can't read morph target uv" << LL_ENDL;
 			return FALSE;
 		}
 
@@ -268,7 +269,7 @@ BOOL LLPolyMorphTargetInfo::parseXml(LLXmlTreeNode* node)
 	static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 	if( !node->getFastAttributeString( name_string, mMorphName ) )
 	{
-		llwarns << "Avatar file: <param> is missing name attribute" << llendl;
+		LL_WARNS() << "Avatar file: <param> is missing name attribute" << LL_ENDL;
 		return FALSE;  // Continue, ignoring this tag
 	}
 
@@ -279,8 +280,8 @@ BOOL LLPolyMorphTargetInfo::parseXml(LLXmlTreeNode* node)
 
         if (NULL == paramNode)
         {
-                llwarns << "Failed to getChildByName(\"param_morph\")"
-                        << llendl;
+                LL_WARNS() << "Failed to getChildByName(\"param_morph\")"
+                        << LL_ENDL;
                 return FALSE;
         }
 
@@ -314,10 +315,27 @@ BOOL LLPolyMorphTargetInfo::parseXml(LLXmlTreeNode* node)
 // LLPolyMorphTarget()
 //-----------------------------------------------------------------------------
 LLPolyMorphTarget::LLPolyMorphTarget(LLPolyMesh *poly_mesh)
-	: mMorphData(NULL), mMesh(poly_mesh),
-	  mVertMask(NULL),
-	  mLastSex(SEX_FEMALE),
-	  mNumMorphMasksPending(0)
+	: LLViewerVisualParam(),
+	mMorphData(NULL),
+	mMesh(poly_mesh),
+	mVertMask(NULL),
+	mLastSex(SEX_FEMALE),
+	mNumMorphMasksPending(0),
+	mVolumeMorphs()
+{
+}
+
+//-----------------------------------------------------------------------------
+// LLPolyMorphTarget()
+//-----------------------------------------------------------------------------
+LLPolyMorphTarget::LLPolyMorphTarget(const LLPolyMorphTarget& pOther)
+	: LLViewerVisualParam(pOther),
+	mMorphData(pOther.mMorphData),
+	mMesh(pOther.mMesh),
+	mVertMask(pOther.mVertMask == NULL ? NULL : new LLPolyVertexMask(*pOther.mVertMask)),
+	mLastSex(pOther.mLastSex),
+	mNumMorphMasksPending(pOther.mNumMorphMasksPending),
+	mVolumeMorphs(pOther.mVolumeMorphs)
 {
 }
 
@@ -326,10 +344,8 @@ LLPolyMorphTarget::LLPolyMorphTarget(LLPolyMesh *poly_mesh)
 //-----------------------------------------------------------------------------
 LLPolyMorphTarget::~LLPolyMorphTarget()
 {
-	if (mVertMask)
-	{
-		delete mVertMask;
-	}
+	delete mVertMask;
+	mVertMask = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -342,7 +358,7 @@ BOOL LLPolyMorphTarget::setInfo(LLPolyMorphTargetInfo* info)
 		return FALSE;
 	mInfo = info;
 	mID = info->mID;
-	setWeight(getDefaultWeight(), FALSE );
+	setWeight(getDefaultWeight());
 
 	LLAvatarAppearance* avatarp = mMesh->getAvatar();
 	LLPolyMorphTargetInfo::volume_info_list_t::iterator iter;
@@ -353,7 +369,8 @@ BOOL LLPolyMorphTarget::setInfo(LLPolyMorphTargetInfo* info)
 		{
 			if (avatarp->mCollisionVolumes[i].getName() == volume_info->mName)
 			{
-				mVolumeMorphs.push_back(LLPolyVolumeMorph(&avatarp->mCollisionVolumes[i],
+				mVolumeMorphs.push_back(
+					LLPolyVolumeMorph(&avatarp->mCollisionVolumes[i],
 														  volume_info->mScale,
 														  volume_info->mPos));
 				break;
@@ -376,7 +393,7 @@ BOOL LLPolyMorphTarget::setInfo(LLPolyMorphTargetInfo* info)
 	}
 	if (!mMorphData)
 	{
-		llwarns << "No morph target named " << morph_param_name << " found in mesh." << llendl;
+		LL_WARNS() << "No morph target named " << morph_param_name << " found in mesh." << LL_ENDL;
 		return FALSE;  // Continue, ignoring this tag
 	}
 	return TRUE;
@@ -384,9 +401,7 @@ BOOL LLPolyMorphTarget::setInfo(LLPolyMorphTargetInfo* info)
 
 /*virtual*/ LLViewerVisualParam* LLPolyMorphTarget::cloneParam(LLWearable* wearable) const
 {
-	LLPolyMorphTarget *new_param = new LLPolyMorphTarget(mMesh);
-	*new_param = *this;
-	return new_param;
+	return new LLPolyMorphTarget(*this);
 }
 
 #if 0 // obsolete
@@ -524,7 +539,7 @@ F32	LLPolyMorphTarget::getMaxDistortion()
 //-----------------------------------------------------------------------------
 // apply()
 //-----------------------------------------------------------------------------
-static LLFastTimer::DeclareTimer FTM_APPLY_MORPH_TARGET("Apply Morph");
+static LLTrace::BlockTimerStatHandle FTM_APPLY_MORPH_TARGET("Apply Morph");
 
 void LLPolyMorphTarget::apply( ESex avatar_sex )
 {
@@ -533,7 +548,7 @@ void LLPolyMorphTarget::apply( ESex avatar_sex )
 		return;
 	}
 
-	LLFastTimer t(FTM_APPLY_MORPH_TARGET);
+	LL_RECORD_BLOCK_TIME(FTM_APPLY_MORPH_TARGET);
 
 	mLastSex = avatar_sex;
 
@@ -619,9 +634,9 @@ void LLPolyMorphTarget::apply( ESex avatar_sex )
 			tangent.setCross3(scaled_binormals[vert_index_mesh], norm);
 			LLVector4a& normalized_binormal = binormals[vert_index_mesh];
 
-			normalized_binormal.setCross3(norm, tangent); 			
+			normalized_binormal.setCross3(norm, tangent); 
 			normalized_binormal.normalize3fast();
-
+			
 			tex_coords[vert_index_mesh] += mMorphData->mTexCoords[vert_index_morph] * delta_weight * maskWeight;
 		}
 
@@ -633,6 +648,7 @@ void LLPolyMorphTarget::apply( ESex avatar_sex )
 			LLVector3 pos_delta = volume_morph->mPos * delta_weight;
 			
 			volume_morph->mVolume->setScale(volume_morph->mVolume->getScale() + scale_delta);
+            // SL-315
 			volume_morph->mVolume->setPosition(volume_morph->mVolume->getPosition() + pos_delta);
 		}
 	}
@@ -716,15 +732,44 @@ void	LLPolyMorphTarget::applyMask(U8 *maskTextureData, S32 width, S32 height, S3
 	apply(mLastSex);
 }
 
+void LLPolyMorphTarget::applyVolumeChanges(F32 delta_weight)
+{
+    // now apply volume changes
+    for( volume_list_t::iterator iter = mVolumeMorphs.begin(); iter != mVolumeMorphs.end(); iter++ )
+    {
+        LLPolyVolumeMorph* volume_morph = &(*iter);
+        LLVector3 scale_delta = volume_morph->mScale * delta_weight;
+        LLVector3 pos_delta = volume_morph->mPos * delta_weight;
+		
+        volume_morph->mVolume->setScale(volume_morph->mVolume->getScale() + scale_delta);
+        // SL-315
+        volume_morph->mVolume->setPosition(volume_morph->mVolume->getPosition() + pos_delta);
+    }
+}
 
 //-----------------------------------------------------------------------------
 // LLPolyVertexMask()
 //-----------------------------------------------------------------------------
 LLPolyVertexMask::LLPolyVertexMask(LLPolyMorphData* morph_data)
+	: mWeights(new F32[morph_data->mNumIndices]),
+	mMorphData(morph_data),
+	mWeightsGenerated(FALSE)
 {
-	mWeights = new F32[morph_data->mNumIndices];
-	mMorphData = morph_data;
-	mWeightsGenerated = FALSE;
+	llassert(mMorphData != NULL);
+	llassert(mMorphData->mNumIndices > 0);
+}
+
+//-----------------------------------------------------------------------------
+// LLPolyVertexMask()
+//-----------------------------------------------------------------------------
+LLPolyVertexMask::LLPolyVertexMask(const LLPolyVertexMask& pOther)
+	: mWeights(new F32[pOther.mMorphData->mNumIndices]),
+	mMorphData(pOther.mMorphData),
+	mWeightsGenerated(pOther.mWeightsGenerated)
+{
+	llassert(mMorphData != NULL);
+	llassert(mMorphData->mNumIndices > 0);
+	memcpy(mWeights, pOther.mWeights, sizeof(F32) * mMorphData->mNumIndices);
 }
 
 //-----------------------------------------------------------------------------
@@ -732,7 +777,8 @@ LLPolyVertexMask::LLPolyVertexMask(LLPolyMorphData* morph_data)
 //-----------------------------------------------------------------------------
 LLPolyVertexMask::~LLPolyVertexMask()
 {
-	delete[] mWeights;
+	delete [] mWeights;
+	mWeights = NULL;
 }
 
 //-----------------------------------------------------------------------------

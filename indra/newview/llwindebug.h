@@ -28,14 +28,17 @@
 #define LL_LLWINDEBUG_H
 
 #include "stdtypes.h"
+#include "llwin32headerslean.h"
 #include <dbghelp.h>
 
 class LLWinDebug:
 	public LLSingleton<LLWinDebug>
 {
+	LLSINGLETON_EMPTY_CTOR(LLWinDebug);
 public:
-	static void init();
+	void initSingleton();
 	static void generateMinidump(struct _EXCEPTION_POINTERS *pExceptionInfo = NULL);
+	void cleanupSingleton();
 private:
 	static void writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename);
 };

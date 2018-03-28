@@ -42,14 +42,14 @@
 #include "lllineeditor.h"
 #include "lluictrlfactory.h"
 #include "llnotifications.h"
-#include "llfunctorregistry.h"
 #include "llrootview.h"
 #include "lltransientfloatermgr.h"
 #include "llviewercontrol.h" // for gSavedSettings
 
+#include <boost/algorithm/string.hpp>
+
 const S32 MAX_ALLOWED_MSG_WIDTH = 400;
 const F32 DEFAULT_BUTTON_DELAY = 0.5f;
-const S32 MSG_PAD = 8;
 
 /*static*/ LLControlGroup* LLToastAlertPanel::sSettings = NULL;
 /*static*/ LLToastAlertPanel::URLLoader* LLToastAlertPanel::sURLLoader;
@@ -69,19 +69,19 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 		mLabel(notification->getName()),
 		mLineEditor(NULL)
 {
-	// EXP-1822
-	// save currently focused view, so that return focus to it
-	// on destroying this toast.
-	LLView* current_selection = dynamic_cast<LLView*>(gFocusMgr.getKeyboardFocus());
-	while(current_selection)
-	{
-		if (current_selection->isFocusRoot())
-		{
-			mPreviouslyFocusedView = current_selection->getHandle();
-			break;
-		}
-		current_selection = current_selection->getParent();
-	}
+    // EXP-1822
+    // save currently focused view, so that return focus to it
+    // on destroying this toast.
+    LLView* current_selection = dynamic_cast<LLView*>(gFocusMgr.getKeyboardFocus());
+    while(current_selection)
+    {
+        if (current_selection->isFocusRoot())
+        {
+            mPreviouslyFocusedView = current_selection->getHandle();
+            break;
+        }
+        current_selection = current_selection->getParent();
+    }
 
 	const LLFontGL* font = LLFontGL::getFontSansSerif();
 	const S32 LINE_HEIGHT = font->getLineHeight();
@@ -175,7 +175,7 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 	// Message: create text box using raw string, as text has been structure deliberately
 	// Use size of created text box to generate dialog box size
 	std::string msg = mNotification->getMessage();
-	llwarns << "Alert: " << msg << llendl;
+	LL_WARNS() << "Alert: " << msg << LL_ENDL;
 	LLTextBox::Params params;
 	params.name("Alert message");
 	params.font(font);
@@ -183,6 +183,7 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 	params.wrap(true);
 	params.follows.flags(FOLLOWS_LEFT | FOLLOWS_TOP);
 	params.allow_scroll(true);
+	params.force_urls_external(mNotification->getForceUrlsExternal());
 
 	LLTextBox * msg_box = LLUICtrlFactory::create<LLTextBox> (params);
 	// Compute max allowable height for the dialog text, so we can allocate
@@ -267,6 +268,11 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 			mLineEditor->setMaxTextChars(edit_text_max_chars);
 			mLineEditor->setText(edit_text_contents);
 
+			if("SaveOutfitAs"  == mNotification->getName())
+			{
+				mLineEditor->setPrevalidate(&LLTextValidate::validateASCII);
+			}
+
 			// decrease limit of line editor of teleport offer dialog to avoid truncation of
 			// location URL in invitation message, see EXT-6891
 			if ("OfferTeleport" == mNotification->getName())
@@ -347,6 +353,10 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 	{
 		setCheckBox(LLNotifications::instance().getGlobalString("skipnexttime"), ignore_label);
 	}
+	if (form->getIgnoreType() == LLNotificationForm::IGNORE_WITH_DEFAULT_RESPONSE_SESSION_ONLY)
+	{
+		setCheckBox(LLNotifications::instance().getGlobalString("skipnexttimesessiononly"), ignore_label);
+	}
 	else if (form->getIgnoreType() == LLNotificationForm::IGNORE_WITH_LAST_RESPONSE)
 	{
 		setCheckBox(LLNotifications::instance().getGlobalString("alwayschoose"), ignore_label);
@@ -381,15 +391,18 @@ bool LLToastAlertPanel::setCheckBox( const std::string& check_title, const std::
 
 	const LLFontGL* font =  mCheck->getFont();
 	const S32 LINE_HEIGHT = font->getLineHeight();
+
+	std::vector<std::string> lines;
+	boost::split(lines, check_title, boost::is_any_of("\n"));
 	
 	// Extend dialog for "check next time"
 	S32 max_msg_width = LLToastPanel::getRect().getWidth() - 2 * HPAD;
-	S32 check_width = S32(font->getWidth(check_title) + 0.99f) + 16;
+	S32 check_width = S32(font->getWidth(lines[0]) + 0.99f) + 16; // use width of the first line
 	max_msg_width = llmax(max_msg_width, check_width);
 	S32 dialog_width = max_msg_width + 2 * HPAD;
 
 	S32 dialog_height = LLToastPanel::getRect().getHeight();
-	dialog_height += LINE_HEIGHT;
+	dialog_height += LINE_HEIGHT * lines.size();
 	dialog_height += LINE_HEIGHT / 2;
 
 	LLToastPanel::reshape( dialog_width, dialog_height, FALSE );
@@ -398,7 +411,7 @@ bool LLToastAlertPanel::setCheckBox( const std::string& check_title, const std::
 
 	// set check_box's attributes
 	LLRect check_rect;
-	mCheck->setRect(check_rect.setOriginAndSize(msg_x, VPAD+BTN_HEIGHT+LINE_HEIGHT/2, max_msg_width, LINE_HEIGHT));
+	mCheck->setRect(check_rect.setOriginAndSize(msg_x, VPAD+BTN_HEIGHT+LINE_HEIGHT/2, max_msg_width, LINE_HEIGHT*lines.size()));
 	mCheck->setLabel(check_title);
 	mCheck->setCommitCallback(boost::bind(&LLToastAlertPanel::onClickIgnore, this, _1));
 	
@@ -428,7 +441,24 @@ LLToastAlertPanel::~LLToastAlertPanel()
 	// return focus to the previously focused view if the viewer is not exiting
 	if (mPreviouslyFocusedView.get() && !LLApp::isExiting())
 	{
-		mPreviouslyFocusedView.get()->setFocus(TRUE);
+        LLView* current_selection = dynamic_cast<LLView*>(gFocusMgr.getKeyboardFocus());
+        while(current_selection)
+        {
+            if (current_selection->isFocusRoot())
+            {
+                break;
+            }
+            current_selection = current_selection->getParent();
+        }
+        if (current_selection)
+        {
+            // If the focus moved to some other view though, move the focus there
+            current_selection->setFocus(TRUE);
+        }
+        else
+        {
+            mPreviouslyFocusedView.get()->setFocus(TRUE);
+        }
 	}
 }
 
@@ -509,7 +539,7 @@ void LLToastAlertPanel::setEditTextArgs(const LLSD& edit_args)
 	}
 	else
 	{
-		llwarns << "LLToastAlertPanel::setEditTextArgs called on dialog with no line editor" << llendl;
+		LL_WARNS() << "LLToastAlertPanel::setEditTextArgs called on dialog with no line editor" << LL_ENDL;
 	}
 }
 

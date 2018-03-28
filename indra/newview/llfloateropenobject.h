@@ -45,20 +45,12 @@ public:
 	
 	void dirty();
 	
-	class LLCategoryCreate
-	{
-		public:
-			LLCategoryCreate(LLUUID object_id, bool wear) : mObjectID(object_id), mWear(wear) {}
-		public:
-			LLUUID mObjectID;
-			bool mWear;
-	};
-	
 	struct LLCatAndWear
 	{
 		LLUUID mCatID;
 		bool mWear;
 		bool mFolderResponded;
+		bool mReplace;
 	};
 
 protected:
@@ -68,11 +60,13 @@ protected:
 	void draw();
 	virtual void onOpen(const LLSD& key);
 
-	void moveToInventory(bool wear);
+	void moveToInventory(bool wear, bool replace = false);
 
 	void onClickMoveToInventory();
 	void onClickMoveAndWear();
-	static void callbackCreateInventoryCategory(const LLSD& result, void* data);
+	void onClickReplace();
+	void onClickCancel();
+	static void callbackCreateInventoryCategory(const LLUUID& category_id, LLUUID object_id, bool wear, bool replace = false);
 	static void callbackMoveInventory(S32 result, void* data);
 
 private:

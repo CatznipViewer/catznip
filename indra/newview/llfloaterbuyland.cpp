@@ -65,9 +65,6 @@
 
 // NOTE: This is duplicated in lldatamoney.cpp ...
 const F32 GROUP_LAND_BONUS_FACTOR = 1.1f;
-const F64 CURRENCY_ESTIMATE_FREQUENCY = 0.5;
-	// how long of a pause in typing a currency buy amount before an
-	// estimate is fetched from the server
 
 class LLFloaterBuyLandUI
 :	public LLFloater
@@ -202,7 +199,7 @@ public:
 	virtual void draw();
 	virtual BOOL canClose();
 
-	void onVisibilityChange ( const LLSD& new_visibility );
+	void onVisibilityChanged ( const LLSD& new_visibility );
 	
 };
 
@@ -392,9 +389,9 @@ void LLFloaterBuyLandUI::updateParcelInfo()
 	}
 
 	mParcelBillableArea =
-		llround(mRegion->getBillableFactor() * mParcelActualArea);
+		ll_round(mRegion->getBillableFactor() * mParcelActualArea);
 
- 	mParcelSupportedObjects = llround(
+ 	mParcelSupportedObjects = ll_round(
 		parcel->getMaxPrimCapacity() * parcel->getParcelPrimBonus()); 
  	// Can't have more than region max tasks, regardless of parcel 
  	// object bonus factor. 
@@ -877,7 +874,7 @@ void LLFloaterBuyLandUI::startTransaction(TransactionType type, const LLXMLRPCVa
 			method = "buyLandPrep";
 			break;
 		default:
-			llwarns << "LLFloaterBuyLandUI: Unknown transaction type!" << llendl;
+			LL_WARNS() << "LLFloaterBuyLandUI: Unknown transaction type!" << LL_ENDL;
 			return;
 	}
 
@@ -934,7 +931,7 @@ void LLFloaterBuyLandUI::tellUserError(
 // virtual
 BOOL LLFloaterBuyLandUI::postBuild()
 {
-	setVisibleCallback(boost::bind(&LLFloaterBuyLandUI::onVisibilityChange, this, _2));
+	setVisibleCallback(boost::bind(&LLFloaterBuyLandUI::onVisibilityChanged, this, _2));
 	
 	mCurrency.prepare();
 	
@@ -1008,7 +1005,7 @@ BOOL LLFloaterBuyLandUI::canClose()
 	return can_close;
 }
 
-void LLFloaterBuyLandUI::onVisibilityChange ( const LLSD& new_visibility )
+void LLFloaterBuyLandUI::onVisibilityChanged ( const LLSD& new_visibility )
 {
 	if (new_visibility.asBoolean())
 	{

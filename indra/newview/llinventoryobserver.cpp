@@ -149,10 +149,10 @@ LLInventoryFetchItemsObserver::LLInventoryFetchItemsObserver(const uuid_vec_t& i
 
 void LLInventoryFetchItemsObserver::changed(U32 mask)
 {
-	lldebugs << this << " remaining incomplete " << mIncomplete.size()
+	LL_DEBUGS() << this << " remaining incomplete " << mIncomplete.size()
 			 << " complete " << mComplete.size()
 			 << " wait period " << mFetchingPeriod.getRemainingTimeF32()
-			 << llendl;
+			 << LL_ENDL;
 
 	// scan through the incomplete items and move or erase them as
 	// appropriate.
@@ -176,7 +176,7 @@ void LLInventoryFetchItemsObserver::changed(U32 mask)
 				if (timeout_expired)
 				{
 					// Just concede that this item hasn't arrived in reasonable time and continue on.
-					llwarns << "Fetcher timed out when fetching inventory item UUID: " << item_id << LL_ENDL;
+					LL_WARNS() << "Fetcher timed out when fetching inventory item UUID: " << item_id << LL_ENDL;
 					it = mIncomplete.erase(it);
 				}
 				else
@@ -191,12 +191,12 @@ void LLInventoryFetchItemsObserver::changed(U32 mask)
 
 	if (mIncomplete.empty())
 	{
-		lldebugs << this << " done at remaining incomplete "
-				 << mIncomplete.size() << " complete " << mComplete.size() << llendl;
+		LL_DEBUGS() << this << " done at remaining incomplete "
+				 << mIncomplete.size() << " complete " << mComplete.size() << LL_ENDL;
 		done();
 	}
-	//llinfos << "LLInventoryFetchItemsObserver::changed() mComplete size " << mComplete.size() << llendl;
-	//llinfos << "LLInventoryFetchItemsObserver::changed() mIncomplete size " << mIncomplete.size() << llendl;
+	//LL_INFOS() << "LLInventoryFetchItemsObserver::changed() mComplete size " << mComplete.size() << LL_ENDL;
+	//LL_INFOS() << "LLInventoryFetchItemsObserver::changed() mIncomplete size " << mIncomplete.size() << LL_ENDL;
 }
 
 void fetch_items_from_llsd(const LLSD& items_llsd)
@@ -224,12 +224,12 @@ void fetch_items_from_llsd(const LLSD& items_llsd)
 	{
 		if (!gAgent.getRegion())
 		{
-			llwarns << "Agent's region is null" << llendl;
+			LL_WARNS() << "Agent's region is null" << LL_ENDL;
 			break;
 		}
 
 		if (0 == body[i]["items"].size()) {
-			lldebugs << "Skipping body with no items to fetch" << llendl;
+			LL_DEBUGS() << "Skipping body with no items to fetch" << LL_ENDL;
 			continue;
 		}
 
@@ -237,36 +237,15 @@ void fetch_items_from_llsd(const LLSD& items_llsd)
 		if (!url.empty())
 		{
 			body[i]["agent_id"]	= gAgent.getID();
-			LLHTTPClient::post(url, body[i], new LLInventoryModel::fetchInventoryResponder(body[i]));
+            LLCore::HttpHandler::ptr_t handler(new LLInventoryModel::FetchItemHttpHandler(body[i]));
+			gInventory.requestPost(true, url, body[i], handler, (i ? "Library Item" : "Inventory Item"));
 			continue;
 		}
+        else
+        {
+            LL_WARNS("INVENTORY") << "Failed to get capability." << LL_ENDL;
+        }
 
-		LLMessageSystem* msg = gMessageSystem;
-		BOOL start_new_message = TRUE;
-		for (S32 j=0; j<body[i]["items"].size(); j++)
-		{
-			LLSD item_entry = body[i]["items"][j];
-			if (start_new_message)
-			{
-				start_new_message = FALSE;
-				msg->newMessageFast(_PREHASH_FetchInventory);
-				msg->nextBlockFast(_PREHASH_AgentData);
-				msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-				msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-			}
-			msg->nextBlockFast(_PREHASH_InventoryData);
-			msg->addUUIDFast(_PREHASH_OwnerID, item_entry["owner_id"].asUUID());
-			msg->addUUIDFast(_PREHASH_ItemID, item_entry["item_id"].asUUID());
-			if (msg->isSendFull(NULL))
-			{
-				start_new_message = TRUE;
-				gAgent.sendReliableMessage();
-			}
-		}
-		if (!start_new_message)
-		{
-			gAgent.sendReliableMessage();
-		}
 	}
 }
 
@@ -302,6 +281,12 @@ void LLInventoryFetchItemsObserver::startFetch()
 		LLViewerInventoryCategory* cat = gInventory.getCategory(*it);
 		if (cat)
 		{
+			continue;
+		}
+
+		if ((*it).isNull())
+		{
+			LL_WARNS("Inventory") << "Skip fetching for a NULL uuid" << LL_ENDL;
 			continue;
 		}
 
@@ -365,6 +350,11 @@ void LLInventoryFetchDescendentsObserver::startFetch()
 		if (!cat) continue;
 		if (!isCategoryComplete(cat))
 		{
+			// CHECK IT: isCategoryComplete() checks both version and descendant count but
+			// fetch() only works for Unknown version and doesn't care about descentants,
+			// as result fetch won't start and folder will potentially get stuck as
+			// incomplete in observer.
+			// Likely either both should use only version or both should check descendants.
 			cat->fetch();		//blindly fetch it without seeing if anything else is fetching it.
 			mIncomplete.push_back(*it);	//Add to list of things being downloaded for this observer.
 		}
@@ -391,14 +381,14 @@ BOOL LLInventoryFetchDescendentsObserver::isCategoryComplete(const LLViewerInven
 	gInventory.getDirectDescendentsOf(cat->getUUID(), cats, items);
 	if (!cats || !items)
 	{
-		llwarns << "Category '" << cat->getName() << "' descendents corrupted, fetch failed." << llendl;
+		LL_WARNS() << "Category '" << cat->getName() << "' descendents corrupted, fetch failed." << LL_ENDL;
 		// NULL means the call failed -- cats/items map doesn't exist (note: this does NOT mean
 		// that the cat just doesn't have any items or subfolders).
 		// Unrecoverable, so just return done so that this observer can be cleared
 		// from memory.
 		return TRUE;
 	}
-	const S32 current_num_known_descendents = cats->count() + items->count();
+	const S32 current_num_known_descendents = cats->size() + items->size();
 	
 	// Got the number of descendents that we were expecting, so we're done.
 	if (current_num_known_descendents == expected_num_descendents)
@@ -411,7 +401,7 @@ BOOL LLInventoryFetchDescendentsObserver::isCategoryComplete(const LLViewerInven
 	// count and thus the category thinks it has fewer descendents than it actually has.
 	if (current_num_known_descendents >= expected_num_descendents)
 	{
-		llwarns << "Category '" << cat->getName() << "' expected descendentcount:" << expected_num_descendents << " descendents but got descendentcount:" << current_num_known_descendents << llendl;
+		LL_WARNS() << "Category '" << cat->getName() << "' expected descendentcount:" << expected_num_descendents << " descendents but got descendentcount:" << current_num_known_descendents << LL_ENDL;
 		const_cast<LLViewerInventoryCategory *>(cat)->setDescendentCount(current_num_known_descendents);
 		return TRUE;
 	}
@@ -465,41 +455,13 @@ void LLInventoryFetchComboObserver::startFetch()
 	mFetchDescendents->startFetch();
 }
 
-void LLInventoryExistenceObserver::watchItem(const LLUUID& id)
-{
-	if (id.notNull())
-	{
-		mMIA.push_back(id);
-	}
-}
-
-void LLInventoryExistenceObserver::changed(U32 mask)
-{
-	// scan through the incomplete items and move or erase them as
-	// appropriate.
-	if (!mMIA.empty())
-	{
-		for (uuid_vec_t::iterator it = mMIA.begin(); it < mMIA.end(); )
-		{
-			LLViewerInventoryItem* item = gInventory.getItem(*it);
-			if (!item)
-			{
-				++it;
-				continue;
-			}
-			mExist.push_back(*it);
-			it = mMIA.erase(it);
-		}
-		if (mMIA.empty())
-		{
-			done();
-		}
-	}
-}
-
+// See comment preceding LLInventoryAddedObserver::changed() for some
+// concerns that also apply to this observer.
 void LLInventoryAddItemByAssetObserver::changed(U32 mask)
 {
-	if(!(mask & LLInventoryObserver::ADD))
+	if(!(mask & LLInventoryObserver::ADD) ||
+	   !(mask & LLInventoryObserver::CREATE) ||
+	   !(mask & LLInventoryObserver::UPDATE_CREATE))
 	{
 		return;
 	}
@@ -510,20 +472,12 @@ void LLInventoryAddItemByAssetObserver::changed(U32 mask)
 		return;
 	}
 
-	LLMessageSystem* msg = gMessageSystem;
-	if (!(msg->getMessageName() && (0 == strcmp(msg->getMessageName(), "UpdateCreateInventoryItem"))))
+	const uuid_set_t& added = gInventory.getAddedIDs();
+	for (uuid_set_t::iterator it = added.begin(); it != added.end(); ++it)
 	{
-		// this is not our message
-		return; // to prevent a crash. EXT-7921;
-	}
-
-	LLPointer<LLViewerInventoryItem> item = new LLViewerInventoryItem;
-	S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_InventoryData);
-	for(S32 i = 0; i < num_blocks; ++i)
-	{
-		item->unpackMessage(msg, _PREHASH_InventoryData, i);
+		LLInventoryItem *item = gInventory.getItem(*it);
 		const LLUUID& asset_uuid = item->getAssetUUID();
-		if (item->getUUID().notNull() && asset_uuid.notNull())
+		if (item && item->getUUID().notNull() && asset_uuid.notNull())
 		{
 			if (isAssetWatched(asset_uuid))
 			{
@@ -532,11 +486,11 @@ void LLInventoryAddItemByAssetObserver::changed(U32 mask)
 			}
 		}
 	}
-
+	
 	if (mAddedItems.size() == mWatchedAssets.size())
 	{
-		done();
 		LL_DEBUGS("Inventory_Move") << "All watched items are added & processed." << LL_ENDL;
+		done();
 		mAddedItems.clear();
 
 		// Unable to clean watched items here due to somebody can require to check them in current frame.
@@ -566,41 +520,28 @@ bool LLInventoryAddItemByAssetObserver::isAssetWatched( const LLUUID& asset_id )
 	return std::find(mWatchedAssets.begin(), mWatchedAssets.end(), asset_id) != mWatchedAssets.end();
 }
 
+// This observer used to explicitly check for whether it was being
+// called as a result of an UpdateCreateInventoryItem message. It has
+// now been decoupled enough that it's not actually checking the
+// message system, but now we have the special UPDATE_CREATE flag
+// being used for the same purpose. Fixing this, as we would need to
+// do to get rid of the message, is somewhat subtle because there's no
+// particular obvious criterion for when creating a new item should
+// trigger this observer and when it shouldn't. For example, creating
+// a new notecard with new->notecard causes a preview window to pop up
+// via the derived class LLOpenTaskOffer, but creating a new notecard
+// by copy and paste does not, solely because one goes through
+// UpdateCreateInventoryItem and the other doesn't.
 void LLInventoryAddedObserver::changed(U32 mask)
 {
-	if (!(mask & LLInventoryObserver::ADD))
+	if (!(mask & LLInventoryObserver::ADD) ||
+		!(mask & LLInventoryObserver::CREATE) ||
+		!(mask & LLInventoryObserver::UPDATE_CREATE))
 	{
 		return;
 	}
 
-	// *HACK: If this was in response to a packet off
-	// the network, figure out which item was updated.
-	LLMessageSystem* msg = gMessageSystem;
-
-	std::string msg_name = msg->getMessageName();
-	if (msg_name.empty())
-	{
-		return;
-	}
-	
-	// We only want newly created inventory items. JC
-	if ( msg_name != "UpdateCreateInventoryItem")
-	{
-		return;
-	}
-
-	LLPointer<LLViewerInventoryItem> titem = new LLViewerInventoryItem;
-	S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_InventoryData);
-	for (S32 i = 0; i < num_blocks; ++i)
-	{
-		titem->unpackMessage(msg, _PREHASH_InventoryData, i);
-		if (!(titem->getUUID().isNull()))
-		{
-			//we don't do anything with null keys
-			mAdded.push_back(titem->getUUID());
-		}
-	}
-	if (!mAdded.empty())
+	if (!gInventory.getAddedIDs().empty())
 	{
 		done();
 	}
@@ -613,9 +554,9 @@ void LLInventoryCategoryAddedObserver::changed(U32 mask)
 		return;
 	}
 	
-	const LLInventoryModel::changed_items_t& changed_ids = gInventory.getChangedIDs();
+	const LLInventoryModel::changed_items_t& added_ids = gInventory.getAddedIDs();
 	
-	for (LLInventoryModel::changed_items_t::const_iterator cit = changed_ids.begin(); cit != changed_ids.end(); ++cit)
+	for (LLInventoryModel::changed_items_t::const_iterator cit = added_ids.begin(); cit != added_ids.end(); ++cit)
 	{
 		LLViewerInventoryCategory* cat = gInventory.getCategory(*cit);
 		
@@ -633,72 +574,29 @@ void LLInventoryCategoryAddedObserver::changed(U32 mask)
 	}
 }
 
-
-LLInventoryTransactionObserver::LLInventoryTransactionObserver(const LLTransactionID& transaction_id) :
-	mTransactionID(transaction_id)
-{
-}
-
-void LLInventoryTransactionObserver::changed(U32 mask)
-{
-	if (mask & LLInventoryObserver::ADD)
-	{
-		// This could be it - see if we are processing a bulk update
-		LLMessageSystem* msg = gMessageSystem;
-		if (msg->getMessageName()
-		   && (0 == strcmp(msg->getMessageName(), "BulkUpdateInventory")))
-		{
-			// we have a match for the message - now check the
-			// transaction id.
-			LLUUID id;
-			msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_TransactionID, id);
-			if (id == mTransactionID)
-			{
-				// woo hoo, we found it
-				uuid_vec_t folders;
-				uuid_vec_t items;
-				S32 count;
-				count = msg->getNumberOfBlocksFast(_PREHASH_FolderData);
-				S32 i;
-				for (i = 0; i < count; ++i)
-				{
-					msg->getUUIDFast(_PREHASH_FolderData, _PREHASH_FolderID, id, i);
-					if (id.notNull())
-					{
-						folders.push_back(id);
-					}
-				}
-				count = msg->getNumberOfBlocksFast(_PREHASH_ItemData);
-				for (i = 0; i < count; ++i)
-				{
-					msg->getUUIDFast(_PREHASH_ItemData, _PREHASH_ItemID, id, i);
-					if (id.notNull())
-					{
-						items.push_back(id);
-					}
-				}
-
-				// call the derived class the implements this method.
-				done(folders, items);
-			}
-		}
-	}
-}
-
 void LLInventoryCategoriesObserver::changed(U32 mask)
 {
 	if (!mCategoryMap.size())
 		return;
+
+	std::vector<LLUUID> deleted_categories_ids;
 
 	for (category_map_t::iterator iter = mCategoryMap.begin();
 		 iter != mCategoryMap.end();
 		 ++iter)
 	{
 		const LLUUID& cat_id = (*iter).first;
-
+		LLCategoryData& cat_data = (*iter).second;
+        
 		LLViewerInventoryCategory* category = gInventory.getCategory(cat_id);
 		if (!category)
+        {
+            LL_WARNS() << "Category : Category id = " << cat_id << " disappeared" << LL_ENDL;
+			cat_data.mCallback();
+            // Keep track of those deleted categories so we can remove them
+            deleted_categories_ids.push_back(cat_id);
 			continue;
+        }
 
 		const S32 version = category->getVersion();
 		const S32 expected_num_descendents = category->getDescendentCount();
@@ -714,7 +612,7 @@ void LLInventoryCategoriesObserver::changed(U32 mask)
 		gInventory.getDirectDescendentsOf(cat_id, cats, items);
 		if (!cats || !items)
 		{
-			llwarns << "Category '" << category->getName() << "' descendents corrupted, fetch failed." << llendl;
+			LL_WARNS() << "Category '" << category->getName() << "' descendents corrupted, fetch failed." << LL_ENDL;
 			// NULL means the call failed -- cats/items map doesn't exist (note: this does NOT mean
 			// that the cat just doesn't have any items or subfolders).
 			// Unrecoverable, so just skip this category.
@@ -724,9 +622,7 @@ void LLInventoryCategoriesObserver::changed(U32 mask)
 			continue;
 		}
 		
-		const S32 current_num_known_descendents = cats->count() + items->count();
-
-		LLCategoryData& cat_data = (*iter).second;
+		const S32 current_num_known_descendents = cats->size() + items->size();
 
 		bool cat_changed = false;
 
@@ -757,9 +653,15 @@ void LLInventoryCategoriesObserver::changed(U32 mask)
 		if (cat_changed)
 			cat_data.mCallback();
 	}
+    
+    // Remove deleted categories from the list
+ 	for (std::vector<LLUUID>::iterator deleted_id = deleted_categories_ids.begin(); deleted_id != deleted_categories_ids.end(); ++deleted_id)
+	{
+		removeCategory(*deleted_id);
+    }
 }
 
-bool LLInventoryCategoriesObserver::addCategory(const LLUUID& cat_id, callback_t cb)
+bool LLInventoryCategoriesObserver::addCategory(const LLUUID& cat_id, callback_t cb, bool init_name_hash)
 {
 	S32 version = LLViewerInventoryCategory::VERSION_UNKNOWN;
 	S32 current_num_known_descendents = LLViewerInventoryCategory::DESCENDENT_COUNT_UNKNOWN;
@@ -781,7 +683,7 @@ bool LLInventoryCategoriesObserver::addCategory(const LLUUID& cat_id, callback_t
 		gInventory.getDirectDescendentsOf(cat_id, cats, items);
 		if (!cats || !items)
 		{
-			llwarns << "Category '" << category->getName() << "' descendents corrupted, fetch failed." << llendl;
+			LL_WARNS() << "Category '" << category->getName() << "' descendents corrupted, fetch failed." << LL_ENDL;
 			// NULL means the call failed -- cats/items map doesn't exist (note: this does NOT mean
 			// that the cat just doesn't have any items or subfolders).
 			// Unrecoverable, so just return "false" meaning that the category can't be observed.
@@ -791,14 +693,21 @@ bool LLInventoryCategoriesObserver::addCategory(const LLUUID& cat_id, callback_t
 		}
 		else
 		{
-			current_num_known_descendents = cats->count() + items->count();
+			current_num_known_descendents = cats->size() + items->size();
 		}
 	}
 
 	if (can_be_added)
 	{
-		mCategoryMap.insert(category_map_value_t(
-								cat_id,LLCategoryData(cat_id, cb, version, current_num_known_descendents)));
+		if(init_name_hash)
+		{
+			LLMD5 item_name_hash = gInventory.hashDirectDescendentNames(cat_id);
+			mCategoryMap.insert(category_map_value_t(cat_id,LLCategoryData(cat_id, cb, version, current_num_known_descendents,item_name_hash)));
+		}
+		else
+		{
+			mCategoryMap.insert(category_map_value_t(cat_id,LLCategoryData(cat_id, cb, version, current_num_known_descendents)));
+		}
 	}
 
 	return can_be_added;
@@ -819,4 +728,36 @@ LLInventoryCategoriesObserver::LLCategoryData::LLCategoryData(
 	, mIsNameHashInitialized(false)
 {
 	mItemNameHash.finalize();
+}
+
+LLInventoryCategoriesObserver::LLCategoryData::LLCategoryData(
+	const LLUUID& cat_id, callback_t cb, S32 version, S32 num_descendents, LLMD5 name_hash)
+
+	: mCatID(cat_id)
+	, mCallback(cb)
+	, mVersion(version)
+	, mDescendentsCount(num_descendents)
+	, mIsNameHashInitialized(true)
+	, mItemNameHash(name_hash)
+{
+}
+
+void LLScrollOnRenameObserver::changed(U32 mask)
+{
+	if (mask & LLInventoryObserver::LABEL)
+	{
+		const uuid_set_t& changed_item_ids = gInventory.getChangedIDs();
+		for (uuid_set_t::const_iterator it = changed_item_ids.begin(); it != changed_item_ids.end(); ++it)
+		{
+			const LLUUID& id = *it;
+			if (id == mUUID)
+			{
+				mView->scrollToShowSelection();
+					
+				gInventory.removeObserver(this);
+				delete this;
+				return;
+			}
+		}
+	}
 }

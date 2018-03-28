@@ -39,8 +39,6 @@
 //-----------------------------------------------------------------------------
 const LLQuaternion EDIT_MOTION_WRIST_ROTATION(F_PI_BY_TWO * 0.7f, LLVector3(1.0f, 0.0f, 0.0f));
 const F32 TARGET_LAG_HALF_LIFE	= 0.1f;		// half-life of IK targeting
-const F32 TORSO_LAG_HALF_LIFE = 0.2f;
-const F32 MAX_TIME_DELTA = 2.f; //max two seconds a frame for calculating interpolation
 
 S32 LLEditingMotion::sHandPose = LLHandMotion::HAND_POSE_RELAXED_R;
 S32 LLEditingMotion::sHandPosePriority = 3;
@@ -89,7 +87,7 @@ LLMotion::LLMotionInitStatus LLEditingMotion::onInitialize(LLCharacter *characte
 		!mCharacter->getJoint("mElbowLeft") ||
 		!mCharacter->getJoint("mWristLeft"))
 	{
-		llwarns << "Invalid skeleton for editing motion!" << llendl;
+		LL_WARNS() << "Invalid skeleton for editing motion!" << LL_ENDL;
 		return STATUS_FAILURE;
 	}
 
@@ -102,7 +100,7 @@ LLMotion::LLMotionInitStatus LLEditingMotion::onInitialize(LLCharacter *characte
 
 	if ( ! mParentState->getJoint() )
 	{
-		llinfos << getName() << ": Can't get parent joint." << llendl;
+		LL_INFOS() << getName() << ": Can't get parent joint." << LL_ENDL;
 		return STATUS_FAILURE;
 	}
 
@@ -119,6 +117,7 @@ LLMotion::LLMotionInitStatus LLEditingMotion::onInitialize(LLCharacter *characte
 	addJointState( mWristState );
 
 	// propagate joint positions to kinematic chain
+    // SL-315
 	mParentJoint.setPosition(	mParentState->getJoint()->getWorldPosition() );
 	mShoulderJoint.setPosition(	mShoulderState->getJoint()->getPosition() );
 	mElbowJoint.setPosition(	mElbowState->getJoint()->getPosition() );
@@ -145,6 +144,7 @@ LLMotion::LLMotionInitStatus LLEditingMotion::onInitialize(LLCharacter *characte
 BOOL LLEditingMotion::onActivate()
 {
 	// propagate joint positions to kinematic chain
+    // SL-315
 	mParentJoint.setPosition(	mParentState->getJoint()->getWorldPosition() );
 	mShoulderJoint.setPosition(	mShoulderState->getJoint()->getPosition() );
 	mElbowJoint.setPosition(	mElbowState->getJoint()->getPosition() );
@@ -183,6 +183,7 @@ BOOL LLEditingMotion::onUpdate(F32 time, U8* joint_mask)
 	focus_pt += mCharacter->getCharacterPosition();
 
 	// propagate joint positions to kinematic chain
+    // SL-315
 	mParentJoint.setPosition(	mParentState->getJoint()->getWorldPosition() );
 	mShoulderJoint.setPosition(	mShoulderState->getJoint()->getPosition() );
 	mElbowJoint.setPosition(	mElbowState->getJoint()->getPosition() );
@@ -215,14 +216,15 @@ BOOL LLEditingMotion::onUpdate(F32 time, U8* joint_mask)
 	if (!target.isFinite())
 	{
 		// Don't error out here, set a fail-safe target vector
-		llwarns << "Non finite target in editing motion with target distance of " << target_dist << 
-			" and focus point " << focus_pt << llendl;
+		LL_WARNS() << "Non finite target in editing motion with target distance of " << target_dist << 
+			" and focus point " << focus_pt << LL_ENDL;
 		target.setVec(1.f, 1.f, 1.f);
 	}
-	
+
+    // SL-315
 	mTarget.setPosition( target + mParentJoint.getPosition());
 
-//	llinfos << "Point At: " << mTarget.getPosition() << llendl;
+//	LL_INFOS() << "Point At: " << mTarget.getPosition() << LL_ENDL;
 
 	// update the ikSolver
 	if (!mTarget.getPosition().isExactlyZero())
@@ -232,7 +234,7 @@ BOOL LLEditingMotion::onUpdate(F32 time, U8* joint_mask)
 		mIKSolver.solve();
 
 		// use blending...
-		F32 slerp_amt = LLCriticalDamp::getInterpolant(TARGET_LAG_HALF_LIFE);
+		F32 slerp_amt = LLSmoothInterpolation::getInterpolant(TARGET_LAG_HALF_LIFE);
 		shoulderRot = slerp(slerp_amt, mShoulderJoint.getRotation(), shoulderRot);
 		elbowRot = slerp(slerp_amt, mElbowJoint.getRotation(), elbowRot);
 

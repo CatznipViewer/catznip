@@ -28,7 +28,6 @@
 #define LL_LLVOGRASS_H
 
 #include "llviewerobject.h"
-#include "lldarray.h"
 #include <map>
 
 class LLSurfacePatch;
@@ -74,11 +73,12 @@ public:
 	void plantBlades();
 
 	/*virtual*/ BOOL    isActive() const; // Whether this object needs to do an idleUpdate.
-	/*virtual*/ void idleUpdate(LLAgent &agent, LLWorld &world, const F64 &time);
+	/*virtual*/ void idleUpdate(LLAgent &agent, const F64 &time);
 
 	/*virtual*/ BOOL lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, 
 										  S32 face = -1,                        // which face to check, -1 = ALL_SIDES
 										  BOOL pick_transparent = FALSE,
+										  BOOL pick_rigged = FALSE,
 										  S32* face_hit = NULL,                 // which face was hit
 										  LLVector4a* intersection = NULL,       // return the intersection point
 										  LLVector2* tex_coord = NULL,          // return the texture coordinates of the intersection point

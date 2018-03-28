@@ -30,6 +30,7 @@
 #include "llcommandhandler.h"
 #include "llnotificationsutil.h"
 #include "llcommanddispatcherlistener.h"
+#include "llstartup.h"
 #include "stringize.h"
 
 // system includes
@@ -116,7 +117,11 @@ bool LLCommandHandlerRegistry::dispatch(const std::string& cmd,
 			LL_WARNS_ONCE("SLURL") << "Blocked SLURL command from untrusted browser" << LL_ENDL;
 			if (! slurl_blocked)
 			{
-				LLNotificationsUtil::add("BlockedSLURL");
+				if (LLStartUp::getStartupState() >= STATE_BROWSER_INIT)
+				{
+					// Note: commands can arrive before we initialize everything we need for Notification.
+					LLNotificationsUtil::add("BlockedSLURL");
+				}
 				slurl_blocked = true;
 			}
 			return true;
@@ -129,7 +134,11 @@ bool LLCommandHandlerRegistry::dispatch(const std::string& cmd,
 			{
 				break;
 			}
-
+			//skip initial request from external browser before STATE_BROWSER_INIT
+			if (LLStartUp::getStartupState() == STATE_FIRST)
+			{
+				return true;
+			}
 			cur_time = LLTimer::getElapsedSeconds();
 			if (cur_time < last_throttle_time + THROTTLE_PERIOD)
 			{
@@ -138,7 +147,10 @@ bool LLCommandHandlerRegistry::dispatch(const std::string& cmd,
 				LL_WARNS_ONCE("SLURL") << "Throttled SLURL command from untrusted browser" << LL_ENDL;
 				if (! slurl_throttled)
 				{
-					LLNotificationsUtil::add("ThrottledSLURL");
+					if (LLStartUp::getStartupState() >= STATE_BROWSER_INIT)
+					{
+						LLNotificationsUtil::add("ThrottledSLURL");
+					}
 					slurl_throttled = true;
 				}
 				return true;
