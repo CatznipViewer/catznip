@@ -281,7 +281,10 @@ F32 LLStreamingAudio_FMODEX::getGain()
 }
 
 
-std::string LLStreamingAudio_FMODEX::getURL()
+//std::string LLStreamingAudio_FMODEX::getURL()
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+const std::string& LLStreamingAudio_FMODEX::getURL() const
+// [/SL:KB]
 {
 	return mURL;
 }

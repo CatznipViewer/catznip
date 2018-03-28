@@ -428,6 +428,10 @@ void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& fil
 		case LLFilePicker::FFLOAD_WAV:
 			strFloater = "upload_sound";
 			break;
+		case LLFilePicker::FFLOAD_MODEL:
+			if (LLFloaterModelPreview* pFloaterModelPreview = LLFloaterReg::getTypedInstance<LLFloaterModelPreview>("upload_model"))
+				pFloaterModelPreview->loadModel(LLModel::LOD_HIGH, filename);
+			return;
 		default:
 			break;
 	}
