@@ -1335,7 +1335,11 @@ static dragdrop_type_lookup_t s_DragDropTypesLookup[] = {
 	std::make_tuple("jpg", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
 	std::make_tuple("jpeg", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
 	std::make_tuple("png", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
-	std::make_tuple("tga", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE)
+	std::make_tuple("tga", LLAssetType::AT_TEXTURE, LLFilePicker::FFLOAD_IMAGE),
+	std::make_tuple("bvh", LLAssetType::AT_ANIMATION, LLFilePicker::FFLOAD_ANIM),
+	std::make_tuple("anim", LLAssetType::AT_ANIMATION, LLFilePicker::FFLOAD_ANIM),
+	std::make_tuple("wav", LLAssetType::AT_SOUND_WAV, LLFilePicker::FFLOAD_WAV),
+	std::make_tuple("dae", LLAssetType::AT_MESH, LLFilePicker::FFLOAD_MODEL),
 };
 
 static LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
@@ -1411,15 +1415,21 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 					{
 						if (fDrop)
 						{
-							if (mDragItems.size() == 1)
+							bool fCanBulkUpload = (mDragItems.size() > 1) && (std::all_of(mDragItems.begin(), mDragItems.end(), [](const drag_item_t& dragItem)
+																																{
+																																	return getAssetTypeFromFilename(dragItem.second) == LLAssetType::AT_TEXTURE;
+																																}));
+							if (!fCanBulkUpload)
 							{
  								if (gAgentCamera.cameraMouselook())
 								{
 									gAgentCamera.changeCameraToDefault();
 								}
 
-								const std::string& strFile = mDragItems.front().second;
-								upload_pick_callback(getLoadFilterFromFilename(strFile), strFile);
+								for (const drag_item_t& dragItem : mDragItems)
+								{
+									upload_pick_callback(getLoadFilterFromFilename(dragItem.second), dragItem.second);
+								}
 							}
 							else
 							{
