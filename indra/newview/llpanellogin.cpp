@@ -565,7 +565,6 @@ void LLPanelLogin::selectUser(LLPointer<LLCredential> cred, BOOL remember)
 //	sInstance->getChild<LLUICtrl>("remember_check")->setValue(remember);
 //}
 
-
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 LLSD LLPanelLogin::getIdentifier()
 {
