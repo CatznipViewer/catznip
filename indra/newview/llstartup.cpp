@@ -880,13 +880,16 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
-			{
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+			if (gUserCredential.notNull() && LLPanelLogin::isCredentialSet())
+			{
 				LLPanelLogin::selectUser(gUserCredential, gRememberPassword);
-// [/SL:KB]
-//				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
+// [/SL:KB]
+//			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
+//			{
+//				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
+//			}
 			LLPanelLogin::giveFocus();
 
 			// MAINT-3231 Show first run dialog only for Desura viewer
