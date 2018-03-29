@@ -1279,7 +1279,6 @@ void set_use_wireframe(bool useWireframe)
 		gWindowResized = TRUE;
 
 		LLPipeline::updateRenderDeferred();
-
 		if (gUseWireframe)
 		{
 			gInitialDeferredModeForWireframe = LLPipeline::sRenderDeferred;

@@ -1105,6 +1105,13 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 	bool can_remove_folder = false;
 // [/SL:KB]
 
+// [RLVa:KB] - Checked: 2010-09-04 (RLVa-1.2.1a) | Added: RLVa-1.2.1a
+	// We'll enable a menu option if at least one item in the selection is wearable/removable
+	bool rlvCanWearReplace = !RlvActions::isRlvEnabled();
+	bool rlvCanWearAdd = !RlvActions::isRlvEnabled();
+	bool rlvCanRemove = !RlvActions::isRlvEnabled();
+// [/RLVa:KB]
+
 	for (uuid_vec_t::const_iterator it = ids.begin(); it != ids.end(); ++it)
 	{
 		LLUUID id = *it;
@@ -1157,6 +1164,29 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 		{
 			can_be_worn = get_can_item_be_worn(item->getLinkedUUID());
 		}
+
+// [RLVa:KB] - Checked: 2010-09-04 (RLVa-1.2.1a) | Added: RLVa-1.2.1a
+		if (RlvActions::isRlvEnabled())
+		{
+			ERlvWearMask eWearMask = RLV_WEAR_LOCKED;
+			switch (item->getType())
+			{
+				case LLAssetType::AT_BODYPART:
+				case LLAssetType::AT_CLOTHING:
+					eWearMask = gRlvWearableLocks.canWear(item);
+					rlvCanRemove |= (is_worn) ? gRlvWearableLocks.canRemove(item) : false;
+					break;
+				case LLAssetType::AT_OBJECT:
+					eWearMask = gRlvAttachmentLocks.canAttach(item);
+					rlvCanRemove |= (is_worn) ? gRlvAttachmentLocks.canDetach(item) : false;
+					break;
+				default:
+					break;
+			}
+			rlvCanWearReplace |= ((eWearMask & RLV_WEAR_REPLACE) == RLV_WEAR_REPLACE);
+			rlvCanWearAdd |= ((eWearMask & RLV_WEAR_ADD) == RLV_WEAR_ADD);
+		}
+// [/RLVa:KB]
 	} // for
 
 	bool standalone = mParent ? mParent->isStandalone() : false;
