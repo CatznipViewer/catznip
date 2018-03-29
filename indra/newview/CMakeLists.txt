@@ -100,6 +100,7 @@ include_directories(SYSTEM
     )
 
 set(viewer_SOURCE_FILES
+    llfloaterquickprefs.cpp
     groupchatlistener.cpp
     llaccountingcostmanager.cpp
     llaisapi.cpp
@@ -135,6 +136,7 @@ set(viewer_SOURCE_FILES
     llbrowsernotification.cpp
     llbuycurrencyhtml.cpp
     llcallingcard.cpp
+    llcategoryitemslist.cpp
     llchannelmanager.cpp
     llchatbar.cpp
     llchathistory.cpp
@@ -267,8 +269,8 @@ set(viewer_SOURCE_FILES
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
     llfloaternotificationstabbed.cpp
-    llfloateroutfitphotopreview.cpp 
-    llfloateroutfitsnapshot.cpp
+#    llfloateroutfitphotopreview.cpp 
+#    llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
     llfloaterpathfindingcharacters.cpp
@@ -410,8 +412,9 @@ set(viewer_SOURCE_FILES
     llnotificationscripthandler.cpp
     llnotificationstorage.cpp
     llnotificationtiphandler.cpp
-    lloutfitgallery.cpp
+#    lloutfitgallery.cpp
     lloutfitslist.cpp
+    lloutfitsview.cpp
     lloutfitobserver.cpp
     lloutputmonitorctrl.cpp
     llpanelappearancetab.cpp
@@ -457,6 +460,7 @@ set(viewer_SOURCE_FILES
     llpanelonlinestatus.cpp
     llpaneloutfitedit.cpp
     llpaneloutfitsinventory.cpp
+    llpaneloutfitstab.cpp
     llpanelpeople.cpp
     llpanelpeoplemenus.cpp
     llpanelpermissions.cpp
@@ -469,6 +473,7 @@ set(viewer_SOURCE_FILES
     llpanelpresetspulldown.cpp
     llpanelprimmediacontrols.cpp
     llpanelprofile.cpp
+    llpanelquickprefsappearance.cpp
     llpanelsnapshot.cpp
     llpanelsnapshotinventory.cpp
     llpanelsnapshotlocal.cpp
@@ -718,6 +723,7 @@ set(VIEWER_BINARY_NAME "secondlife-bin" CACHE STRING
 set(viewer_HEADER_FILES
     CMakeLists.txt
     ViewerInstall.cmake
+    llfloaterquickprefs.h
     groupchatlistener.h
     llaccountingcost.h
     llaccountingcostmanager.h
@@ -754,6 +760,7 @@ set(viewer_HEADER_FILES
     llbreadcrumbview.h
     llbuycurrencyhtml.h
     llcallingcard.h
+    llcategoryitemslist.h
     llcapabilityprovider.h
     llchannelmanager.h
     llchatbar.h
@@ -890,8 +897,8 @@ set(viewer_HEADER_FILES
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
     llfloaternotificationstabbed.h
-    llfloateroutfitphotopreview.h
-    llfloateroutfitsnapshot.h
+#    llfloateroutfitphotopreview.h
+#    llfloateroutfitsnapshot.h
     llfloaterobjectweights.h
     llfloateropenobject.h
     llfloaterpathfindingcharacters.h
@@ -1023,8 +1030,9 @@ set(viewer_HEADER_FILES
     llnotificationlistview.h
     llnotificationmanager.h
     llnotificationstorage.h
-    lloutfitgallery.h
+#    lloutfitgallery.h
     lloutfitslist.h
+    lloutfitsview.h
     lloutfitobserver.h
     lloutputmonitorctrl.h
     llpanelappearancetab.h
@@ -1071,6 +1079,7 @@ set(viewer_HEADER_FILES
     llpanelonlinestatus.h
     llpaneloutfitedit.h
     llpaneloutfitsinventory.h
+    llpaneloutfitstab.h
     llpanelpeople.h
     llpanelpeoplemenus.h
     llpanelpermissions.h
@@ -1083,6 +1092,7 @@ set(viewer_HEADER_FILES
     llpanelpresetspulldown.h
     llpanelprimmediacontrols.h
     llpanelprofile.h
+    llpanelquickprefsappearance.h
     llpanelsnapshot.h
     llpanelteleporthistory.h
     llpaneltiptoast.h

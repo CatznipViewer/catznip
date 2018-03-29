@@ -4918,6 +4918,12 @@ Visita http://status.secondlifegrid.net para ver si hay alguna incidencia conoci
 	<string name="EmptyOutfitText">
 		No hay elementos en este vestuario
 	</string>
+	<string name="SaveOutfit">
+		Guardar
+	</string>
+	<string name="SaveOutfitAs">
+		Guardar como
+	</string>
 	<string name="ExternalEditorNotSet">
 		Selecciona un editor mediante la configuración de ExternalEditor.
 	</string>

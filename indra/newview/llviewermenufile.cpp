@@ -37,7 +37,7 @@
 #include "llfloatermap.h"
 #include "llfloatermodelpreview.h"
 #include "llfloatersnapshot.h"
-#include "llfloateroutfitsnapshot.h"
+//#include "llfloateroutfitsnapshot.h"
 #include "llimage.h"
 #include "llimagebmp.h"
 #include "llimagepng.h"
@@ -47,6 +47,9 @@
 #include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
 #include "llfloaterperms.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+#include "llsnapshotlivepreview.h"
+// [/SL:KB]
 #include "llstatusbar.h"
 #include "llviewercontrol.h"	// gSavedSettings
 #include "llviewertexturelist.h"
@@ -515,9 +518,12 @@ class LLFileEnableCloseAllWindows : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 		LLFloaterSnapshot* floater_snapshot = LLFloaterSnapshot::findInstance();
-		LLFloaterOutfitSnapshot* floater_outfit_snapshot = LLFloaterOutfitSnapshot::findInstance();
-		bool is_floaters_snapshot_opened = (floater_snapshot && floater_snapshot->isInVisibleChain())
-			|| (floater_outfit_snapshot && floater_outfit_snapshot->isInVisibleChain());
+//		LLFloaterOutfitSnapshot* floater_outfit_snapshot = LLFloaterOutfitSnapshot::findInstance();
+//		bool is_floaters_snapshot_opened = (floater_snapshot && floater_snapshot->isInVisibleChain())
+//			|| (floater_outfit_snapshot && floater_outfit_snapshot->isInVisibleChain());
+// [SL:KB] - Patch: Appearance-OutfitGallery | Checked: Catznip-5.0
+		bool is_floaters_snapshot_opened = (floater_snapshot && floater_snapshot->isInVisibleChain());
+// [/SL:KB]
 		bool open_children = gFloaterView->allChildrenClosed() && !is_floaters_snapshot_opened;
 		return !open_children;
 	}
@@ -532,9 +538,9 @@ class LLFileCloseAllWindows : public view_listener_t
 		LLFloaterSnapshot* floater_snapshot = LLFloaterSnapshot::findInstance();
 		if (floater_snapshot)
 			floater_snapshot->closeFloater(app_quitting);
-		LLFloaterOutfitSnapshot* floater_outfit_snapshot = LLFloaterOutfitSnapshot::findInstance();
-		if (floater_outfit_snapshot)
-			floater_outfit_snapshot->closeFloater(app_quitting);
+//		LLFloaterOutfitSnapshot* floater_outfit_snapshot = LLFloaterOutfitSnapshot::findInstance();
+//		if (floater_outfit_snapshot)
+//			floater_outfit_snapshot->closeFloater(app_quitting);
 		if (gMenuHolder) gMenuHolder->hideMenus();
 		return true;
 	}

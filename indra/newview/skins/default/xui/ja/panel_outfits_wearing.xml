@@ -9,5 +9,7 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<menu_button name="options_gear_btn" tool_tip="オプションを表示します"/>
+		<icon name="dummy_icon" width="45" />
+		<flyout_button name="save_btn" label="別名で保存" width="105" />
 	</panel>
 </panel>

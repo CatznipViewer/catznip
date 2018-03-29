@@ -34,6 +34,10 @@
 
 // newview
 #include "llviewermenu.h" // for LLViewerMenuHolderGL
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+#include "llinventorymodel.h"
+#include "llviewerinventory.h"
+// [/SL:KB]
 
 LLListContextMenu::LLListContextMenu()
 {
@@ -114,5 +118,27 @@ LLContextMenu* LLListContextMenu::createFromFile(const std::string& filename)
 	return LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(
 		filename, LLContextMenu::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+// static
+void LLListContextMenu::handlePerFolder(LLListContextMenu::functor_t functor, const uuid_vec_t& item_ids)
+{
+	uuid_vec_t folder_ids;
+	for (uuid_vec_t::const_iterator itItem = item_ids.begin(); itItem != item_ids.end(); ++itItem)
+	{
+		LLViewerInventoryItem* pItem = gInventory.getLinkedItem(*itItem);
+		if (pItem)
+		{
+			if (folder_ids.end() == std::find(folder_ids.begin(), folder_ids.end(), pItem->getParentUUID()))
+				folder_ids.push_back(pItem->getParentUUID());
+		}
+	}
+
+	for (uuid_vec_t::const_iterator itFolder = folder_ids.begin(); itFolder != folder_ids.end(); ++itFolder)
+	{
+		functor(*itFolder);
+	}
+}
+// [/SL:KB]
 
 // EOF

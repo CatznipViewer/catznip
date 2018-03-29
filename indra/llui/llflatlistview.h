@@ -299,6 +299,10 @@ public:
 
 	virtual S32	notify(const LLSD& info) ;
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	void notifyItems(const LLSD& sdInfo);
+// [/SL:KB]
+
 protected:
 
 	/** Pairs LLpanel representing a single item LLPanel and LLSD associated with it */
@@ -326,6 +330,10 @@ protected:
 	LLFlatListView(const LLFlatListView::Params& p);
 
 	/** Manage selection on mouse events */
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	virtual void onItemMouseDoubleClick(item_pair_t* item_pair, MASK mask);
+// [/SL:KB]
+
 	void onItemMouseClick(item_pair_t* item_pair, MASK mask);
 
 	void onItemRightMouseClick(item_pair_t* item_pair, MASK mask);
@@ -482,7 +490,10 @@ public:
 	 * Sets up new filter string and filters the list.
 	 */
 	void setFilterSubString(const std::string& filter_str);
-	std::string getFilterSubString() { return mFilterSubString; }
+//	std::string getFilterSubString() { return mFilterSubString; }
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	const std::string& getFilterSubString() { return mFilterSubString; }
+// [/SL:KB]
 	
 	/**
 	 * Filters the list, rearranges and notifies parent about shape changes.

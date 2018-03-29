@@ -2285,8 +2285,12 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 		return;
 	}	
 
-	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
-		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
+//	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
+//		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	if ( ((!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) && (!gSavedSettings.getBOOL("DisableAllRenderTypes")) && (!isSelf())) ||
+		 (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
+// [/SL:KB]
 	{
 		return;
 	}
@@ -2969,6 +2973,32 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		}
 	}
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32 complexity = 0;
+	bool use_complexity_color = false;
+	LLColor4 complexity_color;
+
+	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
+	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
+	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
+	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
+	if ( (show_avatar_complexity) && (render_others_as == (int)ERenderAvatarAs::NORMAL) &&
+	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
+		   (isSelf() && show_avatar_complexity_self) ) )
+	{
+		// See idleUpdateRenderComplexity()
+		static LLCachedControl<U32> max_render_cost(gSavedSettings, "RenderAvatarMaxComplexity", 0);
+		if (max_render_cost != 0)
+		{
+			F32 green_level = 1.f-llclamp(((F32) mVisualComplexity-(F32)max_render_cost)/(F32)max_render_cost, 0.f, 1.f);
+			F32 red_level   = llmin((F32) mVisualComplexity/(F32)max_render_cost, 1.f);
+			complexity_color.set(red_level, green_level, 0.0, 1.0);
+			use_complexity_color = true;
+		}
+		complexity = mVisualComplexity;
+	}
+// [/SL:KB]
+
 	// Rebuild name tag if state change detected
 	if (!mNameIsSet
 		|| new_name
@@ -2979,6 +3009,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		|| is_muted != mNameMute
 		|| is_appearance != mNameAppearance 
 		|| is_friend != mNameFriend
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		|| complexity != mNameComplexity
+		|| complexity_color != mNameComplexityColor
+// [/SL:KB]
 		|| is_cloud != mNameCloud)
 	{
 		LLColor4 name_tag_color = getNameTagColor(is_friend);
@@ -3018,6 +3052,14 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 			addNameTagLine(line, name_tag_color, LLFontGL::NORMAL,
 				LLFontGL::getFontSansSerifSmall());
 		}
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		if (complexity > 0)
+		{
+			static const std::string s_strComplexity = LLTrans::getString("av_render_complexity", LLSD().with("COMPLEXITY", "%d"));
+			addNameTagLine(llformat(s_strComplexity.c_str(), complexity), (use_complexity_color) ? complexity_color : name_tag_color, LLFontGL::NORMAL, LLFontGL::getFontSansSerifSmall());
+		}
+// [/SL:KB]
 
 		if (sRenderGroupTitles
 			&& title && title->getString() && title->getString()[0] != '\0')
@@ -3069,6 +3111,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		mNameAppearance = is_appearance;
 		mNameFriend = is_friend;
 		mNameCloud = is_cloud;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		mNameComplexity = complexity;
+		mNameComplexityColor = complexity_color;
+// [/SL:KB]
 		mTitle = title ? title->getString() : "";
 		LLStringFn::replace_ascii_controlchars(mTitle,LL_UNKNOWN_CHAR);
 		new_name = TRUE;
@@ -3318,14 +3364,25 @@ bool LLVOAvatar::isVisuallyMuted()
 	// * check against the render cost and attachment limits
 	if (!isSelf())
 	{
-		if (mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//		if (mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//		{
+//			muted = false;
+//		}
+//		else if (mVisuallyMuteSetting == AV_DO_NOT_RENDER)
+//		{	// Always want to see this AV as an impostor
+//			muted = true;
+//		}
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+		const VisualMuteSettings muteSetting = getVisualMuteSettings();
+		if (muteSetting == AV_ALWAYS_RENDER)
 		{
 			muted = false;
 		}
-		else if (mVisuallyMuteSetting == AV_DO_NOT_RENDER)
+		else if (muteSetting == AV_DO_NOT_RENDER)
 		{	// Always want to see this AV as an impostor
 			muted = true;
 		}
+// [/SL:KB]
         else if (isInMuteList())
         {
             muted = true;
@@ -3357,6 +3414,57 @@ bool LLVOAvatar::isInMuteList()
 	}
 	return muted;
 }
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+bool LLVOAvatar::isNearby() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedNearbyUpdateTime)
+	{
+		return mCachedIsNearby;
+	}
+
+	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1.0f;
+	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
+	mCachedIsNearby = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) < CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS;
+	return mCachedIsNearby;
+}
+
+bool LLVOAvatar::isFriend() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedIsFriendUpdateTime)
+	{
+		return mCachedIsFriend;
+	}
+
+	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 5.f;
+	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
+	mCachedIsFriend = LLAvatarTracker::instance().isBuddy(getID());
+	return mCachedIsFriend;
+}
+
+LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
+{
+	static LLCachedControl<S32> render_others_as(gSavedSettings, "RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
+	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+
+	LLVOAvatar::ERenderOthersAs eRenderAs = (LLVOAvatar::ERenderOthersAs)render_others_as();
+	if ( (eRenderAs == ERenderOthersAs::EVERYONE_NORMALLY) || (isSelf()) ||
+         ( (eRenderAs != ERenderOthersAs::INVISIBLE) && ( ((always_render_friends) && (isFriend())) ||
+	                                                      ((always_render_nearby) && (isNearby())) ||
+		                                                  (AV_ALWAYS_RENDER == mVisuallyMuteSetting) ) ) )
+	{
+		return ERenderAvatarAs::NORMAL;
+	}
+	else if (eRenderAs == ERenderOthersAs::EVERYONE_AS_IMPOSTERS)
+	{
+		return ERenderAvatarAs::IMPOSTER;
+	}
+	return ERenderAvatarAs::INVISIBLE;
+}
+// [/SL:KB]
 
 void LLVOAvatar::updateDebugText()
 {
@@ -6239,6 +6347,9 @@ BOOL LLVOAvatar::updateGeometry(LLDrawable *drawable)
 {
 	LL_RECORD_BLOCK_TIME(FTM_UPDATE_AVATAR);
  	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)))
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+//	if ( (!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) || (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
+// [/SL:KB]
 	{
 		return TRUE;
 	}
@@ -6874,9 +6985,15 @@ void LLVOAvatar::onGlobalColorChanged(const LLTexGlobalColor* global_color)
 
 BOOL LLVOAvatar::isVisible() const
 {
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
 	return mDrawable.notNull()
 		&& (!mOrphaned || isSelf())
-		&& (mDrawable->isVisible() || mIsDummy);
+		&& (mDrawable->isVisible() || mIsDummy)
+		&& (getRenderAvatarAs() != ERenderAvatarAs::INVISIBLE);
+// [/SL:KB]
+//	return mDrawable.notNull()
+//		&& (!mOrphaned || isSelf())
+//		&& (mDrawable->isVisible() || mIsDummy);
 }
 
 // Determine if we have enough avatar data to render
@@ -7160,8 +7277,18 @@ bool LLVOAvatar::isTooComplex() const
 		// If the user has chosen unlimited max complexity, we also disregard max attachment area
         // so that unlimited will completely disable the overly complex impostor rendering
         // yes, this leaves them vulnerable to griefing objects... their choice
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		// NOTE: friends are (optionally) exempt from both complexity and surface area checks but
+		//       nearby avatars are (optionally) only exempt from the complexity but not the surface area check
+		static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
+		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+// [/SL:KB]
         too_complex = (   max_render_cost > 0
-                       && (   mVisualComplexity > max_render_cost
+//                       && (   mVisualComplexity > max_render_cost
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+                       && ( !always_render_friends || !isFriend() )
+                       && (   ( (mVisualComplexity > max_render_cost) && (!always_render_nearby || !isNearby()) )
+// [/SL:KB]
                            || (max_attachment_area > 0.0f && mAttachmentSurfaceArea > max_attachment_area)
                            ));
 	}
@@ -9098,6 +9225,9 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 	if (mVisualComplexityStale)
 	{
 		U32 cost = VISUAL_COMPLEXITY_UNKNOWN;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		U32 old_cost = mVisualComplexity;
+// [/SL:KB]
 		LLVOVolume::texture_cost_t textures;
 		hud_complexity_list_t hud_complexity_list;
 
@@ -9126,7 +9256,10 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				const LLViewerObject* attached_object = (*attachment_iter);
+//				const LLViewerObject* attached_object = (*attachment_iter);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+				LLViewerObject* attached_object = (*attachment_iter);
+// [/SL:KB]
 				if (attached_object && !attached_object->isHUDAttachment())
 				{
 					textures.clear();
@@ -9163,7 +9296,10 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 								// add the cost of each individual texture in the linkset
 								attachment_texture_cost += volume_texture->second;
 							}
-                            attachment_total_cost = attachment_volume_cost + attachment_texture_cost + attachment_children_cost;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+							attachment_total_cost = llclamp(attachment_volume_cost + attachment_texture_cost + attachment_children_cost, MIN_ATTACHMENT_COMPLEXITY, max_attachment_complexity);
+// [/SL:KB]
+//                            attachment_total_cost = attachment_volume_cost + attachment_texture_cost + attachment_children_cost;
                             LL_DEBUGS("ARCdetail") << "Attachment costs " << attached_object->getAttachmentItemID()
                                                    << " total: " << attachment_total_cost
                                                    << ", volume: " << attachment_volume_cost
@@ -9172,7 +9308,11 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
                                                    << " children: " << attachment_children_cost
                                                    << LL_ENDL;
                             // Limit attachment complexity to avoid signed integer flipping of the wearer's ACI
-                            cost += (U32)llclamp(attachment_total_cost, MIN_ATTACHMENT_COMPLEXITY, max_attachment_complexity);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+							attached_object->setAttachmentComplexity(attachment_total_cost);
+							cost += (U32)attachment_total_cost;
+// [/SL:KB]
+//							cost += (U32)llclamp(attachment_total_cost, MIN_ATTACHMENT_COMPLEXITY, max_attachment_complexity);
 						}
 					}
 				}
@@ -9294,14 +9434,28 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 
         static LLCachedControl<U32> show_my_complexity_changes(gSavedSettings, "ShowMyComplexityChanges", 20);
 
-        if (isSelf() && show_my_complexity_changes)
-        {
-            // Avatar complexity
-            LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		if (isSelf())
+		{
+			LLAvatarRenderNotifier::getInstance()->notifyComplexityChanged(old_cost, cost);
+			if (show_my_complexity_changes)
+			{
+				// Avatar complexity
+				LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
 
-            // HUD complexity
-            LLHUDRenderNotifier::getInstance()->updateNotificationHUD(hud_complexity_list);
-        }
+				// HUD complexity
+				LLHUDRenderNotifier::getInstance()->updateNotificationHUD(hud_complexity_list);
+			}
+		}
+// [/SL:KB]
+//        if (isSelf() && show_my_complexity_changes)
+//        {
+//            // Avatar complexity
+//            LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
+//
+//            // HUD complexity
+//            LLHUDRenderNotifier::getInstance()->updateNotificationHUD(hud_complexity_list);
+//        }
     }
 }
 

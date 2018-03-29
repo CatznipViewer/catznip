@@ -257,7 +257,10 @@ class LLInventoryCategoriesObserver : public LLInventoryObserver
 public:
 	typedef boost::function<void()> callback_t;
 
-	LLInventoryCategoriesObserver() {};
+//	LLInventoryCategoriesObserver() {};
+// [SL:KB] - Patch: Inventory-Observer | Checked: Catznip-5.2
+	LLInventoryCategoriesObserver(bool compareNameHash = true) : mCompareNameHash(compareNameHash) {};
+// [/SL:KB]
 	virtual void changed(U32 mask);
 
 	/**
@@ -287,6 +290,9 @@ protected:
 	typedef category_map_t::value_type			category_map_value_t;
 
 	category_map_t				mCategoryMap;
+// [SL:KB] - Patch: Inventory-Observer | Checked: Catznip-5.2
+	bool						mCompareNameHash = true;
+// [/SL:KB]
 };
 
 class LLFolderView;

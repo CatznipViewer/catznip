@@ -181,6 +181,10 @@ void LLAvatarRenderNotifier::updateNotificationRegion(U32 agentcount, U32 overLi
         return;
     }
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	notifyVisibilityChanged(mLatestOverLimitAgents, mLatestAgentsCount);
+// [/SL:KB]
+
     if ((mPopUpDelayTimer.hasExpired() || (isNotificationVisible() && mShowOverLimitAgents))
         && (mOverLimitPct > 0 || mLatestOverLimitPct > 0)
         && std::abs(mOverLimitPct - mLatestOverLimitPct) > mLatestOverLimitPct * RENDER_ALLOWED_CHANGE_PCT

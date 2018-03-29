@@ -33,6 +33,9 @@
 
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+#include "llinventorybridge.h"
+// [/SL:KB]
 #include "llinventoryfunctions.h"
 #include "llinventoryicon.h"
 #include "llgesturemgr.h"
@@ -128,7 +131,37 @@ void LLPanelWearableOutfitItem::updateItem(const std::string& name,
 	// worn status of a linked item may still remain unchanged.
 	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkedInCOF(mInventoryItemUUID))
 	{
-		search_label += LLTrans::getString("worn");
+//		search_label += LLTrans::getString("worn");
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-2.6
+		switch (mInventoryItemAssetType)
+		{
+			case LLAssetType::AT_OBJECT:
+				if (isAgentAvatarValid())
+				{
+					std::string strAttachPt;
+					if (gAgentAvatarp->getAttachedPointName(mInventoryItemUUID, strAttachPt))
+					{
+						LLStringUtil::format_map_t args;
+						args["[ATTACHMENT_POINT]"] = LLTrans::getString(strAttachPt);
+						search_label += LLTrans::getString("WornOnAttachmentPoint", args);
+					}
+					else
+					{
+						LLStringUtil::format_map_t args;
+						args["[ATTACHMENT_ERROR]"] = LLTrans::getString(strAttachPt);
+						search_label += LLTrans::getString("AttachmentErrorMessage", args);
+					}
+				}
+				else
+				{
+					search_label += LLTrans::getString("worn");
+				}
+				break;
+			default:
+				search_label += LLTrans::getString("worn");
+				break;
+		}
+// [/SL:KB]
 		item_state = IS_WORN;
 	}
 
@@ -618,6 +651,186 @@ bool LLWearableItemCreationDateComparator::doCompare(const LLPanelInventoryListI
 
 	return date1 > date2;
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+// ============================================================================
+// LLWearableItemAppearanceComparator
+//
+
+LLWearableItemAppearanceComparator::sortorder_list_t LLWearableItemAppearanceComparator::sSortOrder;
+
+LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
+{
+	if (sSortOrder.empty())
+	{
+		sSortOrder =
+			{
+				// Head
+				{ LLAssetType::AT_OBJECT,  2 }, // Skull
+				{ LLAssetType::AT_OBJECT, 15 }, // Left Eyeball
+				{ LLAssetType::AT_OBJECT, 16 }, // Right Eyeball
+				{ LLAssetType::AT_OBJECT, 50 }, // Alt Left Eye
+				{ LLAssetType::AT_OBJECT, 51 }, // Alt Right Eye
+				{ LLAssetType::AT_OBJECT, 13 }, // Left Ear
+				{ LLAssetType::AT_OBJECT, 14 }, // Right Ear
+				{ LLAssetType::AT_OBJECT, 48 }, // Alt Left Ear
+				{ LLAssetType::AT_OBJECT, 49 }, // Alt Right Ear
+				{ LLAssetType::AT_OBJECT, 17 }, // Nose
+				{ LLAssetType::AT_OBJECT, 11 }, // Mouth
+				{ LLAssetType::AT_OBJECT, 52 }, // Tongue
+				{ LLAssetType::AT_OBJECT, 12 }, // Chin
+				{ LLAssetType::AT_OBJECT, 47 }, // Jaw
+
+				// Torso
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_JACKET },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERSHIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_GLOVES },
+				{ LLAssetType::AT_OBJECT,  1 }, // Chest
+				{ LLAssetType::AT_OBJECT,  9 }, // Spine
+				{ LLAssetType::AT_OBJECT, 39 }, // Neck
+				{ LLAssetType::AT_OBJECT, 29 }, // Left Pec
+				{ LLAssetType::AT_OBJECT, 30 }, // Right Pec
+				{ LLAssetType::AT_OBJECT,  3 }, // Left Shoulder
+				{ LLAssetType::AT_OBJECT,  4 }, // Right Shoulder
+				{ LLAssetType::AT_OBJECT, 45 }, // Left Wing
+				{ LLAssetType::AT_OBJECT, 46 }, // Right Wing
+				{ LLAssetType::AT_OBJECT, 20 }, // L Upper Arm
+				{ LLAssetType::AT_OBJECT, 18 }, // R Upper Arm
+				{ LLAssetType::AT_OBJECT, 21 }, // L Forearm
+				{ LLAssetType::AT_OBJECT, 19 }, // R Forearm
+				{ LLAssetType::AT_OBJECT,  5 }, // Left Hand
+				{ LLAssetType::AT_OBJECT, 41 }, // Left Ring Finger
+				{ LLAssetType::AT_OBJECT,  6 }, // Right Hand
+				{ LLAssetType::AT_OBJECT, 42 }, // Right Ring Finger
+				{ LLAssetType::AT_OBJECT, 25 }, // Left Hip
+				{ LLAssetType::AT_OBJECT, 22 }, // Right Hip
+				{ LLAssetType::AT_OBJECT, 28 }, // Stomach
+				{ LLAssetType::AT_OBJECT, 10 }, // Pelvis
+				{ LLAssetType::AT_OBJECT, 53 }, // Groin
+				{ LLAssetType::AT_OBJECT, 43 }, // Tail Base
+				{ LLAssetType::AT_OBJECT, 44 }, // Tail Tip
+				{ LLAssetType::AT_OBJECT, 40 }, // Avatar Center
+
+				// Legs
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERPANTS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PANTS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SKIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SOCKS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHOES },
+				{ LLAssetType::AT_OBJECT, 26 }, // L Upper Leg
+				{ LLAssetType::AT_OBJECT, 23 }, // R Upper Leg
+				{ LLAssetType::AT_OBJECT, 27 }, // L Lower Leg
+				{ LLAssetType::AT_OBJECT, 24 }, // R Lower Leg
+				{ LLAssetType::AT_OBJECT,  7 }, // Left Foot
+				{ LLAssetType::AT_OBJECT,  8 }, // Right Foot
+				{ LLAssetType::AT_OBJECT, 54 }, // Left Hind Foot
+				{ LLAssetType::AT_OBJECT, 55 }, // Right Hind Foot
+
+				// HUD attachments
+				{ LLAssetType::AT_OBJECT, 34 }, // Top Left
+				{ LLAssetType::AT_OBJECT, 33 }, // Top
+				{ LLAssetType::AT_OBJECT, 32 }, // Top Right
+				{ LLAssetType::AT_OBJECT, 35 }, // Center
+				{ LLAssetType::AT_OBJECT, 31 }, // Center 2
+				{ LLAssetType::AT_OBJECT, 36 }, // Bottom Left
+				{ LLAssetType::AT_OBJECT, 37 }, // Bottom
+				{ LLAssetType::AT_OBJECT, 38 }, // Bottom Right
+
+				// Misc
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_HAIR },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_EYES },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SHAPE },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PHYSICS },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SKIN }
+			};
+	}
+}
+
+LLWearableItemAppearanceComparator::sortorder_pair_t LLWearableItemAppearanceComparator::getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const
+{
+	sortorder_pair_t sortOrder(LLAssetType::AT_NONE, -1);
+
+	if (const LLViewerInventoryItem* pInvItem = pListItem->getItem())
+	{
+		sortOrder.first = pInvItem->getType();
+		switch (sortOrder.first)
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+				{
+					sortOrder.second = pInvItem->getWearableType();
+				}
+				break;
+			case LLAssetType::AT_OBJECT:
+				{
+					LLViewerObject* pAttachObj = NULL;
+					if ( (isAgentAvatarValid()) && (pAttachObj = gAgentAvatarp->getWornAttachment(pListItem->getItemID())) )
+						sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getState());
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	return sortOrder;
+}
+
+bool LLWearableItemAppearanceComparator::doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const
+{
+	sortorder_list_t::const_iterator sortLHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pLHS));
+	sortorder_list_t::const_iterator sortRHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pRHS));
+
+	if (sortLHS == sortRHS)
+	{
+		// Sort wearables on the same wearable type from top to bottom
+		if (LLAssetType::AT_CLOTHING == pLHS->getType())
+			return pLHS->getActualDescription() > pRHS->getActualDescription();
+		else
+			return pLHS->getName() < pRHS->getName();
+	}
+	return sortLHS < sortRHS;
+}
+
+LLWearableItemComplexityComparator::LLWearableItemComplexityComparator()
+	: LLWearableItemAppearanceComparator()
+{
+}
+
+bool LLWearableItemComplexityComparator::doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const
+{
+	LLAssetType::EType typeLHS = pLHS->getType();
+	LLAssetType::EType typeRHS = pRHS->getType();
+
+	if ( (LLAssetType::AT_OBJECT == typeLHS) && (LLAssetType::AT_OBJECT == typeRHS) )
+	{
+		if (isAgentAvatarValid())
+		{
+			const LLViewerObject* pObjLHS = gAgentAvatarp->getWornAttachment(pLHS->getItemID());
+			const LLViewerObject* pObjRHS = gAgentAvatarp->getWornAttachment(pRHS->getItemID());
+			if ( (!pObjLHS) || (!pObjRHS) )
+				return (pObjLHS) && (!pObjRHS);
+			else if (pObjLHS->getAttachmentComplexity() != pObjRHS->getAttachmentComplexity())
+				return pObjLHS->getAttachmentComplexity() > pObjRHS->getAttachmentComplexity();
+		}
+	}
+	else if (LLAssetType::AT_OBJECT == typeLHS)
+	{
+		return true;
+	}
+	else if (LLAssetType::AT_OBJECT == typeRHS)
+	{
+		return false;
+	}
+	return LLWearableItemAppearanceComparator::doCompare(pLHS, pRHS);
+}
+
+// ============================================================================
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -626,6 +839,10 @@ static LLWearableItemTypeNameComparator WEARABLE_TYPE_NAME_COMPARATOR;
 static const LLWearableItemTypeNameComparator WEARABLE_TYPE_LAYER_COMPARATOR;
 static const LLWearableItemNameComparator WEARABLE_NAME_COMPARATOR;
 static const LLWearableItemCreationDateComparator WEARABLE_CREATION_DATE_COMPARATOR;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+static const LLWearableItemAppearanceComparator WEARABLE_APPEARANCE_COMPARATOR;
+static const LLWearableItemComplexityComparator WEARABLE_COMPLEXITY_COMPARATOR;
+// [/SL:KB]
 
 static const LLDefaultChildRegistry::Register<LLWearableItemsList> r("wearable_items_list");
 
@@ -754,6 +971,14 @@ void LLWearableItemsList::setSortOrder(ESortOrder sort_order, bool sort_now)
 		setComparator(&WEARABLE_TYPE_NAME_COMPARATOR);
 		break;
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+	case E_SORT_BY_APPEARANCE:
+		setComparator(&WEARABLE_APPEARANCE_COMPARATOR);
+		break;
+	case E_SORT_BY_COMPLEXITY:
+		setComparator(&WEARABLE_COMPLEXITY_COMPARATOR);
+		break;
+// [/SL:KB]
 
 	// No "default:" to raise compiler warning
 	// if we're not handling something
@@ -772,11 +997,11 @@ void LLWearableItemsList::setSortOrder(ESortOrder sort_order, bool sort_now)
 //////////////////////////////////////////////////////////////////////////
 
 LLWearableItemsList::ContextMenu::ContextMenu()
-:	mParent(NULL)
+//:	mParent(NULL)
 {
 }
 
-void LLWearableItemsList::ContextMenu::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
+void LLWearableItemsList::ContextMenuBase::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
 {
 	mParent = dynamic_cast<LLWearableItemsList*>(spawning_view);
 	LLListContextMenu::show(spawning_view, uuids, x, y);
@@ -784,7 +1009,7 @@ void LLWearableItemsList::ContextMenu::show(LLView* spawning_view, const uuid_ve
 }
 
 // virtual
-LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
+LLContextMenu* LLWearableItemsList::ContextMenuBase::createMenu()
 {
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	const uuid_vec_t& ids = mUUIDs;		// selected items IDs
@@ -798,6 +1023,21 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id));
 	registrar.add("Wearable.TakeOffDetach", 
 				  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), ids));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+	functor_t take_off_folder = boost::bind(&LLAppearanceMgr::removeFolderFromAvatar, LLAppearanceMgr::getInstance(), _1);
+	registrar.add("Wearing.TakeOffFolder", boost::bind(&handlePerFolder, take_off_folder, mUUIDs));
+
+	LLUUID selected_linked_id = gInventory.getLinkedItemID(selected_id);
+#ifdef CATZNIP
+	registrar.add("Folder.Wear", boost::bind(&LLFolderBridge::wearItems, &gInventory, selected_linked_id));
+#endif // CATZNIP
+	functor_t add_folder = boost::bind(&LLAppearanceMgr::addCategoryToCurrentOutfit, LLAppearanceMgr::getInstance(), _1);
+	registrar.add("Folder.Add", boost::bind(add_folder, selected_linked_id));
+	functor_t replace_folder = boost::bind(&LLAppearanceMgr::replaceCurrentOutfit, LLAppearanceMgr::getInstance(), _1);
+	registrar.add("Folder.Replace", boost::bind(replace_folder, selected_linked_id));
+	functor_t remove_folder = boost::bind(&LLAppearanceMgr::takeOffOutfit, LLAppearanceMgr::getInstance(), _1);
+	registrar.add("Folder.Remove", boost::bind(remove_folder, selected_linked_id));
+// [/SL:KB]
 
 	// Register handlers for clothing.
 	registrar.add("Clothing.TakeOff", 
@@ -812,7 +1052,10 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Object.Attach", boost::bind(LLViewerAttachMenu::attachObjects, ids, _2));
 
 	// Create the menu.
-	LLContextMenu* menu = createFromFile("menu_wearable_list_item.xml");
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	LLContextMenu* menu = createFromFile(getMenuName());
+// [/SL:KB]
+//	LLContextMenu* menu = createFromFile("menu_wearable_list_item.xml");
 
 	// Determine which items should be visible/enabled.
 	updateItemsVisibility(menu);
@@ -822,7 +1065,7 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	return menu;
 }
 
-void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu)
+void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* menu)
 {
 	if (!menu)
 	{
@@ -839,6 +1082,9 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	U32 n_editable = 0;				// number of editable items among the selected ones
 
 	bool can_be_worn = true;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+	bool can_remove_folder = false;
+// [/SL:KB]
 
 	for (uuid_vec_t::const_iterator it = ids.begin(); it != ids.end(); ++it)
 	{
@@ -852,7 +1098,10 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 			continue;
 		}
 
-		updateMask(mask, item->getType());
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+		updateMask(mask, item);
+// [/SL:KB]
+//		updateMask(mask, item->getType());
 
 		const LLWearableType::EType wearable_type = item->getWearableType();
 		const bool is_link = item->getIsLinkType();
@@ -875,6 +1124,12 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 		{
 			++n_already_worn;
 		}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+		if (!can_remove_folder)
+		{
+			can_remove_folder |= LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(item->getParentUUID());
+		}
+// [/SL:KB]
 
 		if (can_be_worn)
 		{
@@ -883,14 +1138,22 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	} // for
 
 	bool standalone = mParent ? mParent->isStandalone() : false;
-	bool wear_add_visible = mask & (MASK_CLOTHING|MASK_ATTACHMENT) && n_worn == 0 && can_be_worn && (n_already_worn != 0 || mask & MASK_ATTACHMENT);
+//	bool wear_add_visible = mask & (MASK_CLOTHING|MASK_ATTACHMENT) && n_worn == 0 && can_be_worn && (n_already_worn != 0 || mask & MASK_ATTACHMENT);
 
 	// *TODO: eliminate multiple traversals over the menu items
-	setMenuItemVisible(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0 && can_be_worn);
-	setMenuItemEnabled(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0);
-	setMenuItemVisible(menu, "wear_add",			wear_add_visible);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+	setMenuItemVisible(menu, "wear_wear", 			mask & (MASK_BODYPART | MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
+	setMenuItemEnabled(menu, "wear_wear", 			true);
+	setMenuItemVisible(menu, "wear_add",			mask & (MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
 	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
-	setMenuItemVisible(menu, "wear_replace",		n_worn == 0 && n_already_worn != 0 && can_be_worn);
+	setMenuItemVisible(menu, "wear_replace",		mask & (MASK_BODYPART | MASK_CLOTHING | MASK_ATTACHMENT) && can_be_worn);
+	setMenuItemEnabled(menu, "wear_replace",		true);
+// [/RLVa:KB]
+//	setMenuItemVisible(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0 && can_be_worn);
+//	setMenuItemEnabled(menu, "wear_wear", 			n_already_worn == 0 && n_worn == 0);
+//	setMenuItemVisible(menu, "wear_add",			wear_add_visible);
+//	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
+//	setMenuItemVisible(menu, "wear_replace",		n_worn == 0 && n_already_worn != 0 && can_be_worn);
 	//visible only when one item selected and this item is worn
 	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART) && n_worn == n_items && n_worn == 1);
 	setMenuItemEnabled(menu, "edit",				n_editable == 1 && n_worn == 1 && n_items == 1);
@@ -898,10 +1161,35 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	setMenuItemEnabled(menu, "create_new",			LLAppearanceMgr::instance().canAddWearables(ids));
 	setMenuItemVisible(menu, "show_original",		!standalone);
 	setMenuItemEnabled(menu, "show_original",		n_items == 1 && n_links == n_items);
-	setMenuItemVisible(menu, "take_off",			mask == MASK_CLOTHING && n_worn == n_items);
-	setMenuItemVisible(menu, "detach",				mask == MASK_ATTACHMENT && n_worn == n_items);
-	setMenuItemVisible(menu, "take_off_or_detach",	mask == (MASK_ATTACHMENT|MASK_CLOTHING));
-	setMenuItemEnabled(menu, "take_off_or_detach",	n_worn == n_items);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+	bool showTakeOff = (mask & MASK_CLOTHING) && (n_worn == n_items);
+	bool showDetach  = (mask & MASK_ATTACHMENT) && (n_worn == n_items);
+	setMenuItemVisible(menu, "take_off",			showTakeOff && !showDetach);
+	setMenuItemEnabled(menu, "take_off",			true);
+	setMenuItemVisible(menu, "detach",				!showTakeOff && showDetach);
+	setMenuItemEnabled(menu, "detach",				true);
+	setMenuItemVisible(menu, "take_off_or_detach",	showTakeOff && showDetach);
+	setMenuItemEnabled(menu, "take_off_or_detach",	true);
+
+	setMenuItemVisible(menu, "take_off_folder",		showTakeOff);
+	setMenuItemEnabled(menu, "take_off_folder",		can_remove_folder);
+	setMenuItemVisible(menu, "detach_folder",		!showTakeOff && showDetach);
+	setMenuItemEnabled(menu, "detach_folder",		can_remove_folder);
+	setMenuItemVisible(menu, "wear_folder",			mask == MASK_CATEGORY);
+	setMenuItemEnabled(menu, "wear_folder",			true);
+
+	const LLUUID& idFolder = (mask == MASK_CATEGORY || mask == MASK_OUTFIT) ? gInventory.getLinkedItemID(ids.front()) : LLUUID::null;
+	setMenuItemVisible(menu, "add_folder",			mask == MASK_CATEGORY);
+	setMenuItemEnabled(menu, "add_folder",			idFolder.notNull() && LLAppearanceMgr::instance().getCanAddToCOF(idFolder));
+	setMenuItemVisible(menu, "replace_folder",		mask == MASK_CATEGORY || mask == MASK_OUTFIT);
+	setMenuItemEnabled(menu, "replace_folder",		(mask == MASK_OUTFIT && LLAppearanceMgr::instance().getCanReplaceCOF(idFolder)) || (mask == MASK_CATEGORY && !gAgentWearables.isCOFChangeInProgress()));
+	setMenuItemVisible(menu, "remove_folder",		mask == MASK_CATEGORY || mask == MASK_OUTFIT);
+	setMenuItemEnabled(menu, "remove_folder",		idFolder.notNull() && LLAppearanceMgr::getCanRemoveFromCOF(idFolder));
+// [/SL:KB]
+//	setMenuItemVisible(menu, "take_off",			mask == MASK_CLOTHING && n_worn == n_items);
+//	setMenuItemVisible(menu, "detach",				mask == MASK_ATTACHMENT && n_worn == n_items);
+//	setMenuItemVisible(menu, "take_off_or_detach",	mask == (MASK_ATTACHMENT|MASK_CLOTHING));
+//	setMenuItemEnabled(menu, "take_off_or_detach",	n_worn == n_items);
 	setMenuItemVisible(menu, "object_profile",		!standalone);
 	setMenuItemEnabled(menu, "object_profile",		n_items == 1);
 	setMenuItemVisible(menu, "--no options--", 		FALSE);
@@ -938,7 +1226,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	}
 }
 
-void LLWearableItemsList::ContextMenu::updateItemsLabels(LLContextMenu* menu)
+void LLWearableItemsList::ContextMenuBase::updateItemsLabels(LLContextMenu* menu)
 {
 	llassert(menu);
 	if (!menu) return;
@@ -958,20 +1246,25 @@ void LLWearableItemsList::ContextMenu::updateItemsLabels(LLContextMenu* menu)
 // Otherwise code relying on a BOOL value being TRUE may fail
 // (I experienced a weird assert in LLView::drawChildren() because of that.
 // static
-void LLWearableItemsList::ContextMenu::setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val)
+void LLWearableItemsList::ContextMenuBase::setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val)
 {
 	menu->setItemVisible(name, val);
 }
 
 // static
-void LLWearableItemsList::ContextMenu::setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val)
+void LLWearableItemsList::ContextMenuBase::setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val)
 {
 	menu->setItemEnabled(name, val);
 }
 
 // static
-void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType at)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+void LLWearableItemsList::ContextMenuBase::updateMask(U32& mask, LLViewerInventoryItem* item)
 {
+	LLAssetType::EType at = item->getType();
+// [/SL:KB]
+//void LLWearableItemsList::ContextMenuBase::updateMask(U32& mask, LLAssetType::EType at)
+//{
 	if (at == LLAssetType::AT_CLOTHING)
 	{
 		mask |= MASK_CLOTHING;
@@ -988,6 +1281,23 @@ void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType 
 	{
 		mask |= MASK_GESTURE;
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+	else if (at == LLAssetType::AT_CATEGORY)
+	{
+		if (LLViewerInventoryCategory* pFolder = item->getLinkedCategory())
+		{
+			switch (pFolder->getPreferredType())
+			{
+			case LLFolderType::FT_OUTFIT:
+				mask |= MASK_OUTFIT;
+				break;
+			default:
+				mask |= MASK_CATEGORY;
+				break;
+			}
+		}
+	}
+// [/SL:KB]
 	else
 	{
 		mask |= MASK_UNKNOWN;
@@ -995,7 +1305,7 @@ void LLWearableItemsList::ContextMenu::updateMask(U32& mask, LLAssetType::EType 
 }
 
 // static
-void LLWearableItemsList::ContextMenu::createNewWearable(const LLUUID& item_id)
+void LLWearableItemsList::ContextMenuBase::createNewWearable(const LLUUID& item_id)
 {
 	LLViewerInventoryItem* item = gInventory.getLinkedItem(item_id);
 	if (!item || !item->isWearableType()) return;

@@ -8137,6 +8137,39 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>QuickPrefsInventoryFolder</key>
+    <map>
+      <key>Comment</key>
+      <string>Inventory folder to show when opening the quick preference inventory tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>QuickPrefsInventorySort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>QuickPrefsWearingSort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent; appearance: 10; complexity: 11)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
     <key>QuietSnapshotsToDisk</key>
     <map>
       <key>Comment</key>
@@ -9879,6 +9912,39 @@
       <key>Value</key>
       <real>1.0</real>
     </map>
+    <key>RenderNameShowComplexity</key>
+    <map>
+      <key>Comment</key>
+      <string>Show an avatar's complexity in their name tag</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>RenderNameShowComplexityAtLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Show an avatar's complexity number only when it exceeds your current limit</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>RenderNameShowComplexitySelf</key>
+    <map>
+      <key>Comment</key>
+      <string>Show your own avatar's complexity in your name tag</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>RenderNameShowSelf</key>
     <map>
       <key>Comment</key>
@@ -10313,6 +10379,39 @@
     <string>F32</string>
     <key>Value</key>
     <real>10.0E6</real>
+  </map>
+  <key>RenderOthersAs</key>
+  <map>
+    <key>Comment</key>
+    <string>Specifies how to render other avatars (0: normally; 1: as imposters with exceptions; 2: only yourself with exceptions; 3: only yourself with no exceptions</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>S32</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>RenderFriendsFull</key>
+  <map>
+    <key>Comment</key>
+    <string>Friends are always fully rendered</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <boolean>1</boolean>
+  </map>
+  <key>RenderNearbyFull</key>
+  <map>
+    <key>Comment</key>
+    <string>Nearby avatars (within chat range) are always fully rendered</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <boolean>0</boolean>
   </map>
 
     <key>RenderVBOEnable</key>
@@ -13748,6 +13847,17 @@
     <key>Value</key>
     <integer>1</integer>
   </map>
+    <key>UseOutfitInventoryView</key>
+    <map>
+      <key>Comment</key>
+      <string>Determines the type of view to use for the "My Outfits" sidebar panel (TRUE - inventory view ; FALSE - accordion view (default viewer 2)) </string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
   <key>RenderSynchronousOcclusion</key>
   <map>
     <key>Comment</key>
@@ -14364,6 +14474,39 @@
       <key>Value</key>
       <real>50.0</real>
     </map>
+    <key>WearingFolderSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the sort order for the wearing folder view</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>6</integer>
+    </map>
+    <key>WearingListSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the sort order for the wearing list view</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
+    <key>WearingViewType</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the wearing panel as a folder view (0) or a list view (1)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>FlashCount</key>
     <map>
       <key>Comment</key>
@@ -14908,6 +15051,17 @@
       <string>S32</string>
       <key>Value</key>
       <integer>180</integer>
+    </map>
+    <key>OutfitSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies sort key for inventory items (+0 = name, +1 = date)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>HeightUnits</key>
     <map>

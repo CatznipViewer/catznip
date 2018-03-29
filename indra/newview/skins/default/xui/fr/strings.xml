@@ -5008,6 +5008,12 @@ Veuillez vous reporter à http://status.secondlifegrid.net afin de déterminer s
 	<string name="EmptyOutfitText">
 		Cette tenue ne contient aucun article.
 	</string>
+	<string name="SaveOutfit">
+		Enregistrer
+	</string>
+	<string name="SaveOutfitAs">
+		Enregistrer sous
+	</string>
 	<string name="ExternalEditorNotSet">
 		Sélectionnez un éditeur à l&apos;aide du paramètre ExternalEditor.
 	</string>

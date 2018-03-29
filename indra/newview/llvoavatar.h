@@ -397,6 +397,26 @@ public:
 	U32 		renderImpostor(LLColor4U color = LLColor4U(255,255,255,255), S32 diffuse_channel = 0);
 	bool		isVisuallyMuted();
 	bool 		isInMuteList();
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	bool 		isNearby() const;
+	bool 		isFriend() const;
+
+	enum class ERenderAvatarAs
+	{
+		NORMAL,
+		IMPOSTER,
+		INVISIBLE
+	};
+	enum class ERenderOthersAs
+	{
+		EVERYONE_NORMALLY = 0,
+		EVERYONE_AS_IMPOSTERS,
+		ONLY_EXCEPTIONS,
+		INVISIBLE
+	};
+	ERenderAvatarAs getRenderAvatarAs() const;
+// [/SL:KB]
+
 	void		forceUpdateVisualMuteSettings();
 
 	enum VisualMuteSettings
@@ -406,7 +426,10 @@ public:
 		AV_ALWAYS_RENDER   = 2
 	};
 	void		setVisualMuteSettings(VisualMuteSettings set);
-	VisualMuteSettings  getVisualMuteSettings()						{ return mVisuallyMuteSetting;	};
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	VisualMuteSettings  getVisualMuteSettings() const				{ return (ERenderAvatarAs::NORMAL == getRenderAvatarAs()) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
+// [/SL:KB]
+//	VisualMuteSettings  getVisualMuteSettings()						{ return mVisuallyMuteSetting;	};
 
 	U32 		renderRigid();
 	U32 		renderSkinned();
@@ -437,6 +460,12 @@ public:
 
 	bool		mCachedInMuteList;
 	F64			mCachedMuteListUpdateTime;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	mutable bool mCachedIsNearby = false;
+	mutable F64  mCachedNearbyUpdateTime = 0.f;
+	mutable bool mCachedIsFriend = false;
+	mutable F64  mCachedIsFriendUpdateTime = 0.f;
+// [/SL:KB]
 
 	VisualMuteSettings		mVisuallyMuteSetting;			// Always or never visually mute this AV
 
@@ -913,6 +942,10 @@ private:
 	bool			mNameCloud;
 	F32				mNameAlpha;
 	BOOL      		mRenderGroupTitles;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32				mNameComplexity = 0;
+	LLColor4		mNameComplexityColor;
+// [/SL:KB]
 
 	//--------------------------------------------------------------------
 	// Display the name (then optionally fade it out)

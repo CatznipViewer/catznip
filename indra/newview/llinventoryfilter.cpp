@@ -32,6 +32,9 @@
 #include "llagent.h"
 #include "llfolderviewmodel.h"
 #include "llfolderviewitem.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
 #include "llinventoryfunctions.h"
@@ -70,6 +73,9 @@ LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 ///----------------------------------------------------------------------------
 LLInventoryFilter::LLInventoryFilter(const Params& p)
 :	mName(p.name),
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	mFilterSubStringResetFilterLinks(true),
+// [/SL:KB]
 	mFilterModified(FILTER_NONE),
 	mEmptyLookupMessage("InventoryNoMatchingItems"),
 	mFilterOps(p.filter_ops),
@@ -364,6 +370,26 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		}
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	////////////////////////////////////////////////////////////////////////////////
+	// FILTERTYPE_WORN
+	// Pass if this item is currently worn
+	if (filterTypes & FILTERTYPE_WORN)
+	{
+		switch (object_type)
+		{
+			case LLInventoryType::IT_WEARABLE:
+			case LLInventoryType::IT_ATTACHMENT:
+			case LLInventoryType::IT_OBJECT:
+				if (!get_is_item_worn(listener->getUUID()))
+					return FALSE;
+				break;
+			default:
+				return FALSE;
+		}
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -631,10 +657,26 @@ void LLInventoryFilter::setFilterEmptySystemFolders()
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
 }
 
-void LLInventoryFilter::setFilterWorn()
+//void LLInventoryFilter::setFilterWorn()
+//{
+//    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+//}
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+void LLInventoryFilter::setFilterWorn(bool filter)
 {
-    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+	if (filter)
+	{
+		setModified(FILTER_MORE_RESTRICTIVE);
+		mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+	}
+	else
+	{
+		setModified(FILTER_LESS_RESTRICTIVE);
+		mFilterOps.mFilterTypes &= ~FILTERTYPE_WORN;
+	}
 }
+// [/SL:KB]
 
 void LLInventoryFilter::setFilterMarketplaceActiveFolders()
 {
@@ -720,8 +762,15 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 		{
 			if (mBackupFilterOps.mFilterLinks == FILTERLINK_ONLY_LINKS)
 			{
-				// we started viewer/floater in 'only links' mode
-				mFilterOps.mFilterLinks = FILTERLINK_INCLUDE_LINKS;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+				if (mFilterSubStringResetFilterLinks)
+				{
+// [/SL:KB]
+					// we started viewer/floater in 'only links' mode
+					mFilterOps.mFilterLinks = FILTERLINK_INCLUDE_LINKS;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+				}
+// [/SL:KB]
 			}
 			else
 			{
@@ -892,7 +941,10 @@ U32 LLInventoryFilter::getDateSearchDirection() const
 	return mFilterOps.mDateSearchDirection;
 }
 
-void LLInventoryFilter::setFilterLinks(U64 filter_links)
+//void LLInventoryFilter::setFilterLinks(U64 filter_links)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+void LLInventoryFilter::setFilterLinks(U64 filter_links, bool substring_reset)
+// [/SL:KB]
 {
 	if (mFilterOps.mFilterLinks != filter_links)
 	{
@@ -903,6 +955,9 @@ void LLInventoryFilter::setFilterLinks(U64 filter_links)
 			setModified(FILTER_LESS_RESTRICTIVE);
 	}
 	mFilterOps.mFilterLinks = filter_links;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	mFilterSubStringResetFilterLinks = substring_reset;
+// [/SL:KB]
 }
 
 void LLInventoryFilter::setShowFolderState(EFolderShow state)
@@ -940,7 +995,10 @@ void LLInventoryFilter::setFindAllLinksMode(const std::string &search_name, cons
 	setFilterSubString(search_name);
 	setFilterUUID(search_id);
 	setShowFolderState(SHOW_NON_EMPTY_FOLDERS);
-	setFilterLinks(FILTERLINK_ONLY_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2015-12-05 (Catznip-3.8)
+	setFilterLinks(FILTERLINK_ONLY_LINKS, true);
+// [/SL:KB]
+//	setFilterLinks(FILTERLINK_ONLY_LINKS);
 }
 
 void LLInventoryFilter::markDefault()

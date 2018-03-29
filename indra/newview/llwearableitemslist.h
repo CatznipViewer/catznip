@@ -265,6 +265,9 @@ public:
 		return doCompare(wearable_item1, wearable_item2);
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	virtual bool areWearablesOrdered() const { return false; }
+// [/SL:KB]
 protected:
 
 	/**
@@ -316,6 +319,9 @@ public:
 
 	void setOrder(LLAssetType::EType items_of_type, ETypeListOrder order_priority, bool sort_items_by_name, bool sort_wearable_items_by_name);
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	bool areWearablesOrdered() const override { return true; }
+// [/SL:KB]
 protected:
 	/**
 	 * All information about sort order is stored in mWearableOrder map
@@ -391,6 +397,49 @@ protected:
 	/*virtual*/ bool doCompare(const LLPanelInventoryListItemBase* item1, const LLPanelInventoryListItemBase* item2) const;
 };
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+/**
+ * @class LLWearableItemAppearanceComparator
+ *
+ * Comparator for sorting wearable list items by avatar appearance (top to bottom).
+ */
+class LLWearableItemAppearanceComparator : public LLWearableListItemComparator
+{
+	LOG_CLASS(LLWearableItemAppearanceComparator);
+public:
+	LLWearableItemAppearanceComparator();
+	~LLWearableItemAppearanceComparator() override {}
+
+public:
+	bool areWearablesOrdered() const override { return true; }
+protected:
+	typedef std::pair<LLAssetType::EType, int> sortorder_pair_t;
+	typedef std::vector<sortorder_pair_t> sortorder_list_t;
+
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
+	sortorder_pair_t getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const;
+
+protected:
+	static sortorder_list_t sSortOrder;
+};
+
+/**
+* @class LLWearableItemAppearanceComparator
+*
+* Comparator for sorting wearable list items by item complexity
+*/
+class LLWearableItemComplexityComparator : public LLWearableItemAppearanceComparator
+{
+	LOG_CLASS(LLWearableItemComplexityComparator);
+public:
+	LLWearableItemComplexityComparator();
+	~LLWearableItemComplexityComparator() override {}
+
+protected:
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
+};
+// [/SL:KB]
+
 /**
  * @class LLWearableItemsList
  *
@@ -409,10 +458,17 @@ public:
 	 * (e.g. for items selected across multiple wearable lists),
 	 * so making it a singleton.
 	 */
-	class ContextMenu : public LLListContextMenu, public LLSingleton<ContextMenu>
+
+//	class ContextMenu : public LLListContextMenu, public LLSingleton<ContextMenu>
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	class ContextMenuBase : public LLListContextMenu
+// [/SL:KB]
 	{
-		LLSINGLETON(ContextMenu);
+//		LLSINGLETON(ContextMenu);
 	public:
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+		ContextMenuBase() : mParent(nullptr) {}
+// [/SL:KB]
 		/*virtual*/ void show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y);
 
 	protected:
@@ -421,19 +477,40 @@ public:
 			MASK_BODYPART		= 0x02,
 			MASK_ATTACHMENT		= 0x04,
 			MASK_GESTURE		= 0x08,
-			MASK_UNKNOWN		= 0x10,
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+			MASK_CATEGORY		= 0x10,
+			MASK_OUTFIT			= 0x20,
+			MASK_UNKNOWN		= 0x40,
+// [/SL:KB]
+//			MASK_UNKNOWN		= 0x10,
 		};
 
 		/* virtual */ LLContextMenu* createMenu();
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+		virtual const std::string getMenuName() const = 0;
+// [/SL:KB]
 		void updateItemsVisibility(LLContextMenu* menu);
 		void updateItemsLabels(LLContextMenu* menu);
 		static void setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val);
 		static void setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val);
-		static void updateMask(U32& mask, LLAssetType::EType at);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+		static void updateMask(U32& mask, LLViewerInventoryItem* item);
+// [/SL:KB]
+//		static void updateMask(U32& mask, LLAssetType::EType at);
 		static void createNewWearable(const LLUUID& item_id);
 
 		LLWearableItemsList*	mParent;
 	};
+
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	class ContextMenu : public ContextMenuBase, public LLSingleton<ContextMenu>
+	{
+		LLSINGLETON(ContextMenu);
+
+	protected:
+		virtual const std::string getMenuName() const { return "menu_wearable_list_item.xml"; }
+	};
+// [/SL:KB]
 
 	struct Params : public LLInitParam::Block<Params, LLInventoryItemsList::Params>
 	{
@@ -449,6 +526,10 @@ public:
 		E_SORT_BY_MOST_RECENT	= 1,
 		E_SORT_BY_TYPE_LAYER	= 2,
 		E_SORT_BY_TYPE_NAME 	= 3,
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+		E_SORT_BY_APPEARANCE 	= 10,
+		E_SORT_BY_COMPLEXITY 	= 11,
+// [/SL:KB]
 	} ESortOrder;
 
 	virtual ~LLWearableItemsList();
@@ -467,7 +548,10 @@ public:
 
 	ESortOrder getSortOrder() const { return mSortOrder; }
 
-	void setSortOrder(ESortOrder sort_order, bool sort_now = true);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	virtual void setSortOrder(ESortOrder sort_order, bool sort_now = true);
+// [/SL:KB]
+//	void setSortOrder(ESortOrder sort_order, bool sort_now = true);
 
 protected:
 	friend class LLUICtrlFactory;

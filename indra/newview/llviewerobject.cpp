@@ -269,6 +269,9 @@ LLViewerObject::LLViewerObject(const LLUUID &id, const LLPCode pcode, LLViewerRe
 	mCostStale(true),
 	mPhysicsShapeUnknown(true),
 	mAttachmentItemID(LLUUID::null),
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	mAttachmentComplexity(0),
+// [/SL:KB]
 	mLastUpdateType(OUT_UNKNOWN),
 	mLastUpdateCached(FALSE),
 	mCachedMuteListUpdateTime(0),

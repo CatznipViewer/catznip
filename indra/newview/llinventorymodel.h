@@ -228,6 +228,9 @@ public:
 	void getDirectDescendentsOf(const LLUUID& cat_id,
 								cat_array_t*& categories,
 								item_array_t*& items) const;
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	void getDirectDescendentsOf(const LLUUID& cat_id, cat_array_t& categories, item_array_t& items, LLInventoryCollectFunctor& f);
+// [/SL:KB]
 
 	// Compute a hash of direct descendant names (for detecting child name changes)
 	LLMD5 hashDirectDescendentNames(const LLUUID& cat_id) const;
@@ -245,6 +248,9 @@ public:
 	// Simpler existence test if matches don't actually need to be collected.
 	bool hasMatchingDirectDescendent(const LLUUID& cat_id,
 									 LLInventoryCollectFunctor& filter);
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+	bool hasMatchingDirectDescendentRecursive(const LLUUID& cat_id, BOOL include_trash, LLInventoryCollectFunctor& filter);
+// [/SL:KB]
 	void collectDescendents(const LLUUID& id,
 							cat_array_t& categories,
 							item_array_t& items,
