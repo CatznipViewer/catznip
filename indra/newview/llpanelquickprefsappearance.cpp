@@ -137,17 +137,19 @@ void LLQuickPrefsAppearancePanel::refreshComplexity()
 		m_pComplexityText->setText(llformat("%d", nComplexity));
 
 		LLAvatarRenderNotifier* pAvRenderNotif = LLAvatarRenderNotifier::getInstance();
+
+		LLStringUtil::format_map_t visibilityArgs;
 		if (pAvRenderNotif->getLatestAgentsCount() > 0)
 		{
-			m_pVisibilityText->setText(llformat("%d / %d (%.0f%%)", pAvRenderNotif->getLatestAgentsCount() - pAvRenderNotif->getLatestOverLimitAgents(),
-																	pAvRenderNotif->getLatestAgentsCount(),
-																	100.f - pAvRenderNotif->getLatestOverLimitPct()));
+			visibilityArgs["[VISIBLE]"] = std::to_string(pAvRenderNotif->getLatestAgentsCount() - pAvRenderNotif->getLatestOverLimitAgents());
+			visibilityArgs["[TOTAL]"] = std::to_string(pAvRenderNotif->getLatestAgentsCount());
 		}
 		else
 		{
-			m_pVisibilityText->setText(llformat("- / -"));
-
+			visibilityArgs["[VISIBLE]"] = "-";
+			visibilityArgs["[TOTAL]"] = "-";
 		}
+		m_pVisibilityText->setText(getString("visibility_text", visibilityArgs));
 	}
 }
 

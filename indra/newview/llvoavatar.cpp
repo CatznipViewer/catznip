@@ -2292,8 +2292,12 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 		return;
 	}	
 
-	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
-		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
+//	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
+//		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	if ( ((!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) && (!gSavedSettings.getBOOL("DisableAllRenderTypes")) && (!isSelf())) ||
+		 (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
+// [/SL:KB]
 	{
 		return;
 	}
@@ -3014,10 +3018,11 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 	bool use_complexity_color = false;
 	LLColor4 complexity_color;
 
+	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
 	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
 	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
 	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
-	if ( (show_avatar_complexity) &&
+	if ( (show_avatar_complexity) && (render_others_as == (int)ERenderAvatarAs::NORMAL) &&
 	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
 		   (isSelf() && show_avatar_complexity_self) ) )
 	{
@@ -3445,14 +3450,25 @@ bool LLVOAvatar::isVisuallyMuted()
 	// * check against the render cost and attachment limits
 	if (!isSelf())
 	{
-		if (mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//		if (mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//		{
+//			muted = false;
+//		}
+//		else if (mVisuallyMuteSetting == AV_DO_NOT_RENDER)
+//		{	// Always want to see this AV as an impostor
+//			muted = true;
+//		}
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+		const VisualMuteSettings muteSetting = getVisualMuteSettings();
+		if (muteSetting == AV_ALWAYS_RENDER)
 		{
 			muted = false;
 		}
-		else if (mVisuallyMuteSetting == AV_DO_NOT_RENDER)
+		else if (muteSetting == AV_DO_NOT_RENDER)
 		{	// Always want to see this AV as an impostor
 			muted = true;
 		}
+// [/SL:KB]
         else if (isInMuteList())
         {
             muted = true;
@@ -3494,7 +3510,7 @@ bool LLVOAvatar::isNearby() const
 		return mCachedIsNearby;
 	}
 
-	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1;
+	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1.0f;
 	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
 	mCachedIsNearby = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) < CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS;
 	return mCachedIsNearby;
@@ -3508,10 +3524,31 @@ bool LLVOAvatar::isFriend() const
 		return mCachedIsFriend;
 	}
 
-	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 1;
+	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 5.f;
 	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
 	mCachedIsFriend = LLAvatarTracker::instance().isBuddy(getID());
 	return mCachedIsFriend;
+}
+
+LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
+{
+	static LLCachedControl<S32> render_others_as(gSavedSettings, "RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
+	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+
+	LLVOAvatar::ERenderOthersAs eRenderAs = (LLVOAvatar::ERenderOthersAs)render_others_as();
+	if ( (eRenderAs == ERenderOthersAs::EVERYONE_NORMALLY) || (isSelf()) ||
+         ( (eRenderAs != ERenderOthersAs::INVISIBLE) && ( ((always_render_friends) && (isFriend())) ||
+	                                                      ((always_render_nearby) && (isNearby())) ||
+		                                                  (AV_ALWAYS_RENDER == mVisuallyMuteSetting) ) ) )
+	{
+		return ERenderAvatarAs::NORMAL;
+	}
+	else if (eRenderAs == ERenderOthersAs::EVERYONE_AS_IMPOSTERS)
+	{
+		return ERenderAvatarAs::IMPOSTER;
+	}
+	return ERenderAvatarAs::INVISIBLE;
 }
 // [/SL:KB]
 
@@ -6414,6 +6451,9 @@ BOOL LLVOAvatar::updateGeometry(LLDrawable *drawable)
 {
 	LL_RECORD_BLOCK_TIME(FTM_UPDATE_AVATAR);
  	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)))
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+//	if ( (!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) || (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
+// [/SL:KB]
 	{
 		return TRUE;
 	}
@@ -7077,9 +7117,15 @@ void LLVOAvatar::onGlobalColorChanged(const LLTexGlobalColor* global_color)
 
 BOOL LLVOAvatar::isVisible() const
 {
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
 	return mDrawable.notNull()
 		&& (!mOrphaned || isSelf())
-		&& (mDrawable->isVisible() || mIsDummy);
+		&& (mDrawable->isVisible() || mIsDummy)
+		&& (getRenderAvatarAs() != ERenderAvatarAs::INVISIBLE);
+// [/SL:KB]
+//	return mDrawable.notNull()
+//		&& (!mOrphaned || isSelf())
+//		&& (mDrawable->isVisible() || mIsDummy);
 }
 
 // Determine if we have enough avatar data to render

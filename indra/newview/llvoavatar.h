@@ -403,7 +403,23 @@ public:
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 	bool 		isNearby() const;
 	bool 		isFriend() const;
+
+	enum class ERenderAvatarAs
+	{
+		NORMAL,
+		IMPOSTER,
+		INVISIBLE
+	};
+	enum class ERenderOthersAs
+	{
+		EVERYONE_NORMALLY = 0,
+		EVERYONE_AS_IMPOSTERS,
+		ONLY_EXCEPTIONS,
+		INVISIBLE
+	};
+	ERenderAvatarAs getRenderAvatarAs() const;
 // [/SL:KB]
+
 	void		forceUpdateVisualMuteSettings();
 
 	enum VisualMuteSettings
@@ -413,7 +429,10 @@ public:
 		AV_ALWAYS_RENDER   = 2
 	};
 	void		setVisualMuteSettings(VisualMuteSettings set);
-	VisualMuteSettings  getVisualMuteSettings()						{ return mVisuallyMuteSetting;	};
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	VisualMuteSettings  getVisualMuteSettings() const				{ return (ERenderAvatarAs::NORMAL == getRenderAvatarAs()) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
+// [/SL:KB]
+//	VisualMuteSettings  getVisualMuteSettings()						{ return mVisuallyMuteSetting;	};
 
 	U32 		renderRigid();
 	U32 		renderSkinned();
