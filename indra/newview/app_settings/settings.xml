@@ -11052,6 +11052,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>RenderResolutionMultiplier</key>
+    <map>
+      <key>Comment</key>
+      <string>Multiplier for rendering 3D scene at reduced resolution.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>1.0</real>
+    </map>
     <key>RenderShaderLightingMaxLevel</key>
     <map>
       <key>Comment</key>
@@ -11397,6 +11408,17 @@
     <string>F32</string>
     <key>Value</key>
     <real>10.0E6</real>
+  </map>
+  <key>RenderOthersAs</key>
+  <map>
+    <key>Comment</key>
+    <string>Specifies how to render other avatars (0: normally; 1: as imposters with exceptions; 2: only yourself with exceptions; 3: only yourself with no exceptions</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>S32</string>
+    <key>Value</key>
+    <integer>0</integer>
   </map>
   <key>RenderFriendsFull</key>
   <map>

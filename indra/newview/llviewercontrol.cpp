@@ -242,6 +242,15 @@ static bool handleVolumeLODChanged(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+static bool handleRenderOthersAsChanged()
+{
+	LLVOAvatar::resetImpostors();
+	LLVOAvatar::invalidateNameTags();
+	return true;
+}
+// [/SL:KB]
+
 static bool handleAvatarLODChanged(const LLSD& newvalue)
 {
 	LLVOAvatar::sLODFactor = (F32) newvalue.asReal();
@@ -730,6 +739,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("WindLightUseAtmosShaders")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderGammaFull")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderVolumeLODFactor")->getSignal()->connect(boost::bind(&handleVolumeLODChanged, _2));
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	gSavedSettings.getControl("RenderOthersAs")->getSignal()->connect(boost::bind(&handleRenderOthersAsChanged));
+// [/SL:KB]
 	gSavedSettings.getControl("RenderAvatarLODFactor")->getSignal()->connect(boost::bind(&handleAvatarLODChanged, _2));
 	gSavedSettings.getControl("RenderAvatarPhysicsLODFactor")->getSignal()->connect(boost::bind(&handleAvatarPhysicsLODChanged, _2));
 	gSavedSettings.getControl("RenderTerrainLODFactor")->getSignal()->connect(boost::bind(&handleTerrainLODChanged, _2));
@@ -749,6 +761,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderDebugGL")->getSignal()->connect(boost::bind(&handleRenderDebugGLChanged, _2));
 	gSavedSettings.getControl("RenderDebugPipeline")->getSignal()->connect(boost::bind(&handleRenderDebugPipelineChanged, _2));
 	gSavedSettings.getControl("RenderResolutionDivisor")->getSignal()->connect(boost::bind(&handleRenderResolutionDivisorChanged, _2));
+// [SL:KB] - Patch: Settings-RenderResolutionMultiplier | Checked: Catznip-5.4
+	gSavedSettings.getControl("RenderResolutionMultiplier")->getSignal()->connect(boost::bind(&handleRenderResolutionDivisorChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("RenderDeferred")->getSignal()->connect(boost::bind(&handleRenderDeferredChanged, _2));
 	gSavedSettings.getControl("RenderShadowDetail")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderDeferredSSAO")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
