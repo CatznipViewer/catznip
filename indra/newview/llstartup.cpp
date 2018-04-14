@@ -1151,9 +1151,6 @@ bool idle_startup()
 		// Load Avatars icons cache
 		LLAvatarIconIDCache::getInstance()->load();
 		
-		// Load media plugin cookies
-		LLViewerMedia::loadCookieFile();
-
 		LLRenderMuteList::getInstance()->loadFromFile();
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-09-22 (Catznip-3.3)
