@@ -2091,7 +2091,18 @@ std::string zip_llsd(LLSD& data)
 			}
 
 			have = CHUNK-strm.avail_out;
-			output = (U8*) realloc(output, cur_size+have);
+			U8* new_output = (U8*) realloc(output, cur_size+have);
+			if (new_output == NULL)
+			{
+				LL_WARNS() << "Failed to compress LLSD block: can't reallocate memory, current size: " << cur_size << " bytes; requested " << cur_size + have << " bytes." << LL_ENDL;
+				deflateEnd(&strm);
+				if (output)
+				{
+					free(output);
+				}
+				return std::string();
+			}
+			output = new_output;
 			memcpy(output+cur_size, out, have);
 			cur_size += have;
 		}
@@ -2110,22 +2121,13 @@ std::string zip_llsd(LLSD& data)
 	deflateEnd(&strm);
 	free(output);
 
-#if 0 //verify results work with unzip_llsd
-	std::istringstream test(result);
-	LLSD test_sd;
-	if (!unzip_llsd(test_sd, test, result.size()))
-	{
-		LL_ERRS() << "Invalid compression result!" << LL_ENDL;
-	}
-#endif
-
 	return result;
 }
 
 //decompress a block of LLSD from provided istream
 // not very efficient -- creats a copy of decompressed LLSD block in memory
 // and deserializes from that copy using LLSDSerialize
-bool unzip_llsd(LLSD& data, std::istream& is, S32 size)
+LLUZipHelper::EZipRresult LLUZipHelper::unzip_llsd(LLSD& data, std::istream& is, S32 size)
 {
 	U8* result = NULL;
 	U32 cur_size = 0;
@@ -2133,7 +2135,11 @@ bool unzip_llsd(LLSD& data, std::istream& is, S32 size)
 		
 	const U32 CHUNK = 65536;
 
-	U8 *in = new U8[size];
+	U8 *in = new(std::nothrow) U8[size];
+	if (!in)
+	{
+		return ZR_MEM_ERROR;
+	}
 	is.read((char*) in, size); 
 
 	U8 out[CHUNK];
@@ -2156,7 +2162,7 @@ bool unzip_llsd(LLSD& data, std::istream& is, S32 size)
 			inflateEnd(&strm);
 			free(result);
 			delete [] in;
-			return false;
+			return ZR_DATA_ERROR;
 		}
 		
 		switch (ret)
@@ -2168,13 +2174,24 @@ bool unzip_llsd(LLSD& data, std::istream& is, S32 size)
 			inflateEnd(&strm);
 			free(result);
 			delete [] in;
-			return false;
+			return ZR_MEM_ERROR;
 			break;
 		}
 
 		U32 have = CHUNK-strm.avail_out;
 
-		result = (U8*) realloc(result, cur_size + have);
+		U8* new_result = (U8*)realloc(result, cur_size + have);
+		if (new_result == NULL)
+		{
+			inflateEnd(&strm);
+			if (result)
+			{
+				free(result);
+			}
+			delete[] in;
+			return ZR_MEM_ERROR;
+		}
+		result = new_result;
 		memcpy(result+cur_size, out, have);
 		cur_size += have;
 
@@ -2186,33 +2203,50 @@ bool unzip_llsd(LLSD& data, std::istream& is, S32 size)
 	if (ret != Z_STREAM_END)
 	{
 		free(result);
-		return false;
+		return ZR_DATA_ERROR;
 	}
 
 	//result now points to the decompressed LLSD block
 	{
-		std::string res_str((char*) result, cur_size);
-
-		std::string deprecated_header("<? LLSD/Binary ?>");
-
-		if (res_str.substr(0, deprecated_header.size()) == deprecated_header)
+		std::istringstream istr;
+		// Since we are using this for meshes, data we are dealing with tend to be large.
+		// So string can potentially fail to allocate, make sure this won't cause problems
+		try
 		{
-			res_str = res_str.substr(deprecated_header.size()+1, cur_size);
-		}
-		cur_size = res_str.size();
+			std::string res_str((char*)result, cur_size);
 
-		std::istringstream istr(res_str);
-		
+			std::string deprecated_header("<? LLSD/Binary ?>");
+
+			if (res_str.substr(0, deprecated_header.size()) == deprecated_header)
+			{
+				res_str = res_str.substr(deprecated_header.size() + 1, cur_size);
+			}
+			cur_size = res_str.size();
+
+			istr.str(res_str);
+		}
+#ifdef LL_WINDOWS
+		catch (std::length_error)
+		{
+			free(result);
+			return ZR_SIZE_ERROR;
+		}
+#endif
+		catch (std::bad_alloc)
+		{
+			free(result);
+			return ZR_MEM_ERROR;
+		}
+
 		if (!LLSDSerialize::fromBinary(data, istr, cur_size))
 		{
-			LL_WARNS() << "Failed to unzip LLSD block" << LL_ENDL;
 			free(result);
-			return false;
-		}		
+			return ZR_PARSE_ERROR;
+		}
 	}
 
 	free(result);
-	return true;
+	return ZR_OK;
 }
 //This unzip function will only work with a gzip header and trailer - while the contents
 //of the actual compressed data is the same for either format (gzip vs zlib ), the headers
@@ -2266,7 +2300,20 @@ U8* unzip_llsdNavMesh( bool& valid, unsigned int& outsize, std::istream& is, S32
 
 		U32 have = CHUNK-strm.avail_out;
 
-		result = (U8*) realloc(result, cur_size + have);
+		U8* new_result = (U8*) realloc(result, cur_size + have);
+		if (new_result == NULL)
+		{
+			LL_WARNS() << "Failed to unzip LLSD NavMesh block: can't reallocate memory, current size: " << cur_size << " bytes; requested " << cur_size + have << " bytes." << LL_ENDL;
+			inflateEnd(&strm);
+			if (result)
+			{
+				free(result);
+			}
+			delete[] in;
+			valid = false;
+			return NULL;
+		}
+		result = new_result;
 		memcpy(result+cur_size, out, have);
 		cur_size += have;
 

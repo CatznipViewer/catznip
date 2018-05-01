@@ -31,6 +31,7 @@
 #include "llapr.h"
 #include "lldir.h"
 #include "llimage.h"
+#include "llimagej2c.h" // for version control
 #include "lllfsthread.h"
 #include "llviewercontrol.h"
 
@@ -386,22 +387,35 @@ bool LLTextureCacheRemoteWorker::doRead()
 		}
 		// Allocate read buffer
 		mReadData = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), mDataSize);
-		S32 bytes_read = LLAPRFile::readEx(local_filename, 
-											 mReadData, mOffset, mDataSize, mCache->getLocalAPRFilePool());
-		if (bytes_read != mDataSize)
+
+		if (mReadData)
 		{
- 			LL_WARNS() << "Error reading file from local cache: " << local_filename
- 					<< " Bytes: " << mDataSize << " Offset: " << mOffset
+			S32 bytes_read = LLAPRFile::readEx( local_filename,
+												mReadData,
+												mOffset,
+												mDataSize,
+												mCache->getLocalAPRFilePool());
+
+			if (bytes_read != mDataSize)
+			{
+ 				LL_WARNS() << "Error reading file from local cache: " << local_filename
+ 						<< " Bytes: " << mDataSize << " Offset: " << mOffset
  					<< " / " << mDataSize << LL_ENDL;
-			mDataSize = 0;
-			FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
-			mReadData = NULL;
+				mDataSize = 0;
+				FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
+				mReadData = NULL;
+			}
+			else
+			{
+				mImageSize = local_size;
+				mImageLocal = TRUE;
+			}
 		}
 		else
 		{
-			//LL_INFOS() << "texture " << mID.asString() << " found in local_assets" << LL_ENDL;
-			mImageSize = local_size;
-			mImageLocal = TRUE;
+ 			LL_WARNS() << "Error allocating memory for cache: " << local_filename
+ 					<< " of size: " << mDataSize << LL_ENDL;
+			mDataSize = 0;
 		}
 		// We're done...
 		done = true;
@@ -438,26 +452,37 @@ bool LLTextureCacheRemoteWorker::doRead()
 		size = llmin(size, mDataSize);
 		// Allocate the read buffer
 		mReadData = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), size);
-		S32 bytes_read = LLAPRFile::readEx(mCache->mHeaderDataFileName, 
-											 mReadData, offset, size, mCache->getLocalAPRFilePool());
-		if (bytes_read != size)
+		if (mReadData)
 		{
-			LL_WARNS() << "LLTextureCacheWorker: "  << mID
-					<< " incorrect number of bytes read from header: " << bytes_read
-					<< " / " << size << LL_ENDL;
-			FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
-			mReadData = NULL;
-			mDataSize = -1; // failed
-			done = true;
-		}
-		// If we already read all we expected, we're actually done
-		if (mDataSize <= bytes_read)
-		{
-			done = true;
+			S32 bytes_read = LLAPRFile::readEx(mCache->mHeaderDataFileName, 
+												 mReadData, offset, size, mCache->getLocalAPRFilePool());
+			if (bytes_read != size)
+			{
+				LL_WARNS() << "LLTextureCacheWorker: "  << mID
+						<< " incorrect number of bytes read from header: " << bytes_read
+						<< " / " << size << LL_ENDL;
+				FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
+				mReadData = NULL;
+				mDataSize = -1; // failed
+				done = true;
+			}
+			// If we already read all we expected, we're actually done
+			if (mDataSize <= bytes_read)
+			{
+				done = true;
+			}
+			else
+			{
+				mState = BODY;
+			}
 		}
 		else
 		{
-			mState = BODY;
+			LL_WARNS() << "LLTextureCacheWorker: "  << mID
+				<< " failed to allocate memory for reading: " << mDataSize << LL_ENDL;
+			mReadData = NULL;
+			mDataSize = -1; // failed
+			done = true;
 		}
 	}
 
@@ -476,44 +501,55 @@ bool LLTextureCacheRemoteWorker::doRead()
 			
 			// Reserve the whole data buffer first
 			U8* data = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), mDataSize);
-
-			// Set the data file pointers taking the read offset into account. 2 cases:
-			if (mOffset < TEXTURE_CACHE_ENTRY_SIZE)
+			if (data)
 			{
-				// Offset within the header record. That means we read something from the header cache.
-				// Note: most common case is (mOffset = 0), so this is the "normal" code path.
-				data_offset = TEXTURE_CACHE_ENTRY_SIZE - mOffset;	// i.e. TEXTURE_CACHE_ENTRY_SIZE if mOffset nul (common case)
-				file_offset = 0;
-				file_size = mDataSize - data_offset;
-				// Copy the raw data we've been holding from the header cache into the new sized buffer
-				llassert_always(mReadData);
-				memcpy(data, mReadData, data_offset);
-				FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
-				mReadData = NULL;
+				// Set the data file pointers taking the read offset into account. 2 cases:
+				if (mOffset < TEXTURE_CACHE_ENTRY_SIZE)
+				{
+					// Offset within the header record. That means we read something from the header cache.
+					// Note: most common case is (mOffset = 0), so this is the "normal" code path.
+					data_offset = TEXTURE_CACHE_ENTRY_SIZE - mOffset;	// i.e. TEXTURE_CACHE_ENTRY_SIZE if mOffset nul (common case)
+					file_offset = 0;
+					file_size = mDataSize - data_offset;
+					// Copy the raw data we've been holding from the header cache into the new sized buffer
+					llassert_always(mReadData);
+					memcpy(data, mReadData, data_offset);
+					FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
+					mReadData = NULL;
+				}
+				else
+				{
+					// Offset bigger than the header record. That means we haven't read anything yet.
+					data_offset = 0;
+					file_offset = mOffset - TEXTURE_CACHE_ENTRY_SIZE;
+					file_size = mDataSize;
+					// No data from header cache to copy in that case, we skipped it all
+				}
+
+				// Now use that buffer as the object read buffer
+				llassert_always(mReadData == NULL);
+				mReadData = data;
+
+				// Read the data at last
+				S32 bytes_read = LLAPRFile::readEx(filename, 
+												 mReadData + data_offset,
+												 file_offset, file_size,
+												 mCache->getLocalAPRFilePool());
+				if (bytes_read != file_size)
+				{
+					LL_WARNS() << "LLTextureCacheWorker: "  << mID
+							<< " incorrect number of bytes read from body: " << bytes_read
+							<< " / " << file_size << LL_ENDL;
+					FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
+					mReadData = NULL;
+					mDataSize = -1; // failed
+					done = true;
+				}
 			}
 			else
 			{
-				// Offset bigger than the header record. That means we haven't read anything yet.
-				data_offset = 0;
-				file_offset = mOffset - TEXTURE_CACHE_ENTRY_SIZE;
-				file_size = mDataSize;
-				// No data from header cache to copy in that case, we skipped it all
-			}
-
-			// Now use that buffer as the object read buffer
-			llassert_always(mReadData == NULL);
-			mReadData = data;
-
-			// Read the data at last
-			S32 bytes_read = LLAPRFile::readEx(filename, 
-											 mReadData + data_offset,
-											 file_offset, file_size,
-											 mCache->getLocalAPRFilePool());
-			if (bytes_read != file_size)
-			{
 				LL_WARNS() << "LLTextureCacheWorker: "  << mID
-						<< " incorrect number of bytes read from body: " << bytes_read
-						<< " / " << file_size << LL_ENDL;
+					<< " failed to allocate memory for reading: " << mDataSize << LL_ENDL;
 				FREE_MEM(LLImageBase::getPrivatePool(), mReadData);
 				mReadData = NULL;
 				mDataSize = -1; // failed
@@ -549,9 +585,11 @@ bool LLTextureCacheRemoteWorker::doWrite()
 	{
 		if ((mOffset != 0) // We currently do not support write offsets
 			|| (mDataSize <= 0) // Things will go badly wrong if mDataSize is nul or negative...
-			|| (mImageSize < mDataSize))
+			|| (mImageSize < mDataSize)
+			|| (mRawDiscardLevel < 0)
+			|| (mRawImage->isBufferInvalid())) // decode failed or malfunctioned, don't write
 		{
-			LL_WARNS() << "INIT state check failed" << LL_ENDL;
+			LL_WARNS() << "INIT state check failed for image: " << mID << " Size: " << mImageSize << " DataSize: " << mDataSize << " Discard:" << mRawDiscardLevel << LL_ENDL;
 			mDataSize = -1; // failed
 			done = true;
 		}
@@ -576,15 +614,12 @@ bool LLTextureCacheRemoteWorker::doWrite()
 			idx = mCache->setHeaderCacheEntry(mID, entry, mImageSize, mDataSize); // create the new entry.
 			if(idx >= 0)
 			{
-				// (almost always) write to the fast cache.
-				if (mRawImage->getDataSize())
+				// write to the fast cache.
+				if(!mCache->writeToFastCache(idx, mRawImage, mRawDiscardLevel))
 				{
-					if(!mCache->writeToFastCache(idx, mRawImage, mRawDiscardLevel))
-					{
-						LL_WARNS() << "writeToFastCache failed" << LL_ENDL;
-						mDataSize = -1; // failed
-						done = true;
-					}
+					LL_WARNS() << "writeToFastCache failed" << LL_ENDL;
+					mDataSize = -1; // failed
+					done = true;
 				}
 			}
 		}
@@ -935,9 +970,17 @@ BOOL LLTextureCache::isInLocal(const LLUUID& id)
 //////////////////////////////////////////////////////////////////////////////
 
 //static
-F32 LLTextureCache::sHeaderCacheVersion = 1.7f;
+F32 LLTextureCache::sHeaderCacheVersion = 1.71f;
 U32 LLTextureCache::sCacheMaxEntries = 1024 * 1024; //~1 million textures.
 S64 LLTextureCache::sCacheMaxTexturesSize = 0; // no limit
+std::string LLTextureCache::sHeaderCacheEncoderVersion = LLImageJ2C::getEngineInfo();
+
+#if defined(ADDRESS_SIZE)
+U32 LLTextureCache::sHeaderCacheAddressSize = ADDRESS_SIZE;
+#else
+U32 LLTextureCache::sHeaderCacheAddressSize = 32;
+#endif
+
 const char* entries_filename = "texture.entries";
 const char* cache_filename = "texture.cache";
 const char* old_textures_dirname = "textures";
@@ -1022,11 +1065,11 @@ S64 LLTextureCache::initCache(ELLPath location, S64 max_size, BOOL texture_cache
 			return max_size ;
 		}
 	}
-	
+
 	if (!mReadOnly)
 	{
 		LLFile::mkdir(mTexturesDirName);
-		
+
 		const char* subdirs = "0123456789abcdef";
 		for (S32 i=0; i<16; i++)
 		{
@@ -1080,10 +1123,26 @@ void LLTextureCache::readEntriesHeader()
 	}
 	else //create an empty entries header.
 	{
-		mHeaderEntriesInfo.mVersion = sHeaderCacheVersion ;
-		mHeaderEntriesInfo.mEntries = 0 ;
+		setEntriesHeader();
 		writeEntriesHeader() ;
 	}
+}
+
+void LLTextureCache::setEntriesHeader()
+{
+	if (sHeaderEncoderStringSize < sHeaderCacheEncoderVersion.size() + 1)
+	{
+		// For simplicity we use predefined size of header, so if version string
+		// doesn't fit, either getEngineInfo() returned malformed string or 
+		// sHeaderEncoderStringSize need to be increased.
+		// Also take into accout that c_str() returns additional null character
+		LL_ERRS() << "Version string doesn't fit in header" << LL_ENDL;
+	}
+
+	mHeaderEntriesInfo.mVersion = sHeaderCacheVersion;
+	mHeaderEntriesInfo.mAdressSize = sHeaderCacheAddressSize;
+	strcpy(mHeaderEntriesInfo.mEncoderVersion, sHeaderCacheEncoderVersion.c_str());
+	mHeaderEntriesInfo.mEntries = 0;
 }
 
 void LLTextureCache::writeEntriesHeader()
@@ -1439,10 +1498,13 @@ void LLTextureCache::readHeaderCache()
 
 	readEntriesHeader();
 	
-	if (mHeaderEntriesInfo.mVersion != sHeaderCacheVersion)
+	if (mHeaderEntriesInfo.mVersion != sHeaderCacheVersion
+		|| mHeaderEntriesInfo.mAdressSize != sHeaderCacheAddressSize
+		|| strcmp(mHeaderEntriesInfo.mEncoderVersion, sHeaderCacheEncoderVersion.c_str()) != 0)
 	{
 		if (!mReadOnly)
 		{
+			LL_INFOS() << "Texture Cache version mismatch, Purging." << LL_ENDL;
 			purgeAllTextures(false);
 		}
 	}
@@ -1551,11 +1613,11 @@ void LLTextureCache::clearCorruptedCache()
 
 	closeHeaderEntriesFile();//close possible file handler
 	purgeAllTextures(false) ; //clear the cache.
-	
+
 	if (!mReadOnly) //regenerate the directory tree if not exists.
 	{
 		LLFile::mkdir(mTexturesDirName);
-		
+
 		const char* subdirs = "0123456789abcdef";
 		for (S32 i=0; i<16; i++)
 		{
@@ -1587,9 +1649,9 @@ void LLTextureCache::purgeAllTextures(bool purge_directories)
 				gDirUtilp->deleteFilesInDir(dirname, mask);
 			}
 		}
+		gDirUtilp->deleteFilesInDir(mTexturesDirName, mask); // headers, fast cache
 		if (purge_directories)
 		{
-			gDirUtilp->deleteFilesInDir(mTexturesDirName, mask);
 			LLFile::rmdir(mTexturesDirName);
 		}
 	}
@@ -1601,8 +1663,7 @@ void LLTextureCache::purgeAllTextures(bool purge_directories)
 	mUpdatedEntryMap.clear();
 
 	// Info with 0 entries
-	mHeaderEntriesInfo.mVersion = sHeaderCacheVersion;
-	mHeaderEntriesInfo.mEntries = 0;
+	setEntriesHeader();
 	writeEntriesHeader();
 
 	LL_INFOS() << "The entire texture cache is cleared." << LL_ENDL ;
@@ -1766,24 +1827,30 @@ S32 LLTextureCache::getHeaderCacheEntry(const LLUUID& id, Entry& entry)
 S32 LLTextureCache::setHeaderCacheEntry(const LLUUID& id, Entry& entry, S32 imagesize, S32 datasize)
 {
 	mHeaderMutex.lock();
-	S32 idx = openAndReadEntry(id, entry, true);
+	S32 idx = openAndReadEntry(id, entry, true); // read or create
 	mHeaderMutex.unlock();
+
+	if(idx < 0) // retry once
+	{
+		readHeaderCache(); // We couldn't write an entry, so refresh the LRU
+
+		mHeaderMutex.lock();
+		idx = openAndReadEntry(id, entry, true);
+		mHeaderMutex.unlock();
+	}
 
 	if (idx >= 0)
 	{
 		updateEntry(idx, entry, imagesize, datasize);				
 	}
-
-	if(idx < 0) // retry
+	else
 	{
-		readHeaderCache(); // We couldn't write an entry, so refresh the LRU
-	
-		mHeaderMutex.lock();
-		llassert_always(!mLRU.empty() || mHeaderEntriesInfo.mEntries < sCacheMaxEntries);
-		mHeaderMutex.unlock();
-
-		idx = setHeaderCacheEntry(id, entry, imagesize, datasize); // assert above ensures no inf. recursion
+		LL_WARNS() << "Failed to set cache entry for image: " << id << LL_ENDL;
+		// We couldn't write to file, switch to read only mode and clear data
+		setReadOnly(true);
+		clearCorruptedCache(); // won't remove files due to "read only"
 	}
+
 	return idx;
 }
 
@@ -1935,7 +2002,7 @@ LLPointer<LLImageRaw> LLTextureCache::readFromFastCache(const LLUUID& id, S32& d
 bool LLTextureCache::writeToFastCache(S32 id, LLPointer<LLImageRaw> raw, S32 discardlevel)
 {
 	//rescale image if needed
-	if (raw.isNull() || !raw->getData())
+	if (raw.isNull() || raw->isBufferInvalid() || !raw->getData())
 	{
 		LL_ERRS() << "Attempted to write NULL raw image to fastcache" << LL_ENDL;
 		return false;
@@ -1960,15 +2027,13 @@ bool LLTextureCache::writeToFastCache(S32 id, LLPointer<LLImageRaw> raw, S32 dis
 		if(w * h *c > 0) //valid
 		{
 			//make a duplicate to keep the original raw image untouched.
-			raw = raw->duplicate();
+			raw = raw->scaled(w, h);
 			if (raw->isBufferInvalid())
 			{
 				LL_WARNS() << "Invalid image duplicate buffer" << LL_ENDL;
 				return false;
 			}
 
-			raw->scale(w, h) ;
-			
 			discardlevel += i ;
 		}
 	}

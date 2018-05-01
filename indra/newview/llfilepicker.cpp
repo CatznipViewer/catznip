@@ -341,7 +341,7 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
 					dirname = filename + "\\";
 				else
 					mFiles.push_back(dirname + filename);
-				tptrw += filename.size();
+				tptrw += wcslen(tptrw);
 			}
 		}
 	}
@@ -544,11 +544,18 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 	send_agent_pause();
 	{
 		// NOTA BENE: hitting the file dialog triggers a window focus event, destroying the selection manager!!
-		success = GetSaveFileName(&mOFN);
-		if (success)
+		try
 		{
-			std::string filename = utf16str_to_utf8str(llutf16string(mFilesW));
-			mFiles.push_back(filename);
+			success = GetSaveFileName(&mOFN);
+			if (success)
+			{
+				std::string filename = utf16str_to_utf8str(llutf16string(mFilesW));
+				mFiles.push_back(filename);
+			}
+		}
+		catch (...)
+		{
+			LOG_UNHANDLED_EXCEPTION("");
 		}
 		gKeyboard->resetKeys();
 	}

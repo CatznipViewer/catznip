@@ -26,17 +26,19 @@
 #include "llviewerprecompiledheaders.h"
 
 //#include "llfloateravatarrendersettings.h"
-//
+
+//#include "llagent.h"
 //#include "llavatarnamecache.h"
 //#include "llfloateravatarpicker.h"
 //#include "llfiltereditor.h"
 //#include "llfloaterreg.h"
 //#include "llnamelistctrl.h"
+//#include "llnotificationsutil.h"
 //#include "llmenugl.h"
 //#include "lltrans.h"
 //#include "llviewerobjectlist.h"
 //#include "llvoavatar.h"
-//
+
 //class LLSettingsContextMenu : public LLListContextMenu
 //
 //{
@@ -58,14 +60,14 @@
 //
 //    LLFloaterAvatarRenderSettings* mFloaterSettings;
 //};
-//
+
 //class LLAvatarRenderMuteListObserver : public LLMuteListObserver
 //{
 //    /* virtual */ void onChange()  { LLFloaterAvatarRenderSettings::setNeedsUpdate();}
 //};
-//
+
 //static LLAvatarRenderMuteListObserver sAvatarRenderMuteListObserver;
-//
+
 //LLFloaterAvatarRenderSettings::LLFloaterAvatarRenderSettings(const LLSD& key)
 //:   LLFloater(key),
 //	mAvatarSettingsList(NULL),
@@ -75,32 +77,23 @@
 //    LLRenderMuteList::getInstance()->addObserver(&sAvatarRenderMuteListObserver);
 //    mCommitCallbackRegistrar.add("Settings.AddNewEntry", boost::bind(&LLFloaterAvatarRenderSettings::onClickAdd, this, _2));
 //}
-//
+
 //LLFloaterAvatarRenderSettings::~LLFloaterAvatarRenderSettings()
 //{
 //    delete mContextMenu;
 //    LLRenderMuteList::getInstance()->removeObserver(&sAvatarRenderMuteListObserver);
 //}
-//
+
 //BOOL LLFloaterAvatarRenderSettings::postBuild()
 //{
 //    LLFloater::postBuild();
 //    mAvatarSettingsList = getChild<LLNameListCtrl>("render_settings_list");
 //    mAvatarSettingsList->setRightMouseDownCallback(boost::bind(&LLFloaterAvatarRenderSettings::onAvatarListRightClick, this, _1, _2, _3));
-//    this->setVisibleCallback(boost::bind(&LLFloaterAvatarRenderSettings::removePicker, this));
 //    getChild<LLFilterEditor>("people_filter_input")->setCommitCallback(boost::bind(&LLFloaterAvatarRenderSettings::onFilterEdit, this, _2));
 //
 //	return TRUE;
 //}
-//
-//void LLFloaterAvatarRenderSettings::removePicker()
-//{
-//    if(mPicker.get())
-//    {
-//        mPicker.get()->closeFloater();
-//    }
-//}
-//
+
 //void LLFloaterAvatarRenderSettings::draw()
 //{
 //    if(mNeedsUpdate)
@@ -111,7 +104,7 @@
 //
 //    LLFloater::draw();
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::onAvatarListRightClick(LLUICtrl* ctrl, S32 x, S32 y)
 //{
 //    LLNameListCtrl* list = dynamic_cast<LLNameListCtrl*>(ctrl);
@@ -125,12 +118,12 @@
 //        mContextMenu->show(ctrl, selected_uuids, x, y);
 //    }
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::onOpen(const LLSD& key)
 //{
 //    updateList();
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::updateList()
 //{
 //    mAvatarSettingsList->deleteAllItems();
@@ -151,7 +144,7 @@
 //        }
 //    }
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::onFilterEdit(const std::string& search_string)
 //{
 //    std::string filter_upper = search_string;
@@ -162,7 +155,7 @@
 //        mNeedsUpdate = true;
 //    }
 //}
-//
+
 //bool LLFloaterAvatarRenderSettings::isHiddenRow(const std::string& av_name)
 //{
 //    if (mNameFilter.empty()) return false;
@@ -170,7 +163,7 @@
 //    LLStringUtil::toUpper(upper_name);
 //    return std::string::npos == upper_name.find(mNameFilter);
 //}
-//
+
 //static LLVOAvatar* find_avatar(const LLUUID& id)
 //{
 //    LLViewerObject *obj = gObjectList.findObject(id);
@@ -188,8 +181,8 @@
 //        return NULL;
 //    }
 //}
-//
-//
+
+
 //void LLFloaterAvatarRenderSettings::onCustomAction (const LLSD& userdata, const LLUUID& av_id)
 //{
 //    const std::string command_name = userdata.asString();
@@ -210,8 +203,8 @@
 //
 //    setAvatarRenderSetting(av_id, new_setting);
 //}
-//
-//
+
+
 //bool LLFloaterAvatarRenderSettings::isActionChecked(const LLSD& userdata, const LLUUID& av_id)
 //{
 //    const std::string command_name = userdata.asString();
@@ -231,14 +224,14 @@
 //    }
 //    return false;
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::setNeedsUpdate()
 //{
 //    LLFloaterAvatarRenderSettings* instance = LLFloaterReg::getTypedInstance<LLFloaterAvatarRenderSettings>("avatar_render_settings");
 //    if(!instance) return;
 //    instance->mNeedsUpdate = true;
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::onClickAdd(const LLSD& userdata)
 //{
 //    const std::string command_name = userdata.asString();
@@ -261,16 +254,19 @@
 //    {
 //        root_floater->addDependentFloater(picker);
 //    }
-//
-//    mPicker = picker->getHandle();
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::callbackAvatarPicked(const uuid_vec_t& ids, S32 visual_setting)
 //{
 //    if (ids.empty()) return;
+//    if(ids[0] == gAgentID)
+//    {
+//        LLNotificationsUtil::add("AddSelfRenderExceptions");
+//        return;
+//    }
 //    setAvatarRenderSetting(ids[0], visual_setting);
 //}
-//
+
 //void LLFloaterAvatarRenderSettings::setAvatarRenderSetting(const LLUUID& av_id, S32 new_setting)
 //{
 //    LLVOAvatar *avatarp = find_avatar(av_id);
@@ -283,7 +279,7 @@
 //        LLRenderMuteList::getInstance()->saveVisualMuteSetting(av_id, new_setting);
 //    }
 //}
-//
+
 //BOOL LLFloaterAvatarRenderSettings::handleKeyHere(KEY key, MASK mask )
 //{
 //    BOOL handled = FALSE;
@@ -295,7 +291,7 @@
 //    }
 //    return handled;
 //}
-//
+
 //std::string LLFloaterAvatarRenderSettings::createTimestamp(S32 datetime)
 //{
 //    std::string timeStr;

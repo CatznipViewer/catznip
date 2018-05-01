@@ -44,7 +44,7 @@ typedef std::map<std::string, std::string> controller_map_t;
 typedef std::map<std::string, F32> default_controller_map_t;
 
 #define MIN_REQUIRED_PIXEL_AREA_AVATAR_PHYSICS_MOTION 0.f
-#define TIME_ITERATION_STEP 0.1f
+#define TIME_ITERATION_STEP 0.05f
 
 inline F64 llsgn(const F64 a)
 {
@@ -171,8 +171,8 @@ protected:
                                                    F32 behavior_maxeffect);
 
         F32 toLocal(const LLVector3 &world);
-        F32 calculateVelocity_local();
-        F32 calculateAcceleration_local(F32 velocity_local);
+        F32 calculateVelocity_local(const F32 time_delta);
+        F32 calculateAcceleration_local(F32 velocity_local, const F32 time_delta);
 private:
         const std::string mParamDriverName;
         const std::string mParamControllerName;
@@ -425,23 +425,22 @@ F32 LLPhysicsMotion::toLocal(const LLVector3 &world)
         return world * dir_world;
 }
 
-F32 LLPhysicsMotion::calculateVelocity_local()
+F32 LLPhysicsMotion::calculateVelocity_local(const F32 time_delta)
 {
 	const F32 world_to_model_scale = 100.0f;
         LLJoint *joint = mJointState->getJoint();
         const LLVector3 position_world = joint->getWorldPosition();
         const LLVector3 last_position_world = mPosition_world;
 	const LLVector3 positionchange_world = (position_world-last_position_world) * world_to_model_scale;
-        const LLVector3 velocity_world = positionchange_world;
-        const F32 velocity_local = toLocal(velocity_world);
+        const F32 velocity_local = toLocal(positionchange_world) / time_delta;
         return velocity_local;
 }
 
-F32 LLPhysicsMotion::calculateAcceleration_local(const F32 velocity_local)
+F32 LLPhysicsMotion::calculateAcceleration_local(const F32 velocity_local, const F32 time_delta)
 {
 //        const F32 smoothing = getParamValue("Smoothing");
         static const F32 smoothing = 3.0f; // Removed smoothing param since it's probably not necessary
-        const F32 acceleration_local = velocity_local - mVelocityJoint_local;
+        const F32 acceleration_local = (velocity_local - mVelocityJoint_local) / time_delta;
         
         const F32 smoothed_acceleration_local = 
                 acceleration_local * 1.0/smoothing + 
@@ -492,12 +491,6 @@ BOOL LLPhysicsMotion::onUpdate(F32 time)
         //
 
         const F32 time_delta = time - mLastTime;
-
-	// Don't update too frequently, to avoid precision errors from small time slices.
-	if (time_delta <= .01)
-	{
-		return FALSE;
-	}
 	
 	// If less than 1FPS, we don't want to be spending time updating physics at all.
         if (time_delta > 1.0)
@@ -544,9 +537,9 @@ BOOL LLPhysicsMotion::onUpdate(F32 time)
 	// Calculate velocity and acceleration in parameter space.
 	//
         
-	//const F32 velocity_joint_local = calculateVelocity_local(time_iteration_step);
-	const F32 velocity_joint_local = calculateVelocity_local();
-	const F32 acceleration_joint_local = calculateAcceleration_local(velocity_joint_local);
+    const F32 joint_local_factor = 30.0;
+    const F32 velocity_joint_local = calculateVelocity_local(time_delta * joint_local_factor);
+    const F32 acceleration_joint_local = calculateAcceleration_local(velocity_joint_local, time_delta * joint_local_factor);
 	
 	//
 	// End velocity and acceleration
@@ -556,6 +549,18 @@ BOOL LLPhysicsMotion::onUpdate(F32 time)
 	
 	// Break up the physics into a bunch of iterations so that differing framerates will show
 	// roughly the same behavior.
+	// Explanation/example: Lets assume we have a bouncing object. Said abjects bounces at a
+	// trajectory that has points A>B>C. Object bounces from A to B with specific speed.
+	// It needs time T to move from A to B.
+	// As long as our frame's time significantly smaller then T our motion will be split into
+	// multiple parts. with each part speed will decrease. Object will reach B position (roughly)
+	// and bounce/fall back to A.
+	// But if frame's time (F_T) is larger then T, object will move with same speed for whole F_T
+	// and will jump over point B up to C ending up with increased amplitude. To avoid that we
+	// split F_T into smaller portions so that when frame's time is too long object can virtually
+	// bounce at right (relatively) position.
+	// Note: this doesn't look to be optimal, since it provides only "roughly same" behavior, but
+	// irregularity at higher fps looks to be insignificant so it works good enough for low fps.
 	for (F32 time_iteration = 0; time_iteration <= time_delta; time_iteration += TIME_ITERATION_STEP)
 	{
 		F32 time_iteration_step = TIME_ITERATION_STEP;

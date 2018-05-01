@@ -75,6 +75,7 @@
 
 LLPanelLogin *LLPanelLogin::sInstance = NULL;
 BOOL LLPanelLogin::sCapslockDidNotification = FALSE;
+BOOL LLPanelLogin::sCredentialSet = FALSE;
 
 class LLLoginLocationAutoHandler : public LLCommandHandler
 {
@@ -176,6 +177,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	setBackgroundOpaque(TRUE);
 
 	mPasswordModified = FALSE;
+
 	LLPanelLogin::sInstance = this;
 
 	LLView* login_holder = gViewerWindow->getLoginPanelHolder();
@@ -297,11 +299,23 @@ void LLPanelLogin::addFavoritesToStartLocation()
 
 	// Load favorites into the combo.
 	std::string user_defined_name = getChild<LLComboBox>("username_combo")->getSimple();
+	LLStringUtil::toLower(user_defined_name);
 	std::replace(user_defined_name.begin(), user_defined_name.end(), '.', ' ');
 	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites_" + LLGridManager::getInstance()->getGrid() + ".xml");
 	std::string old_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites.xml");
 	mUsernameLength = user_defined_name.length();
 	updateLoginButtons();
+
+	std::string::size_type index = user_defined_name.find(' ');
+	if (index != std::string::npos)
+	{
+		std::string username = user_defined_name.substr(0, index);
+		std::string lastname = user_defined_name.substr(index+1);
+		if (lastname == "resident")
+		{
+			user_defined_name = username;
+		}
+	}
 
 	LLSD fav_llsd;
 	llifstream file;
@@ -458,6 +472,7 @@ void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
 		LL_WARNS() << "Attempted fillFields with no login view shown" << LL_ENDL;
 		return;
 	}
+	sCredentialSet = TRUE;
 	LL_INFOS("Credentials") << "Setting login fields to " << *credential << LL_ENDL;
 
 	LLSD identifier = credential->getIdentifier();
@@ -489,7 +504,7 @@ void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
 	LL_INFOS("Credentials") << "Setting authenticator field " << authenticator["type"].asString() << LL_ENDL;
 	if(authenticator.isMap() && 
 	   authenticator.has("secret") && 
-	   (authenticator["secret"].asString().size() > 0))
+	   (authenticator["secret"].asString().size() > 0) && remember)
 	{
 		
 		// This is a MD5 hex digest of a password.
@@ -680,10 +695,8 @@ void LLPanelLogin::onUpdateStartSLURL(const LLSLURL& new_start_slurl)
 			}
 			if ( new_start_slurl.getLocationString().length() )
 			{
-				if (location_combo->getCurrentIndex() == -1)
-				{
-					location_combo->setLabel(new_start_slurl.getLocationString());
-				}
+					
+				location_combo->setLabel(new_start_slurl.getLocationString());
 				sInstance->mLocationLength = new_start_slurl.getLocationString().length();
 				sInstance->updateLoginButtons();
 			}
@@ -791,7 +804,7 @@ void LLPanelLogin::loadLoginPage()
 	params["grid"] = LLGridManager::getInstance()->getGridId();
 
 	// add OS info
-	params["os"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	params["os"] = LLOSInfo::instance().getOSStringSimple();
 
 	// sourceid
 	params["sourceid"] = gSavedSettings.getString("sourceid");
@@ -800,7 +813,8 @@ void LLPanelLogin::loadLoginPage()
 	params["login_content_version"] = gSavedSettings.getString("LoginContentVersion");
 
 	// Make an LLURI with this augmented info
-	LLURI login_uri(LLURI::buildHTTP(login_page.authority(),
+	std::string url = login_page.scheme().empty()? login_page.authority() : login_page.scheme() + "://" + login_page.authority();
+	LLURI login_uri(LLURI::buildHTTP(url,
 									 login_page.path(),
 									 params));
 
@@ -862,6 +876,7 @@ void LLPanelLogin::onClickConnect(void *)
 		}
 		else
 		{
+			sCredentialSet = FALSE;
 			LLPointer<LLCredential> cred;
 			BOOL remember;
 			getFields(cred, remember);

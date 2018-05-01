@@ -85,7 +85,7 @@ class LLXMLRPCTransaction
 {
 public:
 	LLXMLRPCTransaction(const std::string& uri,
-		XMLRPC_REQUEST request, bool useGzip = true);
+		XMLRPC_REQUEST request, bool useGzip = true, const LLSD& httpParams = LLSD());
 		// does not take ownership of the request object
 		// request can be freed as soon as the transaction is constructed
 
@@ -111,7 +111,7 @@ public:
 	EStatus status(int* curlCode);
 		// return status, and extended CURL code, if code isn't null
 	
-	LLPointer<LLCertificate> getErrorCert();
+	LLSD getErrorCertData();
 	std::string statusMessage();
 		// return a message string, suitable for showing the user
 	std::string statusURI();
