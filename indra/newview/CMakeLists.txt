@@ -756,6 +756,7 @@ set(viewer_SOURCE_FILES
     rlvinventory.cpp
     rlvextensions.cpp
     rlvfloaters.cpp
+    rlvmodifiers.cpp
     rlvui.cpp
     qtoolalign.cpp
     )
@@ -1419,6 +1420,7 @@ set(viewer_HEADER_FILES
     rlvinventory.h
     rlvextensions.h
     rlvfloaters.h
+    rlvmodifiers.h
     rlvui.h
     roles_constants.h
     qtoolalign.h
