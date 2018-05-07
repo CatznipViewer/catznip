@@ -120,7 +120,7 @@
 			<menu_item_call label="Включить следующую часть или лицо" name="Include Next Part or Face"/>
 			<menu_item_call label="Включить предыдущую часть или лицо" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="Наборы связей..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Объекты региона" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="Фокус на выбранном" name="Focus on Selection"/>
 		<menu_item_call label="Приблизить к выбранному" name="Zoom to Selection"/>
 		<menu label="Объект" name="Object">
@@ -140,7 +140,7 @@
 			<menu_item_call label="Остановить скрипты" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="Поиск пути" name="Pathfinding">
-			<menu_item_call label="Наборы связей..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Объекты региона" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="Персонажи..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="Просмотр/тестирование..." name="pathfinding_console_menu_item"/>
 		</menu>
@@ -171,6 +171,7 @@
 	</menu>
 	<menu label="Справка" name="Help">
 		<menu_item_call label="Инструкции..." name="How To"/>
+		<menu_item_call label="Краткое руководство" name="Quickstart"/>
 		<menu_item_call label="База знаний" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="Форумы сообщества" name="Community Forums"/>
@@ -181,7 +182,6 @@
 		<menu_item_call label="Сообщить об ошибке" name="Report Bug"/>
 		<menu_item_call label="Столкновения, толчки и удары" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="О [APP_NAME]" name="About Second Life"/>
-		<menu_item_call label="Проверить наличие обновлений" name="Check for Updates"/>
 	</menu>
 	<menu label="Дополнительно" name="Advanced">
 		<menu_item_call label="Обновить текстуры" name="Rebake Texture"/>

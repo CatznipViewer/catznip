@@ -1746,7 +1746,7 @@ bool LLTextureFetchWorker::doWork(S32 param)
 				// In case of a partial response, our offset may
 				// not be trivially contiguous with the data we have.
 				// Get back into alignment.
-				if (mHttpReplyOffset > cur_size)
+				if ( (mHttpReplyOffset > cur_size) || (cur_size > mHttpReplyOffset + append_size))
 				{
 					LL_WARNS(LOG_TXT) << "Partial HTTP response produces break in image data for texture "
 									  << mID << ".  Aborting load."  << LL_ENDL;
@@ -1760,7 +1760,17 @@ bool LLTextureFetchWorker::doWork(S32 param)
 				mRequestedSize -= src_offset;			// Make requested values reflect useful part
 				mRequestedOffset += src_offset;
 			}
-			
+
+			U8 * buffer = (U8 *)ALLOCATE_MEM(LLImageBase::getPrivatePool(), total_size);
+			if (!buffer)
+			{
+				// abort. If we have no space for packet, we have not enough space to decode image
+				setState(DONE);
+				LL_WARNS(LOG_TXT) << mID << " abort: out of memory" << LL_ENDL;
+				releaseHttpSemaphore();
+				return true;
+			}
+
 			if (mFormattedImage.isNull())
 			{
 				// For now, create formatted image based on extension
@@ -1780,10 +1790,10 @@ bool LLTextureFetchWorker::doWork(S32 param)
 			{
 				mFileSize = total_size + 1 ; //flag the file is not fully loaded.
 			}
-			
-			U8 * buffer = (U8 *) ALLOCATE_MEM(LLImageBase::getPrivatePool(), total_size);
+
 			if (cur_size > 0)
 			{
+				// Copy previously collected data into buffer
 				memcpy(buffer, mFormattedImage->getData(), cur_size);
 			}
 			mHttpBufferArray->read(src_offset, (char *) buffer + cur_size, append_size);
@@ -1890,11 +1900,10 @@ bool LLTextureFetchWorker::doWork(S32 param)
 
 			if (mDecodedDiscard < 0)
 			{
-				LL_DEBUGS(LOG_TXT) << mID << ": Failed to Decode." << LL_ENDL;
 				if (mCachedSize > 0 && !mInLocalCache && mRetryAttempt == 0)
 				{
 					// Cache file should be deleted, try again
- 					LL_WARNS(LOG_TXT) << mID << ": Decode of cached file failed (removed), retrying" << LL_ENDL;
+ 					LL_DEBUGS(LOG_TXT) << mID << ": Decode of cached file failed (removed), retrying" << LL_ENDL;
 					llassert_always(mDecodeHandle == 0);
 					mFormattedImage = NULL;
 					++mRetryAttempt;
@@ -1904,7 +1913,7 @@ bool LLTextureFetchWorker::doWork(S32 param)
 				}
 				else
 				{
-// 					LL_WARNS(LOG_TXT) << "UNABLE TO LOAD TEXTURE: " << mID << " RETRIES: " << mRetryAttempt << LL_ENDL;
+					LL_DEBUGS(LOG_TXT) << "Failed to Decode image " << mID << " after " << mRetryAttempt << " retries" << LL_ENDL;
 					setState(DONE); // failed
 				}
 			}
@@ -2559,7 +2568,7 @@ LLTextureFetch::LLTextureFetch(LLTextureCache* cache, LLImageDecodeThread* image
 	  mTextureInfoMainThread(false)
 {
 	mMaxBandwidth = gSavedSettings.getF32("ThrottleBandwidthKBPS");
-	mTextureInfo.setUpLogging(gSavedSettings.getBOOL("LogTextureDownloadsToViewerLog"), gSavedSettings.getBOOL("LogTextureDownloadsToSimulator"), U32Bytes(gSavedSettings.getU32("TextureLoggingThreshold")));
+	mTextureInfo.setLogging(true);
 
 	LLAppCoreHttp & app_core_http(LLAppViewer::instance()->getAppCoreHttp());
 	mHttpRequest = new LLCore::HttpRequest;

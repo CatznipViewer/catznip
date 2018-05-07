@@ -14,6 +14,10 @@
     <floater.string name="no_one_near">No one near</floater.string>
     <floater.string name="no_results">No results</floater.string>
     <floater.string name="searching">Searching...</floater.string>
+     name="not_found_text">
+        Resident wasn't found.
+    </floater.string>
+    <floater.string
     <!-- For multiple person selection, use "Select" and "Close" 
       instead of "OK" and "Cancel" because "Cancel" still keeps the ones 
       you have already selected.  The code will show the appropriate
@@ -34,7 +38,6 @@
      top="0"
      right="-7">
         <panel
-         border="none"
          height="150"
          label="SEARCH"
          layout="topleft"
@@ -91,7 +94,6 @@
           </scroll_list>
         </panel>
         <panel
-         border="none"
          height="150"
          label="FRIENDS"
          layout="topleft"
@@ -125,7 +127,6 @@
             <scroll_list
              follows="all"
              height="124"
-             border="false"
              layout="topleft"
              left="1"
              name="Friends"
@@ -135,7 +136,6 @@
         </panel>
 
         <panel
-         border="none"
          height="150"
          label="NEARBY"
          layout="topleft"
@@ -196,7 +196,6 @@
              draw_heading="true"
              follows="all"
              height="106"
-             border="false"
              layout="topleft"
              left="1"
              name="NearMe"
