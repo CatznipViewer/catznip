@@ -2451,6 +2451,8 @@ If you continue to receive this message, please contact Second Life support for 
 
 	<string name="no_attachments">No attachments worn</string>
     <string name="Attachments remain">Attachments ([COUNT] slots remain)</string>
+  <string name="WornItemsTabTitle">Worn Items ([WEARABLE_COUNT] wearables, [ATTACH_COUNT] of [ATTACH_LIMIT] attachments)</string>
+  <string name="TempItemsTabTitle">Temporary Attachments ([ATTACH_COUNT])</string>
 
 	<!-- inventory FVBridge -->
 	<!--  This is used in llpanelinventory.cpp when constructing a context menu for an item for Sale  -->

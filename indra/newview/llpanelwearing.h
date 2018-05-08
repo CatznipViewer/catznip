@@ -55,16 +55,17 @@ class LLSaveFolderState;
 
 class LLWornItemsList : public LLWearableItemsList
 {
+	friend class LLUICtrlFactory;
 public:
 	struct Params : public LLInitParam::Block<Params, LLWearableItemsList::Params>
 	{
 		Params() {}
 	};
 protected:
-	friend class LLUICtrlFactory;
 	LLWornItemsList(const LLWornItemsList::Params& p);
 
 public:
+	void refreshList(const std::vector<LLPointer<LLViewerInventoryItem>> item_array) override;
 	void setSortOrder(ESortOrder sortOrder, bool sortNow = true) override;
 protected:
 	LLPanel* createNewItem(LLViewerInventoryItem* pItem) override;
@@ -88,7 +89,7 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
-	/*virtual*/ void draw();
+//	/*virtual*/ void draw();
 
 	/*virtual*/ void onOpen(const LLSD& info);
 
@@ -100,8 +101,12 @@ public:
 
 	/*virtual*/ void copyToClipboard();
 
-	void startUpdateTimer();
-	void updateAttachmentsList();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	void onAttachmentsChanged();
+	static void updateAttachmentsList(LLHandle<LLPanelWearing> hWearingPanel);
+// [/SL:KB]
+//	void startUpdateTimer();
+//	void updateAttachmentsList();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
 	typedef boost::signals2::signal<void()> selection_change_signal_t;
@@ -112,7 +117,7 @@ public:
 	bool hasItemSelected();
 
 	bool populateAttachmentsList(bool update = false);
-	void onAccordionTabStateChanged();
+//	void onAccordionTabStateChanged();
 	void setAttachmentDetails(LLSD content);
 	void requestAttachmentDetails();
 //	void onEditAttachment();
@@ -169,8 +174,11 @@ private:
 
 	std::map<LLUUID, std::string> 	mObjectNames;
 
-	boost::signals2::connection 	mAttachmentsChangedConnection;
-	LLFrameTimer					mUpdateTimer;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	boost::signals2::scoped_connection mAttachmentsChangedConnection;
+// [/SL:KB]
+//	boost::signals2::connection 	mAttachmentsChangedConnection;
+//	LLFrameTimer					mUpdateTimer;
 
 	bool							mIsInitialized;
 };
