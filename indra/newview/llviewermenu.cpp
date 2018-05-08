@@ -2910,11 +2910,9 @@ void handle_object_edit()
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 void handle_attachment_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (isAgentAvatarValid()) && (pItem) )
+	if (isAgentAvatarValid())
 	{
-		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
-		if (pAttachObj)
+		if (LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem)))
 		{
 			LLSelectMgr::getInstance()->deselectAll();
 			LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
@@ -2926,28 +2924,33 @@ void handle_attachment_edit(const LLUUID& idItem)
 
 void handle_item_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (pItem) && (enable_item_edit(idItem)) )
+	if (enable_item_edit(idItem))
 	{
-		switch (pItem->getType())
+		if (const LLInventoryItem* pItem = gInventory.getItem(idItem))
 		{
-			case LLAssetType::AT_BODYPART:
-			case LLAssetType::AT_CLOTHING:
-				LLAgentWearables::editWearable(idItem);
-				break;
-			case LLAssetType::AT_OBJECT:
-				handle_attachment_edit(idItem);
-				break;
-			default:
-				break;
+			switch (pItem->getType())
+			{
+				case LLAssetType::AT_BODYPART:
+				case LLAssetType::AT_CLOTHING:
+					LLAgentWearables::editWearable(idItem);
+					break;
+				case LLAssetType::AT_OBJECT:
+					handle_attachment_edit(idItem);
+					break;
+				default:
+					break;
+			}
+		}
+		else
+		{
+			handle_attachment_edit(idItem);
 		}
 	}
 }
 
 bool enable_item_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if (pItem)
+	if (const LLInventoryItem* pItem = gInventory.getItem(idItem))
 	{
 		switch (pItem->getType())
 		{
@@ -2963,16 +2966,14 @@ bool enable_item_edit(const LLUUID& idItem)
 				break;
 		}
 	}
-	return false;
+	return gAgentAvatarp->getWornAttachment(idItem) != nullptr;
 }
 
 void handle_attachment_touch(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (pItem) && (isAgentAvatarValid()) && (enable_attachment_touch(idItem)) )
+	if ( (isAgentAvatarValid()) && (enable_attachment_touch(idItem)) )
 	{
-		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
-		if (pAttachObj)
+		if (LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem)))
 		{
 			LLSelectMgr::getInstance()->deselectAll();
 
@@ -2997,10 +2998,9 @@ void handle_attachment_touch(const LLUUID& idItem)
 
 bool enable_attachment_touch(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (isAgentAvatarValid()) && (pItem) && (LLAssetType::AT_OBJECT == pItem->getType()) )
+	if (isAgentAvatarValid())
 	{
-		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem));
 // [RLVa:KB] - Checked: 2012-08-15 (RLVa-1.4.7)
 		return (pAttachObj) && (pAttachObj->flagHandleTouch()) &&
 			( (!rlv_handler_t::isEnabled()) ||
@@ -3054,7 +3054,7 @@ void handle_texture_refresh()
 		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
 		{
 			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
-			if ( (pSculptParams) && (0 == (pSculptParams->getSculptType() & LL_SCULPT_TYPE_MESH)) )
+			if ( (pSculptParams) && (LL_SCULPT_TYPE_MESH != pSculptParams->getSculptType()) )
 			{
 				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
 				if (idTextures.end() == itTexture)

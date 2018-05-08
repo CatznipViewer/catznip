@@ -302,6 +302,35 @@ LLPanel* LLWornItemsList::createNewItem(LLViewerInventoryItem* pItem)
 	return LLWornListItem::create(pItem);
 }
 
+void LLWornItemsList::refreshList(const std::vector<LLPointer<LLViewerInventoryItem>> item_array)
+{
+	LLWearableItemsList::refreshList(item_array);
+
+	if (LLAccordionCtrlTab* pAccordionTab = getParentByType<LLAccordionCtrlTab>())
+	{
+		int nWearableCount = 0, nAttachCount = 0;
+		for (const LLPointer<LLViewerInventoryItem>& pItem : item_array)
+		{
+			switch (pItem->getType())
+			{
+				case LLAssetType::AT_BODYPART:
+				case LLAssetType::AT_CLOTHING:
+					nWearableCount++;
+					break;
+				case LLAssetType::AT_OBJECT:
+					nAttachCount++;
+					break;
+			}
+		}
+
+		LLStringUtil::format_map_t args;
+		args["[WEARABLE_COUNT]"] = std::to_string(nWearableCount);
+		args["[ATTACH_COUNT]"] = std::to_string(nAttachCount);
+		args["[ATTACH_LIMIT]"] = std::to_string(MAX_AGENT_ATTACHMENTS);
+		pAccordionTab->setTitle(LLTrans::getString("WornItemsTabTitle", args));
+	}
+}
+
 void LLWornItemsList::setSortOrder(ESortOrder sortOrder, bool sortNow)
 {
 	LLWearableItemsList::setSortOrder(sortOrder, sortNow);
@@ -500,7 +529,10 @@ protected:
 		return menu;
 	}
 
-	void updateMenuItemsVisibility(LLContextMenu* menu)
+//	void updateMenuItemsVisibility(LLContextMenu* menu)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	virtual void updateMenuItemsVisibility(LLContextMenu* menu)
+// [/SL:KB]
 	{
 		bool bp_selected			= false;	// true if body parts selected
 		bool clothes_selected		= false;
@@ -516,17 +548,40 @@ protected:
 		for (uuid_vec_t::const_iterator it = mUUIDs.begin(); it != mUUIDs.end(); ++it)
 		{
 //			LLViewerInventoryItem* item = gInventory.getItem(*it);
+//
+//			if (!item)
+//			{
+//				LL_WARNS() << "Invalid item" << LL_ENDL;
+//				continue;
+//			}
+//
+//			LLAssetType::EType type = item->getType();
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-			LLViewerInventoryItem* item = gInventory.getLinkedItem(*it);
+			LLAssetType::EType type;
+//			if (LLViewerInventoryItem* item = gInventory.getItem(*it))
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+			if (LLViewerInventoryItem* item = gInventory.getLinkedItem(*it))
+// [/SL:KB]
+			{
+				type = item->getType();
+				if (!can_remove_folder)
+				{
+					can_remove_folder |= LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(item->getParentUUID());
+				}
+			}
+			else
+			{
+				// Might be a temporary attachment
+				const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(*it);
+				if ( (!pAttachObj) || (!pAttachObj->isTempAttachment()) )
+				{
+					LL_WARNS() << "Invalid item" << LL_ENDL;
+					continue;
+				}
+				type = LLAssetType::AT_OBJECT;
+			}
 // [/SL:KB]
 
-			if (!item)
-			{
-				LL_WARNS() << "Invalid item" << LL_ENDL;
-				continue;
-			}
-
-			LLAssetType::EType type = item->getType();
 			if (type == LLAssetType::AT_CLOTHING)
 			{
 				clothes_selected = true;
@@ -539,14 +594,8 @@ protected:
 			{
 				attachments_selected = true;
 			}
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-			if (!can_remove_folder)
-			{
-				can_remove_folder |= LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(item->getParentUUID());
-			}
-// [/SL:KB]
 // [RLVa:KB] - Checked: 2012-07-28 (RLVa-1.4.7)
-			if ( (rlv_handler_t::isEnabled()) && (!rlvPredCanRemoveItem(item)) )
+			if ( (rlv_handler_t::isEnabled()) && (!rlvPredCanRemoveItem(*it)) )
 			{
 				rlv_locked_count++;
 			}
@@ -597,7 +646,7 @@ protected:
 //		menu->setItemVisible("take_off",	allow_take_off);
 //		menu->setItemVisible("detach",		allow_detach);
 //		menu->setItemVisible("edit_outfit_separator", allow_take_off || allow_detach);
-		menu->setItemVisible("show_original", mUUIDs.size() == 1);
+//		menu->setItemVisible("show_original", mUUIDs.size() == 1);
 	}
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
@@ -620,35 +669,50 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////
 
-class LLTempAttachmentsContextMenu : public LLListContextMenu
+//class LLTempAttachmentsContextMenu : public LLListContextMenu
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+class LLTempAttachmentsContextMenu : public LLWearingContextMenu
+// [/SL:KB]
 {
 public:
 	LLTempAttachmentsContextMenu(LLPanelWearing* panel_wearing)
 		: mPanelWearing(panel_wearing)
 	{}
 protected:
-	/* virtual */ LLContextMenu* createMenu()
+//	/* virtual */ LLContextMenu* createMenu()
+//	{
+//		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+//
+//		registrar.add("Wearing.EditItem", boost::bind(&LLPanelWearing::onEditAttachment, mPanelWearing));
+//		registrar.add("Wearing.Detach", boost::bind(&LLPanelWearing::onRemoveAttachment, mPanelWearing));
+//		LLContextMenu* menu = createFromFile("menu_wearing_tab.xml");
+//
+//		updateMenuItemsVisibility(menu);
+//
+//		return menu;
+//	}
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	void updateMenuItemsVisibility(LLContextMenu* menu) override
 	{
-		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
-
-		registrar.add("Wearing.EditItem", boost::bind(&LLPanelWearing::onEditAttachment, mPanelWearing));
-		registrar.add("Wearing.Detach", boost::bind(&LLPanelWearing::onRemoveAttachment, mPanelWearing));
-		LLContextMenu* menu = createFromFile("menu_wearing_tab.xml");
-
-		updateMenuItemsVisibility(menu);
-
-		return menu;
+		LLWearingContextMenu::updateMenuItemsVisibility(menu);
+		menu->setItemVisible("find_original", false);
+		menu->setItemVisible("detach_folder", false);
+		menu->setItemVisible("find_original", false);
+		menu->setItemVisible("properties", false);
+		menu->setItemVisible("edit_outfit_separator", false);
+		menu->setItemVisible("edit", false);
 	}
-
-	void updateMenuItemsVisibility(LLContextMenu* menu)
-	{
-		menu->setItemVisible("take_off", FALSE);
-		menu->setItemVisible("detach", TRUE);
-		menu->setItemVisible("edit_outfit_separator", TRUE);
-		menu->setItemVisible("show_original", FALSE);
-		menu->setItemVisible("edit_item", TRUE);
-		menu->setItemVisible("edit", FALSE);
-	}
+// [/SL:KB]
+//	void updateMenuItemsVisibility(LLContextMenu* menu)
+//	{
+//		menu->setItemVisible("take_off", FALSE);
+//		menu->setItemVisible("detach", TRUE);
+//		menu->setItemVisible("edit_outfit_separator", TRUE);
+//		menu->setItemVisible("show_original", FALSE);
+//		menu->setItemVisible("edit_item", TRUE);
+//		menu->setItemVisible("edit", FALSE);
+//	}
 
 	LLPanelWearing* 		mPanelWearing;
 };
@@ -703,10 +767,10 @@ LLPanelWearing::~LLPanelWearing()
 	}
 	delete mCategoriesObserver;
 
-	if (mAttachmentsChangedConnection.connected())
-	{
-		mAttachmentsChangedConnection.disconnect();
-	}
+//	if (mAttachmentsChangedConnection.connected())
+//	{
+//		mAttachmentsChangedConnection.disconnect();
+//	}
 }
 
 BOOL LLPanelWearing::postBuild()
@@ -720,7 +784,10 @@ BOOL LLPanelWearing::postBuild()
 	mWearablesInvTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, EWearingView::FOLDER_VIEW));
 // [/SL:KB]
 	mAttachmentsTab = getChild<LLAccordionCtrlTab>("tab_temp_attachments");
-	mAttachmentsTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onAccordionTabStateChanged, this));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	mAttachmentsChangedConnection = LLAppearanceMgr::instance().setAttachmentsChangedCallback(boost::bind(&LLPanelWearing::onAttachmentsChanged, this));
+// [/SL:KB]
+//	mAttachmentsTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onAccordionTabStateChanged, this));
 //	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
 //	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -796,48 +863,57 @@ void LLPanelWearing::onOpen(const LLSD& /*info*/)
 		category->fetch();
 
 		mCOFItemsList->updateList(cof);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+		onAttachmentsChanged();
+// [/SL:KB]
 
 		mIsInitialized = true;
 	}
 }
 
-void LLPanelWearing::draw()
-{
-	if (mUpdateTimer.getStarted() && (mUpdateTimer.getElapsedTimeF32() > 0.1))
-	{
-		mUpdateTimer.stop();
-		updateAttachmentsList();
-	}
-	LLPanel::draw();
-}
+//void LLPanelWearing::draw()
+//{
+//	if (mUpdateTimer.getStarted() && (mUpdateTimer.getElapsedTimeF32() > 0.1))
+//	{
+//		mUpdateTimer.stop();
+//		updateAttachmentsList();
+//	}
+//	LLPanel::draw();
+//}
 
-void LLPanelWearing::onAccordionTabStateChanged()
-{
-	if(mAttachmentsTab->isExpanded())
-	{
-		startUpdateTimer();
-		mAttachmentsChangedConnection = LLAppearanceMgr::instance().setAttachmentsChangedCallback(boost::bind(&LLPanelWearing::startUpdateTimer, this));
-	}
-	else
-	{
-		if (mAttachmentsChangedConnection.connected())
-		{
-			mAttachmentsChangedConnection.disconnect();
-		}
-	}
-}
+//void LLPanelWearing::onAccordionTabStateChanged()
+//{
+//	if(mAttachmentsTab->isExpanded())
+//	{
+//		startUpdateTimer();
+//		mAttachmentsChangedConnection = LLAppearanceMgr::instance().setAttachmentsChangedCallback(boost::bind(&LLPanelWearing::startUpdateTimer, this));
+//	}
+//	else
+//	{
+//		if (mAttachmentsChangedConnection.connected())
+//		{
+//			mAttachmentsChangedConnection.disconnect();
+//		}
+//	}
+//}
 
-void LLPanelWearing::startUpdateTimer()
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+void LLPanelWearing::onAttachmentsChanged()
 {
-	if (!mUpdateTimer.getStarted())
-	{
-		mUpdateTimer.start();
-	}
-	else
-	{
-		mUpdateTimer.reset();
-	}
+	doAfterInterval(boost::bind(&LLPanelWearing::updateAttachmentsList, getDerivedHandle<LLPanelWearing>()), 0.1);
 }
+// [/SL:KB]
+//void LLPanelWearing::startUpdateTimer()
+//{
+//	if (!mUpdateTimer.getStarted())
+//	{
+//		mUpdateTimer.start();
+//	}
+//	else
+//	{
+//		mUpdateTimer.reset();
+//	}
+//}
 
 // virtual
 void LLPanelWearing::setFilterSubString(const std::string& string)
@@ -938,28 +1014,63 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 	return false;
 }
 
-void LLPanelWearing::updateAttachmentsList()
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+void LLPanelWearing::updateAttachmentsList(LLHandle<LLPanelWearing> hWearingPanel)
 {
+	LLPanelWearing* pSelf = hWearingPanel.get();
+	if (!pSelf)
+		return;
+
 	std::vector<LLViewerObject*> attachs = LLAgentWearables::getTempAttachments();
-	mTempItemsList->deleteAllItems();
-	mAttachmentsMap.clear();
+	pSelf->mTempItemsList->deleteAllItems();
+	pSelf->mAttachmentsMap.clear();
 	if(!attachs.empty())
 	{
-		if(!populateAttachmentsList())
+		if(!pSelf->populateAttachmentsList())
 		{
-			requestAttachmentDetails();
+			pSelf->requestAttachmentDetails();
 		}
 	}
 	else
 	{
-		std::string no_attachments = getString("no_attachments");
+		std::string no_attachments = pSelf->getString("no_attachments");
 		LLSD row;
 		row["columns"][0]["column"] = "text";
 		row["columns"][0]["value"] = no_attachments;
 		row["columns"][0]["font"] = "SansSerifBold";
-		mTempItemsList->addElement(row);
+		pSelf->mTempItemsList->addElement(row);
+	}
+
+	if (LLAccordionCtrlTab* pAccordionTab = pSelf->findChild<LLAccordionCtrlTab>("tab_temp_attachments"))
+	{
+		LLStringUtil::format_map_t args;
+		args["[ATTACH_COUNT]"] = std::to_string(attachs.size());
+		pAccordionTab->setTitle(LLTrans::getString("TempItemsTabTitle", args));
 	}
 }
+// [/SL:KB]
+//void LLPanelWearing::updateAttachmentsList()
+//{
+//	std::vector<LLViewerObject*> attachs = LLAgentWearables::getTempAttachments();
+//	mTempItemsList->deleteAllItems();
+//	mAttachmentsMap.clear();
+//	if(!attachs.empty())
+//	{
+//		if(!populateAttachmentsList())
+//		{
+//			requestAttachmentDetails();
+//		}
+//	}
+//	else
+//	{
+//		std::string no_attachments = getString("no_attachments");
+//		LLSD row;
+//		row["columns"][0]["column"] = "text";
+//		row["columns"][0]["value"] = no_attachments;
+//		row["columns"][0]["font"] = "SansSerifBold";
+//		mTempItemsList->addElement(row);
+//	}
+//}
 
 bool LLPanelWearing::populateAttachmentsList(bool update)
 {
@@ -1118,27 +1229,27 @@ bool LLPanelWearing::hasItemSelected()
 //	return mCOFItemsList->getSelectedItem() != NULL;
 }
 
-void LLPanelWearing::onEditAttachment()
-{
-	LLScrollListItem* item = mTempItemsList->getFirstSelected();
-	if (item)
-	{
-		LLSelectMgr::getInstance()->deselectAll();
-		LLSelectMgr::getInstance()->selectObjectAndFamily(mAttachmentsMap[item->getUUID()]);
-		handle_object_edit();
-	}
-}
+//void LLPanelWearing::onEditAttachment()
+//{
+//	LLScrollListItem* item = mTempItemsList->getFirstSelected();
+//	if (item)
+//	{
+//		LLSelectMgr::getInstance()->deselectAll();
+//		LLSelectMgr::getInstance()->selectObjectAndFamily(mAttachmentsMap[item->getUUID()]);
+//		handle_object_edit();
+//	}
+//}
 
-void LLPanelWearing::onRemoveAttachment()
-{
-	LLScrollListItem* item = mTempItemsList->getFirstSelected();
-	if (item)
-	{
-		LLSelectMgr::getInstance()->deselectAll();
-		LLSelectMgr::getInstance()->selectObjectAndFamily(mAttachmentsMap[item->getUUID()]);
-		LLSelectMgr::getInstance()->sendDropAttachment();
-	}
-}
+//void LLPanelWearing::onRemoveAttachment()
+//{
+//	LLScrollListItem* item = mTempItemsList->getFirstSelected();
+//	if (item)
+//	{
+//		LLSelectMgr::getInstance()->deselectAll();
+//		LLSelectMgr::getInstance()->selectObjectAndFamily(mAttachmentsMap[item->getUUID()]);
+//		LLSelectMgr::getInstance()->sendDropAttachment();
+//	}
+//}
 
 void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 {
