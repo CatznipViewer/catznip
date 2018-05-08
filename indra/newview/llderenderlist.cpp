@@ -300,8 +300,8 @@ bool LLDerenderList::addSelection(bool fPersist, std::vector<LLUUID>* pIdList)
 
 	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
 
-	LLObjectSelection::valid_root_iterator itObj = hSel->valid_root_begin();
-	while (hSel->valid_root_end() != itObj)
+	LLObjectSelection::root_iterator itObj = hSel->root_begin();
+	while (hSel->root_end() != itObj)
 	{
 		const LLSelectNode* pNode = *itObj++;
 		if (!canAdd(pNode->getObject()))
