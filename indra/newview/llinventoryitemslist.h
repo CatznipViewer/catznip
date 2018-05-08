@@ -44,7 +44,10 @@ public:
 
 	virtual ~LLInventoryItemsList();
 
-	void refreshList(const std::vector<LLPointer<LLViewerInventoryItem> > item_array);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.3
+	virtual void refreshList(const std::vector<LLPointer<LLViewerInventoryItem>> item_array);
+// [/SL:KB]
+//	void refreshList(const std::vector<LLPointer<LLViewerInventoryItem> > item_array);
 
 	boost::signals2::connection setRefreshCompleteCallback(const commit_signal_t::slot_type& cb);
 
