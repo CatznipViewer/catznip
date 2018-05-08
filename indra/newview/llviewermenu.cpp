@@ -2910,11 +2910,9 @@ void handle_object_edit()
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 void handle_attachment_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (isAgentAvatarValid()) && (pItem) )
+	if (isAgentAvatarValid())
 	{
-		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
-		if (pAttachObj)
+		if (LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem)))
 		{
 			LLSelectMgr::getInstance()->deselectAll();
 			LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
@@ -2926,28 +2924,33 @@ void handle_attachment_edit(const LLUUID& idItem)
 
 void handle_item_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (pItem) && (enable_item_edit(idItem)) )
+	if (enable_item_edit(idItem))
 	{
-		switch (pItem->getType())
+		if (const LLInventoryItem* pItem = gInventory.getItem(idItem))
 		{
-			case LLAssetType::AT_BODYPART:
-			case LLAssetType::AT_CLOTHING:
-				LLAgentWearables::editWearable(idItem);
-				break;
-			case LLAssetType::AT_OBJECT:
-				handle_attachment_edit(idItem);
-				break;
-			default:
-				break;
+			switch (pItem->getType())
+			{
+				case LLAssetType::AT_BODYPART:
+				case LLAssetType::AT_CLOTHING:
+					LLAgentWearables::editWearable(idItem);
+					break;
+				case LLAssetType::AT_OBJECT:
+					handle_attachment_edit(idItem);
+					break;
+				default:
+					break;
+			}
+		}
+		else
+		{
+			handle_attachment_edit(idItem);
 		}
 	}
 }
 
 bool enable_item_edit(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if (pItem)
+	if (const LLInventoryItem* pItem = gInventory.getItem(idItem))
 	{
 		switch (pItem->getType())
 		{
@@ -2960,16 +2963,14 @@ bool enable_item_edit(const LLUUID& idItem)
 				break;
 		}
 	}
-	return false;
+	return gAgentAvatarp->getWornAttachment(idItem) != nullptr;
 }
 
 void handle_attachment_touch(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (pItem) && (isAgentAvatarValid()) && (enable_attachment_touch(idItem)) )
+	if ( (isAgentAvatarValid()) && (enable_attachment_touch(idItem)) )
 	{
-		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
-		if (pAttachObj)
+		if (LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem)))
 		{
 			LLSelectMgr::getInstance()->deselectAll();
 
@@ -2994,10 +2995,9 @@ void handle_attachment_touch(const LLUUID& idItem)
 
 bool enable_attachment_touch(const LLUUID& idItem)
 {
-	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (isAgentAvatarValid()) && (pItem) && (LLAssetType::AT_OBJECT == pItem->getType()) )
+	if (isAgentAvatarValid())
 	{
-		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(gInventory.getLinkedItemID(idItem));
 		return (pAttachObj) && (pAttachObj->flagHandleTouch());
 	}
 	return false;
