@@ -3046,7 +3046,7 @@ void handle_texture_refresh()
 		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
 		{
 			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
-			if ( (pSculptParams) && (0 == (pSculptParams->getSculptType() & LL_SCULPT_TYPE_MESH)) )
+			if ( (pSculptParams) && (LL_SCULPT_TYPE_MESH != pSculptParams->getSculptType()) )
 			{
 				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
 				if (idTextures.end() == itTexture)
