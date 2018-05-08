@@ -115,8 +115,8 @@ public:
 	void onAccordionTabStateChanged();
 	void setAttachmentDetails(LLSD content);
 	void requestAttachmentDetails();
-	void onEditAttachment();
-	void onRemoveAttachment();
+//	void onEditAttachment();
+//	void onRemoveAttachment();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void onTakeOffClicked();
