@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2016, Kitty Barnett
+ * Copyright (c) 2016-2018, Kitty Barnett
  *
  * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -23,6 +23,7 @@
 //
 
 class LLCategoryItemsList;
+class LLCheckBoxCtrl;
 class LLFilterEditor;
 class LLInventoryCategoriesObserver;
 class LLSliderCtrl;
@@ -162,6 +163,33 @@ protected:
 	LLFilterEditor*                m_pFilterEditor = nullptr;
 	LLInventoryCategoriesObserver* m_pCofObserver = nullptr;
 	LLWornItemsList*               m_pWornItemsList = nullptr;
+};
+
+// ====================================================================================
+// LLRenderOthersAsMessagePanel class - Message panel to show when "Render Others As" is set to non-default
+//
+
+class LLRenderOthersAsMessagePanel : public LLPanel
+{
+	LOG_CLASS(LLRenderOthersAsMessagePanel);
+public:
+	LLRenderOthersAsMessagePanel();
+
+	/*
+	 * Member functions
+	 */
+public:
+	BOOL postBuild() override;
+	void setVisible(BOOL fVisible) override;
+protected:
+	void onRenderEveryone();
+	void onValueChanged();
+
+	/*
+	 * Member variables
+	 */
+protected:
+	boost::signals2::scoped_connection m_ROAConnection;
 };
 
 // ====================================================================================

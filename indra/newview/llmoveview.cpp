@@ -42,6 +42,9 @@
 #include "llfloaterreg.h"
 #include "llhints.h"
 #include "lljoystickbutton.h"
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+#include "llpanelquickprefsappearance.h"
+// [/SL:KB]
 #include "lluictrlfactory.h"
 #include "llviewerwindow.h"
 #include "llviewercontrol.h"
@@ -505,7 +508,75 @@ void LLFloaterMove::setModeButtonToggleState(const EMovementMode mode)
 	mModeControlButtonMap[mode]->setToggleState(TRUE);
 }
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+LLStateManagementButtonPanel::LLStateManagementButtonPanel()
+{
+}
 
+void LLStateManagementButtonPanel::draw()
+{
+	layoutChildren();
+
+	LLPanel::draw();
+}
+
+S32 LLStateManagementButtonPanel::notifyParent(const LLSD& sdInfo)
+{
+	if ( (sdInfo.has("action")) && (sdInfo["action"] == "layout") )
+	{
+		setVisible(true);
+		layoutChildren();
+		return 0;
+	}
+	return LLPanel::notifyParent(sdInfo);
+}
+
+void LLStateManagementButtonPanel::layoutChildren()
+{
+	// Calculate the width of all children
+	int nTotalWidth = 0;
+	for (const LLView* pView : *getChildList())
+	{
+		if (pView->getVisible())
+			nTotalWidth += pView->getRect().getWidth();
+	}
+
+	// If there are no visible children then hide ourselves
+	if (!nTotalWidth)
+	{
+		setVisible(false);
+		return;
+	}
+
+	// Code original from LLPanelStandStopFlying::updatePosition
+	S32 bottom_tb_center = 0;
+	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_BOTTOM))
+	{
+		bottom_tb_center = toolbar_bottom->getRect().getCenterX();
+	}
+
+	S32 x_pos = bottom_tb_center - nTotalWidth / 2;
+	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())
+	{
+		if (LLToolBar* toolbar_left = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT))
+		{
+			x_pos -= toolbar_left->getRect().getWidth();
+		}
+	}
+
+	// Now layout our visible children side to side
+	for (LLView* pView : *getChildList())
+	{
+		if (pView->getVisible())
+		{
+			pView->setOrigin(x_pos, 0);
+			x_pos += pView->getRect().getWidth();
+		}
+	}
+}
+
+static LLPanelInjector<LLStateManagementButtonPanel> t_panel_photo("state_management_buttons_panel");
+// [/SL:KB]
 
 /************************************************************************/
 /*                        LLPanelStandStopFlying                        */
@@ -559,7 +630,9 @@ void LLPanelStandStopFlying::clearStandStopFlyingMode(EStandStopFlyingMode mode)
 	default:
 		LL_ERRS() << "Unexpected EStandStopFlyingMode is passed: " << mode << LL_ENDL;
 	}
-
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	panel->setVisible(false);
+// [/SL:KB]
 }
 
 BOOL LLPanelStandStopFlying::postBuild()
@@ -584,21 +657,28 @@ void LLPanelStandStopFlying::setVisible(BOOL visible)
 	//we dont need to show the panel if these buttons are not activated
 	if (gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK) visible = false;
 
-	if (visible)
-	{
-		updatePosition();
-	}
-
-	// do not change parent visibility in case panel is attached into Move Floater: EXT-3632, EXT-4646
-	if (!mAttached) 
-	{
-		//change visibility of parent layout_panel to animate in/out. EXT-2504
-		if (getParent()) getParent()->setVisible(visible);
-	}
+//	if (visible)
+//	{
+//		updatePosition();
+//	}
+//
+//	// do not change parent visibility in case panel is attached into Move Floater: EXT-3632, EXT-4646
+//	if (!mAttached) 
+//	{
+//		//change visibility of parent layout_panel to animate in/out. EXT-2504
+//		if (getParent()) getParent()->setVisible(visible);
+//	}
 
 	// also change own visibility to avoid displaying the panel in mouselook (broken when EXT-2504 was implemented).
 	// See EXT-4718.
 	LLPanel::setVisible(visible);
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	if (visible)
+	{
+		notifyParent(LLSD().with("action", "layout"));
+	}
+// [/SL:KB]
 }
 
 BOOL LLPanelStandStopFlying::handleToolTip(S32 x, S32 y, MASK mask)
@@ -650,12 +730,18 @@ void LLPanelStandStopFlying::reparent(LLFloaterMove* move_view)
 
 		// Detach from movement controls. 
 		parent->removeChild(this);
-		mOriginalParent.get()->addChild(this);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+		mOriginalParent.get()->addChildInBack(this);
+// [/SL:KB]
+//		mOriginalParent.get()->addChild(this);
 		// update parent with self visibility (it is changed in setVisible()). EXT-4743
 		mOriginalParent.get()->setVisible(getVisible());
 
 		mAttached = false;
-		updatePosition(); // don't defer until next draw() to avoid flicker
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+		notifyParent(LLSD().with("action", "layout"));
+// [/SL:KB]
+//		updatePosition(); // don't defer until next draw() to avoid flicker
 	}
 }
 
@@ -674,7 +760,10 @@ LLPanelStandStopFlying* LLPanelStandStopFlying::getStandStopFlyingPanel()
 
 	LL_INFOS() << "Build LLPanelStandStopFlying panel" << LL_ENDL;
 
-	panel->updatePosition();
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	panel->notifyParent(LLSD().with("action", "layout"));
+// [/SL:KB]
+//	panel->updatePosition();
 	return panel;
 }
 
@@ -698,48 +787,48 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 /**
  * Updates position of the Stand & Stop Flying panel to be center aligned with Move button.
  */
-void LLPanelStandStopFlying::updatePosition()
-{
-	if (mAttached) return;
-
-	S32 y_pos = 0;
-	S32 bottom_tb_center = 0;
-	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_BOTTOM))
-	{
-		y_pos = toolbar_bottom->getRect().getHeight();
-		bottom_tb_center = toolbar_bottom->getRect().getCenterX();
-	}
-
-	S32 left_tb_width = 0;
-	if (LLToolBar* toolbar_left = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT))
-	{
-		left_tb_width = toolbar_left->getRect().getWidth();
-	}
-
-	if (!mStateManagementButtons.get())
-	{
-		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
-		if (panel_ssf_container)
-		{
-			mStateManagementButtons = panel_ssf_container->getHandle();
-		}
-	}
-
-	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
-	{
-		panel_ssf_container->setOrigin(0, y_pos);
-	}
-
-	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())
-	{
-		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2 - left_tb_width;
-		setOrigin( x_pos, 0);
-	}
-	else 
-	{
-		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2;
-		setOrigin( x_pos, 0);
-	}
-}
+//void LLPanelStandStopFlying::updatePosition()
+//{
+//	if (mAttached) return;
+//
+//	S32 y_pos = 0;
+//	S32 bottom_tb_center = 0;
+//	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_BOTTOM))
+//	{
+//		y_pos = toolbar_bottom->getRect().getHeight();
+//		bottom_tb_center = toolbar_bottom->getRect().getCenterX();
+//	}
+//
+//	S32 left_tb_width = 0;
+//	if (LLToolBar* toolbar_left = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT))
+//	{
+//		left_tb_width = toolbar_left->getRect().getWidth();
+//	}
+//
+//	if (!mStateManagementButtons.get())
+//	{
+//		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
+//		if (panel_ssf_container)
+//		{
+//			mStateManagementButtons = panel_ssf_container->getHandle();
+//		}
+//	}
+//
+//	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
+//	{
+//		panel_ssf_container->setOrigin(0, y_pos);
+//	}
+//
+//	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())
+//	{
+//		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2 - left_tb_width;
+//		setOrigin( x_pos, 0);
+//	}
+//	else 
+//	{
+//		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2;
+//		setOrigin( x_pos, 0);
+//	}
+//}
 
 // EOF

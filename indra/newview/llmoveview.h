@@ -111,6 +111,20 @@ private:
 
 };
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+class LLStateManagementButtonPanel : public LLPanel
+{
+	LOG_CLASS(LLStateManagementButtonPanel);
+public:
+	LLStateManagementButtonPanel();
+
+public:
+	void draw() override;
+	S32	 notifyParent(const LLSD& sdInfo);
+protected:
+	void layoutChildren();
+};
+// [/SL:KB]
 
 /**
  * This class contains Stand Up and Stop Flying buttons displayed above Move button in bottom tray
@@ -146,7 +160,7 @@ public:
 
 	// *HACK: due to hard enough to have this control aligned with "Move" button while resizing
 	// let update its position in each frame
-	/*virtual*/ void draw(){updatePosition(); LLPanel::draw();}
+//	/*virtual*/ void draw(){updatePosition(); LLPanel::draw();}
 	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
 
 
@@ -158,7 +172,7 @@ private:
 	static LLPanelStandStopFlying* getStandStopFlyingPanel();
 	void onStandButtonClick();
 	void onStopFlyingButtonClick();
-	void updatePosition();
+//	void updatePosition();
 
 	LLButton* mStandButton;
 	LLButton* mStopFlyingButton;
