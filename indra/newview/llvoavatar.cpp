@@ -2285,12 +2285,8 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 		return;
 	}	
 
-//	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
-//		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
-// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
-	if ( ((!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) && (!gSavedSettings.getBOOL("DisableAllRenderTypes")) && (!isSelf())) ||
-		 (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
-// [/SL:KB]
+	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
+		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
 	{
 		return;
 	}
