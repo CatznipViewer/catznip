@@ -120,6 +120,7 @@
 #include "llviewerparcelmgr.h"
 #include "llviewerstats.h"
 // [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "llavatarpropertiesprocessor.h"
 #include "llviewertexturelist.h"
 #include "llvovolume.h"
 // [/SL:KB]
@@ -2830,63 +2831,122 @@ void handle_object_inspect()
 	*/
 }
 
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
-void handle_texture_refresh()
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
+class LLTextureRefresh
 {
-	typedef std::pair<LLUUID, bool> texture_pair_t;
-	typedef std::list<texture_pair_t> texture_list_t;
-	texture_list_t idTextures;
-
-	LLObjectSelectionHandle pSel = LLSelectMgr::instance().getSelection();
-	for (LLObjectSelection::iterator itNode = pSel->begin(), endNode = pSel->end(); itNode != endNode; ++itNode)
+public:
+	LLTextureRefresh()
 	{
-		const LLSelectNode* pNode = *itNode;
-		const LLViewerObject* pObject = (pNode) ? pNode->getObject() : NULL;
-		if (!pObject)
-			continue;
+		// Refresh textures on all faces of all objects in the current selection
+		LLObjectSelectionHandle hSel = LLSelectMgr::instance().getSelection();
+		for (LLObjectSelection::iterator itNode = hSel->begin(), endNode = hSel->end(); itNode != endNode; ++itNode)
+		{
+			if (const LLViewerObject* pObject = (*itNode)->getObject())
+			{
+				collectFromObject(pObject);
+			}
+		}
+	}
 
+	LLTextureRefresh(const LLVOAvatar* pAvatar)
+	{
+		// Refresh the baked textures and all textures on all faces of all attachments
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_HEAD_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_UPPER_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_LOWER_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_EYES_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_SKIRT_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_HAIR_BAKED)->getID(), false));
+
+		// Refresh all attachments
+		for (const auto& attachPtEntry : pAvatar->mAttachmentPoints)
+		{
+			for (const LLViewerObject* pAttachObj : attachPtEntry.second->mAttachedObjects)
+			{
+				collectFromObjectFamily(pAttachObj);
+			}
+		}
+
+		// Re-request all wearable params
+		LLAvatarPropertiesProcessor::getInstance()->sendAvatarTexturesRequest(pAvatar->getID());
+	}
+
+	~LLTextureRefresh()
+	{
+		for (const auto& textureEntry : m_TextureList)
+		{
+			LLViewerFetchedTexture* pTexture = gTextureList.findImage(textureEntry.first, TEX_LIST_STANDARD);
+			if ( (pTexture) && (FTT_LOCAL_FILE != pTexture->getFTType()) )
+			{
+				LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+				pTexture->clearFetcher();
+				pTexture->clearFetchedResults();
+				pTexture->setIsMissingAsset(0);
+
+				if (textureEntry.second)
+				{
+					const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
+					for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+					{
+						if (LLVOVolume* pVolume = pVolumeList->at(idxVolume))
+						{
+							pVolume->notifyMeshLoaded();
+						}
+					}
+				}
+			}
+		}
+	}
+protected:
+	void collectFromObject(const LLViewerObject* pObject)
+	{
 		for (U8 idxTE = 0, cntTE = pObject->getNumTEs(); idxTE < cntTE; idxTE++)
 		{
-			LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
-			if ((pTexture) && (idTextures.end() == std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pTexture->getID())))
-				idTextures.push_back(texture_pair_t(pTexture->getID(), false));
+			const LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
+			if ( (pTexture) && (m_TextureList.end() == std::find_if(m_TextureList.begin(), m_TextureList.end(), [pTexture](const texture_pair_t& t) { return t.first == pTexture->getID(); }) ) )
+				m_TextureList.push_back(std::make_pair(pTexture->getID(), false));
 		}
 
 		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
 		{
-			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+			const LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
 			if ( (pSculptParams) && (LL_SCULPT_TYPE_MESH != pSculptParams->getSculptType()) )
 			{
-				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
-				if (idTextures.end() == itTexture)
-					idTextures.push_back(texture_pair_t(pSculptParams->getSculptTexture(), true));
+				texture_list_t::iterator itTexture = std::find_if(m_TextureList.begin(), m_TextureList.end(), boost::bind(&texture_pair_t::first, _1) == pSculptParams->getSculptTexture());
+				if (m_TextureList.end() == itTexture)
+					m_TextureList.push_back(std::make_pair(pSculptParams->getSculptTexture(), true));
 				else
 					itTexture->second = true;
 			}
 		}
 	}
 
-	for (texture_list_t::const_iterator itTexture = idTextures.begin(); itTexture != idTextures.end(); ++itTexture)
+	void collectFromObjectFamily(const LLViewerObject* pObject)
 	{
-		LLViewerFetchedTexture* pTexture = gTextureList.findImage(itTexture->first, TEX_LIST_STANDARD);
-		if ( (pTexture) && (FTT_LOCAL_FILE != pTexture->getFTType()) )
-		{
-			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
-			pTexture->clearFetcher();
-			pTexture->clearFetchedResults();
-			pTexture->setIsMissingAsset(0);
+		for (const LLViewerObject* pChildObj : pObject->getChildren())
+			collectFromObject(pChildObj);
+		collectFromObject(pObject);
+	}
 
-			if (itTexture->second)
-			{
-				const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
-				for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
-				{
-					LLVOVolume* pVolume = pVolumeList->at(idxVolume);
-					if (pVolume)
-						pVolume->notifyMeshLoaded();
-				}
-			}
-		}
+	/*
+	 * Member variables
+	 */
+protected:
+	typedef std::pair<LLUUID, bool> texture_pair_t;
+	typedef std::list<texture_pair_t> texture_list_t;
+	texture_list_t m_TextureList;
+};
+
+void handle_refresh_selection_textures()
+{
+	LLTextureRefresh f;
+}
+
+void handle_refresh_avatar_textures()
+{
+	if (const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject()))
+	{
+		LLTextureRefresh f(pAvatar);
 	}
 }
 // [/SL:KB]
@@ -9248,8 +9308,9 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
-	commit.add("Object.TextureRefresh", boost::bind(&handle_texture_refresh));
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
+	commit.add("Avatar.RefreshTextures", boost::bind(&handle_refresh_avatar_textures));
+	commit.add("Object.RefreshTextures", boost::bind(&handle_refresh_selection_textures));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
