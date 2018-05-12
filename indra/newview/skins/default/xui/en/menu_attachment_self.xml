@@ -131,6 +131,12 @@ name="Edit Outfit">
      <menu_item_call.on_click
       function="Advanced.RefreshAttachments" />
     </menu_item_call>
+    <menu_item_call
+     label="Sync Animations"
+     name="Sync Animations">
+        <menu_item_call.on_click
+         function="Avatar.RestartAnimations" />
+    </menu_item_call>
     <menu_item_separator/>
     <menu_item_call
      label="Reset Skeleton"

@@ -49,6 +49,9 @@
 #include "llagentui.h"
 #include "llagentwearables.h"
 #include "llagentpilot.h"
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+#include "llanimationstates.h"
+// [/SL:KB]
 #include "llcompilequeue.h"
 #include "llconsole.h"
 #include "lldaycyclemanager.h"
@@ -2947,6 +2950,80 @@ void handle_refresh_avatar_textures()
 	if (const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject()))
 	{
 		LLTextureRefresh f(pAvatar);
+	}
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+void handle_restart_avatar_animations()
+{
+	/*const*/ LLVOAvatar* pTargetAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (!pTargetAvatar)
+		return;
+
+	// Reset the animations of all other avatars sitting on the same object as the target avatar
+	if (pTargetAvatar->isSitting())
+	{
+		if (const LLViewerObject* pSitObj = dynamic_cast<LLViewerObject*>(pTargetAvatar->getRoot()))
+		{
+			for (/*const*/ LLViewerObject* pChildObj : pSitObj->getChildren())
+			{
+				if (LLVOAvatar* pChildAvatar = pChildObj->asAvatar())
+				{
+					for (const auto& animEntry : pChildAvatar->mPlayingAnimations)
+					{
+						const LLUUID& idAnim = animEntry.first;
+						if (!gAnimLibrary.animStateToString(idAnim))
+						{
+							pChildAvatar->stopMotion(idAnim, true);
+							pChildAvatar->startMotion(idAnim);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Create a set of playing animation UUIDs to make lookups a bit faster
+	std::set<LLUUID> animList;
+	for (const auto& animEntry : pTargetAvatar->mPlayingAnimations)
+	{
+		if (!gAnimLibrary.animStateToString(animEntry.first))
+			animList.insert(animEntry.first);
+	}
+
+	// Reset the animations of all other (non-sitting) avatars that are playing the same animations
+	for (LLCharacter* pCharacter : LLCharacter::sInstances)
+	{
+		if (LLVOAvatar* pAvatar = dynamic_cast<LLVOAvatar*>(pCharacter))
+		{
+			for (const auto& animEntry : pAvatar->mPlayingAnimations)
+			{
+				const LLUUID& idAnim = animEntry.first;
+				if (animList.end() != animList.find(idAnim))
+				{
+					pAvatar->stopMotion(idAnim, true);
+					pAvatar->startMotion(idAnim);
+				}
+			}
+		}
+	}
+}
+
+void handle_restart_all_animations()
+{
+	// Reset the animations of all other avatars
+	for (LLCharacter* pCharacter : LLCharacter::sInstances)
+	{
+		if (LLVOAvatar* pAvatar = dynamic_cast<LLVOAvatar*>(pCharacter))
+		{
+			for (const auto& animEntry : pAvatar->mPlayingAnimations)
+			{
+				const LLUUID& idAnim = animEntry.first;
+				pAvatar->stopMotion(idAnim, true);
+				pAvatar->startMotion(idAnim);
+			}
+		}
 	}
 }
 // [/SL:KB]
@@ -9311,6 +9388,10 @@ void initialize_menus()
 // [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
 	commit.add("Avatar.RefreshTextures", boost::bind(&handle_refresh_avatar_textures));
 	commit.add("Object.RefreshTextures", boost::bind(&handle_refresh_selection_textures));
+// [/SL:KB]
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+	commit.add("Avatar.RestartAnimations", boost::bind(&handle_restart_avatar_animations));
+	commit.add("Advanced.RestartAllAnimations", boost::bind(&handle_restart_all_animations));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
