@@ -119,6 +119,7 @@
                width="20">
         </panel>          
         <panel bottom="100"
+               class="state_management_buttons_panel"
                follows="left|right|bottom"
                height="25"
                left="0"

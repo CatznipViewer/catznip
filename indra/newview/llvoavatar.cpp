@@ -2292,12 +2292,8 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 		return;
 	}	
 
-//	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
-//		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
-// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
-	if ( ((!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) && (!gSavedSettings.getBOOL("DisableAllRenderTypes")) && (!isSelf())) ||
-		 (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
-// [/SL:KB]
+	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
+		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
 	{
 		return;
 	}
@@ -3504,51 +3500,73 @@ bool LLVOAvatar::isInMuteList()
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 bool LLVOAvatar::isNearby() const
 {
-	F64 now = LLFrameTimer::getTotalSeconds();
+	const F64 now = LLFrameTimer::getTotalSeconds();
 	if (now < mCachedNearbyUpdateTime)
 	{
 		return mCachedIsNearby;
 	}
 
 	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1.0f;
-	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
 	mCachedIsNearby = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) < CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS;
+	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
+	mCachedRenderAvatarAsUpdateTime = 0.f;
 	return mCachedIsNearby;
 }
 
 bool LLVOAvatar::isFriend() const
 {
-	F64 now = LLFrameTimer::getTotalSeconds();
+	const F64 now = LLFrameTimer::getTotalSeconds();
 	if (now < mCachedIsFriendUpdateTime)
 	{
 		return mCachedIsFriend;
 	}
 
 	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 5.f;
-	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
 	mCachedIsFriend = LLAvatarTracker::instance().isBuddy(getID());
+	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
+	mCachedRenderAvatarAsUpdateTime = 0.f;
 	return mCachedIsFriend;
 }
 
 LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
 {
 	static LLCachedControl<S32> render_others_as(gSavedSettings, "RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
-	static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
-	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "AlwaysRenderFriends", true);
+	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "AlwaysRenderNearby", false);
+
+	const F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedRenderAvatarAsUpdateTime)
+	{
+		return mCachedRenderAvatarAs;
+	}
 
 	LLVOAvatar::ERenderOthersAs eRenderAs = (LLVOAvatar::ERenderOthersAs)render_others_as();
-	if ( (eRenderAs == ERenderOthersAs::EVERYONE_NORMALLY) || (isSelf()) ||
+	if ( (eRenderAs == ERenderOthersAs::NORMALLY) || (isSelf()) ||
          ( (eRenderAs != ERenderOthersAs::INVISIBLE) && ( ((always_render_friends) && (isFriend())) ||
 	                                                      ((always_render_nearby) && (isNearby())) ||
 		                                                  (AV_ALWAYS_RENDER == mVisuallyMuteSetting) ) ) )
 	{
-		return ERenderAvatarAs::NORMAL;
+		mCachedRenderAvatarAs = ERenderAvatarAs::NORMAL;
 	}
-	else if (eRenderAs == ERenderOthersAs::EVERYONE_AS_IMPOSTERS)
+	else if (eRenderAs == ERenderOthersAs::IMPOSTERS)
 	{
-		return ERenderAvatarAs::IMPOSTER;
+		if (mCachedRenderAvatarAs == ERenderAvatarAs::SILHOUETTE)
+			mNeedsImpostorUpdate = true;
+		mCachedRenderAvatarAs = ERenderAvatarAs::IMPOSTER;
 	}
-	return ERenderAvatarAs::INVISIBLE;
+	else if (eRenderAs == ERenderOthersAs::SILHOUETTES)
+	{
+		if (mCachedRenderAvatarAs == ERenderAvatarAs::IMPOSTER)
+			mNeedsImpostorUpdate = true;
+		mCachedRenderAvatarAs = ERenderAvatarAs::SILHOUETTE;
+	}
+	else
+	{
+		mCachedRenderAvatarAs = ERenderAvatarAs::INVISIBLE;
+	}
+	const F64 SECONDS_BETWEEN_RENDERAVATARAS_UPDATES = 1.f;
+	mCachedRenderAvatarAsUpdateTime = now + SECONDS_BETWEEN_RENDERAVATARAS_UPDATES;
+	return mCachedRenderAvatarAs;
 }
 // [/SL:KB]
 
@@ -3755,6 +3773,12 @@ BOOL LLVOAvatar::updateCharacter(LLAgent &agent)
 		{ // visually muted avatars update at 16 hz
 			mUpdatePeriod = 16;
 		}
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
+		else if (getRenderAvatarAs() == ERenderAvatarAs::IMPOSTER)
+		{
+			mUpdatePeriod = 2;
+		}
+// [/SL:KB]
 		else if (   ! shouldImpostor()
 				 || mDrawable->mDistanceWRTCamera < 1.f + mag)
 		{   // first 25% of max visible avatars are not impostored
@@ -7399,9 +7423,13 @@ BOOL LLVOAvatar::isFullyLoaded() const
 bool LLVOAvatar::isTooComplex() const
 {
 	bool too_complex;
-	bool render_friend =  (LLAvatarTracker::instance().isBuddy(getID()) && gSavedSettings.getBOOL("AlwaysRenderFriends"));
+//	bool render_friend =  (LLAvatarTracker::instance().isBuddy(getID()) && gSavedSettings.getBOOL("AlwaysRenderFriends"));
 
-	if (isSelf() || render_friend || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//	if (isSelf() || render_friend || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "AlwaysRenderFriends", true);
+	if (isSelf() || ((always_render_friends) && (isFriend())) || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+// [/SL:KB]
 	{
 		too_complex = false;
 	}
@@ -7414,15 +7442,12 @@ bool LLVOAvatar::isTooComplex() const
         // so that unlimited will completely disable the overly complex impostor rendering
         // yes, this leaves them vulnerable to griefing objects... their choice
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
-		// NOTE: friends are (optionally) exempt from both complexity and surface area checks but
-		//       nearby avatars are (optionally) only exempt from the complexity but not the surface area check
-		static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
-		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+		// NOTE: nearby avatars are (optionally) only exempt from the complexity but not the surface area check
+		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "AlwaysRenderNearby", false);
 // [/SL:KB]
         too_complex = (   max_render_cost > 0
 //                       && (   mVisualComplexity > max_render_cost
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
-                       && ( !always_render_friends || !isFriend() )
                        && (   ( (mVisualComplexity > max_render_cost) && (!always_render_nearby || !isNearby()) )
 // [/SL:KB]
                            || (max_attachment_area > 0.0f && mAttachmentSurfaceArea > max_attachment_area)
@@ -9611,9 +9636,21 @@ void LLVOAvatar::calcMutedAVColor()
 
     if (getVisualMuteSettings() == AV_DO_NOT_RENDER)
     {
-        // explicitly not-rendered avatars are light grey
-        new_color = LLColor4::grey3;
-        change_msg = " not rendered: color is grey3";
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
+		if (ERenderAvatarAs::SILHOUETTE == getRenderAvatarAs())
+		{
+			new_color = LLColor4::silhouette;
+			change_msg = " not rendered: color is silhouette";
+		}
+		else
+		{
+// [/SL:KB]
+			// explicitly not-rendered avatars are light grey
+			new_color = LLColor4::smoke;
+			change_msg = " not rendered: color is grey3";
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
+		}
+// [/SL:KB]
     }
     else if (LLMuteList::getInstance()->isMuted(av_id)) // the user blocked them
     {
@@ -9621,7 +9658,10 @@ void LLVOAvatar::calcMutedAVColor()
         new_color = LLColor4::grey4;
         change_msg = " blocked: color is grey4";
     }
-    else if ( mMutedAVColor == LLColor4::white || mMutedAVColor == LLColor4::grey3 || mMutedAVColor == LLColor4::grey4 )
+//    else if ( mMutedAVColor == LLColor4::white || mMutedAVColor == LLColor4::grey3 || mMutedAVColor == LLColor4::grey4 )
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
+    else if ( mMutedAVColor == LLColor4::white || mMutedAVColor == LLColor4::grey3 || mMutedAVColor == LLColor4::grey4 || mMutedAVColor == LLColor4::silhouette)
+// [/SL:KB]
     {
         // select a color based on the first byte of the agents uuid so any muted agent is always the same color
         F32 color_value = (F32) (av_id.mData[0]);

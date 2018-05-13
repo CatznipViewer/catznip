@@ -45,6 +45,9 @@
 #include "llmeshrepository.h"
 #include "llnotificationhandler.h"
 #include "llpanellogin.h"
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+#include "llpanelquickprefsappearance.h"
+// [/SL:KB]
 #include "llviewerkeyboard.h"
 #include "llviewermenu.h"
 
@@ -2389,6 +2392,10 @@ void LLViewerWindow::initWorldUI()
 
 	LLPanelStandStopFlying* panel_stand_stop_flying	= LLPanelStandStopFlying::getInstance();
 	panel_ssf_container->addChild(panel_stand_stop_flying);
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	panel_ssf_container->addChild(new LLRenderOthersAsMessagePanel());
+// [/SL:KB]
 
 	panel_ssf_container->setVisible(TRUE);
 

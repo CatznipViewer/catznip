@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ height="25"
+ layout="topleft"
+ name="panel_render_others_as_message"
+ mouse_opaque="false"
+ visible="true"
+ width="375">
+    <text
+     font="SansSerifLarge"
+     font.style="BOLD"
+	 font_shadow="hard"
+     follows="bottom|left"
+     height="19"
+     layout="topleft"
+     left="5"
+     name="render_message_text"
+	 text_color="White_50"
+     top="2"
+     value="Not everyone is (fully) rendered."
+     width="265" />
+    <button
+     follows="bottom|left"
+     height="19"
+     label="Render Everyone"
+     layout="topleft"
+     left_pad="5"
+     name="render_default_btn"
+     tool_tip="Click here to render everyone."
+     top="2"
+	 visible="true"
+     width="100" />
+</panel>

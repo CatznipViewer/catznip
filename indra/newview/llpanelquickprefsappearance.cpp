@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2016, Kitty Barnett
+ * Copyright (c) 2016-2018, Kitty Barnett
  *
  * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -34,6 +34,10 @@
 #ifdef CATZNIP
 #include "llfloaterofferinvfolderbrowse.h"
 #endif // CATZNIP
+
+// Render Others As panel
+#include "llmoveview.h"
+#include "lltoolbarview.h"
 
 // Wearing panel
 #include "llfiltereditor.h"
@@ -457,6 +461,43 @@ void LLQuickPrefsWearingPanel::onCOFChanged()
 	{
 		m_pWornItemsList->updateList(m_idCOF);
 	}
+}
+
+// ====================================================================================
+// LLRenderOthersAsMessagePanel class
+//
+
+LLRenderOthersAsMessagePanel::LLRenderOthersAsMessagePanel()
+{
+	buildFromFile("panel_render_others_as_message.xml");
+}
+
+BOOL LLRenderOthersAsMessagePanel::postBuild()
+{
+	if (LLControlVariable* pRenderOthersAs = gSavedSettings.getControl("RenderOthersAs"))
+		m_ROAConnection = pRenderOthersAs->getSignal()->connect(boost::bind(&LLRenderOthersAsMessagePanel::onValueChanged, this));
+	findChild<LLButton>("render_default_btn")->setCommitCallback(boost::bind(&LLRenderOthersAsMessagePanel::onRenderEveryone, this));
+	onValueChanged();
+	return TRUE;
+}
+
+void LLRenderOthersAsMessagePanel::setVisible(BOOL fVisible)
+{
+	LLPanel::setVisible(fVisible);
+	if (fVisible)
+	{
+		notifyParent(LLSD().with("action", "layout"));
+	}
+}
+
+void LLRenderOthersAsMessagePanel::onRenderEveryone()
+{
+	gSavedSettings.getControl("RenderOthersAs")->resetToDefault(true);
+}
+
+void LLRenderOthersAsMessagePanel::onValueChanged()
+{
+	setVisible(!gSavedSettings.getControl("RenderOthersAs")->isDefault());
 }
 
 // ====================================================================================

@@ -62,21 +62,6 @@
         <menu_item_call.on_visible
          function="Avatar.EnableAddFriend" />
     </menu_item_call>
-   <menu_item_separator />
-
-     <menu_item_call label="Reset Skeleton"
-       layout="topleft"
-       name="Reset Skeleton">
-       <menu_item_call.on_click
-        function="Avatar.ResetSkeleton" />
-     </menu_item_call>
-
-     <menu_item_call label="Reset Skeleton And Animations"
-       layout="topleft"
-       name="Reset Skeleton And Animations">
-       <menu_item_call.on_click
-        function="Avatar.ResetSkeletonAndAnimations" />
-     </menu_item_call>
 
    <menu_item_separator />
     <context_menu
@@ -214,13 +199,6 @@
          <menu_item_call.on_enable
           function="Object.EnableInspect" />
    </menu_item_call>
-   <menu_item_call
-     label="Texture Refresh"
-     layout="topleft"
-     name="Texture Refresh">
-      <menu_item_call.on_click
-       function="Object.TextureRefresh"/>
-   </menu_item_call>
 
       <menu_item_separator
        layout="topleft" name="Impostor seperator"/>
@@ -267,6 +245,41 @@
           parameter="avatar_rendering_tab" />
       </menu_item_call>
       </context_menu>
+
+    <context_menu
+     label="Fix Avatar"
+     layout="topleft"
+     name="Fix Avatar">
+        <menu_item_call
+          label="Refresh Textures"
+          layout="topleft"
+          name="Refresh Textures">
+           <menu_item_call.on_click
+            function="Avatar.RefreshTextures"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Sync Animations"
+         name="Sync Animations">
+            <menu_item_call.on_click
+             function="Avatar.RestartAnimations" />
+        </menu_item_call>
+        <menu_item_separator/>
+        <menu_item_call
+         label="Reset Skeleton"
+         layout="topleft"
+         name="Reset Skeleton">
+            <menu_item_call.on_click
+             function="Avatar.ResetSkeleton" />
+        </menu_item_call>
+        <menu_item_call
+         label="Reset Skeleton &amp; Animations"
+         layout="topleft"
+         name="Reset Skeleton And Animations">
+            <menu_item_call.on_click
+             function="Avatar.ResetSkeletonAndAnimations" />
+        </menu_item_call>
+    </context_menu>
+
   <menu_item_separator
      layout="topleft" on_visible.function="EnableMuteParticle" />
 
