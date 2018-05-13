@@ -49,6 +49,9 @@
 #include "llagentui.h"
 #include "llagentwearables.h"
 #include "llagentpilot.h"
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+#include "llanimationstates.h"
+// [/SL:KB]
 // [SL:KB] - Patch: Appearance-PhantomAttach | Checked: Catznip-5.0
 #include "llattachmentsmgr.h"
 // [/SL:KB]
@@ -138,6 +141,7 @@
 #include "llviewerparcelmgr.h"
 #include "llviewerstats.h"
 // [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "llavatarpropertiesprocessor.h"
 #include "llviewertexturelist.h"
 #include "llvovolume.h"
 // [/SL:KB]
@@ -3021,61 +3025,194 @@ void handle_object_inspect()
 	*/
 }
 
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
-void handle_texture_refresh()
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
+class LLTextureRefresh
 {
-	typedef std::pair<LLUUID, bool> texture_pair_t;
-	typedef std::list<texture_pair_t> texture_list_t;
-	texture_list_t idTextures;
-
-	LLObjectSelectionHandle pSel = LLSelectMgr::instance().getSelection();
-	for (LLObjectSelection::iterator itNode = pSel->begin(), endNode = pSel->end(); itNode != endNode; ++itNode)
+public:
+	LLTextureRefresh()
 	{
-		const LLSelectNode* pNode = *itNode;
-		const LLViewerObject* pObject = (pNode) ? pNode->getObject() : NULL;
-		if (!pObject)
-			continue;
+		// Refresh textures on all faces of all objects in the current selection
+		LLObjectSelectionHandle hSel = LLSelectMgr::instance().getSelection();
+		for (LLObjectSelection::iterator itNode = hSel->begin(), endNode = hSel->end(); itNode != endNode; ++itNode)
+		{
+			if (const LLViewerObject* pObject = (*itNode)->getObject())
+			{
+				collectFromObject(pObject);
+			}
+		}
+	}
 
+	LLTextureRefresh(const LLVOAvatar* pAvatar)
+	{
+		// Refresh the baked textures and all textures on all faces of all attachments
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_HEAD_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_UPPER_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_LOWER_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_EYES_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_SKIRT_BAKED)->getID(), false));
+		m_TextureList.push_back(std::make_pair(pAvatar->getTE(TEX_HAIR_BAKED)->getID(), false));
+
+		// Refresh all attachments
+		for (const auto& attachPtEntry : pAvatar->mAttachmentPoints)
+		{
+			for (const LLViewerObject* pAttachObj : attachPtEntry.second->mAttachedObjects)
+			{
+				collectFromObjectFamily(pAttachObj);
+			}
+		}
+
+		// Re-request all wearable params
+		LLAvatarPropertiesProcessor::getInstance()->sendAvatarTexturesRequest(pAvatar->getID());
+	}
+
+	~LLTextureRefresh()
+	{
+		for (const auto& textureEntry : m_TextureList)
+		{
+			LLViewerFetchedTexture* pTexture = gTextureList.findImage(textureEntry.first, TEX_LIST_STANDARD);
+			if ( (pTexture) && (FTT_LOCAL_FILE != pTexture->getFTType()) )
+			{
+				LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+				pTexture->clearFetcher();
+				pTexture->clearFetchedResults();
+				pTexture->setIsMissingAsset(0);
+
+				if (textureEntry.second)
+				{
+					const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
+					for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+					{
+						if (LLVOVolume* pVolume = pVolumeList->at(idxVolume))
+						{
+							pVolume->notifyMeshLoaded();
+						}
+					}
+				}
+			}
+		}
+	}
+protected:
+	void collectFromObject(const LLViewerObject* pObject)
+	{
 		for (U8 idxTE = 0, cntTE = pObject->getNumTEs(); idxTE < cntTE; idxTE++)
 		{
-			LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
-			if ((pTexture) && (idTextures.end() == std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pTexture->getID())))
-				idTextures.push_back(texture_pair_t(pTexture->getID(), false));
+			const LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
+			if ( (pTexture) && (m_TextureList.end() == std::find_if(m_TextureList.begin(), m_TextureList.end(), [pTexture](const texture_pair_t& t) { return t.first == pTexture->getID(); }) ) )
+				m_TextureList.push_back(std::make_pair(pTexture->getID(), false));
 		}
 
 		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
 		{
-			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+			const LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
 			if ( (pSculptParams) && (LL_SCULPT_TYPE_MESH != pSculptParams->getSculptType()) )
 			{
-				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
-				if (idTextures.end() == itTexture)
-					idTextures.push_back(texture_pair_t(pSculptParams->getSculptTexture(), true));
+				texture_list_t::iterator itTexture = std::find_if(m_TextureList.begin(), m_TextureList.end(), boost::bind(&texture_pair_t::first, _1) == pSculptParams->getSculptTexture());
+				if (m_TextureList.end() == itTexture)
+					m_TextureList.push_back(std::make_pair(pSculptParams->getSculptTexture(), true));
 				else
 					itTexture->second = true;
 			}
 		}
 	}
 
-	for (texture_list_t::const_iterator itTexture = idTextures.begin(); itTexture != idTextures.end(); ++itTexture)
+	void collectFromObjectFamily(const LLViewerObject* pObject)
 	{
-		LLViewerFetchedTexture* pTexture = gTextureList.findImage(itTexture->first, TEX_LIST_STANDARD);
-		if ( (pTexture) && (FTT_LOCAL_FILE != pTexture->getFTType()) )
-		{
-			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
-			pTexture->clearFetcher();
-			pTexture->clearFetchedResults();
-			pTexture->setIsMissingAsset(0);
+		for (const LLViewerObject* pChildObj : pObject->getChildren())
+			collectFromObject(pChildObj);
+		collectFromObject(pObject);
+	}
 
-			if (itTexture->second)
+	/*
+	 * Member variables
+	 */
+protected:
+	typedef std::pair<LLUUID, bool> texture_pair_t;
+	typedef std::list<texture_pair_t> texture_list_t;
+	texture_list_t m_TextureList;
+};
+
+void handle_refresh_selection_textures()
+{
+	LLTextureRefresh f;
+}
+
+void handle_refresh_avatar_textures()
+{
+	if (const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject()))
+	{
+		LLTextureRefresh f(pAvatar);
+	}
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+void handle_restart_avatar_animations()
+{
+	/*const*/ LLVOAvatar* pTargetAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (!pTargetAvatar)
+		return;
+
+	// Reset the animations of all other avatars sitting on the same object as the target avatar
+	if (pTargetAvatar->isSitting())
+	{
+		if (const LLViewerObject* pSitObj = dynamic_cast<LLViewerObject*>(pTargetAvatar->getRoot()))
+		{
+			for (/*const*/ LLViewerObject* pChildObj : pSitObj->getChildren())
 			{
-				const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
-				for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+				if (LLVOAvatar* pChildAvatar = pChildObj->asAvatar())
 				{
-					LLVOVolume* pVolume = pVolumeList->at(idxVolume);
-					if (pVolume)
-						pVolume->notifyMeshLoaded();
+					for (const auto& animEntry : pChildAvatar->mPlayingAnimations)
+					{
+						const LLUUID& idAnim = animEntry.first;
+						if (!gAnimLibrary.animStateToString(idAnim))
+						{
+							pChildAvatar->stopMotion(idAnim, true);
+							pChildAvatar->startMotion(idAnim);
+						}
+					}
 				}
+			}
+		}
+	}
+
+	// Create a set of playing animation UUIDs to make lookups a bit faster
+	std::set<LLUUID> animList;
+	for (const auto& animEntry : pTargetAvatar->mPlayingAnimations)
+	{
+		if (!gAnimLibrary.animStateToString(animEntry.first))
+			animList.insert(animEntry.first);
+	}
+
+	// Reset the animations of all other (non-sitting) avatars that are playing the same animations
+	for (LLCharacter* pCharacter : LLCharacter::sInstances)
+	{
+		if (LLVOAvatar* pAvatar = dynamic_cast<LLVOAvatar*>(pCharacter))
+		{
+			for (const auto& animEntry : pAvatar->mPlayingAnimations)
+			{
+				const LLUUID& idAnim = animEntry.first;
+				if (animList.end() != animList.find(idAnim))
+				{
+					pAvatar->stopMotion(idAnim, true);
+					pAvatar->startMotion(idAnim);
+				}
+			}
+		}
+	}
+}
+
+void handle_restart_all_animations()
+{
+	// Reset the animations of all other avatars
+	for (LLCharacter* pCharacter : LLCharacter::sInstances)
+	{
+		if (LLVOAvatar* pAvatar = dynamic_cast<LLVOAvatar*>(pCharacter))
+		{
+			for (const auto& animEntry : pAvatar->mPlayingAnimations)
+			{
+				const LLUUID& idAnim = animEntry.first;
+				pAvatar->stopMotion(idAnim, true);
+				pAvatar->startMotion(idAnim);
 			}
 		}
 	}
@@ -10247,8 +10384,13 @@ void initialize_menus()
 	commit.add("Object.Derender", boost::bind(&handle_object_derender, _2));
 	enable.add("Object.EnableDerender", boost::bind(&enable_object_derender));
 // [/SL:KB]
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
-	commit.add("Object.TextureRefresh", boost::bind(&handle_texture_refresh));
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
+	commit.add("Avatar.RefreshTextures", boost::bind(&handle_refresh_avatar_textures));
+	commit.add("Object.RefreshTextures", boost::bind(&handle_refresh_selection_textures));
+// [/SL:KB]
+// [SL:KB] - Patch: UI-RestartAnimations | Checked: Catznip-5.3
+	commit.add("Avatar.RestartAnimations", boost::bind(&handle_restart_avatar_animations));
+	commit.add("Advanced.RestartAllAnimations", boost::bind(&handle_restart_all_animations));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");

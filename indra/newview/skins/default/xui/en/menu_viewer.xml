@@ -2522,6 +2522,12 @@
              parameter="all" />
         </menu_item_call>
         <menu_item_call
+         label="Sync Animations"
+         name="Sync Animations">
+            <menu_item_call.on_click
+             function="Advanced.RestartAllAnimations" />
+        </menu_item_call>
+        <menu_item_call
          label="Show Web Browser"
          name="Web Browser"
          shortcut="control|shift|Z">
