@@ -3445,8 +3445,8 @@ bool LLVOAvatar::isFriend() const
 LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
 {
 	static LLCachedControl<S32> render_others_as(gSavedSettings, "RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
-	static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
-	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "AlwaysRenderFriends", true);
+	static LLCachedControl<bool> always_render_nearby(gSavedSettings, "AlwaysRenderNearby", false);
 
 	const F64 now = LLFrameTimer::getTotalSeconds();
 	if (now < mCachedRenderAvatarAsUpdateTime)
@@ -7287,9 +7287,13 @@ BOOL LLVOAvatar::isFullyLoaded() const
 bool LLVOAvatar::isTooComplex() const
 {
 	bool too_complex;
-	bool render_friend =  (LLAvatarTracker::instance().isBuddy(getID()) && gSavedSettings.getBOOL("AlwaysRenderFriends"));
+//	bool render_friend =  (LLAvatarTracker::instance().isBuddy(getID()) && gSavedSettings.getBOOL("AlwaysRenderFriends"));
 
-	if (isSelf() || render_friend || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+//	if (isSelf() || render_friend || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	static LLCachedControl<bool> always_render_friends(gSavedSettings, "AlwaysRenderFriends", true);
+	if (isSelf() || ((always_render_friends) && (isFriend())) || mVisuallyMuteSetting == AV_ALWAYS_RENDER)
+// [/SL:KB]
 	{
 		too_complex = false;
 	}
@@ -7302,15 +7306,12 @@ bool LLVOAvatar::isTooComplex() const
         // so that unlimited will completely disable the overly complex impostor rendering
         // yes, this leaves them vulnerable to griefing objects... their choice
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
-		// NOTE: friends are (optionally) exempt from both complexity and surface area checks but
-		//       nearby avatars are (optionally) only exempt from the complexity but not the surface area check
-		static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
-		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+		// NOTE: nearby avatars are (optionally) only exempt from the complexity but not the surface area check
+		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "AlwaysRenderNearby", false);
 // [/SL:KB]
         too_complex = (   max_render_cost > 0
 //                       && (   mVisualComplexity > max_render_cost
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
-                       && ( !always_render_friends || !isFriend() )
                        && (   ( (mVisualComplexity > max_render_cost) && (!always_render_nearby || !isNearby()) )
 // [/SL:KB]
                            || (max_attachment_area > 0.0f && mAttachmentSurfaceArea > max_attachment_area)

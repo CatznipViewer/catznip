@@ -207,7 +207,7 @@
 		Exceptions:
 	</text>
 	<check_box
-	 control_name="RenderFriendsFull"
+	 control_name="AlwaysRenderFriends"
 	 height="16"
 	 label="Friends"
 	 layout="topleft"
@@ -229,7 +229,7 @@
 		 parameter="avatar_rendering_tab" />
 	</button>
 	<check_box
-	 control_name="RenderNearbyFull"
+	 control_name="AlwaysRenderNearby"
 	 height="16"
 	 label="Nearby avatars (20m)"
 	 layout="topleft"
