@@ -154,6 +154,9 @@ class LLColor4
 		static LLColor4 grey2;
 		static LLColor4 grey3;
 		static LLColor4 grey4;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
+		static LLColor4 silhouette;
+// [/SL:KB]
 
 		static LLColor4 red1;
 		static LLColor4 red2;
