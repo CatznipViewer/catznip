@@ -178,18 +178,22 @@
 		<combo_box.item
 		 label="Only myself"
 		 name="appearance_renderas_type_item0"
-		 value="3" />
+		 value="4" />
 		<combo_box.item
 		 label="Myself and exceptions"
 		 name="appearance_renderas_type_item1"
+		 value="3" />
+		<combo_box.item
+		 label="Everyone as silhouettes"
+		 name="appearance_renderas_type_item2"
 		 value="2" />
 		<combo_box.item
 		 label="Everyone as imposters"
-		 name="appearance_renderas_type_item2"
+		 name="appearance_renderas_type_item3"
 		 value="1" />
 		<combo_box.item
 		 label="Everyone normally"
-		 name="appearance_renderas_type_item3"
+		 name="appearance_renderas_type_item4"
 		 value="0" />
 	</combo_box>
 	<text

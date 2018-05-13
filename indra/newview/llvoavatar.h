@@ -401,16 +401,19 @@ public:
 	bool 		isNearby() const;
 	bool 		isFriend() const;
 
+	// NOTE: the ordering of these actually matters - see getVisualMuteSettings() below
 	enum class ERenderAvatarAs
 	{
-		NORMAL,
-		IMPOSTER,
-		INVISIBLE
+		INVISIBLE = 0,		// Not rendered at all
+		SILHOUETTE,			// Rendered as if muted (slow updating imposter with no texture downloads)
+		IMPOSTER,			// Rendered as a imposter (faster updating with texture downloads and residency)
+		NORMAL				// Normal rendering
 	};
 	enum class ERenderOthersAs
 	{
-		EVERYONE_NORMALLY = 0,
-		EVERYONE_AS_IMPOSTERS,
+		NORMALLY = 0,
+		IMPOSTERS,
+		SILHOUETTES,
 		ONLY_EXCEPTIONS,
 		INVISIBLE
 	};
@@ -427,7 +430,7 @@ public:
 	};
 	void		setVisualMuteSettings(VisualMuteSettings set);
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
-	VisualMuteSettings  getVisualMuteSettings() const				{ return (ERenderAvatarAs::NORMAL == getRenderAvatarAs()) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
+	VisualMuteSettings  getVisualMuteSettings() const				{ return (getRenderAvatarAs() >= ERenderAvatarAs::IMPOSTER) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
 // [/SL:KB]
 //	VisualMuteSettings  getVisualMuteSettings()						{ return mVisuallyMuteSetting;	};
 
@@ -465,6 +468,8 @@ public:
 	mutable F64  mCachedNearbyUpdateTime = 0.f;
 	mutable bool mCachedIsFriend = false;
 	mutable F64  mCachedIsFriendUpdateTime = 0.f;
+	mutable ERenderAvatarAs mCachedRenderAvatarAs = ERenderAvatarAs::NORMAL;
+	mutable F64  mCachedRenderAvatarAsUpdateTime = 0.f;
 // [/SL:KB]
 
 	VisualMuteSettings		mVisuallyMuteSetting;			// Always or never visually mute this AV
@@ -518,7 +523,10 @@ public:
 	static void	resetImpostors();
 	static void updateImpostors();
 	LLRenderTarget mImpostor;
-	BOOL		mNeedsImpostorUpdate;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	mutable BOOL mNeedsImpostorUpdate;
+// [/SL:KB]
+//	BOOL		mNeedsImpostorUpdate;
 private:
 	LLVector3	mImpostorOffset;
 	LLVector2	mImpostorDim;
