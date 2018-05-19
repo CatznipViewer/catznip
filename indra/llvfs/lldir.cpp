@@ -613,7 +613,7 @@ std::string LLDir::getExpandedFilename(ELLPath location, const std::string& subd
 				<< "': prefix is empty, possible bad filename" << LL_ENDL;
 	}
 
-	std::string expanded_filename = add(add(prefix, subdir1), subdir2);
+	std::string expanded_filename = add(prefix, subdir1, subdir2);
 	if (expanded_filename.empty() && in_filename.empty())
 	{
 		return "";
@@ -709,7 +709,7 @@ void LLDir::walkSearchSkinDirs(const std::string& subdir,
 		std::string subdir_path(add(skindir, subdir));
 		BOOST_FOREACH(std::string subsubdir, subsubdirs)
 		{
-			std::string full_path(add(add(subdir_path, subsubdir), filename));
+			std::string full_path(add(subdir_path, subsubdir, filename));
 			if (fileExists(full_path))
 			{
 				function(subsubdir, full_path);
@@ -1097,13 +1097,6 @@ void LLDir::dumpCurrentDirectories()
 // [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.5)
 	LL_DEBUGS("AppInit","Directories") << "  SkinThemeDir:          " << getSkinThemeDir() << LL_ENDL;
 // [/SL:KB]
-}
-
-std::string LLDir::add(const std::string& path, const std::string& name) const
-{
-	std::string destpath(path);
-	append(destpath, name);
-	return destpath;
 }
 
 void LLDir::append(std::string& destpath, const std::string& name) const

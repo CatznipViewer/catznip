@@ -435,18 +435,22 @@ void LLFastTimerView::onClose(bool app_quitting)
 
 void saveChart(const std::string& label, const char* suffix, LLImageRaw* scratch)
 {
-	//read result back into raw image
-	glReadPixels(0, 0, 1024, 512, GL_RGB, GL_UNSIGNED_BYTE, scratch->getData());
+	// disable use of glReadPixels which messes up nVidia nSight graphics debugging
+	if (!LLRender::sNsightDebugSupport)
+	{
+		//read result back into raw image
+		glReadPixels(0, 0, 1024, 512, GL_RGB, GL_UNSIGNED_BYTE, scratch->getData());
 
-	//write results to disk
-	LLPointer<LLImagePNG> result = new LLImagePNG();
-	result->encode(scratch, 0.f);
+		//write results to disk
+		LLPointer<LLImagePNG> result = new LLImagePNG();
+		result->encode(scratch, 0.f);
 
-	std::string ext = result->getExtension();
-	std::string filename = llformat("%s_%s.%s", label.c_str(), suffix, ext.c_str());
+		std::string ext = result->getExtension();
+		std::string filename = llformat("%s_%s.%s", label.c_str(), suffix, ext.c_str());
 	
-	std::string out_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
-	result->save(out_file);
+		std::string out_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
+		result->save(out_file);
+	}
 }
 
 //static
@@ -796,13 +800,13 @@ LLSD LLFastTimerView::analyzePerformanceLogDefault(std::istream& is)
 	for(stats_map_t::iterator it = time_stats.begin(); it != time_stats.end(); ++it)
 	{
 		std::string label = it->first;
-		ret[label]["TotalTime"] = time_stats[label].mSum;
+		ret[label]["TotalTime"] = time_stats[label].getSum();
 		ret[label]["MeanTime"] = time_stats[label].getMean();
 		ret[label]["MaxTime"] = time_stats[label].getMaxValue();
 		ret[label]["MinTime"] = time_stats[label].getMinValue();
 		ret[label]["StdDevTime"] = time_stats[label].getStdDev();
 		
-		ret[label]["Samples"] = sample_stats[label].mSum;
+        ret[label]["Samples"] = sample_stats[label].getSum();
 		ret[label]["MaxSamples"] = sample_stats[label].getMaxValue();
 		ret[label]["MinSamples"] = sample_stats[label].getMinValue();
 		ret[label]["StdDevSamples"] = sample_stats[label].getStdDev();
@@ -904,8 +908,7 @@ void LLFastTimerView::doAnalysisDefault(std::string baseline, std::string target
 			base[label]["Samples"].asInteger());			
 	}
 
-	// This currently crashes, possibly due to a race condition in shutdown:
-	// exportCharts(baseline, target);
+	exportCharts(baseline, target);
 
 	os.flush();
 	os.close();

@@ -313,6 +313,13 @@ void set_flags_and_update_appearance()
 // true when all initialization done.
 bool idle_startup()
 {
+	if (gViewerWindow == NULL)
+	{
+		// We expect window to be initialized
+		LL_WARNS_ONCE() << "gViewerWindow is not initialized" << LL_ENDL;
+		return false; // No world yet
+	}
+
 	const F32 PRECACHING_DELAY = gSavedSettings.getF32("PrecachingDelay");
 	static LLTimer timeout;
 
@@ -718,7 +725,6 @@ bool idle_startup()
 		set_startup_status(0.03f, msg.c_str(), gAgent.mMOTD.c_str());
 		display_startup();
 		// LLViewerMedia::initBrowser();
-		show_release_notes_if_required();
 		LLStartUp::setStartupState( STATE_LOGIN_SHOW );
 		return FALSE;
 	}
@@ -749,6 +755,7 @@ bool idle_startup()
 			initialize_spellcheck_menu();
 			init_menus();
 		}
+		show_release_notes_if_required();
 
 		if (show_connect_box)
 		{
@@ -766,7 +773,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
@@ -965,9 +972,6 @@ bool idle_startup()
 		// Load Avatars icons cache
 		LLAvatarIconIDCache::getInstance()->load();
 		
-		// Load media plugin cookies
-		LLViewerMedia::loadCookieFile();
-
 		LLRenderMuteList::getInstance()->loadFromFile();
 
 		//-------------------------------------------------
@@ -1030,7 +1034,6 @@ bool idle_startup()
 		login->setSerialNumber(LLAppViewer::instance()->getSerialNumber());
 		login->setLastExecEvent(gLastExecEvent);
 		login->setLastExecDuration(gLastExecDuration);
-		login->setUpdaterLauncher(boost::bind(&LLAppViewer::launchUpdater, LLAppViewer::instance()));
 
 		// This call to LLLoginInstance::connect() starts the 
 		// authentication process.
@@ -1155,7 +1158,7 @@ bool idle_startup()
 
 						}
 					}
-					else 
+					else if (!message.empty())
 					{
 						// This wasn't a certificate error, so throw up the normal
 						// notificatioin message.
@@ -2767,6 +2770,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
