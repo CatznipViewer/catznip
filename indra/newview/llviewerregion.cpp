@@ -290,6 +290,13 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
             continue;
         }
 
+        if (!result.isMap() || result.has("error"))
+        {
+            LL_WARNS("AppInit", "Capabilities") << "Malformed response" << LL_ENDL;
+            // setup for retry.
+            continue;
+        }
+
         LLSD httpResults = result["http_result"];
         LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
         if (!status)
@@ -2868,6 +2875,7 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("ParcelVoiceInfoRequest");
 	capabilityNames.append("ProductInfoRequest");
 	capabilityNames.append("ProvisionVoiceAccountRequest");
+	//capabilityNames.append("ReadOfflineMsgs");
 	capabilityNames.append("RemoteParcelRequest");
 	capabilityNames.append("RenderMaterials");
 	capabilityNames.append("RequestTextureDownload");
@@ -2896,6 +2904,7 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("UpdateScriptAgent");
 	capabilityNames.append("UpdateScriptTask");
 	capabilityNames.append("UploadBakedTexture");
+    capabilityNames.append("UserInfo");
 	capabilityNames.append("ViewerAsset"); 
 	capabilityNames.append("ViewerMetrics");
 	capabilityNames.append("ViewerStartAuction");
@@ -2965,6 +2974,17 @@ void LLViewerRegion::setCapability(const std::string& name, const std::string& u
 		mImpl->mCapabilities[name] = url;
 		if(name == "ViewerAsset")
 		{
+			/*==============================================================*/
+			// The following inserted lines are a hack for testing MAINT-7081,
+			// which is why the indentation and formatting are left ugly.
+			const char* VIEWERASSET = getenv("VIEWERASSET");
+			if (VIEWERASSET)
+			{
+				mImpl->mCapabilities[name] = VIEWERASSET;
+				mViewerAssetUrl = VIEWERASSET;
+			}
+			else
+			/*==============================================================*/
 			mViewerAssetUrl = url;
 		}
 	}
@@ -2978,6 +2998,17 @@ void LLViewerRegion::setCapabilityDebug(const std::string& name, const std::stri
 		mImpl->mSecondCapabilitiesTracker[name] = url;
 		if(name == "ViewerAsset")
 		{
+			/*==============================================================*/
+			// The following inserted lines are a hack for testing MAINT-7081,
+			// which is why the indentation and formatting are left ugly.
+			const char* VIEWERASSET = getenv("VIEWERASSET");
+			if (VIEWERASSET)
+			{
+				mImpl->mSecondCapabilitiesTracker[name] = VIEWERASSET;
+				mViewerAssetUrl = VIEWERASSET;
+			}
+			else
+			/*==============================================================*/
 			mViewerAssetUrl = url;
 		}
 	}

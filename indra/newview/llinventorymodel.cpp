@@ -342,6 +342,27 @@ LLViewerInventoryCategory* LLInventoryModel::getCategory(const LLUUID& id) const
 	return category;
 }
 
+bool LLInventoryModel::isCategoryHidden(const LLUUID& id) const
+{
+	bool res = false;
+	const LLViewerInventoryCategory* category = getCategory(id);
+	if (category)
+	{
+		LLFolderType::EType cat_type = category->getPreferredType();
+		switch (cat_type)
+		{
+			case LLFolderType::FT_INBOX:
+			case LLFolderType::FT_OUTBOX:
+			case LLFolderType::FT_MARKETPLACE_LISTINGS:
+				res = true;
+				break;
+			default:
+				break;
+		}
+	}
+	return res;
+}
+
 S32 LLInventoryModel::getItemCount() const
 {
 	return mItemMap.size();
@@ -614,6 +635,11 @@ LLUUID LLInventoryModel::createNewCategory(const LLUUID& parent_id,
         LLCoros::instance().launch("LLInventoryModel::createNewCategoryCoro",
             boost::bind(&LLInventoryModel::createNewCategoryCoro, this, url, body, callback));
 
+		return LLUUID::null;
+	}
+
+	if (!gMessageSystem)
+	{
 		return LLUUID::null;
 	}
 
@@ -2058,11 +2084,6 @@ bool LLInventoryModel::loadSkeleton(
 					// correct contents the next time the viewer opens the folder.
 					tcat->setVersion(NO_VERSION);
 				}
-                else if (tcat->getPreferredType() == LLFolderType::FT_MARKETPLACE_STOCK)
-                {
-                    // Do not trust stock folders being updated
-                    tcat->setVersion(NO_VERSION);
-                }
 				else
 				{
 					cached_ids.insert(tcat->getUUID());
