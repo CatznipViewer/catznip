@@ -89,7 +89,7 @@ const F32 SKEW_MAX	=  0.95f;
 const F32 SCULPT_MIN_AREA = 0.002f;
 const S32 SCULPT_MIN_AREA_DETAIL = 1;
 
-extern BOOL gDebugGL;
+BOOL gDebugGL = FALSE;
 
 BOOL check_same_clock_dir( const LLVector3& pt1, const LLVector3& pt2, const LLVector3& pt3, const LLVector3& norm)
 {    
@@ -2032,13 +2032,8 @@ void LLPathParams::copyParams(const LLPathParams &params)
 	setSkew(params.getSkew());
 }
 
-S32 profile_delete_lock = 1 ; 
 LLProfile::~LLProfile()
 {
-	if(profile_delete_lock)
-	{
-		LL_ERRS() << "LLProfile should not be deleted here!" << LL_ENDL ;
-	}
 }
 
 
@@ -2103,9 +2098,7 @@ LLVolume::~LLVolume()
 	sNumMeshPoints -= mMesh.size();
 	delete mPathp;
 
-	profile_delete_lock = 0 ;
 	delete mProfilep;
-	profile_delete_lock = 1 ;
 
 	mPathp = NULL;
 	mProfilep = NULL;
@@ -2374,9 +2367,10 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 	//input stream is now pointing at a zlib compressed block of LLSD
 	//decompress block
 	LLSD mdl;
-	if (!unzip_llsd(mdl, is, size))
+	U32 uzip_result = LLUZipHelper::unzip_llsd(mdl, is, size);
+	if (uzip_result != LLUZipHelper::ZR_OK)
 	{
-		LL_DEBUGS("MeshStreaming") << "Failed to unzip LLSD blob for LoD, will probably fetch from sim again." << LL_ENDL;
+		LL_DEBUGS("MeshStreaming") << "Failed to unzip LLSD blob for LoD with code " << uzip_result << " , will probably fetch from sim again." << LL_ENDL;
 		return false;
 	}
 	
@@ -2683,10 +2677,16 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 			}
 		}
 	}
+
+	if (!cacheOptimize())
+	{
+		// Out of memory?
+		LL_WARNS() << "Failed to optimize!" << LL_ENDL;
+		mVolumeFaces.clear();
+		return false;
+	}
 	
 	mSculptLevel = 0;  // success!
-
-	cacheOptimize();
 
 	return true;
 }
@@ -2719,12 +2719,16 @@ void LLVolume::copyVolumeFaces(const LLVolume* volume)
 	mSculptLevel = 0;
 }
 
-void LLVolume::cacheOptimize()
+bool LLVolume::cacheOptimize()
 {
 	for (S32 i = 0; i < mVolumeFaces.size(); ++i)
 	{
-		mVolumeFaces[i].cacheOptimize();
+		if (!mVolumeFaces[i].cacheOptimize())
+		{
+			return false;
+		}
 	}
+	return true;
 }
 
 
@@ -2917,15 +2921,41 @@ F32 LLVolume::sculptGetSurfaceArea()
 	return area;
 }
 
-// create placeholder shape
-void LLVolume::sculptGeneratePlaceholder()
+// create empty placeholder shape
+void LLVolume::sculptGenerateEmptyPlaceholder()
 {
 	S32 sizeS = mPathp->mPath.size();
 	S32 sizeT = mProfilep->mProfile.size();
-	
+
 	S32 line = 0;
 
-	// for now, this is a sphere.
+	for (S32 s = 0; s < sizeS; s++)
+	{
+		for (S32 t = 0; t < sizeT; t++)
+		{
+			S32 i = t + line;
+			LLVector4a& pt = mMesh[i];
+					
+			F32* p = pt.getF32ptr();
+
+			p[0] = 0;
+			p[1] = 0;
+			p[2] = 0;
+
+			llassert(pt.isFinite3());
+		}
+		line += sizeT;
+	}
+}
+
+// create sphere placeholder shape
+void LLVolume::sculptGenerateSpherePlaceholder()
+{
+	S32 sizeS = mPathp->mPath.size();
+	S32 sizeT = mProfilep->mProfile.size();
+
+	S32 line = 0;
+
 	for (S32 s = 0; s < sizeS; s++)
 	{
 		for (S32 t = 0; t < sizeT; t++)
@@ -2933,12 +2963,12 @@ void LLVolume::sculptGeneratePlaceholder()
 			S32 i = t + line;
 			LLVector4a& pt = mMesh[i];
 
-			
-			F32 u = (F32)s/(sizeS-1);
-			F32 v = (F32)t/(sizeT-1);
+
+			F32 u = (F32)s / (sizeS - 1);
+			F32 v = (F32)t / (sizeT - 1);
 
 			const F32 RADIUS = (F32) 0.3;
-					
+
 			F32* p = pt.getF32ptr();
 
 			p[0] = (F32)(sin(F_PI * v) * cos(2.0 * F_PI * u) * RADIUS);
@@ -2946,7 +2976,6 @@ void LLVolume::sculptGeneratePlaceholder()
 			p[2] = (F32)(cos(F_PI * v) * RADIUS);
 
 			llassert(pt.isFinite3());
-
 		}
 		line += sizeT;
 	}
@@ -3109,9 +3138,9 @@ void sculpt_calc_mesh_resolution(U16 width, U16 height, U8 type, F32 detail, S32
 }
 
 // sculpt replaces generate() for sculpted surfaces
-void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level)
+void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level, bool visible_placeholder)
 {
-    U8 sculpt_type = mParams.getSculptType();
+	U8 sculpt_type = mParams.getSculptType();
 
 	BOOL data_is_empty = FALSE;
 
@@ -3159,13 +3188,22 @@ void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components,
 			if (area < SCULPT_MIN_AREA || area > SCULPT_MAX_AREA)
 			{
 				data_is_empty = TRUE;
+				visible_placeholder = true;
 			}
 		}
 	}
 
 	if (data_is_empty)
 	{
-		sculptGeneratePlaceholder();
+		if (visible_placeholder)
+		{
+			// Object should be visible since there will be nothing else to display
+			sculptGenerateSpherePlaceholder();
+		}
+		else
+		{
+			sculptGenerateEmptyPlaceholder();
+		}
 	}
 
 
@@ -5180,7 +5218,7 @@ public:
 };
 
 
-void LLVolumeFace::cacheOptimize()
+bool LLVolumeFace::cacheOptimize()
 { //optimize for vertex cache according to Forsyth method: 
   // http://home.comcast.net/~tom_forsyth/papers/fast_vert_cache_opt.html
 	
@@ -5191,7 +5229,7 @@ void LLVolumeFace::cacheOptimize()
 	
 	if (mNumVertices < 3)
 	{ //nothing to do
-		return;
+		return true;
 	}
 
 	//mapping of vertices to triangles and indices
@@ -5200,8 +5238,16 @@ void LLVolumeFace::cacheOptimize()
 	//mapping of triangles do vertices
 	std::vector<LLVCacheTriangleData> triangle_data;
 
-	triangle_data.resize(mNumIndices/3);
-	vertex_data.resize(mNumVertices);
+	try
+	{
+		triangle_data.resize(mNumIndices / 3);
+		vertex_data.resize(mNumVertices);
+	}
+	catch (std::bad_alloc)
+	{
+		LL_WARNS("LLVOLUME") << "Resize failed" << LL_ENDL;
+		return false;
+	}
 
 	for (U32 i = 0; i < mNumIndices; i++)
 	{ //populate vertex data and triangle data arrays
@@ -5313,7 +5359,8 @@ void LLVolumeFace::cacheOptimize()
 	LLVector4a* pos = (LLVector4a*) ll_aligned_malloc<64>(sizeof(LLVector4a)*2*num_verts+size);
 	if (pos == NULL)
 	{
-		LL_ERRS("LLVOLUME") << "Allocation of positions vector[" << sizeof(LLVector4a) * 2 * num_verts + size  << "] failed. " << LL_ENDL;
+		LL_WARNS("LLVOLUME") << "Allocation of positions vector[" << sizeof(LLVector4a) * 2 * num_verts + size  << "] failed. " << LL_ENDL;
+		return false;
 	}
 	LLVector4a* norm = pos + num_verts;
 	LLVector2* tc = (LLVector2*) (norm + num_verts);
@@ -5324,7 +5371,9 @@ void LLVolumeFace::cacheOptimize()
 		wght = (LLVector4a*)ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
 		if (wght == NULL)
 		{
-			LL_ERRS("LLVOLUME") << "Allocation of weights[" << sizeof(LLVector4a) * num_verts << "] failed" << LL_ENDL;
+			ll_aligned_free<64>(pos);
+			LL_WARNS("LLVOLUME") << "Allocation of weights[" << sizeof(LLVector4a) * num_verts << "] failed" << LL_ENDL;
+			return false;
 		}
 	}
 
@@ -5334,13 +5383,28 @@ void LLVolumeFace::cacheOptimize()
 		binorm = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
 		if (binorm == NULL)
 		{
-			LL_ERRS("LLVOLUME") << "Allocation of binormals[" << sizeof(LLVector4a)*num_verts << "] failed" << LL_ENDL;
+			ll_aligned_free<64>(pos);
+			ll_aligned_free_16(wght);
+			LL_WARNS("LLVOLUME") << "Allocation of binormals[" << sizeof(LLVector4a)*num_verts << "] failed" << LL_ENDL;
+			return false;
 		}
 	}
 
 	//allocate mapping of old indices to new indices
 	std::vector<S32> new_idx;
-	new_idx.resize(mNumVertices, -1);
+
+	try
+	{
+		new_idx.resize(mNumVertices, -1);
+	}
+	catch (std::bad_alloc)
+	{
+		ll_aligned_free<64>(pos);
+		ll_aligned_free_16(wght);
+		ll_aligned_free_16(binorm);
+		LL_WARNS("LLVOLUME") << "Resize failed: " << mNumVertices << LL_ENDL;
+		return false;
+	}
 
 	S32 cur_idx = 0;
 	for (U32 i = 0; i < mNumIndices; ++i)
@@ -5386,6 +5450,7 @@ void LLVolumeFace::cacheOptimize()
 	//std::string result = llformat("ACMR pre/post: %.3f/%.3f  --  %d triangles %d breaks", pre_acmr, post_acmr, mNumIndices/3, breaks);
 	//LL_INFOS() << result << LL_ENDL;
 
+	return true;
 }
 
 void LLVolumeFace::createOctree(F32 scaler, const LLVector4a& center, const LLVector4a& size)
