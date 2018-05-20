@@ -3079,8 +3079,8 @@ public:
 
 				if (textureEntry.second)
 				{
-					const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
-					for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+					const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList(LLRender::SCULPT_TEX);
+					for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(LLRender::SCULPT_TEX); ++idxVolume)
 					{
 						if (LLVOVolume* pVolume = pVolumeList->at(idxVolume))
 						{

@@ -240,9 +240,6 @@
 #include "lldrawpoolbump.h"
 #include "llvieweraudio.h"
 #include "llimview.h"
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
-#include "llimstorage.h"
-// [/SL:KB]
 #include "llviewerthrottle.h"
 #include "llparcel.h"
 #include "llavatariconctrl.h"
@@ -589,10 +586,6 @@ bool	create_text_segment_icon_from_url_match(LLUrlMatch* match,LLTextBase* base)
 	
 	return true;
 }
-
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
-		LLPersistentUnreadIMStorage::instance().loadUnreadIMs();
-// [/SL:KB]
 
 // Use these strictly for things that are constructed at startup,
 // or for things that are performance critical.  JC
