@@ -163,6 +163,8 @@ public:
 //	BOOL saveLocal();
 	static void setAgentEmail(const std::string& email);
 
+	BOOL isWaitingState();
+
 	class Impl;
 	friend class Impl;
 };
