@@ -44,6 +44,9 @@
 #include "llnotificationsutil.h"
 #include "llnotificationmanager.h"
 #include "llpanelgroup.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+// [/SL:KB]
 #include "llregionhandle.h"
 #include "llsdserialize.h"
 #include "llslurl.h"
@@ -56,6 +59,12 @@
 #include "llviewerwindow.h"
 #include "llviewerregion.h"
 #include "llvoavatarself.h"
+// [RLVa:KB] - Checked: 2010-03-09 (RLVa-1.2.0a)
+#include "rlvactions.h"
+#include "rlvhelper.h"
+#include "rlvhandler.h"
+#include "rlvui.h"
+// [/RLVa:KB]
 
 #include <boost/regex.hpp>
 #include "boost/lexical_cast.hpp"
@@ -552,7 +561,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
             else if (offline == IM_ONLINE
                 && is_do_not_disturb
                 && from_id.notNull() //not a system message
-                && to_id.notNull())//not global message
+                && to_id.notNull() //not global message
                 && RlvActions::canReceiveIM(from_id))
 // [/RLVa:KB]
             {
@@ -693,7 +702,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 //                    data,
 //                    offline,
 //                    timestamp);
-            gIMMgr->processIMTypingStart(im_info);
+//            gIMMgr->processIMTypingStart(im_info);
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
             gIMMgr->processIMTyping(session_id, true);
 // [/SL:KB]
@@ -1062,8 +1071,8 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 //            {
 //                inventory_offer_handler(info);
 //            }
-//        }
-//        break;
+        }
+        break;
 
         case IM_INVENTORY_ACCEPTED:
         {
@@ -1451,7 +1460,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
                     {
                         RlvUtil::sendBusyMessage(from_id, RlvStrings::getString(RLV_STRING_BLOCKED_TPLUREREQ_REMOTE));
                         if (is_do_not_disturb)
-                            send_do_not_disturb_message(msg, from_id);
+                            send_do_not_disturb_message(gMessageSystem, from_id);
                         return;
                     }
 
@@ -1519,7 +1528,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
                         if (IM_LURE_USER == dialog)
                             gRlvHandler.setCanCancelTp(false);
                         if (is_do_not_disturb)
-                            send_do_not_disturb_message(msg, from_id);
+                            send_do_not_disturb_message(gMessageSystem, from_id);
                         LLNotifications::instance().forceResponse(LLNotification::Params(params.name).payload(payload), 0);
                     }
                     else
