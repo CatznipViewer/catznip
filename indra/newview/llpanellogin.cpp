@@ -289,6 +289,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onSelectUser, this));
 	username_combo->getListCtrl()->setCommitOnSelectionChange(true);
 	username_combo->getListCtrl()->setUserRemoveCallback(boost::bind(&LLPanelLogin::onRemoveUser, this, _1));
+	username_combo->setReturnCallback(boost::bind(&LLPanelLogin::onClickConnect, this));
 // [/SL:KB]
 //	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::addFavoritesToStartLocation, this));
 //	// STEAM-14: When user presses Enter with this field in focus, initiate login
