@@ -263,6 +263,9 @@ private:
 	S32 mInputEditorPad;
 	S32 mChatLayoutPanelHeight;
 	S32 mFloaterHeight;
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: Catznip-5.3
+	S32 mMinFloaterHeight = 0;
+// [/SL:KB]
 };
 
 

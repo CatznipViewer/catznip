@@ -349,16 +349,16 @@ void LLFloaterIMNearbyChat::onTearOffClicked()
 
 
 // virtual
-void LLFloaterIMNearbyChat::onOpen(const LLSD& key)
-{
-	LLFloaterIMSessionTab::onOpen(key);
-	if(!isMessagePaneExpanded())
-	{
-		restoreFloater();
-		onCollapseToLine(this);
-	}
+//void LLFloaterIMNearbyChat::onOpen(const LLSD& key)
+//{
+//	LLFloaterIMSessionTab::onOpen(key);
+//	if(!isMessagePaneExpanded())
+//	{
+//		restoreFloater();
+//		onCollapseToLine(this);
+//	}
 //	showTranslationCheckbox(LLTranslate::isTranslationConfigured());
-}
+//}
 
 // virtual
 void LLFloaterIMNearbyChat::onClose(bool app_quitting)
