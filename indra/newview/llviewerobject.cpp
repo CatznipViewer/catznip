@@ -270,7 +270,9 @@ LLViewerObject::LLViewerObject(const LLUUID &id, const LLPCode pcode, LLViewerRe
 	mPhysicsShapeUnknown(true),
 	mAttachmentItemID(LLUUID::null),
 	mLastUpdateType(OUT_UNKNOWN),
-	mLastUpdateCached(FALSE)
+	mLastUpdateCached(FALSE),
+	mCachedMuteListUpdateTime(0),
+	mCachedOwnerInMuteList(false)
 {
 	if (!is_global)
 	{
@@ -4374,10 +4376,10 @@ void LLViewerObject::setTE(const U8 te, const LLTextureEntry &texture_entry)
 	if (getTE(te)->getMaterialParams().notNull())
 	{
 		const LLUUID& norm_id = getTE(te)->getMaterialParams()->getNormalID();
-		mTENormalMaps[te] = LLViewerTextureManager::getFetchedTexture(norm_id, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
+		mTENormalMaps[te] = LLViewerTextureManager::getFetchedTexture(norm_id, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_ALM, LLViewerTexture::LOD_TEXTURE);
 		
 		const LLUUID& spec_id = getTE(te)->getMaterialParams()->getSpecularID();
-		mTESpecularMaps[te] = LLViewerTextureManager::getFetchedTexture(spec_id, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
+		mTESpecularMaps[te] = LLViewerTextureManager::getFetchedTexture(spec_id, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_ALM, LLViewerTexture::LOD_TEXTURE);
 	}
 }
 
@@ -4500,14 +4502,14 @@ S32 LLViewerObject::setTETexture(const U8 te, const LLUUID& uuid)
 S32 LLViewerObject::setTENormalMap(const U8 te, const LLUUID& uuid)
 {
 	LLViewerFetchedTexture *image = (uuid == LLUUID::null) ? NULL : LLViewerTextureManager::getFetchedTexture(
-		uuid, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE, 0, 0, LLHost());
+		uuid, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_ALM, LLViewerTexture::LOD_TEXTURE, 0, 0, LLHost());
 	return setTENormalMapCore(te, image);
 }
 
 S32 LLViewerObject::setTESpecularMap(const U8 te, const LLUUID& uuid)
 {
 	LLViewerFetchedTexture *image = (uuid == LLUUID::null) ? NULL : LLViewerTextureManager::getFetchedTexture(
-		uuid, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE, 0, 0, LLHost());
+		uuid, FTT_DEFAULT, TRUE, LLGLTexture::BOOST_ALM, LLViewerTexture::LOD_TEXTURE, 0, 0, LLHost());
 	return setTESpecularMapCore(te, image);
 }
 
@@ -5114,6 +5116,30 @@ void LLViewerObject::updateText()
 			}
 		}
 	}
+}
+
+bool LLViewerObject::isOwnerInMuteList(LLUUID id)
+{
+	LLUUID owner_id = id.isNull() ? mOwnerID : id;
+	if (isAvatar() || owner_id.isNull())
+	{
+		return false;
+	}
+	bool muted = false;
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedMuteListUpdateTime)
+	{
+		muted = mCachedOwnerInMuteList;
+	}
+	else
+	{
+		muted = LLMuteList::getInstance()->isMuted(owner_id);
+
+		const F64 SECONDS_BETWEEN_MUTE_UPDATES = 1;
+		mCachedMuteListUpdateTime = now + SECONDS_BETWEEN_MUTE_UPDATES;
+		mCachedOwnerInMuteList = muted;
+	}
+	return muted;
 }
 
 LLVOAvatar* LLViewerObject::asAvatar()

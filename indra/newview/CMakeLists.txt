@@ -18,6 +18,7 @@ include(JsonCpp)
 include(LLAppearance)
 include(LLBase)
 include(LLAudio)
+include(LLCA)
 include(LLCharacter)
 include(LLCommon)
 include(LLCoreHttp)
@@ -344,6 +345,7 @@ set(viewer_SOURCE_FILES
     llhudview.cpp
     llimagefiltersmanager.cpp
     llimhandler.cpp
+    llimprocessing.cpp
     llimview.cpp
     llinspect.cpp
     llinspectavatar.cpp
@@ -966,6 +968,7 @@ set(viewer_HEADER_FILES
     llhudtext.h
     llhudview.h
     llimagefiltersmanager.h
+    llimprocessing.h
     llimview.h
     llinspect.h
     llinspectavatar.h
@@ -1749,8 +1752,6 @@ if (WINDOWS)
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ca-bundle.crt
@@ -1770,6 +1771,18 @@ if (WINDOWS)
       winmm_shim
       windows-crash-logger
       )
+
+    if (ADDRESS_SIZE EQUAL 64)
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk_x64.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp_x64.dll
+            )
+    else (ADDRESS_SIZE EQUAL 64)
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
+            )
+    endif (ADDRESS_SIZE EQUAL 64)
 
     if (FMODEX)
       list(APPEND COPY_INPUT_DEPENDENCIES
