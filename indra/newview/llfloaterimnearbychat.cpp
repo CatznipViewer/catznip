@@ -319,7 +319,14 @@ void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 		}
 // [/SL:KB]
 
-		removeScreenChat();
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: Catznip-5.3
+		// Only remove visible toasts if we're not currently collapsed
+		if (isMessagePaneExpanded())
+		{
+			removeScreenChat();
+		}
+// [/SL:KB]
+//		removeScreenChat();
 	}
 }
 
