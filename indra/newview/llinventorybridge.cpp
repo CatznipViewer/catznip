@@ -2241,11 +2241,13 @@ std::string LLFolderBridge::getLabelSuffix() const
             suffix = " " + LLTrans::getString("InventoryItemsCount", args);
         }
     }
-
 // [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
- 	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
-		return LLInvFVBridge::getLabelSuffix() + LLTrans::getString("worn");
+ 	else if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
+	{
+		suffix = LLTrans::getString("worn");
+	}
 // [/SL:KB]
+
     return LLInvFVBridge::getLabelSuffix() + suffix;
 }
 
