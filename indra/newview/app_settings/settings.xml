@@ -7086,6 +7086,17 @@
       <key>Value</key>
       <integer>23</integer>
     </map>
+    <key>NearbyToastHeightRatio</key>
+    <map>
+      <key>Comment</key>
+      <string>Percentage of the window height that nearby chat toasts can appear in</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.85</real>
+    </map>
     <key>NearbyToastOffset</key>
     <map>
       <key>Comment</key>

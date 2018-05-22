@@ -373,6 +373,10 @@ static bool sort_toasts_predicate(LLHandle<LLToast> first, LLHandle<LLToast> sec
 
 void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 {
+// [SL:KB] - Patch: Chat-NearbyToastHeightRatio | Checked: Catznip-5.3
+	const F32 nToastHeightRatio = llclamp(gSavedSettings.getF32("NearbyToastHeightRatio"), 0.3f, 1.0f);
+// [/SL:KB]
+
 	if(mStopProcessing || isHovering())
 		return;
 
@@ -395,6 +399,9 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 	mFloaterSnapRegion->localRectToOtherView(mFloaterSnapRegion->getLocalRect(), &channel_rect, gFloaterView);
 	channel_rect.mLeft += 10;
 	channel_rect.mRight = channel_rect.mLeft + 300;
+// [SL:KB] - Patch: Chat-NearbyToastHeightRatio | Checked: Catznip-5.3
+	channel_rect.mTop = channel_rect.mBottom + channel_rect.getHeight() * nToastHeightRatio;
+// [/SL:KB]
 
 	S32 channel_bottom = channel_rect.mBottom;
 
@@ -420,7 +427,14 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 
 		S32 toast_top = bottom + toast->getRect().getHeight() + margin;
 
-		if(toast_top > channel_rect.getHeight())
+//		if(toast_top > channel_rect.getHeight())
+// [SL:KB] - Patch: Chat-NearbyToastHeightRatio | Checked: Catznip-5.3
+		// Make some allowances:
+		//  * if a large toast appears (that currently won't fit the reserved height) then don't kill it and all other toasts
+		//  * if only 2 toasts are visible only kill them if we're covering at least half the screen or if they're really too tall
+		if ( (toast_top > channel_rect.mTop) && (it != m_active_toasts.begin()) &&
+		     ((m_active_toasts.size() > 3) || (nToastHeightRatio >= 0.5) || (toast_top > channel_rect.mBottom + channel_rect.getHeight() * 1.5)) )
+// [/SL:KB]
 		{
 			while(it!=m_active_toasts.end())
 			{
