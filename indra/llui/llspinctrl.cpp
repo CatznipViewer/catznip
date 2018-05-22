@@ -80,7 +80,10 @@ LLSpinCtrl::LLSpinCtrl(const LLSpinCtrl::Params& p)
 	// Label
 	if( !p.label().empty() )
 	{
-		LLRect label_rect( 0, centered_top, label_width, centered_bottom );
+//		LLRect label_rect( 0, centered_top, label_width, centered_bottom );
+// [SL:KB] - Patch: Control-Spinner | Checked: Catznip-5.3
+		LLRect label_rect( 0, centered_top - 3, label_width, centered_bottom + 3);
+// [/SL:KB]
 		LLTextBox::Params params;
 		params.wrap(p.label_wrap);
 		params.name("SpinCtrl Label");
