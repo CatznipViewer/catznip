@@ -98,7 +98,6 @@ U32 LLVertexBuffer::sCurVAOName = 1;
 U32 LLVertexBuffer::sAllocatedIndexBytes = 0;
 U32 LLVertexBuffer::sIndexCount = 0;
 
-LLPrivateMemoryPool* LLVertexBuffer::sPrivatePoolp = NULL;
 U32 LLVertexBuffer::sBindCount = 0;
 U32 LLVertexBuffer::sSetCount = 0;
 S32 LLVertexBuffer::sCount = 0;
@@ -191,6 +190,10 @@ volatile U8* LLVBOPool::allocate(U32& name, U32 size, bool for_seed)
 			if (mUsage != GL_DYNAMIC_COPY_ARB)
 			{ //data will be provided by application
 				ret = (U8*) ll_aligned_malloc<64>(size);
+				if (!ret)
+				{
+					LL_ERRS() << "Failed to allocate for LLVBOPool buffer" << LL_ENDL;
+				}
 			}
 		}
 		else
@@ -859,11 +862,6 @@ void LLVertexBuffer::initClass(bool use_vbo, bool no_vbo_mapping)
 {
 	sEnableVBOs = use_vbo && gGLManager.mHasVertexBufferObject;
 	sDisableVBOMapping = sEnableVBOs && no_vbo_mapping;
-
-	if (!sPrivatePoolp)
-	{ 
-		sPrivatePoolp = LLPrivateMemoryPoolManager::getInstance()->newPool(LLPrivateMemoryPool::STATIC);
-	}
 }
 
 //static 
@@ -906,12 +904,6 @@ void LLVertexBuffer::cleanupClass()
 	sStreamVBOPool.cleanup();
 	sDynamicVBOPool.cleanup();
 	sDynamicCopyVBOPool.cleanup();
-
-	if(sPrivatePoolp)
-	{
-		LLPrivateMemoryPoolManager::getInstance()->deletePool(sPrivatePoolp);
-		sPrivatePoolp = NULL;
-	}
 }
 
 //----------------------------------------------------------------------------
@@ -1057,10 +1049,12 @@ LLVertexBuffer::~LLVertexBuffer()
 
 	if (mFence)
 	{
+		// Sanity check. We have weird crashes in this destructor (on delete). Yet mFence is disabled.
+		// TODO: mFence was added in scope of SH-2038, but was never enabled, consider removing mFence.
+		LL_ERRS() << "LLVertexBuffer destruction failed" << LL_ENDL;
 		delete mFence;
+		mFence = NULL;
 	}
-	
-	mFence = NULL;
 
 	sVertexCount -= mNumVerts;
 	sIndexCount -= mNumIndices;
@@ -1200,7 +1194,7 @@ bool LLVertexBuffer::createGLBuffer(U32 size)
 	{
 		static int gl_buffer_idx = 0;
 		mGLBuffer = ++gl_buffer_idx;
-		mMappedData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mMappedData = (U8*)ll_aligned_malloc_16(size);
 		disclaimMem(mSize);
 		mSize = size;
 		claimMem(mSize);
@@ -1242,7 +1236,7 @@ bool LLVertexBuffer::createGLIndices(U32 size)
 	}
 	else
 	{
-		mMappedIndexData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mMappedIndexData = (U8*)ll_aligned_malloc_16(size);
 		static int gl_buffer_idx = 0;
 		mGLIndices = ++gl_buffer_idx;
 		mIndicesSize = size;
@@ -1265,7 +1259,7 @@ void LLVertexBuffer::destroyGLBuffer()
 		}
 		else
 		{
-			FREE_MEM(sPrivatePoolp, (void*) mMappedData);
+			ll_aligned_free_16((void*)mMappedData);
 			mMappedData = NULL;
 			mEmpty = true;
 		}
@@ -1285,7 +1279,7 @@ void LLVertexBuffer::destroyGLIndices()
 		}
 		else
 		{
-			FREE_MEM(sPrivatePoolp, (void*) mMappedIndexData);
+			ll_aligned_free_16((void*)mMappedIndexData);
 			mMappedIndexData = NULL;
 			mEmpty = true;
 		}
@@ -1930,7 +1924,21 @@ void LLVertexBuffer::unmapBuffer()
 					const MappedRegion& region = mMappedVertexRegions[i];
 					S32 offset = region.mIndex >= 0 ? mOffsets[region.mType]+sTypeSize[region.mType]*region.mIndex : 0;
 					S32 length = sTypeSize[region.mType]*region.mCount;
-					glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedData+offset);
+					if (mSize >= length + offset)
+					{
+						glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, length, (U8*)mMappedData + offset);
+					}
+					else
+					{
+						GLint size = 0;
+						glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &size);
+						LL_WARNS() << "Attempted to map regions to a buffer that is too small, " 
+							<< "mapped size: " << mSize
+							<< ", gl buffer size: " << size
+							<< ", length: " << length
+							<< ", offset: " << offset
+							<< LL_ENDL;
+					}
 					stop_glerror();
 				}
 
@@ -1998,7 +2006,21 @@ void LLVertexBuffer::unmapBuffer()
 					const MappedRegion& region = mMappedIndexRegions[i];
 					S32 offset = region.mIndex >= 0 ? sizeof(U16)*region.mIndex : 0;
 					S32 length = sizeof(U16)*region.mCount;
-					glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedIndexData+offset);
+					if (mIndicesSize >= length + offset)
+					{
+						glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedIndexData+offset);
+					}
+					else
+					{
+						GLint size = 0;
+						glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &size);
+						LL_WARNS() << "Attempted to map regions to a buffer that is too small, " 
+							<< "mapped size: " << mIndicesSize
+							<< ", gl buffer size: " << size
+							<< ", length: " << length
+							<< ", offset: " << offset
+							<< LL_ENDL;
+					}
 					stop_glerror();
 				}
 
