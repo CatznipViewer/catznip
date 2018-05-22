@@ -20,7 +20,7 @@
    text_color="LtGray"
    top="10"
    value="Display Name:"
-   width="80" />
+   width="150" />
   <text
    follows="top|left"
    height="13"
