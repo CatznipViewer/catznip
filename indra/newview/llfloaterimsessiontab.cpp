@@ -1363,6 +1363,18 @@ void LLFloaterIMSessionTab::onCollapseToLine(LLFloaterIMSessionTab* self)
 		self->mInputEditor->enableSingleLineMode(expand);
 		self->reshapeFloater(expand);
 		self->setMessagePaneExpanded(!expand);
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: Catznip-5.3
+		if (expand)
+		{
+			self->mMinFloaterHeight = self->getMinHeight();
+			self->setResizeLimits(self->getMinWidth(), self->getRect().getHeight());
+		}
+		else
+		{
+			self->setResizeLimits(self->getMinWidth(), self->mMinFloaterHeight);
+			self->mMinFloaterHeight = 0;
+		}
+// [/SL:KB]
 	}
 }
 
@@ -1417,6 +1429,12 @@ void LLFloaterIMSessionTab::restoreFloater()
 		mBodyStack->updateLayout();
 		mExpandCollapseLineBtn->setImageOverlay(getString("expandline_icon"));
 		setMessagePaneExpanded(true);
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: Catznip-5.3
+		if (mMinFloaterHeight > 0)
+		{
+			setResizeLimits(getMinWidth(), mMinFloaterHeight);
+		}
+// [/SL:KB]
 		saveCollapsedState();
 		mInputEditor->enableSingleLineMode(false);
 		enableResizeCtrls(true, true, true);
