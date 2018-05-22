@@ -2531,7 +2531,7 @@ Linden Lab
 		<usetemplate name="okcancelbuttons" notext="キャンセル" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmEmptyTrash">
-		[COUNT] アイテムが完全に削除されます。ごみ箱の項目をすべて削除しますか？
+		[COUNT] 個のアイテムとフォルダーが完全に削除されます。ごみ箱の項目をすべて削除しますか？
 		<usetemplate name="okcancelbuttons" notext="キャンセル" yestext="OK"/>
 	</notification>
 	<notification name="TrashIsFull">
@@ -3345,9 +3345,6 @@ M キーを押して変更します。
 	<notification name="VoiceChannelJoinFailed">
 		[VOICE_CHANNEL_NAME] への接続に失敗しました。あとで再度お試しください。  「近くのボイスチャット」に再接続されます。
 	</notification>
-	<notification name="VoiceLoginRetry">
-		ボイスチャンネルを作成しています。1 分ほどかかります。
-	</notification>
 	<notification name="VoiceEffectsExpired">
 		ボイスモーフィング効果の1つまたは複数の有効期限が終了しました。期限を延長・更新するには[[URL]こちらをクリック]してください。
 	</notification>
@@ -3539,12 +3536,18 @@ M キーを押して変更します。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		ボイスサーバーに接続できません：
+		ボイスサーバーに接続できません： 音声に許可される必要のある 
 
 [HOSTID]
 
-ボイスチャットによるコミュニケーションが利用できません。
+ポート: 
+:TCP:80, 443 
+:UDP:3478, 3479, 5060, 5062, 6250, 12000-32000
+
 お使いのネットワークやファイアウォールの設定を確認してください。
+お使いのルーターの SIP ALG 機能をすべて無効にしてください。
+
+ボイスチャットによるコミュニケーションが利用できません。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
