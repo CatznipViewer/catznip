@@ -92,7 +92,6 @@ LLTextureKey::LLTextureKey(LLUUID id, ETexListType tex_type)
 
 LLViewerTextureList::LLViewerTextureList() 
 	: mForceResetTextureStats(FALSE),
-	mUpdateStats(FALSE),
 	mMaxResidentTexMemInMegaBytes(0),
 	mMaxTotalTextureMemInMegaBytes(0),
 	mInitialized(FALSE)
@@ -103,7 +102,6 @@ void LLViewerTextureList::init()
 {			
 	mInitialized = TRUE ;
 	sNumImages = 0;
-	mUpdateStats = TRUE;
 	mMaxResidentTexMemInMegaBytes = (U32Bytes)0;
 	mMaxTotalTextureMemInMegaBytes = (U32Bytes)0;
 	
@@ -511,6 +509,12 @@ LLViewerFetchedTexture* LLViewerTextureList::getImage(const LLUUID &image_id,
 	LLPointer<LLViewerFetchedTexture> imagep = findImage(image_id, get_element_type(boost_priority));
 	if (!imagep.isNull())
 	{
+		if (boost_priority != LLViewerTexture::BOOST_ALM && imagep->getBoostLevel() == LLViewerTexture::BOOST_ALM)
+		{
+			// Workaround: we need BOOST_ALM texture for something, 'rise' to NONE
+			imagep->setDecodePriority(LLViewerTexture::BOOST_NONE);
+		}
+
 		LLViewerFetchedTexture *texture = imagep.get();
 		if (request_from_host.isOk() &&
 			!texture->getTargetHost().isOk())
@@ -1171,7 +1175,7 @@ F32 LLViewerTextureList::updateImagesFetchTextures(F32 max_time)
 
 void LLViewerTextureList::updateImagesUpdateStats()
 {
-	if (mUpdateStats && mForceResetTextureStats)
+	if (mForceResetTextureStats)
 	{
 		for (image_priority_list_t::iterator iter = mImageList.begin();
 			 iter != mImageList.end(); )
@@ -1179,7 +1183,6 @@ void LLViewerTextureList::updateImagesUpdateStats()
 			LLViewerFetchedTexture* imagep = *iter++;
 			imagep->resetTextureStats();
 		}
-		mUpdateStats = FALSE;
 		mForceResetTextureStats = FALSE;
 	}
 }
