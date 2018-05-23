@@ -2,7 +2,7 @@
 <panel
  border="true"
  follows="all"
- height="376"
+ height="400"
  label="Text Chat"
  layout="topleft"
  name="chat_nearby"
@@ -308,21 +308,49 @@
      top_pad="3"
      width="330" />
     <spinner
+     control_name="NearbyToastHeightRatio"
+     decimal_digits="0"
+     follows="top|left"
+     height="22"
+     increment="5"
+     initial_value="85"
+     label="Nearby toast height :"
+     label_width="125"
+     layout="topleft"
+     left="55"
+     min_val="30"
+     max_val="100"
+     name="nearbytoast_heightratio_spinner"
+     top_pad="2"
+     width="175" />
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="20"
+     layout="topleft"
+     left_pad="5"
+     name="nearbytoast_fadingtime_text"
+     top_delta="3"
+     width="260">
+        % maximum (of total window height)
+    </text>
+    <spinner
      control_name="NearbyToastLifeTime"
      decimal_digits="0"
      follows="top|left"
-     height="32"
+     height="22"
      increment="1"
      initial_value="0"
      label="Fade chat after :"
-     label_width="110"
+     label_width="125"
      layout="topleft"
      left="55"
      min_val="1"
      max_val="999"
      name="nearbytoast_lifetime_spinner"
-     top_pad="6"
-     width="160" />
+     top_pad="2"
+     width="175" />
     <text
      type="string"
      length="1"
@@ -342,15 +370,15 @@
      height="22"
      increment="11"
      initial_value="0"
-     label="(Fade duration:"
-     label_width="100"
+     label="(Fade for "
+     label_width="65"
      layout="topleft"
-     left_pad="5"
+     left_pad="15"
      min_val="1"
      max_val="999"
      name="nearbytoast_fadingtime_spinner"
      top_delta="-3"
-     width="155" />
+     width="115" />
     <text
      type="string"
      length="1"
@@ -378,7 +406,7 @@
     <text
      layout="topleft"
      follows="top|left"
-     top_pad="15"
+     top_pad="12"
      left="20"
      width="350"
      height="15"
@@ -442,7 +470,7 @@
       left_pad="15"
       name="soundscheme_apply"
       label="Sound Alerts"
-      top_delta="-1"
+      top_delta="-3"
       right="-15"
       width="120">
       <button.commit_callback
