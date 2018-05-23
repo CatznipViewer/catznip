@@ -17,16 +17,16 @@
 	 left="10"
 	 name="appearance_you_text"
 	 top_pad="1"
-	 width="100">
+	 width="90">
 		You
 	</text>
 	<text
 	 follows="left|top"
 	 height="15"
 	 layout="topleft"
-	 left_pad="5"
+	 left_pad="0"
 	 name="appearance_visibility_value"
-	 width="175">
+	 width="195">
 		Visible to 10 out of 40 nearby
 	</text>
 
@@ -104,7 +104,7 @@
 	 increment="1"
 	 tool_tip="Controls at what point a visually complex avatar is drawn as a jelly doll"
 	 label="Complexity limit:"
-	 label_width="94"
+	 label_width="99"
 	 layout="topleft"
 	 left="25"
 	 min_val="1"
@@ -134,7 +134,7 @@
 	 increment="1"
 	 initial_value="12"
 	 label="# Non-impostors:"
-	 label_width="94"
+	 label_width="99"
 	 layout="topleft"
 	 left="25"
 	 min_val="1"
@@ -266,7 +266,7 @@
 	 left="25"
 	 name="appearance_attached_text"
 	 top_pad="4"
-	 width="100">
+	 width="110">
 		Render attached:
 	</text>
 	<check_box
@@ -276,7 +276,7 @@
 	 layout="topleft"
 	 left_pad="0"
 	 name="appearance_attachedlights_check"
-	 width="80"
+	 width="75"
 	 top_delta="0" />
 	<check_box
 	 control_name="RenderAttachedParticles"
