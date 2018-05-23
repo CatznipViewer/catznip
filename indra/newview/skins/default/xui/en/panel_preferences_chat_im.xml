@@ -63,7 +63,7 @@
      text_color="White_50"
      type="string"
      top_delta="5"
-     width="100">
+     width="120">
         (Requires restart)
     </text>
     <check_box
@@ -302,7 +302,7 @@
      text_color="White_50"
      type="string"
      top_delta="4"
-     width="100">
+     width="120">
         (Requires restart)
     </text>
     <text

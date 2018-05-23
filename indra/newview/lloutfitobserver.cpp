@@ -128,10 +128,8 @@ void LLOutfitObserver::checkBaseOutfit()
 	else
 	{
 // [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
-		if (mBaseOutfitId.notNull())
-			gInventory.addChangedMask(LLInventoryObserver::LABEL, mBaseOutfitId);
-		if (baseoutfit_id.notNull())
-			gInventory.addChangedMask(LLInventoryObserver::LABEL, baseoutfit_id);
+		// We're in	a notifyObservers() chain so schedule a label update on the next tick
+		doOnIdleOneTime(boost::bind(&LLOutfitObserver::updateWornOutfitLabelsCb, mBaseOutfitId, baseoutfit_id));
 // [/SL:KB]
 		mBaseOutfitId = baseoutfit_id;
 		mBOFReplaced();
@@ -157,3 +155,15 @@ void LLOutfitObserver::checkBaseOutfit()
 		mLastOutfitDirtiness = app_mgr.isOutfitDirty();
 	}
 }
+
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+// static
+void LLOutfitObserver::updateWornOutfitLabelsCb(const LLUUID& idPrevBaseOutfit, const LLUUID& idCurBaseOutfit)
+{
+	if (idPrevBaseOutfit.notNull())
+		gInventory.addChangedMask(LLInventoryObserver::LABEL, idPrevBaseOutfit);
+	if (idCurBaseOutfit.notNull())
+		gInventory.addChangedMask(LLInventoryObserver::LABEL, idCurBaseOutfit);
+	gInventory.notifyObservers();
+}
+// [/SL:KB]

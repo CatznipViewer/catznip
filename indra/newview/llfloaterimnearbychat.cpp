@@ -348,7 +348,14 @@ void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 		}
 // [/SL:KB]
 
-		removeScreenChat();
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: Catznip-5.3
+		// Only remove visible toasts if we're not currently collapsed
+		if (isMessagePaneExpanded())
+		{
+			removeScreenChat();
+		}
+// [/SL:KB]
+//		removeScreenChat();
 	}
 }
 
@@ -378,16 +385,16 @@ void LLFloaterIMNearbyChat::onTearOffClicked()
 
 
 // virtual
-void LLFloaterIMNearbyChat::onOpen(const LLSD& key)
-{
-	LLFloaterIMSessionTab::onOpen(key);
-	if(!isMessagePaneExpanded())
-	{
-		restoreFloater();
-		onCollapseToLine(this);
-	}
+//void LLFloaterIMNearbyChat::onOpen(const LLSD& key)
+//{
+//	LLFloaterIMSessionTab::onOpen(key);
+//	if(!isMessagePaneExpanded())
+//	{
+//		restoreFloater();
+//		onCollapseToLine(this);
+//	}
 //	showTranslationCheckbox(LLTranslate::isTranslationConfigured());
-}
+//}
 
 // virtual
 void LLFloaterIMNearbyChat::onClose(bool app_quitting)

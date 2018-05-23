@@ -36,8 +36,8 @@
     <!-- TODO:  <check_box label="Entering a blank line closes the nearby chat floater" name="chat_closeonreturn_check" /> -->
     <check_box label="Używaj animacji podczas pisania" name="play_typing_animation" />
     <!-- TODO:  -->
-    <check_box name="play_chatting_animation" left="240" />
-    <check_box label="Czat chmurkowy" name="bubble_text_chat" />
+    <check_box name="play_chatting_animation" left="240" top_pad="2" />
+    <check_box label="Czat chmurkowy" name="bubble_text_chat" top_pad="-18" />
     
     <text name="chat_notifications">Powiadomienia</text>
     <!-- TODO: Notification Options -->

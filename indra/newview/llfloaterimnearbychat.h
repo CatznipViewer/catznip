@@ -55,7 +55,7 @@ public:
 	static LLFloaterIMNearbyChat* buildFloater(const LLSD& key);
 
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& key);
+//	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ void onClose(bool app_quitting);
 // [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
 	/*virtual*/ void setMinimized(BOOL b);

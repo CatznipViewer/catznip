@@ -89,7 +89,7 @@
    top_pad="10"
    layout="topleft"
    left="10"
-   height="60"
+   height="80"
    right="-110"
    follows="left|top|right"
    column_padding="0"
@@ -127,7 +127,7 @@
    image_overlay="Arrow_Down"
    tool_tip="Move this list down in priority."/>
   <scroll_list
-   top_pad="10"
+   top_pad="30"
    layout="topleft"
    left="10"
    height="100"

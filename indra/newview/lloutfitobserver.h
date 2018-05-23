@@ -68,6 +68,10 @@ protected:
 
 	void checkBaseOutfit();
 
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	static void updateWornOutfitLabelsCb(const LLUUID& idPrevBaseOutfit, const LLUUID& idCurBaseOutfit);
+// [/SL:KB]
+
 	//last version number of a COF category
 	S32 mCOFLastVersion;
 
