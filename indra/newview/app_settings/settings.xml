@@ -7093,9 +7093,9 @@
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
-      <string>F32</string>
+      <string>S32</string>
       <key>Value</key>
-      <real>0.85</real>
+      <integer>85</integer>
     </map>
     <key>NearbyToastOffset</key>
     <map>

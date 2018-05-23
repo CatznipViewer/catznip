@@ -374,7 +374,7 @@ static bool sort_toasts_predicate(LLHandle<LLToast> first, LLHandle<LLToast> sec
 void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 {
 // [SL:KB] - Patch: Chat-NearbyToastHeightRatio | Checked: Catznip-5.3
-	const F32 nToastHeightRatio = llclamp(gSavedSettings.getF32("NearbyToastHeightRatio"), 0.3f, 1.0f);
+	const float nToastHeightRatio = llclamp(gSavedSettings.getS32("NearbyToastHeightRatio"), 30, 100) / 100.f;
 // [/SL:KB]
 
 	if(mStopProcessing || isHovering())
