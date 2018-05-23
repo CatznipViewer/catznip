@@ -115,7 +115,7 @@
 	 name="windlight_water_text"
 	 top_pad="8"
 	 width="75">
-		Water preset :
+		Water :
 	</text>
 	<combo_box
 	 follows="top|left|right"
@@ -159,7 +159,7 @@
 	 left="15"
 	 name="windlight_sunmoon_text"
 	 top_pad="8"
-	 width="110">
+	 width="125">
 		Sun/moon Position :
 	</text>
 	<check_box
@@ -331,7 +331,7 @@
 	<check_box
 	 control_name="EnvironmentPersistAcrossLogin"
 	 height="16"
-	 label="Reapply current environment settings at logon"
+	 label="Reapply current Windlight at logon"
 	 layout="topleft"
 	 left="10"
 	 name="windlight_prefs_persist"
