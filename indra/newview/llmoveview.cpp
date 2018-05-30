@@ -631,7 +631,7 @@ void LLPanelStandStopFlying::clearStandStopFlyingMode(EStandStopFlyingMode mode)
 		LL_ERRS() << "Unexpected EStandStopFlyingMode is passed: " << mode << LL_ENDL;
 	}
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
-	panel->setVisible(false);
+	panel->setVisible(panel->mStandButton->getVisible() || panel->mStopFlyingButton->getVisible());
 // [/SL:KB]
 }
 
