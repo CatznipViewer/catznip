@@ -3014,11 +3014,11 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 	bool use_complexity_color = false;
 	LLColor4 complexity_color;
 
-	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
+	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderOthersAs::NORMALLY);
 	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
 	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
 	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
-	if ( (show_avatar_complexity) && (render_others_as == (int)ERenderAvatarAs::NORMAL) &&
+	if ( (show_avatar_complexity) && ((render_others_as == (int)ERenderOthersAs::NORMALLY) || (render_others_as == (int)ERenderOthersAs::IMPOSTERS)) &&
 	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
 		   (isSelf() && show_avatar_complexity_self) ) )
 	{
@@ -9265,7 +9265,11 @@ void LLVOAvatar::updateImpostorRendering(U32 newMaxNonImpostorsValue)
 		sMaxNonImpostors = newMaxNonImpostorsValue;
 	}
 	// the sUseImpostors flag depends on whether or not sMaxNonImpostors is set to the no-limit value (0)
-	sUseImpostors = (0 != sMaxNonImpostors);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
+	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderOthersAs::NORMALLY);
+	sUseImpostors = (0 != sMaxNonImpostors) || (render_others_as != (int)ERenderOthersAs::NORMALLY);
+// [/SL:KB]
+//	sUseImpostors = (0 != sMaxNonImpostors);
     if ( oldflg != sUseImpostors )
     {
         LL_DEBUGS("AvatarRender")

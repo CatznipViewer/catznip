@@ -5,29 +5,29 @@
  name="panel_render_others_as_message"
  mouse_opaque="false"
  visible="true"
- width="375">
+ width="425">
     <text
      font="SansSerifLarge"
      font.style="BOLD"
-	 font_shadow="hard"
+     font_shadow="hard"
      follows="bottom|left"
      height="19"
      layout="topleft"
      left="5"
      name="render_message_text"
-	 text_color="White_50"
+     text_color="White_50"
      top="2"
-     value="Not everyone is (fully) rendered."
-     width="265" />
+     value="Not everyone is rendered fully."
+     width="285" />
     <button
      follows="bottom|left"
-     height="19"
+     height="20"
      label="Render Everyone"
      layout="topleft"
      left_pad="5"
      name="render_default_btn"
      tool_tip="Click here to render everyone."
      top="2"
-	 visible="true"
-     width="100" />
+     visible="true"
+     width="125" />
 </panel>
