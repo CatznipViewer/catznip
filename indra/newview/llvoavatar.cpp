@@ -2974,11 +2974,11 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 	bool use_complexity_color = false;
 	LLColor4 complexity_color;
 
-	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderAvatarAs::NORMAL);
+	static LLUICachedControl<S32> render_others_as("RenderOthersAs", (int)ERenderOthersAs::NORMALLY);
 	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
 	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
 	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
-	if ( (show_avatar_complexity) && (render_others_as == (int)ERenderAvatarAs::NORMAL) &&
+	if ( (show_avatar_complexity) && ((render_others_as == (int)ERenderOthersAs::NORMALLY) || (render_others_as == (int)ERenderOthersAs::IMPOSTERS)) &&
 	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
 		   (isSelf() && show_avatar_complexity_self) ) )
 	{
