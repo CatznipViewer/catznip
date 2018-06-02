@@ -565,6 +565,7 @@ set(viewer_SOURCE_FILES
     llscriptfloater.cpp
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
+    llsculptidsize.cpp
     llsearchcombobox.cpp
     llsearchdirectory.cpp
     llsearchhistory.cpp
@@ -1226,6 +1227,7 @@ set(viewer_HEADER_FILES
     llscriptruntimeperms.h
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
+    llsculptidsize.h
     llsearchcombobox.h
     llsearchdirectory.h
     llsearchhistory.h
