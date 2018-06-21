@@ -6055,7 +6055,7 @@ bool LLTextureBridge::canSaveTexture(void) const
 		return false;
 	}
 	
-// [RLVa:KB] - Checked: RLVa-2.2
+// [RLVa:KB] - Checked: RLVa-2.2 (@viewtexture)
 	if (!RlvActions::canPreviewTextures())
 	{
 		return false;
