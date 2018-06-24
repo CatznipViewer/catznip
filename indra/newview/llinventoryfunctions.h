@@ -125,6 +125,8 @@ void rename_category(LLInventoryModel* model, const LLUUID& cat_id, const std::s
 
 void copy_inventory_category(LLInventoryModel* model, LLViewerInventoryCategory* cat, const LLUUID& parent_id, const LLUUID& root_copy_id = LLUUID::null, bool move_no_copy_items = false);
 
+void copy_inventory_category_content(const LLUUID& new_cat_uuid, LLInventoryModel* model, LLViewerInventoryCategory* cat, const LLUUID& root_copy_id, bool move_no_copy_items);
+
 // Generates a string containing the path to the item specified by item_id.
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
 void append_path(const LLUUID& id, std::string& path, bool include_root = true, bool prepend_slash = true);

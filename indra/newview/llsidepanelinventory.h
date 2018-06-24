@@ -129,7 +129,6 @@ protected:
 //	void 						onWearButtonClicked();
 //	void 						onPlayButtonClicked();
 //	void 						onTeleportButtonClicked();
-//	void 						onOverflowButtonClicked();
 	void 						onBackButtonClicked();
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 	void 						onToolbarActionClicked();
@@ -142,7 +141,6 @@ private:
 //	LLButton*					mWearBtn;
 //	LLButton*					mPlayBtn;
 //	LLButton*					mTeleportBtn;
-//	LLButton*					mOverflowBtn;
 //	LLButton*					mShopBtn;
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 	// Single action button

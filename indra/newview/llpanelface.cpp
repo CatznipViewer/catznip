@@ -1308,16 +1308,6 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			getChild<LLUICtrl>("combobox texgen")->setTentative(!identical);
 			getChildView("tex gen")->setEnabled(editable);
 
-			if (selected_texgen == LLTextureEntry::TEX_GEN_PLANAR)
-			{
-				// EXP-1507 (change label based on the mapping mode)
-				getChild<LLUICtrl>("rpt")->setValue(getString("string repeats per meter"));
-			}
-			else
-			if (selected_texgen == LLTextureEntry::TEX_GEN_DEFAULT)
-			{
-				getChild<LLUICtrl>("rpt")->setValue(getString("string repeats per face"));
-			}
 			}
 
 		{
@@ -1536,8 +1526,7 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			mColorSwatch->setValid(FALSE);
 		}
 		getChildView("color trans")->setEnabled(FALSE);
-		getChildView("rpt")->setEnabled(FALSE);
-		getChildView("tex offset")->setEnabled(FALSE);
+		getChildView("rptctrl")->setEnabled(FALSE);
 		getChildView("tex gen")->setEnabled(FALSE);
 		getChildView("label shininess")->setEnabled(FALSE);
 		getChildView("label bumpiness")->setEnabled(FALSE);

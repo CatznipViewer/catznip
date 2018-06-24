@@ -3535,11 +3535,20 @@ class LLAvatarCheckImpostorMode : public view_listener_t
 		switch (mode) 
 		{
 			case 0:
-				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_RENDER_NORMALLY);
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+				return LLRenderMuteList::instance().getSavedVisualMuteSetting(avatar->getID()) == LLVOAvatar::AV_RENDER_NORMALLY;
+// [/RLVa:KB]
+//				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_RENDER_NORMALLY);
 			case 1:
-				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_DO_NOT_RENDER);
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+				return LLRenderMuteList::instance().getSavedVisualMuteSetting(avatar->getID()) == LLVOAvatar::AV_DO_NOT_RENDER;
+// [/RLVa:KB]
+//				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_DO_NOT_RENDER);
 			case 2:
-				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_ALWAYS_RENDER);
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+				return LLRenderMuteList::instance().getSavedVisualMuteSetting(avatar->getID()) == LLVOAvatar::AV_ALWAYS_RENDER;
+// [/RLVa:KB]
+//				return (avatar->getVisualMuteSettings() == LLVOAvatar::AV_ALWAYS_RENDER);
 			default:
 				return false;
 		}
@@ -9168,6 +9177,23 @@ void handle_web_browser_test(const LLSD& param)
 	LLWeb::loadURLInternal(url);
 }
 
+bool callback_clear_cache_immediately(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if ( option == 0 ) // YES
+	{
+		//clear cache
+		LLAppViewer::instance()->purgeCacheImmediate();
+	}
+
+	return false;
+}
+
+void handle_cache_clear_immediately()
+{
+	LLNotificationsUtil::add("ConfirmClearCache", LLSD(), LLSD(), callback_clear_cache_immediately);
+}
+
 void handle_web_content_test(const LLSD& param)
 {
 	std::string url = param.asString();
@@ -10306,6 +10332,8 @@ void initialize_menus()
 	
 	//Develop (Texture Fetch Debug Console)
 	view_listener_t::addMenu(new LLDevelopTextureFetchDebugger(), "Develop.SetTexFetchDebugger");
+	//Develop (clear cache immediately)
+	commit.add("Develop.ClearCache", boost::bind(&handle_cache_clear_immediately) );
 
 	// Admin >Object
 	view_listener_t::addMenu(new LLAdminForceTakeCopy(), "Admin.ForceTakeCopy");

@@ -43,7 +43,7 @@ void init_menu_file();
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 // NOTE: uploads the files without asking the user for confirmation
-void upload_bulk(const std::vector<std::string>& files);
+const void upload_bulk(const std::vector<std::string>& filenames);
 // [/SL:KB]
 
 LLUUID upload_new_resource(
@@ -91,15 +91,19 @@ public:
 	static void cleanupClass();
 	static void clearDead();
 
-//	std::string mFile; 
-//
-//	LLFilePicker::ELoadFilter mFilter;
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	enum EPickerType { OPEN_SINGLE, OPEN_MULTIPLE, SAVE_SINGLE } mPickerType;
 	std::vector<std::string> mFiles;
 	S32 mFilter;
 	std::string mInitialFile;
 // [/SL:KB]
+//	std::vector<std::string> mResponses;
+//	std::string mProposedName;
+//
+//	LLFilePicker::ELoadFilter mLoadFilter;
+//	LLFilePicker::ESaveFilter mSaveFilter;
+//	bool mIsSaveDialog;
+//	bool mIsGetMultiple;
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
@@ -117,21 +121,41 @@ public:
 	{
 	}
 // [/SL:KB]
-//	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
-//		: LLThread("file picker"), mFilter(filter)
+//	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool get_multiple = false)
+//		: LLThread("file picker"), mLoadFilter(filter), mIsSaveDialog(false), mIsGetMultiple(get_multiple)
 //	{
-//
+//	}
+
+//	LLFilePickerThread(LLFilePicker::ESaveFilter filter, const std::string &proposed_name)
+//		: LLThread("file picker"), mSaveFilter(filter), mIsSaveDialog(true), mProposedName(proposed_name)
+//	{
 //	}
 
 	void getFile();
 
 	virtual void run();
 
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	virtual void notify(const std::vector<std::string>& files) = 0;
-// [/SL:KB]
-//	virtual void notify(const std::string& filename) = 0;
+	virtual void notify(const std::vector<std::string>& filenames) = 0;
 };
+
+
+//class LLFilePickerReplyThread : public LLFilePickerThread
+//{
+//public:
+//
+//	typedef boost::signals2::signal<void(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter load_filter, LLFilePicker::ESaveFilter save_filter)> file_picked_signal_t;
+//	
+//	LLFilePickerReplyThread(const file_picked_signal_t::slot_type& cb, LLFilePicker::ELoadFilter filter, bool get_multiple);
+//	LLFilePickerReplyThread(const file_picked_signal_t::slot_type& cb, LLFilePicker::ESaveFilter filter, const std::string &proposed_name);
+//	~LLFilePickerReplyThread();
+//
+//	virtual void notify(const std::vector<std::string>& filenames);
+//
+//private:
+//	LLFilePicker::ELoadFilter	mLoadFilter;
+//	LLFilePicker::ESaveFilter	mSaveFilter;
+//	file_picked_signal_t*		mFilePickedSignal;
+//};
 
 
 #endif

@@ -696,6 +696,13 @@ void LLAgent::moveLeftNudge(S32 direction)
 //-----------------------------------------------------------------------------
 void LLAgent::moveUp(S32 direction)
 {
+// [RLVa:KB] - Checked: RLVa-2.2 (@jump)
+	if ( (!RlvActions::canJump()) && (direction > 0) && (!getFlying()) )
+	{
+		return;
+	}
+// [/Sl:KB]
+
 	mMoveTimer.reset();
 	LLFirstUse::notMoving(false);
 
@@ -766,8 +773,11 @@ void LLAgent::movePitch(F32 mag)
 // Does this parcel allow you to fly?
 BOOL LLAgent::canFly()
 {
-// [RLVa:KB] - Checked: 2010-03-02 (RLVa-1.2.0d) | Modified: RLVa-1.0.0c
-	if (gRlvHandler.hasBehaviour(RLV_BHVR_FLY)) return FALSE;
+// [RLVa:KB] - Checked: RLVa-1.0
+	if (!RlvActions::canFly())
+	{
+		return FALSE;
+	}
 // [/RLVa:KB]
 	if (isGodlike()) return TRUE;
 
@@ -817,8 +827,8 @@ void LLAgent::setFlying(BOOL fly)
 
 	if (fly)
 	{
-// [RLVa:KB] - Checked: 2010-03-02 (RLVa-1.2.0d) | Modified: RLVa-1.0.0c
-		if (gRlvHandler.hasBehaviour(RLV_BHVR_FLY))
+// [RLVa:KB] - Checked: RLVa-1.0
+		if (!RlvActions::canFly())
 		{
 			return;
 		}
@@ -1657,6 +1667,8 @@ void LLAgent::setAutoPilotTargetGlobal(const LLVector3d &target_global)
 		LLViewerObject *obj;
 
 		LLWorld::getInstance()->resolveStepHeightGlobal(NULL, target_global, traceEndPt, targetOnGround, groundNorm, &obj);
+		// Note: this might malfunction for sitting agent, since pelvis stays same, but agent's position becomes lower
+		// But for autopilot to work we assume that agent is standing and ready to go.
 		F64 target_height = llmax((F64)gAgentAvatarp->getPelvisToFoot(), target_global.mdV[VZ] - targetOnGround.mdV[VZ]);
 
 		// clamp z value of target to minimum height above ground

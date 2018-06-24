@@ -400,6 +400,9 @@ public:
 	U32 		renderImpostor(LLColor4U color = LLColor4U(255,255,255,255), S32 diffuse_channel = 0);
 	bool		isVisuallyMuted();
 	bool 		isInMuteList();
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+	bool        isRlvSilhouette() const;
+// [/RLVa:KB]
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 	bool 		isNearby() const;
 	bool 		isFriend() const;
@@ -432,6 +435,9 @@ public:
 		AV_ALWAYS_RENDER   = 2
 	};
 	void		setVisualMuteSettings(VisualMuteSettings set);
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+//	VisualMuteSettings  getVisualMuteSettings()						{ return (!isRlvSilhouette()) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
+// [/RLVa:KB]
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
 	VisualMuteSettings  getVisualMuteSettings() const				{ return (getRenderAvatarAs() >= ERenderAvatarAs::IMPOSTER) ? mVisuallyMuteSetting : AV_DO_NOT_RENDER; };
 // [/SL:KB]
@@ -466,6 +472,10 @@ public:
 
 	bool		mCachedInMuteList;
 	F64			mCachedMuteListUpdateTime;
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+	mutable bool mCachedIsRlvSilhouette = false;
+	mutable F64  mCachedRlvSilhouetteUpdateTime = 0.f;
+// [/RLVa:KB]
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 	mutable bool mCachedIsNearby = false;
 	mutable F64  mCachedNearbyUpdateTime = 0.f;

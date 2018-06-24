@@ -311,8 +311,10 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 // [/SL:KB]
 		}
 
+		BOOL zoom_tool = gCameraBtnZoom && (LLToolMgr::getInstance()->getBaseTool() == LLToolCamera::getInstance());
 		if (!(pick_info.mKeyMask & MASK_ALT) &&
 			!LLFloaterCamera::inFreeCameraMode() &&
+			!zoom_tool &&
 			gAgentCamera.cameraThirdPerson() &&
 //			gViewerWindow->getLeftMouseDown() && 
 // [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2

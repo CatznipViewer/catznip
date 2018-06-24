@@ -702,6 +702,9 @@ L$ が不足しているのでこのグループに参加することができ�
 		</url>
 		<usetemplate ignoretext="使用中のコンピューターのハードウェアがサポートされていないとき" name="okcancelignore" notext="いいえ" yestext="はい"/>
 	</notification>
+	<notification name="RunLauncher">
+		ビューワ実行ファイルを直接実行しないでください。代わりに、既存のショートカットの内のどれかをアップデートし、SL_Launcher を実行してください。
+	</notification>
 	<notification name="OldGPUDriver">
 		グラフィックスチップに最新のドライバがある可能性があります。グラフィックドライバを更新することにより、大幅にパフォーマンスが向上します。
 
@@ -1610,32 +1613,92 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 		未加工の地形ファイルをダウンロードしました：
 [DOWNLOAD_PATH]
 	</notification>
+	<notification name="DownloadWindowsMandatory">
+		[APP_NAME] の最新バージョンがご利用可能です。
+[MESSAGE]
+[APP_NAME] をご利用になるにはこのアップデートは必須です。
+		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadWindows">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadWindowsReleaseForDownload">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadLinuxMandatory">
+		[APP_NAME] の最新バージョンがご利用可能です。
+[MESSAGE]
+[APP_NAME] をご利用になるにはこのアップデートは必須です。
+		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadLinux">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadLinuxReleaseForDownload">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadMacMandatory">
+		[APP_NAME] の最新バージョンがご利用可能です。
+[MESSAGE]
+[APP_NAME] をご利用になるにはこのアップデートは必須です。
+
+あなたのアプリケーションフォルダにダウンロードしますか？
+		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadMac">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+
+あなたのアプリケーションフォルダにダウンロードしますか？
+		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
+	</notification>
+	<notification name="DownloadMacReleaseForDownload">
+		[APP_NAME] のアップデートバージョンがご利用可能です。
+[MESSAGE]
+このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
+
+あなたのアプリケーションフォルダにダウンロードしますか？
+		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
+	</notification>
 	<notification name="FailedUpdateInstall">
 		ビューワのアップデートをインストール中にエラーが発生しました。
-https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
+http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		必要なアップデートをインストールできませんでした。 
 [APP_NAME] がアップデートされるまでログインできません。
 
-https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
+http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、https://get.catznip.com からダウンロードして、今すぐインストールできます。
+このアップデートは、http://www.secondlife.com/downloads からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
+バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
+バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1695,6 +1758,7 @@ https://get.catznip.com から最新バージョンをダウンロードして�
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		ご利用のビューワは最新です!
+最新の機能と修正を今すぐ試したい場合は、代替ビューワページ (http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers) をチェックしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
@@ -3496,6 +3560,10 @@ M キーを押して変更します。
 お使いのルーターの SIP ALG 機能をすべて無効にしてください。
 
 ボイスチャットによるコミュニケーションが利用できません。
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		ボイスサーバーに接続できません。ボイスチャットによるコミュニケーションが利用できません。お使いのネットワークやファイアウォールの設定を確認してください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">

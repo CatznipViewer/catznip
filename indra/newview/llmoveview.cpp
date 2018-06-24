@@ -846,9 +846,9 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 //		left_tb_width = toolbar_left->getRect().getWidth();
 //	}
 //
-//	if (!mStateManagementButtons.get())
+//	if (!mStateManagementButtons.get()) // Obsolete?!!
 //	{
-//		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
+//		LLPanel* panel_ssf_container = gToolBarView->getChild<LLPanel>("state_management_buttons_container");
 //		if (panel_ssf_container)
 //		{
 //			mStateManagementButtons = panel_ssf_container->getHandle();

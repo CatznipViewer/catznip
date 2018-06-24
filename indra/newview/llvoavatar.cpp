@@ -100,6 +100,7 @@
 // [RLVa:KB] - Checked: RLVa-2.0.1
 #include "rlvactions.h"
 #include "rlvhandler.h"
+#include "rlvmodifiers.h"
 // [/RLVa:KB]
 
 #include "llgesturemgr.h" //needed to trigger the voice gesticulations
@@ -1014,7 +1015,7 @@ void LLVOAvatar::dumpBakedStatus()
 				const ETextureIndex index = baked_dict->mTextureIndex;
 				if (!inst->isTextureDefined(index))
 				{
-					LL_CONT << " " << LLAvatarAppearanceDictionary::getInstance()->getTexture(index)->mName;
+					LL_CONT << " " << (LLAvatarAppearanceDictionary::getInstance()->getTexture(index) ? LLAvatarAppearanceDictionary::getInstance()->getTexture(index)->mName : "");
 				}
 			}
 			LL_CONT << " ) " << inst->getUnbakedPixelAreaRank();
@@ -3469,6 +3470,12 @@ bool LLVOAvatar::isVisuallyMuted()
         {
             muted = true;
         }
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+//		else if (isRlvSilhouette())
+//		{
+//			muted = true;
+//		}
+// [/RLVa:KB]
 		else
 		{
 			muted = isTooComplex();
@@ -3496,6 +3503,33 @@ bool LLVOAvatar::isInMuteList()
 	}
 	return muted;
 }
+
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+bool LLVOAvatar::isRlvSilhouette() const
+{
+	if (!gRlvHandler.hasBehaviour(RLV_BHVR_SETCAM_AVDIST))
+		return false;
+
+	static RlvCachedBehaviourModifier<float> s_nSetCamAvDist(RLV_MODIFIER_SETCAM_AVDIST);
+
+	const F64 now = LLFrameTimer::getTotalSeconds();
+	if (now >= mCachedRlvSilhouetteUpdateTime)
+	{
+		const F64 SECONDS_BETWEEN_NEARBY_UPDATES = .5f;
+		bool fIsRlvSilhouette = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) > s_nSetCamAvDist() * s_nSetCamAvDist();
+		if (fIsRlvSilhouette != mCachedIsRlvSilhouette)
+		{
+			mCachedIsRlvSilhouette = fIsRlvSilhouette;
+			mNeedsImpostorUpdate = TRUE;
+		}
+		mCachedRlvSilhouetteUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		mCachedRenderAvatarAsUpdateTime = 0.f;
+// [/SL:KB]
+	}
+	return mCachedIsRlvSilhouette;
+}
+// [/RLVa:KB]
 
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 bool LLVOAvatar::isNearby() const
@@ -3541,7 +3575,13 @@ LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
 	}
 
 	LLVOAvatar::ERenderOthersAs eRenderAs = (LLVOAvatar::ERenderOthersAs)render_others_as();
-	if ( (eRenderAs == ERenderOthersAs::NORMALLY) || (isSelf()) ||
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+	if (isRlvSilhouette())
+	{
+		mCachedRenderAvatarAs = ERenderAvatarAs::SILHOUETTE;
+	}
+// [/RLVa:KB]
+	else if ( (eRenderAs == ERenderOthersAs::NORMALLY) || (isSelf()) ||
          ( (eRenderAs != ERenderOthersAs::INVISIBLE) && ( ((always_render_friends) && (isFriend())) ||
 	                                                      ((always_render_nearby) && (isNearby())) ||
 		                                                  (AV_ALWAYS_RENDER == mVisuallyMuteSetting) ) ) )
@@ -3564,7 +3604,10 @@ LLVOAvatar::ERenderAvatarAs LLVOAvatar::getRenderAvatarAs() const
 	{
 		mCachedRenderAvatarAs = ERenderAvatarAs::INVISIBLE;
 	}
-	const F64 SECONDS_BETWEEN_RENDERAVATARAS_UPDATES = 1.f;
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+	const F64 SECONDS_BETWEEN_RENDERAVATARAS_UPDATES = .5f;
+// [/RLVa:KB]
+//	const F64 SECONDS_BETWEEN_RENDERAVATARAS_UPDATES = 1.f;
 	mCachedRenderAvatarAsUpdateTime = now + SECONDS_BETWEEN_RENDERAVATARAS_UPDATES;
 	return mCachedRenderAvatarAs;
 }
@@ -4939,7 +4982,7 @@ void LLVOAvatar::collectLocalTextureUUIDs(std::set<LLUUID>& ids) const
 			if (imagep)
 			{
 				const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture((ETextureIndex)texture_index);
-				if (texture_dict->mIsLocalTexture)
+				if (texture_dict && texture_dict->mIsLocalTexture)
 				{
 					ids.insert(imagep->getID());
 				}
@@ -5105,8 +5148,8 @@ void LLVOAvatar::updateTextures()
 			if (imagep)
 			{
 				const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture((ETextureIndex)texture_index);
-				const EBakedTextureIndex baked_index = texture_dict->mBakedTextureIndex;
-				if (texture_dict->mIsLocalTexture)
+				const EBakedTextureIndex baked_index = texture_dict ? texture_dict->mBakedTextureIndex : EBakedTextureIndex::BAKED_NUM_INDICES;
+				if (texture_dict && texture_dict->mIsLocalTexture)
 				{
 					addLocalTextureStats((ETextureIndex)texture_index, imagep, texel_area_ratio, render_avatar, mBakedTextureDatas[baked_index].mIsUsed);
 				}
@@ -5557,6 +5600,11 @@ LLUUID LLVOAvatar::remapMotionID(const LLUUID& id)
 		{
 			if (use_new_walk_run)
 				result = ANIM_AGENT_RUN_NEW;
+		}
+		// keeps in sync with setSex() related code (viewer controls sit's sex)
+		else if (id == ANIM_AGENT_SIT_FEMALE)
+		{
+			result = ANIM_AGENT_SIT;
 		}
 	
 	}
@@ -6329,7 +6377,26 @@ void LLVOAvatar::initAttachmentPoints(bool ignore_hud_joints)
 //-----------------------------------------------------------------------------
 void LLVOAvatar::updateVisualParams()
 {
-	setSex( (getVisualParamWeight( "male" ) > 0.5f) ? SEX_MALE : SEX_FEMALE );
+	ESex avatar_sex = (getVisualParamWeight("male") > 0.5f) ? SEX_MALE : SEX_FEMALE;
+	if (getSex() != avatar_sex)
+	{
+		if (mIsSitting && findMotion(avatar_sex == SEX_MALE ? ANIM_AGENT_SIT_FEMALE : ANIM_AGENT_SIT) != NULL)
+		{
+			// In some cases of gender change server changes sit motion with motion message,
+			// but in case of some avatars (legacy?) there is no update from server side,
+			// likely because server doesn't know about difference between motions
+			// (female and male sit ids are same server side, so it is likely unaware that it
+			// need to send update)
+			// Make sure motion is up to date
+			stopMotion(ANIM_AGENT_SIT);
+			setSex(avatar_sex);
+			startMotion(ANIM_AGENT_SIT);
+		}
+		else
+		{
+			setSex(avatar_sex);
+		}
+	}
 
 	LLCharacter::updateVisualParams();
 
@@ -8803,6 +8870,8 @@ void LLVOAvatar::dumpArchetypeXML(const std::string& prefix, bool group_by_weara
 		apr_file_printf( file, "<linden_genepool version=\"1.0\">\n" );
 		apr_file_printf( file, "\n\t<archetype name=\"???\">\n" );
 
+		bool agent_is_godlike = gAgent.isGodlikeWithoutAdminMenuFakery();
+
 		if (group_by_wearables)
 		{
 			for (S32 type = LLWearableType::WT_SHAPE; type < LLWearableType::WT_COUNT; type++)
@@ -8828,8 +8897,11 @@ void LLVOAvatar::dumpArchetypeXML(const std::string& prefix, bool group_by_weara
 						LLViewerTexture* te_image = getImage((ETextureIndex)te, 0);
 						if( te_image )
 						{
-							std::string uuid_str;
-							te_image->getID().toString( uuid_str );
+							std::string uuid_str = LLUUID().asString();
+							if (agent_is_godlike)
+							{
+								te_image->getID().toString(uuid_str);
+							}
 							apr_file_printf( file, "\t\t<texture te=\"%i\" uuid=\"%s\"/>\n", te, uuid_str.c_str());
 						}
 					}
@@ -8851,8 +8923,11 @@ void LLVOAvatar::dumpArchetypeXML(const std::string& prefix, bool group_by_weara
 				LLViewerTexture* te_image = getImage((ETextureIndex)te, 0);
 				if( te_image )
 				{
-					std::string uuid_str;
-					te_image->getID().toString( uuid_str );
+					std::string uuid_str = LLUUID().asString();
+					if (agent_is_godlike)
+					{
+						te_image->getID().toString(uuid_str);
+					}
 					apr_file_printf( file, "\t\t<texture te=\"%i\" uuid=\"%s\"/>\n", te, uuid_str.c_str());
 				}
 			}
@@ -9644,6 +9719,15 @@ void LLVOAvatar::calcMutedAVColor()
 
     if (getVisualMuteSettings() == AV_DO_NOT_RENDER)
     {
+// [RLVa:KB] - Checked: RLVa-2.2 (@setcam_avdist)
+//		 if (isRlvSilhouette())
+//		 {
+//			 new_color = LLColor4::silhouette;
+//			 change_msg = " not rendered: color is silhouette";
+//		 }
+//		 else
+//		 {
+// [/RLVa:KB]
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.3
 		if (ERenderAvatarAs::SILHOUETTE == getRenderAvatarAs())
 		{

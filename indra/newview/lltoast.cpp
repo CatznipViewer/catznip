@@ -35,6 +35,7 @@
 #include "llviewercontrol.h"
 
 using namespace LLNotificationsUI;
+std::list<LLToast*> LLToast::sModalToastsList;
 
 //--------------------------------------------------------------------------
 LLToastLifeTimer::LLToastLifeTimer(LLToast* toast, F32 period)
@@ -148,6 +149,11 @@ LLToast::LLToast(const LLToast::Params& p)
 		mOnDeleteToastSignal.connect(p.on_delete_toast());
 	}
 
+	if (isModal())
+	{
+		sModalToastsList.push_front(this);
+	}
+
 // [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
 	setFrontmostToast(p.is_frontmost);
 // [/SL:KB]
@@ -194,6 +200,15 @@ LLToast::~LLToast()
 	else
 	{
 		mOnToastDestroyedSignal(this);
+	}
+
+	if (isModal())
+	{
+		std::list<LLToast*>::iterator iter = std::find(sModalToastsList.begin(), sModalToastsList.end(), this);
+		if (iter != sModalToastsList.end())
+		{
+			sModalToastsList.erase(iter);
+		}
 	}
 }
 
