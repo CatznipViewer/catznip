@@ -138,8 +138,8 @@ void LLFilePickerThread::getFile()
 //virtual 
 void LLFilePickerThread::run()
 {
-	LLFilePicker picker;
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+	LLFilePicker picker;
 	switch (mPickerType)
 	{
 		case OPEN_SINGLE:
@@ -185,16 +185,34 @@ void LLFilePickerThread::run()
 	}
 // [/SL:KB]
 //#if LL_WINDOWS
-//	if (picker.getOpenFile(mFilter, false))
-//	{
-//		mFile = picker.getFirstFile();
-//	}
+//	bool blocking = false;
 //#else
-//	if (picker.getOpenFile(mFilter, true))
-//	{
-//		mFile = picker.getFirstFile();
-//	}
+//	bool blocking = true; // modal
 //#endif
+//
+//	LLFilePicker picker;
+//
+//	if (mIsSaveDialog)
+//	{
+//		if (picker.getSaveFile(mSaveFilter, mProposedName, blocking))
+//		{
+//			mResponses.push_back(picker.getFirstFile());
+//		}
+//	}
+//	else
+//	{
+//		bool result = mIsGetMultiple ? picker.getMultipleOpenFiles(mLoadFilter, blocking) : picker.getOpenFile(mLoadFilter, blocking);
+//		if (result)
+//		{
+//			std::string filename = picker.getFirstFile(); // consider copying mFiles directly
+//			do
+//			{
+//				mResponses.push_back(filename);
+//				filename = picker.getNextFile();
+//			}
+//			while (mIsGetMultiple && !filename.empty());
+//		}
+//	}
 
 	{
 		LLMutexLock lock(sMutex);
@@ -230,13 +248,47 @@ void LLFilePickerThread::clearDead()
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 			thread->notify(thread->mFiles);
 // [/SL:KB]
-//			thread->notify(thread->mFile);
+//			thread->notify(thread->mResponses);
 			delete thread;
 			sDeadQ.pop();
 		}
 	}
 }
 
+//LLFilePickerReplyThread::LLFilePickerReplyThread(const file_picked_signal_t::slot_type& cb, LLFilePicker::ELoadFilter filter, bool get_multiple)
+//	: LLFilePickerThread(filter, get_multiple),
+//	mLoadFilter(filter),
+//	mSaveFilter(LLFilePicker::FFSAVE_ALL),
+//	mFilePickedSignal(NULL)
+//{
+//	mFilePickedSignal = new file_picked_signal_t();
+//	mFilePickedSignal->connect(cb);
+//}
+
+//LLFilePickerReplyThread::LLFilePickerReplyThread(const file_picked_signal_t::slot_type& cb, LLFilePicker::ESaveFilter filter, const std::string &proposed_name)
+//	: LLFilePickerThread(filter, proposed_name),
+//	mLoadFilter(LLFilePicker::FFLOAD_ALL),
+//	mSaveFilter(filter),
+//	mFilePickedSignal(NULL)
+//{
+//	mFilePickedSignal = new file_picked_signal_t();
+//	mFilePickedSignal->connect(cb);
+//}
+
+//LLFilePickerReplyThread::~LLFilePickerReplyThread()
+//{
+//	delete mFilePickedSignal;
+//}
+
+//void LLFilePickerReplyThread::notify(const std::vector<std::string>& filenames)
+//{
+//	if (filenames.empty()) return;
+//
+//	if (mFilePickedSignal)
+//	{
+//		(*mFilePickedSignal)(filenames, mLoadFilter, mSaveFilter);
+//	}
+//}
 
 //============================================================================
 
@@ -283,69 +335,27 @@ std::string build_extensions_string(LLFilePicker::ELoadFilter filter)
 	}
 }
 
-/**
-   char* upload_pick(void* data)
-
-   If applicable, brings up a file chooser in which the user selects a file
-   to upload for a particular task.  If the file is valid for the given action,
-   returns the string to the full path filename, else returns NULL.
-   Data is the load filter for the type of file as defined in LLFilePicker.
-**/
-//const std::string upload_pick(void* data)
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-void upload_pick(LLFilePicker::ELoadFilter filter)
-// [/SL:KB]
+const bool check_file_extension(const std::string& filename, LLFilePicker::ELoadFilter type)
 {
- 	if( gAgentCamera.cameraMouselook() )
-	{
-		gAgentCamera.changeCameraToDefault();
-		// This doesn't seem necessary. JC
-		// display();
-	}
-
-//	LLFilePicker::ELoadFilter type;
-//	if(data)
-//	{
-//		type = (LLFilePicker::ELoadFilter)((intptr_t)data);
-//	}
-//	else
-//	{
-//		type = LLFilePicker::FFLOAD_ALL;
-//	}
-//
-//	LLFilePicker& picker = LLFilePicker::instance();
-//	if (!picker.getOpenFile(type))
-//	{
-//		LL_INFOS() << "Couldn't import objects from file" << LL_ENDL;
-//		return std::string();
-//	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	LLFilePicker::getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
-}
-
-void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& filename)
-{
 	if (filename.empty())
 	{
-		return;
+		return false;
 	}
 // [/SL:KB]
-//	const std::string& filename = picker.getFirstFile();
+
 	std::string ext = gDirUtilp->getExtension(filename);
 
 	//strincmp doesn't like NULL pointers
 	if (ext.empty())
 	{
 		std::string short_name = gDirUtilp->getBaseFileName(filename);
-		
+
 		// No extension
 		LLSD args;
 		args["FILE"] = short_name;
 		LLNotificationsUtil::add("NoFileExtension", args);
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-		return;
-// [/SL:KB]
-//		return std::string();
+		return false;
 	}
 	else
 	{
@@ -357,7 +367,7 @@ void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& fil
 		std::string valid_extensions = build_extensions_string(type);
 
 		BOOL ext_valid = FALSE;
-		
+
 		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 		boost::char_separator<char> sep(" ");
 		tokenizer tokens(valid_extensions, sep);
@@ -366,9 +376,9 @@ void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& fil
 		//now loop over all valid file extensions
 		//and compare them to the extension of the file
 		//to be uploaded
-		for( token_iter = tokens.begin();
-			 token_iter != tokens.end() && ext_valid != TRUE;
-			 ++token_iter)
+		for (token_iter = tokens.begin();
+			token_iter != tokens.end() && ext_valid != TRUE;
+			++token_iter)
 		{
 			const std::string& cur_token = *token_iter;
 
@@ -388,73 +398,156 @@ void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& fil
 			args["EXTENSION"] = ext;
 			args["VALIDS"] = valid_extensions;
 			LLNotificationsUtil::add("InvalidFileExtension", args);
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-			return;
-// [/SL:KB]
-//			return std::string();
+			return false;
 		}
 	}//end else (non-null extension)
-
-	//valid file extension
-	
-	//now we check to see
-	//if the file is actually a valid image/sound/etc.
-	if (type == LLFilePicker::FFLOAD_WAV)
-	{
-		// pre-qualify wavs to make sure the format is acceptable
-		std::string error_msg;
-		if (check_for_invalid_wav_formats(filename,error_msg))
-		{
-			LL_INFOS() << error_msg << ": " << filename << LL_ENDL;
-			LLSD args;
-			args["FILE"] = filename;
-			LLNotificationsUtil::add( error_msg, args );
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-			return;
-// [/SL:KB]
-//			return std::string();
-		}
-	}//end if a wave/sound file
-
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	std::string strFloater;
-	switch (type)
-	{
-		case LLFilePicker::FFLOAD_ANIM:
-			strFloater = (filename.rfind(".anim") != std::string::npos) ? "upload_anim_anim" : "upload_anim_bvh";
-			break;
-		case LLFilePicker::FFLOAD_IMAGE:
-			strFloater = "upload_image";
-			break;
-		case LLFilePicker::FFLOAD_WAV:
-			strFloater = "upload_sound";
-			break;
-		case LLFilePicker::FFLOAD_MODEL:
-			if (LLFloaterModelPreview* pFloaterModelPreview = LLFloaterReg::getTypedInstance<LLFloaterModelPreview>("upload_model"))
-				pFloaterModelPreview->loadModel(LLModel::LOD_HIGH, filename);
-			return;
-		default:
-			break;
-	}
-
-	if (!strFloater.empty())
-	{
-		LLFloaterReg::showInstance(strFloater, LLSD(filename));
-	}
-// [/SL:KB]
-//	return filename;
+	return true;
 }
+
+//const void upload_single_file(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter type)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+const void upload_single_file(const std::string& filename, LLFilePicker::ELoadFilter type)
+// [/SL:KB]
+{
+//	std::string filename = filenames[0];
+	if (!check_file_extension(filename, type)) return;
+	
+	if (!filename.empty())
+	{
+		if (type == LLFilePicker::FFLOAD_WAV)
+		{
+			// pre-qualify wavs to make sure the format is acceptable
+			std::string error_msg;
+			if (check_for_invalid_wav_formats(filename, error_msg))
+			{
+				LL_INFOS() << error_msg << ": " << filename << LL_ENDL;
+				LLSD args;
+				args["FILE"] = filename;
+				LLNotificationsUtil::add(error_msg, args);
+				return;
+			}
+//			else
+//			{
+//				LLFloaterReg::showInstance("upload_sound", LLSD(filename));
+//			}
+		}
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+		std::string strFloater;
+		switch (type)
+		{
+			case LLFilePicker::FFLOAD_ANIM:
+				strFloater = (filename.rfind(".anim") != std::string::npos) ? "upload_anim_anim" : "upload_anim_bvh";
+				break;
+			case LLFilePicker::FFLOAD_IMAGE:
+				strFloater = "upload_image";
+				break;
+			case LLFilePicker::FFLOAD_WAV:
+				strFloater = "upload_sound";
+				break;
+			case LLFilePicker::FFLOAD_MODEL:
+				if (LLFloaterModelPreview* pFloaterModelPreview = LLFloaterReg::getTypedInstance<LLFloaterModelPreview>("upload_model"))
+					pFloaterModelPreview->loadModel(LLModel::LOD_HIGH, filename);
+				return;
+			default:
+				break;
+		}
+
+		if (!strFloater.empty())
+		{
+			LLFloaterReg::showInstance(strFloater, LLSD(filename));
+		}
+// [/SL:KB]
+//		if (type == LLFilePicker::FFLOAD_IMAGE)
+//		{
+//			LLFloaterReg::showInstance("upload_image", LLSD(filename));
+//		}
+//		if (type == LLFilePicker::FFLOAD_ANIM)
+//		{
+//			if (filename.rfind(".anim") != std::string::npos)
+//			{
+//				LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
+//			}
+//			else
+//			{
+//				LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
+//			}
+//		}		
+	}
+	return;
+}
+
+
+//const void upload_bulk(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter type)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+const void upload_bulk(const std::vector<std::string>& filenames)
+// [/SL:KB]
+{
+	// TODO:
+	// Check user balance for entire cost
+	// Charge user entire cost
+	// Loop, uploading
+	// If an upload fails, refund the user for that one
+	//
+	// Also fix single upload to charge first, then refund
+
+	S32 expected_upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
+	for (std::vector<std::string>::const_iterator in_iter = filenames.begin(); in_iter != filenames.end(); ++in_iter)
+	{
+		std::string filename = (*in_iter);
+//		if (!check_file_extension(filename, type)) continue;
+		
+		std::string name = gDirUtilp->getBaseFileName(filename, true);
+		std::string asset_name = name;
+		LLStringUtil::replaceNonstandardASCII(asset_name, '?');
+		LLStringUtil::replaceChar(asset_name, '|', '?');
+		LLStringUtil::stripNonprintable(asset_name);
+		LLStringUtil::trim(asset_name);
+
+		LLResourceUploadInfo::ptr_t uploadInfo(new LLNewFileResourceUploadInfo(
+			filename,
+			asset_name,
+			asset_name, 0,
+			LLFolderType::FT_NONE, LLInventoryType::IT_NONE,
+			LLFloaterPerms::getNextOwnerPerms("Uploads"),
+			LLFloaterPerms::getGroupPerms("Uploads"),
+			LLFloaterPerms::getEveryonePerms("Uploads"),
+			expected_upload_cost));
+
+		upload_new_resource(uploadInfo, NULL, NULL);
+	}
+}
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+/**
+   char* upload_pick(void* data)
+
+   If applicable, brings up a file chooser in which the user selects a file
+   to upload for a particular task.  If the file is valid for the given action,
+   returns the string to the full path filename, else returns NULL.
+   Data is the load filter for the type of file as defined in LLFilePicker.
+**/
+void upload_pick(LLFilePicker::ELoadFilter filter)
+{
+ 	if (gAgentCamera.cameraMouselook())
+	{
+		gAgentCamera.changeCameraToDefault();
+	}
+
+	LLFilePicker::getOpenFile(filter, boost::bind(&upload_single_file, _1, filter));
+}
+// [/SL:KB]
 
 //class LLFileUploadImage : public view_listener_t
 //{
 //	bool handleEvent(const LLSD& userdata)
 //	{
-//		std::string filename = upload_pick((void *)LLFilePicker::FFLOAD_IMAGE);
-//		if (!filename.empty())
+//		if (gAgentCamera.cameraMouselook())
 //		{
-//			LLFloaterReg::showInstance("upload_image", LLSD(filename));
+//			gAgentCamera.changeCameraToDefault();
 //		}
-//		return TRUE;
+//		(new LLFilePickerReplyThread(boost::bind(&upload_single_file, _1, _2), LLFilePicker::FFLOAD_IMAGE, false))->getFile();
+//		return true;
 //	}
 //};
 
@@ -476,11 +569,11 @@ class LLFileUploadModel : public view_listener_t
 //{
 //	bool handleEvent(const LLSD& userdata)
 //	{
-//		std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_WAV);
-//		if (!filename.empty())
+//		if (gAgentCamera.cameraMouselook())
 //		{
-//			LLFloaterReg::showInstance("upload_sound", LLSD(filename));
+//			gAgentCamera.changeCameraToDefault();
 //		}
+//		(new LLFilePickerReplyThread(boost::bind(&upload_single_file, _1, _2), LLFilePicker::FFLOAD_WAV, false))->getFile();
 //		return true;
 //	}
 //};
@@ -489,19 +582,11 @@ class LLFileUploadModel : public view_listener_t
 //{
 //	bool handleEvent(const LLSD& userdata)
 //	{
-//		const std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_ANIM);
-//		if (!filename.empty())
+//		if (gAgentCamera.cameraMouselook())
 //		{
-//			if (filename.rfind(".anim") != std::string::npos)
-//			{
-//				LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
-//			}
-//			else
-//			{
-//				LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
-//			}
+//			gAgentCamera.changeCameraToDefault();
 //		}
-//
+//		(new LLFilePickerReplyThread(boost::bind(&upload_single_file, _1, _2), LLFilePicker::FFLOAD_ANIM, false))->getFile();
 //		return true;
 //	}
 //};
@@ -510,80 +595,17 @@ class LLFileUploadBulk : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		if( gAgentCamera.cameraMouselook() )
+		if (gAgentCamera.cameraMouselook())
 		{
 			gAgentCamera.changeCameraToDefault();
 		}
-
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 		LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, boost::bind(upload_bulk, _1));
-
+// [/SL:KB]
+//		(new LLFilePickerReplyThread(boost::bind(&upload_bulk, _1, _2), LLFilePicker::FFLOAD_ALL, true))->getFile();
 		return true;
 	}
 };
-
-	void upload_bulk(const std::vector<std::string>& files)
-	{
-// [/SL:KB]
-		// TODO:
-		// Check extensions for uploadability, cost
-		// Check user balance for entire cost
-		// Charge user entire cost
-		// Loop, uploading
-		// If an upload fails, refund the user for that one
-		//
-		// Also fix single upload to charge first, then refund
-
-//		LLFilePicker& picker = LLFilePicker::instance();
-//		if (picker.getMultipleOpenFiles())
-//		{
-//            std::string filename = picker.getFirstFile();
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-		if (!files.empty())
-		{
-			bool fHasNewFileUpload = (gAgent.getRegion()) ? !gAgent.getRegion()->getCapability("NewFileAgentInventory").empty() : false;
-// [/SL:KB]
-            S32 expected_upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
-
-//            while (!filename.empty())
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-			for (const std::string& filename : files)
-// [/SL:KB]
-            {
-                std::string name = gDirUtilp->getBaseFileName(filename, true);
-
-                std::string asset_name = name;
-                LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
-                LLStringUtil::replaceChar(asset_name, '|', '?');
-                LLStringUtil::stripNonprintable(asset_name);
-                LLStringUtil::trim(asset_name);
-
-                LLResourceUploadInfo::ptr_t uploadInfo(new LLNewFileResourceUploadInfo(
-                    filename,
-                    asset_name,
-                    asset_name, 0,
-                    LLFolderType::FT_NONE, LLInventoryType::IT_NONE,
-                    LLFloaterPerms::getNextOwnerPerms("Uploads"),
-                    LLFloaterPerms::getGroupPerms("Uploads"),
-                    LLFloaterPerms::getEveryonePerms("Uploads"),
-                    expected_upload_cost));
-
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-				std::list<std::string>* pFileList = (!fHasNewFileUpload) ? new std::list<std::string>(files.begin() + 1, files.end()) : nullptr;
-				upload_new_resource(uploadInfo, NULL, pFileList);
-// [/SL:KB]
-//                upload_new_resource(uploadInfo, NULL, NULL);
-//
-//                filename = picker.getNextFile();
-            }
-		}
-		else
-		{
-			LL_INFOS() << "Couldn't import objects from file" << LL_ENDL;
-		}
-//		return true;
-	}
-//};
 
 void upload_error(const std::string& error_message, const std::string& label, const std::string& filename, const LLSD& args) 
 {

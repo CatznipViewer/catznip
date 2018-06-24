@@ -53,6 +53,7 @@
 #include "llviewercontrol.h"
 // [/SL:KB]
 #include "llviewerinventory.h"
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 #include "llviewertexture.h"
 #include "llviewertexturelist.h"
 #include "lluictrlfactory.h"
@@ -392,49 +393,44 @@ void LLPreviewTexture::saveAs(LLFilePicker::ESaveFilter filter)
 	if( mLoadingFullImage )
 		return;
 
-//	LLFilePicker& file_picker = LLFilePicker::instance();
-	const LLInventoryItem* item = getItem() ;
-////	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TGAPNG, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
-//// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
-//	if( !file_picker.getSaveFile(filter, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
-//// [/SL:KB]
-//	{
-//		// User canceled or we failed to acquire save file.
-//		return;
-//	}
+	std::string filename = getItem() ? LLDir::getScrubbedFileName(getItem()->getName()) : LLStringUtil::null;
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getSaveFile(filter, (item) ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null,
-		boost::bind(&LLPreviewTexture::save, this, _1));
+	LLFilePicker::getSaveFile(filter, filename, boost::bind(&LLPreviewTexture::saveTextureToFile, this, _1));
+// [/SL:KB]
+//	(new LLFilePickerReplyThread(boost::bind(&LLPreviewTexture::saveTextureToFile, this, _1), LLFilePicker::FFSAVE_TGAPNG, filename))->getFile();
 }
 
-void LLPreviewTexture::save(const std::string& filename)
+//void LLPreviewTexture::saveTextureToFile(const std::vector<std::string>& filenames)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLPreviewTexture::saveTextureToFile(const std::string& filename)
+// [/SL:KB]
 {
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	if(filename.empty())
 	{
 		// User canceled or we failed to acquire save file.
 		return;
 	}
-
-	mSaveFileName = filename;
-
-	const LLInventoryItem* item = getItem();
 // [/SL:KB]
 
-	if(mPreviewToSave)
+	const LLInventoryItem* item = getItem();
+	if (item && mPreviewToSave)
 	{
 		mPreviewToSave = FALSE;
 		LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", item->getUUID());
 	}
 
-//	// remember the user-approved/edited file name.
-//	mSaveFileName = file_picker.getFirstFile();
-
+	// remember the user-approved/edited file name.
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	mSaveFileName = filename;
+// [/SL:KB]
+//	mSaveFileName = filenames[0];
 	mLoadingFullImage = TRUE;
 	getWindow()->incBusyCount();
 
-	mImage->forceToSaveRawImage(0) ;//re-fetch the raw image if the old one is removed.
-	mImage->setLoadedCallback( LLPreviewTexture::onFileLoadedForSave, 
-								0, TRUE, FALSE, new LLUUID( mItemUUID ), &mCallbackTextureList );
+	mImage->forceToSaveRawImage(0);//re-fetch the raw image if the old one is removed.
+	mImage->setLoadedCallback(LLPreviewTexture::onFileLoadedForSave,
+		0, TRUE, FALSE, new LLUUID(mItemUUID), &mCallbackTextureList);
 }
 
 // virtual
