@@ -686,23 +686,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 
         case IM_TYPING_START:
         {
-//            std::vector<U8> bucket(binary_bucket[0], binary_bucket_size);
-//            LLSD data;
-//            data["binary_bucket"] = bucket;
-//            LLPointer<LLIMInfo> im_info = new LLIMInfo(from_id,
-//                    from_group,
-//                    to_id,
-//                    dialog,
-//                    agentName,
-//                    message,
-//                    session_id,
-//                    parent_estate_id,
-//                    region_id,
-//                    position,
-//                    data,
-//                    offline,
-//                    timestamp);
-//            gIMMgr->processIMTypingStart(im_info);
+//            gIMMgr->processIMTypingStart(from_id, dialog);
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
             gIMMgr->processIMTyping(session_id, true);
 // [/SL:KB]
@@ -711,23 +695,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 
         case IM_TYPING_STOP:
         {
-//            std::vector<U8> bucket(binary_bucket[0], binary_bucket_size);
-//            LLSD data;
-//            data["binary_bucket"] = bucket;
-//            LLPointer<LLIMInfo> im_info = new LLIMInfo(from_id,
-//                    from_group,
-//                    to_id,
-//                    dialog,
-//                    agentName,
-//                    message,
-//                    session_id,
-//                    parent_estate_id,
-//                    region_id,
-//                    position,
-//                    data,
-//                    offline,
-//                    timestamp);
-//            gIMMgr->processIMTypingStop(im_info);
+//            gIMMgr->processIMTypingStop(from_id, dialog);
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
             gIMMgr->processIMTyping(session_id, false);
 // [/SL:KB]

@@ -682,6 +682,9 @@ Visitare [_URL] per ulteriori informazioni?
 		</url>
 		<usetemplate ignoretext="L&apos;hardware di questo computer non è compatibile" name="okcancelignore" notext="No" yestext="Si"/>
 	</notification>
+	<notification name="RunLauncher">
+		Non avviare direttamente il viewer eseguibile. Aggiorna le scorciatoie attuali per avviare invece il Launcher_SL.
+	</notification>
 	<notification name="OldGPUDriver">
 		È probabile che ci sia un driver aggiornato per il processore grafico. L&apos;aggiornamento dei driver della grafica può migliorare le prestazioni in maniera significativa.
 
@@ -1581,10 +1584,70 @@ Imposta l&apos;oggetto per la vendita e riprova.
 		Hai terminato di scaricare il file del terreno nella cartella:
 [DOWNLOAD_PATH].
 	</notification>
+	<notification name="DownloadWindowsMandatory">
+		È disponibile una nuova versione di [APP_NAME].
+[MESSAGE]
+Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
+		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
+	<notification name="DownloadWindows">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
+	<notification name="DownloadWindowsReleaseForDownload">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
+	<notification name="DownloadLinuxMandatory">
+		È disponibile una nuova versione di [APP_NAME].
+[MESSAGE]
+Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
+		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica"/>
+	</notification>
+	<notification name="DownloadLinux">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
+	</notification>
+	<notification name="DownloadLinuxReleaseForDownload">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
+	</notification>
+	<notification name="DownloadMacMandatory">
+		È disponibile una nuova versione di [APP_NAME].
+[MESSAGE]
+Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
+
+Scaricare nella cartella Applicazioni?
+		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
+	<notification name="DownloadMac">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+
+Scaricare nella cartella Applicazioni?
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
+	<notification name="DownloadMacReleaseForDownload">
+		È disponibile una versione aggiornata di [APP_NAME].
+[MESSAGE]
+Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
+
+Scaricare nella cartella Applicazioni?
+		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
+	</notification>
 	<notification name="FailedUpdateInstall">
 		Si è verificato un errore durante l&apos;aggiornamento del viewer.
 Scarica e installa la versione più recente del viewer da
-https://get.catznip.com
+http://secondlife.com/download.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1592,24 +1655,24 @@ https://get.catznip.com
 Non potrai accedere fino a quando non verrà aggiornato [APP_NAME].
 
 Scarica e installa la versione più recente del viewer da
-https://get.catznip.com
+http://secondlife.com/download.
 		<usetemplate name="okbutton" yestext="Esci"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		È disponibile un aggiornamento obbligatorio per l&apos;installazione di Second Life.
 
-Puoi scaricare questo aggiornamento da https://get.catznip.com
+Puoi scaricare questo aggiornamento da http://www.secondlife.com/downloads
 oppure puoi installarlo adesso.
 		<usetemplate name="okcancelbuttons" notext="Esci da Second Life" yestext="Scarica e aggiorna adesso"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1669,6 +1732,7 @@ Riprova più tardi.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Il Viewer è aggiornato.
+Per provare le funzioni e modifiche più recenti, visita la pagina Alternate Viewers. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
@@ -3459,6 +3523,10 @@ Controlla le tue impostazione di rete e della firewall.
 Disabilita la funzione SIP ALG del router. 
 
 La comunicazione voce non sará possibile.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Stiamo riscontrando dei problemi nel connetterci al tuo server di voce. La comunicazione voce non sará possibile. Controlla le tue impostazione di rete e della firewall.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">

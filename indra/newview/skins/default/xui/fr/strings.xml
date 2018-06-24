@@ -77,11 +77,11 @@ Mémoire textures : [TEXTURE_MEMORY] Mo
 Durée de création VFS (cache) : [VFS_TIME]
 	</string>
 	<string name="AboutLibs">
-		Version J2C Decoder : [J2C_VERSION]
-Version Audio Driver : [AUDIO_DRIVER_VERSION]
-Version CEF : [LIBCEF_VERSION]
-Version LibVLC : [LIBVLC_VERSION]
-Version serveur vocal : [VOICE_VERSION]
+		J2C Decoder Version: [J2C_VERSION] 
+Audio Driver Version: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+LibVLC Version: [LIBVLC_VERSION] 
+Voice Server Version: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
 		Paquets perdus : [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
@@ -1465,6 +1465,9 @@ http://secondlife.com/support pour vous aider à résoudre ce problème.
 	</string>
 	<string name="InventoryNoMatchingItems">
 		Vous n&apos;avez pas trouvé ce que vous cherchiez ? Essayez [secondlife:///app/search/all/[SEARCH_TERM] Rechercher].
+	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Avez-vous trouvé ce que vous cherchiez ? Essayez [secondlife:///app/inventory/filters Show filters].
 	</string>
 	<string name="PlacesNoMatchingItems">
 		Vous n&apos;avez pas trouvé ce que vous cherchiez ? Essayez [secondlife:///app/search/places/[SEARCH_TERM] Rechercher].

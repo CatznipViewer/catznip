@@ -46,6 +46,7 @@
 #include "llimagetga.h"
 #include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
+#include "lltoast.h"
 #include "llfloaterperms.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
 #include "llsnapshotlivepreview.h"
@@ -602,7 +603,7 @@ class LLFileEnableCloseWindow : public view_listener_t
 		bool frontmost_fl_exists = (NULL != gFloaterView->getFrontmostClosableFloater());
 		bool frontmost_snapshot_fl_exists = (NULL != gSnapshotFloaterView->getFrontmostClosableFloater());
 
-		return frontmost_fl_exists || frontmost_snapshot_fl_exists;
+		return !LLNotificationsUI::LLToast::isAlertToastShown() && (frontmost_fl_exists || frontmost_snapshot_fl_exists);
 	}
 };
 
@@ -642,7 +643,7 @@ class LLFileEnableCloseAllWindows : public view_listener_t
 		bool is_floaters_snapshot_opened = (floater_snapshot && floater_snapshot->isInVisibleChain());
 // [/SL:KB]
 		bool open_children = gFloaterView->allChildrenClosed() && !is_floaters_snapshot_opened;
-		return !open_children;
+		return !open_children && !LLNotificationsUI::LLToast::isAlertToastShown();
 	}
 };
 

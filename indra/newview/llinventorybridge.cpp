@@ -833,6 +833,14 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 	if (obj)
 	{
+		
+//		items.push_back(std::string("Copy Separator"));
+//		items.push_back(std::string("Copy"));
+//		if (!isItemCopyable())
+//		{
+//			disabled_items.push_back(std::string("Copy"));
+//		}
+
 		if (obj->getIsLinkType())
 		{
 			items.push_back(std::string("Find Original"));
@@ -879,14 +887,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 					disabled_items.push_back(std::string("Copy Asset UUID"));
 				}
 			}
-//			items.push_back(std::string("Copy Separator"));
-//			
-//			items.push_back(std::string("Copy"));
-//			if (!isItemCopyable())
-//			{
-//				disabled_items.push_back(std::string("Copy"));
-//			}
-//
+
 //			items.push_back(std::string("Cut"));
 //			if (!isItemMovable() || !isItemRemovable())
 //			{
@@ -2361,11 +2362,6 @@ BOOL LLItemBridge::isItemCopyable() const
 			return (NULL != item->getLinkedItem());
 		}
 // [/SL:KB]
-//		// You can never copy a link.
-//		if (item->getIsLinkType())
-//		{
-//			return FALSE;
-//		}
 
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
 		return (item->getPermissions().allowCopyBy(gAgent.getID()));
@@ -4335,26 +4331,20 @@ void LLFolderBridge::perform_pasteFromClipboard()
                                     break;
                                 }
                             }
+                            else if (item->getIsLinkType())
+                            {
+                                link_inventory_object(parent_id, item_id,
+                                    LLPointer<LLInventoryCallback>(NULL));
+                            }
                             else
                             {
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
-								if (item->getPermissions().allowCopyBy(gAgent.getID()))
-								{
-// [/SL:KB]
-									copy_inventory_item(
-										gAgent.getID(),
-										item->getPermissions().getOwner(),
-										item->getUUID(),
-										parent_id,
-										std::string(),
-										LLPointer<LLInventoryCallback>(NULL));
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
-								}
-								else if (LLAssetType::lookupIsLinkType(item->getActualType()))
-								{
-									link_inventory_object(parent_id, item, LLPointer<LLInventoryCallback>(NULL));
-								}
-// [/SL:KB]
+								copy_inventory_item(
+									gAgent.getID(),
+									item->getPermissions().getOwner(),
+									item->getUUID(),
+									parent_id,
+									std::string(),
+									LLPointer<LLInventoryCallback>(NULL));
                             }
                         }
                     }

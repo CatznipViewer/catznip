@@ -35,6 +35,7 @@
 
 // Linden libs
 #include "llbutton.h"
+#include "llcheckboxctrl.h"
 #include "lltabcontainer.h"
 #include "llfloaterreg.h"
 #include "llfloaterpreference.h"
@@ -52,7 +53,9 @@ LLPanelVolumePulldown::LLPanelVolumePulldown()
 {
 	mHoverTimer.stop();
 
-    mCommitCallbackRegistrar.add("Vol.setControlFalse", boost::bind(&LLPanelVolumePulldown::setControlFalse, this, _2));
+	mCommitCallbackRegistrar.add("Vol.setControlFalse", boost::bind(&LLPanelVolumePulldown::setControlFalse, this, _2));
+	mCommitCallbackRegistrar.add("Vol.SetSounds", boost::bind(&LLPanelVolumePulldown::onClickSetSounds, this));
+	mCommitCallbackRegistrar.add("Vol.updateMediaAutoPlayCheckbox",	boost::bind(&LLPanelVolumePulldown::updateMediaAutoPlayCheckbox, this, _1));
 	mCommitCallbackRegistrar.add("Vol.GoAudioPrefs", boost::bind(&LLPanelVolumePulldown::onAdvancedButtonClick, this, _2));
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
 	mCommitCallbackRegistrar.add("Vol.ToggleMuteSounds", boost::bind(&LLPanelVolumePulldown::onToggleMuteSounds, this));
@@ -62,10 +65,6 @@ LLPanelVolumePulldown::LLPanelVolumePulldown()
 
 BOOL LLPanelVolumePulldown::postBuild()
 {
-//	// set the initial volume-slider's position to reflect reality
-//	LLSliderCtrl* volslider =  getChild<LLSliderCtrl>( "mastervolume" );
-//	volslider->setValue(gSavedSettings.getF32("AudioLevelMaster"));
-
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
 	onToggleMuteSounds();
 // [/SL:KB]
@@ -138,6 +137,28 @@ void LLPanelVolumePulldown::setControlFalse(const LLSD& user_data)
 	
 	if (control)
 		control->set(LLSD(FALSE));
+}
+
+void LLPanelVolumePulldown::updateMediaAutoPlayCheckbox(LLUICtrl* ctrl)
+{
+	std::string name = ctrl->getName();
+
+	// Disable "Allow Media to auto play" only when both
+	// "Streaming Music" and "Media" are unchecked. STORM-513.
+	if ((name == "enable_music") || (name == "enable_media"))
+	{
+		bool music_enabled = getChild<LLCheckBoxCtrl>("enable_music")->get();
+		bool media_enabled = getChild<LLCheckBoxCtrl>("enable_media")->get();
+
+		getChild<LLCheckBoxCtrl>("media_auto_play_btn")->setEnabled(music_enabled || media_enabled);
+	}
+}
+
+void LLPanelVolumePulldown::onClickSetSounds()
+{
+	// Disable Enable gesture sounds checkbox if the master sound is disabled 
+	// or if sound effects are disabled.
+	getChild<LLCheckBoxCtrl>("gesture_audio_play_btn")->setEnabled(!gSavedSettings.getBOOL("MuteSounds"));
 }
 
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)

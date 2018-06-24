@@ -133,7 +133,7 @@ public:
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 	void processIMTyping(bool typing);
 // [/SL:KB]
-//	void processIMTyping(const LLIMInfo* im_info, BOOL typing);
+//	void processIMTyping(const LLUUID& from_id, BOOL typing);
 	void processAgentListUpdates(const LLSD& body);
 	void processSessionUpdate(const LLSD& session_update);
 
@@ -185,13 +185,13 @@ private:
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 	void addTypingIndicator();
 // [/SL:KB]
-//	void addTypingIndicator(const LLIMInfo* im_info);
+//	void addTypingIndicator(const LLUUID& from_id);
 
 	// Remove the "User is typing..." indicator.
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 	void removeTypingIndicator();
 // [/SL:KB]
-//	void removeTypingIndicator(const LLIMInfo* im_info = NULL);
+//	void removeTypingIndicator(const LLUUID& from_id = LLUUID::null);
 
 	static void closeHiddenIMToasts();
 
@@ -222,7 +222,7 @@ private:
 	// connection to voice channel state change signal
 	boost::signals2::connection mVoiceChannelStateChangeConnection;
 
-//	const LLIMInfo* mImInfo;
+//	LLUUID mImFromId;
 };
 
 #endif  // LL_FLOATERIMSESSION_H

@@ -40,7 +40,6 @@
 // [SL:KB] - Patch: Build-AssetRecovery | Checked: 2011-11-24 (Catznip-3.2)
 #include "llfloaterassetrecovery.h"
 // [/SL:KB]
-#include "llfloaterauction.h"
 //#include "llfloaterautoreplacesettings.h"
 #include "llfloateravatar.h"
 #include "llfloateravatarpicker.h"
@@ -252,7 +251,6 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("asset_recovery", "floater_asset_recovery.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAssetRecovery>);
 // [/SL:KB]
 	LLFloaterReg::add("associate_listing", "floater_associate_listing.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAssociateListing>);
-	LLFloaterReg::add("auction", "floater_auction.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAuction>);
 	LLFloaterReg::add("avatar", "floater_avatar.xml",  (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatar>);
 	LLFloaterReg::add("avatar_picker", "floater_avatar_picker.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatarPicker>);
 //	LLFloaterReg::add("avatar_render_settings", "floater_avatar_render_settings.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatarRenderSettings>);
