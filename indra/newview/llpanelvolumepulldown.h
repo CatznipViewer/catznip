@@ -47,6 +47,10 @@ class LLPanelVolumePulldown : public LLPanel
 	
  private:
 	void setControlFalse(const LLSD& user_data);
+	void onClickSetSounds();
+	// Disables "Allow Media to auto play" check box only when both
+	// "Streaming Music" and "Media" are unchecked. Otherwise enables it.
+	void updateMediaAutoPlayCheckbox(LLUICtrl* ctrl);
 	void onAdvancedButtonClick(const LLSD& user_data);
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
 	void onToggleMuteSounds();

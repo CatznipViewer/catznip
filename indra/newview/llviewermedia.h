@@ -209,7 +209,7 @@ public:
 	bool initializeMedia(const std::string& mime_type);
 	bool initializePlugin(const std::string& media_type);
 	void loadURI();
-	LLPluginClassMedia* getMediaPlugin() { return mMediaSource; }
+	LLPluginClassMedia* getMediaPlugin() { return mMediaSource.get(); }
 	void setSize(int width, int height);
 
 	void showNotification(LLNotificationPtr notify);
@@ -424,7 +424,7 @@ private:
 	
 private:
 	// a single media url with some data and an impl.
-	LLPluginClassMedia* mMediaSource;
+	boost::shared_ptr<LLPluginClassMedia> mMediaSource;
 	F64		mZoomFactor;
 	LLUUID mTextureId;
 	bool  mMovieImageHasMips;
