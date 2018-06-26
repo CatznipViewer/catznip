@@ -69,6 +69,10 @@ const F32	ICON_FLASH_TIME = 0.5f;
 #define WM_DPICHANGED 0x02E0
 #endif
 
+#ifndef USER_DEFAULT_SCREEN_DPI
+#define USER_DEFAULT_SCREEN_DPI 96 // Win7
+#endif
+
 extern BOOL gDebugWindowProc;
 
 LPWSTR gIconResource = IDI_APPLICATION;
@@ -421,6 +425,11 @@ LLWindowWin32::LLWindowWin32(LLWindowCallbacks* callbacks,
 	mKeyVirtualKey = 0;
 	mhDC = NULL;
 	mhRC = NULL;
+	
+	if (!SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &mMouseVanish, 0))
+	{
+		mMouseVanish = TRUE;
+	}
 
 	// Initialize the keyboard
 	gKeyboard = new LLKeyboardWin32();
@@ -1096,7 +1105,14 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 		mhInstance,
 		NULL);
 
-	LL_INFOS("Window") << "window is created." << LL_ENDL ;
+	if (mWindowHandle)
+	{
+		LL_INFOS("Window") << "window is created." << LL_ENDL ;
+	}
+	else
+	{
+		LL_WARNS("Window") << "Window creation failed, code: " << GetLastError() << LL_ENDL;
+	}
 
 	//-----------------------------------------------------------------------
 	// Create GL drawing context
@@ -1411,7 +1427,16 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 			mhInstance,
 			NULL);
 
-		LL_INFOS("Window") << "recreate window done." << LL_ENDL ;
+
+		if (mWindowHandle)
+		{
+			LL_INFOS("Window") << "recreate window done." << LL_ENDL ;
+		}
+		else
+		{
+			// Note: if value is NULL GetDC retrieves the DC for the entire screen.
+			LL_WARNS("Window") << "Window recreation failed, code: " << GetLastError() << LL_ENDL;
+		}
 
 		if (!(mhDC = GetDC(mWindowHandle)))
 		{
@@ -1524,7 +1549,10 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 					(LLRender::sGLCoreProfile ? " core" : " compatibility") << " context." << LL_ENDL;
 				done = true;
 
-				if (LLRender::sGLCoreProfile)
+			// force sNoFixedFunction iff we're trying to use nsight debugging which does not support many legacy API uses
+
+				// nSight doesn't support use of legacy API funcs in the fixed function pipe
+				if (LLRender::sGLCoreProfile || LLRender::sNsightDebugSupport)
 				{
 					LLGLSLShader::sNoFixedFunction = true;
 				}
@@ -1680,7 +1708,7 @@ void LLWindowWin32::showCursorFromMouseMove()
 
 void LLWindowWin32::hideCursorUntilMouseMove()
 {
-	if (!mHideCursorPermanent)
+	if (!mHideCursorPermanent && mMouseVanish)
 	{
 		hideCursor();
 		mHideCursorPermanent = FALSE;
@@ -2641,20 +2669,20 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			}
 
 		case WM_SETFOCUS:
-			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_SETFOCUS");
 			if (gDebugWindowProc)
 			{
 				LL_INFOS("Window") << "WINDOWPROC SetFocus" << LL_ENDL;
 			}
+			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_SETFOCUS");
 			window_imp->mCallbacks->handleFocus(window_imp);
 			return 0;
 
 		case WM_KILLFOCUS:
-			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_KILLFOCUS");
 			if (gDebugWindowProc)
 			{
 				LL_INFOS("Window") << "WINDOWPROC KillFocus" << LL_ENDL;
 			}
+			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_KILLFOCUS");
 			window_imp->mCallbacks->handleFocusLost(window_imp);
 			return 0;
 
@@ -2667,6 +2695,26 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			};
 			return 0;			
 
+			break;
+
+		case WM_SETTINGCHANGE:
+			{
+				if (w_param == SPI_SETMOUSEVANISH)
+				{
+					if (!SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &window_imp->mMouseVanish, 0))
+					{
+						window_imp->mMouseVanish = TRUE;
+					}
+				}
+			}
+			break;
+		default:
+			{
+				if (gDebugWindowProc)
+				{
+					LL_INFOS("Window") << "Unhandled windows message code: " << U32(u_msg) << LL_ENDL;
+				}
+			}
 			break;
 		}
 

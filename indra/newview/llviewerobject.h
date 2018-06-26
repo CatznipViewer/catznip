@@ -412,6 +412,7 @@ public:
 	void clearIcon();
 
 	void markForUpdate(BOOL priority);
+	void markForUnload(BOOL priority);
 	void updateVolume(const LLVolumeParams& volume_params);
 	virtual	void updateSpatialExtents(LLVector4a& min, LLVector4a& max);
 	virtual F32 getBinRadius();
@@ -421,6 +422,8 @@ public:
 	void updatePositionCaches() const; // Update the global and region position caches from the object (and parent's) xform.
 	void updateText(); // update text label position
 	virtual void updateDrawable(BOOL force_damped); // force updates on static objects
+
+	bool isOwnerInMuteList(LLUUID item_id = LLUUID());
 
 	void setDrawableState(U32 state, BOOL recursive = TRUE);
 	void clearDrawableState(U32 state, BOOL recursive = TRUE);
@@ -822,6 +825,9 @@ private:
 
 	static BOOL sVelocityInterpolate;
 	static BOOL sPingInterpolate;
+
+	bool mCachedOwnerInMuteList;
+	F64 mCachedMuteListUpdateTime;
 
 	//--------------------------------------------------------------------
 	// For objects that are attachments
