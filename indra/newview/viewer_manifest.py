@@ -66,7 +66,6 @@ class ViewerManifest(LLManifest):
             with self.prefix(src="app_settings"):
                 self.exclude("logcontrol.xml")
                 self.exclude("logcontrol-dev.xml")
-                self.path("*.pem")
                 self.path("*.ini")
                 self.path("*.xml")
                 self.path("*.db2")
@@ -91,7 +90,6 @@ class ViewerManifest(LLManifest):
 
                 # include the extracted packages information (see BuildPackagesInfo.cmake)
                 self.path(src=os.path.join(self.args['build'],"packages-info.txt"), dst="packages-info.txt")
-
                 # CHOP-955: If we have "sourceid" or "viewer_channel" in the
                 # build process environment, generate it into
                 # settings_install.xml.
@@ -563,8 +561,12 @@ class WindowsManifest(ViewerManifest):
 
             # Vivox runtimes
             self.path("SLVoice.exe")
-            self.path("vivoxsdk.dll")
-            self.path("ortp.dll")
+            if (self.address_size == 64):
+                self.path("vivoxsdk_x64.dll")
+                self.path("ortp_x64.dll")
+            else:
+                self.path("vivoxsdk.dll")
+                self.path("ortp.dll")
             self.path("libsndfile-1.dll")
             self.path("vivoxoal.dll")
             
@@ -590,7 +592,9 @@ class WindowsManifest(ViewerManifest):
 
         self.path(src="licenses-win32.txt", dst="licenses.txt")
         self.path("featuretable.txt")
-        self.path("ca-bundle.crt")
+
+        with self.prefix(src=pkgdir,dst=""):
+            self.path("ca-bundle.crt")
 
         # Media plugins - CEF
         with self.prefix(src='../media_plugins/cef/%s' % self.args['configuration'], dst="llplugin"):
@@ -1047,7 +1051,9 @@ open "%s" --args "$@"
                         self.path("licenses-mac.txt", dst="licenses.txt")
                         self.path("featuretable_mac.txt")
                         self.path("SecondLife.nib")
-                        self.path("ca-bundle.crt")
+
+                        with self.prefix(src=pkgdir,dst=""):
+                            self.path("ca-bundle.crt")
 
                         self.path("SecondLife.nib")
 
@@ -1505,7 +1511,9 @@ class LinuxManifest(ViewerManifest):
             print "Skipping llcommon.so (assuming llcommon was linked statically)"
 
         self.path("featuretable_linux.txt")
-        self.path("ca-bundle.crt")
+
+        with self.prefix(src=pkgdir,dst=""):
+            self.path("ca-bundle.crt")
 
     def package_finish(self):
         installer_name = self.installer_base_name()
