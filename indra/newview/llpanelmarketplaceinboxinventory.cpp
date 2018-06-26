@@ -62,6 +62,12 @@ LLInboxInventoryPanel::LLInboxInventoryPanel(const LLInboxInventoryPanel::Params
 LLInboxInventoryPanel::~LLInboxInventoryPanel()
 {}
 
+void LLInboxInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
+{
+	LLInventoryPanel::initFromParams(params);
+	getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+}
+
 LLFolderViewFolder * LLInboxInventoryPanel::createFolderViewFolder(LLInvFVBridge * bridge, bool allow_drop)
 {
 	LLUIColor item_color = LLUIColorTable::instance().getColor("MenuItemEnabledColor", DEFAULT_WHITE);
@@ -133,6 +139,7 @@ void LLInboxFolderViewFolder::draw()
 	if (!hasBadgeHolderParent())
 	{
 		addBadgeToParentHolder();
+		setDrawBadgeAtTop(true);
 	}
 
 	setBadgeVisibility(mFresh);
@@ -140,18 +147,22 @@ void LLInboxFolderViewFolder::draw()
 	LLFolderViewFolder::draw();
 }
 
+BOOL LLInboxFolderViewFolder::handleMouseDown( S32 x, S32 y, MASK mask )
+{
+	deFreshify();
+	return LLFolderViewFolder::handleMouseDown(x, y, mask);
+}
+
+BOOL LLInboxFolderViewFolder::handleDoubleClick( S32 x, S32 y, MASK mask )
+{
+	deFreshify();
+	return LLFolderViewFolder::handleDoubleClick(x, y, mask);
+}
+
 void LLInboxFolderViewFolder::selectItem()
 {
 	deFreshify();
-
 	LLFolderViewFolder::selectItem();
-}
-
-void LLInboxFolderViewFolder::toggleOpen()
-{
-	deFreshify();
-
-	LLFolderViewFolder::toggleOpen();
 }
 
 void LLInboxFolderViewFolder::computeFreshness()
