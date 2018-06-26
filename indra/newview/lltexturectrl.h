@@ -165,6 +165,9 @@ public:
 	void			setAllowNoTexture( BOOL b )					{ mAllowNoTexture = b; }
 	bool			getAllowNoTexture() const					{ return mAllowNoTexture; }
 
+	void			setAllowLocalTexture(BOOL b)					{ mAllowLocalTexture = b; }
+	BOOL			getAllowLocalTexture() const					{ return mAllowLocalTexture; }
+
 // [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
 	void			setControlMode(EControlMode ctrlMode);
 	EControlMode	getControlMode() const						{ return mControlMode; }
@@ -254,6 +257,7 @@ private:
 //	LLTextBox*				 	mCaption;
 	std::string				 	mLabel;
 	BOOL					 	mAllowNoTexture; // If true, the user can select "none" as an option
+	BOOL						mAllowLocalTexture;
 // [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
 	EControlMode				mControlMode = EControlMode::DISABLED;
 // [/SL:KB]

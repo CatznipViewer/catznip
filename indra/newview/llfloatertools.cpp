@@ -253,7 +253,6 @@ BOOL	LLFloaterTools::postBuild()
 	mCheckStretchTexture	= getChild<LLCheckBoxCtrl>("checkbox stretch textures");
 	getChild<LLUICtrl>("checkbox stretch textures")->setValue((BOOL)gSavedSettings.getBOOL("ScaleStretchTextures"));
 	mComboGridMode			= getChild<LLComboBox>("combobox grid mode");
-	mCheckStretchUniformLabel = getChild<LLTextBox>("checkbox uniform label");
 
 	//
 	// Create Buttons
@@ -1214,7 +1213,7 @@ void LLFloaterTools::getMediaState()
 		  &&first_object->permModify() 
 	      ))
 	{
-		getChildView("Add_Media")->setEnabled(FALSE);
+		getChildView("add_media")->setEnabled(FALSE);
 		media_info->clear();
 		clearMediaSettings();
 		return;
@@ -1225,7 +1224,7 @@ void LLFloaterTools::getMediaState()
 	
 	if(!has_media_capability)
 	{
-		getChildView("Add_Media")->setEnabled(FALSE);
+		getChildView("add_media")->setEnabled(FALSE);
 		LL_WARNS("LLFloaterTools: media") << "Media not enabled (no capability) in this region!" << LL_ENDL;
 		clearMediaSettings();
 		return;
@@ -1317,11 +1316,10 @@ void LLFloaterTools::getMediaState()
 	
 	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
 	std::string media_title = "";
-	mNeedMediaTitle = false;
 	// update UI depending on whether "object" (prim or face) has media
 	// and whether or not you are allowed to edit it.
 	
-	getChildView("Add_Media")->setEnabled(editable);
+	getChildView("add_media")->setEnabled(editable);
 	// IF all the faces have media (or all dont have media)
 	if ( LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo )
 	{
@@ -1335,23 +1333,15 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 			// else all faces might be empty. 
 		}
 		else // there' re Different Medias' been set on on the faces.
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		
-		getChildView("media_tex")->setEnabled(bool_has_media && editable);
-		getChildView("edit_media")->setEnabled(bool_has_media && LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo && editable );
 		getChildView("delete_media")->setEnabled(bool_has_media && editable );
-		getChildView("add_media")->setEnabled(editable);
 			// TODO: display a list of all media on the face - use 'identical' flag
 	}
 	else // not all face has media but at least one does.
@@ -1362,7 +1352,6 @@ void LLFloaterTools::getMediaState()
 		if(LLFloaterMediaSettings::getInstance()->mMultipleValidMedia)
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		else
 		{
@@ -1371,18 +1360,13 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 		}
 		
-		getChildView("media_tex")->setEnabled(TRUE);
-		getChildView("edit_media")->setEnabled(LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo);
 		getChildView("delete_media")->setEnabled(TRUE);
-		getChildView("add_media")->setEnabled(editable);
 	}
+
+	navigateToTitleMedia(media_title);
 	media_info->setText(media_title);
 	
 	// load values for media settings
@@ -1472,16 +1456,31 @@ void LLFloaterTools::clearMediaSettings()
 //
 void LLFloaterTools::navigateToTitleMedia( const std::string url )
 {
-	if ( mTitleMedia )
+	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
+	if (url.empty() || multi_media_info_str == url)
+	{
+		// nothing to show
+		mNeedMediaTitle = false;
+	}
+	else if (mTitleMedia)
 	{
 		LLPluginClassMedia* media_plugin = mTitleMedia->getMediaPlugin();
-		if ( media_plugin )
+
+		if ( media_plugin ) // Shouldn't this be after navigateTo creates plugin?
 		{
 			// if it's a movie, we don't want to hear it
 			media_plugin->setVolume( 0 );
 		};
-		mTitleMedia->navigateTo( url );
-	};
+
+		// check if url changed or if we need a new media source
+		if (mTitleMedia->getCurrentNavUrl() != url || media_plugin == NULL)
+		{
+			mTitleMedia->navigateTo( url );
+		}
+
+		// flag that we need to update the title (even if no request were made)
+		mNeedMediaTitle = true;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
