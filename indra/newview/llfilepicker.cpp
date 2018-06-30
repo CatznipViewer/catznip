@@ -102,17 +102,20 @@ public:
 
 	/*virtual*/ void notify(const std::vector<std::string>& files)
 	{
-		switch (mPickerType)
+		if (!files.empty())
 		{
-			case OPEN_SINGLE:
-			case SAVE_SINGLE:
-				mSingleCb( (!files.empty()) ? files.front() : LLStringUtil::null);
-				break;
-			case OPEN_MULTIPLE:
-				mMultiCb(files);
-				break;
-			default:
-				break;
+			switch (mPickerType)
+			{
+				case OPEN_SINGLE:
+				case SAVE_SINGLE:
+					mSingleCb( (!files.empty()) ? files.front() : LLStringUtil::null);
+					break;
+				case OPEN_MULTIPLE:
+					mMultiCb(files);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 
