@@ -72,7 +72,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 //	mAvatarName->setValue(title);
 
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-29 (Catznip-3.3)
-//	mAvatarName->setValue(p.from);
+	mAvatarName->setValue(p.from);
 	mMessage->clear();
 
 	//Handle IRC styled /me messages.
