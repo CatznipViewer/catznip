@@ -354,8 +354,8 @@ public:
 	typedef boost::function<void(bool)> save_image_callback_t;
 	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker = false);
 // [/SL:KB]
-//	BOOL			isSnapshotLocSet() const { return ! sSnapshotDir.empty(); }
-//	void			resetSnapshotLoc() const { sSnapshotDir.clear(); }
+//	BOOL			isSnapshotLocSet() const;
+//	void			resetSnapshotLoc() const;
 //	BOOL			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory);
 
 //	// Reset the directory where snapshots are saved.
@@ -423,7 +423,7 @@ public:
 
 	bool getSystemUIScaleFactorChanged() { return mSystemUIScaleFactorChanged; }
 	static void showSystemUIScaleFactorChanged();
-//	static std::string getLastSnapshotDir() { return sSnapshotDir; }
+//	static std::string getLastSnapshotDir();
 
 private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
@@ -513,11 +513,6 @@ private:
 	boost::scoped_ptr<LLWindowListener> mWindowListener;
 	boost::scoped_ptr<LLViewerWindowListener> mViewerWindowListener;
 
-//	static std::string sSnapshotBaseName;
-//	static std::string sSnapshotDir;
-
-	static std::string sMovieBaseName;
-	
 	// Object temporarily hovered over while dragging
 	LLPointer<LLViewerObject>	mDragHoveredObject;
 

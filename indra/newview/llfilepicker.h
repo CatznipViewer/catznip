@@ -139,9 +139,9 @@ public:
 	static const std::string& getExtension(ESaveFilter filter);
 	static bool               hasExtension(ESaveFilter filter);
 // [/SL:KB]
-//	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
+//	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null, bool blocking = true);
 //	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
-//	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
+//	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL, bool blocking = true );
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	// We refactored the entire class to work exclusively with callbacks so there isn't any need for outside access to these functions
@@ -232,10 +232,8 @@ public:
 	~LLFilePicker();
 };
 
-//const std::string upload_pick(void* data);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void upload_pick(LLFilePicker::ELoadFilter filter);
-void upload_pick_callback(LLFilePicker::ELoadFilter filter, const std::string& filename);
+const void upload_single_file(const std::string& filename, LLFilePicker::ELoadFilter type);
 // [/SL:KB]
 
 #endif

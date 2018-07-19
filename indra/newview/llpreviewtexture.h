@@ -70,6 +70,11 @@ public:
 							BOOL final,
 							void* userdata );
 	void 				openToSave();
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	void				saveTextureToFile(const std::string& filename);
+// [/SL:KB]
+//	void				saveTextureToFile(const std::vector<std::string>& filenames);
 	
 // [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
 	void				onSaveAsBtn(LLUICtrl* ctrl);

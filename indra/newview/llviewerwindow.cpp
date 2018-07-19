@@ -265,10 +265,8 @@ static const F32 MIN_UI_SCALE = 0.75f;
 static const F32 MAX_UI_SCALE = 7.0f;
 static const F32 MIN_DISPLAY_SCALE = 0.75f;
 
-//std::string	LLViewerWindow::sSnapshotBaseName;
-//std::string	LLViewerWindow::sSnapshotDir;
-
-std::string	LLViewerWindow::sMovieBaseName;
+//static LLCachedControl<std::string>	sSnapshotBaseName(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseName", "Snapshot"));
+//static LLCachedControl<std::string>	sSnapshotDir(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseDir", ""));
 
 LLTrace::SampleStatHandle<> LLViewerWindow::sMouseVelocityStat("Mouse Velocity");
 
@@ -397,14 +395,12 @@ public:
 		}
 		}
 		
-#if LL_WINDOWS
 		if (gSavedSettings.getBOOL("DebugShowMemory"))
 		{
 			addText(xpos, ypos,
 					STRINGIZE("Memory: " << (LLMemory::getCurrentRSS() / 1024) << " (KB)"));
 			ypos += y_inc;
 		}
-#endif
 
 		if (gDisplayCameraPos)
 		{
@@ -1698,11 +1694,6 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	LL_INFOS() << "NOTE: ALL NOTIFICATIONS THAT OCCUR WILL GET ADDED TO IGNORE LIST FOR LATER RUNS." << LL_ENDL;
 	}
 
-	// Default to application directory.
-//	LLViewerWindow::sSnapshotBaseName = "Snapshot";
-	LLViewerWindow::sMovieBaseName = "SLmovie";
-//	resetSnapshotLoc();
-
 
 	/*
 	LLWindowCallbacks* callbacks,
@@ -1881,6 +1872,11 @@ void LLViewerWindow::showSystemUIScaleFactorChanged()
 	LLNotificationsUtil::add("SystemUIScaleFactorChanged", LLSD(), LLSD(), onSystemUIScaleFactorChanged);
 }
 
+//std::string LLViewerWindow::getLastSnapshotDir()
+//{
+//    return sSnapshotDir;
+//}
+
 //static
 bool LLViewerWindow::onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response)
 {
@@ -1949,6 +1945,10 @@ void LLViewerWindow::initBase()
 	}
 
 	// Create global views
+
+	// Login screen and main_view.xml need edit menus for preferences and browser
+	LL_DEBUGS("AppInit") << "initializing edit menu" << LL_ENDL;
+	initialize_edit_menu();
 
 	// Create the floater view at the start so that other views can add children to it. 
 	// (But wait to add it as a child of the root view so that it will be in front of the 
@@ -2160,6 +2160,15 @@ void LLViewerWindow::shutdownViews()
 	RecordToChatConsole::getInstance()->stopRecorder();
 	LL_INFOS() << "Warning logger is cleaned." << LL_ENDL ;
 
+	gFocusMgr.unlockFocus();
+	gFocusMgr.setMouseCapture(NULL);
+	gFocusMgr.setKeyboardFocus(NULL);
+	gFocusMgr.setTopCtrl(NULL);
+	if (mWindow)
+	{
+		mWindow->allowLanguageTextInput(NULL, FALSE);
+	}
+
 	delete mDebugText;
 	mDebugText = NULL;
 	
@@ -2192,7 +2201,11 @@ void LLViewerWindow::shutdownViews()
 
 	view_listener_t::cleanup();
 	LL_INFOS() << "view listeners destroyed." << LL_ENDL ;
-	
+
+	// Clean up pointers that are going to be invalid. (todo: check sMenuContainer)
+	mProgressView = NULL;
+	mPopupView = NULL;
+
 	// Delete all child views.
 	delete mRootView;
 	mRootView = NULL;
@@ -4397,7 +4410,7 @@ bool LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_ima
 	else
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
-	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
+//	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
 
 	// Get a base file location if needed.
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
@@ -4446,8 +4459,8 @@ bool LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_ima
 //		// Copy the directory + file name
 //		std::string filepath = picker.getFirstFile();
 //
-//		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
-//		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+//		gSavedPerAccountSettings.setString("SnapshotBaseName", gDirUtilp->getBaseFileName(filepath, true));
+//		gSavedPerAccountSettings.setString("SnapshotBaseDir", gDirUtilp->getDirName(filepath));
 //	}
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 	/*
@@ -4540,9 +4553,9 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 	}
 // [/SL:KB]
 //#ifdef LL_WINDOWS
-//	boost::filesystem::space_info b_space = boost::filesystem::space(utf8str_to_utf16str(sSnapshotDir));
+//	boost::filesystem::space_info b_space = boost::filesystem::space(utf8str_to_utf16str(snapshot_dir));
 //#else
-//	boost::filesystem::space_info b_space = boost::filesystem::space(sSnapshotDir);
+//	boost::filesystem::space_info b_space = boost::filesystem::space(snapshot_dir);
 //#endif
 //	if (b_space.free < image->getDataSize())
 //	{
@@ -4579,8 +4592,11 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 		err = LLFile::stat( filepath, &stat_info );
 		i++;
 	}
-	while( -1 != err  // Search until the file is not found (i.e., stat() gives an error).
-			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.2
+	while( -1 != err );  // search until the file is not found (i.e., stat() gives an error).
+// [/SL:KB]
+//	while( -1 != err  // Search until the file is not found (i.e., stat() gives an error).
+//			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
 
 	LL_INFOS() << "Saving snapshot to " << filepath << LL_ENDL;
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
@@ -4595,7 +4611,7 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 
 //void LLViewerWindow::resetSnapshotLoc()
 //{
-//	sSnapshotDir.clear();
+//	gSavedPerAccountSettings.setString("SnapshotBaseDir", std::string());
 //}
 
 // static
@@ -4648,6 +4664,17 @@ void LLViewerWindow::playSnapshotAnimAndSound()
 	gAgent.sendAnimationRequest(ANIM_AGENT_SNAPSHOT, ANIM_REQUEST_START);
 	send_sound_trigger(LLUUID(gSavedSettings.getString("UISndSnapshot")), 1.0f);
 }
+
+//BOOL LLViewerWindow::isSnapshotLocSet() const
+//{
+//	std::string snapshot_dir = sSnapshotDir;
+//	return !snapshot_dir.empty();
+//}
+
+//void LLViewerWindow::resetSnapshotLoc() const
+//{
+//	gSavedPerAccountSettings.setString("SnapshotBaseDir", std::string());
+//}
 
 BOOL LLViewerWindow::thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type)
 {

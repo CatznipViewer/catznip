@@ -30,12 +30,13 @@
 #include "llfilepicker.h"
 #include "llfloaterreg.h"
 #include "llfloaterspellchecksettings.h"
+#include "llnotificationsutil.h"
 #include "llscrolllistctrl.h"
 #include "llsdserialize.h"
 #include "llspellcheck.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
-#include "llnotificationsutil.h"
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 
 #include <boost/algorithm/string.hpp>
 
@@ -258,25 +259,18 @@ BOOL LLFloaterSpellCheckerImport::postBuild(void)
 
 void LLFloaterSpellCheckerImport::onBtnBrowse()
 {
-//	LLFilePicker& file_picker = LLFilePicker::instance();
-//	if (!file_picker.getOpenFile(LLFilePicker::FFLOAD_DICTIONARY))
-//	{
-//		return;
-//	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_DICTIONARY, 
-		boost::bind(&LLFloaterSpellCheckerImport::onBtnBrowseCallback, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_DICTIONARY, boost::bind(&LLFloaterSpellCheckerImport::importSelectedDictionary, this, _1));
+// [/SL:KB]
+//	(new LLFilePickerReplyThread(boost::bind(&LLFloaterSpellCheckerImport::importSelectedDictionary, this, _1), LLFilePicker::FFLOAD_DICTIONARY, false))->getFile();
 }
 
-void LLFloaterSpellCheckerImport::onBtnBrowseCallback(std::string filepath)
-{
-	if (filepath.empty())
-	{
-		return;
-	}
+//void LLFloaterSpellCheckerImport::importSelectedDictionary(const std::vector<std::string>& filenames)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+void LLFloaterSpellCheckerImport::importSelectedDictionary(std::string filepath)
 // [/SL:KB]
-
-//	std::string filepath = file_picker.getFirstFile();
+{
+//	std::string filepath = filenames[0];
 
 	const std::string extension = gDirUtilp->getExtension(filepath);
 	if ("xcu" == extension)
@@ -289,7 +283,7 @@ void LLFloaterSpellCheckerImport::onBtnBrowseCallback(std::string filepath)
 	}
 
 	getChild<LLUICtrl>("dictionary_path")->setValue(filepath);
-	
+
 	mDictionaryDir = gDirUtilp->getDirName(filepath);
 	mDictionaryBasename = gDirUtilp->getBaseFileName(filepath, true);
 	getChild<LLUICtrl>("dictionary_name")->setValue(mDictionaryBasename);

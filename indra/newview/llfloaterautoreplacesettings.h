@@ -77,13 +77,7 @@ private:
 	void onSelectList();
 
 	void onImportList();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	void onImportListCallback(const std::string& filepath);
-// [/SL:KB]
 	void onExportList();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	void onExportListCallback(const std::string& listName, const std::string& filepath);
-// [/SL:KB]
 	void onNewList();
 	void onDeleteList();
 
@@ -118,6 +112,13 @@ private:
 	bool selectedListIsLast();
 
 	void cleanUp();
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	void loadListFromFile(const std::string& filename);
+	void saveListToFile(const std::string& filename, std::string listName);
+// [/SL:KB]
+//	void loadListFromFile(const std::vector<std::string>& filenames);
+//	void saveListToFile(const std::vector<std::string>& filenames, std::string listName);
 };
 
 #endif  // LLFLOATERAUTOREPLACESETTINGS_H

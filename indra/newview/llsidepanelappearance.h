@@ -55,7 +55,6 @@ public:
 
 	void fetchInventory();
 	void inventoryFetched();
-	void onNewOutfitButtonClicked();
 
 	void showOutfitsInventoryPanel();
 	void showOutfitEditPanel();
@@ -87,7 +86,6 @@ private:
 
 	LLButton*					mOpenOutfitBtn;
 	LLButton*					mEditAppearanceBtn;
-	LLButton*					mNewOutfitBtn;
 	LLPanel*					mCurrOutfitPanel;
 
 	LLTextBox*					mCurrentLookName;

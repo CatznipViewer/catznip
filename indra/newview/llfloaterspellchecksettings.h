@@ -56,11 +56,12 @@ public:
 
 protected:
 	void onBtnBrowse();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	void onBtnBrowseCallback(std::string filepath);
-// [/SL:KB]
 	void onBtnCancel();
 	void onBtnOK();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	void importSelectedDictionary(std::string filepath);
+// [/SL:KB]
+//	void importSelectedDictionary(const std::vector<std::string>& filenames);
 	std::string parseXcuFile(const std::string& file_path) const;
 
 	std::string mDictionaryDir;
