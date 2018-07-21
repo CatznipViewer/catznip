@@ -1029,7 +1029,7 @@ BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
 					.message(pHoverItem->getToolTip())
 					.sticky_rect(pHoverItem->calcScreenRect())
 					.delay_time(nTimeout)
-					.create_callback(boost::bind(&createInventoryToolTip, _1))
+					.create_callback(boost::bind(&LLInspectTextureUtil::createInventoryToolTip, _1))
 					.create_params(LLSD().with("inv_type", pVMItem->getInventoryType()).with("item_id", pVMItem->getUUID())));
 			return TRUE;
 		}

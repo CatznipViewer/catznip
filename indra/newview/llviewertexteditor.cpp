@@ -252,7 +252,7 @@ public:
 		{
 			LLToolTipMgr::instance().show(LLToolTip::Params()
 					.message(mToolTip)
-					.create_callback(boost::bind(&createInventoryToolTip, _1))
+					.create_callback(boost::bind(&LLInspectTextureUtil::createInventoryToolTip, _1))
 					.create_params(LLSD().with("inv_type", mItem->getInventoryType()).with("asset_id", mItem->getAssetUUID())));
 
 //			LLSD sdParams;

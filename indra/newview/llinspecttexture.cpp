@@ -1,28 +1,30 @@
-/** 
+/**
  *
- * Copyright (c) 2010-2013, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2010-2018, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 #include "llviewerprecompiledheaders.h"
 
 #include "llfloaterreg.h"
 #include "llinspect.h"
 #include "llinspecttexture.h"
+#include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llpreviewnotecard.h"
 #include "llpreviewtexture.h"
 #include "lltexturectrl.h"
 #include "lltrans.h"
+#include "llviewercontrol.h"
 #include "llviewerinventory.h"
 #include "llviewertexteditor.h"
 #include "llviewertexture.h"
@@ -186,13 +188,7 @@ void LLInspectTexture::onClickCopyToInv()
 // Helper functions
 //
 
-void LLInspectTextureUtil::registerFloater()
-{
-	LLFloaterReg::add("inspect_texture", "inspect_texture.xml", &LLFloaterReg::build<LLInspectTexture>);
-}
-
- 
-LLToolTip* createInventoryToolTip(LLToolTip::Params p)
+LLToolTip* LLInspectTextureUtil::createInventoryToolTip(LLToolTip::Params p)
 {
 	const LLSD& sdTooltip = p.create_params;
 
@@ -202,9 +198,36 @@ LLToolTip* createInventoryToolTip(LLToolTip::Params p)
 		case LLInventoryType::IT_SNAPSHOT:
 		case LLInventoryType::IT_TEXTURE:
 			return LLUICtrlFactory::create<LLTextureToolTip>(p);
+		case LLInventoryType::IT_CATEGORY:
+			{
+				if ( (sdTooltip.has("item_id")) && (gSavedSettings.getBOOL("ShowInventoryFolderTextureTips")) )
+				{
+					const LLUUID idCategory = sdTooltip["item_id"].asUUID();
+
+					LLInventoryModel::cat_array_t cats;
+					LLInventoryModel::item_array_t items;
+					LLIsOfAssetType f(LLAssetType::AT_TEXTURE);
+					gInventory.getDirectDescendentsOf(idCategory, cats, items, f);
+
+					// Exactly one texture found => show the texture tooltip
+					if (1 == items.size())
+					{
+						p.create_params.getValue()["asset_id"] = items.front()->getAssetUUID();
+						return LLUICtrlFactory::create<LLTextureToolTip>(p);
+					}
+				}
+
+				// No or more than one texture found => show default tooltip
+				return LLUICtrlFactory::create<LLToolTip>(p);
+			}
 		default:
 			return LLUICtrlFactory::create<LLToolTip>(p);
 	}
+}
+
+void LLInspectTextureUtil::registerFloater()
+{
+	LLFloaterReg::add("inspect_texture", "inspect_texture.xml", &LLFloaterReg::build<LLInspectTexture>);
 }
 
 // ============================================================================
