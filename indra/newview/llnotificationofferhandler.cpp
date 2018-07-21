@@ -137,6 +137,12 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 			p.panel = notify_box;
 			// we not save offer notifications to the syswell floater that should be added to the IM floater
 			p.can_be_stored = !add_notif_to_im;
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.4
+			if (add_notif_to_im)
+			{
+				p.session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, notification->getPayload()["from_id"]);
+			}
+// [/SL:KB]
 			p.force_show = notification->getOfferFromAgent();
 			p.can_fade = notification->canFadeToast();
 
@@ -184,11 +190,17 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 		{
 			panelp->updateNotification();
 		}
-		else
-		{
-			// if notification has changed, hide it
-			mChannel.get()->removeToastByNotificationID(p->getID());
-		}
+
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.4
+		// Since we regularly call LLFloaterIMSession::updateMessages() the screen toast might already have been
+		// replaced by the embedded toast panel so we always hide the screen notification
+		mChannel.get()->removeToastByNotificationID(p->getID());
+// [/SL:KB]
+//		else
+//		{
+//			// if notification has changed, hide it
+//			mChannel.get()->removeToastByNotificationID(p->getID());
+//		}
 	}
 }
 

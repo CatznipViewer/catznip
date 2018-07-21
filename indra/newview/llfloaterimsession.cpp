@@ -716,6 +716,9 @@ void LLFloaterIMSession::setVisible(BOOL visible)
 	{
 		sIMFloaterShowedSignal(mSessionID);
         updateMessages();
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.4
+		channel->removeToastsBySessionID(mSessionID);
+// [/SL:KB]
 	}
 
 }
