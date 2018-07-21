@@ -94,7 +94,7 @@
      top="0"
      valign="center"     
      wrap="false" 
-     value="L$123,456,789" 
+     value="L$(Unknown)" 
      width="90" />
     </layout_panel>
     <layout_panel
