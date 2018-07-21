@@ -334,18 +334,19 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 			// We might have just made the session floater visible and/or focused so update those two variables
 			is_session_visible = session_floater->isShown();
 			is_session_focused = (gFocusMgr.getAppHasFocus()) && (session_floater->hasFocus());
+
 // [/SL:KB]
 //			if(!LLAppViewer::instance()->quitRequested() && !LLFloater::isVisible(im_box))
 //			{
 //				// Open conversations floater
 //				LLFloaterReg::showInstance("im_container");
-//// [SL:KB] - Patch: Chat-Container | Checked: 2013-05-11 (Catznip-3.5)
-//				if (LLFloaterIMContainerBase::CT_VIEW == im_box->getContainerType())
-//				{
-//					dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
-//				}
-//// [/SL:KB]
 //			}
+//// [SL:KB] - Patch: Chat-Container | Checked: 2013-05-11 (Catznip-3.5)
+//			if (LLFloaterIMContainerBase::CT_VIEW == im_box->getContainerType())
+//			{
+//				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
+//			}
+//// [/SL:KB]
 ////			im_box->collapseMessagesPane(false);
 //			if (session_floater)
 //			{

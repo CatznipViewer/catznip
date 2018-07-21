@@ -686,19 +686,19 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 
         case IM_TYPING_START:
         {
-//            gIMMgr->processIMTypingStart(from_id, dialog);
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
-            gIMMgr->processIMTyping(session_id, true);
+			gIMMgr->processIMTyping(session_id, true);
 // [/SL:KB]
+//            gIMMgr->processIMTypingStart(from_id, dialog);
         }
         break;
 
         case IM_TYPING_STOP:
         {
-//            gIMMgr->processIMTypingStop(from_id, dialog);
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
-            gIMMgr->processIMTyping(session_id, false);
+			gIMMgr->processIMTyping(session_id, false);
 // [/SL:KB]
+//            gIMMgr->processIMTypingStop(from_id, dialog);
         }
         break;
 
