@@ -33,6 +33,9 @@
 #include "llfirstuse.h"
 #include "llfloaterreg.h"
 #include "llfloaterimnearbychat.h"
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+#include "llimstorage.h"
+// [/SL:KB]
 #include "llimview.h"
 #include "llinventoryobserver.h"
 #include "llinventorymodel.h"
@@ -1454,6 +1457,10 @@ void LLIMProcessing::requestOfflineMessages()
         && gAgent.getRegion()
         && gAgent.getRegion()->capabilitiesReceived())
     {
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+		LLPersistentUnreadIMStorage::instance().loadUnreadIMs();
+// [/SL:KB]
+
         std::string cap_url = gAgent.getRegionCapability("ReadOfflineMsgs");
 
         // Auto-accepted inventory items may require the avatar object
