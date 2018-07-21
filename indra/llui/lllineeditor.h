@@ -218,6 +218,7 @@ public:
 	
 	void			setCommitOnFocusLost( BOOL b )	{ mCommitOnFocusLost = b; }
 	void			setRevertOnEsc( BOOL b )		{ mRevertOnEsc = b; }
+	void			setKeystrokeOnEsc(BOOL b)		{ mKeystrokeOnEsc = b; }
 
 	void setCursorColor(const LLColor4& c)			{ mCursorColor = c; }
 	const LLColor4& getCursorColor() const			{ return mCursorColor.get(); }
@@ -342,6 +343,7 @@ protected:
 
 	BOOL		mCommitOnFocusLost;
 	BOOL		mRevertOnEsc;
+	BOOL		mKeystrokeOnEsc;
 
 	keystroke_callback_t mKeystrokeCallback;
 
