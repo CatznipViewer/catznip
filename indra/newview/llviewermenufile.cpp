@@ -480,7 +480,7 @@ const void upload_single_file(const std::string& filename, LLFilePicker::ELoadFi
 
 //const void upload_bulk(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter type)
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-const void upload_bulk(const std::vector<std::string>& filenames)
+void upload_bulk(const std::vector<std::string>& filenames)
 // [/SL:KB]
 {
 	// TODO:
