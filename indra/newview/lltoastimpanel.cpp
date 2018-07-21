@@ -68,15 +68,11 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 	
 //	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(p.session_id);
 //	mIsGroupMsg = (im_session && im_session->mSessionType == LLIMModel::LLIMSession::GROUP_SESSION);
-//	if(mIsGroupMsg)
-//	{
-//		mAvatarName->setValue(im_session->mName);
-//		LLAvatarName avatar_name;
-//		LLAvatarNameCache::get(p.avatar_id, &avatar_name);
-//		p.message = "[From " + avatar_name.getDisplayName() + "]\n" + p.message;
-//	}
+//	std::string title = mIsGroupMsg ? im_session->mName : p.from;
+//	mAvatarName->setValue(title);
 
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-29 (Catznip-3.3)
+//	mAvatarName->setValue(p.from);
 	mMessage->clear();
 
 	//Handle IRC styled /me messages.
@@ -122,29 +118,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 		mMessage->appendText(message, FALSE, style_params);
 	}
 // [/SL:KB]
-//	//Handle IRC styled /me messages.
-//	std::string prefix = p.message.substr(0, 4);
-//	if (prefix == "/me " || prefix == "/me'")
-//	{
-//		//style_params.font.style = "UNDERLINE";
-//		mMessage->clear();
-//		
-//		style_params.font.style ="ITALIC";
-//		mMessage->appendText(p.from, FALSE, style_params);
-//
-//		style_params.font.style = "ITALIC";
-//		mMessage->appendText(p.message.substr(3), FALSE, style_params);
-//	}
-//	else
-//	{
-//		style_params.font.style =  "NORMAL";
-//		mMessage->setText(p.message, style_params);
-// 	}
 
-//	if(!mIsGroupMsg)
-//	{
-	mAvatarName->setValue(p.from);
-//	}
 	mTime->setValue(p.time);
 	mSessionID = p.session_id;
 	mAvatarID = p.avatar_id;

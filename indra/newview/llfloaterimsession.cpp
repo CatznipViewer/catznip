@@ -90,11 +90,7 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
 	mPositioned(false),
 	mSessionInitialized(false),
 	mMeTypingTimer(),
-// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 	mOtherTypingTimer()
-// [/SL:KB]
-//	mOtherTypingTimer(),
-//	mImInfo()
 {
 	mIsNearbyChat = false;
 
@@ -150,7 +146,7 @@ void LLFloaterIMSession::refresh()
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 		removeTypingIndicator();
 // [/SL:KB]
-//		removeTypingIndicator(mImInfo);
+//		removeTypingIndicator(mImFromId);
 		mOtherTyping = false;
 	}
 
@@ -1215,7 +1211,7 @@ void LLFloaterIMSession::setTyping(bool typing)
 //	}
 }
 
-//void LLFloaterIMSession::processIMTyping(const LLIMInfo* im_info, BOOL typing)
+//void LLFloaterIMSession::processIMTyping(const LLUUID& from_id, BOOL typing)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 void LLFloaterIMSession::processIMTyping(bool typing)
 // [/SL:KB]
@@ -1227,7 +1223,7 @@ void LLFloaterIMSession::processIMTyping(bool typing)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 		addTypingIndicator();
 // [/SL:KB]
-//		addTypingIndicator(im_info);
+//		addTypingIndicator(from_id);
 		mOtherTypingTimer.reset();
 	}
 	else
@@ -1236,7 +1232,7 @@ void LLFloaterIMSession::processIMTyping(bool typing)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 		removeTypingIndicator();
 // [/SL:KB]
-//		removeTypingIndicator(im_info);
+//		removeTypingIndicator(from_id);
 	}
 }
 
@@ -1443,7 +1439,7 @@ BOOL LLFloaterIMSession::inviteToSession(const uuid_vec_t& ids)
 	return is_region_exist;
 }
 
-//void LLFloaterIMSession::addTypingIndicator(const LLIMInfo* im_info)
+//void LLFloaterIMSession::addTypingIndicator(const LLUUID& from_id)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 void LLFloaterIMSession::addTypingIndicator()
 // [/SL:KB]
@@ -1476,7 +1472,7 @@ Note: OTHER_TYPING_TIMEOUT must be > ME_TYPING_TIMEOUT for proper operation of t
 */
 
 	// We may have lost a "stop-typing" packet, don't add it twice
-//	if (im_info && !mOtherTyping)
+//	if (from_id.notNull() && !mOtherTyping)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 	if (!mOtherTyping)
 // [/SL:KB]
@@ -1487,13 +1483,13 @@ Note: OTHER_TYPING_TIMEOUT must be > ME_TYPING_TIMEOUT for proper operation of t
 // [/SL:KB]
 		mOtherTypingTimer.reset();
 //		// Save im_info so that removeTypingIndicator can be properly called because a timeout has occurred
-//		mImInfo = im_info;
+//		mImFromId = from_id;
 //
 //		// Update speaker
 //		LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
 //		if ( speaker_mgr )
 //		{
-//			speaker_mgr->setSpeakerTyping(im_info->mFromID, TRUE);
+//			speaker_mgr->setSpeakerTyping(from_id, TRUE);
 //		}
 // [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
 		refreshConversation();
@@ -1501,7 +1497,7 @@ Note: OTHER_TYPING_TIMEOUT must be > ME_TYPING_TIMEOUT for proper operation of t
 	}
 }
 
-//void LLFloaterIMSession::removeTypingIndicator(const LLIMInfo* im_info)
+//void LLFloaterIMSession::removeTypingIndicator(const LLUUID& from_id)
 // [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
 void LLFloaterIMSession::removeTypingIndicator()
 // [/SL:KB]
@@ -1513,13 +1509,13 @@ void LLFloaterIMSession::removeTypingIndicator()
 		mChatHistory->showTypingIndicator(false);
 // [/SL:KB]
 
-//		if (im_info)
+//		if (from_id.notNull())
 //		{
 //			// Update speaker
 //			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
 //			if (speaker_mgr)
 //			{
-//				speaker_mgr->setSpeakerTyping(im_info->mFromID, FALSE);
+//				speaker_mgr->setSpeakerTyping(from_id, FALSE);
 //			}
 //		}
 // [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)

@@ -2468,6 +2468,7 @@ BOOL LLFloaterIMContainerView::isFrontmost()
 // This is intentional so it doesn't confuse the user. onClickCloseBtn() closes the whole floater.
 void LLFloaterIMContainerView::onClickCloseBtn(bool app_quitting/* = false*/)
 {
+	gSavedPerAccountSettings.setS32("ConversationsListPaneWidth", mConversationsPane->getRect().getWidth());
 	LLMultiFloater::closeFloater(app_quitting);
 }
 
