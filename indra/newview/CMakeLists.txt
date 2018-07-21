@@ -201,7 +201,6 @@ set(viewer_SOURCE_FILES
     llflickrconnect.cpp
     llfloaterabout.cpp
     llfloaterbvhpreview.cpp
-    llfloaterauction.cpp
     llfloaterautoreplacesettings.cpp
     llfloateravatar.cpp
     llfloateravatarpicker.cpp
@@ -347,6 +346,7 @@ set(viewer_SOURCE_FILES
     llhudview.cpp
     llimagefiltersmanager.cpp
     llimhandler.cpp
+    llimprocessing.cpp
     llimview.cpp
     llinspect.cpp
     llinspectavatar.cpp
@@ -531,6 +531,7 @@ set(viewer_SOURCE_FILES
     llscriptfloater.cpp
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
+    llsculptidsize.cpp
     llsearchcombobox.cpp
     llsearchhistory.cpp
     llsecapi.cpp
@@ -823,7 +824,6 @@ set(viewer_HEADER_FILES
     llflickrconnect.h
     llfloaterabout.h
     llfloaterbvhpreview.h
-    llfloaterauction.h
     llfloaterautoreplacesettings.h
     llfloateravatar.h
     llfloateravatarpicker.h
@@ -970,6 +970,7 @@ set(viewer_HEADER_FILES
     llhudtext.h
     llhudview.h
     llimagefiltersmanager.h
+    llimprocessing.h
     llimview.h
     llinspect.h
     llinspectavatar.h
@@ -1145,6 +1146,7 @@ set(viewer_HEADER_FILES
     llscriptruntimeperms.h
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
+    llsculptidsize.h
     llsearchcombobox.h
     llsearchhistory.h
     llsecapi.h
@@ -1628,7 +1630,6 @@ set(viewer_APPSETTINGS_FILES
     app_settings/viewerart.xml
     ${CMAKE_SOURCE_DIR}/../etc/message.xml
     ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
-    ${AUTOBUILD_INSTALL_DIR}/ca-bundle.crt
     packages-info.txt
     )
 
