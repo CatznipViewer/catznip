@@ -378,6 +378,16 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
             LLSD form_element = form->getElement(i);
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
+			if (form_element.has("visible_payload"))
+			{
+				const std::string& strVisibleKey = form_element["visible_payload"].asStringRef();
+				const LLSD& sdPayload = mNotification->getPayload();
+				if ( (sdPayload.has(strVisibleKey)) && (sdPayload[strVisibleKey].isBoolean()) && (!sdPayload[strVisibleKey].asBoolean()) )
+				{
+					continue;
+				}
+			}
+
 			if (form_element["type"].asString() == "panel")
 			{
 				// Create panel

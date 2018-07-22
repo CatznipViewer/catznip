@@ -259,7 +259,12 @@ void inventory_offer_handler(LLOfferInfo* info)
 		payload["accept_in"] = false;
 		payload["accept_in_folder"] = LLUUID::null;
 	}
+
+	bool canPreview = check_asset_previewable(info->mType);
+	payload["show_preview"] = canPreview;
+	payload["show_in_inventory"] = !canPreview;
 // [/SL:KB]
+
     // Flag indicating that this notification is faked for toast.
     payload["give_inventory_notification"] = FALSE;
     args["OBJECTFROMNAME"] = info->mFromName;
