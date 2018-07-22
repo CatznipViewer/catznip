@@ -3330,7 +3330,7 @@ bool LLIMMgr::leaveSession(const LLUUID& session_id)
 
 		if (LLIMModel::LLIMSession::SCloseAction::CLOSE_DEFAULT == eCloseAction)
 		{
-			if (LLGroupOptions* pOptions = LLGroupOptionsMgr::instance().getOptions(session_id))
+			if (const LLGroupOptions* pOptions = LLGroupOptionsMgr::instance().getOptions(session_id))
 			{
 				eCloseAction = (pOptions->mSnoozeOnClose) ? LLIMModel::LLIMSession::SCloseAction::CLOSE_SNOOZE : LLIMModel::LLIMSession::SCloseAction::CLOSE_LEAVE;
 				nSnoozeDuration = pOptions->mSnoozeDuration * 60;
@@ -3341,7 +3341,10 @@ bool LLIMMgr::leaveSession(const LLUUID& session_id)
 		{
 			static LLCachedControl<S32> s_nSnoozeTime(gSavedSettings, "GroupSnoozeTime", 900);
 			if (-1 == nSnoozeDuration)
-				nSnoozeDuration = s_nSnoozeTime;
+			{
+				const LLGroupOptions* pOptions = LLGroupOptionsMgr::instance().getOptions(session_id);
+				nSnoozeDuration = ((pOptions) && (pOptions->mSnoozeOnClose)) ? pOptions->mSnoozeDuration * 60 : s_nSnoozeTime;
+			}
 
 			snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
 			if (mSnoozedSessions.end() != itSession)
