@@ -295,12 +295,20 @@ LLTexUnit::eTextureAddressMode LLGLTexture::getAddressMode(void) const
 	return mGLTexturep->getAddressMode() ;
 }
 
-S32Bytes LLGLTexture::getTextureMemory() const
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+S64Bytes LLGLTexture::getTextureMemory() const
 {
 	llassert(mGLTexturep.notNull()) ;
 
 	return mGLTexturep->mTextureMemory ;
 }
+// [/SL:KB]
+//S32Bytes LLGLTexture::getTextureMemory() const
+//{
+//	llassert(mGLTexturep.notNull()) ;
+//
+//	return mGLTexturep->mTextureMemory ;
+//}
 
 LLGLenum LLGLTexture::getPrimaryFormat() const
 {

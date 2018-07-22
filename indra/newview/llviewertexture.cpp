@@ -63,10 +63,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // extern
-const S32Megabytes gMinVideoRam(32);
-// [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.3
-const S32Megabytes gMaxVideoRam(4096);
+// [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+const S64Megabytes gMinVideoRam(32);
+const S64Megabytes gMaxVideoRam(4096);
 // [/SL:DP]
+//const S32Megabytes gMinVideoRam(32);
 //const S32Megabytes gMaxVideoRam(512);
 
 
@@ -89,11 +90,18 @@ S32 LLViewerTexture::sAuxCount = 0;
 LLFrameTimer LLViewerTexture::sEvaluationTimer;
 F32 LLViewerTexture::sDesiredDiscardBias = 0.f;
 F32 LLViewerTexture::sDesiredDiscardScale = 1.1f;
-S32Bytes LLViewerTexture::sBoundTextureMemory;
-S32Bytes LLViewerTexture::sTotalTextureMemory;
-S32Megabytes LLViewerTexture::sMaxBoundTextureMemory;
-S32Megabytes LLViewerTexture::sMaxTotalTextureMem;
-S32Bytes LLViewerTexture::sMaxDesiredTextureMem;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+S64Bytes LLViewerTexture::sBoundTextureMemory;
+S64Bytes LLViewerTexture::sTotalTextureMemory;
+S64Megabytes LLViewerTexture::sMaxBoundTextureMemory;
+S64Megabytes LLViewerTexture::sMaxTotalTextureMem;
+S64Bytes LLViewerTexture::sMaxDesiredTextureMem;
+// [/Sl:KB]
+//S32Bytes LLViewerTexture::sBoundTextureMemory;
+//S32Bytes LLViewerTexture::sTotalTextureMemory;
+//S32Megabytes LLViewerTexture::sMaxBoundTextureMemory;
+//S32Megabytes LLViewerTexture::sMaxTotalTextureMem;
+//S32Bytes LLViewerTexture::sMaxDesiredTextureMem;
 S8  LLViewerTexture::sCameraMovingDiscardBias = 0;
 F32 LLViewerTexture::sCameraMovingBias = 0.0f;
 S32 LLViewerTexture::sMaxSculptRez = 128; //max sculpt image size
@@ -3914,7 +3922,10 @@ void LLTexturePipelineTester::outputTestRecord(LLSD *sd)
 
 void LLTexturePipelineTester::updateTextureBindingStats(const LLViewerTexture* imagep) 
 {
-	U32Bytes mem_size = imagep->getTextureMemory();
+//	U32Bytes mem_size = imagep->getTextureMemory();
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	U64Bytes mem_size = imagep->getTextureMemory();
+// [/SL:KB]
 	mTotalBytesUsed += mem_size; 
 
 	if(MIN_LARGE_IMAGE_AREA <= (U32)(mem_size.value() / (U32)imagep->getComponents()))

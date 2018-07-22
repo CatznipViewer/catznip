@@ -136,7 +136,10 @@ public:
 	BOOL  	 	 	 	 	updateJointLODs();
 	void					updateLODRiggedAttachments( void );
 	/*virtual*/ BOOL   	 	 	isActive() const; // Whether this object needs to do an idleUpdate.
-	S32Bytes				totalTextureMemForUUIDS(std::set<LLUUID>& ids);
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes				totalTextureMemForUUIDS(std::set<LLUUID>& ids);
+// [/SL:KB]
+//	S32Bytes				totalTextureMemForUUIDS(std::set<LLUUID>& ids);
 	bool 						allTexturesCompletelyDownloaded(std::set<LLUUID>& ids) const;
 	bool 						allLocalTexturesCompletelyDownloaded() const;
 	bool 						allBakedTexturesCompletelyDownloaded() const;

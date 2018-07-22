@@ -39,8 +39,12 @@
 #include <map>
 #include <list>
 
-extern const S32Megabytes gMinVideoRam;
-extern const S32Megabytes gMaxVideoRam;
+// [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+extern const S64Megabytes gMinVideoRam;
+extern const S64Megabytes gMaxVideoRam;
+// [/SL:DP]
+//extern const S32Megabytes gMinVideoRam;
+//extern const S32Megabytes gMaxVideoRam;
 
 class LLFace;
 class LLImageGL ;
@@ -217,11 +221,18 @@ public:
 	static LLFrameTimer sEvaluationTimer;
 	static F32 sDesiredDiscardBias;
 	static F32 sDesiredDiscardScale;
-	static S32Bytes sBoundTextureMemory;
-	static S32Bytes sTotalTextureMemory;
-	static S32Megabytes sMaxBoundTextureMemory;
-	static S32Megabytes sMaxTotalTextureMem;
-	static S32Bytes sMaxDesiredTextureMem ;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	static S64Bytes sBoundTextureMemory;
+	static S64Bytes sTotalTextureMemory;
+	static S64Megabytes sMaxBoundTextureMemory;
+	static S64Megabytes sMaxTotalTextureMem;
+	static S64Bytes sMaxDesiredTextureMem ;
+// [/SL:KB]
+//	static S32Bytes sBoundTextureMemory;
+//	static S32Bytes sTotalTextureMemory;
+//	static S32Megabytes sMaxBoundTextureMemory;
+//	static S32Megabytes sMaxTotalTextureMem;
+//	static S32Bytes sMaxDesiredTextureMem ;
 	static S8  sCameraMovingDiscardBias;
 	static F32 sCameraMovingBias;
 	static S32 sMaxSculptRez ;

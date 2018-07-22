@@ -56,7 +56,10 @@ public:
 	static S32 dataFormatBytes(S32 dataformat, S32 width, S32 height);
 	static S32 dataFormatComponents(S32 dataformat);
 
-	BOOL updateBindStats(S32Bytes tex_mem) const ;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	BOOL updateBindStats(S64Bytes tex_mem) const ;
+// [/SL:KB]
+//	BOOL updateBindStats(S32Bytes tex_mem) const ;
 	F32 getTimePassedSinceLastBound();
 	void forceUpdateBindStats(void) const;
 
@@ -69,7 +72,10 @@ public:
 	static void dirtyTexOptions();
 
 	// Sometimes called externally for textures not using LLImageGL (should go away...)	
-	static S32 updateBoundTexMem(const S32Bytes mem, const S32 ncomponents, S32 category) ;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	static S64 updateBoundTexMem(const S64Bytes mem, const S32 ncomponents, S32 category) ;
+// [/SL:KB]
+//	static S32 updateBoundTexMem(const S32Bytes mem, const S32 ncomponents, S32 category) ;
 	
 	static bool checkSize(S32 width, S32 height);
 
@@ -182,7 +188,10 @@ public:
 
 public:
 	// Various GL/Rendering options
-	S32Bytes mTextureMemory;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	S64Bytes mTextureMemory;
+// [/SL:KB]
+//	S32Bytes mTextureMemory;
 	mutable F32  mLastBindTime;	// last time this was bound, by discard level
 	
 private:
@@ -242,9 +251,14 @@ public:
 	static F32 sLastFrameTime;
 
 	// Global memory statistics
-	static S32Bytes sGlobalTextureMemory;	// Tracks main memory texmem
-	static S32Bytes sBoundTextureMemory;	// Tracks bound texmem for last completed frame
-	static S32Bytes sCurBoundTextureMemory;		// Tracks bound texmem for current frame
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	static S64Bytes sGlobalTextureMemory;	// Tracks main memory texmem
+	static S64Bytes sBoundTextureMemory;	// Tracks bound texmem for last completed frame
+	static S64Bytes sCurBoundTextureMemory;		// Tracks bound texmem for current frame
+// [/SL:KB]
+//	static S32Bytes sGlobalTextureMemory;	// Tracks main memory texmem
+//	static S32Bytes sBoundTextureMemory;	// Tracks bound texmem for last completed frame
+//	static S32Bytes sCurBoundTextureMemory;		// Tracks bound texmem for current frame
 	static U32 sBindCount;					// Tracks number of texture binds for current frame
 	static U32 sUniqueCount;				// Tracks number of unique texture binds for current frame
 	static BOOL sGlobalUseAnisotropic;

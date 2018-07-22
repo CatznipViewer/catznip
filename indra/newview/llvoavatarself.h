@@ -249,7 +249,10 @@ public:
 public:
 	static void		deleteScratchTextures();
 private:
-	static S32Bytes sScratchTexBytes;
+// [SL:KB] - Patch: Viewer-TextureMemory | Checked: Catznip-5.4
+	static S64Bytes sScratchTexBytes;
+// [/SL:KB]
+//	static S32Bytes sScratchTexBytes;
 	static std::map< LLGLenum, LLGLuint*> sScratchTexNames;
 
 /**                    Textures
