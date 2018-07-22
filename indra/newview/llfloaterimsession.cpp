@@ -956,6 +956,9 @@ void LLFloaterIMSession::setVisible(BOOL visible)
 	{
 		sIMFloaterShowedSignal(mSessionID);
         updateMessages();
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.4
+		channel->removeToastsBySessionID(mSessionID);
+// [/SL:KB]
 	}
 
 }
@@ -1145,18 +1148,18 @@ void LLFloaterIMSession::updateMessages()
 //			appendMessage(chat);
 			mLastMessageIndex = msg["index"].asInteger();
 
-			// if it is a notification - next message is a notification history log, so skip it
-			if (chat.mNotifId.notNull() && LLNotificationsUtil::find(chat.mNotifId) != NULL)
-			{
-				if (++iter == iter_end)
-				{
-					break;
-				}
-				else
-				{
-					mLastMessageIndex++;
-				}
-			}
+//			// if it is a notification - next message is a notification history log, so skip it
+//			if (chat.mNotifId.notNull() && LLNotificationsUtil::find(chat.mNotifId) != NULL)
+//			{
+//				if (++iter == iter_end)
+//				{
+//					break;
+//				}
+//				else
+//				{
+//					mLastMessageIndex++;
+//				}
+//			}
 		}
 	}
 }
