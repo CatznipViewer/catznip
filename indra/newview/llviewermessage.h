@@ -63,6 +63,9 @@ enum InventoryOfferResponse
 	IOR_MUTE,
 	IOR_SHOW
 };
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+bool check_asset_previewable(const LLAssetType::EType asset_type);
+// [/SL:KB]
 
 BOOL can_afford_transaction(S32 cost);
 void give_money(const LLUUID& uuid, LLViewerRegion* region, S32 amount, BOOL is_group = FALSE,
