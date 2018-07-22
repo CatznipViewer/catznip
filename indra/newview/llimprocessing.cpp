@@ -41,6 +41,9 @@
 #include "llnotificationsutil.h"
 #include "llnotificationmanager.h"
 #include "llpanelgroup.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+// [/SL:KB]
 #include "llregionhandle.h"
 #include "llsdserialize.h"
 #include "llslurl.h"
