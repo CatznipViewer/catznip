@@ -282,7 +282,6 @@ void LLPanelVolume::getState( )
 	
 	if (is_light && editable && single_volume)
 	{
-		getChildView("label color")->setEnabled(true);
 		//mLabelColor		 ->setEnabled( TRUE );
 		LLColorSwatchCtrl* LightColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
 		if(LightColorSwatch)
@@ -325,7 +324,6 @@ void LLPanelVolume::getState( )
 		getChild<LLSpinCtrl>("Light Radius", true)->clear();
 		getChild<LLSpinCtrl>("Light Falloff", true)->clear();
 
-		getChildView("label color")->setEnabled(false);	
 		LLColorSwatchCtrl* LightColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
 		if(LightColorSwatch)
 		{
@@ -526,7 +524,6 @@ void LLPanelVolume::refresh()
 
 	BOOL visible = LLViewerShaderMgr::instance()->getVertexShaderLevel(LLViewerShaderMgr::SHADER_DEFERRED) > 0 ? TRUE : FALSE;
 
-	getChildView("label texture")->setVisible( visible);
 	getChildView("Light FOV")->setVisible( visible);
 	getChildView("Light Focus")->setVisible( visible);
 	getChildView("Light Ambiance")->setVisible( visible);
@@ -567,9 +564,7 @@ void LLPanelVolume::clearCtrls()
 	getChildView("select_single")->setVisible(true);
 	getChildView("edit_object")->setEnabled(false);
 	getChildView("edit_object")->setVisible(false);
-	getChildView("Light Checkbox Ctrl")->setEnabled(false);
-	getChildView("label color")->setEnabled(false);
-	getChildView("label color")->setEnabled(false);
+	getChildView("Light Checkbox Ctrl")->setEnabled(false);;
 	LLColorSwatchCtrl* LightColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
 	if(LightColorSwatch)
 	{
@@ -710,22 +705,20 @@ void LLPanelVolume::onLightCancelColor(const LLSD& data)
 void LLPanelVolume::onLightCancelTexture(const LLSD& data)
 {
 	LLTextureCtrl* LightTextureCtrl = getChild<LLTextureCtrl>("light texture control");
-
-	if (LightTextureCtrl)
-	{
-        LightTextureCtrl->setImageAssetID(mLightSavedTexture);
-	}
-
 	LLVOVolume *volobjp = (LLVOVolume *) mObject.get();
-	if(volobjp)
+
+	if (volobjp && LightTextureCtrl)
 	{
 		// Cancel the light texture as requested
 		// NORSPEC-292
-		//
+        //
+        // Texture picker triggers cancel both in case of actual cancel and in case of
+        // selection of "None" texture.
+        LLUUID tex_id = LightTextureCtrl->getImageAssetID();
         bool is_spotlight = volobjp->isLightSpotlight();
-        volobjp->setLightTextureID(mLightSavedTexture); //updates spotlight
+        volobjp->setLightTextureID(tex_id); //updates spotlight
 
-        if (!is_spotlight && mLightSavedTexture.notNull())
+        if (!is_spotlight && tex_id.notNull())
         {
             LLVector3 spot_params = volobjp->getSpotLightParams();
             getChild<LLUICtrl>("Light FOV")->setValue(spot_params.mV[0]);
@@ -769,7 +762,6 @@ void LLPanelVolume::onLightSelectTexture(const LLSD& data)
 	{
 		LLUUID id = LightTextureCtrl->getImageAssetID();
 		volobjp->setLightTextureID(id);
-		mLightSavedTexture = id;
 	}
 }
 

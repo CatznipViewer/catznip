@@ -39,6 +39,7 @@
 #include "lleconomy.h"
 #include "llagent.h"
 #include "llfloaterreg.h"
+#include "llfloatersnapshot.h"
 #include "llstatusbar.h"
 #include "llinventorypanel.h"
 #include "llsdutil.h"
@@ -52,6 +53,8 @@
 #include "llcoproceduremanager.h"
 
 void dialog_refresh_all();
+
+static const U32 LL_ASSET_UPLOAD_TIMEOUT_SEC = 60;
 
 LLResourceUploadInfo::LLResourceUploadInfo(LLTransactionID transactId,
         LLAssetType::EType assetType, std::string name, std::string description,
@@ -678,6 +681,8 @@ void LLViewerAssetUpload::AssetInventoryUploadCoproc(LLCoreHttpUtil::HttpCorouti
     const LLUUID &id, std::string url, LLResourceUploadInfo::ptr_t uploadInfo)
 {
     LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOptions(new LLCore::HttpOptions);
+    httpOptions->setTimeout(LL_ASSET_UPLOAD_TIMEOUT_SEC);
 
     LLSD result = uploadInfo->prepareUpload();
     uploadInfo->logPreparedUpload();
@@ -699,7 +704,7 @@ void LLViewerAssetUpload::AssetInventoryUploadCoproc(LLCoreHttpUtil::HttpCorouti
 
     LLSD body = uploadInfo->generatePostBody();
 
-    result = httpAdapter->postAndSuspend(httpRequest, url, body);
+    result = httpAdapter->postAndSuspend(httpRequest, url, body, httpOptions);
 
     LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
     LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
@@ -717,7 +722,7 @@ void LLViewerAssetUpload::AssetInventoryUploadCoproc(LLCoreHttpUtil::HttpCorouti
     bool success = false;
     if (!uploader.empty() && uploadInfo->getAssetId().notNull())
     {
-        result = httpAdapter->postFileAndSuspend(httpRequest, uploader, uploadInfo->getAssetId(), uploadInfo->getAssetType());
+        result = httpAdapter->postFileAndSuspend(httpRequest, uploader, uploadInfo->getAssetId(), uploadInfo->getAssetType(), httpOptions);
         httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
         status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
 
@@ -756,17 +761,15 @@ void LLViewerAssetUpload::AssetInventoryUploadCoproc(LLCoreHttpUtil::HttpCorouti
         {
             success = true;
 
+            LLFocusableElement* focus = gFocusMgr.getKeyboardFocus();
+
             // Show the preview panel for textures and sounds to let
             // user know that the image (or snapshot) arrived intact.
-            LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel();
-            if (panel)
-            {
-                LLFocusableElement* focus = gFocusMgr.getKeyboardFocus();
-                panel->setSelection(serverInventoryItem, TAKE_FOCUS_NO);
+            LLInventoryPanel* panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+            LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, serverInventoryItem, TRUE, TAKE_FOCUS_NO, (panel == NULL));
 
-                // restore keyboard focus
-                gFocusMgr.setKeyboardFocus(focus);
-            }
+            // restore keyboard focus
+            gFocusMgr.setKeyboardFocus(focus);
         }
         else
         {
@@ -811,14 +814,19 @@ void LLViewerAssetUpload::HandleUploadError(LLCore::HttpStatus status, LLSD &res
     }
     else
     {
-        if (status.getType() == 499)
+        switch (status.getType())
         {
-            reason = "The server is experiencing unexpected difficulties.";
-        }
-        else
-        {
-            reason = "Error in upload request.  Please visit "
-                "http://secondlife.com/support for help fixing this problem.";
+        case 404:
+            reason = LLTrans::getString("AssetUploadServerUnreacheble");
+            break;
+        case 499:
+            reason = LLTrans::getString("AssetUploadServerDifficulties");
+            break;
+        case 503:
+            reason = LLTrans::getString("AssetUploadServerUnavaliable");
+            break;
+        default:
+            reason = LLTrans::getString("AssetUploadRequestInvalid");
         }
     }
 
@@ -849,11 +857,19 @@ void LLViewerAssetUpload::HandleUploadError(LLCore::HttpStatus status, LLSD &res
     }
 
     // Let the Snapshot floater know we have failed uploading.
-    LLFloater* floater_snapshot = LLFloaterReg::findInstance("snapshot");
-    if (uploadInfo->getAssetType() == LLAssetType::AT_TEXTURE && floater_snapshot && floater_snapshot->isShown())
+    LLFloaterSnapshot* floater_snapshot = LLFloaterSnapshot::findInstance();
+    if (floater_snapshot && floater_snapshot->isWaitingState())
     {
-        floater_snapshot->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "inventory")));
+        if (uploadInfo->getAssetType() == LLAssetType::AT_IMAGE_JPEG)
+        {
+            floater_snapshot->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "postcard")));
+        }
+        if (uploadInfo->getAssetType() == LLAssetType::AT_TEXTURE)
+        {
+            floater_snapshot->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "inventory")));
+        }
     }
+
     LLFloater* floater_outfit_snapshot = LLFloaterReg::findInstance("outfit_snapshot");
     if (uploadInfo->getAssetType() == LLAssetType::AT_TEXTURE && floater_outfit_snapshot && floater_outfit_snapshot->isShown())
     {

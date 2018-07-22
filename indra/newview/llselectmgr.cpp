@@ -33,6 +33,7 @@
 
 // library includes
 #include "llcachename.h"
+#include "llavatarnamecache.h"
 #include "lldbstrings.h"
 #include "lleconomy.h"
 #include "llgl.h"
@@ -132,11 +133,6 @@ LLColor4 LLSelectMgr::sHighlightParentColor;
 LLColor4 LLSelectMgr::sHighlightChildColor;
 LLColor4 LLSelectMgr::sContextSilhouetteColor;
 
-static LLObjectSelection *get_null_object_selection();
-template<> 
-	const LLSafeHandle<LLObjectSelection>::NullFunc 
-		LLSafeHandle<LLObjectSelection>::sNullFunc = get_null_object_selection;
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // struct LLDeRezInfo
 //
@@ -156,25 +152,13 @@ struct LLDeRezInfo
 //
 
 
-static LLPointer<LLObjectSelection> sNullSelection;
-
 //
 // Functions
 //
 
 void LLSelectMgr::cleanupGlobals()
 {
-	sNullSelection = NULL;
 	LLSelectMgr::getInstance()->clearSelections();
-}
-
-LLObjectSelection *get_null_object_selection()
-{
-	if (sNullSelection.isNull())
-	{
-		sNullSelection = new LLObjectSelection;
-	}
-	return sNullSelection;
 }
 
 // Build time optimization, generate this function once here
@@ -610,6 +594,12 @@ bool LLSelectMgr::linkObjects()
 		// the most likely to be stumped by this one, so offer the
 		// easiest and most likely solution.
 		LLNotificationsUtil::add("CannotLinkDifferentOwners");
+		return true;
+	}
+
+	if (!LLSelectMgr::getInstance()->selectGetSameRegion())
+	{
+		LLNotificationsUtil::add("CannotLinkAcrossRegions");
 		return true;
 	}
 
@@ -2777,6 +2767,35 @@ BOOL LLSelectMgr::selectGetRootsModify()
 	return TRUE;
 }
 
+//-----------------------------------------------------------------------------
+// selectGetSameRegion() - return TRUE if all objects are in same region
+//-----------------------------------------------------------------------------
+BOOL LLSelectMgr::selectGetSameRegion()
+{
+    if (getSelection()->isEmpty())
+    {
+        return TRUE;
+    }
+    LLViewerObject* object = getSelection()->getFirstObject();
+    if (!object)
+    {
+        return FALSE;
+    }
+    LLViewerRegion* current_region = object->getRegion();
+
+    for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
+        iter != getSelection()->root_end(); iter++)
+    {
+        LLSelectNode* node = *iter;
+        object = node->getObject();
+        if (!node->mValid || !object || current_region != object->getRegion())
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
 
 //-----------------------------------------------------------------------------
 // selectGetNonPermanentEnforced() - return TRUE if all objects are not
@@ -5385,9 +5404,9 @@ void LLSelectMgr::processObjectPropertiesFamily(LLMessageSystem* msg, void** use
 		LLFloaterReporter *reporterp = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
 		if (reporterp)
 		{
-			std::string fullname;
-			gCacheName->getFullName(owner_id, fullname);
-			reporterp->setPickedObjectProperties(name, fullname, owner_id);
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(owner_id, &av_name);
+			reporterp->setPickedObjectProperties(name, av_name.getUserName(), owner_id);
 		}
 	}
 	else if (request_flags & OBJECT_PAY_REQUEST)
@@ -6252,92 +6271,107 @@ void pushWireframe(LLDrawable* drawable)
 
 void LLSelectNode::renderOneWireframe(const LLColor4& color)
 {
-	//Need to because crash on ATI 3800 (and similar cards) MAINT-5018 
-	LLGLDisable multisample(LLPipeline::RenderFSAASamples > 0 ? GL_MULTISAMPLE_ARB : 0);
+    //Need to because crash on ATI 3800 (and similar cards) MAINT-5018 
+    LLGLDisable multisample(LLPipeline::RenderFSAASamples > 0 ? GL_MULTISAMPLE_ARB : 0);
 
-	LLViewerObject* objectp = getObject();
-	if (!objectp)
-	{
-		return;
-	}
+    LLViewerObject* objectp = getObject();
+    if (!objectp)
+    {
+        return;
+    }
 
-	LLDrawable* drawable = objectp->mDrawable;
-	if(!drawable)
-	{
-		return;
-	}
+    LLDrawable* drawable = objectp->mDrawable;
+    if (!drawable)
+    {
+        return;
+    }
 
-	LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
+    LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
 
-	if (shader)
-	{
-		gDebugProgram.bind();
-	}
+    if (shader)
+    {
+        gDebugProgram.bind();
+    }
 
-	gGL.matrixMode(LLRender::MM_MODELVIEW);
-	gGL.pushMatrix();
-	
-	BOOL is_hud_object = objectp->isHUDAttachment();
+    gGL.matrixMode(LLRender::MM_MODELVIEW);
+    gGL.pushMatrix();
 
-	if (drawable->isActive())
-	{
-		gGL.loadMatrix(gGLModelView);
-		gGL.multMatrix((F32*) objectp->getRenderMatrix().mMatrix);
-	}
-	else if (!is_hud_object)
-	{
-		gGL.loadIdentity();
-		gGL.multMatrix(gGLModelView);
-		LLVector3 trans = objectp->getRegion()->getOriginAgent();		
-		gGL.translatef(trans.mV[0], trans.mV[1], trans.mV[2]);		
-	}
-	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	if (LLSelectMgr::sRenderHiddenSelections) // && gFloaterTools && gFloaterTools->getVisible())
-	{
-		gGL.blendFunc(LLRender::BF_SOURCE_COLOR, LLRender::BF_ONE);
-		LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE, GL_GEQUAL);
-		if (shader)
-		{
-			gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
-			pushWireframe(drawable);
-		}
-		else
-		{
-			LLGLEnable fog(GL_FOG);
-			glFogi(GL_FOG_MODE, GL_LINEAR);
-			float d = (LLViewerCamera::getInstance()->getPointOfInterest()-LLViewerCamera::getInstance()->getOrigin()).magVec();
-			LLColor4 fogCol = color * (F32)llclamp((LLSelectMgr::getInstance()->getSelectionCenterGlobal()-gAgentCamera.getCameraPositionGlobal()).magVec()/(LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal().magVec()*4), 0.0, 1.0);
-			glFogf(GL_FOG_START, d);
-			glFogf(GL_FOG_END, d*(1 + (LLViewerCamera::getInstance()->getView() / LLViewerCamera::getInstance()->getDefaultFOV())));
-			glFogfv(GL_FOG_COLOR, fogCol.mV);
+    BOOL is_hud_object = objectp->isHUDAttachment();
 
-			gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
-			{
-				gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
-				pushWireframe(drawable);
-			}
-		}
-	}
+    if (drawable->isActive())
+    {
+        gGL.loadMatrix(gGLModelView);
+        gGL.multMatrix((F32*)objectp->getRenderMatrix().mMatrix);
+    }
+    else if (!is_hud_object)
+    {
+        gGL.loadIdentity();
+        gGL.multMatrix(gGLModelView);
+        LLVector3 trans = objectp->getRegion()->getOriginAgent();
+        gGL.translatef(trans.mV[0], trans.mV[1], trans.mV[2]);
+    }
 
-	gGL.flush();
-	gGL.setSceneBlendType(LLRender::BT_ALPHA);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	gGL.diffuseColor4f(color.mV[VRED]*2, color.mV[VGREEN]*2, color.mV[VBLUE]*2, LLSelectMgr::sHighlightAlpha*2);
-	
-	LLGLEnable offset(GL_POLYGON_OFFSET_LINE);
-	glPolygonOffset(3.f, 3.f);
-	glLineWidth(3.f);
-	pushWireframe(drawable);
-	glLineWidth(1.f);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	gGL.popMatrix();
+    if (LLSelectMgr::sRenderHiddenSelections) // && gFloaterTools && gFloaterTools->getVisible())
+    {
+        gGL.blendFunc(LLRender::BF_SOURCE_COLOR, LLRender::BF_ONE);
+        LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE, GL_GEQUAL);
+        if (shader)
+        {
+            gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
+            pushWireframe(drawable);
+        }
+        else
+        {
+            LLGLEnable fog(GL_FOG);
+            glFogi(GL_FOG_MODE, GL_LINEAR);
+            float d = (LLViewerCamera::getInstance()->getPointOfInterest() - LLViewerCamera::getInstance()->getOrigin()).magVec();
+            LLColor4 fogCol = color * (F32)llclamp((LLSelectMgr::getInstance()->getSelectionCenterGlobal() - gAgentCamera.getCameraPositionGlobal()).magVec() / (LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal().magVec() * 4), 0.0, 1.0);
+            glFogf(GL_FOG_START, d);
+            glFogf(GL_FOG_END, d*(1 + (LLViewerCamera::getInstance()->getView() / LLViewerCamera::getInstance()->getDefaultFOV())));
+            glFogfv(GL_FOG_COLOR, fogCol.mV);
 
-	if (shader)
-	{
-		shader->bind();
-	}
+            gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
+            {
+                gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
+                pushWireframe(drawable);
+            }
+        }
+    }
+
+    gGL.flush();
+    gGL.setSceneBlendType(LLRender::BT_ALPHA);
+
+    gGL.diffuseColor4f(color.mV[VRED] * 2, color.mV[VGREEN] * 2, color.mV[VBLUE] * 2, LLSelectMgr::sHighlightAlpha * 2);
+
+    {
+        bool wireframe_selection = gFloaterTools && gFloaterTools->getVisible();
+
+        LLGLDisable depth(wireframe_selection ? 0 : GL_BLEND);
+        LLGLEnable stencil(wireframe_selection ? 0 : GL_STENCIL_TEST);
+
+        if (!wireframe_selection)
+        { //modify wireframe into outline selection mode
+            glStencilFunc(GL_NOTEQUAL, 2, 0xffff);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        }
+
+        LLGLEnable offset(GL_POLYGON_OFFSET_LINE);
+        glPolygonOffset(3.f, 3.f);
+        glLineWidth(5.f);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        pushWireframe(drawable);
+    }
+
+    glLineWidth(1.f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    gGL.popMatrix();
+
+    if (shader)
+    {
+        shader->bind();
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -6618,7 +6652,7 @@ void LLSelectMgr::updateSelectionCenter()
 	{
 		mSelectedObjects->mSelectType = getSelectTypeForObject(object);
 
-		if (mSelectedObjects->mSelectType == SELECT_TYPE_ATTACHMENT && isAgentAvatarValid())
+		if (mSelectedObjects->mSelectType == SELECT_TYPE_ATTACHMENT && isAgentAvatarValid() && object->getParent() != NULL)
 		{
 			mPauseRequest = gAgentAvatarp->requestPause();
 		}

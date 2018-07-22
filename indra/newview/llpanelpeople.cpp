@@ -586,7 +586,6 @@ BOOL LLPanelPeople::postBuild()
 	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 
 	if(gMaxAgentGroups <= BASE_MAX_AGENT_GROUPS)
 	{
@@ -1465,7 +1464,17 @@ void	LLPanelPeople::onOpen(const LLSD& key)
 {
 	std::string tab_name = key["people_panel_tab_name"];
 	if (!tab_name.empty())
+	{
 		mTabContainer->selectTabByName(tab_name);
+		if(tab_name == BLOCKED_TAB_NAME)
+		{
+			LLPanel* blocked_tab = mTabContainer->getCurrentPanel()->findChild<LLPanel>("panel_block_list_sidetray");
+			if(blocked_tab)
+			{
+				blocked_tab->onOpen(key);
+			}
+		}
+	}
 }
 
 bool LLPanelPeople::notifyChildren(const LLSD& info)

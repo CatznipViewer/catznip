@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <functional>
 #include "llcachename.h"
+#include "llavatarnamecache.h"
 #include "lldbstrings.h"
 #include "llfloaterreg.h"
 
@@ -274,12 +275,12 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 
 	if (item->getCreatorUUID().notNull())
 	{
-		std::string name;
-		gCacheName->getFullName(item->getCreatorUUID(), name);
+		LLAvatarName av_name;
+		LLAvatarNameCache::get(item->getCreatorUUID(), &av_name);
 		getChildView("BtnCreator")->setEnabled(TRUE);
 		getChildView("LabelCreatorTitle")->setEnabled(TRUE);
 		getChildView("LabelCreatorName")->setEnabled(TRUE);
-		getChild<LLUICtrl>("LabelCreatorName")->setValue(name);
+		getChild<LLUICtrl>("LabelCreatorName")->setValue(av_name.getUserName());
 	}
 	else
 	{
@@ -301,7 +302,9 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		}
 		else
 		{
-			gCacheName->getFullName(perm.getOwner(), name);
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(perm.getOwner(), &av_name);
+			name = av_name.getUserName();
 		}
 		getChildView("BtnOwner")->setEnabled(TRUE);
 		getChildView("LabelOwnerTitle")->setEnabled(TRUE);
@@ -487,7 +490,6 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 	if (is_obj_modify && can_agent_sell 
 		&& gAgent.allowOperation(PERM_TRANSFER, perm, GP_OBJECT_MANIPULATE))
 	{
-		getChildView("SaleLabel")->setEnabled(is_complete);
 		getChildView("CheckPurchase")->setEnabled(is_complete);
 
 		getChildView("NextOwnerLabel")->setEnabled(TRUE);
@@ -495,13 +497,11 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled((base_mask & PERM_COPY) && !cannot_restrict_permissions);
 		getChildView("CheckNextOwnerTransfer")->setEnabled((next_owner_mask & PERM_COPY) && !cannot_restrict_permissions);
 
-		getChildView("TextPrice")->setEnabled(is_complete && is_for_sale);
 		combo_sale_type->setEnabled(is_complete && is_for_sale);
 		edit_cost->setEnabled(is_complete && is_for_sale);
 	}
 	else
 	{
-		getChildView("SaleLabel")->setEnabled(FALSE);
 		getChildView("CheckPurchase")->setEnabled(FALSE);
 
 		getChildView("NextOwnerLabel")->setEnabled(FALSE);
@@ -509,7 +509,6 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled(FALSE);
 		getChildView("CheckNextOwnerTransfer")->setEnabled(FALSE);
 
-		getChildView("TextPrice")->setEnabled(FALSE);
 		combo_sale_type->setEnabled(FALSE);
 		edit_cost->setEnabled(FALSE);
 	}

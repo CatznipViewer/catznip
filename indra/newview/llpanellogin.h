@@ -56,8 +56,10 @@ public:
 		void* callback_data);
 
 	static void setFields(LLPointer<LLCredential> credential, BOOL remember);
-
+  
 	static void getFields(LLPointer<LLCredential>& credential, BOOL& remember);
+
+	static BOOL isCredentialSet() { return sCredentialSet; }
 
 	static BOOL areCredentialFieldsDirty();
 	static void setLocation(const LLSLURL& slurl);
@@ -97,7 +99,6 @@ private:
 	static void onClickNewAccount(void*);
 	static void onClickVersion(void*);
 	static void onClickForgotPassword(void*);
-	static void onClickHelp(void*);
 	static void onPassKey(LLLineEditor* caller, void* user_data);
 	static void updateServerCombo();
 
@@ -115,6 +116,8 @@ private:
 	static LLPanelLogin* sInstance;
 	static BOOL		sCapslockDidNotification;
 	bool			mFirstLoginThisInstall;
+    
+    static BOOL sCredentialSet;
 
 	unsigned int mUsernameLength;
 	unsigned int mPasswordLength;

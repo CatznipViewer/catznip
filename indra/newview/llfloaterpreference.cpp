@@ -360,6 +360,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+	mCommitCallbackRegistrar.add("Pref.RenderExceptions",       boost::bind(&LLFloaterPreference::onClickRenderExceptions, this));
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.AvatarImpostorsEnable",	boost::bind(&LLFloaterPreference::onAvatarImpostorsEnable, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",	boost::bind(&LLFloaterPreference::updateMaxComplexity, this));
@@ -385,7 +386,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	gSavedSettings.getControl("NameTagShowUsernames")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("NameTagShowFriends")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("UseDisplayNames")->getCommitSignal()->connect(boost::bind(&handleDisplayNamesOptionChanged,  _2));
-	
+
 	gSavedSettings.getControl("AppearanceCameraMovement")->getCommitSignal()->connect(boost::bind(&handleAppearanceCameraMovementChanged,  _2));
 
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
@@ -786,10 +787,12 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	LLButton* load_btn = findChild<LLButton>("PrefLoadButton");
 	LLButton* save_btn = findChild<LLButton>("PrefSaveButton");
 	LLButton* delete_btn = findChild<LLButton>("PrefDeleteButton");
+	LLButton* exceptions_btn = findChild<LLButton>("RenderExceptionsButton");
 
 	load_btn->setEnabled(started);
 	save_btn->setEnabled(started);
 	delete_btn->setEnabled(started);
+	exceptions_btn->setEnabled(started);
 }
 
 void LLFloaterPreference::onVertexShaderEnable()
@@ -1013,12 +1016,12 @@ void LLFloaterPreference::onBtnCancel(const LLSD& userdata)
 }
 
 // static 
-void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::updateUserInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance)
 	{
-		instance->setPersonalInfo(visibility, im_via_email);	
+        instance->setPersonalInfo(visibility, im_via_email, is_verified_email);
 	}
 }
 
@@ -1246,6 +1249,8 @@ void LLFloaterPreference::refreshEnabledState()
 
 	// Cannot have floater active until caps have been received
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
+
+	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
@@ -1301,7 +1306,6 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	BOOL shaders = ctrl_shader_enable->get();
 	if (shaders)
 	{
-		terrain_detail->setValue(1);
 		terrain_detail->setEnabled(FALSE);
 		terrain_text->setEnabled(FALSE);
 	}
@@ -1381,8 +1385,6 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 
 	// now turn off any features that are unavailable
 	disableUnavailableSettings();
-
-	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
 }
 
 // static
@@ -1827,7 +1829,7 @@ bool LLFloaterPreference::moveTranscriptsAndLog()
 	return true;
 }
 
-void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email)
+void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email, bool is_verified_email)
 {
 	mGotPersonalInfo = true;
 	mOriginalIMViaEmail = im_via_email;
@@ -1852,8 +1854,16 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChildView("friends_online_notify_checkbox")->setEnabled(TRUE);
 	getChild<LLUICtrl>("online_visibility")->setValue(mOriginalHideOnlineStatus); 	 
 	getChild<LLUICtrl>("online_visibility")->setLabelArg("[DIR_VIS]", mDirectoryVisibility);
-	getChildView("send_im_to_email")->setEnabled(TRUE);
-	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
+	getChildView("send_im_to_email")->setEnabled(is_verified_email);
+
+    std::string tooltip;
+    if (!is_verified_email)
+        tooltip = getString("email_unverified_tooltip");
+
+    getChildView("send_im_to_email")->setToolTip(tooltip);
+
+    // *TODO: Show or hide verify email text here based on is_verified_email
+    getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
 	getChildView("chat_font_size")->setEnabled(TRUE);
@@ -2073,6 +2083,11 @@ void LLFloaterPreference::onClickAutoReplace()
 void LLFloaterPreference::onClickSpellChecker()
 {
     LLFloaterReg::showInstance("prefs_spellchecker");
+}
+
+void LLFloaterPreference::onClickRenderExceptions()
+{
+    LLFloaterReg::showInstance("avatar_render_settings");
 }
 
 void LLFloaterPreference::onClickAdvanced()
@@ -2548,18 +2563,6 @@ BOOL LLPanelPreferenceGraphics::postBuild()
 	LLFloaterReg::showInstance("prefs_graphics_advanced");
 	LLFloaterReg::hideInstance("prefs_graphics_advanced");
 
-// Don't do this on Mac as their braindead GL versioning
-// sets this when 8x and 16x are indeed available
-//
-#if !LL_DARWIN
-	if (gGLManager.mIsIntel || gGLManager.mGLVersion < 3.f)
-	{ //remove FSAA settings above "4x"
-		LLComboBox* combo = getChild<LLComboBox>("fsaa");
-		combo->remove("8x");
-		combo->remove("16x");
-	}
-#endif
-
 	resetDirtyChilds();
 	setPresetText();
 
@@ -2732,6 +2735,23 @@ LLFloaterPreferenceProxy::LLFloaterPreferenceProxy(const LLSD& key)
 	mCommitCallbackRegistrar.add("Proxy.OK",                boost::bind(&LLFloaterPreferenceProxy::onBtnOk, this));
 	mCommitCallbackRegistrar.add("Proxy.Cancel",            boost::bind(&LLFloaterPreferenceProxy::onBtnCancel, this));
 	mCommitCallbackRegistrar.add("Proxy.Change",            boost::bind(&LLFloaterPreferenceProxy::onChangeSocksSettings, this));
+}
+
+BOOL LLFloaterPreferenceGraphicsAdvanced::postBuild()
+{
+    // Don't do this on Mac as their braindead GL versioning
+    // sets this when 8x and 16x are indeed available
+    //
+#if !LL_DARWIN
+    if (gGLManager.mIsIntel || gGLManager.mGLVersion < 3.f)
+    { //remove FSAA settings above "4x"
+        LLComboBox* combo = getChild<LLComboBox>("fsaa");
+        combo->remove("8x");
+        combo->remove("16x");
+    }
+#endif
+
+    return TRUE;
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::onOpen(const LLSD& key)

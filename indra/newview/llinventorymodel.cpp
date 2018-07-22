@@ -34,12 +34,14 @@
 #include "llagent.h"
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
+#include "llavatarnamecache.h"
 #include "llclipboard.h"
 #include "llinventorypanel.h"
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventoryobserver.h"
 #include "llinventorypanel.h"
+#include "llfloaterpreviewtrash.h"
 #include "llnotificationsutil.h"
 #include "llmarketplacefunctions.h"
 #include "llwindow.h"
@@ -219,7 +221,11 @@ BOOL LLInventoryModel::isObjectDescendentOf(const LLUUID& obj_id,
 const LLViewerInventoryCategory *LLInventoryModel::getFirstNondefaultParent(const LLUUID& obj_id) const
 {
 	const LLInventoryObject* obj = getObject(obj_id);
-
+	if(!obj)
+	{
+		LL_WARNS(LOG_INV) << "Non-existent object [ id: " << obj_id << " ] " << LL_ENDL;
+		return NULL;
+	}
 	// Search up the parent chain until we get to root or an acceptable folder.
 	// This assumes there are no cycles in the tree else we'll get a hang.
 	LLUUID parent_id = obj->getParentUUID();
@@ -334,6 +340,27 @@ LLViewerInventoryCategory* LLInventoryModel::getCategory(const LLUUID& id) const
 		category = iter->second;
 	}
 	return category;
+}
+
+bool LLInventoryModel::isCategoryHidden(const LLUUID& id) const
+{
+	bool res = false;
+	const LLViewerInventoryCategory* category = getCategory(id);
+	if (category)
+	{
+		LLFolderType::EType cat_type = category->getPreferredType();
+		switch (cat_type)
+		{
+			case LLFolderType::FT_INBOX:
+			case LLFolderType::FT_OUTBOX:
+			case LLFolderType::FT_MARKETPLACE_LISTINGS:
+				res = true;
+				break;
+			default:
+				break;
+		}
+	}
+	return res;
 }
 
 S32 LLInventoryModel::getItemCount() const
@@ -456,12 +483,8 @@ void LLInventoryModel::consolidateForType(const LLUUID& main_id, LLFolderType::E
         }
         
         // Purge the emptied folder
-        // Note: we'd like to use purgeObject() but it doesn't cleanly eliminate the folder
-        // which leads to issues further down the road when the folder is found again
-        //purgeObject(folder_id);
-        // We remove the folder and empty the trash instead which seems to work
-		removeCategory(folder_id);
-        gInventory.emptyFolderType("", LLFolderType::FT_TRASH);
+        removeCategory(folder_id);
+        remove_inventory_category(folder_id, NULL);
 	}
 }
 
@@ -612,6 +635,11 @@ LLUUID LLInventoryModel::createNewCategory(const LLUUID& parent_id,
         LLCoros::instance().launch("LLInventoryModel::createNewCategoryCoro",
             boost::bind(&LLInventoryModel::createNewCategoryCoro, this, url, body, callback));
 
+		return LLUUID::null;
+	}
+
+	if (!gMessageSystem)
+	{
 		return LLUUID::null;
 	}
 
@@ -797,22 +825,6 @@ void LLInventoryModel::collectDescendentsIf(const LLUUID& id,
 	}
 }
 
-U32 LLInventoryModel::getDescendentsCountRecursive(const LLUUID& id, U32 max_item_limit)
-{
-	LLInventoryModel::cat_array_t cats;
-	LLInventoryModel::item_array_t items;
-	gInventory.collectDescendents(id, cats, items, LLInventoryModel::INCLUDE_TRASH);
-
-	U32 items_found = items.size() + cats.size();
-
-	for (U32 i = 0; i < cats.size() && items_found <= max_item_limit; ++i)
-	{
-		items_found += getDescendentsCountRecursive(cats[i]->getUUID(), max_item_limit - items_found);
-	}
-
-	return items_found;
-}
-
 void LLInventoryModel::addChangedMaskForLinks(const LLUUID& object_id, U32 mask)
 {
 	const LLInventoryObject *obj = getObject(object_id);
@@ -913,7 +925,20 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 		new_item = old_item;
 		LLUUID old_parent_id = old_item->getParentUUID();
 		LLUUID new_parent_id = item->getParentUUID();
-			
+		bool update_parent_on_server = false;
+
+		if (new_parent_id.isNull())
+		{
+			// item with null parent will end in random location and then in Lost&Found,
+			// either move to default folder as if it is new item or don't move at all
+			LL_WARNS(LOG_INV) << "Update attempts to reparent item " << item->getUUID()
+				<< " to null folder. Moving to Lost&Found. Old item name: " << old_item->getName()
+				<< ". New name: " << item->getName()
+				<< "." << LL_ENDL;
+			new_parent_id = findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND);
+			update_parent_on_server = true;
+		}
+
 		if(old_parent_id != new_parent_id)
 		{
 			// need to update the parent-child tree
@@ -926,6 +951,11 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 			item_array = get_ptr_in_map(mParentChildItemTree, new_parent_id);
 			if(item_array)
 			{
+				if (update_parent_on_server)
+				{
+					LLInventoryModel::LLCategoryUpdate update(new_parent_id, 1);
+					gInventory.accountForUpdate(update);
+				}
 				item_array->push_back(old_item);
 			}
 			mask |= LLInventoryObserver::STRUCTURE;
@@ -935,6 +965,12 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 			mask |= LLInventoryObserver::LABEL;
 		}
 		old_item->copyViewerItem(item);
+		if (update_parent_on_server)
+		{
+			// Parent id at server is null, so update server even if item already is in the same folder
+			old_item->setParent(new_parent_id);
+			new_item->updateParentOnServer(FALSE);
+		}
 		mask |= LLInventoryObserver::INTERNAL;
 	}
 	else
@@ -1022,19 +1058,19 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 		{
 			// Valid UUID; set the item UUID and rename it
 			new_item->setCreator(id);
-			std::string avatar_name;
+			LLAvatarName av_name;
 
-			if (gCacheName->getFullName(id, avatar_name))
+			if (LLAvatarNameCache::get(id, &av_name))
 			{
-				new_item->rename(avatar_name);
+				new_item->rename(av_name.getUserName());
 				mask |= LLInventoryObserver::LABEL;
 			}
 			else
 			{
 				// Fetch the current name
-				gCacheName->get(id, FALSE,
+				LLAvatarNameCache::get(id,
 					boost::bind(&LLViewerInventoryItem::onCallingCardNameLookup, new_item.get(),
-					_1, _2, _3));
+					_1, _2));
 			}
 
 		}
@@ -2072,11 +2108,6 @@ bool LLInventoryModel::loadSkeleton(
 					// correct contents the next time the viewer opens the folder.
 					tcat->setVersion(NO_VERSION);
 				}
-                else if (tcat->getPreferredType() == LLFolderType::FT_MARKETPLACE_STOCK)
-                {
-                    // Do not trust stock folders being updated
-                    tcat->setVersion(NO_VERSION);
-                }
 				else
 				{
 					cached_ids.insert(tcat->getUUID());
@@ -2813,7 +2844,6 @@ bool LLInventoryModel::messageUpdateCore(LLMessageSystem* msg, bool account, U32
 	item_array_t items;
 	update_map_t update;
 	S32 count = msg->getNumberOfBlocksFast(_PREHASH_InventoryData);
-	LLUUID folder_id;
 	// Does this loop ever execute more than once?
 	for(S32 i = 0; i < count; ++i)
 	{
@@ -2839,10 +2869,6 @@ bool LLInventoryModel::messageUpdateCore(LLMessageSystem* msg, bool account, U32
 		else
 		{
 			++update[titem->getParentUUID()];
-		}
-		if (folder_id.isNull())
-		{
-			folder_id = titem->getParentUUID();
 		}
 	}
 	if(account)
@@ -3298,9 +3324,7 @@ void LLInventoryModel::processMoveInventoryItem(LLMessageSystem* msg, void**)
 }
 
 //----------------------------------------------------------------------------
-
 // Trash: LLFolderType::FT_TRASH, "ConfirmEmptyTrash"
-// Trash: LLFolderType::FT_TRASH, "TrashIsFull" when trash exceeds maximum capacity
 // Lost&Found: LLFolderType::FT_LOST_AND_FOUND, "ConfirmEmptyLostAndFound"
 
 bool LLInventoryModel::callbackEmptyFolderType(const LLSD& notification, const LLSD& response, LLFolderType::EType preferred_type)
@@ -3318,7 +3342,17 @@ void LLInventoryModel::emptyFolderType(const std::string notification, LLFolderT
 {
 	if (!notification.empty())
 	{
-		LLNotificationsUtil::add(notification, LLSD(), LLSD(),
+		LLSD args;
+		if(LLFolderType::FT_TRASH == preferred_type)
+		{
+			LLInventoryModel::cat_array_t cats;
+			LLInventoryModel::item_array_t items;
+			const LLUUID trash_id = findCategoryUUIDForType(preferred_type);
+			gInventory.collectDescendents(trash_id, cats, items, LLInventoryModel::INCLUDE_TRASH); //All descendants
+			S32 item_count = items.size() + cats.size();
+			args["COUNT"] = item_count;
+		}
+		LLNotificationsUtil::add(notification, args, LLSD(),
 										boost::bind(&LLInventoryModel::callbackEmptyFolderType, this, _1, _2, preferred_type));
 	}
 	else
@@ -3414,13 +3448,43 @@ void LLInventoryModel::removeObject(const LLUUID& object_id)
 	}
 }
 
+bool callback_preview_trash_folder(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (option == 0) // YES
+	{
+		LLFloaterPreviewTrash::show();
+	}
+	return false;
+}
+
 void  LLInventoryModel::checkTrashOverflow()
 {
-	static const U32 trash_max_capacity = gSavedSettings.getU32("InventoryTrashMaxCapacity");
+	static LLCachedControl<U32> trash_max_capacity(gSavedSettings, "InventoryTrashMaxCapacity");
+
+	// Collect all descendants including those in subfolders.
+	//
+	// Note: Do we really need content of subfolders?
+	// This was made to prevent download of trash folder timeouting
+	// viewer and sub-folders are supposed to download independently.
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
 	const LLUUID trash_id = findCategoryUUIDForType(LLFolderType::FT_TRASH);
-	if (getDescendentsCountRecursive(trash_id, trash_max_capacity) >= trash_max_capacity)
+	gInventory.collectDescendents(trash_id, cats, items, LLInventoryModel::INCLUDE_TRASH);
+	S32 item_count = items.size() + cats.size();
+
+	if (item_count >= trash_max_capacity)
 	{
-		gInventory.emptyFolderType("TrashIsFull", LLFolderType::FT_TRASH);
+		if (LLFloaterPreviewTrash::isVisible())
+		{
+			// bring to front
+			LLFloaterPreviewTrash::show();
+		}
+		else
+		{
+			LLNotificationsUtil::add("TrashIsFull", LLSD(), LLSD(),
+				boost::bind(callback_preview_trash_folder, _1, _2));
+		}
 	}
 }
 

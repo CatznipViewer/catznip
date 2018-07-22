@@ -172,7 +172,7 @@ LLPrimitive::~LLPrimitive()
 {
 	clearTextureList();
 	// Cleanup handled by volume manager
-	if (mVolumep)
+	if (mVolumep && sVolumeManager)
 	{
 		sVolumeManager->unrefVolume(mVolumep);
 	}
@@ -732,6 +732,16 @@ S32	face_index_from_id(LLFaceID face_ID, const std::vector<LLProfile::Face>& fac
 
 BOOL LLPrimitive::setVolume(const LLVolumeParams &volume_params, const S32 detail, bool unique_volume)
 {
+	if (NO_LOD == detail)
+	{
+		// build the new object
+		setChanged(GEOMETRY);
+		sVolumeManager->unrefVolume(mVolumep);
+		mVolumep = new LLVolume(volume_params, 1, TRUE, TRUE);
+		setNumTEs(mVolumep->getNumFaces());
+		return FALSE;
+	}
+
 	LLVolume *volumep;
 	if (unique_volume)
 	{

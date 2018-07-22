@@ -311,7 +311,7 @@ void LLOutfitsList::onSetSelectedOutfitByUUID(const LLUUID& outfit_uuid)
 			tab->setFocus(TRUE);
 			ChangeOutfitSelection(list, outfit_uuid);
 
-			tab->setDisplayChildren(true);
+			tab->changeOpenClose(false);
 		}
 	}
 }
@@ -995,7 +995,8 @@ void LLOutfitListBase::deselectOutfit(const LLUUID& category_id)
     // Reset selection if the outfit is selected.
     if (category_id == mSelectedOutfitUUID)
     {
-        signalSelectionOutfitUUID(LLUUID::null);
+        mSelectedOutfitUUID = LLUUID::null;
+        signalSelectionOutfitUUID(mSelectedOutfitUUID);
     }
 }
 
@@ -1049,15 +1050,15 @@ bool LLOutfitContextMenu::onEnable(LLSD::String param)
 bool LLOutfitContextMenu::onVisible(LLSD::String param)
 {
     LLUUID outfit_cat_id = mUUIDs.back();
-    bool is_worn = LLAppearanceMgr::instance().getBaseOutfitUUID() == outfit_cat_id;
 
     if ("edit" == param)
     {
+        bool is_worn = LLAppearanceMgr::instance().getBaseOutfitUUID() == outfit_cat_id;
         return is_worn;
     }
     else if ("wear_replace" == param)
     {
-        return !is_worn;
+        return true;
     }
     else if ("delete" == param)
     {

@@ -38,10 +38,14 @@
 #include "llpanel.h"
 #include "lluictrlfactory.h"
 #include "llscrollcontainer.h"
-#include "llavatariconctrl.h"
-#include "llcallingcard.h" //for LLAvatarTracker
+#include "llagent.h"
 #include "llagentdata.h"
 #include "llavataractions.h"
+#include "llavatariconctrl.h"
+#include "llcallingcard.h" //for LLAvatarTracker
+#include "llgroupactions.h"
+#include "llgroupmgr.h"
+#include "llspeakers.h" //for LLIMSpeakerMgr
 #include "lltrans.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
@@ -49,7 +53,7 @@
 #include "llstylemap.h"
 #include "llslurl.h"
 #include "lllayoutstack.h"
-#include "llagent.h"
+#include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
@@ -61,7 +65,6 @@
 #include "llurlaction.h"
 #include "llviewercontrol.h"
 #include "llviewerobjectlist.h"
-#include "llmutelist.h"
 
 static LLDefaultChildRegistry::Register<LLChatHistory> r("chat_history");
 
@@ -187,6 +190,161 @@ public:
         return false;
     }
 
+	void banGroupMember(const LLUUID& participant_uuid)
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return;
+		}
+
+		gdatap->banMemberById(participant_uuid);
+	}
+
+	bool canBanInGroup()
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return false;
+		}
+
+		if (gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+			&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool canBanGroupMember(const LLUUID& participant_uuid)
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return false;
+		}
+
+		if (gdatap->mPendingBanRequest)
+		{
+			return false;
+		}
+
+		if (gAgentID == getAvatarId())
+		{
+			//Don't ban self
+			return false;
+		}
+
+		if (gdatap->isRoleMemberDataComplete())
+		{
+			if (gdatap->mMembers.size())
+			{
+				LLGroupMgrGroupData::member_list_t::iterator mi = gdatap->mMembers.find(participant_uuid);
+				if (mi != gdatap->mMembers.end())
+				{
+					LLGroupMemberData* member_data = (*mi).second;
+					// Is the member an owner?
+					if (member_data && member_data->isInRole(gdatap->mOwnerRole))
+					{
+						return false;
+					}
+
+					if (gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+						&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (speaker_mgr)
+		{
+			LLSpeaker * speakerp = speaker_mgr->findSpeaker(participant_uuid).get();
+
+			if (speakerp
+				&& gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+				&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool isGroupModerator()
+	{
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (!speaker_mgr)
+		{
+			LL_WARNS() << "Speaker manager is missing" << LL_ENDL;
+			return false;
+		}
+
+		// Is session a group call/chat?
+		if(gAgent.isInGroup(mSessionID))
+		{
+			LLSpeaker * speakerp = speaker_mgr->findSpeaker(gAgentID).get();
+
+			// Is agent a moderator?
+			return speakerp && speakerp->mIsModerator;
+		}
+
+		return false;
+	}
+
+	bool canModerate(const std::string& userdata)
+	{
+		// only group moderators can perform actions related to this "enable callback"
+		if (!isGroupModerator() || gAgentID == getAvatarId())
+		{
+			return false;
+		}
+
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (!speaker_mgr)
+		{
+			return false;
+		}
+
+		LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+		if (!speakerp)
+		{
+			return false;
+		}
+
+		bool voice_channel = speakerp->isInVoiceChannel();
+
+		if ("can_moderate_voice" == userdata)
+		{
+			return voice_channel;
+		}
+		else if ("can_mute" == userdata)
+		{
+			return voice_channel && (speakerp->mStatus != LLSpeaker::STATUS_MUTED);
+		}
+		else if ("can_unmute" == userdata)
+		{
+			return speakerp->mStatus == LLSpeaker::STATUS_MUTED;
+		}
+		else if ("can_allow_text_chat" == userdata)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	void onAvatarIconContextMenuItemClicked(const LLSD& userdata)
 	{
 		std::string level = userdata.asString();
@@ -245,11 +403,36 @@ public:
 		}
 		else if(level == "block_unblock")
 		{
-			mute(getAvatarId(), LLMute::flagVoiceChat);
+			LLAvatarActions::toggleMute(getAvatarId(), LLMute::flagVoiceChat);
 		}
 		else if(level == "mute_unmute")
 		{
-			mute(getAvatarId(), LLMute::flagTextChat);
+			LLAvatarActions::toggleMute(getAvatarId(), LLMute::flagTextChat);
+		}
+		else if(level == "toggle_allow_text_chat")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			speaker_mgr->toggleAllowTextChat(getAvatarId());
+		}
+		else if(level == "group_mute")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				speaker_mgr->moderateVoiceParticipant(getAvatarId(), false);
+			}
+		}
+		else if(level == "group_unmute")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				speaker_mgr->moderateVoiceParticipant(getAvatarId(), true);
+			}
+		}
+		else if(level == "ban_member")
+		{
+			banGroupMember(getAvatarId());
 		}
 	}
 
@@ -265,24 +448,71 @@ public:
 		{
 			return LLMuteList::getInstance()->isMuted(getAvatarId(), LLMute::flagTextChat);
 		}
+		else if (level == "is_allowed_text_chat")
+		{
+			if (gAgent.isInGroup(mSessionID))
+			{
+				LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+				if(speaker_mgr)
+				{
+					const LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId());
+					if (NULL != speakerp)
+					{
+						return !speakerp->mModeratorMutedText;
+					}
+				}
+			}
+			return false;
+		}
 		return false;
 	}
 
-	void mute(const LLUUID& participant_id, U32 flags)
+	bool onAvatarIconContextMenuItemEnabled(const LLSD& userdata)
 	{
-		BOOL is_muted = LLMuteList::getInstance()->isMuted(participant_id, flags);
-		std::string name;
-		gCacheName->getFullName(participant_id, name);
-		LLMute mute(participant_id, name, LLMute::AGENT);
+		std::string level = userdata.asString();
 
-		if (!is_muted)
+		if (level == "can_allow_text_chat" || level == "can_mute" || level == "can_unmute")
 		{
-			LLMuteList::getInstance()->add(mute, flags);
+			return canModerate(userdata);
 		}
-		else
+		else if (level == "can_ban_member")
 		{
-			LLMuteList::getInstance()->remove(mute, flags);
+			return canBanGroupMember(getAvatarId());
 		}
+		return false;
+	}
+
+	bool onAvatarIconContextMenuItemVisible(const LLSD& userdata)
+	{
+		std::string level = userdata.asString();
+
+		if (level == "show_mute")
+		{
+			LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+				if (speakerp)
+				{
+					return speakerp->isInVoiceChannel() && speakerp->mStatus != LLSpeaker::STATUS_MUTED;
+				}
+			}
+			return false;
+		}
+		else if (level == "show_unmute")
+		{
+			LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+				if (speakerp)
+				{
+					return speakerp->mStatus == LLSpeaker::STATUS_MUTED;
+				}
+			}
+			return false;
+		}
+		return false;
 	}
 
 	BOOL postBuild()
@@ -292,6 +522,8 @@ public:
 
 		registrar.add("AvatarIcon.Action", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("AvatarIcon.Check", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemChecked, this, _2));
+		registrar_enable.add("AvatarIcon.Enable", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemEnabled, this, _2));
+		registrar_enable.add("AvatarIcon.Visible", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemVisible, this, _2));
 		registrar.add("ObjectIcon.Action", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("ObjectIcon.Visible", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemVisible, this, _2));
 
@@ -567,9 +799,14 @@ protected:
 		if(menu)
 		{
 			bool is_friend = LLAvatarActions::isFriend(mAvatarID);
+			bool is_group_session = gAgent.isInGroup(mSessionID);
 			
 			menu->setItemEnabled("Add Friend", !is_friend);
 			menu->setItemEnabled("Remove Friend", is_friend);
+			menu->setItemVisible("Moderator Options Separator", is_group_session && isGroupModerator());
+			menu->setItemVisible("Moderator Options", is_group_session && isGroupModerator());
+			menu->setItemVisible("Group Ban Separator", is_group_session && canBanInGroup());
+			menu->setItemVisible("BanMember", is_group_session && canBanInGroup());
 
 			if(gAgentID == mAvatarID)
 			{
@@ -1079,43 +1316,51 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	// notify processing
 	if (chat.mNotifId.notNull())
 	{
-		bool create_toast = true;
-		for (LLToastNotifyPanel::instance_iter ti(LLToastNotifyPanel::beginInstances())
-			, tend(LLToastNotifyPanel::endInstances()); ti != tend; ++ti)
-		{
-			LLToastNotifyPanel& panel = *ti;
-			LLIMToastNotifyPanel * imtoastp = dynamic_cast<LLIMToastNotifyPanel *>(&panel);
-			const std::string& notification_name = panel.getNotificationName();
-			if (notification_name == "OfferFriendship" && panel.isControlPanelEnabled() && imtoastp)
-			{
-				create_toast = false;
-				break;
-			}
-		}
-
-		if (create_toast)
-		{
 		LLNotificationPtr notification = LLNotificationsUtil::find(chat.mNotifId);
 		if (notification != NULL)
 		{
-			LLIMToastNotifyPanel* notify_box = new LLIMToastNotifyPanel(
-					notification, chat.mSessionID, LLRect::null, !use_plain_text_chat_history, mEditor);
+			bool create_toast = true;
+			if (notification->getName() == "OfferFriendship")
+			{
+				// We don't want multiple friendship offers to appear, this code checks if there are previous offers
+				// by iterating though all panels.
+				// Note: it might be better to simply add a "pending offer" flag somewhere
+				for (LLToastNotifyPanel::instance_iter ti(LLToastNotifyPanel::beginInstances())
+					, tend(LLToastNotifyPanel::endInstances()); ti != tend; ++ti)
+				{
+					LLToastNotifyPanel& panel = *ti;
+					LLIMToastNotifyPanel * imtoastp = dynamic_cast<LLIMToastNotifyPanel *>(&panel);
+					const std::string& notification_name = panel.getNotificationName();
+					if (notification_name == "OfferFriendship"
+						&& panel.isControlPanelEnabled()
+						&& imtoastp)
+					{
+						create_toast = false;
+						break;
+					}
+				}
+			}
 
-			//Prepare the rect for the view
-			LLRect target_rect = mEditor->getDocumentView()->getRect();
-			// squeeze down the widget by subtracting padding off left and right
-			target_rect.mLeft += mLeftWidgetPad + mEditor->getHPad();
-			target_rect.mRight -= mRightWidgetPad;
-			notify_box->reshape(target_rect.getWidth(),	notify_box->getRect().getHeight());
-			notify_box->setOrigin(target_rect.mLeft, notify_box->getRect().mBottom);
+			if (create_toast)
+			{
+				LLIMToastNotifyPanel* notify_box = new LLIMToastNotifyPanel(
+						notification, chat.mSessionID, LLRect::null, !use_plain_text_chat_history, mEditor);
 
-			LLInlineViewSegment::Params params;
-			params.view = notify_box;
-			params.left_pad = mLeftWidgetPad;
-			params.right_pad = mRightWidgetPad;
-			mEditor->appendWidget(params, "\n", false);
+				//Prepare the rect for the view
+				LLRect target_rect = mEditor->getDocumentView()->getRect();
+				// squeeze down the widget by subtracting padding off left and right
+				target_rect.mLeft += mLeftWidgetPad + mEditor->getHPad();
+				target_rect.mRight -= mRightWidgetPad;
+				notify_box->reshape(target_rect.getWidth(),	notify_box->getRect().getHeight());
+				notify_box->setOrigin(target_rect.mLeft, notify_box->getRect().mBottom);
+
+				LLInlineViewSegment::Params params;
+				params.view = notify_box;
+				params.left_pad = mLeftWidgetPad;
+				params.right_pad = mRightWidgetPad;
+				mEditor->appendWidget(params, "\n", false);
+			}
 		}
-	}
 	}
 
 	// usual messages showing

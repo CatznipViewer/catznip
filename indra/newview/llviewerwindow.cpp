@@ -33,6 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <boost/lambda/core.hpp>
 #include <boost/regex.hpp>
 
@@ -53,6 +54,7 @@
 #include "llrender.h"
 
 #include "llvoiceclient.h"	// for push-to-talk button handling
+#include "stringize.h"
 
 //
 // TODO: Many of these includes are unnecessary.  Remove them.
@@ -259,10 +261,8 @@ static const F32 MIN_UI_SCALE = 0.75f;
 static const F32 MAX_UI_SCALE = 7.0f;
 static const F32 MIN_DISPLAY_SCALE = 0.75f;
 
-std::string	LLViewerWindow::sSnapshotBaseName;
-std::string	LLViewerWindow::sSnapshotDir;
-
-std::string	LLViewerWindow::sMovieBaseName;
+static LLCachedControl<std::string>	sSnapshotBaseName(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseName", "Snapshot"));
+static LLCachedControl<std::string>	sSnapshotDir(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseDir", ""));
 
 LLTrace::SampleStatHandle<> LLViewerWindow::sMouseVelocityStat("Mouse Velocity");
 
@@ -391,13 +391,12 @@ public:
 		}
 		}
 		
-#if LL_WINDOWS
 		if (gSavedSettings.getBOOL("DebugShowMemory"))
 		{
-			addText(xpos, ypos, llformat("Memory: %d (KB)", LLMemory::getWorkingSetSize() / 1024)); 
+			addText(xpos, ypos,
+					STRINGIZE("Memory: " << (LLMemory::getCurrentRSS() / 1024) << " (KB)"));
 			ypos += y_inc;
 		}
-#endif
 
 		if (gDisplayCameraPos)
 		{
@@ -611,7 +610,7 @@ public:
 
  			if (last_frame_recording.getSampleCount(LLPipeline::sStatBatchSize) > 0)
 			{
- 				addText(xpos, ypos, llformat("Batch min/max/mean: %d/%d/%d", last_frame_recording.getMin(LLPipeline::sStatBatchSize), last_frame_recording.getMax(LLPipeline::sStatBatchSize), last_frame_recording.getMean(LLPipeline::sStatBatchSize)));
+                addText(xpos, ypos, llformat("Batch min/max/mean: %d/%d/%d", (U32)last_frame_recording.getMin(LLPipeline::sStatBatchSize), (U32)last_frame_recording.getMax(LLPipeline::sStatBatchSize), (U32)last_frame_recording.getMean(LLPipeline::sStatBatchSize)));
 			}
             ypos += y_inc;
 
@@ -728,7 +727,8 @@ public:
 			addText(xpos, ypos, "View Matrix");
 			ypos += y_inc;
 		}
-		if (gSavedSettings.getBOOL("DebugShowColor"))
+		// disable use of glReadPixels which messes up nVidia nSight graphics debugging
+		if (gSavedSettings.getBOOL("DebugShowColor") && !LLRender::sNsightDebugSupport)
 		{
 			U8 color[4];
 			LLCoordGL coord = gViewerWindow->getCurrentMouse();
@@ -737,56 +737,46 @@ public:
 			ypos += y_inc;
 		}
 
-		if (gSavedSettings.getBOOL("DebugShowPrivateMem"))
-		{
-			LLPrivateMemoryPoolManager::getInstance()->updateStatistics() ;
-			addText(xpos, ypos, llformat("Total Reserved(KB): %d", LLPrivateMemoryPoolManager::getInstance()->mTotalReservedSize / 1024));
-			ypos += y_inc;
-
-			addText(xpos, ypos, llformat("Total Allocated(KB): %d", LLPrivateMemoryPoolManager::getInstance()->mTotalAllocatedSize / 1024));
-			ypos += y_inc;
-		}
-
 		// only display these messages if we are actually rendering beacons at this moment
-		if (LLPipeline::getRenderBeacons(NULL) && LLFloaterReg::instanceVisible("beacons"))
+		if (LLPipeline::getRenderBeacons() && LLFloaterReg::instanceVisible("beacons"))
 		{
-			if (LLPipeline::getRenderMOAPBeacons(NULL))
+			if (LLPipeline::getRenderMOAPBeacons())
 			{
 				addText(xpos, ypos, "Viewing media beacons (white)");
 				ypos += y_inc;
 			}
 
-			if (LLPipeline::toggleRenderTypeControlNegated((void*)LLPipeline::RENDER_TYPE_PARTICLES))
+			if (LLPipeline::toggleRenderTypeControlNegated(LLPipeline::RENDER_TYPE_PARTICLES))
 			{
 				addText(xpos, ypos, particle_hiding);
 				ypos += y_inc;
 			}
 
-			if (LLPipeline::getRenderParticleBeacons(NULL))
+			if (LLPipeline::getRenderParticleBeacons())
 			{
 				addText(xpos, ypos, "Viewing particle beacons (blue)");
 				ypos += y_inc;
 			}
 
-			if (LLPipeline::getRenderSoundBeacons(NULL))
+			if (LLPipeline::getRenderSoundBeacons())
 			{
 				addText(xpos, ypos, "Viewing sound beacons (yellow)");
 				ypos += y_inc;
 			}
 
-			if (LLPipeline::getRenderScriptedBeacons(NULL))
+			if (LLPipeline::getRenderScriptedBeacons())
 			{
 				addText(xpos, ypos, beacon_scripted);
 				ypos += y_inc;
 			}
 			else
-				if (LLPipeline::getRenderScriptedTouchBeacons(NULL))
+				if (LLPipeline::getRenderScriptedTouchBeacons())
 				{
 					addText(xpos, ypos, beacon_scripted_touch);
 					ypos += y_inc;
 				}
 
-			if (LLPipeline::getRenderPhysicalBeacons(NULL))
+			if (LLPipeline::getRenderPhysicalBeacons())
 			{
 				addText(xpos, ypos, "Viewing physical object beacons (green)");
 				ypos += y_inc;
@@ -1403,7 +1393,7 @@ BOOL LLViewerWindow::handleTranslatedKeyDown(KEY key,  MASK mask, BOOL repeated)
 {
 	// Let the voice chat code check for its PTT key.  Note that this never affects event processing.
 	LLVoiceClient::getInstance()->keyDown(key, mask);
-	
+
 	if (gAwayTimer.getElapsedTimeF32() > LLAgent::MIN_AFK_TIME)
 	{
 		gAgent.clearAFK();
@@ -1700,11 +1690,6 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	LL_INFOS() << "NOTE: ALL NOTIFICATIONS THAT OCCUR WILL GET ADDED TO IGNORE LIST FOR LATER RUNS." << LL_ENDL;
 	}
 
-	// Default to application directory.
-	LLViewerWindow::sSnapshotBaseName = "Snapshot";
-	LLViewerWindow::sMovieBaseName = "SLmovie";
-	resetSnapshotLoc();
-
 
 	/*
 	LLWindowCallbacks* callbacks,
@@ -1883,6 +1868,11 @@ void LLViewerWindow::showSystemUIScaleFactorChanged()
 	LLNotificationsUtil::add("SystemUIScaleFactorChanged", LLSD(), LLSD(), onSystemUIScaleFactorChanged);
 }
 
+std::string LLViewerWindow::getLastSnapshotDir()
+{
+    return sSnapshotDir;
+}
+
 //static
 bool LLViewerWindow::onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response)
 {
@@ -1952,11 +1942,19 @@ void LLViewerWindow::initBase()
 
 	// Create global views
 
+	// Login screen and main_view.xml need edit menus for preferences and browser
+	LL_DEBUGS("AppInit") << "initializing edit menu" << LL_ENDL;
+	initialize_edit_menu();
+
 	// Create the floater view at the start so that other views can add children to it. 
 	// (But wait to add it as a child of the root view so that it will be in front of the 
 	// other views.)
 	MainPanel* main_view = new MainPanel();
-	main_view->buildFromFile("main_view.xml");
+	if (!main_view->buildFromFile("main_view.xml"))
+	{
+		LL_ERRS() << "Failed to initialize viewer: Viewer couldn't process file main_view.xml, "
+				<< "if this problem happens again, please validate your installation." << LL_ENDL;
+	}
 	main_view->setShape(full_window);
 	getRootView()->addChild(main_view);
 
@@ -2158,6 +2156,15 @@ void LLViewerWindow::shutdownViews()
 	RecordToChatConsole::getInstance()->stopRecorder();
 	LL_INFOS() << "Warning logger is cleaned." << LL_ENDL ;
 
+	gFocusMgr.unlockFocus();
+	gFocusMgr.setMouseCapture(NULL);
+	gFocusMgr.setKeyboardFocus(NULL);
+	gFocusMgr.setTopCtrl(NULL);
+	if (mWindow)
+	{
+		mWindow->allowLanguageTextInput(NULL, FALSE);
+	}
+
 	delete mDebugText;
 	mDebugText = NULL;
 	
@@ -2190,7 +2197,11 @@ void LLViewerWindow::shutdownViews()
 
 	view_listener_t::cleanup();
 	LL_INFOS() << "view listeners destroyed." << LL_ENDL ;
-	
+
+	// Clean up pointers that are going to be invalid. (todo: check sMenuContainer)
+	mProgressView = NULL;
+	mPopupView = NULL;
+
 	// Delete all child views.
 	delete mRootView;
 	mRootView = NULL;
@@ -2261,6 +2272,7 @@ void LLViewerWindow::shutdownGL()
 LLViewerWindow::~LLViewerWindow()
 {
 	LL_INFOS() << "Destroying Window" << LL_ENDL;
+	gDebugWindowProc = TRUE; // event catching, at this point it shouldn't output at all
 	destroyWindow();
 
 	delete mDebugText;
@@ -2724,8 +2736,16 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 			return TRUE;
 		}
 
-		if ((gMenuBarView && gMenuBarView->handleAcceleratorKey(key, mask))
-			||(gLoginMenuBarView && gLoginMenuBarView->handleAcceleratorKey(key, mask)))
+		if (gAgent.isInitialized()
+			&& (gAgent.getTeleportState() == LLAgent::TELEPORT_NONE || gAgent.getTeleportState() == LLAgent::TELEPORT_LOCAL)
+			&& gMenuBarView
+			&& gMenuBarView->handleAcceleratorKey(key, mask))
+		{
+			LLViewerEventRecorder::instance().logKeyEvent(key, mask);
+			return TRUE;
+		}
+
+		if (gLoginMenuBarView && gLoginMenuBarView->handleAcceleratorKey(key, mask))
 		{
 			LLViewerEventRecorder::instance().logKeyEvent(key,mask);
 			return TRUE;
@@ -2855,8 +2875,16 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 	}
 
 	// give menus a chance to handle unmodified accelerator keys
-	if ((gMenuBarView && gMenuBarView->handleAcceleratorKey(key, mask))
-		||(gLoginMenuBarView && gLoginMenuBarView->handleAcceleratorKey(key, mask)))
+	if (gAgent.isInitialized()
+		&& (gAgent.getTeleportState() == LLAgent::TELEPORT_NONE || gAgent.getTeleportState() == LLAgent::TELEPORT_LOCAL)
+		&& gMenuBarView
+		&& gMenuBarView->handleAcceleratorKey(key, mask))
+	{
+		LLViewerEventRecorder::instance().logKeyEvent(key, mask);
+		return TRUE;
+	}
+
+	if (gLoginMenuBarView && gLoginMenuBarView->handleAcceleratorKey(key, mask))
 	{
 		return TRUE;
 	}
@@ -4337,8 +4365,10 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 }
 
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
-BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picker)
+BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory)
 {
+	insufficient_memory = FALSE;
+
 	if (!image)
 	{
 		LL_WARNS() << "No image to save" << LL_ENDL;
@@ -4360,6 +4390,8 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 	else
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
+	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
+
 	// Get a base file location if needed.
 	if (force_picker || !isSnapshotLocSet())
 	{
@@ -4378,10 +4410,27 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 		// Copy the directory + file name
 		std::string filepath = picker.getFirstFile();
 
-		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
-		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+		gSavedPerAccountSettings.setString("SnapshotBaseName", gDirUtilp->getBaseFileName(filepath, true));
+		gSavedPerAccountSettings.setString("SnapshotBaseDir", gDirUtilp->getDirName(filepath));
 	}
 
+	std::string snapshot_dir = sSnapshotDir;
+	if(snapshot_dir.empty())
+	{
+		return FALSE;
+	}
+
+// Check if there is enough free space to save snapshot
+#ifdef LL_WINDOWS
+	boost::filesystem::space_info b_space = boost::filesystem::space(utf8str_to_utf16str(snapshot_dir));
+#else
+	boost::filesystem::space_info b_space = boost::filesystem::space(snapshot_dir);
+#endif
+	if (b_space.free < image->getDataSize())
+	{
+		insufficient_memory = TRUE;
+		return FALSE;
+	}
 	// Look for an unused file name
 	std::string filepath;
 	S32 i = 1;
@@ -4392,14 +4441,20 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 		filepath = sSnapshotDir;
 		filepath += gDirUtilp->getDirDelimiter();
 		filepath += sSnapshotBaseName;
-		filepath += llformat("_%.3d",i);
+
+		if (is_snapshot_name_loc_set)
+		{
+			filepath += llformat("_%.3d",i);
+		}		
+
 		filepath += extension;
 
 		llstat stat_info;
 		err = LLFile::stat( filepath, &stat_info );
 		i++;
 	}
-	while( -1 != err );  // search until the file is not found (i.e., stat() gives an error).
+	while( -1 != err  // Search until the file is not found (i.e., stat() gives an error).
+			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
 
 	LL_INFOS() << "Saving snapshot to " << filepath << LL_ENDL;
 	return image->save(filepath);
@@ -4407,7 +4462,7 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 
 void LLViewerWindow::resetSnapshotLoc()
 {
-	sSnapshotDir.clear();
+	gSavedPerAccountSettings.setString("SnapshotBaseDir", std::string());
 }
 
 // static
@@ -4461,6 +4516,17 @@ void LLViewerWindow::playSnapshotAnimAndSound()
 	send_sound_trigger(LLUUID(gSavedSettings.getString("UISndSnapshot")), 1.0f);
 }
 
+BOOL LLViewerWindow::isSnapshotLocSet() const
+{
+	std::string snapshot_dir = sSnapshotDir;
+	return !snapshot_dir.empty();
+}
+
+void LLViewerWindow::resetSnapshotLoc() const
+{
+	gSavedPerAccountSettings.setString("SnapshotBaseDir", std::string());
+}
+
 BOOL LLViewerWindow::thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type)
 {
 	return rawSnapshot(raw, preview_width, preview_height, FALSE, FALSE, show_ui, do_rebuild, type);
@@ -4501,7 +4567,7 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 
 	if ( prev_draw_ui != show_ui)
 	{
-		LLPipeline::toggleRenderDebugFeature((void*)LLPipeline::RENDER_DEBUG_FEATURE_UI);
+		LLPipeline::toggleRenderDebugFeature(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 	}
 
 	BOOL hide_hud = !gSavedSettings.getBOOL("RenderHUDInSnapshot") && LLPipeline::sShowHUDAttachments;
@@ -4677,36 +4743,39 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 					{
 						LLAppViewer::instance()->pingMainloopTimeout("LLViewerWindow::rawSnapshot");
 					}
-				
-					if (type == LLSnapshotModel::SNAPSHOT_TYPE_COLOR)
+					// disable use of glReadPixels when doing nVidia nSight graphics debugging
+					if (!LLRender::sNsightDebugSupport)
 					{
-						glReadPixels(
+						if (type == LLSnapshotModel::SNAPSHOT_TYPE_COLOR)
+						{
+							glReadPixels(
 									 subimage_x_offset, out_y + subimage_y_offset,
 									 read_width, 1,
 									 GL_RGB, GL_UNSIGNED_BYTE,
 									 raw->getData() + output_buffer_offset
 									 );
-					}
-					else // LLSnapshotModel::SNAPSHOT_TYPE_DEPTH
-					{
-						LLPointer<LLImageRaw> depth_line_buffer = new LLImageRaw(read_width, 1, sizeof(GL_FLOAT)); // need to store floating point values
-						glReadPixels(
-									 subimage_x_offset, out_y + subimage_y_offset,
-									 read_width, 1,
-									 GL_DEPTH_COMPONENT, GL_FLOAT,
-									 depth_line_buffer->getData()// current output pixel is beginning of buffer...
-									 );
-
-						for (S32 i = 0; i < (S32)read_width; i++)
+						}
+						else // LLSnapshotModel::SNAPSHOT_TYPE_DEPTH
 						{
-							F32 depth_float = *(F32*)(depth_line_buffer->getData() + (i * sizeof(F32)));
-					
-							F32 linear_depth_float = 1.f / (depth_conversion_factor_1 - (depth_float * depth_conversion_factor_2));
-							U8 depth_byte = F32_to_U8(linear_depth_float, LLViewerCamera::getInstance()->getNear(), LLViewerCamera::getInstance()->getFar());
-							// write converted scanline out to result image
-							for (S32 j = 0; j < raw->getComponents(); j++)
+							LLPointer<LLImageRaw> depth_line_buffer = new LLImageRaw(read_width, 1, sizeof(GL_FLOAT)); // need to store floating point values
+							glReadPixels(
+										 subimage_x_offset, out_y + subimage_y_offset,
+										 read_width, 1,
+										 GL_DEPTH_COMPONENT, GL_FLOAT,
+										 depth_line_buffer->getData()// current output pixel is beginning of buffer...
+										 );
+
+							for (S32 i = 0; i < (S32)read_width; i++)
 							{
-								*(raw->getData() + output_buffer_offset + (i * raw->getComponents()) + j) = depth_byte;
+								F32 depth_float = *(F32*)(depth_line_buffer->getData() + (i * sizeof(F32)));
+					
+								F32 linear_depth_float = 1.f / (depth_conversion_factor_1 - (depth_float * depth_conversion_factor_2));
+								U8 depth_byte = F32_to_U8(linear_depth_float, LLViewerCamera::getInstance()->getNear(), LLViewerCamera::getInstance()->getFar());
+								// write converted scanline out to result image
+								for (S32 j = 0; j < raw->getComponents(); j++)
+								{
+									*(raw->getData() + output_buffer_offset + (i * raw->getComponents()) + j) = depth_byte;
+								}
 							}
 						}
 					}
@@ -4724,7 +4793,7 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 	// POST SNAPSHOT
 	if (!gPipeline.hasRenderDebugFeatureMask(LLPipeline::RENDER_DEBUG_FEATURE_UI))
 	{
-		LLPipeline::toggleRenderDebugFeature((void*)LLPipeline::RENDER_DEBUG_FEATURE_UI);
+		LLPipeline::toggleRenderDebugFeature(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 	}
 
 	if (hide_hud)

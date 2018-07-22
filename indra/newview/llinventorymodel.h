@@ -265,9 +265,6 @@ public:
 	// Follow parent chain to the top.
 	bool getObjectTopmostAncestor(const LLUUID& object_id, LLUUID& result) const;
 
-private:
-	U32 getDescendentsCountRecursive(const LLUUID& id, U32 max_item_limit);
-	
 	//--------------------------------------------------------------------
 	// Find
 	//--------------------------------------------------------------------
@@ -319,7 +316,9 @@ public:
     // Copy content of all folders of type "type" into folder "id" and delete/purge the empty folders
     // Note : This method has been designed for FT_OUTBOX (aka Merchant Outbox) but can be used for other categories
     void consolidateForType(const LLUUID& id, LLFolderType::EType type);
-    
+
+    bool isCategoryHidden(const LLUUID& id) const;
+
 private:
 	mutable LLPointer<LLViewerInventoryItem> mLastItem; // cache recent lookups	
 
@@ -411,6 +410,7 @@ public:
 	/// removeItem() or removeCategory(), whichever is appropriate
 	void removeObject(const LLUUID& object_id);
 
+	// "TrashIsFull" when trash exceeds maximum capacity
 	void checkTrashOverflow();
 
 protected:

@@ -54,7 +54,7 @@ LLSnapshotFloaterView* gSnapshotFloaterView = NULL;
 
 const F32 AUTO_SNAPSHOT_TIME_DELAY = 1.f;
 
-const S32 MAX_POSTCARD_DATASIZE = 1024 * 1024; // one megabyte
+const S32 MAX_POSTCARD_DATASIZE = 1572864; // 1.5 megabyte, similar to simulator limit
 const S32 MAX_TEXTURE_SIZE = 512 ; //max upload texture size 512 * 512
 
 static LLDefaultChildRegistry::Register<LLSnapshotFloaterView> r("snapshot_floater_view");
@@ -314,8 +314,8 @@ void LLFloaterSnapshot::Impl::updateControls(LLFloaterSnapshotBase* floater)
 		}
 		else
 		{
-			width_ctrl->setMaxValue(6016);
-			height_ctrl->setMaxValue(6016);
+			width_ctrl->setMaxValue(MAX_SNAPSHOT_IMAGE_SIZE);
+			height_ctrl->setMaxValue(MAX_SNAPSHOT_IMAGE_SIZE);
 		}
 	}
 		
@@ -653,10 +653,6 @@ void LLFloaterSnapshot::Impl::setFinished(bool finished, bool ok, const std::str
 		LLUICtrl* finished_lbl = mFloater->getChild<LLUICtrl>(ok ? "succeeded_lbl" : "failed_lbl");
 		std::string result_text = mFloater->getString(msg + "_" + (ok ? "succeeded_str" : "failed_str"));
 		finished_lbl->setValue(result_text);
-
-		LLSideTrayPanelContainer* panel_container = mFloater->getChild<LLSideTrayPanelContainer>("panel_container");
-		panel_container->openPreviousPanel();
-		panel_container->getCurrentPanel()->onOpen(LLSD());
 	}
 }
 
@@ -1104,6 +1100,7 @@ void LLFloaterSnapshot::onOpen(const LLSD& key)
 	if(preview)
 	{
 		LL_DEBUGS() << "opened, updating snapshot" << LL_ENDL;
+		preview->setAllowFullScreenPreview(TRUE);
 		preview->updateSnapshot(TRUE);
 	}
 	focusFirstItem(FALSE);
@@ -1133,6 +1130,7 @@ void LLFloaterSnapshotBase::onClose(bool app_quitting)
 	LLSnapshotLivePreview* previewp = getPreviewView();
 	if (previewp)
 	{
+		previewp->setAllowFullScreenPreview(FALSE);
 		previewp->setVisible(FALSE);
 		previewp->setEnabled(FALSE);
 	}
@@ -1234,6 +1232,11 @@ S32 LLFloaterSnapshot::notify(const LLSD& info)
 	}
     
 	return 0;
+}
+
+BOOL LLFloaterSnapshot::isWaitingState()
+{
+	return (impl->getStatus() == ImplBase::STATUS_WORKING);
 }
 
 BOOL LLFloaterSnapshotBase::ImplBase::updatePreviewList(bool initialized)

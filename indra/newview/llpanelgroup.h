@@ -95,7 +95,6 @@ protected:
 	void onBtnCreate();
 	void onBackBtnClick();
 	void onBtnJoin();
-	void onBtnCancel();
 
 	static void onBtnApply(void*);
 	static void onBtnRefresh(void*);
@@ -163,6 +162,8 @@ public:
 	const LLUUID& getGroupID() const { return mGroupID;}
 
 	virtual void setupCtrls	(LLPanel* parent) {};
+
+	virtual void onFilterChanged() { }
 
 protected:
 	LLUUID	mGroupID;

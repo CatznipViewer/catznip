@@ -218,9 +218,17 @@ LLMeshFilePicker::LLMeshFilePicker(LLModelPreview* mp, S32 lod)
 		mLOD = lod;
 	}
 
-void LLMeshFilePicker::notify(const std::string& filename)
+void LLMeshFilePicker::notify(const std::vector<std::string>& filenames)
 {
-	mMP->loadModel(mFile, mLOD);
+	if (filenames.size() > 0)
+	{
+		mMP->loadModel(filenames[0], mLOD);
+	}
+	else
+	{
+		//closes floater
+		mMP->loadModel(std::string(), mLOD);
+	}
 }
 
 void FindModel(LLModelLoader::scene& scene, const std::string& name_to_match, LLModel*& baseModelOut, LLMatrix4& matOut)
@@ -1262,6 +1270,10 @@ LLModelPreview::~LLModelPreview()
 	// glod.dll!glodShutdown()  + 0x77 bytes	
 	//
 	//glodShutdown();
+	if(mModelLoader)
+	{
+		mModelLoader->shutdown();
+	}
 }
 
 U32 LLModelPreview::calcResourceCost()
@@ -2564,13 +2576,21 @@ void LLModelPreview::genLODs(S32 which_lod, U32 decimation, bool enforce_tri_lim
 
 				if (sizes[i*2+1] > 0 && sizes[i*2] > 0)
 				{
-					buff->allocateBuffer(sizes[i*2+1], sizes[i*2], true);
+					if (!buff->allocateBuffer(sizes[i * 2 + 1], sizes[i * 2], true))
+					{
+						// Todo: find a way to stop preview in this case instead of crashing
+						LL_ERRS() << "Failed buffer allocation during preview LOD generation."
+							<< " Vertices: " << sizes[i * 2 + 1]
+							<< " Indices: " << sizes[i * 2] << LL_ENDL;
+					}
 					buff->setBuffer(type_mask);
 					glodFillElements(mObject[base], names[i], GL_UNSIGNED_SHORT, (U8*) buff->getIndicesPointer());
 					stop_gloderror();
 				}
 				else
-				{ //this face was eliminated, create a dummy triangle (one vertex, 3 indices, all 0)
+				{
+					// This face was eliminated or we failed to allocate buffer,
+					// attempt to create a dummy triangle (one vertex, 3 indices, all 0)
 					buff->allocateBuffer(1, 3, true);
 					memset((U8*) buff->getMappedData(), 0, buff->getSize());
 					memset((U8*) buff->getIndicesPointer(), 0, buff->getIndicesSize());
@@ -3318,7 +3338,13 @@ void LLModelPreview::genBuffers(S32 lod, bool include_skin_weights)
 
 			vb = new LLVertexBuffer(mask, 0);
 
-			vb->allocateBuffer(num_vertices, num_indices, TRUE);
+			if (!vb->allocateBuffer(num_vertices, num_indices, TRUE))
+			{
+				// We are likely to crash due this failure, if this happens, find a way to gracefully stop preview
+				LL_WARNS() << "Failed to allocate Vertex Buffer for model preview "
+					<< num_vertices << " vertices and "
+					<< num_indices << " indices" << LL_ENDL;
+			}
 
 			LLStrider<LLVector3> vertex_strider;
 			LLStrider<LLVector3> normal_strider;

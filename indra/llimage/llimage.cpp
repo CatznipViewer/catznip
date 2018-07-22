@@ -588,7 +588,6 @@ std::string LLImage::sLastErrorMessage;
 LLMutex* LLImage::sMutex = NULL;
 bool LLImage::sUseNewByteRange = false;
 S32  LLImage::sMinimalReverseByteRangePercent = 75;
-LLPrivateMemoryPool* LLImageBase::sPrivatePoolp = NULL ;
 
 //static
 void LLImage::initClass(bool use_new_byte_range, S32 minimal_reverse_byte_range_percent)
@@ -596,8 +595,6 @@ void LLImage::initClass(bool use_new_byte_range, S32 minimal_reverse_byte_range_
 	sUseNewByteRange = use_new_byte_range;
     sMinimalReverseByteRangePercent = minimal_reverse_byte_range_percent;
 	sMutex = new LLMutex(NULL);
-
-	LLImageBase::createPrivatePool() ;
 }
 
 //static
@@ -605,8 +602,6 @@ void LLImage::cleanupClass()
 {
 	delete sMutex;
 	sMutex = NULL;
-
-	LLImageBase::destroyPrivatePool() ;
 }
 
 //static
@@ -644,25 +639,6 @@ LLImageBase::~LLImageBase()
 	deleteData(); // virtual
 }
 
-//static 
-void LLImageBase::createPrivatePool() 
-{
-	if(!sPrivatePoolp)
-	{
-		sPrivatePoolp = LLPrivateMemoryPoolManager::getInstance()->newPool(LLPrivateMemoryPool::STATIC_THREADED) ;
-	}
-}
-	
-//static 
-void LLImageBase::destroyPrivatePool() 
-{
-	if(sPrivatePoolp)
-	{
-		LLPrivateMemoryPoolManager::getInstance()->deletePool(sPrivatePoolp) ;
-		sPrivatePoolp = NULL ;
-	}
-}
-
 // virtual
 void LLImageBase::dump()
 {
@@ -696,7 +672,7 @@ void LLImageBase::sanityCheck()
 // virtual
 void LLImageBase::deleteData()
 {
-	FREE_MEM(sPrivatePoolp, mData) ;
+	ll_aligned_free_16(mData);
 	disclaimMem(mDataSize);
 	mDataSize = 0;
 	mData = NULL;
@@ -736,7 +712,7 @@ U8* LLImageBase::allocateData(S32 size)
 	if (!mBadBufferAllocation && (!mData || size != mDataSize))
 	{
 		deleteData(); // virtual
-		mData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mData = (U8*)ll_aligned_malloc_16(size);
 		if (!mData)
 		{
 			LL_WARNS() << "Failed to allocate image data size [" << size << "]" << LL_ENDL;
@@ -748,7 +724,11 @@ U8* LLImageBase::allocateData(S32 size)
 	{
 		size = 0;
 		mWidth = mHeight = 0;
-		mData = NULL;
+		if (mData)
+		{
+			deleteData(); // virtual
+			mData = NULL;
+		}
 	}
 	mDataSize = size;
 	claimMem(mDataSize);
@@ -759,7 +739,7 @@ U8* LLImageBase::allocateData(S32 size)
 // virtual
 U8* LLImageBase::reallocateData(S32 size)
 {
-	U8 *new_datap = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+	U8 *new_datap = (U8*)ll_aligned_malloc_16(size);
 	if (!new_datap)
 	{
 		LL_WARNS() << "Out of memory in LLImageBase::reallocateData" << LL_ENDL;
@@ -769,12 +749,13 @@ U8* LLImageBase::reallocateData(S32 size)
 	{
 		S32 bytes = llmin(mDataSize, size);
 		memcpy(new_datap, mData, bytes);	/* Flawfinder: ignore */
-		FREE_MEM(sPrivatePoolp, mData) ;
+		ll_aligned_free_16(mData) ;
 	}
 	mData = new_datap;
 	disclaimMem(mDataSize);
 	mDataSize = size;
 	claimMem(mDataSize);
+	mBadBufferAllocation = false;
 	return mData;
 }
 
@@ -1227,9 +1208,10 @@ void LLImageRaw::fill( const LLColor4U& color )
 	if( 4 == getComponents() )
 	{
 		U32* data = (U32*) getData();
+		U32 rgbaColor = color.asRGBA();
 		for( S32 i = 0; i < pixels; i++ )
 		{
-			data[i] = color.mAll;
+			data[ i ] = rgbaColor;
 		}
 	}
 	else
@@ -1436,7 +1418,7 @@ void LLImageRaw::copyScaled( LLImageRaw* src )
 bool LLImageRaw::scale( S32 new_width, S32 new_height, bool scale_image_data )
 {
     S32 components = getComponents();
-	if (! ((1 == components) || (3 == components) || (4 == components) ))
+    if (components != 1 && components != 3 && components != 4)
     {
         LL_WARNS() << "Invalid getComponents value (" << components << ")" << LL_ENDL;
         return false;
@@ -1464,7 +1446,7 @@ bool LLImageRaw::scale( S32 new_width, S32 new_height, bool scale_image_data )
 
 		if (new_data_size > 0)
         {
-            U8 *new_data = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), new_data_size); 
+            U8 *new_data = (U8*)ll_aligned_malloc_16(new_data_size); 
             if(NULL == new_data) 
             {
                 return false; 
@@ -1510,6 +1492,55 @@ bool LLImageRaw::scale( S32 new_width, S32 new_height, bool scale_image_data )
 	}
 
 	return true ;
+}
+
+LLPointer<LLImageRaw> LLImageRaw::scaled(S32 new_width, S32 new_height)
+{
+    LLPointer<LLImageRaw> result;
+
+    S32 components = getComponents();
+    if (components != 1 && components != 3 && components != 4)
+    {
+        LL_WARNS() << "Invalid getComponents value (" << components << ")" << LL_ENDL;
+        return result;
+    }
+
+    if (isBufferInvalid())
+    {
+        LL_WARNS() << "Invalid image buffer" << LL_ENDL;
+        return result;
+    }
+
+    S32 old_width = getWidth();
+    S32 old_height = getHeight();
+
+    if ((old_width == new_width) && (old_height == new_height))
+    {
+        result = new LLImageRaw(old_width, old_height, components);
+        if (!result || result->isBufferInvalid())
+        {
+            LL_WARNS() << "Failed to allocate new image" << LL_ENDL;
+            return result;
+        }
+        memcpy(result->getData(), getData(), getDataSize());
+    }
+    else
+    {
+        S32 new_data_size = new_width * new_height * components;
+
+        if (new_data_size > 0)
+        {
+            result = new LLImageRaw(new_width, new_height, components);
+            if (!result || result->isBufferInvalid())
+            {
+                LL_WARNS() << "Failed to allocate new image" << LL_ENDL;
+                return result;
+            }
+            bilinear_scale(getData(), old_width, old_height, components, old_width*components, result->getData(), new_width, new_height, components, new_width*components);
+        }
+    }
+
+    return result;
 }
 
 void LLImageRaw::copyLineScaled( U8* in, U8* out, S32 in_pixel_len, S32 out_pixel_len, S32 in_pixel_step, S32 out_pixel_step )
@@ -1785,10 +1816,13 @@ static std::string find_file(std::string &name, S8 *codec)
 #endif
 EImageCodec LLImageBase::getCodecFromExtension(const std::string& exten)
 {
-	for (int i=0; i<(int)(NUM_FILE_EXTENSIONS); i++)
+	if (!exten.empty())
 	{
-		if (exten == file_extensions[i].exten)
-			return file_extensions[i].codec;
+		for (int i = 0; i < (int)(NUM_FILE_EXTENSIONS); i++)
+		{
+			if (exten == file_extensions[i].exten)
+				return file_extensions[i].codec;
+		}
 	}
 	return IMG_CODEC_INVALID;
 }
@@ -2111,7 +2145,7 @@ void LLImageFormatted::appendData(U8 *data, S32 size)
 			S32 newsize = cursize + size;
 			reallocateData(newsize);
 			memcpy(getData() + cursize, data, size);
-			FREE_MEM(LLImageBase::getPrivatePool(), data);
+			ll_aligned_free_16(data);
 		}
 	}
 }

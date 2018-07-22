@@ -178,6 +178,8 @@ public:
 	virtual BOOL	isHUDAttachment() const { return FALSE; }
 	virtual BOOL	isTempAttachment() const;
 
+	virtual BOOL isHiglightedOrBeacon() const;
+
 	virtual void 	updateRadius() {};
 	virtual F32 	getVObjRadius() const; // default implemenation is mDrawable->getRadius()
 	
@@ -388,7 +390,7 @@ public:
 
 	 // Create if necessary
 	LLAudioSource *getAudioSource(const LLUUID& owner_id);
-	bool isAudioSource() {return mAudioSourcep != NULL;}
+	BOOL isAudioSource() const {return mAudioSourcep != NULL;}
 
 	U8 getMediaType() const;
 	void setMediaType(U8 media_type);
@@ -410,6 +412,7 @@ public:
 	void clearIcon();
 
 	void markForUpdate(BOOL priority);
+	void markForUnload(BOOL priority);
 	void updateVolume(const LLVolumeParams& volume_params);
 	virtual	void updateSpatialExtents(LLVector4a& min, LLVector4a& max);
 	virtual F32 getBinRadius();
@@ -419,6 +422,8 @@ public:
 	void updatePositionCaches() const; // Update the global and region position caches from the object (and parent's) xform.
 	void updateText(); // update text label position
 	virtual void updateDrawable(BOOL force_damped); // force updates on static objects
+
+	bool isOwnerInMuteList(LLUUID item_id = LLUUID());
 
 	void setDrawableState(U32 state, BOOL recursive = TRUE);
 	void clearDrawableState(U32 state, BOOL recursive = TRUE);
@@ -573,7 +578,7 @@ public:
 
 public:
 	//counter-translation
-	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE) ;
+	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE,  BOOL skip_avatar_child = FALSE) ;
 	//counter-rotation
 	void resetChildrenRotationAndPosition(const std::vector<LLQuaternion>& rotations, 
 											const std::vector<LLVector3>& positions) ;
@@ -820,6 +825,9 @@ private:
 
 	static BOOL sVelocityInterpolate;
 	static BOOL sPingInterpolate;
+
+	bool mCachedOwnerInMuteList;
+	F64 mCachedMuteListUpdateTime;
 
 	//--------------------------------------------------------------------
 	// For objects that are attachments

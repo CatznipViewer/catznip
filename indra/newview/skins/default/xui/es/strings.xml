@@ -29,7 +29,7 @@
 		Error de inicialización de gráficos. Actualiza tu controlador de gráficos.
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) 
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
@@ -68,17 +68,17 @@ Memoria de textura: [TEXTURE_MEMORY]MB
 Tiempo de creación de VFS (caché): [VFS_TIME]
 	</string>
 	<string name="AboutLibs">
-		Versión de J2C Decoder: [J2C_VERSION]
-Versión de Audio Driver: [AUDIO_DRIVER_VERSION]
-Versión de LLCEFLib/CEF: [LLCEFLIB_VERSION]
-Versión de LibVLC: [LLCEFLIB_VERSION]
-Versión de Voice Server: [VOICE_VERSION]
+		Versión de descodificador J2C: [J2C_VERSION] 
+Versión del controlador audio: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+Versión LibVLC: [LIBVLC_VERSION] 
+Versión del servidor de voz: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
 		Paquetes perdidos: [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
 	</string>
 	<string name="AboutTime">
-		[mes, fecha_hora, slt] [día, fecha_hora, slt] [año, fecha_hora, slt] [hora, fecha_hora, slt]:[min, fecha_hora, slt]:[segundo,fecha_hora,slt]
+		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
 	</string>
 	<string name="ErrorFetchingServerReleaseNotesURL">
 		Error al obtener la URL de las notas de la versión del servidor.
@@ -252,9 +252,8 @@ support@secondlife.com.
 [HORA] (horario de la costa del Pacífico).
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		En este momento no podemos completar la solicitud.
-Si deseas obtener asistencia, ponte en contacto con el departamento de soporte de Second Life a través de la página http://secondlife.com/support.
-Si no puedes cambiar la contraseña, llama al número (866) 476-9763.
+		En este momento no podemos completar la solicitud. 
+Por favor solicita ayuda al personal de asistencia de Second Life en http://support.secondlife.com.
 	</string>
 	<string name="LoginFailedTransformError">
 		Se han detectado datos incorrectos en el inicio de sesión.
@@ -270,9 +269,8 @@ Si crees que se trata de un error, ponte en contacto con support@secondlife.com.
 		La solicitud de cierre de sesión ha obtenido como resultado un error del simulador.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		El sistema está cerrando tu sesión en estos momentos.
-Tu cuenta no estará disponible hasta las
-[HORA] (horario de la costa del Pacífico).
+		El sistema te desconectará. 
+Por favor, aguarda un momento antes de intentar conectarte nuevamente.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		No se ha podido crear una sesión válida.
@@ -691,6 +689,19 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Estado desconocido
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		El servicio no está disponible.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Se detectaron errores inesperados en el servidor.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		El servicio no está disponible o se alcanzó el tiempo de carga máxima.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Error en la solicitud de carga. Por favor, ingresa a 
+http://secondlife.com/support para obtener ayuda sobre cómo solucionar este problema.
 	</string>
 	<string name="texture">
 		la textura
@@ -1416,6 +1427,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="InventoryNoMatchingItems">
 		¿No encuentras lo que buscas? Prueba con [secondlife:///app/search/all/[SEARCH_TERM] Buscar].
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		¿No encuentras lo que buscas? Intenta [secondlife:///app/inventory/filters Show filters].
+	</string>
 	<string name="PlacesNoMatchingItems">
 		¿No encuentras lo que buscas? Prueba con [secondlife:///app/search/places/[SEARCH_TERM] Buscar].
 	</string>
@@ -1473,13 +1487,17 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		La [[MARKETPLACE_CREATE_STORE_URL] tienda del Mercado] devuelve errores.
 	</string>
 	<string name="InventoryMarketplaceError">
-		Esta función está actualmente en versión beta. Si quieres participar, añade tu nombre a este [http://goo.gl/forms/FCQ7UXkakz Formulario de Google].
+		Se ha producido un error al abrir Artículos del Mercado.
+Si sigues recibiendo el mismo mensaje, solicita ayuda al personal de asistencia de Second Life en http://support.secondlife.com
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">
 		Tu carpeta Artículos del mercado está vacía.
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Arrastra carpetas a esta sección para incluirlas en la lista de venta del [[MARKETPLACE_DASHBOARD_URL] Mercado].
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Objetos)
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		La carpeta de stock debe estar contenida en una carpeta de versión
@@ -2173,10 +2191,19 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		todos los estados que administras para [OWNER]
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Resientes autorizados: ([ALLOWEDAGENTS], de un máx. de [MAXACCESS])
+		Siempre permitido: ([ALLOWEDAGENTS], de un máx. de [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Grupos autorizados: ([ALLOWEDGROUPS], de un máx. de [MAXACCESS])
+		Grupos siempre permitidos: ([ALLOWEDGROUPS], de un máx. de [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Siempre prohibido: ([BANNEDAGENTS], de un máx. de [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Siempre permitido
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Siempre prohibido
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Memoria de los scripts de la parcela
@@ -4354,7 +4381,10 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 		Conferencia con [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Ofrecido el item del inventario
+		Ítem del inventario &apos;[ITEM_NAME]&apos; ofrecido
+	</string>
+	<string name="inventory_folder_offered-im">
+		Carpeta del inventario &apos;[ITEM_NAME]&apos; ofrecida
 	</string>
 	<string name="share_alert">
 		Arrastra los ítems desde el invenbtario hasta aquí
@@ -4441,7 +4471,10 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 		Posición inicial establecida.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] te ha pagado [AMOUNT] L$ [REASON].
@@ -4650,7 +4683,7 @@ Denuncia de infracción
 		Varón - Encogimiento de hombros
 	</string>
 	<string name="Male - Stick tougue out">
-		Varón - Sacando la lengua
+		Hombre - Sacando la lengua
 	</string>
 	<string name="Male - Wow">
 		Varón - Admiración
@@ -4812,7 +4845,7 @@ Denuncia de infracción
 	<string name="server_is_down">
 		Parece que hay algún problema que ha escapado a nuestros controles.
 
-	Visita status.secondlifegrid.net para ver si hay alguna incidencia conocida que esté afectando al servicio.
+Visita http://status.secondlifegrid.net para ver si hay alguna incidencia conocida que esté afectando al servicio.
         Si sigues teniendo problemas, comprueba la configuración de la red y del servidor de seguridad.
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -5273,6 +5306,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	<string name="Command_Gestures_Label">
 		Gestos
 	</string>
+	<string name="Command_Grid_Status_Label">
+		Estado del Grid
+	</string>
 	<string name="Command_HowTo_Label">
 		Cómo
 	</string>
@@ -5365,6 +5401,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	</string>
 	<string name="Command_Gestures_Tooltip">
 		Gestos para tu avatar
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Mostrar el estado actual del Grid
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Cómo hacer las tareas habituales
@@ -5587,6 +5626,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	</string>
 	<string name="loading_chat_logs">
 		Cargando...
+	</string>
+	<string name="na">
+		n/c
 	</string>
 	<string name="preset_combo_label">
 		-Lista vacía-
