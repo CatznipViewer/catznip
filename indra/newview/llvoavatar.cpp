@@ -2978,7 +2978,7 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
 	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
 	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
-	if ( (show_avatar_complexity) && ((render_others_as == (int)ERenderOthersAs::NORMALLY) || (render_others_as == (int)ERenderOthersAs::IMPOSTERS)) &&
+	if ( (show_avatar_complexity) && (!is_muted) && ((render_others_as == (int)ERenderOthersAs::NORMALLY) || (render_others_as == (int)ERenderOthersAs::IMPOSTERS)) &&
 	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
 		   (isSelf() && show_avatar_complexity_self) ) )
 	{
