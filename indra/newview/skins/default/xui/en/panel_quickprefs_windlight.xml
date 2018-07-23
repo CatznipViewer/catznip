@@ -346,5 +346,14 @@
 	 name="windlight_prefs_interpolate"
 	 top_pad="4"
 	 width="130" />
-	 
+	<button
+	 follows="top|right"
+	 height="21"
+	 label="Reset WindLight"
+	 layout="topleft"
+	 left="30"
+	 name="windlight_reset_btn"
+	 top_pad="2"
+	 width="110" />
+
 </panel>
