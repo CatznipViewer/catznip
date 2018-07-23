@@ -999,6 +999,7 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	mShowLoadingPlaceholder( TRUE ),
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	mShowLabel(p.show_label),
+	mAspectRatio(p.aspect_ratio),
 // [/SL:KB]
 	mImageAssetID(p.image_id),
 	mDefaultImageAssetID(p.default_image_id),
@@ -1447,7 +1448,8 @@ void LLTextureCtrl::draw()
 	// Border
 //	LLRect border( 0, getRect().getHeight(), getRect().getWidth(), BTN_HEIGHT_SMALL );
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
-	LLRect border(0, getRect().getHeight(), getRect().getWidth(), (mShowLabel) ? BTN_HEIGHT_SMALL : 0);
+//	LLRect border(0, getRect().getHeight(), getRect().getWidth(), (mShowLabel) ? BTN_HEIGHT_SMALL : 0);
+	LLRect border(mBorder->getRect());
 // [/SL:KB]
 	gl_rect_2d( border, mBorderColor.get(), FALSE );
 
@@ -1589,6 +1591,43 @@ BOOL LLTextureCtrl::handleUnicodeCharHere(llwchar uni_char)
 	}
 	return LLUICtrl::handleUnicodeCharHere(uni_char);
 }
+
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: Catznip-5.4
+void LLTextureCtrl::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLUICtrl::reshape(width, height, called_from_parent);
+
+	if (mAspectRatio > 0.f)
+	{
+		LLRect clientRect = getLocalRect();
+		clientRect.mBottom += (mShowLabel) ? BTN_HEIGHT_SMALL : 0;
+
+		S32 nClientWidth = clientRect.getWidth();
+		S32 nClientHeight = clientRect.getHeight();
+		if (mAspectRatio > 1.f)
+		{
+			nClientHeight = llceil((F32)nClientWidth / mAspectRatio);
+			if (nClientHeight > clientRect.getHeight())
+			{
+				nClientHeight = clientRect.getHeight();
+				nClientWidth = llceil((F32)nClientHeight * mAspectRatio);
+			}
+		}
+		else
+		{
+			nClientWidth = llceil((F32)nClientHeight * mAspectRatio);
+			if (nClientWidth > clientRect.getWidth())
+			{
+				nClientWidth = clientRect.getWidth();
+				nClientHeight = llceil((F32)nClientWidth / mAspectRatio);
+			}
+		}
+
+		clientRect.setCenterAndSize(clientRect.getWidth() / 2, clientRect.mBottom + clientRect.getHeight() / 2, nClientWidth, nClientHeight);
+		mBorder->setRect(clientRect);
+	}
+}
+// [/SL:KB]
 
 void LLTextureCtrl::setValue( const LLSD& value )
 {
