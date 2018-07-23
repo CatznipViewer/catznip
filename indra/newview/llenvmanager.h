@@ -295,6 +295,9 @@ public:
 	// debugging methods
 	void dumpUserPrefs();
 	void dumpPresets();
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: Catznip-5.4
+	static void resetUserPrefs();
+// [/SL:KB]
 
 	// Misc.
 	void requestRegionSettings();

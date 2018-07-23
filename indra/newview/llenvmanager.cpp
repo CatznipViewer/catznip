@@ -35,6 +35,9 @@
 #include "llwaterparammanager.h"
 #include "llwlhandlers.h"
 #include "llwlparammanager.h"
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: Catznip-5.4
+#include "llstartup.h"
+// [/SL:KB]
 #include "lltrans.h"
 
 std::string LLWLParamKey::toString() const
@@ -328,6 +331,35 @@ void LLEnvManagerNew::loadUserPrefs()
 		requestRegionSettings();
 	}
 }
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: Catznip-5.4
+void LLEnvManagerNew::resetUserPrefs()
+{
+	const std::string strSettings[] =
+	{
+		"WaterPresetName",
+		"SkyPresetName",
+		"DayCycleName",
+		"UseEnvironmentFromRegion",
+		"UseDayCycle"
+	};
+
+	for (int idxSetting = 0, cntSetting = sizeof(strSettings) / sizeof(std::string); idxSetting < cntSetting; idxSetting++)
+	{
+		if (LLControlVariable* pControl = gSavedSettings.getControl(strSettings[idxSetting]))
+		{
+			pControl->resetToDefault(false);
+		}
+	}
+
+	if (LLStartUp::getStartupState() >= STATE_STARTED)
+	{
+		LLEnvManagerNew::instance().loadUserPrefs();
+		LLEnvManagerNew::instance().updateManagersFromPrefs(false);
+		LLEnvManagerNew::instance().mUsePrefsChangeSignal();
+	}
+}
+// [/SL:KB]
 
 void LLEnvManagerNew::saveUserPrefs()
 {
