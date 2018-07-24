@@ -261,8 +261,8 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	}
 
 	mCommitCallbackRegistrar.pushScope(); // registered as a widget; need to push callback scope ourselves
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
-	mEnableCallbackRegistrar.pushScope();
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	mEnableCallbackRegistrar.pushScope(); // registered as a widget; need to push callback scope ourselves
 // [/SL:KB]
 	{
 		// Determine the root folder in case specified, and

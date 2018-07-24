@@ -2965,9 +2965,7 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 			{
 				LLFolderViewFolder* folder_view = inv_dest_panel->getFolderByID(inv_cat->getUUID());
 				if ( (folder_view) && (use_filter) )
-				{
 					is_movable = (folder_view->passedFilter()) || (folder_view->descendantsPassedFilter());
-				}
 			}
 		}
 // [/SL:KB]
