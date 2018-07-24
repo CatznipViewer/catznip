@@ -877,6 +877,14 @@ LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 		pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
 		pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
 		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		if (!gSavedSettings.getBOOL("ShowReceivedItemsPanel"))
+		{
+			pInvPanel->getFilter().setFilterCategoryTypes(pInvPanel->getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		}
+		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, pInvPanel));
+		pInvPanel->getRootFolder()->setFilterStateChangedCallback(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, pInvPanel));
+// [/SL:KB]
 		pInvPanel->getFilter().markDefault();
 		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
 	}
