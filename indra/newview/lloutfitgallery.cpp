@@ -1270,6 +1270,13 @@ LLUUID LLOutfitGallery::getDefaultPhoto()
 
 void LLOutfitGallery::onTexturePickerCommit(LLTextureCtrl::ETexturePickOp op, LLUUID id)
 {
+    LLUUID selected_outfit_id = getSelectedOutfitUUID();
+
+    if (selected_outfit_id.isNull())
+    {
+        return;
+    }
+
     LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
 
     if (floaterp && op == LLTextureCtrl::TEXTURE_SELECT)
@@ -1319,8 +1326,8 @@ void LLOutfitGallery::onTexturePickerCommit(LLTextureCtrl::ETexturePickOp op, LL
             return;
         }
 
-        checkRemovePhoto(getSelectedOutfitUUID());
-        linkPhotoToOutfit(image_item_id, getSelectedOutfitUUID());
+        checkRemovePhoto(selected_outfit_id);
+        linkPhotoToOutfit(image_item_id, selected_outfit_id);
     }
 }
 
