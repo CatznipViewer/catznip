@@ -478,15 +478,25 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 			{
 				U32 flags = 0;
 				mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_UpdateFlags, flags, i);
-                
-				if(flags & FLAGS_TEMPORARY_ON_REZ)
+
+				compressed_dp.unpackUUID(fullid, "ID");
+				compressed_dp.unpackU32(local_id, "LocalID");
+				compressed_dp.unpackU8(pcode, "PCode");
+				
+				if (pcode == 0)
 				{
-                    compressed_dp.unpackUUID(fullid, "ID");
-                    compressed_dp.unpackU32(local_id, "LocalID");
-                    compressed_dp.unpackU8(pcode, "PCode");
-                }
-				else //send to object cache
+					// object creation will fail, LLViewerObject::createObject()
+					LL_WARNS() << "Received object " << fullid
+						<< " with 0 PCode. Local id: " << local_id
+						<< " Flags: " << flags
+						<< " Region: " << regionp->getName()
+						<< " Region id: " << regionp->getRegionID() << LL_ENDL;
+					recorder.objectUpdateFailure(local_id, update_type, msg_size);
+					continue;
+				}
+				else if ((flags & FLAGS_TEMPORARY_ON_REZ) == 0)
 				{
+					//send to object cache
 					regionp->cacheFullUpdate(compressed_dp, flags);
 					continue;
 				}
@@ -732,9 +742,9 @@ void LLViewerObjectList::updateApparentAngles(LLAgent &agent)
 	S32 num_updates, max_value;
 	if (NUM_BINS - 1 == mCurBin)
 	{
+		// Remainder (mObjects.size() could have changed)
 		num_updates = (S32) mObjects.size() - mCurLazyUpdateIndex;
 		max_value = (S32) mObjects.size();
-		gTextureList.setUpdateStats(TRUE);
 	}
 	else
 	{
@@ -791,10 +801,14 @@ void LLViewerObjectList::updateApparentAngles(LLAgent &agent)
 	mCurLazyUpdateIndex = max_value;
 	if (mCurLazyUpdateIndex == mObjects.size())
 	{
+		// restart
 		mCurLazyUpdateIndex = 0;
+		mCurBin = 0; // keep in sync with index (mObjects.size() could have changed)
 	}
-
-	mCurBin = (mCurBin + 1) % NUM_BINS;
+	else
+	{
+		mCurBin = (mCurBin + 1) % NUM_BINS;
+	}
 
 	LLVOAvatar::cullAvatarsByPixelArea();
 }
@@ -1032,9 +1046,11 @@ void LLViewerObjectList::fetchObjectCostsCoro(std::string url)
         mPendingObjectCost.begin(), mPendingObjectCost.end(), 
         std::inserter(diff, diff.begin()));
 
+    mStaleObjectCost.clear();
+
     if (diff.empty())
     {
-        LL_INFOS() << "No outstanding object IDs to request." << LL_ENDL;
+        LL_INFOS() << "No outstanding object IDs to request. Pending count: " << mPendingObjectCost.size() << LL_ENDL;
         return;
     }
 
@@ -1043,7 +1059,6 @@ void LLViewerObjectList::fetchObjectCostsCoro(std::string url)
     for (uuid_set_t::iterator it = diff.begin(); it != diff.end(); ++it)
     {
         idList.append(*it);
-        mStaleObjectCost.erase(*it);
     }
 
     mPendingObjectCost.insert(diff.begin(), diff.end());
@@ -1080,9 +1095,7 @@ void LLViewerObjectList::fetchObjectCostsCoro(std::string url)
     {
         LLUUID objectId = it->asUUID();
 
-        // If the object was added to the StaleObjectCost set after it had been 
-        // added to mPendingObjectCost it would still be in the StaleObjectCost 
-        // set when we got the response back.
+        // Object could have been added to the mStaleObjectCost after request started
         mStaleObjectCost.erase(objectId);
         mPendingObjectCost.erase(objectId);
 
