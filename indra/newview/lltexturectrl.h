@@ -104,6 +104,7 @@ public:
 														// only on DnD or when OK is pressed in the picker
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 		Optional<bool>			show_label;
+		Optional<F32>			aspect_ratio;
 // [/SL:KB]
 		Optional<S32>			label_width;
 		Optional<LLUIColor>		border_color;
@@ -126,6 +127,7 @@ public:
 			no_commit_on_selection("no_commit_on_selection", false),
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 			show_label("show_label", true),
+			aspect_ratio("aspect_ratio", 0.0f),
 // [/SL:KB]
 		    label_width("label_width", -1),
 			border_color("border_color"),
@@ -150,6 +152,9 @@ public:
 						std::string& tooltip_msg);
 	virtual BOOL	handleHover(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleUnicodeCharHere(llwchar uni_char);
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: Catznip-5.4
+	        void	reshape(S32 width, S32 height, BOOL called_from_parent = TRUE) override;
+// [/SL:KB]
 
 	virtual void	draw();
 	virtual void	setVisible( BOOL visible );
@@ -287,6 +292,7 @@ private:
 	BOOL					 	mShowLoadingPlaceholder;
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	bool					 	mShowLabel;
+	F32                         mAspectRatio = 0.0f;
 // [/SL:KB]
 	std::string				 	mLoadingPlaceholderString;
 	S32						 	mLabelWidth;
