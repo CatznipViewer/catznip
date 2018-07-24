@@ -342,9 +342,6 @@ BOOL LLSidepanelInventory::postBuild()
 //		
 //		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
 //		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
-//		
-//		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
-//		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
 		
 		mPanelMainInventory = mInventoryPanel->getChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
@@ -735,49 +732,9 @@ void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 //	static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->performAction(mPanelMainInventory->getActivePanel()->getModel(), action);
 }
 
-//void LLSidepanelInventory::onWearButtonClicked()
-//{
-//	// Get selected items set.
-//	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
-//	if (selected_uuids_set.empty()) return; // nothing selected
-//
-//	// Convert the set to a vector.
-//	uuid_vec_t selected_uuids_vec;
-//	for (std::set<LLUUID>::const_iterator it = selected_uuids_set.begin(); it != selected_uuids_set.end(); ++it)
-//	{
-//		selected_uuids_vec.push_back(*it);
-//	}
-//
-//	// Wear all selected items.
-//	wear_multiple(selected_uuids_vec, true);
-//}
-
-//void LLSidepanelInventory::onPlayButtonClicked()
-//{
-//	const LLInventoryItem *item = getSelectedItem();
-//	if (!item)
-//	{
-//		return;
-//	}
-//
-//	switch(item->getInventoryType())
-//	{
-//	case LLInventoryType::IT_GESTURE:
-//		performActionOnSelection("play");
-//		break;
-//	default:
-//		performActionOnSelection("open");
-//		break;
-//	}
-//}
-
 //void LLSidepanelInventory::onTeleportButtonClicked()
 //{
 //	performActionOnSelection("teleport");
-//}
-
-//void LLSidepanelInventory::onOverflowButtonClicked()
-//{
 //}
 
 void LLSidepanelInventory::onBackButtonClicked()
