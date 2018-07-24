@@ -55,6 +55,7 @@ protected:
 	 * Event handlers
 	 */
 protected:
+	void onResetWindLight();
 	void onSelectComboPrev(LLComboBox* pComboBox);
 	void onSelectComboNext(LLComboBox* pComboBox);
 	void onSelectDayCyclePreset();

@@ -81,6 +81,8 @@ BOOL LLQuickPrefsWindlightPanel::postBuild()
 
 	m_pInterpolatePresetsCheck = getChild<LLCheckBoxCtrl>("windlight_prefs_interpolate");
 
+	getChild<LLButton>("windlight_reset_btn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onResetWindLight, this));
+
 	return LLQuickPrefsPanel::postBuild();
 }
 
@@ -105,6 +107,11 @@ void LLQuickPrefsWindlightPanel::onVisibilityChange(BOOL fVisible)
 	{
 		refreshControls(true);
 	}
+}
+
+void LLQuickPrefsWindlightPanel::onResetWindLight()
+{
+	LLEnvManagerNew::resetUserPrefs();
 }
 
 void LLQuickPrefsWindlightPanel::onSelectComboPrev(LLComboBox* pComboBox)
