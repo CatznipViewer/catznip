@@ -64,7 +64,11 @@ void NotificationPriorityValues::declareValues()
 
 LLNotificationForm::FormElementBase::FormElementBase()
 :	name("name"),
-	enabled("enabled", true)
+//	enabled("enabled", true),
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.3
+	enabled("enabled", true),
+	visible_payload("visible_payload")
+// [/SL:KB]
 {}
 
 LLNotificationForm::FormIgnore::FormIgnore()

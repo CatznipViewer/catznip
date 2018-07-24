@@ -155,7 +155,7 @@ extern bool gShiftFrame;
 
 // function prototypes
 bool check_offer_throttle(const std::string& from_name, bool check_only);
-bool check_asset_previewable(const LLAssetType::EType asset_type);
+//bool check_asset_previewable(const LLAssetType::EType asset_type);
 static void process_money_balance_reply_extended(LLMessageSystem* msg);
 bool handle_trusted_experiences_notification(const LLSD&);
 
@@ -1341,7 +1341,11 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 
 		// Either an inventory item or a category.
 		const LLInventoryItem* item = dynamic_cast<const LLInventoryItem*>(obj);
-		if (item && check_asset_previewable(asset_type))
+//		if (item && check_asset_previewable(asset_type))
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+		bool can_preview = item && check_asset_previewable(asset_type);
+		if ( (can_preview) && (gSavedSettings.getBOOL("ShowNewInventory")) )
+// [/SL:KB]
 		{
 			////////////////////////////////////////////////////////////////////////////////
 			// Special handling for various types.
@@ -1434,7 +1438,10 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		////////////////////////////////////////////////////////////////////////////////
 		// Highlight item
 		const BOOL auto_open = 
-			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
+//			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+			!can_preview && gSavedSettings.getBOOL("ShowOfferedInventory") &&
+// [/SL:KB]
 			!from_name.empty(); // don't open if it's not from anyone.
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.6
 		if (auto_open || ((from_name.empty()) && (LLFloaterReg::instanceVisible("inventory") && (gSavedSettings.getBOOL("ShowDerezzedInventory")))) )
@@ -1753,7 +1760,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 				}
 // [/SL:KB]
 
-				if (gSavedSettings.getBOOL("ShowOfferedInventory"))
+//				if (gSavedSettings.getBOOL("ShowOfferedInventory"))
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+				if ( (gSavedSettings.getBOOL("ShowOfferedInventory")) || (gSavedSettings.getBOOL("ShowNewInventory")) )
+// [/SL:KB]
 				{
 					LLOpenAgentOffer* open_agent_offer = new LLOpenAgentOffer(mObjectID, from_string);
 					open_agent_offer->startFetch();
