@@ -7,6 +7,7 @@
  width="150">
     <texture_picker
      allow_no_texture="true"
+     aspect_ratio="1"
      bevel_style="in"
      border_style="line"
      default_image_name="None"
@@ -18,6 +19,7 @@
      left="10"
      mode="zoom"
      name="avatar_icon"
+     show_label="false"
      top="5"
      width="130"/>
 
