@@ -120,6 +120,9 @@ private:
 	bool selectedListIsLast();
 
 	void cleanUp();
+
+	void loadListFromFile(const std::vector<std::string>& filenames);
+	void saveListToFile(const std::vector<std::string>& filenames, std::string listName);
 };
 // [/SL:KB]
 //class LLFloaterAutoReplaceSettings : public LLFloater
