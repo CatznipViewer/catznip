@@ -101,6 +101,9 @@
 // project includes
 
 #include "llbutton.h"
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: Catznip-5.4
+#include "llenvmanager.h"
+// [/SL:KB]
 #include "llflexibleobject.h"
 #include "lllineeditor.h"
 #include "llresmgr.h"
@@ -3159,6 +3162,7 @@ public:
 	{
 		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClearSettings, _2));
 		mCommitCallbackRegistrar.add("Pref.ForceInitialOutfit", boost::bind(&LLPanelPreferenceTroubleshooting::onForceInitialOutfit));
+		mCommitCallbackRegistrar.add("Pref.ResetWindLight", boost::bind(&LLPanelPreferenceTroubleshooting::onResetWindLight));
 	}
 
 	/*virtual*/ void refresh()
@@ -3217,6 +3221,11 @@ public:
 			gSavedPerAccountSettings.setBOOL("WearInitialOutfit", TRUE);
 			LLNotificationsUtil::add("OutfitWillReset");
 		}
+	}
+
+	static void onResetWindLight()
+	{
+		LLEnvManagerNew::resetUserPrefs();
 	}
 };
 

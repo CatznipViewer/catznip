@@ -81,7 +81,32 @@
      top_delta="5"
      type="string"
      width="330">
-       (Reset avatar &amp; attachments to defaults .. )
+       (Reset avatar &amp; attachments to defaults)
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Reset WindLight"
+     layout="topleft"
+     left="25"
+     name="reset_windlight_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ResetWindLight" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="reset_windlight_text"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Reset all WindLight settings to their defaults)
     </text>
     <button
      follows="top|left"
@@ -107,7 +132,7 @@
      top_delta="5"
      type="string"
      width="330">
-       (Preferences, menu options and debug settings .. )
+       (Preferences, menu options and debug settings, ...)
     </text>
     <button
      follows="top|left"
@@ -133,7 +158,7 @@
      top_delta="5"
      type="string"
      width="330">
-       (Toolbar layout, saved notifications, derender list ..)
+       (Toolbar layout, saved notifications, derender list, ...)
     </text>
     <button
      follows="left|top"
