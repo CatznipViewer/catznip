@@ -323,6 +323,21 @@ void LLFloaterEditSky::setColorSwatch(const std::string& name, const WLColorCont
 	getChild<LLColorSwatchCtrl>(name)->set(LLColor4(color_vec / k));
 }
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+void LLFloaterEditSky::selectSkyPreset(const std::string& strSkyPreset)
+{
+	if (!isNewPreset())
+	{
+		if (/*const*/ LLScrollListItem* pItem = mSkyPresetCombo->getListControl()->getItemByLabel(strSkyPreset))
+		{
+			S32 idxItem = mSkyPresetCombo->getListControl()->getItemIndex(pItem);
+			mSkyPresetCombo->selectNthItem(idxItem);
+			mSkyPresetCombo->onCommit();
+		}
+	}
+}
+// [/SL:KB]
+
 // color control callbacks
 void LLFloaterEditSky::onColorControlMoved(LLUICtrl* ctrl, WLColorControl* color_ctrl)
 {
@@ -512,27 +527,44 @@ void LLFloaterEditSky::onGlowBMoved(LLUICtrl* ctrl, void* userdata)
 	LLWLParamManager::getInstance()->propagateParameters();
 }
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
 void LLFloaterEditSky::onFloatControlMoved(LLUICtrl* ctrl, void* userdata)
 {
-	LLWLParamManager::getInstance()->mAnimator.deactivate();
-
 	LLSliderCtrl* sldr_ctrl = static_cast<LLSliderCtrl*>(ctrl);
 	WLFloatControl * floatControl = static_cast<WLFloatControl *>(userdata);
+	onFloatControlMoved(sldr_ctrl, floatControl);
+}
+
+void LLFloaterEditSky::onFloatControlMoved(LLSliderCtrl* sldr_ctrl, WLFloatControl* floatControl)
+{
+	LLWLParamManager::getInstance()->mAnimator.deactivate();
 
 	floatControl->x = sldr_ctrl->getValueF32() / floatControl->mult;
 
 	floatControl->update(LLWLParamManager::getInstance()->mCurParams);
 	LLWLParamManager::getInstance()->propagateParameters();
 }
+// [/SL:KB]
+//void LLFloaterEditSky::onFloatControlMoved(LLUICtrl* ctrl, void* userdata)
+//{
+//	LLWLParamManager::getInstance()->mAnimator.deactivate();
+//
+//	LLSliderCtrl* sldr_ctrl = static_cast<LLSliderCtrl*>(ctrl);
+//	WLFloatControl * floatControl = static_cast<WLFloatControl *>(userdata);
+//
+//	floatControl->x = sldr_ctrl->getValueF32() / floatControl->mult;
+//
+//	floatControl->update(LLWLParamManager::getInstance()->mCurParams);
+//	LLWLParamManager::getInstance()->propagateParameters();
+//}
 
 
 // Lighting callbacks
 
 // time of day
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
 void LLFloaterEditSky::onSunMoved(LLUICtrl* ctrl, void* userdata)
 {
-	LLWLParamManager::getInstance()->mAnimator.deactivate();
-
 	LLMultiSliderCtrl* sun_msldr = getChild<LLMultiSliderCtrl>("WLSunPos");
 	LLSliderCtrl* east_sldr = getChild<LLSliderCtrl>("WLEastAngle");
 	LLTimeCtrl* time_ctrl = getChild<LLTimeCtrl>("WLDayTime");
@@ -541,11 +573,18 @@ void LLFloaterEditSky::onSunMoved(LLUICtrl* ctrl, void* userdata)
 	F32 time24  = sun_msldr->getCurSliderValue();
 	time_ctrl->setTime24(time24); // sync the time ctrl with the new sun position
 
+	onSunEastAngleChanged(F_TWO_PI * time24_to_sun_pos(time24), F_TWO_PI * east_sldr->getValueF32(), color_ctrl);
+}
+
+void LLFloaterEditSky::onSunEastAngleChanged(F32 sun_angle, F32 east_angle, WLColorControl* color_ctrl)
+{
+	LLWLParamManager::getInstance()->mAnimator.deactivate();
+
 	// get the two angles
 	LLWLParamManager * param_mgr = LLWLParamManager::getInstance();
 
-	param_mgr->mCurParams.setSunAngle(F_TWO_PI * time24_to_sun_pos(time24));
-	param_mgr->mCurParams.setEastAngle(F_TWO_PI * east_sldr->getValueF32());
+	param_mgr->mCurParams.setSunAngle(sun_angle);
+	param_mgr->mCurParams.setEastAngle(east_angle);
 
 	// set the sun vector
 	color_ctrl->r = -sin(param_mgr->mCurParams.getEastAngle()) *
@@ -558,6 +597,36 @@ void LLFloaterEditSky::onSunMoved(LLUICtrl* ctrl, void* userdata)
 	color_ctrl->update(param_mgr->mCurParams);
 	param_mgr->propagateParameters();
 }
+// [/SL:KB]
+//void LLFloaterEditSky::onSunMoved(LLUICtrl* ctrl, void* userdata)
+//{
+//	LLWLParamManager::getInstance()->mAnimator.deactivate();
+//
+//	LLMultiSliderCtrl* sun_msldr = getChild<LLMultiSliderCtrl>("WLSunPos");
+//	LLSliderCtrl* east_sldr = getChild<LLSliderCtrl>("WLEastAngle");
+//	LLTimeCtrl* time_ctrl = getChild<LLTimeCtrl>("WLDayTime");
+//	WLColorControl* color_ctrl = static_cast<WLColorControl *>(userdata);
+//
+//	F32 time24  = sun_msldr->getCurSliderValue();
+//	time_ctrl->setTime24(time24); // sync the time ctrl with the new sun position
+//
+//	// get the two angles
+//	LLWLParamManager * param_mgr = LLWLParamManager::getInstance();
+//
+//	param_mgr->mCurParams.setSunAngle(F_TWO_PI * time24_to_sun_pos(time24));
+//	param_mgr->mCurParams.setEastAngle(F_TWO_PI * east_sldr->getValueF32());
+//
+//	// set the sun vector
+//	color_ctrl->r = -sin(param_mgr->mCurParams.getEastAngle()) *
+//		cos(param_mgr->mCurParams.getSunAngle());
+//	color_ctrl->g = sin(param_mgr->mCurParams.getSunAngle());
+//	color_ctrl->b = cos(param_mgr->mCurParams.getEastAngle()) *
+//		cos(param_mgr->mCurParams.getSunAngle());
+//	color_ctrl->i = 1.f;
+//
+//	color_ctrl->update(param_mgr->mCurParams);
+//	param_mgr->propagateParameters();
+//}
 
 void LLFloaterEditSky::onTimeChanged()
 {

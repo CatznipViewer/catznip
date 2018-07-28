@@ -53,6 +53,9 @@ public:
 	/*virtual*/ void	onClose(bool app_quitting);
 	/*virtual*/ void	draw();
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	void selectWaterPreset(const std::string& strWaterPreset);
+// [/SL:KB]
 private:
 	void initCallbacks(void);
 

@@ -34,6 +34,9 @@ class LLButton;
 class LLCheckBoxCtrl;
 class LLComboBox;
 class LLLineEditor;
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+class LLSliderCtrl;
+// [/SL:KB]
 
 /**
  * Floater for creating or editing a sky preset.
@@ -41,6 +44,9 @@ class LLLineEditor;
 class LLFloaterEditSky : public LLFloater
 {
 	LOG_CLASS(LLFloaterEditSky);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	friend class LLQuickPrefsWindlightPanel;
+// [/SL:KB]
 
 public:
 	LLFloaterEditSky(const LLSD &key);
@@ -50,6 +56,9 @@ public:
 	/*virtual*/ void	onClose(bool app_quitting);
 	/*virtual*/ void	draw();
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	void selectSkyPreset(const std::string& strSkyPreset);
+// [/SL:KB]
 private:
 	void initCallbacks(void);
 
@@ -65,6 +74,9 @@ private:
 	void onColorControlGMoved(LLUICtrl* ctrl, void* userdata);
 	void onColorControlBMoved(LLUICtrl* ctrl, void* userdata);
 	void onFloatControlMoved(LLUICtrl* ctrl, void* userdata);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	static void onFloatControlMoved(LLSliderCtrl* sldr_ctrl, WLFloatControl* floatControl);
+// [/SL:KB]
 
 	// lighting callbacks for glow
 	void onGlowRMoved(LLUICtrl* ctrl, void* userdata);
@@ -72,6 +84,9 @@ private:
 
 	// lighting callbacks for sun
 	void onSunMoved(LLUICtrl* ctrl, void* userdata);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	static void onSunEastAngleChanged(F32 sun_angle, F32 east_angle, WLColorControl* color_ctrl);
+// [/SL:KB]
 	void onTimeChanged();
 
 	// for handling when the star slider is moved to adjust the alpha
