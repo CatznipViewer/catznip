@@ -661,12 +661,6 @@ void LLPanelMainInventory::shareWithAvatars()
 	LLAvatarActions::shareWithAvatars(getPanel());
 }
 // [/SL:KB]
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
-	else if (command_name == "show_derezzed_objects")
-	{
-		gSavedSettings.setBOOL("ShowDerezzedInventory", !gSavedSettings.getBOOL("ShowDerezzedInventory"));
-	}
-// [/SL:KB]
 
 //void LLPanelMainInventory::onSelectSearchType()
 //{
@@ -1822,6 +1816,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		gSavedSettings.setBOOL("ShowReceivedItemsPanel", !gSavedSettings.getBOOL("ShowReceivedItemsPanel"));
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+	else if (command_name == "show_derezzed_objects")
+	{
+		gSavedSettings.setBOOL("ShowDerezzedInventory", !gSavedSettings.getBOOL("ShowDerezzedInventory"));
+	}
+// [/SL:KB]
 
 	if (command_name == "replace_links")
 	{
@@ -1998,6 +1998,12 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+	else if (command_name == "show_derezzed_objects")
+	{
+		return gSavedSettings.getBOOL("ShowDerezzedInventory");
+	}
+// [/SL:KB]
 //	U32 sort_order_mask = getActivePanel()->getSortOrder();
 //	const std::string command_name = userdata.asString();
 //	if (command_name == "sort_by_name")
@@ -2019,13 +2025,6 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 //	{
 //		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
 //	}
-
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
-	if (command_name == "show_derezzed_objects")
-	{
-		return gSavedSettings.getBOOL("ShowDerezzedInventory");
-	}
-// [/SL:KB]
 
 	return FALSE;
 }
