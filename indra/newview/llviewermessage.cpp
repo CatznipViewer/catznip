@@ -1038,7 +1038,10 @@ protected:
 			else ++it;
 		}
 
-		open_inventory_offer(added, "");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+		open_inventory_offer(added, "task_handler");
+// [/SL:KB]
+//		open_inventory_offer(added, "");
 	}
  };
 
@@ -1206,6 +1209,9 @@ bool check_asset_previewable(const LLAssetType::EType asset_type)
 			(asset_type == LLAssetType::AT_LANDMARK)  ||
 			(asset_type == LLAssetType::AT_TEXTURE)   ||
 			(asset_type == LLAssetType::AT_ANIMATION) ||
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+			(asset_type == LLAssetType::AT_LSL_TEXT)  ||
+// [/SL:KB]
 			(asset_type == LLAssetType::AT_SCRIPT)    ||
 			(asset_type == LLAssetType::AT_SOUND);
 }
@@ -1314,8 +1320,19 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 						LLFloaterReg::showInstance("preview_anim", LLSD(obj_id), take_focus);
 						break;
 					case LLAssetType::AT_SCRIPT:
-						LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+					case LLAssetType::AT_LSL_TEXT:
+						{
+							LLViewerInventoryItem* pItem = gInventory.getItem(obj_id);
+							if ( (pItem) && (pItem->getPermissionMask() & PERM_MODIFY) )
+								LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+							else
+								can_preview = false;
+						}
 						break;
+// [/SL:KB]
+//						LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+//						break;
 					case LLAssetType::AT_SOUND:
 						LLFloaterReg::showInstance("preview_sound", LLSD(obj_id), take_focus);
 						break;
