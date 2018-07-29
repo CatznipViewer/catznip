@@ -284,6 +284,14 @@ public:
 			open_inventory_offer(items_to_open, "inventory_handler");
 			return true;
 		}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+		else if (verb == "show")
+		{
+#ifdef CATZNIP
+			show_item(inventory_id, EShowItemOptions::TAKE_FOCUS_YES);
+#endif // CATZNIP
+		}
+// [:SL:KB]
 		
 		return false;
 	}

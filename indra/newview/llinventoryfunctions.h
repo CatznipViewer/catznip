@@ -42,6 +42,10 @@ const S32 COMPUTE_STOCK_NOT_EVALUATED = -2;
  **                    MISCELLANEOUS GLOBAL FUNCTIONS
  **/
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+bool can_preview_item(const LLUUID& idItem);
+// [/SL:KB]
+
 // Is this a parent folder to a worn item
 BOOL get_is_parent_to_worn_item(const LLUUID& id);
 
