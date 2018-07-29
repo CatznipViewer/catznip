@@ -1210,7 +1210,10 @@ bool check_asset_previewable(const LLAssetType::EType asset_type)
 			(asset_type == LLAssetType::AT_SOUND);
 }
 
-void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name)
+//void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name, bool force_open)
+// [/SL:KB]
 {
 	for (uuid_vec_t::const_iterator obj_iter = objects.begin();
 		 obj_iter != objects.end();
@@ -1241,7 +1244,7 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 //		if (item && check_asset_previewable(asset_type))
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
 		bool can_preview = item && check_asset_previewable(asset_type);
-		if ( (can_preview) && (gSavedSettings.getBOOL("ShowNewInventory")) )
+		if ( (can_preview) && ((force_open) || (gSavedSettings.getBOOL("ShowNewInventory"))) )
 // [/SL:KB]
 		{
 			////////////////////////////////////////////////////////////////////////////////
@@ -1328,7 +1331,7 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		const BOOL auto_open = 
 //			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
-			!can_preview && gSavedSettings.getBOOL("ShowOfferedInventory") &&
+			!can_preview && (force_open || gSavedSettings.getBOOL("ShowOfferedInventory")) &&
 // [/SL:KB]
 			!from_name.empty(); // don't open if it's not from anyone.
 		LLInventoryPanel::openInventoryPanelAndSetSelection(auto_open, obj_id);

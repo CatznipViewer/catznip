@@ -281,7 +281,10 @@ public:
 			uuid_vec_t items_to_open;
 			items_to_open.push_back(inventory_id);
 			//inventory_handler is just a stub, because we don't know from who this offer
-			open_inventory_offer(items_to_open, "inventory_handler");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+			open_inventory_offer(items_to_open, "inventory_handler", true);
+// [/SL:KB]
+//			open_inventory_offer(items_to_open, "inventory_handler");
 			return true;
 		}
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
