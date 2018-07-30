@@ -716,6 +716,16 @@ void LLPreviewTexture::loadAsset()
 	mImageOldBoostLevel = mImage->getBoostLevel();
 	mImage->setBoostLevel(LLGLTexture::BOOST_PREVIEW);
 	mImage->forceToSaveRawImage(0) ;
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.4
+	if ( (!mImage->isFullyLoaded()) && (!mImage->hasFetcher()) )
+	{
+		if (mImage->isInFastCacheList())
+		{
+			mImage->loadFromFastCache();
+		}
+		gTextureList.forceImmediateUpdate(mImage);
+	}
+// [/SL:KB]
 	mAssetStatus = PREVIEW_ASSET_LOADING;
 	mUpdateDimensions = TRUE;
 	updateDimensions();

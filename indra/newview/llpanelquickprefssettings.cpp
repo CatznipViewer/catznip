@@ -18,12 +18,16 @@
 
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
+#include "llfloaterreg.h"
 #include "llpanelquickprefssettings.h"
 #include "llsliderctrl.h"
 
 // Windlight panel
 #include "lldaycyclemanager.h"
 #include "llenvmanager.h"
+#include "llfloatereditdaycycle.h"
+#include "llfloatereditsky.h"
+#include "llfloatereditwater.h"
 #include "llfloaterenvironmentsettings.h"
 #include "llwaterparammanager.h"
 #include "llwlparammanager.h"
@@ -58,20 +62,33 @@ BOOL LLQuickPrefsWindlightPanel::postBuild()
 	LLDayCycleManager::instance().setModifyCallback(boost::bind(&LLFloaterEnvironmentSettings::populateDayCyclePresetsList, m_pDayCyclePresetCombo));
 	getChild<LLButton>("windlight_daycycle_prevbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboPrev, this, m_pDayCyclePresetCombo));
 	getChild<LLButton>("windlight_daycycle_nextbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboNext, this, m_pDayCyclePresetCombo));
+	m_pDayCycleEditButton = getChild<LLButton>("windlight_daycycle_editbtn");
+	m_pDayCycleEditButton->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onEditDayCycle, this));
 
 	m_pSkyPresetCombo = getChild<LLComboBox>("windlight_fixedsky_combo");
 	m_pSkyPresetCombo->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectSkyPreset, this));
 	LLWLParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateSkyPresetsList, m_pSkyPresetCombo));
 	getChild<LLButton>("windlight_fixedsky_prevbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboPrev, this, m_pSkyPresetCombo));
 	getChild<LLButton>("windlight_fixedsky_nextbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboNext, this, m_pSkyPresetCombo));
+	m_pSkyEditButton = getChild<LLButton>("windlight_fixedsky_editbtn");
+	m_pSkyEditButton->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onEditSkyPreset, this));
 
 	m_pWaterPresetCombo = getChild<LLComboBox>("windlight_water_combo");
 	m_pWaterPresetCombo->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectWaterPreset, this));
 	LLWaterParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateWaterPresetsList, m_pWaterPresetCombo));
 	getChild<LLButton>("windlight_water_prevbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboPrev, this, m_pWaterPresetCombo));
 	getChild<LLButton>("windlight_water_nextbtn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSelectComboNext, this, m_pWaterPresetCombo));
+	m_pWaterEditButton = getChild<LLButton>("windlight_water_editbtn");
+	m_pWaterEditButton->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onEditWaterPreset, this));
 
 	LLEnvManagerNew::instance().setPreferencesChangeCallback(boost::bind(&LLQuickPrefsWindlightPanel::refreshControls, this, false));
+
+	m_pSceneGammaText = getChild<LLTextBox>("windlight_scenegamma_text");
+	m_pSceneGammaSlider = getChild<LLSliderCtrl>("windlight_scenegamma_slider");
+	m_pSceneGammaSlider->setCommitCallback(boost::bind(&LLFloaterEditSky::onFloatControlMoved, m_pSceneGammaSlider, &LLWLParamManager::instance().mWLGamma));
+	m_pEastAngleText = getChild<LLTextBox>("windlight_eastangle_text");
+	m_pEastAngleSlider = getChild<LLSliderCtrl>("windlight_eastangle_slider");
+	m_pEastAngleSlider->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onEastAngleChanged, this));
 
 	m_pSunMoonSlider = getChild<LLSliderCtrl>("windlight_sunmoon_position");
 	m_pSunMoonSlider->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onSunPositionMoved, this));
@@ -81,6 +98,8 @@ BOOL LLQuickPrefsWindlightPanel::postBuild()
 
 	m_pInterpolatePresetsCheck = getChild<LLCheckBoxCtrl>("windlight_prefs_interpolate");
 
+	getChild<LLButton>("windlight_reset_btn")->setCommitCallback(boost::bind(&LLQuickPrefsWindlightPanel::onResetWindLight, this));
+
 	return LLQuickPrefsPanel::postBuild();
 }
 
@@ -88,14 +107,7 @@ BOOL LLQuickPrefsWindlightPanel::postBuild()
 void LLQuickPrefsWindlightPanel::draw()
 {
 	LLQuickPrefsPanel::draw();
-
-	float nTime24 = 0.f;
-	if (LLEnvManagerNew::instance().getUseFixedSky())
-		nTime24 = sun_pos_to_time24(LLWLParamManager::instance().mCurParams.getSunAngle() / F_TWO_PI);
-	else
-		nTime24 = (float)(LLWLParamManager::instance().mAnimator.getDayTime() * 24.f);
-	m_pSunMoonSlider->setValue(nTime24, true);
-	m_pSunMoonFreezeCheck->set(!LLWLParamManager::instance().mAnimator.getIsRunning());
+	syncControls();
 }
 
 // virtual
@@ -105,6 +117,46 @@ void LLQuickPrefsWindlightPanel::onVisibilityChange(BOOL fVisible)
 	{
 		refreshControls(true);
 	}
+}
+
+void LLQuickPrefsWindlightPanel::onEastAngleChanged()
+{
+	if (LLEnvManagerNew::instance().getUseFixedSky())
+	{
+		// Fixed sky so just change the sun angle
+		const float nSunAngle = LLWLParamManager::instance().mCurParams.getSunAngle();
+		const float nEastAngle = m_pEastAngleSlider->getValueF32() * F_TWO_PI;
+		LLFloaterEditSky::onSunEastAngleChanged(nSunAngle, nEastAngle, &LLWLParamManager::instance().mLightnorm);
+	}
+}
+
+void LLQuickPrefsWindlightPanel::onEditDayCycle()
+{
+	if (LLFloaterEditDayCycle* pEditDayCycleFloater = LLFloaterReg::showTypedInstance<LLFloaterEditDayCycle>("env_edit_day_cycle", "edit"))
+	{
+		pEditDayCycleFloater->selectDayCycle(m_pDayCyclePresetCombo->getValue().asStringRef());
+	}
+}
+
+void LLQuickPrefsWindlightPanel::onEditSkyPreset()
+{
+	if (LLFloaterEditSky* pEditSkyPresetFloater = LLFloaterReg::showTypedInstance<LLFloaterEditSky>("env_edit_sky", "edit"))
+	{
+		pEditSkyPresetFloater->selectSkyPreset(m_pSkyPresetCombo->getValue().asStringRef());
+	}
+}
+
+void LLQuickPrefsWindlightPanel::onEditWaterPreset()
+{
+	if (LLFloaterEditWater* pEditWaterPresetFloater = LLFloaterReg::showTypedInstance<LLFloaterEditWater>("env_edit_water", "edit"))
+	{
+		pEditWaterPresetFloater->selectWaterPreset(m_pWaterPresetCombo->getValue().asStringRef());
+	}
+}
+
+void LLQuickPrefsWindlightPanel::onResetWindLight()
+{
+	LLEnvManagerNew::resetUserPrefs();
 }
 
 void LLQuickPrefsWindlightPanel::onSelectComboPrev(LLComboBox* pComboBox)
@@ -146,9 +198,9 @@ void LLQuickPrefsWindlightPanel::onSunPositionMoved()
 	if (LLEnvManagerNew::instance().getUseFixedSky())
 	{
 		// Fixed sky so just change the sun angle
-		LLWLParamManager::instance().mAnimator.deactivate();
-		float nAngle = time24_to_sun_pos(m_pSunMoonSlider->getValueF32()) * F_TWO_PI;
-		LLWLParamManager::instance().mCurParams.setSunAngle(nAngle);
+		const float nSunAngle = time24_to_sun_pos(m_pSunMoonSlider->getValueF32()) * F_TWO_PI;
+		const float nEastAngle = LLWLParamManager::instance().mCurParams.getEastAngle();
+		LLFloaterEditSky::onSunEastAngleChanged(nSunAngle, nEastAngle, &LLWLParamManager::instance().mLightnorm);
 	}
 	else
 	{
@@ -200,24 +252,55 @@ void LLQuickPrefsWindlightPanel::refreshControls(bool fRefreshPresets)
 	bool fUseDayCycle = pEnvMgr->getUseDayCycle();
 	bool fUseFixedSky = pEnvMgr->getUseFixedSky();
 
-	m_pUseRegionCheck->set(pEnvMgr->getUseRegionSettings());
+	m_pUseRegionCheck->set(fUseRegionSettings);
 
-	if ((!fUseRegionSettings) && (fUseDayCycle))
+	bool fHasDayCycle = (!fUseRegionSettings) && (fUseDayCycle);
+	if (fHasDayCycle)
 		m_pDayCyclePresetCombo->selectByValue(pEnvMgr->getDayCycleName());
 	else
 		m_pDayCyclePresetCombo->setLabel(getString((fUseRegionSettings) ? "WINDLIGHT_REGION" : "WINDLIGHT_FIXEDSKY"));
+	m_pDayCycleEditButton->setEnabled(fHasDayCycle);
 
-	if ((!fUseRegionSettings) && (fUseFixedSky))
+	bool fHasSkyPreset = (!fUseRegionSettings) && (fUseFixedSky);
+	if (fHasSkyPreset)
 		m_pSkyPresetCombo->selectByValue(pEnvMgr->getSkyPresetName());
 	else
 		m_pSkyPresetCombo->setLabel(getString((fUseRegionSettings) ? "WINDLIGHT_REGION" : "WINDLIGHT_DAYCYCLE"));
+	m_pSkyEditButton->setEnabled(fHasSkyPreset);
 
-	if (!fUseRegionSettings)
+	bool fHasWaterPreset = !fUseRegionSettings;
+	if (fHasWaterPreset)
 		m_pWaterPresetCombo->selectByValue(pEnvMgr->getWaterPresetName());
 	else
 		m_pWaterPresetCombo->setLabel(getString("WINDLIGHT_REGION"));
+	m_pWaterEditButton->setEnabled(fHasWaterPreset);
 
 	m_pSunMoonFreezeCheck->setEnabled(!fUseFixedSky);
+}
+
+void LLQuickPrefsWindlightPanel::syncControls()
+{
+	LLWLParamManager& wlParamMgr = LLWLParamManager::instance();
+	LLWLParamSet& wlCurParams = wlParamMgr.mCurParams;
+
+	const bool fUseFixedSky = LLEnvManagerNew::instance().getUseFixedSky();
+	const bool fAnimatorRunning = wlParamMgr.mAnimator.getIsRunning();
+
+	bool fError;
+	//m_pSceneGammaText->setEnabled(!fAnimatorRunning);
+	//m_pSceneGammaSlider->setEnabled(!fAnimatorRunning);
+	m_pSceneGammaSlider->setValue(wlCurParams.getFloat(wlParamMgr.mWLGamma.mName, fError));
+	m_pEastAngleText->setEnabled(fUseFixedSky);
+	m_pEastAngleSlider->setEnabled(fUseFixedSky);
+	m_pEastAngleSlider->setValue(wlCurParams.getEastAngle() / F_TWO_PI);
+
+	float nTime24 = 0.f;
+	if (fUseFixedSky)
+		nTime24 = sun_pos_to_time24(wlCurParams.getSunAngle() / F_TWO_PI);
+	else
+		nTime24 = (float)(wlParamMgr.mAnimator.getDayTime() * 24.f);
+	m_pSunMoonSlider->setValue(nTime24, true);
+	m_pSunMoonFreezeCheck->set(!fAnimatorRunning);
 }
 
 // ====================================================================================

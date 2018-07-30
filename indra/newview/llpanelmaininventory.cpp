@@ -871,6 +871,14 @@ LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 		pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
 		pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
 		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		if (!gSavedSettings.getBOOL("ShowReceivedItemsPanel"))
+		{
+			pInvPanel->getFilter().setFilterCategoryTypes(pInvPanel->getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		}
+		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, pInvPanel));
+		pInvPanel->getRootFolder()->setFilterStateChangedCallback(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, pInvPanel));
+// [/SL:KB]
 		pInvPanel->getFilter().markDefault();
 		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
 	}
@@ -1808,6 +1816,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		gSavedSettings.setBOOL("ShowReceivedItemsPanel", !gSavedSettings.getBOOL("ShowReceivedItemsPanel"));
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+	else if (command_name == "show_derezzed_objects")
+	{
+		gSavedSettings.setBOOL("ShowDerezzedInventory", !gSavedSettings.getBOOL("ShowDerezzedInventory"));
+	}
+// [/SL:KB]
 
 	if (command_name == "replace_links")
 	{
@@ -1982,6 +1996,12 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 	else if (command_name == "show_received_items_panel")
 	{
 		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
+	}
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+	else if (command_name == "show_derezzed_objects")
+	{
+		return gSavedSettings.getBOOL("ShowDerezzedInventory");
 	}
 // [/SL:KB]
 //	U32 sort_order_mask = getActivePanel()->getSortOrder();

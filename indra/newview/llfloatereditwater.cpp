@@ -600,6 +600,21 @@ void LLFloaterEditWater::onWaterPresetNameEdited()
 	mSaveButton->setEnabled(!getCurrentPresetName().empty());
 }
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+void LLFloaterEditWater::selectWaterPreset(const std::string& strWaterPreset)
+{
+	if (!isNewPreset())
+	{
+		if (/*const*/ LLScrollListItem* pItem = mWaterPresetCombo->getListControl()->getItemByLabel(strWaterPreset))
+		{
+			S32 idxItem = mWaterPresetCombo->getListControl()->getItemIndex(pItem);
+			mWaterPresetCombo->selectNthItem(idxItem);
+			mWaterPresetCombo->onCommit();
+		}
+	}
+}
+// [/SL:KB]
+
 void LLFloaterEditWater::onWaterPresetSelected()
 {
 	LLWaterParamSet water_params;

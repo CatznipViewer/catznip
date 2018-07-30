@@ -88,6 +88,9 @@ public:
 
 	/// if the Url specifies an SL command in the form like 'app/{cmd}/{id}/*', show its profile
 	static void showProfile(std::string url);
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	static std::string getInventoryID(std::string url);
+// [/SL:KB]
 	static std::string getUserID(std::string url);
 	static std::string getObjectName(std::string url);
 	static std::string getObjectId(std::string url);
@@ -96,6 +99,7 @@ public:
 	static void startGroupChat(const std::string& url);
 	static void offerTeleport(const std::string& url);
 	static void requestTeleport(const std::string& url);
+	static void showItem(const std::string& url);
 // [/SL:KB]
 	static void addFriend(std::string url);
 	static void removeFriend(std::string url);

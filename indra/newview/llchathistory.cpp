@@ -49,6 +49,9 @@
 #include "lltrans.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llmutelist.h"
 #include "llstylemap.h"
 #include "llslurl.h"
@@ -1150,6 +1153,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	editor_params.show_context_menu = "true";
 	editor_params.trusted_content = false;
 	mEditor = LLUICtrlFactory::create<LLTextEditor>(editor_params, this);
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	mEditor->setCanPreviewItemCallback(boost::bind(&can_preview_item, _1));
+// [/SL/KB]
 	mEditor->setIsFriendCallback(LLAvatarActions::isFriend);
 	mEditor->setIsObjectBlockedCallback(boost::bind(&LLMuteList::isMuted, LLMuteList::getInstance(), _1, _2, 0));
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)

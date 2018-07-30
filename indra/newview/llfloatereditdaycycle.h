@@ -52,6 +52,9 @@ public:
 	/*virtual*/ void	onClose(bool app_quitting);
 	/*virtual*/ void	draw();
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+	void selectDayCycle(const std::string& strDayCycle);
+// [/SL:KB]
 private:
 
 	/// sync the time slider with day cycle structure

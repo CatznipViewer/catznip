@@ -50,11 +50,17 @@ public:
 	 */
 protected:
 	void refreshControls(bool fRefreshPresets);
+	void syncControls();
 
 	/*
 	 * Event handlers
 	 */
 protected:
+	void onEastAngleChanged();
+	void onEditDayCycle();
+	void onEditSkyPreset();
+	void onEditWaterPreset();
+	void onResetWindLight();
 	void onSelectComboPrev(LLComboBox* pComboBox);
 	void onSelectComboNext(LLComboBox* pComboBox);
 	void onSelectDayCyclePreset();
@@ -70,8 +76,15 @@ protected:
 protected:
 	LLCheckBoxCtrl* m_pUseRegionCheck = nullptr;
 	LLComboBox*     m_pDayCyclePresetCombo = nullptr;
+	LLButton*       m_pDayCycleEditButton = nullptr;
 	LLComboBox*     m_pSkyPresetCombo = nullptr;
+	LLButton*       m_pSkyEditButton = nullptr;
 	LLComboBox*     m_pWaterPresetCombo = nullptr;
+	LLButton*       m_pWaterEditButton = nullptr;
+	LLTextBox*      m_pSceneGammaText = nullptr;
+	LLSliderCtrl*   m_pSceneGammaSlider = nullptr;
+	LLTextBox*      m_pEastAngleText = nullptr;
+	LLSliderCtrl*   m_pEastAngleSlider = nullptr;
 	LLCheckBoxCtrl* m_pInterpolatePresetsCheck = nullptr;
 	LLSliderCtrl*   m_pSunMoonSlider = nullptr;
 	LLCheckBoxCtrl* m_pSunMoonFreezeCheck = nullptr;

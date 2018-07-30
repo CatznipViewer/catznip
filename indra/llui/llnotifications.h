@@ -170,6 +170,9 @@ public:
 	{
 		Optional<std::string>	name;
 		Optional<bool>			enabled;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.3
+		Optional<std::string>	visible_payload;
+// [/SL:KB]
 
 		FormElementBase();
 	};

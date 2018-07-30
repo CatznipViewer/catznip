@@ -68,7 +68,6 @@ BOOL LLPanelVolumePulldown::postBuild()
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
 	onToggleMuteSounds();
 // [/SL:KB]
-
 	return LLPanel::postBuild();
 }
 

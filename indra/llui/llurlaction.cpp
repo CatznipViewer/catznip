@@ -208,6 +208,22 @@ void LLUrlAction::showProfile(std::string url)
 	}
 }
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+std::string LLUrlAction::getInventoryID(std::string url)
+{
+	LLURI uri(url);
+	LLSD path_array = uri.pathArray();
+	std::string id_str;
+	// Only grab the UUID if it's an inventory URL
+	const std::string strCommand = path_array.get(1).asString();
+	if ( (path_array.size() == 4) && ("inventory" == strCommand) )
+	{
+		id_str = path_array.get(2).asString();
+	}
+	return id_str;
+}
+// [/SL:KB]
+
 std::string LLUrlAction::getUserID(std::string url)
 {
 	LLURI uri(url);
@@ -285,6 +301,16 @@ void LLUrlAction::requestTeleport(const std::string& url)
 		executeSLURL("secondlife:///app/agent/" + strAgentId + "/requestteleport");
 	}
 }
+
+void LLUrlAction::showItem(const std::string& url)
+{
+	const std::string strItemId = getInventoryID(url);
+	if (LLUUID::validate(strItemId))
+	{
+		executeSLURL("secondlife:///app/inventory/" + strItemId + "/show");
+	}
+}
+
 // [/SL:KB]
 
 void LLUrlAction::addFriend(std::string url)

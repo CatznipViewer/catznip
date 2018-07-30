@@ -7718,8 +7718,14 @@ An object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; owned by [NAME_SLU
 -->
       <check
        name="check"
+       control="ShowNewInventory"
+       text="Show item after accepting"
+       visible_payload="show_preview" />
+      <check
+       name="check"
        control="ShowOfferedInventory"
-       text="Show in inventory" />
+       text="Show in inventory"
+       visible_payload="show_in_inventory" />
       <panel
        class="panel_offer_invfolder" />
     </form>
@@ -7742,8 +7748,14 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        text="Discard"/>
       <check
        name="check"
+       control="ShowNewInventory"
+       text="Show item after accepting"
+       visible_payload="show_preview" />
+      <check
+       name="check"
        control="ShowOfferedInventory"
-       text="Show in inventory" />
+       text="Show in inventory"
+       visible_payload="show_in_inventory" />
       <panel
        class="panel_offer_invfolder" />
     </form>
@@ -7762,7 +7774,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
       <button
        index="3"
        name="Show"
-       text="Show"/>
+       text="Keep"/>
       <button
        index="1"
        name="Discard"
@@ -7773,8 +7785,14 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        text="Block"/>
       <check
        name="check"
+       control="ShowNewInventory"
+       text="Show item after accepting"
+       visible_payload="show_preview" />
+      <check
+       name="check"
        control="ShowOfferedInventory"
-       text="Show in inventory" />
+       text="Show in inventory"
+       visible_payload="show_in_inventory" />
       <panel
        class="panel_offer_invfolder" />
     </form>

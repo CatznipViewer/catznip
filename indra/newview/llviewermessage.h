@@ -66,6 +66,9 @@ enum InventoryOfferResponse
 	IOR_MUTE,
 	IOR_SHOW
 };
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+bool check_asset_previewable(const LLAssetType::EType asset_type);
+// [/SL:KB]
 
 BOOL can_afford_transaction(S32 cost);
 void give_money(const LLUUID& uuid, LLViewerRegion* region, S32 amount, BOOL is_group = FALSE,
@@ -206,7 +209,10 @@ void invalid_message_callback(LLMessageSystem*, void*, EMessageException);
 
 void process_initiate_download(LLMessageSystem* msg, void**);
 void start_new_inventory_observer();
-void open_inventory_offer(const uuid_vec_t& items, const std::string& from_name);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+void open_inventory_offer(const uuid_vec_t& items, const std::string& from_name, bool force_open = false);
+// [/SL:KB]
+//void open_inventory_offer(const uuid_vec_t& items, const std::string& from_name);
 
 // Returns true if item is not in certain "quiet" folder which don't need UI
 // notification (e.g. trash, cof, lost-and-found) and agent is not AFK, false otherwise.

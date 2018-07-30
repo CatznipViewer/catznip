@@ -17,6 +17,7 @@
 	 name="windlight_regiondefault_check"
 	 top_pad="2"
 	 width="130" />
+
 	<text
 	 follows="top|left"
 	 height="15"
@@ -24,7 +25,7 @@
 	 left="15"
 	 name="windlight_daycycle_text"
 	 top_pad="6"
-	 width="75">
+	 width="65">
 		Day cycle :
 	</text>
 	<combo_box
@@ -34,7 +35,7 @@
 	 layout="topleft"
 	 left_pad="5"
 	 top_delta="-4"
-	 width="160">
+	 width="150">
 		<combo_box.item
 		 label="-Select a preset-"
 		 name="item0"/>
@@ -46,7 +47,8 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_daycycle_prevbtn"
-	 right="-25"
+	 right="-45"
+	 tool_tip="Change to the previous day cycle"
 	 top_delta="1"
 	 width="18">
 	</button>
@@ -57,10 +59,24 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_daycycle_nextbtn"
-	 right="-5"
+	 right="-25"
+	 tool_tip="Change to the next day cycle"
 	 top_delta="0"
 	 width="18">
 	</button>
+	<button
+	 follows="top|right"
+	 height="21"
+	 image_overlay="Edit_Wrench"
+	 hover_glow_amount="0.15"
+	 layout="topleft"
+	 name="windlight_daycycle_editbtn"
+	 right="-5"
+	 tool_tip="Edit the current day cycle"
+	 top_delta="0"
+	 width="20">
+	</button>
+
 	<text
 	 follows="top|left"
 	 height="15"
@@ -70,7 +86,7 @@
 	 name="windlight_fixedsky_text"
 	 top_pad="8"
 	 type="string"
-	 width="75">
+	 width="65">
 		Fixed sky :
 	</text>
 	<combo_box
@@ -80,7 +96,7 @@
 	 left_pad="5"
 	 name="windlight_fixedsky_combo"
 	 top_delta="-4"
-	 width="160">
+	 width="150">
 		<combo_box.item
 		 label="-Select a preset-"
 		 name="item0"/>
@@ -92,7 +108,8 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_fixedsky_prevbtn"
-	 right="-25"
+	 right="-45"
+	 tool_tip="Change to the previous sky preset"
 	 top_delta="1"
 	 width="18">
 	</button>
@@ -103,10 +120,24 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_fixedsky_nextbtn"
-	 right="-5"
+	 right="-25"
+	 tool_tip="Change to the next sky preset"
 	 top_delta="0"
 	 width="18">
 	</button>
+	<button
+	 follows="top|right"
+	 height="21"
+	 image_overlay="Edit_Wrench"
+	 hover_glow_amount="0.15"
+	 layout="topleft"
+	 name="windlight_fixedsky_editbtn"
+	 right="-5"
+	 tool_tip="Edit the current sky preset"
+	 top_delta="0"
+	 width="20">
+	</button>
+
 	<text
 	 follows="top|left"
 	 height="15"
@@ -114,7 +145,7 @@
 	 left="15"
 	 name="windlight_water_text"
 	 top_pad="8"
-	 width="75">
+	 width="65">
 		Water :
 	</text>
 	<combo_box
@@ -124,7 +155,7 @@
 	 left_pad="5"
 	 name="windlight_water_combo"
 	 top_delta="-4"
-	 width="160">
+	 width="150">
 		<combo_box.item
 		 label="-Select a preset-"
 		 name="item0"/>
@@ -136,7 +167,8 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_water_prevbtn"
-	 right="-25"
+	 right="-45"
+	 tool_tip="Change to the previous water preset"
 	 top_delta="1"
 	 width="18">
 	</button>
@@ -147,11 +179,73 @@
 	 hover_glow_amount="0.15"
 	 layout="topleft"
 	 name="windlight_water_nextbtn"
-	 right="-5"
+	 right="-25"
+	 tool_tip="Change to the next water preset"
 	 top_delta="0"
 	 width="18">
 	</button>
-	
+	<button
+	 follows="top|right"
+	 height="21"
+	 image_overlay="Edit_Wrench"
+	 hover_glow_amount="0.15"
+	 layout="topleft"
+	 name="windlight_water_editbtn"
+	 right="-5"
+	 tool_tip="Edit the current water preset"
+	 top_delta="0"
+	 width="20">
+	</button>
+
+	<text
+	 follows="top|left"
+	 height="15"
+	 layout="topleft"
+	 left="15"
+	 name="windlight_scenegamma_text"
+	 text_readonly_color="LabelDisabledColor"
+	 top_pad="7"
+	 width="90">
+	    Scene Gamma :
+	</text>
+	<slider
+	 decimal_digits="2"
+	 follows="top|left"
+	 height="10"
+	 increment="0.01"
+	 initial_value="2.0"
+	 layout="topleft"
+	 left_pad="5"
+	 max_val="10"
+	 name="windlight_scenegamma_slider"
+	 right="-5"
+	 text_width="27"
+	 top_delta="3" />
+
+	<text
+	 follows="top|left"
+	 height="15"
+	 layout="topleft"
+	 left="15"
+	 name="windlight_eastangle_text"
+	 text_readonly_color="LabelDisabledColor"
+	 top_pad="8"
+	 width="90">
+	    East Angle :
+	</text>
+	<slider
+	 decimal_digits="2"
+	 follows="top|left"
+	 height="10"
+	 increment="0.01"
+	 initial_value="0.0"
+	 layout="topleft"
+	 left_pad="5"
+	 name="windlight_eastangle_slider"
+	 right="-5"
+	 text_width="27"
+	 top_delta="3" />
+
 	<text
 	 follows="top|left"
 	 height="15"
@@ -346,5 +440,14 @@
 	 name="windlight_prefs_interpolate"
 	 top_pad="4"
 	 width="130" />
-	 
+	<button
+	 follows="top|right"
+	 height="21"
+	 label="Reset WindLight"
+	 layout="topleft"
+	 left="30"
+	 name="windlight_reset_btn"
+	 top_pad="2"
+	 width="110" />
+
 </panel>

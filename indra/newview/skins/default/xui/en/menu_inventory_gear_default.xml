@@ -18,6 +18,17 @@
     <menu_item_separator
      layout="topleft" />
     <menu_item_check
+     label="Auto-scroll when taking objects"
+     layout="topleft"
+     name="show_derezzed_objects">
+        <on_click
+         function="Inventory.GearDefault.Custom.Action"
+         parameter="show_derezzed_objects" />
+        <on_check
+         function="Inventory.GearDefault.Check"
+         parameter="show_derezzed_objects" />
+    </menu_item_check>
+    <menu_item_check
      label="Separate Text Filters"
      layout="topleft"
      name="filter_string_per_tab">

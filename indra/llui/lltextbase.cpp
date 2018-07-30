@@ -2096,6 +2096,7 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.GroupChat", boost::bind(&LLUrlAction::startGroupChat, url));
 	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
 	registrar.add("Url.RequestTeleport", boost::bind(&LLUrlAction::requestTeleport, url));
+	registrar.add("Url.ShowItem", boost::bind(&LLUrlAction::showItem, url));
 // [/SL:KB]
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
@@ -2125,6 +2126,21 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
     if (menu)
     {
         mPopupMenuHandle = menu->getHandle();
+
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+		if (mCanPreviewItemSignal)
+		{
+			const LLUUID& idItem = LLUUID(LLUrlAction::getInventoryID(url));
+			if (idItem.notNull())
+			{
+				bool canPreview = *(*mCanPreviewItemSignal)(idItem);
+				if (!canPreview)
+				{
+					menu->getChild<LLView>("preview_item")->setEnabled(canPreview);
+				}
+			}
+		}
+// [/SL:KB]
 
         if (mIsFriendSignal)
         {
@@ -3374,6 +3390,17 @@ boost::signals2::connection LLTextBase::setURLClickedCallback(const commit_signa
 	}
 	return mURLClickSignal->connect(cb);
 }
+
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+boost::signals2::connection LLTextBase::setCanPreviewItemCallback(const can_preview_signal_t::slot_type& cb)
+{
+	if (!mCanPreviewItemSignal)
+	{
+		mCanPreviewItemSignal = new can_preview_signal_t();
+	}
+	return mCanPreviewItemSignal->connect(cb);
+}
+// [/SL:KB]
 
 boost::signals2::connection LLTextBase::setIsFriendCallback(const is_friend_signal_t::slot_type& cb)
 {

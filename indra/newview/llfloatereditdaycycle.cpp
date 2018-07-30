@@ -310,6 +310,21 @@ void LLFloaterEditDayCycle::refreshDayCyclesList()
 	mDayCyclesCombo->setLabel(getString("combo_label"));
 }
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-5.4
+void LLFloaterEditDayCycle::selectDayCycle(const std::string& strDayCycle)
+{
+	if (!isNewDay())
+	{
+		if (/*const*/ LLScrollListItem* pItem = mDayCyclesCombo->getListControl()->getItemByLabel(strDayCycle))
+		{
+			S32 idxItem = mDayCyclesCombo->getListControl()->getItemIndex(pItem);
+			mDayCyclesCombo->selectNthItem(idxItem);
+			mDayCyclesCombo->onCommit();
+		}
+	}
+}
+// [/SL:KB]
+
 void LLFloaterEditDayCycle::onTimeSliderMoved()
 {
 	/// get the slider value

@@ -46,6 +46,10 @@ const S32 COMPUTE_STOCK_NOT_EVALUATED = -2;
  **                    MISCELLANEOUS GLOBAL FUNCTIONS
  **/
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+bool can_preview_item(const LLUUID& idItem);
+// [/SL:KB]
+
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 // Implemented in lltexturectrl.cpp
 const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only, BOOL ignore_library);

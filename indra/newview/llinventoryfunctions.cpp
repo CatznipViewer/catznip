@@ -106,6 +106,17 @@ BOOL LLInventoryState::sWearNewClothing = FALSE;
 LLUUID LLInventoryState::sWearNewClothingTransactionID;
 std::list<LLUUID> LLInventoryAction::sMarketplaceFolders;
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+bool can_preview_item(const LLUUID& idItem)
+{
+	if (LLViewerInventoryItem* pItem = gInventory.getItem(idItem))
+	{
+		return check_asset_previewable(pItem->getType());
+	}
+	return false;
+}
+// [/SL:KB]
+
 // Helper function : callback to update a folder after inventory action happened in the background
 void update_folder_cb(const LLUUID& dest_folder)
 {

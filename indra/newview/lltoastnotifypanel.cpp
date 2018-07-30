@@ -42,6 +42,9 @@
 #include "lluiconstants.h"
 #include "llrect.h"
 #include "lltrans.h"
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+#include "llinventoryfunctions.h"
+// [/SL/KB]
 #include "llnotificationsutil.h"
 #include "llviewermessage.h"
 #include "llfloaterimsession.h"
@@ -358,6 +361,9 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
     mTextBox->setPlainText(!show_images);
     mTextBox->setContentTrusted(is_content_trusted);
     mTextBox->setValue(mNotification->getMessage());
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	mTextBox->setCanPreviewItemCallback(boost::bind(&can_preview_item, _1));
+// [/SL/KB]
 	mTextBox->setIsFriendCallback(LLAvatarActions::isFriend);
     mTextBox->setIsObjectBlockedCallback(boost::bind(&LLMuteList::isMuted, LLMuteList::getInstance(), _1, _2, 0));
 
@@ -381,6 +387,16 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
             LLSD form_element = form->getElement(i);
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
+			if (form_element.has("visible_payload"))
+			{
+				const std::string& strVisibleKey = form_element["visible_payload"].asStringRef();
+				const LLSD& sdPayload = mNotification->getPayload();
+				if ( (sdPayload.has(strVisibleKey)) && (sdPayload[strVisibleKey].isBoolean()) && (!sdPayload[strVisibleKey].asBoolean()) )
+				{
+					continue;
+				}
+			}
+
 			if (form_element["type"].asString() == "panel")
 			{
 				// Create panel

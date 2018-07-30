@@ -699,7 +699,7 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 //	else
 //	{
 //		return std::string::npos;
-//	}
+//	}$
 //}
 
 bool LLInventoryFilter::isDefault() const

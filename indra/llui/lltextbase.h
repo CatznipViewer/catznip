@@ -291,6 +291,9 @@ public:
 	friend class LLNormalTextSegment;
 	friend class LLUICtrlFactory;
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	typedef boost::signals2::signal<bool (const LLUUID& item_id)> can_preview_signal_t;
+// [/SL:KB]
 	typedef boost::signals2::signal<bool (const LLUUID& user_id)> is_friend_signal_t;
 	typedef boost::signals2::signal<bool (const LLUUID& blocked_id, const std::string from)> is_blocked_signal_t;
 
@@ -503,6 +506,9 @@ public:
 	virtual void			appendImageSegment(const LLStyle::Params& style_params);
 	virtual void			appendWidget(const LLInlineViewSegment::Params& params, const std::string& text, bool allow_undo);
 	boost::signals2::connection setURLClickedCallback(const commit_signal_t::slot_type& cb);
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	boost::signals2::connection setCanPreviewItemCallback(const can_preview_signal_t::slot_type& cb);
+// [/SL:KB]
 	boost::signals2::connection setIsFriendCallback(const is_friend_signal_t::slot_type& cb);
 	boost::signals2::connection setIsObjectBlockedCallback(const is_blocked_signal_t::slot_type& cb);
 
@@ -775,6 +781,9 @@ protected:
 	commit_signal_t*			mURLClickSignal;
 
 	// Used to check if user with given ID is avatar's friend
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+	can_preview_signal_t*       mCanPreviewItemSignal = nullptr;
+// [/SL:KB]
 	is_friend_signal_t*         mIsFriendSignal;
 	is_blocked_signal_t*        mIsObjectBlockedSignal;
 
