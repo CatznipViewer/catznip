@@ -1085,7 +1085,10 @@ protected:
 			else ++it;
 		}
 
-		open_inventory_offer(added, "");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+		open_inventory_offer(added, "task_handler");
+// [/SL:KB]
+//		open_inventory_offer(added, "");
 	}
  };
 
@@ -1309,11 +1312,17 @@ bool check_asset_previewable(const LLAssetType::EType asset_type)
 			(asset_type == LLAssetType::AT_LANDMARK)  ||
 			(asset_type == LLAssetType::AT_TEXTURE)   ||
 			(asset_type == LLAssetType::AT_ANIMATION) ||
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+			(asset_type == LLAssetType::AT_LSL_TEXT)  ||
+// [/SL:KB]
 			(asset_type == LLAssetType::AT_SCRIPT)    ||
 			(asset_type == LLAssetType::AT_SOUND);
 }
 
-void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name)
+//void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_name, bool force_open)
+// [/SL:KB]
 {
 	for (uuid_vec_t::const_iterator obj_iter = objects.begin();
 		 obj_iter != objects.end();
@@ -1344,7 +1353,7 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 //		if (item && check_asset_previewable(asset_type))
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
 		bool can_preview = item && check_asset_previewable(asset_type);
-		if ( (can_preview) && (gSavedSettings.getBOOL("ShowNewInventory")) )
+		if ( (can_preview) && ((force_open) || (gSavedSettings.getBOOL("ShowNewInventory"))) )
 // [/SL:KB]
 		{
 			////////////////////////////////////////////////////////////////////////////////
@@ -1423,8 +1432,19 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 						LLFloaterReg::showInstance("preview_anim", LLSD(obj_id), take_focus);
 						break;
 					case LLAssetType::AT_SCRIPT:
-						LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+					case LLAssetType::AT_LSL_TEXT:
+						{
+							LLViewerInventoryItem* pItem = gInventory.getItem(obj_id);
+							if ( (pItem) && (pItem->getPermissionMask() & PERM_MODIFY) )
+								LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+							else
+								can_preview = false;
+						}
 						break;
+// [/SL:KB]
+//						LLFloaterReg::showInstance("preview_script", LLSD(obj_id), take_focus);
+//						break;
 					case LLAssetType::AT_SOUND:
 						LLFloaterReg::showInstance("preview_sound", LLSD(obj_id), take_focus);
 						break;
@@ -1440,7 +1460,7 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		const BOOL auto_open = 
 //			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
-			!can_preview && gSavedSettings.getBOOL("ShowOfferedInventory") &&
+			!can_preview && (force_open || gSavedSettings.getBOOL("ShowOfferedInventory")) &&
 // [/SL:KB]
 			!from_name.empty(); // don't open if it's not from anyone.
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.6
