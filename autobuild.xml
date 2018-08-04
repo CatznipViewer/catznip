@@ -2692,9 +2692,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>98bd3d9c23282621ae07a662b6b8499d</string>
+              <string>0f70815a710dc1cea9b5f7bc76abba71</string>
               <key>url</key>
-              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.60-windows.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.61-windows.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -2704,9 +2704,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>6c4bce749689018ac8f92a7a9fe92f12</string>
+              <string>ffb991590aaada15c3f268323ab2e508</string>
               <key>url</key>
-              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.60-windows64.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.61-windows64.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
