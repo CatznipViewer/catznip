@@ -1255,7 +1255,10 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		{
 			////////////////////////////////////////////////////////////////////////////////
 			// Special handling for various types.
-			if (check_offer_throttle(from_name, false)) // If we are throttled, don't display
+//			if (check_offer_throttle(from_name, false)) // If we are throttled, don't display
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+			if ( (force_open) || (check_offer_throttle(from_name, false)) ) // If we are throttled, don't display
+// [/SL:KB]
 			{
 				LL_DEBUGS("Messaging") << "Highlighting inventory item: " << item->getUUID()  << LL_ENDL;
 				// If we opened this ourselves, focus it
