@@ -1262,7 +1262,10 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 			{
 				LL_DEBUGS("Messaging") << "Highlighting inventory item: " << item->getUUID()  << LL_ENDL;
 				// If we opened this ourselves, focus it
-				const BOOL take_focus = from_name.empty() ? TAKE_FOCUS_YES : TAKE_FOCUS_NO;
+//				const BOOL take_focus = from_name.empty() ? TAKE_FOCUS_YES : TAKE_FOCUS_NO;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+				const BOOL take_focus = (force_open || from_name.empty()) ? TAKE_FOCUS_YES : TAKE_FOCUS_NO;
+// [/SL:KB]
 				switch(asset_type)
 				{
 					case LLAssetType::AT_NOTECARD:
