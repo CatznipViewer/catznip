@@ -315,6 +315,7 @@ public:
 #ifdef CATZNIP
 			show_item(inventory_id, EShowItemOptions::TAKE_FOCUS_YES);
 #endif // CATZNIP
+			return true;
 		}
 // [:SL:KB]
 		
