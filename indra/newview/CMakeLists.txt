@@ -206,6 +206,7 @@ set(viewer_SOURCE_FILES
     llfloaterabout.cpp
     llfloaterassetrecovery.cpp
     llfloaterbvhpreview.cpp
+    llfloaterauction.cpp
     llfloaterautoreplacesettings.cpp
     llfloateravatar.cpp
     llfloateravatarpicker.cpp
@@ -875,6 +876,7 @@ set(viewer_HEADER_FILES
     llfloaterabout.h
     llfloaterassetrecovery.h
     llfloaterbvhpreview.h
+    llfloaterauction.h
     llfloaterautoreplacesettings.h
     llfloateravatar.h
     llfloateravatarpicker.h
@@ -2164,7 +2166,12 @@ if (DARWIN)
   # These all get set with PROPERTIES
   set(product "Catznip")
   # this is the setting for the Python wrapper, see SL-322 and WRAPPER line in Info-SecondLife.plist
-  set(MACOSX_WRAPPER_EXECUTABLE_NAME "SL_Launcher")
+  if (PACKAGE)
+      set(MACOSX_WRAPPER_EXECUTABLE_NAME "SL_Launcher")
+  else (PACKAGE)
+      # force the name of the actual executable to allow running it within Xcode for debugging
+      set(MACOSX_WRAPPER_EXECUTABLE_NAME "../Resources/Second Life Viewer.app/Contents/MacOS/Second Life")
+  endif (PACKAGE)
   set(MACOSX_BUNDLE_INFO_STRING "Catznip Viewer")
   set(MACOSX_BUNDLE_ICON_FILE "catznip.icns")
   set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.catznip.indra.viewer")

@@ -4268,19 +4268,22 @@ class LLSelfSitDown : public view_listener_t
         }
     };
 
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
-bool visible_sitdown_self()
+
+
+bool show_sitdown_self()
 {
-    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
-}
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
 // [/SL:KB]
+//	return isAgentAvatarValid() && !gAgentAvatarp->isSitting();
+}
 
 bool enable_sitdown_self()
 {
 // [RLVa:KB] - Checked: 2010-08-28 (RLVa-1.2.1a) | Added: RLVa-1.2.1a
-	return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
+	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
 // [/RLVa:KB]
-//    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
+//	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
 }
 
 class LLCheckPanelPeopleTab : public view_listener_t
@@ -10360,10 +10363,8 @@ void initialize_menus()
 // [/SL:KB]
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
-	enable.add("Self.VisibleSitDown", boost::bind(&visible_sitdown_self));
-// [/SL:KB]
-	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self));
+	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self)); 
+	enable.add("Self.ShowSitDown", boost::bind(&show_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");
 
 	view_listener_t::addMenu(new LLSelfEnableRemoveAllAttachments(), "Self.EnableRemoveAllAttachments");

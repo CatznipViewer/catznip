@@ -157,10 +157,11 @@ public:
 	static LLFloaterSnapshot* findInstance();
 	/*virtual*/ void saveTexture();
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	typedef boost::function<void(bool)> save_image_callback_t;
-	void saveLocal(bool prompt_path, const save_image_callback_t& cb);
+	typedef boost::function<void()> save_image_callback_t;
+	void saveLocal(bool prompt_path, const save_image_callback_t& success_cb, const save_image_callback_t& failure_cb);
 // [/SL:KB]
-//	BOOL saveLocal();
+//	typedef boost::signals2::signal<void(void)> snapshot_saved_signal_t;
+//	void saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb);
 	static void setAgentEmail(const std::string& email);
 
 	BOOL isWaitingState();

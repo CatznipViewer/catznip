@@ -129,12 +129,13 @@ protected:
 	BOOL getOpenFile(ELoadFilter filter, bool blocking);
 	BOOL getMultipleOpenFiles(ELoadFilter filter, bool blocking);
 public:
+	typedef boost::function<void()> picker_fail_callback_t;
 	typedef boost::function<void(const std::string&)> picker_single_callback_t;
 	typedef boost::function<void(const std::vector<std::string>&)> picker_multi_callback_t;
 
-	static void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
-	static void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
-	static void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
+	static void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& success_cb = picker_single_callback_t(), const picker_fail_callback_t& failure_cb = picker_fail_callback_t());
+	static void getOpenFile(ELoadFilter filter, const picker_single_callback_t& success_cb = picker_single_callback_t(), const picker_fail_callback_t& failure_cb = picker_fail_callback_t());
+	static void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb = picker_multi_callback_t(), const picker_fail_callback_t& failure_cb = picker_fail_callback_t());
 
 	static const std::string& getExtension(ESaveFilter filter);
 	static bool               hasExtension(ESaveFilter filter);

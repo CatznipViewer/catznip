@@ -223,6 +223,7 @@ public:
 	void skipBack(F32 step_scale);
 	void skipForward(F32 step_scale);
 	void setVolume(F32 volume);
+	void setMute(bool mute);
 	void updateVolume();
 	F32 getVolume();
 	void focus(bool focus);
@@ -459,6 +460,7 @@ private:
 	bool mNavigateServerRequest;
 	bool mMediaSourceFailed;
 	F32 mRequestedVolume;
+	F32 mPreviousVolume;
 	bool mIsMuted;
 	bool mNeedsMuteCheck;
 	int mPreviousMediaState;

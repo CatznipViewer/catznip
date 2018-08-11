@@ -82,21 +82,24 @@ std::map<LLFilePicker::ESaveFilter, std::string> LLFilePicker::sSaveFilterExtens
 class LLFilePickerCallbackThread : public LLFilePickerThread
 {
 public:
-	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_single_callback_t& cb)
+	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_single_callback_t& success_cb, const LLFilePicker::picker_fail_callback_t& failure_cb)
 		: LLFilePickerThread(filter, false)
-		, mSingleCb(cb)
+		, mSingleCb(success_cb)
+		, mFailureCb(failure_cb)
 	{
 	}
 
-	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_multi_callback_t& cb)
+	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_multi_callback_t& success_cb, const LLFilePicker::picker_fail_callback_t& failure_cb)
 		: LLFilePickerThread(filter, true)
-		, mMultiCb(cb)
+		, mMultiCb(success_cb)
+		, mFailureCb(failure_cb)
 	{
 	}
 
-	LLFilePickerCallbackThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file, const LLFilePicker::picker_single_callback_t& cb)
+	LLFilePickerCallbackThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file, const LLFilePicker::picker_single_callback_t& success_cb, const LLFilePicker::picker_fail_callback_t& failure_cb)
 		: LLFilePickerThread(filter, initial_file)
-		, mSingleCb(cb)
+		, mSingleCb(success_cb)
+		, mFailureCb(failure_cb)
 	{
 	}
 
@@ -108,7 +111,7 @@ public:
 			{
 				case OPEN_SINGLE:
 				case SAVE_SINGLE:
-					mSingleCb( (!files.empty()) ? files.front() : LLStringUtil::null);
+					mSingleCb(files.front());
 					break;
 				case OPEN_MULTIPLE:
 					mMultiCb(files);
@@ -117,11 +120,16 @@ public:
 					break;
 			}
 		}
+		else
+		{
+			mFailureCb();
+		}
 	}
 
 protected:
 	LLFilePicker::picker_single_callback_t mSingleCb;
 	LLFilePicker::picker_multi_callback_t mMultiCb;
+	LLFilePicker::picker_fail_callback_t mFailureCb;
 };
 // [/SL:KB]
 
@@ -254,21 +262,21 @@ void LLFilePicker::reset()
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 // static
-void LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb)
+void LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& success_cb, const picker_fail_callback_t& failure_cb)
 {
-	(new LLFilePickerCallbackThread(filter, filename, cb))->getFile();
+	(new LLFilePickerCallbackThread(filter, filename, success_cb, failure_cb))->getFile();
 }
 
 // static
-void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb)
+void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_single_callback_t& success_cb, const picker_fail_callback_t& failure_cb)
 {
-	(new LLFilePickerCallbackThread(filter, cb))->getFile();
+	(new LLFilePickerCallbackThread(filter, success_cb, failure_cb))->getFile();
 }
 
 // static
-void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb)
+void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& success_cb, const picker_fail_callback_t& failure_cb)
 {
-	(new LLFilePickerCallbackThread(filter, cb))->getFile();
+	(new LLFilePickerCallbackThread(filter, success_cb, failure_cb))->getFile();
 }
 // [/SL:KB]
 
