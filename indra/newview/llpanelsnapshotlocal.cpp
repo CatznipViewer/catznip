@@ -65,9 +65,13 @@ private:
 	void onFormatComboCommit(LLUICtrl* ctrl);
 	void onQualitySliderCommit(LLUICtrl* ctrl);
 	void onSaveFlyoutCommit(LLUICtrl* ctrl);
+
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	void onSaveCallback(bool success);
+	void onSaveCallback();
+	void onSaveCanceled();
 // [/SL:KB]
+//	void onLocalSaved();
+//	void onLocalCanceled();
 };
 
 static LLPanelInjector<LLPanelSnapshotLocal> panel_class("llpanelsnapshotlocal");
@@ -167,31 +171,30 @@ void LLPanelSnapshotLocal::onSaveFlyoutCommit(LLUICtrl* ctrl)
 	LLFloaterSnapshot* floater = LLFloaterSnapshot::getInstance();
 
 	floater->notify(LLSD().with("set-working", true));
-//	BOOL saved = floater->saveLocal();
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
-	floater->saveLocal("save as" == ctrl->getValue().asString(), boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this, _1));
+	floater->saveLocal("save as" == ctrl->getValue().asString(), boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this), boost::bind(&LLPanelSnapshotLocal::onSaveCanceled, this));
+// [/SL:KB]
+//	floater->saveLocal((boost::bind(&LLPanelSnapshotLocal::onLocalSaved, this)), (boost::bind(&LLPanelSnapshotLocal::onLocalCanceled, this)));
 }
 
-void LLPanelSnapshotLocal::onSaveCallback(bool saved)
+//void LLPanelSnapshotLocal::onLocalSaved()
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+void LLPanelSnapshotLocal::onSaveCallback()
+// [/SL:KB]
 {
-// [/SL:KB]
-	if (saved)
-	{
-		mSnapshotFloater->postSave();
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-		LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
-// [/SL:KB]
-//		floater->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
-	}
-	else
-	{
-		cancel();
-// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-		LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "local")));
-// [/SL:KB]
-//		floater->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "local")));
-	}
+	mSnapshotFloater->postSave();
+	LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
 }
+
+//void LLPanelSnapshotLocal::onLocalCanceled()
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+void LLPanelSnapshotLocal::onSaveCanceled()
+// [/SL:KB]
+{
+	cancel();
+	LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "local")));
+}
+
 
 LLSnapshotModel::ESnapshotType LLPanelSnapshotLocal::getSnapshotType()
 {

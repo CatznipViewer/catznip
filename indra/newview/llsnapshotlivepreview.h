@@ -40,8 +40,9 @@ class LLSnapshotLivePreview : public LLView
 {
 	LOG_CLASS(LLSnapshotLivePreview);
 public:
+//	typedef boost::signals2::signal<void(void)> snapshot_saved_signal_t;
 
-	static BOOL saveLocal(LLPointer<LLImageFormatted>);
+//	static void saveLocal(LLPointer<LLImageFormatted> image, const snapshot_saved_signal_t::slot_type& success_cb = snapshot_saved_signal_t(), const snapshot_saved_signal_t::slot_type& failure_cb = snapshot_saved_signal_t());
 	struct Params : public LLInitParam::Block<Params, LLView::Params>
 	{
 		Params()
@@ -102,9 +103,9 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
     void saveTexture(BOOL outfit_snapshot = FALSE, std::string name = "");
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
-	void saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb);
+	void saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& success_cb, const LLViewerWindow::save_image_callback_t& failure_cb);
 // [/SL:KB]
-//	BOOL saveLocal();
+//	void saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb);
 
 	LLPointer<LLImageFormatted>	getFormattedImage();
 	LLPointer<LLImageRaw>		getEncodedImage();
@@ -173,7 +174,9 @@ private:
 	LLQuaternion				mCameraRot;
 	BOOL						mSnapshotActive;
 	LLSnapshotModel::ESnapshotLayerType mSnapshotBufferType;
-    std::string                 mFilterName;
+	std::string					mFilterName;
+
+//	static LLPointer<LLImageFormatted> sSaveLocalImage;
 
 public:
 	static std::set<LLSnapshotLivePreview*> sList;

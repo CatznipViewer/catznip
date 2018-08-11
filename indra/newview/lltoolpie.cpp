@@ -325,6 +325,8 @@ BOOL LLToolPie::handleLeftClickPick()
 				}
 			}
 			return TRUE;			
+		case CLICK_ACTION_DISABLED:
+			return TRUE;
 		default:
 			// nothing
 			break;
@@ -488,6 +490,8 @@ ECursorType LLToolPie::cursorFromObject(LLViewerObject* object)
 	case CLICK_ACTION_OPEN_MEDIA: 
 		cursor = cursor_from_parcel_media(click_action);
 		break;
+	case CLICK_ACTION_DISABLED: 
+		break;
 	default:
 		break;
 	}
@@ -552,6 +556,8 @@ void LLToolPie::selectionPropertiesReceived()
 				break;
 			case CLICK_ACTION_OPEN:
 				LLFloaterReg::showInstance("openobject");
+				break;
+			case CLICK_ACTION_DISABLED:
 				break;
 			default:
 				break;

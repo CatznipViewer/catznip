@@ -351,18 +351,27 @@ public:
 		BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, LLSnapshotModel::ESnapshotLayerType type = LLSnapshotModel::SNAPSHOT_TYPE_COLOR, S32 max_size = MAX_SNAPSHOT_IMAGE_SIZE);
 	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type);
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	typedef boost::function<void(bool)> save_image_callback_t;
-	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker = false);
+	typedef boost::function<void()> save_image_callback_t;
+	void			saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& success_cb, const save_image_callback_t& failure_cb, bool force_picker = false);
 // [/SL:KB]
 //	BOOL			isSnapshotLocSet() const;
 //	void			resetSnapshotLoc() const;
-//	BOOL			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory);
+
+//	typedef boost::signals2::signal<void(void)> snapshot_saved_signal_t;
+//
+//	void			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb);
+//	void			onDirectorySelected(const std::vector<std::string>& filenames, LLImageFormatted *image, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb);
+//	void			saveImageLocal(LLImageFormatted *image, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb);
+//	void			onSelectionFailure(const snapshot_saved_signal_t::slot_type& failure_cb);
 
 //	// Reset the directory where snapshots are saved.
 //	// Client will open directory picker on next snapshot save.
 //	void resetSnapshotLoc();
 
-	void			playSnapshotAnimAndSound();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
+	static void     playSnapshotAnimAndSound();
+// [/SL:KB]
+//	void			playSnapshotAnimAndSound();
 	
 	// draws selection boxes around selected objects, must call displayObjects first
 	void			renderSelections( BOOL for_gl_pick, BOOL pick_parcel_walls, BOOL for_hud );
@@ -429,8 +438,8 @@ private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	void		    saveImageCallback(LLPointer<LLImageFormatted> image, const std::string& filename, bool force_picker, const save_image_callback_t& cb);
-	static void		saveImageNumbered(LLImageFormatted* image, const std::string& path, std::string base_name, const save_image_callback_t& cb);
+	void		    saveImageCallback(LLPointer<LLImageFormatted> image, const std::string& filename, bool force_picker, const save_image_callback_t& success_cb, const save_image_callback_t& failure_cb);
+	static void		saveImageNumbered(LLImageFormatted* image, const std::string& path, std::string base_name, const save_image_callback_t& success_cb, const save_image_callback_t& failure_cb);
 // [/SL:KB]
 
 	void			switchToolByMask(MASK mask);

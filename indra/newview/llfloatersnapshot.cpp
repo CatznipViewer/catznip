@@ -1309,33 +1309,22 @@ void LLFloaterSnapshot::saveTexture()
 	previewp->saveTexture();
 }
 
+//void LLFloaterSnapshot::saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
-void LLFloaterSnapshot::saveLocal(bool prompt_path, const save_image_callback_t& cb)
+void LLFloaterSnapshot::saveLocal(bool prompt_path, const save_image_callback_t& success_cb, const save_image_callback_t& failure_cb)
+// [/SL:KB]
 {
 	LL_DEBUGS() << "saveLocal" << LL_ENDL;
 	LLSnapshotLivePreview* previewp = getPreviewView();
-	if (!previewp)
+	llassert(previewp != NULL);
+	if (previewp)
 	{
-		llassert(previewp != NULL);
-		cb(false);
-		return;
-	}
-
-	previewp->saveLocal(prompt_path, cb);
-}
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
+		previewp->saveLocal(prompt_path, success_cb, failure_cb);
 // [/SL:KB]
-//BOOL LLFloaterSnapshot::saveLocal()
-//{
-//	LL_DEBUGS() << "saveLocal" << LL_ENDL;
-//	LLSnapshotLivePreview* previewp = getPreviewView();
-//	if (!previewp)
-//	{
-//		llassert(previewp != NULL);
-//		return FALSE;
-//	}
-//
-//	return previewp->saveLocal();
-//}
+//		previewp->saveLocal(success_cb, failure_cb);
+	}
+}
 
 void LLFloaterSnapshotBase::postSave()
 {
