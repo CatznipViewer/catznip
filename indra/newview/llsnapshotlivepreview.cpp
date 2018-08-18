@@ -611,7 +611,10 @@ void LLSnapshotLivePreview::generateThumbnailImage(BOOL force_update)
             }
         }
         // Scale to a power of 2 so it can be mapped to a texture
-        raw->expandToPowerOfTwo();
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+		raw->expandToPowerOfTwo(MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
+// [/SL:KB]
+//        raw->expandToPowerOfTwo();
 		mThumbnailImage = LLViewerTextureManager::getLocalTexture(raw.get(), FALSE);
 		mThumbnailUpToDate = TRUE ;
 	}
@@ -659,7 +662,10 @@ LLViewerTexture* LLSnapshotLivePreview::getBigThumbnailImage()
             }
         }
         // Scale to a power of 2 so it can be mapped to a texture
-        raw->expandToPowerOfTwo();
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+		raw->expandToPowerOfTwo(MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
+// [/SL:KB]
+//        raw->expandToPowerOfTwo();
 		mBigThumbnailImage = LLViewerTextureManager::getLocalTexture(raw.get(), FALSE);
 		mBigThumbnailUpToDate = TRUE ;
 	}
@@ -806,7 +812,10 @@ void LLSnapshotLivePreview::prepareFreezeFrame()
         if (mPreviewImageEncoded->getWidth() > 1024 || mPreviewImageEncoded->getHeight() > 1024)
         {
             // go ahead and shrink image to appropriate power of 2 for display
-            scaled->biasedScaleToPowerOfTwo(1024);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+            scaled->biasedScaleToPowerOfTwo(1024, 1024);
+// [/SL:KB]
+//            scaled->biasedScaleToPowerOfTwo(1024);
             setImageScaled(TRUE);
         }
         else
@@ -871,7 +880,10 @@ LLPointer<LLImageRaw> LLSnapshotLivePreview::getEncodedImage()
                                                           mPreviewImage->getHeight(),
                                                           mPreviewImage->getComponents());
             // Scale it as required by J2C
-			scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+			scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE);
+// [/SL:KB]
+//			scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE);
 			setImageScaled(TRUE);
             // Compress to J2C
 			if (formatted->encode(scaled, 0.f))
@@ -1027,7 +1039,10 @@ void LLSnapshotLivePreview::saveTexture(BOOL outfit_snapshot, std::string name)
 		}
 	}
 
-	scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE);
+// [/SL:KB]
+//	scaled->biasedScaleToPowerOfTwo(MAX_TEXTURE_SIZE);
 	LL_DEBUGS() << "scaled texture to " << scaled->getWidth() << "x" << scaled->getHeight() << LL_ENDL;
 
 	if (formatted->encode(scaled, 0.0f))

@@ -1497,11 +1497,21 @@ BOOL LLViewerFetchedTexture::createTexture(S32 usename/*= 0*/)
 			
 		if (mBoostLevel == BOOST_PREVIEW)
 		{ 
-			mRawImage->biasedScaleToPowerOfTwo(1024);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+			S32 maxWidth = ( (FTT_FETCHED_FILE == mFTType) && (mKnownDrawWidth) ) ? mKnownDrawWidth : 1024;
+			S32 maxHeight = ( (FTT_FETCHED_FILE == mFTType) && (mKnownDrawHeight) ) ? mKnownDrawHeight : 1024;
+			mRawImage->biasedScaleToPowerOfTwo(maxWidth, maxHeight);
+// [/SL:KB]
+//			mRawImage->biasedScaleToPowerOfTwo(1024);
 		}
 		else
 		{ // leave black border, do not scale image content
-			mRawImage->expandToPowerOfTwo(MAX_IMAGE_SIZE, FALSE);
+// [SL:KB] - Patch: Inspect-ImageLinkPreview | Checked: Catznip-5.4
+			S32 maxWidth = ( (FTT_FETCHED_FILE == mFTType) && (mKnownDrawWidth) ) ? mKnownDrawWidth : MAX_IMAGE_SIZE;
+			S32 maxHeight = ( (FTT_FETCHED_FILE == mFTType) && (mKnownDrawHeight) ) ? mKnownDrawHeight : MAX_IMAGE_SIZE;
+			mRawImage->expandToPowerOfTwo(maxWidth, maxHeight, FALSE);
+// [/SL:KB]
+//			mRawImage->expandToPowerOfTwo(MAX_IMAGE_SIZE, FALSE);
 		}
 		
 		mFullWidth = mRawImage->getWidth();

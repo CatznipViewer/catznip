@@ -976,14 +976,24 @@ void LLImageRaw::verticalFlip()
 }
 
 
-void LLImageRaw::expandToPowerOfTwo(S32 max_dim, bool scale_image)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+void LLImageRaw::expandToPowerOfTwo(S32 max_width, S32 max_height, bool scale_image)
 {
 	// Find new sizes
-	S32 new_width  = expandDimToPowerOfTwo(getWidth(), max_dim);
-	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_dim);
+	S32 new_width = expandDimToPowerOfTwo(getWidth(), max_width);
+	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_height);
 
-	scale( new_width, new_height, scale_image );
+	scale(new_width, new_height, scale_image);
 }
+// [/SL:KB]
+//void LLImageRaw::expandToPowerOfTwo(S32 max_dim, bool scale_image)
+//{
+//	// Find new sizes
+//	S32 new_width  = expandDimToPowerOfTwo(getWidth(), max_dim);
+//	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_dim);
+//
+//	scale( new_width, new_height, scale_image );
+//}
 
 void LLImageRaw::contractToPowerOfTwo(S32 max_dim, bool scale_image)
 {
@@ -1034,14 +1044,24 @@ S32 LLImageRaw::contractDimToPowerOfTwo(S32 curr_dim, S32 min_dim)
     return new_dim;
 }
 
-void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_dim)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_width, S32 max_height)
 {
 	// Find new sizes
-	S32 new_width  = biasedDimToPowerOfTwo(getWidth(),max_dim);
-	S32 new_height = biasedDimToPowerOfTwo(getHeight(),max_dim);
+	S32 new_width = biasedDimToPowerOfTwo(getWidth(), max_width);
+	S32 new_height = biasedDimToPowerOfTwo(getHeight(), max_height);
 
-	scale( new_width, new_height );
+	scale( new_width, new_height);
 }
+// [/SL:KB]
+//void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_dim)
+//{
+//	// Find new sizes
+//	S32 new_width  = biasedDimToPowerOfTwo(getWidth(),max_dim);
+//	S32 new_height = biasedDimToPowerOfTwo(getHeight(),max_dim);
+//
+//	scale( new_width, new_height );
+//}
 
 // Calculates (U8)(255*(a/255.f)*(b/255.f) + 0.5f).  Thanks, Jim Blinn!
 inline U8 LLImageRaw::fastFractionalMult( U8 a, U8 b )

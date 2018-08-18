@@ -1311,7 +1311,10 @@ BOOL LLViewerTextureList::createUploadFile(const std::string& filename,
 // note: modifies the argument raw_image!!!!
 LLPointer<LLImageJ2C> LLViewerTextureList::convertToUploadFile(LLPointer<LLImageRaw> raw_image)
 {
-	raw_image->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	raw_image->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//	raw_image->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
 	LLPointer<LLImageJ2C> compressedImage = new LLImageJ2C();
 	
 	if (gSavedSettings.getBOOL("LosslessJ2CUpload") &&

@@ -208,9 +208,13 @@ public:
     static S32 biasedDimToPowerOfTwo(S32 curr_dim, S32 max_dim = MAX_IMAGE_SIZE);
     static S32 expandDimToPowerOfTwo(S32 curr_dim, S32 max_dim = MAX_IMAGE_SIZE);
     static S32 contractDimToPowerOfTwo(S32 curr_dim, S32 min_dim = MIN_IMAGE_SIZE);
-	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	void expandToPowerOfTwo(S32 max_width, S32 max_height, bool scale_image = true);
+	void biasedScaleToPowerOfTwo(S32 max_width, S32 max_height);
+// [/SL:KB]
+//	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void contractToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
-	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
+//	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
 	bool scale(S32 new_width, S32 new_height, bool scale_image = true);
     LLPointer<LLImageRaw> scaled(S32 new_width, S32 new_height);
 	
