@@ -1824,6 +1824,47 @@ static std::string find_file(std::string &name, S8 *codec)
 	return std::string("");
 }
 #endif
+
+// [SL:KB] - Patch: Viewer-Textures | Checked: Catznip-5.4
+// static
+EImageCodec LLImageBase::getCodec(const std::string& strExtension, const U8* pData, unsigned int szData)
+{
+	EImageCodec eCodec = getCodecFromData(pData, szData);
+	if (IMG_CODEC_INVALID == eCodec)
+		return getCodecFromExtension(strExtension);
+	return eCodec;
+}
+
+// static
+EImageCodec LLImageBase::getCodecFromData(const U8* pData, unsigned int szData)
+{
+	if (szData >= 8)
+	{
+		switch ((char)pData[0])
+		{
+			// BMP
+			case 'B':
+				if (pData[1] == 'M')
+					return IMG_CODEC_BMP;
+				break;
+			// JPG
+			case '\x0ff':
+				if (!strncmp((const char*)pData, "\x0ff\x0d8", 2))
+					return IMG_CODEC_JPEG;
+				break;
+			// PNG
+			case '\x089':
+				if (!strncmp((const char*)pData, "\x89PNG\x00d\x00a\x01a\x00a", 8))
+					return  IMG_CODEC_PNG;
+				break;
+			default:
+				break;
+		}
+	}
+	return IMG_CODEC_INVALID;
+}
+// [/SL:KB]
+
 EImageCodec LLImageBase::getCodecFromExtension(const std::string& exten)
 {
 	if (!exten.empty())
