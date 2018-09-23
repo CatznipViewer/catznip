@@ -989,6 +989,32 @@ S32 LLTextEditor::overwriteChar(S32 pos, llwchar wc)
 	}
 }
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.5
+void LLTextEditor::removePreviousWord()
+{
+	if (!getEnabled())
+		return;
+
+	if (mCursorPos > 0)
+	{
+		S32 pos = prevWordPos(mCursorPos);
+		if (pos < mCursorPos)
+		{
+			remove(pos, mCursorPos - pos, false);
+			setCursorPos(pos);
+		}
+		else
+		{
+			removeCharOrTab();
+		}
+	}
+	else
+	{
+		LLUI::reportBadKeystroke();
+	}
+}
+// [/SL:KB]
+
 // Remove a single character from the text.  Tries to remove
 // a pseudo-tab (up to for spaces in a row)
 void LLTextEditor::removeCharOrTab()
@@ -1651,7 +1677,13 @@ BOOL LLTextEditor::handleSpecialKey(const KEY key, const MASK mask)
 		else
 		if( 0 < mCursorPos )
 		{
-			removeCharOrTab();
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.5
+			if (mask & MASK_CONTROL)
+				removePreviousWord();
+			else
+				removeCharOrTab();
+// [/SL:KB]
+//			removeCharOrTab();
 		}
 		else
 		{

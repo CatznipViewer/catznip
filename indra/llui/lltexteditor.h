@@ -219,6 +219,9 @@ protected:
 
 	void 			assignEmbedded(const std::string &s);
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-5.5
+	void			removePreviousWord();
+// [/SL:KB]
 	void			removeCharOrTab();
 
 	void			indentSelectedLines( S32 spaces );
