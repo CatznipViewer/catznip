@@ -116,6 +116,7 @@ public:
 	void onBrowseFolderCb(const LLSD& sdData);
 	void onFilterEdit(std::string strFilter);
 	void onFolderChanged();
+	void onShowInInventory();
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
 
@@ -123,6 +124,7 @@ public:
 	* Member variables
 	*/
 protected:
+	LLButton*            m_pShowInInventoryBtn = nullptr;
 	LLButton*            m_pFolderBrowseBtn = nullptr;
 	LLFilterEditor*      m_pFilterEditor = nullptr;
 	LLHandle<LLFloater>  m_BrowseFloaterHandle;

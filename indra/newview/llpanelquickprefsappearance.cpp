@@ -42,6 +42,7 @@
 // Wearing panel
 #include "llfiltereditor.h"
 #include "llfloatersidepanelcontainer.h"
+#include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
@@ -261,6 +262,9 @@ BOOL LLQuickPrefsInventoryPanel::postBuild()
 	m_pItemsList = findChild<LLCategoryItemsList>("items_list");
 	m_pItemsList->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFolderChanged, this));
 
+	m_pShowInInventoryBtn = findChild<LLButton>("open_inv_folder_btn");
+	m_pShowInInventoryBtn->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onShowInInventory, this));
+
 	m_pFolderBrowseBtn = findChild<LLButton>("inv_folder_btn");
 	m_pFolderBrowseBtn->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onBrowseFolder, this));
 
@@ -275,6 +279,7 @@ void LLQuickPrefsInventoryPanel::onVisibilityChange(BOOL fVisible)
 		if (!isInitialized())
 		{
 			m_pItemsList->setFolderId(LLUUID(gSavedSettings.getString("QuickPrefsInventoryFolder")));
+			m_pShowInInventoryBtn->setEnabled(m_pItemsList->getFolderId().notNull());
 			onFolderChanged();
 
 			setInitialized();
@@ -301,6 +306,7 @@ void LLQuickPrefsInventoryPanel::onBrowseFolder()
 void LLQuickPrefsInventoryPanel::onBrowseFolderCb(const LLSD& sdData)
 {
 	m_pItemsList->setFolderId(sdData["uuid"].asUUID());
+	m_pShowInInventoryBtn->setEnabled(m_pItemsList->getFolderId().notNull());
 }
 
 void LLQuickPrefsInventoryPanel::onFilterEdit(std::string strFilter)
@@ -328,6 +334,15 @@ void LLQuickPrefsInventoryPanel::onFolderChanged()
 		m_pFolderBrowseBtn->setLabel(getString("folder_select_label"));
 	}
 	gSavedSettings.setString("QuickPrefsInventoryFolder", idFolder.asString());
+}
+
+void LLQuickPrefsInventoryPanel::onShowInInventory()
+{
+	const LLUUID& idFolder = m_pItemsList->getFolderId();
+	if (idFolder.notNull())
+	{
+		show_item(idFolder, EShowItemOptions::TAKE_FOCUS_YES);
+	}
 }
 
 void LLQuickPrefsInventoryPanel::onSortOrderChanged(const LLSD& sdParam)
