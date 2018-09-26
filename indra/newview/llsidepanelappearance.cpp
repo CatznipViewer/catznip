@@ -125,7 +125,10 @@ BOOL LLSidepanelAppearance::postBuild()
 		LLButton* back_btn = mOutfitEdit->getChild<LLButton>("back_btn");
 		if (back_btn)
 		{
-			back_btn->setClickedCallback(boost::bind(&LLSidepanelAppearance::showOutfitsInventoryPanel, this));
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+			back_btn->setClickedCallback(boost::bind(&LLSidepanelAppearance::showOutfitsInventoryPanel, this, LLStringUtil::null));
+// [/SL:KB]
+//			back_btn->setClickedCallback(boost::bind(&LLSidepanelAppearance::showOutfitsInventoryPanel, this));
 		}
 
 	}
@@ -179,10 +182,16 @@ void LLSidepanelAppearance::onOpen(const LLSD& key)
 	{
 		// Switch to the requested panel.
 		std::string type = key["type"].asString();
-		if (type == "my_outfits")
+//		if (type == "my_outfits")
+//		{
+//			showOutfitsInventoryPanel();
+//		}
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+		if ( (type == "my_outfits") || (type == "current_outfit") )
 		{
-			showOutfitsInventoryPanel();
+			showOutfitsInventoryPanel(type);
 		}
+// [/SL:KB]
 		else if (type == "edit_outfit")
 		{
 			showOutfitEditPanel();
@@ -323,11 +332,17 @@ void LLSidepanelAppearance::onEditAppearanceButtonClicked()
 	}
 }
 
-void LLSidepanelAppearance::showOutfitsInventoryPanel()
+//void LLSidepanelAppearance::showOutfitsInventoryPanel()
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+void LLSidepanelAppearance::showOutfitsInventoryPanel(const std::string& tab_name)
+// [/SL:KB]
 {
 	toggleWearableEditPanel(FALSE);
 	toggleOutfitEditPanel(FALSE);
-	toggleMyOutfitsPanel(TRUE);
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+	toggleMyOutfitsPanel(TRUE, tab_name);
+// [/SL:KB]
+//	toggleMyOutfitsPanel(TRUE);
 }
 
 void LLSidepanelAppearance::showOutfitEditPanel()
@@ -364,11 +379,20 @@ void LLSidepanelAppearance::showWearableEditPanel(LLViewerWearable *wearable /* 
 	toggleWearableEditPanel(TRUE, wearable, disable_camera_switch);
 }
 
-void LLSidepanelAppearance::toggleMyOutfitsPanel(BOOL visible)
+//void LLSidepanelAppearance::toggleMyOutfitsPanel(BOOL visible)
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+void LLSidepanelAppearance::toggleMyOutfitsPanel(BOOL visible, const std::string& tab_name)
+// [/SL:KB]
 {
 	if (!mPanelOutfitsInventory || mPanelOutfitsInventory->getVisible() == visible)
 	{
 		// visibility isn't changing, hence nothing to do
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+		if ( (visible) && (!tab_name.empty()) && (mPanelOutfitsInventory) )
+		{
+			mPanelOutfitsInventory->onOpen(tab_name);
+		}
+// [/SL:KB]
 		return;
 	}
 
@@ -381,7 +405,10 @@ void LLSidepanelAppearance::toggleMyOutfitsPanel(BOOL visible)
 
 	if (visible)
 	{
-		mPanelOutfitsInventory->onOpen(LLSD());
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+		mPanelOutfitsInventory->onOpen(tab_name);
+// [/SL:KB]
+//		mPanelOutfitsInventory->onOpen(LLSD());
 	}
 }
 

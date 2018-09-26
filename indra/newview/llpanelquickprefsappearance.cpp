@@ -41,6 +41,7 @@
 
 // Wearing panel
 #include "llfiltereditor.h"
+#include "llfloatersidepanelcontainer.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
@@ -385,6 +386,8 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 	if (m_idCOF.isNull())
 		m_idCOF = gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
 
+	getChild<LLButton>("wearning_panel_btn")->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onShowWearingPanel));
+
 	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
 	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onFilterEdit, this, _2));
 
@@ -415,6 +418,16 @@ void LLQuickPrefsWearingPanel::onItemRightClick(LLUICtrl* pCtrl, S32 x, S32 y)
 	uuid_vec_t idItems;
 	pWearableList->getSelectedUUIDs(idItems);
 	m_pListContextMenu->show(pWearableList, idItems, x, y);
+}
+
+void LLQuickPrefsWearingPanel::onShowWearingPanel()
+{
+	LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "current_outfit"));
+	if (LLFloater* pAppearanceFloater = LLFloaterReg::findInstance("appearance"))
+	{
+		if (pAppearanceFloater->getVisible())
+			pAppearanceFloater->setFrontmost(true);
+	}
 }
 
 void LLQuickPrefsWearingPanel::onSortOrderChanged(const LLSD& sdParam)
