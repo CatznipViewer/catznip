@@ -366,6 +366,7 @@ LLQuickPrefsWearingPanel::LLQuickPrefsWearingPanel()
 	mEnableCallbackRegistrar.add("Inventory.CheckSort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderCheck, this, _2));
 
 	m_pCofObserver = new LLInventoryCategoriesObserver();
+	m_pListContextMenu = LLListContextMenuUtil::createWearingContextMenu();
 }
 
 LLQuickPrefsWearingPanel::~LLQuickPrefsWearingPanel()
@@ -374,6 +375,8 @@ LLQuickPrefsWearingPanel::~LLQuickPrefsWearingPanel()
 		gInventory.removeObserver(m_pCofObserver);
 	delete m_pCofObserver;
 	m_pCofObserver = nullptr;
+	delete m_pListContextMenu;
+	m_pListContextMenu = nullptr;
 }
 
 // virtual
@@ -386,6 +389,7 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onFilterEdit, this, _2));
 
 	m_pWornItemsList = getChild<LLWornItemsList>("cof_items_list");
+	m_pWornItemsList->setRightMouseDownCallback(boost::bind(&LLQuickPrefsWearingPanel::onItemRightClick, this, _1, _2, _3));
 	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("QuickPrefsWearingSort"));
 
 	return LLQuickPrefsPanel::postBuild();
@@ -400,6 +404,17 @@ void LLQuickPrefsWearingPanel::onFilterEdit(std::string strFilter)
 	{
 		m_pWornItemsList->setFilterSubString(strFilter);
 	}
+}
+
+void LLQuickPrefsWearingPanel::onItemRightClick(LLUICtrl* pCtrl, S32 x, S32 y)
+{
+	LLWearableItemsList* pWearableList = dynamic_cast<LLWearableItemsList*>(pCtrl);
+	if (!pWearableList)
+		return;
+
+	uuid_vec_t idItems;
+	pWearableList->getSelectedUUIDs(idItems);
+	m_pListContextMenu->show(pWearableList, idItems, x, y);
 }
 
 void LLQuickPrefsWearingPanel::onSortOrderChanged(const LLSD& sdParam)
@@ -447,6 +462,8 @@ void LLQuickPrefsWearingPanel::onVisibilityChange(BOOL fVisible)
 
 			gInventory.addObserver(m_pCofObserver);
 			m_pCofObserver->addCategory(m_idCOF, boost::bind(&LLQuickPrefsWearingPanel::onCOFChanged, this));
+
+			m_ComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLWornItemsList::setNeedsRefresh, m_pWornItemsList, true));
 
 			setInitialized();
 		}

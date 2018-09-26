@@ -1289,4 +1289,15 @@ void LLPanelWearing::copyToClipboard()
 //
 //	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(text),0,text.size());
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.5
+namespace LLListContextMenuUtil
+{
+	LLListContextMenu* createWearingContextMenu()
+	{
+		return new LLWearingContextMenu();
+	}
+}
+// [/SL:KB]
+
 // EOF

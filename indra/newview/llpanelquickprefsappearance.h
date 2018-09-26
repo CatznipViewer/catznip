@@ -17,6 +17,7 @@
 #pragma once
 
 #include "llfloaterquickprefs.h"
+#include "lllistcontextmenu.h"
 
 // ====================================================================================
 // Foward declarations
@@ -145,6 +146,7 @@ public:
 public:
 	BOOL postBuild() override;
 	void onFilterEdit(std::string strFilter);
+	void onItemRightClick(LLUICtrl* pCtrl, S32 x, S32 y);
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
 	void onVisibilityChange(BOOL fVisible) override;
@@ -163,6 +165,8 @@ protected:
 	LLFilterEditor*                m_pFilterEditor = nullptr;
 	LLInventoryCategoriesObserver* m_pCofObserver = nullptr;
 	LLWornItemsList*               m_pWornItemsList = nullptr;
+	LLListContextMenu*             m_pListContextMenu = nullptr;
+	boost::signals2::scoped_connection m_ComplexityChangedSlot;
 };
 
 // ====================================================================================
