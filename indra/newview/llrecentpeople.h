@@ -67,6 +67,7 @@ class LLRecentPeople : public LLSingleton<LLRecentPeople>
 	LOG_CLASS(LLRecentPeople);
 
 public:
+	typedef std::map <LLUUID, F32> id_to_time_map_t;
 	typedef boost::signals2::signal<void ()> signal_t;
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 public:
@@ -157,6 +158,9 @@ public:
 	 */
 //	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
+	void updateAvatarsArrivalTime(uuid_vec_t& uuids);
+	F32 getArrivalTimeByID(const LLUUID& id);
+
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 public:
 	void purgeItems();
@@ -190,6 +194,7 @@ private:
 //	typedef std::map<LLUUID, LLDate> recent_people_t;
 //	recent_people_t		mPeople;
 	signal_t			mChangedSignal;
+	id_to_time_map_t	mAvatarsArrivalTime;
 };
 
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
