@@ -145,7 +145,7 @@ void LLGridManager::initialize(const std::string& grid_file)
 	addSystemGrid(LLTrans::getString("AditiGridLabel"),
 				  "util.aditi.lindenlab.com",
 				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
-				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
+				  "https://secondlife.aditi.lindenlab.com/helpers/",
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
 				  strLoginPage,
 // [/SL:KB]

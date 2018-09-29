@@ -819,7 +819,8 @@ LLUUID upload_new_resource(
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	std::list<std::string>* pFileList)
 // [/SL:KB]
-//	void *userdata)
+//	void *userdata,
+//	bool show_inventory)
 {	
 
     LLResourceUploadInfo::ptr_t uploadInfo(new LLNewFileResourceUploadInfo(
@@ -827,7 +828,10 @@ LLUUID upload_new_resource(
         name, desc, compression_info,
         destination_folder_type, inv_type,
         next_owner_perms, group_perms, everyone_perms,
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
         expected_upload_cost));
+// [/SL:KB]
+//        expected_upload_cost, show_inventory));
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	upload_new_resource(uploadInfo, callback, pFileList);
 // [/SL:KB]

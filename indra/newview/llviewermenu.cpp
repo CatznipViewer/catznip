@@ -166,6 +166,7 @@
 #include "llupdaterservice.h"
 // [/SL:KB]
 #include "boost/unordered_map.hpp"
+#include <boost/regex.hpp>
 #include "llcleanup.h"
 // [RLVa:KB] - Checked: 2011-05-22 (RLVa-1.3.1a)
 #include "rlvactions.h"
@@ -9222,7 +9223,12 @@ void handle_report_bug(const LLSD& param)
 	LLUIString url(param.asString());
 	
 	LLStringUtil::format_map_t replace;
-	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getViewerInfoString(true));
+	std::string environment = LLAppViewer::instance()->getViewerInfoString(true);
+	boost::regex regex;
+	regex.assign("</?nolink>");
+	std::string stripped_env = boost::regex_replace(environment, regex, "");
+
+	replace["[ENVIRONMENT]"] = LLURI::escape(stripped_env);
 	LLSLURL location_url;
 	LLAgentUI::buildSLURL(location_url);
 	replace["[LOCATION]"] = LLURI::escape(location_url.getSLURLString());

@@ -62,7 +62,8 @@ LLUUID upload_new_resource(
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	std::list<std::string>* pFileList = NULL);
 // [/SL:KB]
-//    void *userdata);
+//    void *userdata,
+//    bool show_inventory = true);//    void *userdata);
 
 void upload_new_resource(
     LLResourceUploadInfo::ptr_t &uploadInfo,
