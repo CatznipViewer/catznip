@@ -60,6 +60,7 @@ public:
 		LLUUID          sender_id;
 // [/SL:KB]
         S32             fee;
+        U8              use_offline_cap;
         LLDate          time_stamp;
         LLDate          received_time;
         LLSD            inventory_offer;
