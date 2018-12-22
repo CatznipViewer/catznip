@@ -718,11 +718,12 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 		bool		identical_color	= false;
 
 		if(mColorSwatch)
-			{
+		{
 			LLSelectedTE::getColor(color, identical_color);
+			LLColor4 prev_color = mColorSwatch->get();
 
 			mColorSwatch->setOriginal(color);
-			mColorSwatch->set(color, TRUE);
+			mColorSwatch->set(color, force_set_values || (prev_color != color) || !editable);
 
 			mColorSwatch->setValid(editable);
 			mColorSwatch->setEnabled( editable );
@@ -1165,16 +1166,6 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			getChild<LLUICtrl>("combobox texgen")->setTentative(!identical);
 			getChildView("tex gen")->setEnabled(editable);
 
-			if (selected_texgen == LLTextureEntry::TEX_GEN_PLANAR)
-			{
-				// EXP-1507 (change label based on the mapping mode)
-				getChild<LLUICtrl>("rpt")->setValue(getString("string repeats per meter"));
-			}
-			else
-			if (selected_texgen == LLTextureEntry::TEX_GEN_DEFAULT)
-			{
-				getChild<LLUICtrl>("rpt")->setValue(getString("string repeats per face"));
-			}
 			}
 
 		{
@@ -1265,7 +1256,7 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 
 			if (material && editable)
 			{
-				LL_DEBUGS("Materials: OnMatererialsLoaded:") << material->asLLSD() << LL_ENDL;
+				LL_DEBUGS("Materials") << material->asLLSD() << LL_ENDL;
 
 				// Alpha
 				LLCtrlSelectionInterface* combobox_alphamode =
@@ -1328,8 +1319,12 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 				//
 				if (!material->getSpecularID().isNull())
 				{
-					getChild<LLColorSwatchCtrl>("shinycolorswatch")->setOriginal(material->getSpecularLightColor());
-					getChild<LLColorSwatchCtrl>("shinycolorswatch")->set(material->getSpecularLightColor(),TRUE);
+					LLColorSwatchCtrl*	shiny_swatch = getChild<LLColorSwatchCtrl>("shinycolorswatch");
+					LLColor4 new_color = material->getSpecularLightColor();
+					LLColor4 old_color = shiny_swatch->get();
+
+					shiny_swatch->setOriginal(new_color);
+					shiny_swatch->set(new_color, force_set_values || old_color != new_color || !editable);
 				}
 
 				// Bumpy (normal)
@@ -1390,8 +1385,7 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			mColorSwatch->setValid(FALSE);
 		}
 		getChildView("color trans")->setEnabled(FALSE);
-		getChildView("rpt")->setEnabled(FALSE);
-		getChildView("tex offset")->setEnabled(FALSE);
+		getChildView("rptctrl")->setEnabled(FALSE);
 		getChildView("tex gen")->setEnabled(FALSE);
 		getChildView("label shininess")->setEnabled(FALSE);
 		getChildView("label bumpiness")->setEnabled(FALSE);

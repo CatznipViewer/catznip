@@ -1100,6 +1100,7 @@ void LLFloaterSnapshot::onOpen(const LLSD& key)
 	if(preview)
 	{
 		LL_DEBUGS() << "opened, updating snapshot" << LL_ENDL;
+		preview->setAllowFullScreenPreview(TRUE);
 		preview->updateSnapshot(TRUE);
 	}
 	focusFirstItem(FALSE);
@@ -1129,6 +1130,7 @@ void LLFloaterSnapshotBase::onClose(bool app_quitting)
 	LLSnapshotLivePreview* previewp = getPreviewView();
 	if (previewp)
 	{
+		previewp->setAllowFullScreenPreview(FALSE);
 		previewp->setVisible(FALSE);
 		previewp->setEnabled(FALSE);
 	}
@@ -1307,17 +1309,15 @@ void LLFloaterSnapshot::saveTexture()
 	previewp->saveTexture();
 }
 
-BOOL LLFloaterSnapshot::saveLocal()
+void LLFloaterSnapshot::saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
 {
 	LL_DEBUGS() << "saveLocal" << LL_ENDL;
 	LLSnapshotLivePreview* previewp = getPreviewView();
-	if (!previewp)
+	llassert(previewp != NULL);
+	if (previewp)
 	{
-		llassert(previewp != NULL);
-		return FALSE;
+		previewp->saveLocal(success_cb, failure_cb);
 	}
-
-	return previewp->saveLocal();
 }
 
 void LLFloaterSnapshotBase::postSave()
