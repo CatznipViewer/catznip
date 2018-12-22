@@ -540,13 +540,6 @@ void LLFloaterPreference::onDoNotDisturbResponseChanged()
 
 LLFloaterPreference::~LLFloaterPreference()
 {
-	// clean up user data
-	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
-	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
-	{
-		ctrl_window_size->setCurrentByIndex(i);
-	}
-
 	LLConversationLog::instance().removeObserver(this);
 }
 
@@ -1108,16 +1101,15 @@ void LLFloaterPreference::onClickSetCache()
 	
 	std::string proposed_name(cur_name);
 
-	LLDirPicker& picker = LLDirPicker::instance();
-	if (! picker.getDir(&proposed_name ) )
-	{
-		return; //Canceled!
-	}
+	(new LLDirPickerThread(boost::bind(&LLFloaterPreference::changeCachePath, this, _1, _2), proposed_name))->getFile();
+}
 
-	std::string dir_name = picker.getDirName();
-	if (!dir_name.empty() && dir_name != cur_name)
+void LLFloaterPreference::changeCachePath(const std::vector<std::string>& filenames, std::string proposed_name)
+{
+	std::string dir_name = filenames[0];
+	if (!dir_name.empty() && dir_name != proposed_name)
 	{
-		std::string new_top_folder(gDirUtilp->getBaseFileName(dir_name));	
+		std::string new_top_folder(gDirUtilp->getBaseFileName(dir_name));
 		LLNotificationsUtil::add("CacheWillBeMoved");
 		gSavedSettings.setString("NewCacheLocation", dir_name);
 		gSavedSettings.setString("NewCacheLocationTopFolder", new_top_folder);
@@ -1261,6 +1253,8 @@ void LLFloaterPreference::refreshEnabledState()
 
 	// Cannot have floater active until caps have been received
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
+
+	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
@@ -1395,8 +1389,6 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 
 	// now turn off any features that are unavailable
 	disableUnavailableSettings();
-
-	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
 }
 
 // static
@@ -1756,25 +1748,21 @@ void LLFloaterPreference::onClickLogPath()
 	std::string proposed_name(gSavedPerAccountSettings.getString("InstantMessageLogPath"));	 
 	mPriorInstantMessageLogPath.clear();
 	
-	LLDirPicker& picker = LLDirPicker::instance();
-	//Launches a directory picker and waits for feedback
-	if (!picker.getDir(&proposed_name ) )
-	{
-		return; //Canceled!
-	}
 
-	//Gets the path from the directory picker
-	std::string dir_name = picker.getDirName();
-
-	//Path changed
-	if(proposed_name != dir_name)
-	{
-	gSavedPerAccountSettings.setString("InstantMessageLogPath", dir_name);
-		mPriorInstantMessageLogPath = proposed_name;
-	
-	// enable/disable 'Delete transcripts button
-	updateDeleteTranscriptsButton();
+	(new LLDirPickerThread(boost::bind(&LLFloaterPreference::changeLogPath, this, _1, _2), proposed_name))->getFile();
 }
+
+void LLFloaterPreference::changeLogPath(const std::vector<std::string>& filenames, std::string proposed_name)
+{
+	//Path changed
+	if (proposed_name != filenames[0])
+	{
+		gSavedPerAccountSettings.setString("InstantMessageLogPath", filenames[0]);
+		mPriorInstantMessageLogPath = proposed_name;
+
+		// enable/disable 'Delete transcripts button
+		updateDeleteTranscriptsButton();
+	}
 }
 
 bool LLFloaterPreference::moveTranscriptsAndLog()
@@ -2406,11 +2394,20 @@ BOOL LLPanelPreference::postBuild()
 	{
 		getChild<LLCheckBoxCtrl>("voice_call_friends_only_check")->setCommitCallback(boost::bind(&showFriendsOnlyWarning, _1, _2));
 	}
+	if (hasChild("allow_multiple_viewer_check", TRUE))
+	{
+		getChild<LLCheckBoxCtrl>("allow_multiple_viewer_check")->setCommitCallback(boost::bind(&showMultipleViewersWarning, _1, _2));
+	}
 	if (hasChild("favorites_on_login_check", TRUE))
 	{
 		getChild<LLCheckBoxCtrl>("favorites_on_login_check")->setCommitCallback(boost::bind(&handleFavoritesOnLoginChanged, _1, _2));
 		bool show_favorites_at_login = LLPanelLogin::getShowFavorites();
 		getChild<LLCheckBoxCtrl>("favorites_on_login_check")->setValue(show_favorites_at_login);
+	}
+	if (hasChild("mute_chb_label", TRUE))
+	{
+		getChild<LLTextBox>("mute_chb_label")->setShowCursorHand(false);
+		getChild<LLTextBox>("mute_chb_label")->setClickedCallback(boost::bind(&toggleMuteWhenMinimized));
 	}
 
 	//////////////////////PanelAdvanced ///////////////////
@@ -2501,6 +2498,14 @@ void LLPanelPreference::saveSettings()
 	}	
 }
 
+void LLPanelPreference::showMultipleViewersWarning(LLUICtrl* checkbox, const LLSD& value)
+{
+    if (checkbox && checkbox->getValue())
+    {
+        LLNotificationsUtil::add("AllowMultipleViewers");
+    }
+}
+
 void LLPanelPreference::showFriendsOnlyWarning(LLUICtrl* checkbox, const LLSD& value)
 {
 	if (checkbox && checkbox->getValue())
@@ -2519,6 +2524,12 @@ void LLPanelPreference::handleFavoritesOnLoginChanged(LLUICtrl* checkbox, const 
 			LLNotificationsUtil::add("FavoritesOnLogin");
 		}
 	}
+}
+
+void LLPanelPreference::toggleMuteWhenMinimized()
+{
+	std::string mute("MuteWhenMinimized");
+	gSavedSettings.setBOOL(mute, !gSavedSettings.getBOOL(mute));
 }
 
 void LLPanelPreference::cancel()
@@ -2640,18 +2651,6 @@ BOOL LLPanelPreferenceGraphics::postBuild()
 {
 	LLFloaterReg::showInstance("prefs_graphics_advanced");
 	LLFloaterReg::hideInstance("prefs_graphics_advanced");
-
-// Don't do this on Mac as their braindead GL versioning
-// sets this when 8x and 16x are indeed available
-//
-#if !LL_DARWIN
-	if (gGLManager.mIsIntel || gGLManager.mGLVersion < 3.f)
-	{ //remove FSAA settings above "4x"
-		LLComboBox* combo = getChild<LLComboBox>("fsaa");
-		combo->remove("8x");
-		combo->remove("16x");
-	}
-#endif
 
 	resetDirtyChilds();
 	setPresetText();
@@ -2799,6 +2798,16 @@ void LLPanelPreferenceGraphics::cancel()
 void LLPanelPreferenceGraphics::saveSettings()
 {
 	resetDirtyChilds();
+	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
+	if (preset_graphic_active.empty())
+	{
+		LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
+		if (instance)
+		{
+			//don't restore previous preset after closing Preferences
+			instance->saveGraphicsPreset(preset_graphic_active);
+		}
+	}
 	LLPanelPreference::saveSettings();
 }
 void LLPanelPreferenceGraphics::setHardwareDefaults()
@@ -2825,6 +2834,23 @@ LLFloaterPreferenceProxy::LLFloaterPreferenceProxy(const LLSD& key)
 	mCommitCallbackRegistrar.add("Proxy.OK",                boost::bind(&LLFloaterPreferenceProxy::onBtnOk, this));
 	mCommitCallbackRegistrar.add("Proxy.Cancel",            boost::bind(&LLFloaterPreferenceProxy::onBtnCancel, this));
 	mCommitCallbackRegistrar.add("Proxy.Change",            boost::bind(&LLFloaterPreferenceProxy::onChangeSocksSettings, this));
+}
+
+BOOL LLFloaterPreferenceGraphicsAdvanced::postBuild()
+{
+    // Don't do this on Mac as their braindead GL versioning
+    // sets this when 8x and 16x are indeed available
+    //
+#if !LL_DARWIN
+    if (gGLManager.mIsIntel || gGLManager.mGLVersion < 3.f)
+    { //remove FSAA settings above "4x"
+        LLComboBox* combo = getChild<LLComboBox>("fsaa");
+        combo->remove("8x");
+        combo->remove("16x");
+    }
+#endif
+
+    return TRUE;
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::onOpen(const LLSD& key)
