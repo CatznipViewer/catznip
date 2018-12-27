@@ -134,6 +134,7 @@
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
 #include "boost/unordered_map.hpp"
+#include <boost/regex.hpp>
 #include "llcleanup.h"
 
 using namespace LLAvatarAppearanceDefines;
@@ -795,7 +796,7 @@ class LLAdvancedToggleRenderType : public view_listener_t
 		U32 render_type = render_type_from_string( userdata.asString() );
 		if ( render_type != 0 )
 		{
-			LLPipeline::toggleRenderTypeControl( (void*)render_type );
+			LLPipeline::toggleRenderTypeControl( render_type );
 		}
 		return true;
 	}
@@ -811,7 +812,7 @@ class LLAdvancedCheckRenderType : public view_listener_t
 
 		if ( render_type != 0 )
 		{
-			new_value = LLPipeline::hasRenderTypeControl( (void*)render_type );
+			new_value = LLPipeline::hasRenderTypeControl( render_type );
 		}
 
 		return new_value;
@@ -870,7 +871,7 @@ class LLAdvancedToggleFeature : public view_listener_t
 		U32 feature = feature_from_string( userdata.asString() );
 		if ( feature != 0 )
 		{
-			LLPipeline::toggleRenderDebugFeature( (void*)feature );
+			LLPipeline::toggleRenderDebugFeature( feature );
 		}
 		return true;
 	}
@@ -885,7 +886,7 @@ class LLAdvancedCheckFeature : public view_listener_t
 
 	if ( feature != 0 )
 	{
-		new_value = LLPipeline::toggleRenderDebugFeatureControl( (void*)feature );
+		new_value = LLPipeline::toggleRenderDebugFeatureControl( feature );
 	}
 
 	return new_value;
@@ -926,7 +927,7 @@ class LLAdvancedSetDisplayTextureDensity : public view_listener_t
 		{
 			if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY) == TRUE) 
 			{
-				gPipeline.toggleRenderDebug((void*)LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
+				gPipeline.toggleRenderDebug(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
 			}
 			LLViewerTexture::sDebugTexelsMode = LLViewerTexture::DEBUG_TEXELS_OFF;
 		}
@@ -934,7 +935,7 @@ class LLAdvancedSetDisplayTextureDensity : public view_listener_t
 		{
 			if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY) == FALSE) 
 			{
-				gPipeline.toggleRenderDebug((void*)LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
+				gPipeline.toggleRenderDebug(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
 			}
 			LLViewerTexture::sDebugTexelsMode = LLViewerTexture::DEBUG_TEXELS_CURRENT;
 		}
@@ -942,7 +943,7 @@ class LLAdvancedSetDisplayTextureDensity : public view_listener_t
 		{
 			if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY) == FALSE) 
 			{
-				gPipeline.toggleRenderDebug((void*)LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
+				gPipeline.toggleRenderDebug(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
 			}
 			gPipeline.setRenderDebugFeatureControl(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY, true);
 			LLViewerTexture::sDebugTexelsMode = LLViewerTexture::DEBUG_TEXELS_DESIRED;
@@ -951,7 +952,7 @@ class LLAdvancedSetDisplayTextureDensity : public view_listener_t
 		{
 			if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY) == FALSE) 
 			{
-				gPipeline.toggleRenderDebug((void*)LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
+				gPipeline.toggleRenderDebug(LLPipeline::RENDER_DEBUG_TEXEL_DENSITY);
 			}
 			LLViewerTexture::sDebugTexelsMode = LLViewerTexture::DEBUG_TEXELS_FULL;
 		}
@@ -963,7 +964,7 @@ class LLAdvancedSetDisplayTextureDensity : public view_listener_t
 //////////////////
 // INFO DISPLAY //
 //////////////////
-U32 info_display_from_string(std::string info_display)
+U64 info_display_from_string(std::string info_display)
 {
 	if ("verify" == info_display)
 	{
@@ -1077,6 +1078,14 @@ U32 info_display_from_string(std::string info_display)
 	{
 		return LLPipeline::RENDER_DEBUG_TEXEL_DENSITY;
 	}
+	else if ("triangle count" == info_display)
+	{
+		return LLPipeline::RENDER_DEBUG_TRIANGLE_COUNT;
+	}
+	else if ("impostors" == info_display)
+	{
+		return LLPipeline::RENDER_DEBUG_IMPOSTORS;
+	}
 	else
 	{
 		LL_WARNS() << "unrecognized feature name '" << info_display << "'" << LL_ENDL;
@@ -1088,13 +1097,13 @@ class LLAdvancedToggleInfoDisplay : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		U32 info_display = info_display_from_string( userdata.asString() );
+		U64 info_display = info_display_from_string( userdata.asString() );
 
 		LL_INFOS("ViewerMenu") << "toggle " << userdata.asString() << LL_ENDL;
 		
 		if ( info_display != 0 )
 		{
-			LLPipeline::toggleRenderDebug( (void*)info_display );
+			LLPipeline::toggleRenderDebug( info_display );
 		}
 
 		return true;
@@ -1106,12 +1115,12 @@ class LLAdvancedCheckInfoDisplay : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		U32 info_display = info_display_from_string( userdata.asString() );
+		U64 info_display = info_display_from_string( userdata.asString() );
 		bool new_value = false;
 
 		if ( info_display != 0 )
 		{
-			new_value = LLPipeline::toggleRenderDebugControl( (void*)info_display );
+			new_value = LLPipeline::toggleRenderDebugControl( info_display );
 		}
 
 		return new_value;
@@ -1225,7 +1234,7 @@ class LLAdvancedToggleWireframe : public view_listener_t
 
 		gPipeline.resetVertexBuffers();
 
-		if (!gUseWireframe && !gInitialDeferredModeForWireframe && LLPipeline::sRenderDeferred != gInitialDeferredModeForWireframe && gPipeline.isInit())
+		if (!gUseWireframe && !gInitialDeferredModeForWireframe && LLPipeline::sRenderDeferred != bool(gInitialDeferredModeForWireframe) && gPipeline.isInit())
 		{
 			LLPipeline::refreshCachedSettings();
 			gPipeline.releaseGLBuffers();
@@ -1616,7 +1625,24 @@ class LLAdvancedEnableAppearanceToXML : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		return gSavedSettings.getBOOL("DebugAvatarAppearanceMessage");
+        LLViewerObject *obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+        if (obj && obj->isAnimatedObject() && obj->getControlAvatar())
+        {
+            return gSavedSettings.getBOOL("DebugAnimatedObjects");
+        }
+        else if (obj && obj->isAttachment() && obj->getAvatar())
+        {
+            return gSavedSettings.getBOOL("DebugAvatarAppearanceMessage");
+        }
+        else if (obj && obj->isAvatar())
+        {
+            // This has to be a non-control avatar, because control avs are invisible and unclickable.
+            return gSavedSettings.getBOOL("DebugAvatarAppearanceMessage");
+        }
+		else
+		{
+			return false;
+		}
 	}
 };
 
@@ -1625,13 +1651,34 @@ class LLAdvancedAppearanceToXML : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 		std::string emptyname;
-		LLVOAvatar* avatar =
-			find_avatar_from_object( LLSelectMgr::getInstance()->getSelection()->getPrimaryObject() );
-		if (!avatar)
-		{
+        LLViewerObject *obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+        LLVOAvatar *avatar = NULL;
+        if (obj)
+        {
+            if (obj->isAvatar())
+            {
+                avatar = obj->asAvatar();
+            }
+            else
+            {
+                // If there is a selection, find the associated
+                // avatar. Normally there's only one obvious choice. But
+                // what should be returned if the object is in an attached
+                // animated object? getAvatar() will give the skeleton of
+                // the animated object. getAvatarAncestor() will give the
+                // actual human-driven avatar.
+                avatar = obj->getAvatar();
+            }
+        }
+        else
+        {
+            // If no selection, use the self avatar.
 			avatar = gAgentAvatarp;
-		}
-		avatar->dumpArchetypeXML(emptyname);
+        }
+        if (avatar)
+        {
+            avatar->dumpArchetypeXML(emptyname);
+        }
 		return true;
 	}
 };
@@ -2123,22 +2170,6 @@ class LLAdvancedCheckShowObjectUpdates : public view_listener_t
 	}
 };
 
-
-
-///////////////////////
-// CHECK FOR UPDATES //
-///////////////////////
-
-
-
-class LLAdvancedCheckViewerUpdates : public view_listener_t
-{
-	bool handleEvent(const LLSD& userdata)
-	{
-		LLFloaterAboutUtil::checkUpdatesAndNotify();
-		return true;
-	}
-};
 
 
 ////////////////////
@@ -3675,9 +3706,16 @@ class LLSelfSitDown : public view_listener_t
         }
     };
 
+
+
+bool show_sitdown_self()
+{
+	return isAgentAvatarValid() && !gAgentAvatarp->isSitting();
+}
+
 bool enable_sitdown_self()
 {
-    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
+	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
 }
 
 class LLCheckPanelPeopleTab : public view_listener_t
@@ -6076,7 +6114,12 @@ class LLAvatarResetSkeleton: public view_listener_t
 {
     bool handleEvent(const LLSD& userdata)
     {
-		LLVOAvatar* avatar = find_avatar_from_object( LLSelectMgr::getInstance()->getSelection()->getPrimaryObject() );
+		LLVOAvatar* avatar = NULL;
+        LLViewerObject *obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+        if (obj)
+        {
+            avatar = obj->getAvatar();
+        }
 		if(avatar)
         {
             avatar->resetSkeleton(false);
@@ -6084,6 +6127,20 @@ class LLAvatarResetSkeleton: public view_listener_t
         return true;
     }
 };
+
+class LLAvatarEnableResetSkeleton: public view_listener_t
+{
+    bool handleEvent(const LLSD& userdata)
+    {
+        LLViewerObject *obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+        if (obj && obj->getAvatar())
+        {
+            return true;
+        }
+        return false;
+    }
+};
+
 
 class LLAvatarResetSkeletonAndAnimations : public view_listener_t
 {
@@ -6918,7 +6975,7 @@ class LLAttachmentEnableDrop : public view_listener_t
 		// Do not enable drop if all faces of object are not enabled
 		if (object && LLSelectMgr::getInstance()->getSelection()->contains(object,SELECT_ALL_TES ))
 		{
-    		S32 attachmentID  = ATTACHMENT_ID_FROM_STATE(object->getState());
+    		S32 attachmentID  = ATTACHMENT_ID_FROM_STATE(object->getAttachmentState());
 			attachment = get_if_there(gAgentAvatarp->mAttachmentPoints, attachmentID, (LLViewerJointAttachment*)NULL);
 
 			if (attachment)
@@ -8002,6 +8059,23 @@ void handle_web_browser_test(const LLSD& param)
 	LLWeb::loadURLInternal(url);
 }
 
+bool callback_clear_cache_immediately(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if ( option == 0 ) // YES
+	{
+		//clear cache
+		LLAppViewer::instance()->purgeCacheImmediate();
+	}
+
+	return false;
+}
+
+void handle_cache_clear_immediately()
+{
+	LLNotificationsUtil::add("ConfirmClearCache", LLSD(), LLSD(), callback_clear_cache_immediately);
+}
+
 void handle_web_content_test(const LLSD& param)
 {
 	std::string url = param.asString();
@@ -8027,7 +8101,12 @@ void handle_report_bug(const LLSD& param)
 	LLUIString url(param.asString());
 	
 	LLStringUtil::format_map_t replace;
-	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getShortViewerInfoString());
+	std::string environment = LLAppViewer::instance()->getViewerInfoString(true);
+	boost::regex regex;
+	regex.assign("</?nolink>");
+	std::string stripped_env = boost::regex_replace(environment, regex, "");
+
+	replace["[ENVIRONMENT]"] = LLURI::escape(stripped_env);
 	LLSLURL location_url;
 	LLAgentUI::buildSLURL(location_url);
 	replace["[LOCATION]"] = LLURI::escape(location_url.getSLURLString());
@@ -8152,66 +8231,66 @@ class LLViewToggleBeacon : public view_listener_t
 		std::string beacon = userdata.asString();
 		if (beacon == "scriptsbeacon")
 		{
-			LLPipeline::toggleRenderScriptedBeacons(NULL);
-			gSavedSettings.setBOOL( "scriptsbeacon", LLPipeline::getRenderScriptedBeacons(NULL) );
+			LLPipeline::toggleRenderScriptedBeacons();
+			gSavedSettings.setBOOL( "scriptsbeacon", LLPipeline::getRenderScriptedBeacons() );
 			// toggle the other one off if it's on
-			if (LLPipeline::getRenderScriptedBeacons(NULL) && LLPipeline::getRenderScriptedTouchBeacons(NULL))
+			if (LLPipeline::getRenderScriptedBeacons() && LLPipeline::getRenderScriptedTouchBeacons())
 			{
-				LLPipeline::toggleRenderScriptedTouchBeacons(NULL);
-				gSavedSettings.setBOOL( "scripttouchbeacon", LLPipeline::getRenderScriptedTouchBeacons(NULL) );
+				LLPipeline::toggleRenderScriptedTouchBeacons();
+				gSavedSettings.setBOOL( "scripttouchbeacon", LLPipeline::getRenderScriptedTouchBeacons() );
 			}
 		}
 		else if (beacon == "physicalbeacon")
 		{
-			LLPipeline::toggleRenderPhysicalBeacons(NULL);
-			gSavedSettings.setBOOL( "physicalbeacon", LLPipeline::getRenderPhysicalBeacons(NULL) );
+			LLPipeline::toggleRenderPhysicalBeacons();
+			gSavedSettings.setBOOL( "physicalbeacon", LLPipeline::getRenderPhysicalBeacons() );
 		}
 		else if (beacon == "moapbeacon")
 		{
-			LLPipeline::toggleRenderMOAPBeacons(NULL);
-			gSavedSettings.setBOOL( "moapbeacon", LLPipeline::getRenderMOAPBeacons(NULL) );
+			LLPipeline::toggleRenderMOAPBeacons();
+			gSavedSettings.setBOOL( "moapbeacon", LLPipeline::getRenderMOAPBeacons() );
 		}
 		else if (beacon == "soundsbeacon")
 		{
-			LLPipeline::toggleRenderSoundBeacons(NULL);
-			gSavedSettings.setBOOL( "soundsbeacon", LLPipeline::getRenderSoundBeacons(NULL) );
+			LLPipeline::toggleRenderSoundBeacons();
+			gSavedSettings.setBOOL( "soundsbeacon", LLPipeline::getRenderSoundBeacons() );
 		}
 		else if (beacon == "particlesbeacon")
 		{
-			LLPipeline::toggleRenderParticleBeacons(NULL);
-			gSavedSettings.setBOOL( "particlesbeacon", LLPipeline::getRenderParticleBeacons(NULL) );
+			LLPipeline::toggleRenderParticleBeacons();
+			gSavedSettings.setBOOL( "particlesbeacon", LLPipeline::getRenderParticleBeacons() );
 		}
 		else if (beacon == "scripttouchbeacon")
 		{
-			LLPipeline::toggleRenderScriptedTouchBeacons(NULL);
-			gSavedSettings.setBOOL( "scripttouchbeacon", LLPipeline::getRenderScriptedTouchBeacons(NULL) );
+			LLPipeline::toggleRenderScriptedTouchBeacons();
+			gSavedSettings.setBOOL( "scripttouchbeacon", LLPipeline::getRenderScriptedTouchBeacons() );
 			// toggle the other one off if it's on
-			if (LLPipeline::getRenderScriptedBeacons(NULL) && LLPipeline::getRenderScriptedTouchBeacons(NULL))
+			if (LLPipeline::getRenderScriptedBeacons() && LLPipeline::getRenderScriptedTouchBeacons())
 			{
-				LLPipeline::toggleRenderScriptedBeacons(NULL);
-				gSavedSettings.setBOOL( "scriptsbeacon", LLPipeline::getRenderScriptedBeacons(NULL) );
+				LLPipeline::toggleRenderScriptedBeacons();
+				gSavedSettings.setBOOL( "scriptsbeacon", LLPipeline::getRenderScriptedBeacons() );
 			}
 		}
 		else if (beacon == "renderbeacons")
 		{
-			LLPipeline::toggleRenderBeacons(NULL);
-			gSavedSettings.setBOOL( "renderbeacons", LLPipeline::getRenderBeacons(NULL) );
+			LLPipeline::toggleRenderBeacons();
+			gSavedSettings.setBOOL( "renderbeacons", LLPipeline::getRenderBeacons() );
 			// toggle the other one on if it's not
-			if (!LLPipeline::getRenderBeacons(NULL) && !LLPipeline::getRenderHighlights(NULL))
+			if (!LLPipeline::getRenderBeacons() && !LLPipeline::getRenderHighlights())
 			{
-				LLPipeline::toggleRenderHighlights(NULL);
-				gSavedSettings.setBOOL( "renderhighlights", LLPipeline::getRenderHighlights(NULL) );
+				LLPipeline::toggleRenderHighlights();
+				gSavedSettings.setBOOL( "renderhighlights", LLPipeline::getRenderHighlights() );
 			}
 		}
 		else if (beacon == "renderhighlights")
 		{
-			LLPipeline::toggleRenderHighlights(NULL);
-			gSavedSettings.setBOOL( "renderhighlights", LLPipeline::getRenderHighlights(NULL) );
+			LLPipeline::toggleRenderHighlights();
+			gSavedSettings.setBOOL( "renderhighlights", LLPipeline::getRenderHighlights() );
 			// toggle the other one on if it's not
-			if (!LLPipeline::getRenderBeacons(NULL) && !LLPipeline::getRenderHighlights(NULL))
+			if (!LLPipeline::getRenderBeacons() && !LLPipeline::getRenderHighlights())
 			{
-				LLPipeline::toggleRenderBeacons(NULL);
-				gSavedSettings.setBOOL( "renderbeacons", LLPipeline::getRenderBeacons(NULL) );
+				LLPipeline::toggleRenderBeacons();
+				gSavedSettings.setBOOL( "renderbeacons", LLPipeline::getRenderBeacons() );
 			}
 		}
 
@@ -8290,7 +8369,7 @@ class LLViewCheckRenderType : public view_listener_t
 		bool new_value = false;
 		if (type == "hideparticles")
 		{
-			new_value = LLPipeline::toggleRenderTypeControlNegated((void *)LLPipeline::RENDER_TYPE_PARTICLES);
+			new_value = LLPipeline::toggleRenderTypeControlNegated(LLPipeline::RENDER_TYPE_PARTICLES);
 		}
 		return new_value;
 	}
@@ -9039,7 +9118,6 @@ void initialize_menus()
 	// Advanced (toplevel)
 	view_listener_t::addMenu(new LLAdvancedToggleShowObjectUpdates(), "Advanced.ToggleShowObjectUpdates");
 	view_listener_t::addMenu(new LLAdvancedCheckShowObjectUpdates(), "Advanced.CheckShowObjectUpdates");
-	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");
 	view_listener_t::addMenu(new LLAdvancedEnableViewAdminOptions(), "Advanced.EnableViewAdminOptions");
@@ -9056,6 +9134,8 @@ void initialize_menus()
 	
 	//Develop (Texture Fetch Debug Console)
 	view_listener_t::addMenu(new LLDevelopTextureFetchDebugger(), "Develop.SetTexFetchDebugger");
+	//Develop (clear cache immediately)
+	commit.add("Develop.ClearCache", boost::bind(&handle_cache_clear_immediately) );
 
 	// Admin >Object
 	view_listener_t::addMenu(new LLAdminForceTakeCopy(), "Admin.ForceTakeCopy");
@@ -9079,7 +9159,8 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLSelfStandUp(), "Self.StandUp");
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
-	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self));
+	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self)); 
+	enable.add("Self.ShowSitDown", boost::bind(&show_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");
 
 	view_listener_t::addMenu(new LLSelfEnableRemoveAllAttachments(), "Self.EnableRemoveAllAttachments");
@@ -9106,6 +9187,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAvatarReportAbuse(), "Avatar.ReportAbuse");
 	view_listener_t::addMenu(new LLAvatarToggleMyProfile(), "Avatar.ToggleMyProfile");
 	view_listener_t::addMenu(new LLAvatarResetSkeleton(), "Avatar.ResetSkeleton");
+	view_listener_t::addMenu(new LLAvatarEnableResetSkeleton(), "Avatar.EnableResetSkeleton");
 	view_listener_t::addMenu(new LLAvatarResetSkeletonAndAnimations(), "Avatar.ResetSkeletonAndAnimations");
 	enable.add("Avatar.IsMyProfileOpen", boost::bind(&my_profile_visible));
 

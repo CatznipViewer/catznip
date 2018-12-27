@@ -221,9 +221,9 @@ void display_stats()
 	F32 mem_log_freq = gSavedSettings.getF32("MemoryLogFrequency");
 	if (mem_log_freq > 0.f && gRecentMemoryTime.getElapsedTimeF32() >= mem_log_freq)
 	{
-		gMemoryAllocated = (U64Bytes)LLMemory::getCurrentRSS();
+		gMemoryAllocated = U64Bytes(LLMemory::getCurrentRSS());
 		U32Megabytes memory = gMemoryAllocated;
-		LL_INFOS() << llformat("MEMORY: %d MB", memory.value()) << LL_ENDL;
+		LL_INFOS() << "MEMORY: " << memory << LL_ENDL;
 		LLMemory::logMemoryInfo(TRUE) ;
 		gRecentMemoryTime.reset();
 	}
@@ -1005,7 +1005,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 															  gPipeline.mDeferredScreen.getHeight(), 0, 0, 
 															  gPipeline.mDeferredScreen.getWidth(), 
 															  gPipeline.mDeferredScreen.getHeight(), 
-															  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+															  GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 				}
 			}
 			else
@@ -1017,7 +1017,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 															  gPipeline.mScreen.getHeight(), 0, 0, 
 															  gPipeline.mScreen.getWidth(), 
 															  gPipeline.mScreen.getHeight(), 
-															  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+															  GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 				}
 			}
 		}
@@ -1117,7 +1117,7 @@ void render_hud_attachments()
 		bool has_ui = gPipeline.hasRenderDebugFeatureMask(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 		if (has_ui)
 		{
-			gPipeline.toggleRenderDebugFeature((void*) LLPipeline::RENDER_DEBUG_FEATURE_UI);
+			gPipeline.toggleRenderDebugFeature(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 		}
 
 		S32 use_occlusion = LLPipeline::sUseOcclusion;
@@ -1162,7 +1162,7 @@ void render_hud_attachments()
 
 		if (has_ui)
 		{
-			gPipeline.toggleRenderDebugFeature((void*) LLPipeline::RENDER_DEBUG_FEATURE_UI);
+			gPipeline.toggleRenderDebugFeature(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 		}
 		LLPipeline::sUseOcclusion = use_occlusion;
 		LLPipeline::sRenderingHUDs = FALSE;
@@ -1240,13 +1240,13 @@ bool get_hud_matrices(glh::matrix4f &proj, glh::matrix4f &model)
 	return get_hud_matrices(whole_screen, proj, model);
 }
 
-BOOL setup_hud_matrices()
+bool setup_hud_matrices()
 {
 	LLRect whole_screen = get_whole_screen_region();
 	return setup_hud_matrices(whole_screen);
 }
 
-BOOL setup_hud_matrices(const LLRect& screen_region)
+bool setup_hud_matrices(const LLRect& screen_region)
 {
 	glh::matrix4f proj, model;
 	bool result = get_hud_matrices(screen_region, proj, model);

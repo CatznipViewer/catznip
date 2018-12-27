@@ -268,7 +268,8 @@ public:
 	:	LLInvFVBridge(inventory, root, uuid),
 		mCallingCards(FALSE),
 		mWearables(FALSE),
-		mIsLoading(false)
+		mIsLoading(false),
+		mShowDescendantsCount(false)
 	{}
 		
 	BOOL dragItemIntoFolder(LLInventoryItem* inv_item, BOOL drop, std::string& tooltip_msg, BOOL user_confirm = TRUE);
@@ -292,6 +293,8 @@ public:
 	static LLUIImagePtr getIcon(LLFolderType::EType preferred_type);
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
+
+	void setShowDescendantsCount(bool show_count) {mShowDescendantsCount = show_count;}
 
 	virtual BOOL renameItem(const std::string& new_name);
 
@@ -373,6 +376,7 @@ protected:
 	bool							mCallingCards;
 	bool							mWearables;
 	bool							mIsLoading;
+	bool							mShowDescendantsCount;
 	LLTimer							mTimeSinceRequestStart;
     std::string                     mMessage;
 	LLRootHandle<LLFolderBridge> mHandle;
@@ -571,6 +575,17 @@ protected:
 	static std::string sPrefix;
 };
 
+class LLUnknownItemBridge : public LLItemBridge
+{
+public:
+	LLUnknownItemBridge(LLInventoryPanel* inventory,
+		LLFolderView* root,
+		const LLUUID& uuid) :
+		LLItemBridge(inventory, root, uuid) {}
+	virtual LLUIImagePtr getIcon() const;
+	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
+};
+
 class LLLinkFolderBridge : public LLItemBridge
 {
 public:
@@ -743,6 +758,7 @@ class LLFolderViewGroupedItemBridge: public LLFolderViewGroupedItemModel
 public:
     LLFolderViewGroupedItemBridge();
     virtual void groupFilterContextMenu(folder_view_item_deque& selected_items, LLMenuGL& menu);
+    bool canWearSelected(uuid_vec_t item_ids);
 };
 
 #endif // LL_LLINVENTORYBRIDGE_H

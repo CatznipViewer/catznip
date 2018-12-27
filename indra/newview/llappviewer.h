@@ -55,7 +55,6 @@ class LLTextureCache;
 class LLImageDecodeThread;
 class LLTextureFetch;
 class LLWatchdogTimeout;
-class LLUpdaterService;
 class LLViewerJoystick;
 
 extern LLTrace::BlockTimerStatHandle FTM_FRAME;
@@ -100,8 +99,7 @@ public:
 
 	void setServerReleaseNotesURL(const std::string& url) { mServerReleaseNotesURL = url; }
 	LLSD getViewerInfo() const;
-	std::string getViewerInfoString() const;
-	std::string getShortViewerInfoString() const;
+	std::string getViewerInfoString(bool default_string = false) const;
 
 	// Report true if under the control of a debugger. A null-op default.
 	virtual bool beingDebugged() { return false; } 
@@ -223,11 +221,12 @@ protected:
 
 private:
 
+	bool doFrame();
+
 	void initMaxHeapSize();
 	bool initThreads(); // Initialize viewer threads, return false on failure.
 	bool initConfiguration(); // Initialize settings from the command line/config file.
 	void initStrings();       // Initialize LLTrans machinery
-	void initUpdater(); // Initialize the updater service.
 	bool initCache(); // Initialize local client cache.
 	void checkMemory() ;
 
@@ -307,30 +306,14 @@ private:
     LLAllocator mAlloc;
 
 	LLFrameTimer mMemCheckTimer;
-	
-	boost::scoped_ptr<LLUpdaterService> mUpdater;
 
 	// llcorehttp library init/shutdown helper
 	LLAppCoreHttp mAppCoreHttp;
 
-	bool mIsFirstRun;
+        bool mIsFirstRun;
 	U64 mMinMicroSecPerFrame; // frame throttling
 
-	//---------------------------------------------
-	//*NOTE: Mani - legacy updater stuff
-	// Still useable?
-public:
 
-	//some information for updater
-	typedef struct
-	{
-		std::string mUpdateExePath;
-		std::ostringstream mParams;
-	}LLUpdaterInfo ;
-	static LLUpdaterInfo *sUpdaterInfo ;
-
-	void launchUpdater();
-	//---------------------------------------------
 };
 
 // consts from viewer.h
@@ -388,8 +371,8 @@ extern BOOL		gDisconnected;
 
 extern LLFrameTimer	gRestoreGLTimer;
 extern BOOL			gRestoreGL;
-extern BOOL		gUseWireframe;
-extern BOOL		gInitialDeferredModeForWireframe;
+extern bool		gUseWireframe;
+extern bool		gInitialDeferredModeForWireframe;
 
 // VFS globals - gVFS is for general use
 // gStaticVFS is read-only and is shipped w/ the viewer
@@ -413,5 +396,7 @@ extern LLUUID gBlackSquareID;
 
 extern BOOL gRandomizeFramerate;
 extern BOOL gPeriodicSlowFrame;
+
+extern BOOL gSimulateMemLeak;
 
 #endif // LL_LLAPPVIEWER_H
