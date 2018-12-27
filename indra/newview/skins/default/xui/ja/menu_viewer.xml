@@ -44,6 +44,7 @@
 			<menu_item_check label="ボイスモーフィングなし" name="NoVoiceMorphing"/>
 			<menu_item_check label="プレビュー..." name="Preview"/>
 			<menu_item_call label="申し込む..." name="Subscribe"/>
+			<menu_item_call label="プレミアム会員特典..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="ジェスチャー..." name="Gestures"/>
 		<menu_item_check label="フレンド" name="My Friends"/>
@@ -57,7 +58,8 @@
 		<menu_item_call label="行き先..." name="Destinations"/>
 		<menu_item_check label="世界地図" name="World Map"/>
 		<menu_item_check label="ミニマップ" name="Mini-Map"/>
-		<menu_item_check label="検索" name="Search"/>
+		<menu_item_call label="イベント" name="Events"/>
+		<menu_item_check label="検索..." name="Search"/>
 		<menu_item_call label="ホームにテレポート" name="Teleport Home"/>
 		<menu_item_call label="現在地をホームに設定" name="Set Home to Here"/>
 		<menu_item_call label="スナップショット" name="Take Snapshot"/>
@@ -75,11 +77,11 @@
 			<menu_item_check label="区画プロパティ" name="Parcel Properties"/>
 			<menu_item_check label="アドバンスメニュー" name="Show Advanced Menu"/>
 		</menu>
-		<menu label="太陽" name="Sun">
+		<menu label="日" name="Sun">
 			<menu_item_check label="日の出" name="Sunrise"/>
 			<menu_item_check label="正午" name="Noon"/>
 			<menu_item_check label="日没" name="Sunset"/>
-			<menu_item_check label="真夜中" name="Midnight"/>
+			<menu_item_check label="深夜" name="Midnight"/>
 			<menu_item_check label="リージョンの設定を使用" name="Use Region Settings"/>
 		</menu>
 		<menu label="自然環境エディター" name="Environment Editor">
@@ -119,7 +121,7 @@
 			<menu_item_call label="次のパーツまたは面を含める" name="Include Next Part or Face"/>
 			<menu_item_call label="前のパーツまたは面を含める" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="リンクセット..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="リージョンオブジェクト" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="選択したものに焦点を合わせる" name="Focus on Selection"/>
 		<menu_item_call label="選択したものをズームする" name="Zoom to Selection"/>
 		<menu label="オブジェクト" name="Object">
@@ -128,8 +130,10 @@
 			<menu_item_call label="コピーを取る" name="Take Copy"/>
 			<menu_item_call label="オブジェクトの中身に保存" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="オブジェクトを返却する" name="Return Object back to Owner"/>
+			<menu_item_call label="複製" name="DuplicateObject"/>
 		</menu>
 		<menu label="スクリプト" name="Scripts">
+			<menu_item_check label="スクリプトの警告/エラー..." name="Script debug"/>
 			<menu_item_call label="スクリプトのリコンパイル（Mono）" name="Mono"/>
 			<menu_item_call label="スクリプトのリコンパイル（LSL）" name="LSL"/>
 			<menu_item_call label="スクリプトのリセット" name="Reset Scripts"/>
@@ -137,7 +141,7 @@
 			<menu_item_call label="スクリプトを実行停止にする" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="パスファインディング" name="Pathfinding">
-			<menu_item_call label="リンクセット..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="リージョンオブジェクト" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="キャラクター..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="表示/テスト..." name="pathfinding_console_menu_item"/>
 			<menu_item_call label="地域の再構築" name="pathfinding_rebake_navmesh_item"/>
@@ -169,6 +173,7 @@
 	</menu>
 	<menu label="ヘルプ" name="Help">
 		<menu_item_call label="ハウツー..." name="How To"/>
+		<menu_item_call label="クイックスタート" name="Quickstart"/>
 		<menu_item_call label="ナレッジベース" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="コミュニティフォーラム" name="Community Forums"/>
@@ -179,7 +184,6 @@
 		<menu_item_call label="バグを報告する" name="Report Bug"/>
 		<menu_item_call label="衝突・プッシュ・打撃" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="[APP_NAME] について" name="About Second Life"/>
-		<menu_item_call label="アップデートを確認" name="Check for Updates"/>
 	</menu>
 	<menu label="アドバンス" name="Advanced">
 		<menu_item_call label="テクスチャのリベークをする" name="Rebake Texture"/>
@@ -274,7 +278,6 @@
 			<menu_item_check label="マトリックスを表示する" name="Show Matrices"/>
 			<menu_item_check label="カーソルを乗せた場所の色を表示する" name="Show Color Under Cursor"/>
 			<menu_item_check label="メモリを表示：" name="Show Memory"/>
-			<menu_item_check label="プライベートメモリ情報を表示" name="Show Private Mem Info"/>
 			<menu_item_check label="オブジェクトのアップデートを表示する" name="Show Updates"/>
 		</menu>
 		<menu label="エラー実行" name="Force Errors">
@@ -309,6 +312,7 @@
 			<menu_item_check label="テクスチャの範囲" name="Texture Area"/>
 			<menu_item_check label="側面" name="Face Area"/>
 			<menu_item_check label="LOD 情報" name="LOD Info"/>
+			<menu_item_check label="三角形の数" name="Triangle Count"/>
 			<menu_item_check label="制作キュー" name="Build Queue"/>
 			<menu_item_check label="光" name="Lights"/>
 			<menu_item_check label="パーティクル" name="Particles"/>
@@ -421,6 +425,7 @@
 			<menu_item_check label="骨組みの衝突判定を表示する" name="Show Collision Skeleton"/>
 			<menu_item_check label="骨を表示" name="Show Bones"/>
 			<menu_item_check label="エージェントのターゲットを表示する" name="Display Agent Target"/>
+			<menu_item_check label="インポスターの範囲を表示" name="Show Impostor Extents"/>
 			<menu_item_call label="アタッチメントをダンプ" name="Dump Attachments"/>
 			<menu_item_call label="アバターテクスチャをデバッグ" name="Debug Avatar Textures"/>
 			<menu_item_call label="ローカルテクスチャをダンプ" name="Dump Local Textures"/>

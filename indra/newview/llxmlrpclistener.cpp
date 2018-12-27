@@ -312,7 +312,7 @@ public:
         }
         XMLRPC_RequestSetData(request, xparams);
 
-        mTransaction.reset(new LLXMLRPCTransaction(mUri, request));
+        mTransaction.reset(new LLXMLRPCTransaction(mUri, request, true, command.has("http_params")? LLSD(command["http_params"]) : LLSD()));
 		mPreviousStatus = mTransaction->status(NULL);
 
         // Free the XMLRPC_REQUEST object and the attached data values.
@@ -379,14 +379,9 @@ public:
 		{
 			case CURLE_SSL_PEER_CERTIFICATE:
 			case CURLE_SSL_CACERT:
-			{
-				LLPointer<LLCertificate> error_cert(mTransaction->getErrorCert());
-				if(error_cert)
-				{
-					data["certificate"] = error_cert->getPem();
-				}
+                data["certificate"] = mTransaction->getErrorCertData();
 				break;
-			}
+
 			default:
 				break;
 		}

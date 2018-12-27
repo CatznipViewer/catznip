@@ -408,7 +408,7 @@ BOOL LLGLSLShader::createShader(std::vector<LLStaticHashedString> * attributes,
     {
         GLhandleARB shaderhandle = LLShaderMgr::instance()->loadShaderFile((*fileIter).first, mShaderLevel, (*fileIter).second, &mDefines, mFeatures.mIndexedTextureChannels);
         LL_DEBUGS("ShaderLoading") << "SHADER FILE: " << (*fileIter).first << " mShaderLevel=" << mShaderLevel << LL_ENDL;
-        if (shaderhandle > 0)
+        if (shaderhandle)
         {
             attachObject(shaderhandle);
         }
@@ -537,7 +537,11 @@ BOOL LLGLSLShader::mapAttributes(const std::vector<LLStaticHashedString> * attri
 
     mAttribute.clear();
     U32 numAttributes = (attributes == NULL) ? 0 : attributes->size();
+#if LL_RELEASE_WITH_DEBUG_INFO
+    mAttribute.resize(LLShaderMgr::instance()->mReservedAttribs.size() + numAttributes, { -1, NULL });
+#else
     mAttribute.resize(LLShaderMgr::instance()->mReservedAttribs.size() + numAttributes, -1);
+#endif
     
     if (res)
     { //read back channel locations
@@ -551,7 +555,11 @@ BOOL LLGLSLShader::mapAttributes(const std::vector<LLStaticHashedString> * attri
             S32 index = glGetAttribLocationARB(mProgramObject, (const GLcharARB *)name);
             if (index != -1)
             {
+#if LL_RELEASE_WITH_DEBUG_INFO
+                mAttribute[i] = { index, name };
+#else
                 mAttribute[i] = index;
+#endif
                 mAttributeMask |= 1 << i;
                 LL_DEBUGS("ShaderLoading") << "Attribute " << name << " assigned to channel " << index << LL_ENDL;
             }
@@ -744,24 +752,25 @@ BOOL LLGLSLShader::mapUniforms(const vector<LLStaticHashedString> * uniforms)
 	, even if the "diffuseMap" will be appear and use first in shader code.
 
 	As example where this situation appear see: "Deferred Material Shader 28/29/30/31"
-	And tickets: MAINT-4165, MAINT-4839, MAINT-3568
+	And tickets: MAINT-4165, MAINT-4839, MAINT-3568, MAINT-6437
 	*/
 
 
 	S32 diffuseMap = glGetUniformLocationARB(mProgramObject, "diffuseMap");
+	S32 specularMap = glGetUniformLocationARB(mProgramObject, "specularMap");
 	S32 bumpMap = glGetUniformLocationARB(mProgramObject, "bumpMap");
 	S32 environmentMap = glGetUniformLocationARB(mProgramObject, "environmentMap");
 
 	std::set<S32> skip_index;
 
-	if (-1 != diffuseMap && (-1 != bumpMap || -1 != environmentMap))
+	if (-1 != diffuseMap && (-1 != specularMap || -1 != bumpMap || -1 != environmentMap))
 	{
 		GLenum type;
 		GLsizei length;
 		GLint size = -1;
 		char name[1024];
 
-		diffuseMap = bumpMap = environmentMap = -1;
+		diffuseMap = specularMap = bumpMap = environmentMap = -1;
 
 		for (S32 i = 0; i < activeCount; i++)
 		{
@@ -772,6 +781,18 @@ BOOL LLGLSLShader::mapUniforms(const vector<LLStaticHashedString> * uniforms)
 			if (-1 == diffuseMap && std::string(name) == "diffuseMap")
 			{
 				diffuseMap = i;
+				continue;
+			}
+
+			if (-1 == specularMap && std::string(name) == "specularMap")
+			{
+				specularMap = i;
+				continue;
+			}
+
+			if (-1 == specularMap && std::string(name) == "specularMap")
+			{
+				specularMap = i;
 				continue;
 			}
 
@@ -788,34 +809,29 @@ BOOL LLGLSLShader::mapUniforms(const vector<LLStaticHashedString> * uniforms)
 			}
 		}
 
+		bool specularDiff = specularMap < diffuseMap && -1 != specularMap;
 		bool bumpLessDiff = bumpMap < diffuseMap && -1 != bumpMap;
 		bool envLessDiff = environmentMap < diffuseMap && -1 != environmentMap;
 
-		if (bumpLessDiff && envLessDiff)
+		if (specularDiff || bumpLessDiff || envLessDiff)
 		{
 			mapUniform(diffuseMap, uniforms);
-			mapUniform(bumpMap, uniforms);
-			mapUniform(environmentMap, uniforms);
-
 			skip_index.insert(diffuseMap);
-			skip_index.insert(bumpMap);
-			skip_index.insert(environmentMap);
-		}
-		else if (bumpLessDiff)
-		{
-			mapUniform(diffuseMap, uniforms);
-			mapUniform(bumpMap, uniforms);
 
-			skip_index.insert(diffuseMap);
-			skip_index.insert(bumpMap);
-		}
-		else if (envLessDiff)
-		{
-			mapUniform(diffuseMap, uniforms);
-			mapUniform(environmentMap, uniforms);
+			if (-1 != specularMap) {
+				mapUniform(specularMap, uniforms);
+				skip_index.insert(specularMap);
+			}
 
-			skip_index.insert(diffuseMap);
-			skip_index.insert(environmentMap);
+			if (-1 != bumpMap) {
+				mapUniform(bumpMap, uniforms);
+				skip_index.insert(bumpMap);
+			}
+
+			if (-1 != environmentMap) {
+				mapUniform(environmentMap, uniforms);
+				skip_index.insert(environmentMap);
+			}
 		}
 	}
 
@@ -997,7 +1013,7 @@ S32 LLGLSLShader::disableTexture(S32 uniform, LLTexUnit::eTextureType mode)
 
 void LLGLSLShader::uniform1i(U32 index, GLint x)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1019,7 +1035,7 @@ void LLGLSLShader::uniform1i(U32 index, GLint x)
 
 void LLGLSLShader::uniform1f(U32 index, GLfloat x)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1041,7 +1057,7 @@ void LLGLSLShader::uniform1f(U32 index, GLfloat x)
 
 void LLGLSLShader::uniform2f(U32 index, GLfloat x, GLfloat y)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1064,7 +1080,7 @@ void LLGLSLShader::uniform2f(U32 index, GLfloat x, GLfloat y)
 
 void LLGLSLShader::uniform3f(U32 index, GLfloat x, GLfloat y, GLfloat z)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1087,7 +1103,7 @@ void LLGLSLShader::uniform3f(U32 index, GLfloat x, GLfloat y, GLfloat z)
 
 void LLGLSLShader::uniform4f(U32 index, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1110,7 +1126,7 @@ void LLGLSLShader::uniform4f(U32 index, GLfloat x, GLfloat y, GLfloat z, GLfloat
 
 void LLGLSLShader::uniform1iv(U32 index, U32 count, const GLint* v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1133,7 +1149,7 @@ void LLGLSLShader::uniform1iv(U32 index, U32 count, const GLint* v)
 
 void LLGLSLShader::uniform1fv(U32 index, U32 count, const GLfloat* v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1156,7 +1172,7 @@ void LLGLSLShader::uniform1fv(U32 index, U32 count, const GLfloat* v)
 
 void LLGLSLShader::uniform2fv(U32 index, U32 count, const GLfloat* v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1179,7 +1195,7 @@ void LLGLSLShader::uniform2fv(U32 index, U32 count, const GLfloat* v)
 
 void LLGLSLShader::uniform3fv(U32 index, U32 count, const GLfloat* v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1202,7 +1218,7 @@ void LLGLSLShader::uniform3fv(U32 index, U32 count, const GLfloat* v)
 
 void LLGLSLShader::uniform4fv(U32 index, U32 count, const GLfloat* v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1225,7 +1241,7 @@ void LLGLSLShader::uniform4fv(U32 index, U32 count, const GLfloat* v)
 
 void LLGLSLShader::uniformMatrix2fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1242,7 +1258,7 @@ void LLGLSLShader::uniformMatrix2fv(U32 index, U32 count, GLboolean transpose, c
 
 void LLGLSLShader::uniformMatrix3fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1259,7 +1275,7 @@ void LLGLSLShader::uniformMatrix3fv(U32 index, U32 count, GLboolean transpose, c
 
 void LLGLSLShader::uniformMatrix3x4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v)
 {
-	if (mProgramObject > 0)
+	if (mProgramObject)
 	{	
 		if (mUniform.size() <= index)
 		{
@@ -1276,7 +1292,7 @@ void LLGLSLShader::uniformMatrix3x4fv(U32 index, U32 count, GLboolean transpose,
 
 void LLGLSLShader::uniformMatrix4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v)
 {
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {   
         if (mUniform.size() <= index)
         {
@@ -1294,7 +1310,7 @@ void LLGLSLShader::uniformMatrix4fv(U32 index, U32 count, GLboolean transpose, c
 GLint LLGLSLShader::getUniformLocation(const LLStaticHashedString& uniform)
 {
     GLint ret = -1;
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {
         LLStaticStringTable<GLint>::iterator iter = mUniformMap.find(uniform);
         if (iter != mUniformMap.end())
@@ -1318,7 +1334,7 @@ GLint LLGLSLShader::getUniformLocation(const LLStaticHashedString& uniform)
 GLint LLGLSLShader::getUniformLocation(U32 index)
 {
     GLint ret = -1;
-    if (mProgramObject > 0)
+    if (mProgramObject)
     {
         llassert(index < mUniform.size());
         return mUniform[index];

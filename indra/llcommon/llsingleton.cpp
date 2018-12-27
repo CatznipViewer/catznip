@@ -220,6 +220,9 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
             std::find(initializing.begin(), initializing.end(), this);
         if (found != initializing.end())
         {
+            list_t::const_iterator it_next = found;
+            it_next++;
+
             // Report the circularity. Requiring the coder to dig through the
             // logic to diagnose exactly how we got here is less than helpful.
             std::ostringstream out;
@@ -238,11 +241,30 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
             // otherwise we'd be returning a pointer to a partially-
             // constructed object! But from initSingleton() is okay: that
             // method exists specifically to support circularity.
-            // Decide which log helper to call based on initState. They have
-            // identical signatures.
-            ((initState == CONSTRUCTING)? logerrs : logwarns)
-                ("LLSingleton circularity: ", out.str().c_str(),
-                 demangle(typeid(*this).name()).c_str(), "");
+            // Decide which log helper to call.
+            if (initState == CONSTRUCTING)
+            {
+                logerrs("LLSingleton circularity in Constructor: ", out.str().c_str(),
+                    demangle(typeid(*this).name()).c_str(), "");
+            }
+            else if (it_next == initializing.end())
+            {
+                // Points to self after construction, but during initialization.
+                // Singletons can initialize other classes that depend onto them,
+                // so this is expected.
+                //
+                // Example: LLNotifications singleton initializes default channels.
+                // Channels register themselves with singleton once done.
+                logdebugs("LLSingleton circularity: ", out.str().c_str(),
+                    demangle(typeid(*this).name()).c_str(), "");
+            }
+            else
+            {
+                // Actual circularity with other singleton (or single singleton is used extensively).
+                // Dependency can be unclear.
+                logwarns("LLSingleton circularity: ", out.str().c_str(),
+                    demangle(typeid(*this).name()).c_str(), "");
+            }
         }
         else
         {
@@ -369,62 +391,20 @@ void LLSingletonBase::deleteAll()
     }
 }
 
-/*------------------------ Final cleanup management ------------------------*/
-class LLSingletonBase::MasterRefcount
-{
-public:
-    // store a POD int so it will be statically initialized to 0
-    int refcount;
-};
-static LLSingletonBase::MasterRefcount sMasterRefcount;
-
-LLSingletonBase::ref_ptr_t LLSingletonBase::get_master_refcount()
-{
-    // Calling this method constructs a new ref_ptr_t, which implicitly calls
-    // intrusive_ptr_add_ref(MasterRefcount*).
-    return &sMasterRefcount;
-}
-
-void intrusive_ptr_add_ref(LLSingletonBase::MasterRefcount* mrc)
-{
-    // Count outstanding SingletonLifetimeManager instances.
-    ++mrc->refcount;
-}
-
-void intrusive_ptr_release(LLSingletonBase::MasterRefcount* mrc)
-{
-    // Notice when each SingletonLifetimeManager instance is destroyed.
-    if (! --mrc->refcount)
-    {
-        // The last instance was destroyed. Time to kill any remaining
-        // LLSingletons -- but in dependency order.
-        LLSingletonBase::deleteAll();
-    }
-}
-
 /*---------------------------- Logging helpers -----------------------------*/
 namespace {
 bool oktolog()
 {
     // See comments in log() below.
-    return sMasterRefcount.refcount && LLError::is_available();
+    return LLError::is_available();
 }
 
 void log(LLError::ELevel level,
          const char* p1, const char* p2, const char* p3, const char* p4)
 {
-    // Check whether we're in the implicit final LLSingletonBase::deleteAll()
-    // call. We've carefully arranged for deleteAll() to be called when the
-    // last SingletonLifetimeManager instance is destroyed -- in other words,
-    // when the last translation unit containing an LLSingleton instance
-    // cleans up static data. That could happen after std::cerr is destroyed!
     // The is_available() test below ensures that we'll stop logging once
     // LLError has been cleaned up. If we had a similar portable test for
-    // std::cerr, this would be a good place to use it. As we do not, just
-    // don't log anything during implicit final deleteAll(). Detect that by
-    // the master refcount having gone to zero.
-    if (sMasterRefcount.refcount == 0)
-        return;
+    // std::cerr, this would be a good place to use it.
 
     // Check LLError::is_available() because some of LLError's infrastructure
     // is itself an LLSingleton. If that LLSingleton has not yet been

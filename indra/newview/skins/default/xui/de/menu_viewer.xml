@@ -44,6 +44,7 @@
 			<menu_item_check label="Kein Voice-Morphing" name="NoVoiceMorphing"/>
 			<menu_item_check label="Vorschau..." name="Preview"/>
 			<menu_item_call label="Abonnieren..." name="Subscribe"/>
+			<menu_item_call label="Premium-Vorteil..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="Gesten..." name="Gestures"/>
 		<menu_item_check label="Freunde" name="My Friends"/>
@@ -57,7 +58,8 @@
 		<menu_item_call label="Ziele..." name="Destinations"/>
 		<menu_item_check label="Karte" name="World Map"/>
 		<menu_item_check label="Minikarte" name="Mini-Map"/>
-		<menu_item_check label="Suchen" name="Search"/>
+		<menu_item_call label="Events" name="Events"/>
+		<menu_item_check label="Suchen..." name="Search"/>
 		<menu_item_call label="Nach Hause teleportieren" name="Teleport Home"/>
 		<menu_item_call label="Hier als Zuhause wählen" name="Set Home to Here"/>
 		<menu_item_call label="Foto" name="Take Snapshot"/>
@@ -119,7 +121,7 @@
 			<menu_item_call label="Nächsten Teil oder nächste Fläche einschließen" name="Include Next Part or Face"/>
 			<menu_item_call label="Vorherigen Teil oder vorherige Fläche einschließen" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="Linksets..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Regionsobjekte" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="Fokus auf Auswahl" name="Focus on Selection"/>
 		<menu_item_call label="Auf Auswahl zoomen" name="Zoom to Selection"/>
 		<menu label="Objekt" name="Object">
@@ -128,8 +130,10 @@
 			<menu_item_call label="Kopie nehmen" name="Take Copy"/>
 			<menu_item_call label="Wieder in Objektinhalt speichern" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="Objekt zurückgeben" name="Return Object back to Owner"/>
+			<menu_item_call label="Duplizieren" name="DuplicateObject"/>
 		</menu>
 		<menu label="Skripts" name="Scripts">
+			<menu_item_check label="Skriptwarnungen/Fehler..." name="Script debug"/>
 			<menu_item_call label="Skripts rekompilieren (Mono)" name="Mono"/>
 			<menu_item_call label="Skripts rekompilieren (LSL)" name="LSL"/>
 			<menu_item_call label="Skripts zurücksetzen" name="Reset Scripts"/>
@@ -137,7 +141,7 @@
 			<menu_item_call label="Skripts auf nicht ausführen einstellen" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="Pathfinding" name="Pathfinding">
-			<menu_item_call label="Linksets..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Regionsobjekte" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="Figuren..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="Anzeigen/Testen..." name="pathfinding_console_menu_item"/>
 			<menu_item_call label="Region neu formen" name="pathfinding_rebake_navmesh_item"/>
@@ -169,6 +173,7 @@
 	</menu>
 	<menu label="Hilfe" name="Help">
 		<menu_item_call label="Anweisungen..." name="How To"/>
+		<menu_item_call label="Kurzanleitung" name="Quickstart"/>
 		<menu_item_call label="Knowledge Base" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="Community-Foren" name="Community Forums"/>
@@ -179,7 +184,6 @@
 		<menu_item_call label="Fehler melden" name="Report Bug"/>
 		<menu_item_call label="Rempler, Stöße &amp; Schläge" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="INFO ÜBER [APP_NAME]" name="About Second Life"/>
-		<menu_item_call label="Nach Updates suchen" name="Check for Updates"/>
 	</menu>
 	<menu label="Erweitert" name="Advanced">
 		<menu_item_call label="Textur neu laden" name="Rebake Texture"/>
@@ -274,7 +278,6 @@
 			<menu_item_check label="Matrizen anzeigen" name="Show Matrices"/>
 			<menu_item_check label="Farbe unter Cursor anzeigen" name="Show Color Under Cursor"/>
 			<menu_item_check label="Speicher anzeigen" name="Show Memory"/>
-			<menu_item_check label="Info über privaten Speicher anzeigen" name="Show Private Mem Info"/>
 			<menu_item_check label="Akutalisierungen an Objekten anzeigen" name="Show Updates"/>
 		</menu>
 		<menu label="Fehler erzwingen" name="Force Errors">
@@ -309,6 +312,7 @@
 			<menu_item_check label="Texturbereich" name="Texture Area"/>
 			<menu_item_check label="Oberflächenbereich" name="Face Area"/>
 			<menu_item_check label="Detailstufeninfos" name="LOD Info"/>
+			<menu_item_check label="Dreieckszähler" name="Triangle Count"/>
 			<menu_item_check label="Konstruktionswarteschlange" name="Build Queue"/>
 			<menu_item_check label="Lichter" name="Lights"/>
 			<menu_item_check label="Partikel" name="Particles"/>
@@ -415,6 +419,7 @@
 			<menu_item_check label="Gelenkpunkte anzeigen" name="Show Collision Skeleton"/>
 			<menu_item_check label="Knochen anzeigen" name="Show Bones"/>
 			<menu_item_check label="Agent-Ziel anzeigen" name="Display Agent Target"/>
+			<menu_item_check label="Umfang der vereinfachten Darstellung anzeigen" name="Show Impostor Extents"/>
 			<menu_item_call label="Anhänge ausgeben" name="Dump Attachments"/>
 			<menu_item_call label="Fehler in Avatar-Texturen beseitigen" name="Debug Avatar Textures"/>
 			<menu_item_call label="Lokale Texturen ausgeben" name="Dump Local Textures"/>

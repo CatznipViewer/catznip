@@ -38,7 +38,7 @@
 		Ошибка инициализации графики. Обновите графический драйвер!
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) 
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
@@ -71,17 +71,17 @@ SLURL: &lt;nolink&gt;[SLURL]&lt;/nolink&gt;
 Дальность отрисовки: [DRAW_DISTANCE] м
 Ширина канала: [NET_BANDWITH] кбит/с
 Коэффициент детализации: [LOD_FACTOR]
-Качество визуализации: [RENDER_QUALITY] / 7
+Качество визуализации: [RENDER_QUALITY]
 Расширенная модель освещения: [GPU_SHADERS]
 Память текстур: [TEXTURE_MEMORY] МБ
 Время создания VFS (кэш): [VFS_TIME]
 	</string>
 	<string name="AboutLibs">
-		Версия декодера J2C: [J2C_VERSION]
-Версия драйвера звука: [AUDIO_DRIVER_VERSION]
-Версия LLCEFLib/CEF: [LLCEFLIB_VERSION]
-Версия LibVLC: [LIBVLC_VERSION]
-Версия голосового сервера: [VOICE_VERSION]
+		Версия декодера J2C: [J2C_VERSION] 
+Версия аудиодрайвера: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+Версия LibVLC: [LIBVLC_VERSION] 
+Версия речевого сервера: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
 		Потеряно пакетов: [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
@@ -261,9 +261,8 @@ support@secondlife.com.
 [TIME] по тихоокеанскому времени.
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		В данное время нам не удается выполнить ваш запрос.
-Обратитесь за помощью в службу поддержки Second Life по адресу http://secondlife.com/support.
-Если вам не удается изменить свой пароль, позвоните по телефону (866) 476-9763.
+		В данное время нам не удается выполнить ваш запрос. 
+Обратитесь за помощью в службу поддержки Second Life по адресу http://support.secondlife.com.
 	</string>
 	<string name="LoginFailedTransformError">
 		При входе обнаружена несогласованность данных.
@@ -279,9 +278,8 @@ support@secondlife.com.
 		В ответ на запрос выхода симулятор возвратил сообщение о сбое.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		В системе выполняется выход для вашего аккаунта.
-Она будет недоступна до
-[TIME] по тихоокеанскому времени.
+		В системе выполняется выход для вашего аккаунта. 
+Подождите минуту перед повторным входом в систему.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		Не удается создать допустимый сеанс.
@@ -700,6 +698,19 @@ support@secondlife.com.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Неизвестный статус
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		Услуги недоступны.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Сервер испытывает неожиданные трудности.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		Услуги недоступны или превышение времени ожидания при передаче.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Ошибка при запросе на передачу. Для получения помощи в 
+решении этой проблемы пройдите по ссылке http://secondlife.com/support.
 	</string>
 	<string name="texture">
 		текстуру
@@ -1431,6 +1442,9 @@ support@secondlife.com.
 	<string name="InventoryNoMatchingItems">
 		Не нашли того, что вам нужно? Воспользуйтесь [secondlife:///app/search/all/[SEARCH_TERM] поиском].
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Не нашли то, что искали? Попробуйте на [secondlife:///app/inventory/filters Show filters].
+	</string>
 	<string name="PlacesNoMatchingItems">
 		Не нашли того, что вам нужно? Воспользуйтесь [secondlife:///app/search/places/[SEARCH_TERM] поиском].
 	</string>
@@ -1488,13 +1502,17 @@ support@secondlife.com.
 		[[MARKETPLACE_CREATE_STORE_URL] Магазин] возвращает ошибки.
 	</string>
 	<string name="InventoryMarketplaceError">
-		Это бета-версия функции. Если вы хотите участвовать в ее тестировании, заполните эту [http://goo.gl/forms/FCQ7UXkakz форму Google].
+		Ошибка при открытии списков товаров торгового центра.
+Если данное сообщение повторится, обратитесь за помощью в службу поддержки Second Life на странице http://support.secondlife.com
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">
 		Папка списков товаров торгового центра пуста.
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Перетащите папки в эту область, чтобы выставить их на продажу в [[MARKETPLACE_DASHBOARD_URL] Торговом центре].
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] предметов(а))
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		В папке версии должна быть папка запасов
@@ -2194,10 +2212,19 @@ support@secondlife.com.
 		все землевладения пользователя [OWNER], которыми вы управляете
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Допущенные жители: ([ALLOWEDAGENTS], не более [MAXACCESS])
+		Разрешено всегда: ([ALLOWEDAGENTS], не более [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Допущенные группы: ([ALLOWEDGROUPS], не более [MAXACCESS])
+		Группы всегда разрешены: ([ALLOWEDGROUPS], не более [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Всегда заблокированы: ([BANNEDAGENTS], не более [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Разрешено всегда
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Всегда заблокированы
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Память под скрипты на участке
@@ -4438,7 +4465,10 @@ support@secondlife.com.
 		Конференция с жителем [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Предложено пополнить инвентарь
+		Предложен предмет инвентаря «[ITEM_NAME]»
+	</string>
+	<string name="inventory_folder_offered-im">
+		Предложена папка инвентаря «[ITEM_NAME]»
 	</string>
 	<string name="share_alert">
 		Перетаскивайте вещи из инвентаря сюда
@@ -4525,7 +4555,10 @@ support@secondlife.com.
 		Задано положение дома.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		Житель [NAME] заплатил вам L$[AMOUNT] за [REASON].
@@ -4896,7 +4929,7 @@ support@secondlife.com.
 	<string name="server_is_down">
 		Несмотря на наши усилия, что-то неожиданно пошло не так.
 
-	Ознакомьтесь с описанием известных проблем в работе этой службы на сайте status.secondlifegrid.net.
+Ознакомьтесь с описанием известных проблем в работе этой службы на сайте http://status.secondlifegrid.net.
         Если проблемы продолжаются, то проверьте подключение к сети и настройки брандмауэра.
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -5369,6 +5402,9 @@ support@secondlife.com.
 	<string name="Command_Gestures_Label">
 		Жесты
 	</string>
+	<string name="Command_Grid_Status_Label">
+		Состояние сетки
+	</string>
 	<string name="Command_HowTo_Label">
 		Инструкции
 	</string>
@@ -5461,6 +5497,9 @@ support@secondlife.com.
 	</string>
 	<string name="Command_Gestures_Tooltip">
 		Жесты для аватара
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Показать текущее состояние сетки
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Выполнение типичных задач
@@ -5683,6 +5722,9 @@ support@secondlife.com.
 	</string>
 	<string name="loading_chat_logs">
 		Загрузка...
+	</string>
+	<string name="na">
+		н/д
 	</string>
 	<string name="preset_combo_label">
 		-Пустой список-

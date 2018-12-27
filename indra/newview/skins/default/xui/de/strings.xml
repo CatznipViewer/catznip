@@ -38,8 +38,7 @@
 		Grafikinitialisierung fehlgeschlagen. Bitte aktualisieren Sie Ihren Grafiktreiber.
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
-[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]Bit) [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
 		Build-Konfiguration [BUILD_CONFIG]
@@ -66,12 +65,12 @@ Grafikkarte: [GRAPHICS_CARD]
 	</string>
 	<string name="AboutSettings">
 		Fenstergröße: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
-Schriftgrößenanpassung [FONT_SIZE_ADJUSTMENT] Pt
+Schriftgrößenanpassung: [FONT_SIZE_ADJUSTMENT] pt
 UI-Skalierung: [UI_SCALE]
 Sichtweite: [DRAW_DISTANCE] m
 Bandbreite: [NET_BANDWITH] kbit/s
 LOD-Faktor: [LOD_FACTOR]
-Darstellungsqualität: [RENDER_QUALITY] / 7
+Darstellungsqualität: [RENDER_QUALITY]
 Erweitertes Beleuchtungsmodell: [GPU_SHADERS]
 Texturspeicher: [TEXTURE_MEMORY] MB
 Erstellungszeit VFS (Cache): [VFS_TIME]
@@ -79,7 +78,7 @@ Erstellungszeit VFS (Cache): [VFS_TIME]
 	<string name="AboutLibs">
 		J2C-Decoderversion: [J2C_VERSION]
 Audiotreiberversion: [AUDIO_DRIVER_VERSION]
-LLCEFLib/CEF-Version: [LLCEFLIB_VERSION]
+[LIBCEF_VERSION]
 LibVLC-Version: [LIBVLC_VERSION]
 Voice-Server-Version: [VOICE_VERSION]
 	</string>
@@ -261,9 +260,8 @@ support@secondlife.com.
 [TIME] Pacific Time wieder verfügbar.
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		Ihre Anfrage kann derzeit nicht bearbeitet werden.
-Wenden Sie sich unter http://secondlife.com/support an den Second Life-Support.
-Wenn Sie Ihr Kennwort nicht ändern können, rufen Sie die US-Nummer (866) 476-9763 an.
+		Ihre Anfrage kann derzeit nicht bearbeitet werden. 
+Bitte wenden Sie sich unter http://secondlife.com/support an den Second Life-Support.
 	</string>
 	<string name="LoginFailedTransformError">
 		Nicht übereinstimmende Daten bei der Anmeldung festgestellt.
@@ -279,9 +277,8 @@ Wenn Sie der Ansicht sind, dass Sie diese Meldung fälschlicherweise erhalten ha
 		Abmeldeanforderung führte zu einem Simulatorfehler.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		Das System meldet Sie gerade ab.
-Ihr Konto ist erst ab
-[TIME] Pacific Time wieder verfügbar.
+		Das System meldet Sie gerade ab. 
+Bitte warten Sie eine Minute, bevor Sie sich erneut einloggen.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		Es kann keine gültige Sitzung erstellt werden.
@@ -703,6 +700,19 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Status unbekannt
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		Dienst nicht verfügbar.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Auf dem Server sind unerwartete Probleme aufgetreten.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		Dienst nicht verfügbar oder Zeitüberschreitung beim Upload.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Fehler bei der Upload-Anforderung. Um das Problem zu lösen, 
+besuchen Sie bitte http://secondlife.com/support
 	</string>
 	<string name="texture">
 		Textur
@@ -1434,6 +1444,9 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 	<string name="InventoryNoMatchingItems">
 		Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/all/[SEARCH_TERM] Suche].
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Sie haben nicht das Richtige gefunden? Versuchen Sie [secondlife:///app/inventory/filters Show filters].
+	</string>
 	<string name="PlacesNoMatchingItems">
 		Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/places/[SEARCH_TERM] Suche].
 	</string>
@@ -1491,13 +1504,17 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 		Der [[MARKETPLACE_CREATE_STORE_URL] Marktplatz-Laden] gibt Fehler zurück.
 	</string>
 	<string name="InventoryMarketplaceError">
-		Diese Funktion befindet sich in der Betaphase. Wenn Sie teilnehmen möchten, tragen Sie sich in dieses [http://goo.gl/forms/FCQ7UXkakz Google-Formular] ein.
+		Beim Öffnen der Marktplatz-Auflistungen ist ein Fehler aufgetreten.
+Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://support.secondlife.com an den Support von Second Life.
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">
 		Ihr Ordner mit Marktplatz-Auflistungen ist leer.
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Ziehen Sie Ordner in diesen Bereich, um sie im [[MARKETPLACE_DASHBOARD_URL] Marktplatz] zum Verkauf anzubieten.
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Artikel )
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		Bestandsordner müssen in einem Versionsordner gespeichert sein
@@ -2197,10 +2214,19 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 		alle Grundbesitze, die Sie für [OWNER] verwalten
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Zulässige Einwohner: ([ALLOWEDAGENTS], max [MAXACCESS])
+		Immer zulässig: ([ALLOWEDAGENTS], max. [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Zulässige Gruppen: ([ALLOWEDGROUPS], max [MAXACCESS])
+		Immer zugelassene Gruppen: ([ALLOWEDGROUPS], max. [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Immer verbannt: ([BANNEDAGENTS], max. [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Immer zugelassen
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Immer verbannt
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Parzellenskript-Speicher
@@ -4444,7 +4470,10 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich bitte an [SUPPORT_
 		Konferenz mit [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Inventarobjekt angeboten
+		Inventarobjekt „[ITEM_NAME]“ angeboten
+	</string>
+	<string name="inventory_folder_offered-im">
+		Inventarordner „[ITEM_NAME]“ angeboten
 	</string>
 	<string name="share_alert">
 		Objekte aus dem Inventar hier her ziehen
@@ -4531,7 +4560,10 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich bitte an [SUPPORT_
 		Position für Zuhause festgelegt.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] hat Ihnen [REASON] [AMOUNT] L$ bezahlt.
@@ -4902,8 +4934,8 @@ Missbrauchsbericht
 	<string name="server_is_down">
 		Trotz all unserer Bemühungen ist ein unerwarteter Fehler aufgetreten.
 
-	Bitte überprüfen Sie status.secondlifegrid.net, um herauszufinden, ob ein Problem besteht.
- Falls Sie weiterhin Problem haben, überprüfen Sie bitte Ihre Netzwerk- und Firewalleinstellungen.
+Bitte überprüfen Sie http://status.secondlifegrid.net, um herauszufinden, ob ein Problem mit dem Service vorliegt.
+        Falls Sie weiterhin Problem haben, überprüfen Sie bitte Ihre Netzwerk- und Firewalleinstellungen.
 	</string>
 	<string name="dateTimeWeekdaysNames">
 		Sonntag:Montag:Dienstag:Mittwoch:Donnerstag:Freitag:Samstag
@@ -5363,6 +5395,9 @@ Setzen Sie den Editorpfad in Anführungszeichen
 	<string name="Command_Gestures_Label">
 		Gesten
 	</string>
+	<string name="Command_Grid_Status_Label">
+		Grid-Status
+	</string>
 	<string name="Command_HowTo_Label">
 		Infos
 	</string>
@@ -5455,6 +5490,9 @@ Setzen Sie den Editorpfad in Anführungszeichen
 	</string>
 	<string name="Command_Gestures_Tooltip">
 		Gesten für Ihren Avatar
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Aktuellen Grid-Status anzeigen
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Wie führe ich gängige Aufgaben aus?
@@ -5677,6 +5715,9 @@ Setzen Sie den Editorpfad in Anführungszeichen
 	</string>
 	<string name="loading_chat_logs">
 		Laden...
+	</string>
+	<string name="na">
+		Nicht zutreffend
 	</string>
 	<string name="preset_combo_label">
 		-Leere Liste-

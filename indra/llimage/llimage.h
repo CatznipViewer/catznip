@@ -71,7 +71,6 @@ const S32 HTTP_PACKET_SIZE = 1496;
 class LLImageFormatted;
 class LLImageRaw;
 class LLColor4U;
-class LLPrivateMemoryPool;
 
 typedef enum e_image_codec
 {
@@ -160,10 +159,6 @@ public:
 	static F32 calc_download_priority(F32 virtual_size, F32 visible_area, S32 bytes_sent);
 
 	static EImageCodec getCodecFromExtension(const std::string& exten);
-	
-	static void createPrivatePool() ;
-	static void destroyPrivatePool() ;
-	static LLPrivateMemoryPool* getPrivatePool() {return sPrivatePoolp;}
 
 	//static LLTrace::MemStatHandle sMemStat;
 
@@ -178,8 +173,6 @@ private:
 
 	bool mBadBufferAllocation ;
 	bool mAllowOverSize ;
-
-	static LLPrivateMemoryPool* sPrivatePoolp ;
 };
 
 // Raw representation of an image (used for textures, and other uncompressed formats
@@ -215,7 +208,8 @@ public:
 	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void contractToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
-	bool scale( S32 new_width, S32 new_height, bool scale_image = true );
+	bool scale(S32 new_width, S32 new_height, bool scale_image = true);
+    LLPointer<LLImageRaw> scaled(S32 new_width, S32 new_height);
 	
 	// Fill the buffer with a constant color
 	void fill( const LLColor4U& color );
