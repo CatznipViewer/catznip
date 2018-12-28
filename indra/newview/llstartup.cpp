@@ -249,6 +249,7 @@ static bool mLoginStatePastUI = false;
 
 const S32 DEFAULT_MAX_AGENT_GROUPS = 42;
 const S32 ALLOWED_MAX_AGENT_GROUPS = 500;
+const F32 STATE_AGENT_WAIT_TIMEOUT = 240; //seconds
 
 boost::scoped_ptr<LLEventPump> LLStartUp::sStateWatcher(new LLEventStream("StartupState"));
 boost::scoped_ptr<LLStartupListener> LLStartUp::sListener(new LLStartupListener());
@@ -316,6 +317,13 @@ void set_flags_and_update_appearance()
 // true when all initialization done.
 bool idle_startup()
 {
+	if (gViewerWindow == NULL)
+	{
+		// We expect window to be initialized
+		LL_WARNS_ONCE() << "gViewerWindow is not initialized" << LL_ENDL;
+		return false; // No world yet
+	}
+
 	const F32 PRECACHING_DELAY = gSavedSettings.getF32("PrecachingDelay");
 	static LLTimer timeout;
 
@@ -721,7 +729,6 @@ bool idle_startup()
 		set_startup_status(0.03f, msg.c_str(), gAgent.mMOTD.c_str());
 		display_startup();
 		// LLViewerMedia::initBrowser();
-		show_release_notes_if_required();
 		LLStartUp::setStartupState( STATE_LOGIN_SHOW );
 		return FALSE;
 	}
@@ -748,10 +755,10 @@ bool idle_startup()
 		if (gLoginMenuBarView == NULL)
 		{
 			LL_DEBUGS("AppInit") << "initializing menu bar" << LL_ENDL;
-			initialize_edit_menu();
 			initialize_spellcheck_menu();
 			init_menus();
 		}
+		show_release_notes_if_required();
 
 		if (show_connect_box)
 		{
@@ -988,9 +995,6 @@ bool idle_startup()
 		// Load Avatars icons cache
 		LLAvatarIconIDCache::getInstance()->load();
 		
-		// Load media plugin cookies
-		LLViewerMedia::loadCookieFile();
-
 		LLRenderMuteList::getInstance()->loadFromFile();
 
 		//-------------------------------------------------
@@ -1177,7 +1181,7 @@ bool idle_startup()
 
 						}
 					}
-					else 
+					else if (!message.empty())
 					{
 						// This wasn't a certificate error, so throw up the normal
 						// notificatioin message.
@@ -1635,6 +1639,13 @@ bool idle_startup()
 			LLStartUp::setStartupState( STATE_INVENTORY_SEND );
 		}
 		display_startup();
+
+		if (!gAgentMovementCompleted && timeout.getElapsedTimeF32() > STATE_AGENT_WAIT_TIMEOUT)
+		{
+			LL_WARNS("AppInit") << "Backing up to login screen!" << LL_ENDL;
+			LLNotificationsUtil::add("LoginPacketNeverReceived", LLSD(), LLSD(), login_alert_status);
+			reset_login();
+		}
 		return FALSE;
 	}
 
@@ -2409,6 +2420,7 @@ void register_viewer_callbacks(LLMessageSystem* msg)
 	msg->setHandlerFuncFast(_PREHASH_NameValuePair,			process_name_value);
 	msg->setHandlerFuncFast(_PREHASH_RemoveNameValuePair,	process_remove_name_value);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAnimation,		process_avatar_animation);
+	msg->setHandlerFuncFast(_PREHASH_ObjectAnimation,		process_object_animation);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAppearance,		process_avatar_appearance);
 	msg->setHandlerFuncFast(_PREHASH_CameraConstraint,		process_camera_constraint);
 	msg->setHandlerFuncFast(_PREHASH_AvatarSitResponse,		process_avatar_sit_response);

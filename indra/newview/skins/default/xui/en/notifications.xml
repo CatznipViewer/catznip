@@ -616,6 +616,16 @@ Save all changes to clothing/body parts?
 
   <notification
    icon="alertmodal.tga"
+   name="AllowMultipleViewers"
+   type="alertmodal">
+    Running multiple Second Life viewers is not supported. It can lead to texture cache collisions, corruption and degraded visuals and performance.
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="GrantModifyRights"
    type="alertmodal">
 Granting modify rights to another Resident allows them to change, delete or take ANY objects you may have in-world. Be VERY careful when handing out this permission.
@@ -6105,7 +6115,7 @@ The folder &apos;[FOLDERNAME]&apos; is a system folder. Deleting system folders 
    icon="alertmodal.tga"
    name="ConfirmEmptyTrash"
    type="alertmodal">
-[COUNT] items will be permanently deleted. Are you sure you want to permanently delete the contents of your Trash?
+[COUNT] items and folders will be permanently deleted. Are you sure you want to permanently delete the contents of your Trash?
     <tag>confirm</tag>
     <usetemplate
      name="okcancelbuttons"
@@ -8271,17 +8281,6 @@ Failed to connect to [VOICE_CHANNEL_NAME], please try again later.  You will now
   </notification>
 
   <notification
-   duration="10"
-   icon="notifytip.tga"
-   name="VoiceLoginRetry"
-   type="notifytip">
-    <unique/>    
-We are creating a voice channel for you. This may take up to one minute.
-  <tag>status</tag>
-  <tag>voice</tag>
-  </notification>
-
-  <notification
    icon="notify.tga"
    name="VoiceEffectsExpired"
    sound="UISndAlert"
@@ -8290,6 +8289,8 @@ We are creating a voice channel for you. This may take up to one minute.
     <unique/>    
 One or more of your subscribed Voice Morphs has expired.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
   <tag>voice</tag>
   </notification>
@@ -8303,6 +8304,8 @@ One or more of your subscribed Voice Morphs has expired.
     <unique/>
 The active Voice Morph has expired, your normal voice settings have been applied.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
     <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8316,6 +8319,8 @@ The active Voice Morph has expired, your normal voice settings have been applied
     <unique/>    
 One or more of your Voice Morphs will expire in less than [INTERVAL] days.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8448,11 +8453,23 @@ Failed to save appearance to XML.
 Failed to save snapshot to [PATH]: Disk is full. [NEED_MEMORY]KB is required but only [FREE_MEMORY]KB is free.
   </notification>
 
+  <notification icon="notifytip.tga"
+    name="SnapshotToLocalDirNotExist" type="notifytip">
+Failed to save snapshot to [PATH]: Directory does not exist.
+  </notification>
+
   <notification
     icon="notifytip.tga"
     name="PresetNotSaved"
     type="notifytip">
 Error saving preset [NAME].
+  </notification>
+    
+  <notification
+    icon="notifytip.tga"
+    name="DefaultPresetNotSaved"
+    type="notifytip">
+Can not overwrite default preset.
   </notification>
 
   <notification
@@ -8736,12 +8753,18 @@ Please check your network and firewall setup.
    icon="alertmodal.tga"
    name="NoVoiceConnect"
    type="alertmodal">
-We're having trouble connecting to your voice server:
+We are unable to connect to the voice server:
 
 [HOSTID]
 
-Voice communications will not be available.
+Ports that must be allowed for voice are:
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
 Please check your network and firewall setup.
+Disable any SIP ALG feature in your router.
+
+Voice communications will not be available.
     <tag>voice</tag>
   <tag>fail</tag>
     <usetemplate
@@ -10379,6 +10402,14 @@ You have been teleported by the object '[OBJECT_NAME]' owned by an unknown user.
 Unable to create requested object. The region is full.
   </notification>
 
+   <notification
+    icon="alertmodal.tga"
+   name="CantCreateAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Unable to create requested animated object because it exceeds the rigged triangle limit.
+  </notification>
+
   <notification
    icon="alertmodal.tga"
    name="CantAttackMultipleObjOneSpot"
@@ -10509,6 +10540,46 @@ You are not allowed to change this shape.
 
   <notification
    icon="alertmodal.tga"
+   name="NoPermsTooManyAttachedAnimatedObjects"
+   type="notify">
+   <tag>fail</tag>
+Operation would cause the number of attached animated objects to exceed the limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="NoPermsLinkAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Can't link these objects because the resulting animated object would exceed the rigged triangle limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="NoPermsSetFlagAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Can't make this object into an animated object because it would exceed the rigged triangle limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="CantChangeAnimatedObjectStateInsufficientLand"
+   type="notify">
+   <tag>fail</tag>
+Can't change animated object state for this object because it would cause parcel limit to be exceeded.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ErrorNoMeshData"
+   type="notify">
+   <tag>fail</tag>
+Server error: cannot complete this operation because mesh data is not loaded.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="NoAccessToClaimObjects"
    type="notify">
    <tag>fail</tag>
@@ -10593,14 +10664,6 @@ Not enough script resources available to attach object!
    type="notify">
     <tag>fail</tag>
     Cannot attach object because it is already being removed.
-  </notification>
-
-  <notification
-  icon="alertmodal.tga"
-  name="IllegalAttachment"
-  type="notify">
-   <tag>fail</tag>
-   The attachment has requested a nonexistent point on the avatar. It has been attached to the chest instead.
   </notification>
 
   <notification
@@ -11213,7 +11276,7 @@ An internal error prevented us from properly updating your viewer.  The L$ balan
    name="LargePrimAgentIntersect"
    type="notify">
    <tag>fail</tag>
-Cannot create large prims that intersect other players.  Please re-try when other players have moved.
+Cannot create large prims that intersect other residents.  Please re-try when other residents have moved.
   </notification>
   
   <notification

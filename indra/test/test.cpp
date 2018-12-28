@@ -34,7 +34,6 @@
  *
  */
 
-
 #include "linden_common.h"
 #include "llerrorcontrol.h"
 #include "lltut.h"
@@ -526,12 +525,12 @@ int main(int argc, char **argv)
 	const char* LOGTEST = getenv("LOGTEST");
 	if (LOGTEST)
 	{
-		LLError::initForApplication(".", true /* log to stderr */);
+		LLError::initForApplication(".", ".", true /* log to stderr */);
 		LLError::setDefaultLevel(LLError::decodeLevel(LOGTEST));
 	}
 	else
 	{
-		LLError::initForApplication(".", false /* do not log to stderr */);
+		LLError::initForApplication(".", ".", false /* do not log to stderr */);
 		LLError::setDefaultLevel(LLError::LEVEL_DEBUG);
 	}	
 	LLError::setFatalFunction(wouldHaveCrashed);
@@ -685,5 +684,4 @@ int main(int argc, char **argv)
 	return retval;
 
 	//delete mycallback;
-
 }

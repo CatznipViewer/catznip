@@ -204,6 +204,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 
 	// change z sort of clickable text to be behind buttons
 	sendChildToBack(getChildView("forgot_password_text"));
+	sendChildToBack(getChildView("sign_up_text"));
 
 	LLComboBox* favorites_combo = getChild<LLComboBox>("start_location_combo");
 	updateLocationSelectorsVisibility(); // separate so that it can be called from preferences
@@ -271,9 +272,9 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	LLTextBox* forgot_password_text = getChild<LLTextBox>("forgot_password_text");
 	forgot_password_text->setClickedCallback(onClickForgotPassword, NULL);
 
-	LLTextBox* need_help_text = getChild<LLTextBox>("login_help");
-	need_help_text->setClickedCallback(onClickHelp, NULL);
-	
+	LLTextBox* sign_up_text = getChild<LLTextBox>("sign_up_text");
+	sign_up_text->setClickedCallback(onClickSignUp, NULL);
+
 	// get the web browser control
 	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("login_html");
 	web_browser->addObserver(this);
@@ -284,6 +285,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::addFavoritesToStartLocation, this));
 	// STEAM-14: When user presses Enter with this field in focus, initiate login
 	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onClickConnect, this));
+	username_combo->setKeystrokeOnEsc(TRUE);
 }
 
 void LLPanelLogin::addFavoritesToStartLocation()
@@ -299,11 +301,23 @@ void LLPanelLogin::addFavoritesToStartLocation()
 
 	// Load favorites into the combo.
 	std::string user_defined_name = getChild<LLComboBox>("username_combo")->getSimple();
+	LLStringUtil::toLower(user_defined_name);
 	std::replace(user_defined_name.begin(), user_defined_name.end(), '.', ' ');
 	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites_" + LLGridManager::getInstance()->getGrid() + ".xml");
 	std::string old_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites.xml");
 	mUsernameLength = user_defined_name.length();
 	updateLoginButtons();
+
+	std::string::size_type index = user_defined_name.find(' ');
+	if (index != std::string::npos)
+	{
+		std::string username = user_defined_name.substr(0, index);
+		std::string lastname = user_defined_name.substr(index+1);
+		if (lastname == "resident")
+		{
+			user_defined_name = username;
+		}
+	}
 
 	LLSD fav_llsd;
 	llifstream file;
@@ -492,7 +506,7 @@ void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
 	LL_INFOS("Credentials") << "Setting authenticator field " << authenticator["type"].asString() << LL_ENDL;
 	if(authenticator.isMap() && 
 	   authenticator.has("secret") && 
-	   (authenticator["secret"].asString().size() > 0))
+	   (authenticator["secret"].asString().size() > 0) && remember)
 	{
 		
 		// This is a MD5 hex digest of a password.
@@ -801,7 +815,8 @@ void LLPanelLogin::loadLoginPage()
 	params["login_content_version"] = gSavedSettings.getString("LoginContentVersion");
 
 	// Make an LLURI with this augmented info
-	LLURI login_uri(LLURI::buildHTTP(login_page.authority(),
+	std::string url = login_page.scheme().empty()? login_page.authority() : login_page.scheme() + "://" + login_page.authority();
+	LLURI login_uri(LLURI::buildHTTP(url,
 									 login_page.path(),
 									 params));
 
@@ -911,12 +926,11 @@ void LLPanelLogin::onClickForgotPassword(void*)
 }
 
 //static
-void LLPanelLogin::onClickHelp(void*)
+void LLPanelLogin::onClickSignUp(void*)
 {
 	if (sInstance)
 	{
-		LLViewerHelp* vhelp = LLViewerHelp::getInstance();
-		vhelp->showTopic(vhelp->preLoginTopic());
+		LLWeb::loadURLExternal(sInstance->getString("sign_up_url"));
 	}
 }
 

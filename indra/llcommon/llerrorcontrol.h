@@ -60,12 +60,7 @@ public:
 
 namespace LLError
 {
-	LL_COMMON_API void initForServer(const std::string& identity);
-		// resets all logging settings to defaults needed by server processes
-		// logs to stderr, syslog, and windows debug log
-		// the identity string is used for in the syslog
-
-	LL_COMMON_API void initForApplication(const std::string& dir, bool log_to_stderr = true);
+	LL_COMMON_API void initForApplication(const std::string& user_dir, const std::string& app_dir, bool log_to_stderr = true);
 		// resets all logging settings to defaults needed by applicaitons
 		// logs to stderr and windows debug log
 		// sets up log configuration from the file logcontrol.xml in dir
@@ -79,6 +74,10 @@ namespace LLError
 	LL_COMMON_API void setPrintLocation(bool);
 	LL_COMMON_API void setDefaultLevel(LLError::ELevel);
 	LL_COMMON_API ELevel getDefaultLevel();
+	LL_COMMON_API void setAlwaysFlush(bool flush);
+    LL_COMMON_API bool getAlwaysFlush();
+	LL_COMMON_API void setEnabledLogTypesMask(U32 mask);
+	LL_COMMON_API U32 getEnabledLogTypesMask();
 	LL_COMMON_API void setFunctionLevel(const std::string& function_name, LLError::ELevel);
 	LL_COMMON_API void setClassLevel(const std::string& class_name, LLError::ELevel);
 	LL_COMMON_API void setFileLevel(const std::string& file_name, LLError::ELevel);
@@ -144,6 +143,8 @@ namespace LLError
 
 		virtual void recordMessage(LLError::ELevel, const std::string& message) = 0;
 			// use the level for better display, not for filtering
+
+        virtual bool enabled() { return true; }
 
 		bool wantsTime();
 		bool wantsTags();
