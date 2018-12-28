@@ -112,6 +112,11 @@ void LLPngWrapper::readDataCallback(png_structp png_ptr, png_bytep dest, png_siz
 void LLPngWrapper::writeDataCallback(png_structp png_ptr, png_bytep src, png_size_t length)
 {
 	PngDataInfo *dataInfo = (PngDataInfo *) png_get_io_ptr(png_ptr);
+	if (dataInfo->mOffset + length > dataInfo->mDataSize)
+	{
+		png_error(png_ptr, "Data write error. Requested data size exceeds available data size.");
+		return;
+	}
 	U8 *dest = &dataInfo->mData[dataInfo->mOffset];
 	memcpy(dest, src, length);
 	dataInfo->mOffset += static_cast<U32>(length);
@@ -168,8 +173,11 @@ BOOL LLPngWrapper::readPng(U8* src, S32 dataSize, LLImageRaw* rawImage, ImageInf
 		// data space
 		if (rawImage != NULL)
 		{
-			rawImage->resize(static_cast<U16>(mWidth),
-				static_cast<U16>(mHeight), mChannels);
+			if (!rawImage->resize(static_cast<U16>(mWidth),
+				static_cast<U16>(mHeight), mChannels))
+			{
+				LLTHROW(PngError("Failed to resize image"));
+			}
 			U8 *dest = rawImage->getData();
 			int offset = mWidth * mChannels;
 
@@ -199,6 +207,12 @@ BOOL LLPngWrapper::readPng(U8* src, S32 dataSize, LLImageRaw* rawImage, ImageInf
 	catch (const PngError& msg)
 	{
 		mErrorMessage = msg.what();
+		releaseResources();
+		return (FALSE);
+	}
+	catch (std::bad_alloc)
+	{
+		mErrorMessage = "LLPngWrapper";
 		releaseResources();
 		return (FALSE);
 	}
@@ -272,7 +286,7 @@ void LLPngWrapper::updateMetaData()
 
 // Method to write raw image into PNG at dest. The raw scanline begins
 // at the bottom of the image per SecondLife conventions.
-BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
+BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest, size_t destSize)
 {
 	try
 	{
@@ -313,6 +327,7 @@ BOOL LLPngWrapper::writePng(const LLImageRaw* rawImage, U8* dest)
 		PngDataInfo dataPtr;
 		dataPtr.mData = dest;
 		dataPtr.mOffset = 0;
+		dataPtr.mDataSize = destSize;
 		png_set_write_fn(mWritePngPtr, &dataPtr, &writeDataCallback, &writeFlush);
 
 		// Setup image params

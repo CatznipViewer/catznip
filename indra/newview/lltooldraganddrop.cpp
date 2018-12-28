@@ -267,7 +267,7 @@ LLToolDragAndDrop::LLDragAndDropDictionary::LLDragAndDropDictionary()
 	addEntry(DAD_CLOTHING, 		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL, &LLToolDragAndDrop::dad3dWearItem, 				&LLToolDragAndDrop::dad3dGiveInventory, 		&LLToolDragAndDrop::dad3dUpdateInventory, 			&LLToolDragAndDrop::dad3dNULL));
 	addEntry(DAD_OBJECT, 		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL, &LLToolDragAndDrop::dad3dRezAttachmentFromInv,	&LLToolDragAndDrop::dad3dGiveInventoryObject,	&LLToolDragAndDrop::dad3dRezObjectOnObject, 		&LLToolDragAndDrop::dad3dRezObjectOnLand));
 	addEntry(DAD_NOTECARD, 		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL, &LLToolDragAndDrop::dad3dNULL, 					&LLToolDragAndDrop::dad3dGiveInventory, 		&LLToolDragAndDrop::dad3dUpdateInventory, 			&LLToolDragAndDrop::dad3dNULL));
-	addEntry(DAD_CATEGORY, 		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL, &LLToolDragAndDrop::dad3dWearCategory,			&LLToolDragAndDrop::dad3dGiveInventoryCategory,	&LLToolDragAndDrop::dad3dUpdateInventoryCategory,	&LLToolDragAndDrop::dad3dNULL));
+	addEntry(DAD_CATEGORY,		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL, &LLToolDragAndDrop::dad3dWearCategory,			&LLToolDragAndDrop::dad3dGiveInventoryCategory,	&LLToolDragAndDrop::dad3dRezCategoryOnObject,		&LLToolDragAndDrop::dad3dNULL));
 	addEntry(DAD_ROOT_CATEGORY, new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL,	&LLToolDragAndDrop::dad3dNULL,					&LLToolDragAndDrop::dad3dNULL,					&LLToolDragAndDrop::dad3dNULL,						&LLToolDragAndDrop::dad3dNULL));
 	addEntry(DAD_BODYPART, 		new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL,	&LLToolDragAndDrop::dad3dWearItem,				&LLToolDragAndDrop::dad3dGiveInventory,			&LLToolDragAndDrop::dad3dUpdateInventory,			&LLToolDragAndDrop::dad3dNULL));
 	addEntry(DAD_ANIMATION, 	new DragAndDropEntry(&LLToolDragAndDrop::dad3dNULL,	&LLToolDragAndDrop::dad3dNULL,					&LLToolDragAndDrop::dad3dGiveInventory,			&LLToolDragAndDrop::dad3dUpdateInventory,			&LLToolDragAndDrop::dad3dNULL));
@@ -789,7 +789,7 @@ void LLToolDragAndDrop::dragOrDrop3D( S32 x, S32 y, MASK mask, BOOL drop, EAccep
 	mDrop = drop;
 	if (mDrop)
 	{
-		// don't allow drag and drop onto transparent objects
+		// don't allow drag and drop onto rigged or transparent objects
 		pick(gViewerWindow->pickImmediate(x, y, FALSE, FALSE));
 	}
 	else
@@ -1282,7 +1282,6 @@ void LLToolDragAndDrop::dropObject(LLViewerObject* raycast_target,
 	if (gInventory.isObjectDescendentOf(item->getUUID(), trash_id))
 	{
 		is_in_trash = true;
-		remove_from_inventory = TRUE;
 	}
 
 	LLUUID source_id = from_task_inventory ? mSourceID : LLUUID::null;
@@ -1465,13 +1464,20 @@ void LLToolDragAndDrop::dropInventory(LLViewerObject* hit_obj,
 
 // accessor that looks at permissions, copyability, and names of
 // inventory items to determine if a drop would be ok.
-EAcceptance LLToolDragAndDrop::willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item)
+EAcceptance LLToolDragAndDrop::willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item, EDragAndDropType type)
 {
 	// check the basics
 	if (!item || !obj) return ACCEPT_NO;
 	// HACK: downcast
 	LLViewerInventoryItem* vitem = (LLViewerInventoryItem*)item;
-	if (!vitem->isFinished()) return ACCEPT_NO;
+	if (!vitem->isFinished() && (type != DAD_CATEGORY))
+	{
+		// Note: for DAD_CATEGORY we assume that folder version check passed and folder 
+		// is complete, meaning that items inside are up to date. 
+		// (isFinished() == false) at the moment shows that item was loaded from cache.
+		// Library or agent inventory only.
+		return ACCEPT_NO;
+	}
 	if (vitem->getIsLinkType()) return ACCEPT_NO; // No giving away links
 
 	// deny attempts to drop from an object onto itself. This is to
@@ -1599,12 +1605,12 @@ static void show_object_sharing_confirmation(const std::string name,
 }
 
 static void get_name_cb(const LLUUID& id,
-						const std::string& full_name,
+						const LLAvatarName& av_name,
 						LLInventoryObject* inv_obj,
 						const LLSD& dest,
 						const LLUUID& dest_agent)
 {
-	show_object_sharing_confirmation(full_name,
+	show_object_sharing_confirmation(av_name.getUserName(),
 								     inv_obj,
 								     dest,
 						  		     id,
@@ -1649,17 +1655,17 @@ bool LLToolDragAndDrop::handleGiveDragAndDrop(LLUUID dest_agent, LLUUID session_
 				// If no IM session found get the destination agent's name by id.
 				if (NULL == session)
 				{
-					std::string fullname;
+					LLAvatarName av_name;
 
 					// If destination agent's name is found in cash proceed to showing the confirmation dialog.
 					// Otherwise set up a callback to show the dialog when the name arrives.
-					if (gCacheName->getFullName(dest_agent, fullname))
+					if (LLAvatarNameCache::get(dest_agent, &av_name))
 					{
-						show_object_sharing_confirmation(fullname, inv_obj, dest, dest_agent, LLUUID::null);
+						show_object_sharing_confirmation(av_name.getUserName(), inv_obj, dest, dest_agent, LLUUID::null);
 					}
 					else
 					{
-						gCacheName->get(dest_agent, false, boost::bind(&get_name_cb, _1, _2, inv_obj, dest, dest_agent));
+						LLAvatarNameCache::get(dest_agent, boost::bind(&get_name_cb, _1, _2, inv_obj, dest, dest_agent));
 					}
 
 					return true;
@@ -1814,7 +1820,6 @@ EAcceptance LLToolDragAndDrop::dad3dRezObjectOnLand(
 	if(gInventory.isObjectDescendentOf(item->getUUID(), trash_id))
 	{
 		accept = ACCEPT_YES_SINGLE;
-		remove_inventory = TRUE;
 	}
 
 	if(drop)
@@ -2333,7 +2338,7 @@ EAcceptance LLToolDragAndDrop::dad3dUpdateInventoryCategory(
 				(*item_iter) = item;
 			}
 			*/
-			rv = willObjectAcceptInventory(root_object, item);
+			rv = willObjectAcceptInventory(root_object, item, DAD_CATEGORY);
 			if (rv < ACCEPT_YES_COPY_SINGLE)
 			{
 				LL_DEBUGS() << "Object will not accept " << item->getUUID() << LL_ENDL;
@@ -2366,6 +2371,21 @@ EAcceptance LLToolDragAndDrop::dad3dUpdateInventoryCategory(
 	}
 	return rv;
 }
+
+
+EAcceptance LLToolDragAndDrop::dad3dRezCategoryOnObject(
+	LLViewerObject* obj, S32 face, MASK mask, BOOL drop)
+{
+	if ((mask & MASK_CONTROL))
+	{
+		return dad3dUpdateInventoryCategory(obj, face, mask, drop);
+	}
+	else
+	{
+		return ACCEPT_NO;
+	}
+}
+
 
 BOOL LLToolDragAndDrop::dadUpdateInventoryCategory(LLViewerObject* obj,
 												   BOOL drop)

@@ -11,14 +11,6 @@
          name="Texture"
          top="0"
          width="295">
-            <panel.string
-             name="string repeats per meter">
-                Repeats Per Meter
-            </panel.string>
-            <panel.string
-             name="string repeats per face">
-                Repeats Per Face
-            </panel.string>
             <text
              type="string"
              length="1"
@@ -192,7 +184,7 @@
              left="10"
              name="texture control"
              tool_tip="Click to choose a picture"
-             top_pad="7"
+             top_pad="5"
              width="64" />
             <button
              follows="left|top"

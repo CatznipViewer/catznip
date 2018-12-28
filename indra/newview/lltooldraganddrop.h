@@ -165,6 +165,8 @@ protected:
 									 MASK mask, BOOL drop);
 	EAcceptance dad3dRezObjectOnObject(LLViewerObject* obj, S32 face,
 									   MASK mask, BOOL drop);
+	EAcceptance dad3dRezCategoryOnObject(LLViewerObject* obj, S32 face,
+										 MASK mask, BOOL drop);
 	EAcceptance dad3dRezScript(LLViewerObject* obj, S32 face,
 							   MASK mask, BOOL drop);
 	EAcceptance dad3dTextureObject(LLViewerObject* obj, S32 face,
@@ -227,7 +229,7 @@ protected:
 	
 	// accessor that looks at permissions, copyability, and names of
 	// inventory items to determine if a drop would be ok.
-	static EAcceptance willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item);
+	static EAcceptance willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item, EDragAndDropType type = DAD_NONE);
 
 public:
 	// helper functions

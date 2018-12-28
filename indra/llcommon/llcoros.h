@@ -151,6 +151,9 @@ public:
     /// for delayed initialization
     void setStackSize(S32 stacksize);
 
+    /// for delayed initialization
+    void printActiveCoroutines();
+
     /// get the current coro::self& for those who really really care
     static coro::self& get_self();
 
@@ -182,6 +185,9 @@ private:
     bool cleanup(const LLSD&);
     struct CoroData;
     static void no_cleanup(CoroData*);
+#if LL_WINDOWS
+    static void winlevel(const callable_t& callable);
+#endif
     static void toplevel(coro::self& self, CoroData* data, const callable_t& callable);
     static CoroData& get_CoroData(const std::string& caller);
 
@@ -220,6 +226,7 @@ private:
         // function signature down to that point -- and of course through every
         // other caller of every such function.
         LLCoros::coro::self* mSelf;
+        F64 mCreationTime; // since epoch
     };
     typedef boost::ptr_map<std::string, CoroData> CoroMap;
     CoroMap mCoros;

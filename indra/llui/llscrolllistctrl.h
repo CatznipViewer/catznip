@@ -90,6 +90,7 @@ public:
 
 	
 	typedef boost::signals2::signal<S32 (S32,const LLScrollListItem*,const LLScrollListItem*),maximum<S32> > sort_signal_t;
+	typedef boost::signals2::signal<bool(const LLUUID& user_id)> is_friend_signal_t;
 	
 	struct Params : public LLInitParam::Block<Params, LLUICtrl::Params>
 	{
@@ -200,6 +201,8 @@ public:
 	BOOL			isSorted() const { return mSorted; }
 
 	virtual BOOL	isSelected(const LLSD& value) const;
+
+	BOOL 			hasSelectedItem() const;
 
 	BOOL			handleClick(S32 x, S32 y, MASK mask);
 	BOOL			selectFirstItem();
@@ -391,6 +394,8 @@ public:
 		return mSortCallback->connect(cb);
 	}
 
+	boost::signals2::connection setIsFriendCallback(const is_friend_signal_t::slot_type& cb);
+
 
 protected:
 	// "Full" interface: use this when you're creating a list that has one or more of the following:
@@ -432,6 +437,7 @@ private:
 	static void		showProfile(std::string id, bool is_group);
 	static void		sendIM(std::string id);
 	static void		addFriend(std::string id);
+	static void		removeFriend(std::string id);
 	static void		showNameDetails(std::string id, bool is_group);
 	static void		copyNameToClipboard(std::string id, bool is_group);
 	static void		copySLURLToClipboard(std::string id, bool is_group);
@@ -512,6 +518,8 @@ private:
 	std::vector<sort_column_t>	mSortColumns;
 
 	sort_signal_t*	mSortCallback;
+
+	is_friend_signal_t*	mIsFriendSignal;
 }; // end class LLScrollListCtrl
 
 #endif  // LL_SCROLLLISTCTRL_H

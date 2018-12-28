@@ -92,10 +92,23 @@
          shortcut="alt|shift|S"
          name="Sit Down Here">
           <menu_item_call.on_click
-           function="Self.SitDown"
-           parameter="" />
+           function="Self.SitDown"/>
+          <menu_item_call.on_visible
+           function="Self.ShowSitDown"/>
           <menu_item_call.on_enable
            function="Self.EnableSitDown" />
+        </menu_item_call>
+        <menu_item_call
+         label="Stand Up"
+         layout="topleft"
+         shortcut="alt|shift|S"
+         name="Stand up">
+          <menu_item_call.on_click
+           function="Self.StandUp"/>
+          <menu_item_call.on_visible
+           function="Self.EnableStandUp"/>
+          <menu_item_call.on_enable
+           function="Self.EnableStandUp" />
         </menu_item_call>
         <menu_item_check
          label="Fly"
@@ -336,6 +349,12 @@
              name="Subscribe">
                 <menu_item_call.on_click
                  function="Communicate.VoiceMorphing.Subscribe" />
+            </menu_item_call>
+            <menu_item_call
+             label="Premium perk..."
+             name="PremiumPerk">
+                <menu_item_call.on_click
+                 function="Communicate.VoiceMorphing.PremiumPerk" />
             </menu_item_call>
         </menu>
         <menu_item_check
@@ -937,7 +956,7 @@
             </menu_item_call>
         </menu>
         <menu_item_call
-            label="Linksets..."
+            label="Region Objects"
             name="pathfinding_linkset_menu_item">
           <menu_item_call.on_click
               function="Floater.ToggleOrBringToFront"
@@ -1019,6 +1038,15 @@
 			<menu_item_call.on_enable
                function="Object.EnableReturn" />
           </menu_item_call>
+          <menu_item_call
+           label="Duplicate"
+           name="DuplicateObject"
+           shortcut="control|D">
+            <menu_item_call.on_click
+               function="Object.Duplicate" />
+            <menu_item_call.on_enable
+               function="Object.EnableDuplicate" />
+          </menu_item_call>
 		</menu>
         <menu
            create_jump_keys="true"
@@ -1088,7 +1116,7 @@
          name="Pathfinding"
          tear_off="true">
         <menu_item_call
-            label="Linksets..."
+            label="Region Objects"
             name="pathfinding_linksets_menu_item">
           <menu_item_call.on_click
               function="Floater.ToggleOrBringToFront"
@@ -1488,12 +1516,6 @@
              function="Floater.Show"
              parameter="sl_about" />
         </menu_item_call>
-        <menu_item_call
-         label="Check for Updates"
-         name="Check for Updates">
-          <menu_item_call.on_click
-           function="Advanced.CheckViewerUpdates"/>
-        </menu_item_call>
     </menu>
     <menu
      create_jump_keys="true"
@@ -1510,7 +1532,8 @@
         </menu_item_call>
         <menu_item_call
            label="Set UI Size to Default"
-           name="Set UI Size to Default">
+           name="Set UI Size to Default"
+           shortcut="control|alt|shift|R">
           <menu_item_call.on_click
              function="View.DefaultUISize" />
         </menu_item_call>
@@ -2396,16 +2419,6 @@
                function="ToggleControl"
                parameter="DebugShowMemory" />
             </menu_item_check>
-	     <menu_item_check
-               label="Show Private Mem Info"
-               name="Show Private Mem Info">
-              <menu_item_check.on_check
-               function="CheckControl"
-               parameter="DebugShowPrivateMem" />
-              <menu_item_check.on_click
-               function="ToggleControl"
-               parameter="DebugShowPrivateMem" />
-            </menu_item_check>
 
             <menu_item_separator/>
 
@@ -2669,6 +2682,16 @@
           <menu_item_check.on_click
            function="Advanced.ToggleInfoDisplay"
            parameter="lod info" />
+        </menu_item_check>
+        <menu_item_check
+         label="Triangle Count"
+         name="Triangle Count">
+          <menu_item_check.on_check
+           function="Advanced.CheckInfoDisplay"
+           parameter="triangle count" />
+          <menu_item_check.on_click
+           function="Advanced.ToggleInfoDisplay"
+           parameter="triangle count" />
         </menu_item_check>
         <menu_item_check
          label="Build Queue"
@@ -3196,7 +3219,7 @@
            shortcut="control|alt|shift|Z">
             <menu_item_call.on_click
              function="Advanced.WebContentTest"
-             parameter="http://google.com"/>
+             parameter="http://duckduckgo.com"/>
           </menu_item_call>
           <menu_item_call
            label="FB Connect Test"
@@ -3578,6 +3601,16 @@
                 <menu_item_check.on_click
                  function="Advanced.ToggleInfoDisplay"
                  parameter="agent target" />
+            </menu_item_check>
+            <menu_item_check
+             label="Show Impostor Extents"
+             name="Show Impostor Extents">
+                <menu_item_check.on_check
+                 function="Advanced.CheckInfoDisplay"
+                 parameter="impostors" />
+                <menu_item_check.on_click
+                 function="Advanced.ToggleInfoDisplay"
+                 parameter="impostors" />
             </menu_item_check>
             <!-- Appears not to exist anymore
             <menu_item_check

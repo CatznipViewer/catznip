@@ -544,7 +544,7 @@ void getPreeditLocation(float *location, unsigned int length)
 		
 		preeditor->getPreeditLocation(length, &coord, &rect, NULL);
 		
-		float c[4] = {coord.mX, coord.mY, 0, 0};
+		float c[4] = {float(coord.mX), float(coord.mY), 0, 0};
 		
 		convertRectToScreen(gWindowImplementation->getWindow(), c);
 		
@@ -899,7 +899,7 @@ BOOL LLWindowMacOSX::setPosition(const LLCoordScreen position)
 {
 	if(mWindow)
 	{
-		float pos[2] = {position.mX, position.mY};
+		float pos[2] = {float(position.mX), float(position.mY)};
 		setWindowPos(mWindow, pos);
 	}
 
@@ -1515,6 +1515,7 @@ void LLWindowMacOSX::updateCursor()
 	case UI_CURSOR_NOLOCKED:
 	case UI_CURSOR_ARROWLOCKED:
 	case UI_CURSOR_GRABLOCKED:
+	case UI_CURSOR_PIPETTE:
 	case UI_CURSOR_TOOLTRANSLATE:
 	case UI_CURSOR_TOOLROTATE:
 	case UI_CURSOR_TOOLSCALE:
@@ -1565,6 +1566,7 @@ void LLWindowMacOSX::initCursors()
 	initPixmapCursor(UI_CURSOR_NOLOCKED, 8, 8);
 	initPixmapCursor(UI_CURSOR_ARROWLOCKED, 1, 1);
 	initPixmapCursor(UI_CURSOR_GRABLOCKED, 2, 14);
+	initPixmapCursor(UI_CURSOR_PIPETTE, 3, 29);
 	initPixmapCursor(UI_CURSOR_TOOLTRANSLATE, 1, 1);
 	initPixmapCursor(UI_CURSOR_TOOLROTATE, 1, 1);
 	initPixmapCursor(UI_CURSOR_TOOLSCALE, 1, 1);
@@ -1758,7 +1760,7 @@ void LLWindowMacOSX::spawnWebBrowser(const std::string& escaped_url, bool async)
 LLSD LLWindowMacOSX::getNativeKeyData()
 {
 	LLSD result = LLSD::emptyMap();
-#if 1
+
 	if(mRawKeyEvent)
 	{
         result["event_type"] = LLSD::Integer(mRawKeyEvent->mEventType);
@@ -1768,7 +1770,6 @@ LLSD LLWindowMacOSX::getNativeKeyData()
         result["event_umodchars"] = (mRawKeyEvent->mEventUnmodChars) ? LLSD(LLSD::Integer(mRawKeyEvent->mEventUnmodChars)) : LLSD();
         result["event_isrepeat"] = LLSD::Boolean(mRawKeyEvent->mEventRepeat);
 	}
-#endif
 
 	LL_DEBUGS() << "native key data is: " << result << LL_ENDL;
 

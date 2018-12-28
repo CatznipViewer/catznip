@@ -64,7 +64,7 @@ class LLLocalBitmap
 		void replaceIDs(LLUUID old_id, LLUUID new_id);
 		std::vector<LLViewerObject*> prepUpdateObjects(LLUUID old_id, U32 channel);
 		void updateUserPrims(LLUUID old_id, LLUUID new_id, U32 channel);
-		void updateUserSculpts(LLUUID old_id, LLUUID new_id);
+		void updateUserVolumes(LLUUID old_id, LLUUID new_id, U32 channel);
 		void updateUserLayers(LLUUID old_id, LLUUID new_id, LLWearableType::EType type);
 		LLAvatarAppearanceDefines::ETextureIndex getTexIndex(LLWearableType::EType type, LLAvatarAppearanceDefines::EBakedTextureIndex baked_texind);
 
@@ -120,8 +120,11 @@ class LLLocalBitmapMgr
 		static void			cleanupClass();
 		static bool         addUnit();
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-		static bool         addUnit(const std::string& filename, LLUUID* pTrackingId = NULL);
-		static bool         hasUnit(const std::string& filename, LLUUID* pTrackingId = NULL);
+protected:
+		static LLUUID       addUnitInternal(const std::string& filename);
+public:
+		static LLUUID       addUnit(const std::string& filename);
+		static LLUUID       getUnitID(const std::string& filename);
 // [/SL:KB]
 		static void         delUnit(LLUUID tracking_id);
 		static bool 		checkTextureDimensions(std::string filename);

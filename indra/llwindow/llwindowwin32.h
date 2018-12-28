@@ -152,7 +152,7 @@ protected:
 	U32		fillReconvertString(const LLWString &text, S32 focus, S32 focus_length, RECONVERTSTRING *reconvert_string);
 	void	handleStartCompositionMessage();
 	void	handleCompositionMessage(U32 indexes);
-	BOOL	handleImeRequests(U32 request, U32 param, LRESULT *result);
+	BOOL	handleImeRequests(WPARAM request, LPARAM param, LRESULT *result);
 
 protected:
 	//
@@ -217,6 +217,8 @@ protected:
 	U32				mRawMsg;
 	U32				mRawWParam;
 	U32				mRawLParam;
+
+	BOOL			mMouseVanish;
 
 	friend class LLWindowManager;
 };

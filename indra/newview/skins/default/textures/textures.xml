@@ -136,6 +136,7 @@ with the same filename but different name
   <texture name="Command_Facebook_Icon"     file_name="toolbar_icons/facebook.png"     preload="true" />
   <texture name="Command_Flickr_Icon"       file_name="toolbar_icons/flickr.png"       preload="true" />
   <texture name="Command_Gestures_Icon"     file_name="toolbar_icons/gestures.png"     preload="true" />
+  <texture name="Command_Grid_Status_Icon"  file_name="toolbar_icons/grid_status.png"  preload="true" />
   <texture name="Command_HowTo_Icon"        file_name="toolbar_icons/howto.png"        preload="true" />
   <texture name="Command_Inventory_Icon"    file_name="toolbar_icons/inventory.png"    preload="true" />
   <texture name="Command_Map_Icon"          file_name="toolbar_icons/map.png"          preload="true" />
@@ -325,6 +326,7 @@ with the same filename but different name
   <texture name="Inv_Undershirt" file_name="icons/Inv_Undershirt.png" preload="false" />
   <texture name="Inv_Link" file_name="icons/Inv_Link.png" preload="false" />
   <texture name="Inv_Invalid" file_name="icons/Inv_Invalid.png" preload="false" />
+  <texture name="Inv_Unknown" file_name="icons/Inv_UnknownObject.png" preload="false" />
   <texture name="Inv_VersionFolderClosed" file_name="icons/Inv_VersionFolderClosed.png" preload="false" />
   <texture name="Inv_VersionFolderOpen" file_name="icons/Inv_VersionFolderOpen.png" preload="false" />
   
