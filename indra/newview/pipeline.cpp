@@ -8709,7 +8709,8 @@ void LLPipeline::renderDeferredLighting()
 					}
 
 					const LLViewerObject *vobj = drawablep->getVObj();
-					if(vobj && vobj->getAvatar() && vobj->getAvatar()->isInMuteList())
+					if(vobj && vobj->getAvatar()
+						&& (vobj->getAvatar()->isTooComplex() || vobj->getAvatar()->isInMuteList()))
 					{
 						continue;
 					}
