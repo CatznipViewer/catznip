@@ -3386,14 +3386,14 @@ Diese werden für ein paar Sekunden sicherheitshalber gesperrt.
 	<notification name="SnapshotToComputerFailed">
 		Fehler beim Speichern des Bildes unter [PATH]: Zu wenig Speicherplatz auf dem Medium. [NEED_MEMORY]KB werden benötigt, es stehen jedoch nur [FREE_MEMORY]KB zur Verfügung.
 	</notification>
+	<notification name="PresetNotSaved">
+		Fehler beim Speichern der Voreinstellung [NAME].
 	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Die Standart-Voreinstellung kann nicht überschrieben werden.
 	</notification>
-	<notification name="AppearanceToXMLFailed">
-		Fehler beim Speichern des Erscheinungsbilds als XML.
-    icon=&quot;notifytip.tga&quot;
-	name=&quot;PresetNotDeleted&quot;
-    type=&quot;notifytip&quot;&gt;
-Fehler beim Löschen der Voreinstellung [NAME].
+	<notification name="PresetNotDeleted">
+		Fehler beim Löschen der Voreinstellung [NAME].
 	</notification>
 	<notification name="UnableToFindHelpTopic">
 		Hilfethema für dieses Element wurde nicht gefunden.
@@ -4155,6 +4155,9 @@ Warten Sie kurz und versuchen Sie es noch einmal.
 	<notification name="CantCreateObjectRegionFull">
 		Angefordertes Objekt kann nicht erstellt werden. Die Region ist voll.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Das gewünschte animierte Objekt kann nicht erstellt werden, da es das Limit für geriggte Dreiecke überschreitet.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Sie können nicht mehrere Objekte an ein und derselben Stelle anhängen.
 	</notification>
@@ -4202,6 +4205,21 @@ Warten Sie kurz und versuchen Sie es noch einmal.
 	</notification>
 	<notification name="CantChangeShape">
 		Sie können diese Form nicht ändern.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		Durch den Vorgang würde die Anzahl der angehängten animierten Objekte das zulässige Limit überschreiten.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Diese Objekte können nicht verknüpft werden, da das hieraus resultierende animierte Objekt das Limit für geriggte Dreiecke überschreiten würde.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Dieses Objekt kann nicht in ein animiertes Objekt umgewandelt werden, da es das Limit für geriggte Dreiecke überschreiten würde.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Der Status der animierten Objekte für dieses Objekt kann nicht geändert werden, da hierdurch die Parzellenlimits überschritten würden.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Serverfehler: Dieser Vorgang kann nicht abgeschlossen werden, da die Netzdaten nicht geladen sind.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Ihr Zugangsberechtigungen gestatten nicht das Beanspruchen von Objekten an dieser Stelle.

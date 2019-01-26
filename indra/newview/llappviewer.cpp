@@ -1168,7 +1168,7 @@ bool LLAppViewer::init()
 //// don't nag developers who need to run the executable directly
 //#if LL_RELEASE_FOR_DOWNLOAD
 //	// MAINT-8305: If we're processing a SLURL, skip the launcher check.
-//	if (gSavedSettings.getString("CmdLineLoginLocation").empty())
+//	if (gSavedSettings.getString("CmdLineLoginLocation").empty() && !beingDebugged())
 //	{
 //		const char* PARENT = getenv("PARENT");
 //		if (! (PARENT && std::string(PARENT) == "SL_Launcher"))
@@ -4672,12 +4672,6 @@ void LLAppViewer::requestQuit()
 	{
 		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
 	}
-
-//	// Try to send last batch of avatar rez metrics.
-//	if (!gDisconnected && isAgentAvatarValid())
-//	{
-//		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
-//	}
 
 	LLHUDEffectSpiral *effectp = (LLHUDEffectSpiral*)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINT, TRUE);
 	effectp->setPositionGlobal(gAgent.getPositionGlobal());

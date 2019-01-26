@@ -778,7 +778,7 @@ LLWearableItemAppearanceComparator::sortorder_pair_t LLWearableItemAppearanceCom
 				{
 					LLViewerObject* pAttachObj = NULL;
 					if ( (isAgentAvatarValid()) && (pAttachObj = gAgentAvatarp->getWornAttachment(pListItem->getItemID())) )
-						sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getState());
+						sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getAttachmentState());
 				}
 				break;
 			default:
