@@ -98,6 +98,9 @@ private:
 	};
 	typedef std::list<creation_info> creation_list_t;
 	creation_list_t mCreationList;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<int> mCreationCount = 0;
+// [/SL:KB]
 	LLMutex* mCreationMutex;
 };
 

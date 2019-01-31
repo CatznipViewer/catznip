@@ -81,6 +81,9 @@ protected:
 private:
 	typedef std::list<LLWorkerClass*> delete_list_t;
 	delete_list_t mDeleteList;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<int> mDeleteCount = 0;
+// [/SL:KB]
 	LLMutex* mDeleteMutex;
 	
 public:
@@ -91,7 +94,10 @@ public:
 	
 	handle_t addWorkRequest(LLWorkerClass* workerclass, S32 param, U32 priority = PRIORITY_NORMAL);
 	
-	S32 getNumDeletes() { return (S32)mDeleteList.size(); } // debug
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	int getNumDeletes() const { return mDeleteCount; } // debug
+// [/SL:KB]
+//	S32 getNumDeletes() { return (S32)mDeleteList.size(); } // debug
 
 private:
 	void deleteWorker(LLWorkerClass* workerclass); // schedule for deletion

@@ -27,6 +27,9 @@
 #ifndef LL_LLQUEUEDTHREAD_H
 #define LL_LLQUEUEDTHREAD_H
 
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+#include <atomic>
+// [/SL:KB]
 #include <queue>
 #include <string>
 #include <map>
@@ -179,7 +182,10 @@ public:
 	void waitOnPending();
 	void printQueueStats();
 
-	virtual S32 getPending();
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	virtual int getPending() const { return mRequestQueueSize; }
+// [/SL:KB]
+//	virtual S32 getPending();
 	bool getThreaded() { return mThreaded ? true : false; }
 
 	// Request accessors
@@ -202,12 +208,16 @@ protected:
 	
 	typedef std::set<QueuedRequest*, queued_request_less> request_queue_t;
 	request_queue_t mRequestQueue;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<int> mRequestQueueSize;
+// [/SL:KB]
 
 	enum { REQUEST_HASH_SIZE = 512 }; // must be power of 2
 	typedef LLSimpleHash<handle_t, REQUEST_HASH_SIZE> request_hash_t;
 	request_hash_t mRequestHash;
 
 	handle_t mNextHandle;
+
 };
 
 #endif // LL_LLQUEUEDTHREAD_H

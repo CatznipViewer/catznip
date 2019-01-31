@@ -27,6 +27,9 @@
 #ifndef LL_LLTEXTUREFETCH_H
 #define LL_LLTEXTUREFETCH_H
 
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+#include <atomic>
+// [/SL:KB]
 #include <vector>
 #include <map>
 
@@ -136,7 +139,10 @@ public:
 	U32 getTotalNumHTTPRequests();
 	
     // Threads:  T*
-    S32 getPending();
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	int getPending() const override { return mCommandsSize + mRequestQueueSize; }
+// [/SL:KB]
+//    S32 getPending();
 
     // Threads:  T*
 	void lockQueue() { mQueueMutex.lock(); }
@@ -329,12 +335,18 @@ private:
 	typedef std::map<LLHost,std::set<LLUUID> > cancel_queue_t;
 	cancel_queue_t mCancelQueue;										// Mfnq
 	F32 mTextureBandwidth;												// <none>
-	F32 mMaxBandwidth;													// Mfnq
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<float> mMaxBandwidth;
+// [/SL:KB]
+//	F32 mMaxBandwidth;													// Mfnq
 	LLTextureInfo mTextureInfo;
 	LLTextureInfo mTextureInfoMainThread;
 
 	// XXX possible delete
-	U32Bits mHTTPTextureBits;												// Mfnq
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<U32Bits> mHTTPTextureBits = (U32Bits)0;
+// [/SL:KB]
+//	U32Bits mHTTPTextureBits;												// Mfnq
 
 	// XXX possible delete
 	//debug use
@@ -346,6 +358,9 @@ private:
 	// same locks.
 	typedef std::vector<TFRequest *> command_queue_t;
 	command_queue_t mCommands;											// Mfq
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<int> mCommandsSize = 0;
+// [/SL:KB]
 
 	// If true, modifies some behaviors that help with QA tasks.
 	const bool mQAMode;
