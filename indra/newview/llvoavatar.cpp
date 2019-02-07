@@ -10100,6 +10100,14 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 
 	if (mVisualComplexityStale)
 	{
+// [SL:KB] - Patch: Viewer-OptimizationComplexity | Checked: Catznip-6.0
+		const F64 now = LLFrameTimer::getTotalSeconds();
+		if (now < mVisualComplexityUpdateTime)
+		{
+			return;
+		}
+// [/SL:KB]
+
 		U32 cost = VISUAL_COMPLEXITY_UNKNOWN;
 		LLVOVolume::texture_cost_t textures;
 		hud_complexity_list_t hud_complexity_list;
@@ -10208,6 +10216,10 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
         }
 		mVisualComplexity = cost;
 		mVisualComplexityStale = false;
+// [SL:KB] - Patch: Viewer-OptimizationComplexity | Checked: Catznip-6.0
+		const F64 SECONDS_BETWEEN_COMPLEXITY_RECALC = 0.5f;
+		mVisualComplexityUpdateTime = now + SECONDS_BETWEEN_COMPLEXITY_RECALC;
+// [/SL:KB]
 
         static LLCachedControl<U32> show_my_complexity_changes(gSavedSettings, "ShowMyComplexityChanges", 20);
 
