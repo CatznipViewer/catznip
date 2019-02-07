@@ -62,6 +62,9 @@
 #include "llparcel.h"
 #include "llkeyboard.h"
 #include "llerrorcontrol.h"
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llappviewer.h"
 #include "llvosurfacepatch.h"
 #include "llvowlsky.h"
@@ -586,6 +589,14 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+bool handleIdleFastTimerChanged(const LLSD& sdValue)
+{
+	LLTrace::BlockTimer::sEnabled = !sdValue.asBoolean() || LLFloaterReg::instanceVisible("block_timers");
+	return true;
+}
+// [/SL:KB]
+
 bool toggle_show_object_render_cost(const LLSD& newvalue)
 {
 	LLFloaterTools::sShowObjectCost = newvalue.asBoolean();
@@ -747,6 +758,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("LoginLocation")->getSignal()->connect(boost::bind(&handleLoginLocationChanged));
 	gSavedSettings.getControl("DebugAvatarJoints")->getCommitSignal()->connect(boost::bind(&handleDebugAvatarJointsChanged, _2));
 	gSavedSettings.getControl("RenderAutoMuteByteLimit")->getSignal()->connect(boost::bind(&handleRenderAutoMuteByteLimitChanged, _2));
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	gSavedSettings.getControl("DisableIdleFastTimer")->getSignal()->connect(boost::bind(&handleIdleFastTimerChanged, _2));
+// [/SL:KB]
 	gSavedPerAccountSettings.getControl("AvatarHoverOffsetZ")->getCommitSignal()->connect(boost::bind(&handleAvatarHoverOffsetChanged, _2));
 }
 

@@ -5522,6 +5522,10 @@ void LLAppViewer::handleLoginComplete()
 
 	mOnLoginCompleted();
 
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	LLTrace::BlockTimer::sEnabled = !gSavedSettings.getBOOL("DisableIdleFastTimer");
+// [/SL:KB]
+
 	writeDebugInfo();
 
 	// we logged in successfully, so save settings on logout
