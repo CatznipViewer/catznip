@@ -151,6 +151,10 @@ public:
     {
         affineTransformSSE(v,res);
     }
+
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	friend bool operator==(const LLMatrix4a &a, const LLMatrix4a &b);			// Return a == b
+// [/SL:KB]
 };
 
 inline LLVector4a rowMul(const LLVector4a &row, const LLMatrix4a &mat)

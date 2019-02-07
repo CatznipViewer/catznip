@@ -144,8 +144,11 @@ void LLSkinningUtil::initSkinningMatrixPalette(
             LLMatrix4a bind, world, res;
             bind.loadu(skin->mInvBindMatrix[j]);
             world.loadu(joint->getWorldMatrix());
-            matMul(bind,world,res);
-            memcpy(mat[j].mMatrix,res.mMatrix,16*sizeof(float));
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+            matMul(bind, world, mat[j]);
+// [/SL:KB]
+//            matMul(bind,world,res);
+//            memcpy(mat[j].mMatrix,res.mMatrix,16*sizeof(float));
 #else
             mat[j] = skin->mInvBindMatrix[j];
             mat[j] *= joint->getWorldMatrix();

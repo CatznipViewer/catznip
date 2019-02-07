@@ -1600,7 +1600,11 @@ void LLDrawPoolAvatar::updateRiggedFaceVertexBuffer(
 	LLPointer<LLVertexBuffer> buffer = face->getVertexBuffer();
 	LLDrawable* drawable = face->getDrawable();
 
-	if (drawable->getVOVolume() && drawable->getVOVolume()->isNoLOD())
+//	if (drawable->getVOVolume() && drawable->getVOVolume()->isNoLOD())
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	LLVOVolume* vobj = drawable->getVOVolume();
+	if (vobj && vobj->isNoLOD())
+// [/SL:KB]
 	{
 		return;
 	}
@@ -1676,7 +1680,9 @@ void LLDrawPoolAvatar::updateRiggedFaceVertexBuffer(
 		LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
         U32 count = LLSkinningUtil::getMeshJointCount(skin);
 // [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
-        LLSkinningUtil::initSkinningMatrixPalette(mat, count, skin, avatar);
+//		U32 count;
+//		const LLMatrix4a* mat = vobj->initSkinningMatrixPalette(count, avatar, skin);
+		LLSkinningUtil::initSkinningMatrixPalette(mat, count, skin, avatar);
 // [/SL:KB]
 //        LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
         LLSkinningUtil::checkSkinWeights(weights, buffer->getNumVerts(), skin);
@@ -1765,10 +1771,11 @@ void LLDrawPoolAvatar::renderRigged(LLVOAvatar* avatar, U32 type, bool glow)
 			if (sShaderLevel > 0)
 			{
                 // upload matrix palette to shader
-				LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
-				U32 count = LLSkinningUtil::getMeshJointCount(skin);
+//				LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
+//				U32 count = LLSkinningUtil::getMeshJointCount(skin);
 // [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
-                LLSkinningUtil::initSkinningMatrixPalette(mat, count, skin, avatar);
+				U32 count;
+				const LLMatrix4a* mat = vobj->initSkinningMatrixPalette(count, avatar, skin);
 // [/SL:KB]
 //                LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
 

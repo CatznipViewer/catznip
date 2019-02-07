@@ -3522,6 +3522,50 @@ const LLMeshSkinInfo* LLVOVolume::getSkinInfo() const
     }
 }
 
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const LLVOAvatar *avatar, const LLMeshSkinInfo* skin) const
+{
+	// Calculate this only once per frame
+	const U32 curFrameCount = LLFrameTimer::getFrameCount();
+	if (curFrameCount == mLastSkinningMatCacheFrame)
+	{
+		joint_count = mSkinningMatJointCount;
+
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+		// Returning cached result - sanity check that it matches the currently cached value
+		if (!skin)
+			skin = getSkinInfo();
+		U32 refJointCount = LLSkinningUtil::getMeshJointCount(skin);
+		llassert(refJointCount == mSkinningMatJointCount);
+
+		LLMatrix4a refMatrix[LL_MAX_JOINTS_PER_MESH_OBJECT];
+		LLSkinningUtil::initSkinningMatrixPalette(refMatrix, refJointCount, skin, avatar);
+		for (int idxJoint = 0; idxJoint < refJointCount; idxJoint++)
+		{
+			llassert(refMatrix[idxJoint] == mSkinningMatCache[idxJoint]);
+		}
+#endif // LL_RELEASE_FOR_DOWNLOAD
+
+		return mSkinningMatCache;
+	}
+
+	if (!skin)
+		skin = getSkinInfo();
+	joint_count = LLSkinningUtil::getMeshJointCount(skin);
+
+	if ( (!mSkinningMatCache) || (joint_count != mSkinningMatJointCount) )
+	{
+		delete[] mSkinningMatCache;
+		mSkinningMatCache = new LLMatrix4a[joint_count];
+	}
+
+	LLSkinningUtil::initSkinningMatrixPalette(mSkinningMatCache, mSkinningMatJointCount, skin, avatar);
+	mSkinningMatJointCount = joint_count;
+	mLastSkinningMatCacheFrame = curFrameCount;
+	return mSkinningMatCache;
+}
+// [/SL:KB]
+
 // virtual
 BOOL LLVOVolume::isRiggedMesh() const
 {
