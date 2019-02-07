@@ -700,7 +700,10 @@ void LLVOAvatarSelf::idleUpdate(LLAgent &agent, const F64 &time)
 }
 
 // virtual
-LLJoint *LLVOAvatarSelf::getJoint(const std::string &name)
+//LLJoint *LLVOAvatarSelf::getJoint(const std::string &name)
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+LLJoint *LLVOAvatarSelf::getJoint(const std::string &name) const
+// [/SL:KB]
 {
     LLJoint *jointp = NULL;
     jointp = LLVOAvatar::getJoint(name);

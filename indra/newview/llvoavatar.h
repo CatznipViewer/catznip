@@ -202,8 +202,12 @@ public:
 	void					startDefaultMotions();
 	void					dumpAnimationState();
 
-	virtual LLJoint*		getJoint(const std::string &name);
-	LLJoint*		        getJoint(S32 num);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	LLJoint*				getJoint(const std::string &name) const override;
+	LLJoint*		        getJoint(S32 num) const;
+// [/SL:KB]
+//	virtual LLJoint*		getJoint(const std::string &name);
+//	LLJoint*		        getJoint(S32 num);
 
 	void 					addAttachmentOverridesForObject(LLViewerObject *vo, std::set<LLUUID>* meshes_seen = NULL, bool recursive = true);
 	void					removeAttachmentOverridesForObject(const LLUUID& mesh_id);

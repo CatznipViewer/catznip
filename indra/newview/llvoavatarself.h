@@ -90,7 +90,10 @@ public:
 	/*virtual*/ bool 		hasMotionFromSource(const LLUUID& source_id);
 	/*virtual*/ void 		stopMotionFromSource(const LLUUID& source_id);
 	/*virtual*/ void 		requestStopMotion(LLMotion* motion);
-	/*virtual*/ LLJoint*	getJoint(const std::string &name);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	            LLJoint*	getJoint(const std::string &name) const override;
+// [/SL:KB]
+//	/*virtual*/ LLJoint*	getJoint(const std::string &name);
 	
 	/*virtual*/ BOOL setVisualParamWeight(const LLVisualParam *which_param, F32 weight);
 	/*virtual*/ BOOL setVisualParamWeight(const char* param_name, F32 weight);

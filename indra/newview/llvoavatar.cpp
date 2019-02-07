@@ -5827,9 +5827,15 @@ const LLUUID& LLVOAvatar::getID() const
 // getJoint()
 //-----------------------------------------------------------------------------
 // RN: avatar joints are multi-rooted to include screen-based attachments
-LLJoint *LLVOAvatar::getJoint( const std::string &name )
+//LLJoint *LLVOAvatar::getJoint( const std::string &name )
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+LLJoint *LLVOAvatar::getJoint(const std::string &name) const
+// [/SL:KB]
 {
-	joint_map_t::iterator iter = mJointMap.find(name);
+//	joint_map_t::iterator iter = mJointMap.find(name);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	joint_map_t::const_iterator iter = mJointMap.find(name);
+// [/SL:KB]
 
 	LLJoint* jointp = NULL;
 
@@ -5852,7 +5858,10 @@ LLJoint *LLVOAvatar::getJoint( const std::string &name )
 	return jointp;
 }
 
-LLJoint *LLVOAvatar::getJoint( S32 joint_num )
+//LLJoint *LLVOAvatar::getJoint( S32 joint_num )
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+LLJoint *LLVOAvatar::getJoint(S32 joint_num) const
+// [/SL:KB]
 {
     LLJoint *pJoint = NULL;
     S32 collision_start = mNumBones;
@@ -5861,7 +5870,10 @@ LLJoint *LLVOAvatar::getJoint( S32 joint_num )
     {
         // Attachment IDs start at 1
         S32 attachment_id = joint_num - attachment_start + 1;
-        attachment_map_t::iterator iter = mAttachmentPoints.find(attachment_id);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+        attachment_map_t::const_iterator iter = mAttachmentPoints.find(attachment_id);
+// [/SL:KB]
+//        attachment_map_t::iterator iter = mAttachmentPoints.find(attachment_id);
         if (iter != mAttachmentPoints.end())
         {
             pJoint = iter->second;
