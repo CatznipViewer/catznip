@@ -405,7 +405,7 @@ private:
 	LLVolumeInterface *mVolumeImpl;
 	LLPointer<LLViewerFetchedTexture> mSculptTexture;
 // [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
-	mutable LLMatrix4a* mSkinningMatCache = nullptr;
+	mutable LL_ALIGN_16(LLMatrix4a* mSkinningMatCache) = nullptr;
 	mutable U32 mSkinningMatJointCount = 0;
 	mutable U32 mLastSkinningMatCacheFrame = 0;
 // [/SL:KB]
