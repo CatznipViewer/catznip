@@ -253,6 +253,10 @@ LLVOVolume::~LLVOVolume()
 	mTextureAnimp = NULL;
 	delete mVolumeImpl;
 	mVolumeImpl = NULL;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	ll_aligned_free_16(mSkinningMatCache);
+	mSkinningMatCache = nullptr;
+// [/SL:KB]
 
 	if(!mMediaImplList.empty())
 	{
@@ -3532,6 +3536,71 @@ const LLMeshSkinInfo* LLVOVolume::getSkinInfo() const
     }
 }
 
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const LLVOAvatar *avatar, const LLMeshSkinInfo* skin) const
+{
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+	static size_t cntTotal = 0, cntCached = 0;
+	cntTotal++;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+
+	// Calculate this only once per frame
+	const U32 curFrameCount = LLFrameTimer::getFrameCount();
+	if (curFrameCount == mLastSkinningMatCacheFrame)
+	{
+		joint_count = mSkinningMatJointCount;
+
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+		// Returning cached result - sanity check that it matches the currently cached value
+		if (!skin)
+		{
+			skin = getSkinInfo();
+			if (!skin)
+			{
+				joint_count = 0;
+				return nullptr;
+			}
+		}
+		U32 refJointCount = LLSkinningUtil::getMeshJointCount(skin);
+		llassert(refJointCount == mSkinningMatJointCount);
+
+		LLMatrix4a refMatrix[LL_MAX_JOINTS_PER_MESH_OBJECT];
+		LLSkinningUtil::initSkinningMatrixPalette(refMatrix, refJointCount, skin, avatar);
+		for (int idxJoint = 0; idxJoint < refJointCount; idxJoint++)
+		{
+			llassert(refMatrix[idxJoint] == mSkinningMatCache[idxJoint]);
+		}
+		cntCached++;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+
+		return mSkinningMatCache;
+	}
+
+	if (!skin)
+	{
+		skin = getSkinInfo();
+		if (!skin)
+		{
+			joint_count = 0;
+			return nullptr;
+		}
+	}
+	joint_count = LLSkinningUtil::getMeshJointCount(skin);
+
+	if ( (!mSkinningMatCache) || (joint_count != mSkinningMatJointCount) )
+	{
+		ll_aligned_free_16(mSkinningMatCache);
+		mSkinningMatCache = (LLMatrix4a*)ll_aligned_malloc_16(sizeof(LLMatrix4a) * joint_count);
+	}
+
+	LLSkinningUtil::initSkinningMatrixPalette(mSkinningMatCache, mSkinningMatJointCount, skin, avatar);
+	mSkinningMatJointCount = joint_count;
+	// *TODO: doesn't catch all occurrences
+	mLastSkinningMatCacheFrame = (!(mLODChanged || mSculptChanged || avatar->getIsCloud() || (avatar->isSelf() && avatar->isEditingAppearance()))) ? curFrameCount : 0;
+	return mSkinningMatCache;
+}
+// [/SL:KB]
+
 // virtual
 BOOL LLVOVolume::isRiggedMesh() const
 {
@@ -4796,7 +4865,10 @@ void LLRiggedVolume::update(const LLMeshSkinInfo* skin, LLVOAvatar* avatar, cons
 
 	LLMatrix4a mat[kMaxJoints];
 	U32 maxJoints = LLSkinningUtil::getMeshJointCount(skin);
-    LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, maxJoints, skin, avatar);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	LLSkinningUtil::initSkinningMatrixPalette(mat, maxJoints, skin, avatar);
+// [/SL:KB]
+//    LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, maxJoints, skin, avatar);
 
     S32 rigged_vert_count = 0;
     S32 rigged_face_count = 0;
@@ -5386,10 +5458,10 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
         vobj = bridge->mDrawable->getVObj();
         vol_obj = dynamic_cast<LLVOVolume*>(vobj);
 	}
-    if (vol_obj)
-    {
-        vol_obj->updateVisualComplexity();
-    }
+//    if (vol_obj)
+//    {
+//        vol_obj->updateVisualComplexity();
+//    }
 
 	group->mGeometryBytes = 0;
 	group->mSurfaceArea = 0;

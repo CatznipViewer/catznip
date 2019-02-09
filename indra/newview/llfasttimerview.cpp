@@ -416,6 +416,9 @@ void LLFastTimerView::draw()
 
 void LLFastTimerView::onOpen(const LLSD& key)
 {
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	LLTrace::BlockTimer::sEnabled = true;
+// [/SL:KB]
 	setPauseState(false);
 	mRecording.reset();
 	mRecording.appendPeriodicRecording(LLTrace::get_frame_recording());
@@ -431,6 +434,9 @@ void LLFastTimerView::onOpen(const LLSD& key)
 void LLFastTimerView::onClose(bool app_quitting)
 {
 	setVisible(FALSE);
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	LLTrace::BlockTimer::sEnabled = !gSavedSettings.getBOOL("DisableIdleFastTimer");
+// [/SL:KB]
 }
 
 void saveChart(const std::string& label, const char* suffix, LLImageRaw* scratch)

@@ -36,7 +36,9 @@
 #include "m4math.h"		// LLMatrix4
 #include <map>
 #include <set>
-
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+#include "lljoint.h"
+// [/SL:KB]
 
 class LLViewerTextureAnim;
 class LLDrawPool;
@@ -280,6 +282,9 @@ public:
 	BOOL setIsFlexible(BOOL is_flexible);
 
     const LLMeshSkinInfo* getSkinInfo() const;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	const LLMatrix4a* initSkinningMatrixPalette(U32& joint_count, const LLVOAvatar *avatar, const LLMeshSkinInfo* skin = nullptr) const;
+// [/SL:KB]
     
     // Extended Mesh Properties
     U32 getExtendedMeshFlags() const;
@@ -402,6 +407,11 @@ private:
 	F32			mVObjRadius;
 	LLVolumeInterface *mVolumeImpl;
 	LLPointer<LLViewerFetchedTexture> mSculptTexture;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	mutable LL_ALIGN_16(LLMatrix4a* mSkinningMatCache) = nullptr;
+	mutable U32 mSkinningMatJointCount = 0;
+	mutable U32 mLastSkinningMatCacheFrame = 0;
+// [/SL:KB]
 	LLPointer<LLViewerFetchedTexture> mLightTexture;
 	media_list_t mMediaImplList;
 	S32			mLastFetchedMediaVersion; // as fetched from the server, starts as -1

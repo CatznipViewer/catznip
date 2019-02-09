@@ -1600,7 +1600,11 @@ void LLDrawPoolAvatar::updateRiggedFaceVertexBuffer(
 	LLPointer<LLVertexBuffer> buffer = face->getVertexBuffer();
 	LLDrawable* drawable = face->getDrawable();
 
-	if (drawable->getVOVolume() && drawable->getVOVolume()->isNoLOD())
+//	if (drawable->getVOVolume() && drawable->getVOVolume()->isNoLOD())
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	LLVOVolume* vobj = drawable->getVOVolume();
+	if (vobj && vobj->isNoLOD())
+// [/SL:KB]
 	{
 		return;
 	}
@@ -1675,7 +1679,12 @@ void LLDrawPoolAvatar::updateRiggedFaceVertexBuffer(
 		//build matrix palette
 		LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
         U32 count = LLSkinningUtil::getMeshJointCount(skin);
-        LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+//		U32 count;
+//		const LLMatrix4a* mat = vobj->initSkinningMatrixPalette(count, avatar, skin);
+		LLSkinningUtil::initSkinningMatrixPalette(mat, count, skin, avatar);
+// [/SL:KB]
+//        LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
         LLSkinningUtil::checkSkinWeights(weights, buffer->getNumVerts(), skin);
 
 		LLMatrix4a bind_shape_matrix;
@@ -1762,9 +1771,17 @@ void LLDrawPoolAvatar::renderRigged(LLVOAvatar* avatar, U32 type, bool glow)
 			if (sShaderLevel > 0)
 			{
                 // upload matrix palette to shader
-				LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
-				U32 count = LLSkinningUtil::getMeshJointCount(skin);
-                LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
+//				LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
+//				U32 count = LLSkinningUtil::getMeshJointCount(skin);
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+				U32 count;
+				const LLMatrix4a* mat = vobj->initSkinningMatrixPalette(count, avatar, skin);
+				if (!mat)
+				{
+					continue;
+				}
+// [/SL:KB]
+//                LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
 
 				stop_glerror();
 

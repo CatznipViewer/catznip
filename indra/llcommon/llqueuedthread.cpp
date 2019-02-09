@@ -164,14 +164,14 @@ void LLQueuedThread::incQueue()
 
 //virtual
 // May be called from any thread
-S32 LLQueuedThread::getPending()
-{
-	S32 res;
-	lockData();
-	res = mRequestQueue.size();
-	unlockData();
-	return res;
-}
+//S32 LLQueuedThread::getPending()
+//{
+//	S32 res;
+//	lockData();
+//	res = mRequestQueue.size();
+//	unlockData();
+//	return res;
+//}
 
 // MAIN thread
 void LLQueuedThread::waitOnPending()
@@ -236,6 +236,9 @@ bool LLQueuedThread::addRequest(QueuedRequest* req)
 #if _DEBUG
 // 	LL_INFOS() << llformat("LLQueuedThread::Added req [%08d]",handle) << LL_ENDL;
 #endif
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mRequestQueueSize = mRequestQueue.size();
+// [/SL:KB]
 	unlockData();
 
 	incQueue();
@@ -435,6 +438,9 @@ S32 LLQueuedThread::processNextRequest()
 		req->setStatus(STATUS_INPROGRESS);
 		start_priority = req->getPriority();
 	}
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mRequestQueueSize = mRequestQueue.size();
+// [/SL:KB]
 	unlockData();
 
 	// This is the only place we will call req->setStatus() after
@@ -463,6 +469,9 @@ S32 LLQueuedThread::processNextRequest()
 			lockData();
 			req->setStatus(STATUS_QUEUED);
 			mRequestQueue.insert(req);
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+			mRequestQueueSize = mRequestQueue.size();
+// [/SL:KB]
 			unlockData();
 			if (mThreaded && start_priority < PRIORITY_NORMAL)
 			{
@@ -480,11 +489,14 @@ S32 LLQueuedThread::processNextRequest()
 // virtual
 bool LLQueuedThread::runCondition()
 {
-	// mRunCondition must be locked here
-	if (mRequestQueue.empty() && mIdleThread)
-		return false;
-	else
-		return true;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	return !(!mRequestQueueSize && mIdleThread);
+// [/SL:KB]
+//	// mRunCondition must be locked here
+//	if (mRequestQueue.empty() && mIdleThread)
+//		return false;
+//	else
+//		return true;
 }
 
 // virtual

@@ -71,12 +71,18 @@ public:
 	virtual const char *getAnimationPrefix() = 0;
 
 	// get the root joint of the character
-	virtual LLJoint *getRootJoint() = 0;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	virtual LLJoint *getRootJoint() const = 0;
+// [/SL:KB]
+//	virtual LLJoint *getRootJoint() = 0;
 
 	// get the specified joint
 	// default implementation does recursive search,
 	// subclasses may optimize/cache results.
-	virtual LLJoint *getJoint( const std::string &name );
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	virtual LLJoint *getJoint(const std::string &name) const;
+// [/SL:KB]
+//	virtual LLJoint *getJoint( const std::string &name );
 
 	// get the position of the character
 	virtual LLVector3 getCharacterPosition() = 0;
