@@ -73,8 +73,8 @@
 	<button label="Link" name="link_btn" width="30"/>
 	<button label="Verknüpfung auflösen" name="unlink_btn" width="126"/>
 	<check_box label="Beide Seiten dehnen" name="checkbox uniform"/>
-	<check_box initial_value="true" label="Texturen dehnen" name="checkbox stretch textures" />
-	<check_box initial_value="true" label="Einrasten" name="checkbox snap to grid" />
+	<check_box initial_value="true" label="Texturen dehnen" name="checkbox stretch textures" top_pad="-5"/>
+	<check_box initial_value="true" label="Einrasten" name="checkbox snap to grid" top_pad="15"/>
 	<combo_box name="combobox grid mode" tool_tip="Wählen Sie das gewünschte Rasterlineal zum Positionieren des Objekts aus.">
 		<combo_box.item label="Welt" name="World"/>
 		<combo_box.item label="Lokal" name="Local"/>
@@ -372,6 +372,7 @@
 			<text name="edit_object">
 				Objekteigenschaften bearbeiten:
 			</text>
+			<check_box label="Animiertes Netz:" name="Animated Mesh Checkbox Ctrl" tool_tip="Ermöglicht die unabhängige Animation geriggter Netzobjekte"/>
 			<check_box label="Flexibler Pfad" name="Flexible1D Checkbox Ctrl" tool_tip="Bewirkt, dass sich das Objekt um die Z-Achse biegen kann. (Nur Client-Seite)"/>
 			<spinner label="Weichheit" name="FlexNumSections"/>
 			<spinner label="Schwerkraft" name="FlexGravity"/>
