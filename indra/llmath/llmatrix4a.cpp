@@ -78,3 +78,19 @@ void matMulBoundBox(const LLMatrix4a &mat, const LLVector4a *in_extents, LLVecto
 			out_extents[1].setMax(out_extents[1], tv[i]);
 		}
 }
+
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+bool operator==(const LLMatrix4a &a, const LLMatrix4a &b)
+{
+	U32 i, j;
+	for (i = 0; i < NUM_VALUES_IN_MAT4; i++)
+	{
+		for (j = 0; j < NUM_VALUES_IN_MAT4; j++)
+		{
+			if (a.mMatrix[j][i] != b.mMatrix[j][i])
+				return false;
+		}
+	}
+	return true;
+}
+// [/SL:KB]

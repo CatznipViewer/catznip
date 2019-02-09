@@ -217,6 +217,9 @@ public:
 	static std::string		sLogName;
 	static bool				sMetricLog,
 							sLog;	
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	static bool             sEnabled;
+// [/SL:KB]
 	static U64				sClockResolution;
 
 };
@@ -277,6 +280,14 @@ block_timer_tree_bf_iterator_t end_block_timer_tree_bf();
 LL_FORCE_INLINE BlockTimer::BlockTimer(BlockTimerStatHandle& timer)
 {
 #if LL_FAST_TIMER_ON
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	if (!sEnabled)
+	{
+		mStartTime = 0;
+		return;
+	}
+// [/SL:KB]
+
 	BlockTimerStackRecord* cur_timer_data = LLThreadLocalSingletonPointer<BlockTimerStackRecord>::getInstance();
 	if (!cur_timer_data)
 	{
@@ -307,6 +318,13 @@ LL_FORCE_INLINE BlockTimer::BlockTimer(BlockTimerStatHandle& timer)
 LL_FORCE_INLINE BlockTimer::~BlockTimer()
 {
 #if LL_FAST_TIMER_ON
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+	if (!mStartTime)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	U64 total_time = getCPUClockCount64() - mStartTime;
 	BlockTimerStackRecord* cur_timer_data = LLThreadLocalSingletonPointer<BlockTimerStackRecord>::getInstance();
 	if (!cur_timer_data) return;

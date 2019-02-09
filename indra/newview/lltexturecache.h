@@ -196,9 +196,15 @@ private:
 
 	typedef std::vector<handle_t> handle_list_t;
 	handle_list_t mPrioritizeWriteList;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<bool> mPrioritizeWriteListEmpty = true;
+// [/SL:KB]
 
 	typedef std::vector<std::pair<LLPointer<Responder>, bool> > responder_list_t;
 	responder_list_t mCompletedList;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	std::atomic<bool> mCompletedListEmpty = true;
+// [/SL:KB]
 	
 	BOOL mReadOnly;
 	

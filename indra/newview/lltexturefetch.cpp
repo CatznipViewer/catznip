@@ -2548,7 +2548,7 @@ LLTextureFetch::LLTextureFetch(LLTextureCache* cache, LLImageDecodeThread* image
 	  mTextureCache(cache),
 	  mImageDecodeThread(imagedecodethread),
 	  mTextureBandwidth(0),
-	  mHTTPTextureBits(0),
+//	  mHTTPTextureBits(0),
 	  mTotalHTTPRequests(0),
 	  mQAMode(qa_mode),
 	  mHttpRequest(NULL),
@@ -2611,6 +2611,9 @@ LLTextureFetch::~LLTextureFetch()
 		mCommands.erase(mCommands.begin());
 		delete req;
 	}
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mCommandsSize = 0;
+// [/SL:KB]
 
 	mHttpWaitResource.clear();
 	
@@ -2793,7 +2796,10 @@ void LLTextureFetch::removeFromHTTPQueue(const LLUUID& id, S32Bytes received_siz
 {
 	LLMutexLock lock(&mNetworkQueueMutex);								// +Mfnq
 	mHTTPTextureQueue.erase(id);
-	mHTTPTextureBits += received_size; // Approximate - does not include header bits	
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mHTTPTextureBits = (U32Bits)mHTTPTextureBits + received_size;
+// [/SL:KB]
+//	mHTTPTextureBits += received_size; // Approximate - does not include header bits	
 }																		// -Mfnq
 
 // NB:  If you change deleteRequest() you should probably make
@@ -3003,42 +3009,45 @@ bool LLTextureFetch::updateRequestPriority(const LLUUID& id, F32 priority)
 // Threads:  T*
 
 //virtual
-S32 LLTextureFetch::getPending()
-{
-	S32 res;
-	lockData();															// +Ct
-    {
-        LLMutexLock lock(&mQueueMutex);									// +Mfq
-        
-        res = mRequestQueue.size();
-        res += mCommands.size();
-    }																	// -Mfq
-	unlockData();														// -Ct
-	return res;
-}
+//S32 LLTextureFetch::getPending()
+//{
+//	S32 res;
+//	lockData();															// +Ct
+//    {
+//        LLMutexLock lock(&mQueueMutex);									// +Mfq
+//        
+//        res = mRequestQueue.size();
+//        res += mCommands.size();
+//    }																	// -Mfq
+//	unlockData();														// -Ct
+//	return res;
+//}
 
 // Locks:  Ct
 // virtual
 bool LLTextureFetch::runCondition()
 {
-	// Caller is holding the lock on LLThread's condition variable.
-	
-	// LLQueuedThread, unlike its base class LLThread, makes this a
-	// private method which is unfortunate.  I want to use it directly
-	// but I'm going to have to re-implement the logic here (or change
-	// declarations, which I don't want to do right now).
-	//
-	// Changes here may need to be reflected in getPending().
-	
-	bool have_no_commands(false);
-	{
-		LLMutexLock lock(&mQueueMutex);									// +Mfq
-		
-		have_no_commands = mCommands.empty();
-	}																	// -Mfq
-	
-	return ! (have_no_commands
-			  && (mRequestQueue.empty() && mIdleThread));		// From base class
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	return ! ( !mCommandsSize && (!mRequestQueueSize && mIdleThread) );		// From base class
+// [/SL:KB]
+//	// Caller is holding the lock on LLThread's condition variable.
+//	
+//	// LLQueuedThread, unlike its base class LLThread, makes this a
+//	// private method which is unfortunate.  I want to use it directly
+//	// but I'm going to have to re-implement the logic here (or change
+//	// declarations, which I don't want to do right now).
+//	//
+//	// Changes here may need to be reflected in getPending().
+//	
+//	bool have_no_commands(false);
+//	{
+//		LLMutexLock lock(&mQueueMutex);									// +Mfq
+//		
+//		have_no_commands = mCommands.empty();
+//	}																	// -Mfq
+//	
+//	return ! (have_no_commands
+//			  && (mRequestQueue.empty() && mIdleThread));		// From base class
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3085,13 +3094,16 @@ S32 LLTextureFetch::update(F32 max_time_ms)
 	static LLCachedControl<F32> band_width(gSavedSettings,"ThrottleBandwidthKBPS", 3000.0);
 
 	{
-		mNetworkQueueMutex.lock();										// +Mfnq
+//		mNetworkQueueMutex.lock();										// +Mfnq
 		mMaxBandwidth = band_width();
 
-		add(LLStatViewer::TEXTURE_NETWORK_DATA_RECEIVED, mHTTPTextureBits);
-		mHTTPTextureBits = (U32Bits)0;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+		add(LLStatViewer::TEXTURE_NETWORK_DATA_RECEIVED, mHTTPTextureBits.exchange((U32Bits)0));
+// [/SL:KB]
+//		add(LLStatViewer::TEXTURE_NETWORK_DATA_RECEIVED, mHTTPTextureBits);
+//		mHTTPTextureBits = (U32Bits)0;
 
-		mNetworkQueueMutex.unlock();									// -Mfnq
+//		mNetworkQueueMutex.unlock();									// -Mfnq
 	}
 
 	S32 res = LLWorkerThread::update(max_time_ms);
@@ -3910,6 +3922,9 @@ void LLTextureFetch::cmdEnqueue(TFRequest * req)
 {
 	lockQueue();														// +Mfq
 	mCommands.push_back(req);
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mCommandsSize = mCommands.size();
+// [/SL:KB]
 	unlockQueue();														// -Mfq
 
 	unpause();
@@ -3926,6 +3941,9 @@ LLTextureFetch::TFRequest * LLTextureFetch::cmdDequeue()
 		ret = mCommands.front();
 		mCommands.erase(mCommands.begin());
 	}
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mCommandsSize = mCommands.size();
+// [/SL:KB]
 	unlockQueue();														// -Mfq
 
 	return ret;

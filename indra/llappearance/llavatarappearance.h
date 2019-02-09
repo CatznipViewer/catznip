@@ -133,13 +133,19 @@ protected:
 
 public:
 	F32					getPelvisToFoot() const { return mPelvisToFoot; }
-	/*virtual*/ LLJoint*	getRootJoint() { return mRoot; }
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	            LLJoint*	getRootJoint() const override { return mRoot; }
+// [/SL:KB]
+//	/*virtual*/ LLJoint*	getRootJoint() { return mRoot; }
 
 	LLVector3			mHeadOffset; // current head position
 	LLAvatarJoint		*mRoot;
 
 	typedef std::map<std::string, LLJoint*> joint_map_t;
-	joint_map_t			mJointMap;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	mutable joint_map_t mJointMap;
+// [/SL:KB]
+//	joint_map_t			mJointMap;
 
     typedef std::map<std::string, LLVector3> joint_state_map_t;
     joint_state_map_t mLastBodySizeState;

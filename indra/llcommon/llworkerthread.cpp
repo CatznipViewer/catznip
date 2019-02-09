@@ -76,6 +76,9 @@ void LLWorkerThread::clearDeleteList()
 			delete *iter ;
 		}
 		mDeleteList.clear() ;
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+		mDeleteCount = mDeleteList.size();
+// [/SL:KB]
 		mDeleteMutex->unlock() ;
 	}
 }
@@ -87,26 +90,36 @@ S32 LLWorkerThread::update(F32 max_time_ms)
 	// Delete scheduled workers
 	std::vector<LLWorkerClass*> delete_list;
 	std::vector<LLWorkerClass*> abort_list;
-	mDeleteMutex->lock();
-	for (delete_list_t::iterator iter = mDeleteList.begin();
-		 iter != mDeleteList.end(); )
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	if (mDeleteCount)
 	{
-		delete_list_t::iterator curiter = iter++;
-		LLWorkerClass* worker = *curiter;
-		if (worker->deleteOK())
+// [/SL:KB]
+		mDeleteMutex->lock();
+		for (delete_list_t::iterator iter = mDeleteList.begin();
+			 iter != mDeleteList.end(); )
 		{
-			if (worker->getFlags(LLWorkerClass::WCF_WORK_FINISHED))
+			delete_list_t::iterator curiter = iter++;
+			LLWorkerClass* worker = *curiter;
+			if (worker->deleteOK())
 			{
-				delete_list.push_back(worker);
-				mDeleteList.erase(curiter);
-			}
-			else if (!worker->getFlags(LLWorkerClass::WCF_ABORT_REQUESTED))
-			{
-				abort_list.push_back(worker);
+				if (worker->getFlags(LLWorkerClass::WCF_WORK_FINISHED))
+				{
+					delete_list.push_back(worker);
+					mDeleteList.erase(curiter);
+				}
+				else if (!worker->getFlags(LLWorkerClass::WCF_ABORT_REQUESTED))
+				{
+					abort_list.push_back(worker);
+				}
 			}
 		}
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+		mDeleteCount = mDeleteList.size();
+// [/SL:KB]
+		mDeleteMutex->unlock();	
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
 	}
-	mDeleteMutex->unlock();	
+// [/SL:KB]
 	// abort and delete after releasing mutex
 	for (std::vector<LLWorkerClass*>::iterator iter = abort_list.begin();
 		 iter != abort_list.end(); ++iter)
@@ -154,6 +167,9 @@ void LLWorkerThread::deleteWorker(LLWorkerClass* workerclass)
 {
 	mDeleteMutex->lock();
 	mDeleteList.push_back(workerclass);
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mDeleteCount = mDeleteList.size();
+// [/SL:KB]
 	mDeleteMutex->unlock();
 }
 

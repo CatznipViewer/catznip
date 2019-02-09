@@ -120,11 +120,18 @@ void LLSkinningUtil::scrubInvalidJoints(LLVOAvatar *avatar, LLMeshSkinInfo* skin
     skin->mInvalidJointsScrubbed = true;
 }
 
+//void LLSkinningUtil::initSkinningMatrixPalette(
+//    LLMatrix4* mat,
+//    S32 count, 
+//    const LLMeshSkinInfo* skin,
+//    LLVOAvatar *avatar)
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
 void LLSkinningUtil::initSkinningMatrixPalette(
-    LLMatrix4* mat,
+    LLMatrix4a* mat,
     S32 count, 
     const LLMeshSkinInfo* skin,
-    LLVOAvatar *avatar)
+    const LLVOAvatar *avatar)
+// [/SL:KB]
 {
     initJointNums(const_cast<LLMeshSkinInfo*>(skin), avatar);
     for (U32 j = 0; j < count; ++j)
@@ -137,8 +144,11 @@ void LLSkinningUtil::initSkinningMatrixPalette(
             LLMatrix4a bind, world, res;
             bind.loadu(skin->mInvBindMatrix[j]);
             world.loadu(joint->getWorldMatrix());
-            matMul(bind,world,res);
-            memcpy(mat[j].mMatrix,res.mMatrix,16*sizeof(float));
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+            matMul(bind, world, mat[j]);
+// [/SL:KB]
+//            matMul(bind,world,res);
+//            memcpy(mat[j].mMatrix,res.mMatrix,16*sizeof(float));
 #else
             mat[j] = skin->mInvBindMatrix[j];
             mat[j] *= joint->getWorldMatrix();
@@ -146,7 +156,10 @@ void LLSkinningUtil::initSkinningMatrixPalette(
         }
         else
         {
-            mat[j] = skin->mInvBindMatrix[j];
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+            mat[j].loadu(skin->mInvBindMatrix[j]);
+// [/SL:KB]
+//            mat[j] = skin->mInvBindMatrix[j];
             // This  shouldn't  happen   -  in  mesh  upload,  skinned
             // rendering  should  be disabled  unless  all joints  are
             // valid.  In other  cases of  skinned  rendering, invalid
@@ -205,7 +218,10 @@ void LLSkinningUtil::scrubSkinWeights(LLVector4a* weights, U32 num_vertices, con
 
 void LLSkinningUtil::getPerVertexSkinMatrix(
     F32* weights,
-    LLMatrix4a* mat,
+//    LLMatrix4a* mat,
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+    const LLMatrix4a* mat,
+// [/SL:KB]
     bool handle_bad_scale,
     LLMatrix4a& final_mat,
     U32 max_joints)
@@ -259,7 +275,10 @@ void LLSkinningUtil::getPerVertexSkinMatrix(
     llassert(valid_weights);
 }
 
-void LLSkinningUtil::initJointNums(LLMeshSkinInfo* skin, LLVOAvatar *avatar)
+//void LLSkinningUtil::initJointNums(LLMeshSkinInfo* skin, LLVOAvatar *avatar)
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+void LLSkinningUtil::initJointNums(LLMeshSkinInfo* skin, const LLVOAvatar *avatar)
+// [/SL:KB]
 {
     if (!skin->mJointNumsInitialized)
     {

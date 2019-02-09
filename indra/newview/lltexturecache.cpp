@@ -859,28 +859,48 @@ S32 LLTextureCache::update(F32 max_time_ms)
 	S32 res;
 	res = LLWorkerThread::update(max_time_ms);
 
-	mListMutex.lock();
-	handle_list_t priorty_list = mPrioritizeWriteList; // copy list
-	mPrioritizeWriteList.clear();
-	responder_list_t completed_list = mCompletedList; // copy list
-	mCompletedList.clear();
-	mListMutex.unlock();
-	
-	lockWorkers();
-	
-	for (handle_list_t::iterator iter1 = priorty_list.begin();
-		 iter1 != priorty_list.end(); ++iter1)
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	handle_list_t priorty_list;
+	responder_list_t completed_list;
+	if ( (!mPrioritizeWriteListEmpty) || (!mCompletedListEmpty) )
 	{
-		handle_t handle = *iter1;
-		handle_map_t::iterator iter2 = mWriters.find(handle);
-		if(iter2 != mWriters.end())
-		{
-			LLTextureCacheWorker* worker = iter2->second;
-			worker->setPriority(LLWorkerThread::PRIORITY_HIGH | worker->mPriority);
-		}
+		mListMutex.lock();
+		priorty_list = mPrioritizeWriteList; // copy list
+		mPrioritizeWriteList.clear();
+		completed_list = mCompletedList; // copy list
+		mCompletedList.clear();
+		mListMutex.unlock();
 	}
+// [/SL:KB]
+//	mListMutex.lock();
+//	handle_list_t priorty_list = mPrioritizeWriteList; // copy list
+//	mPrioritizeWriteList.clear();
+//	responder_list_t completed_list = mCompletedList; // copy list
+//	mCompletedList.clear();
+//	mListMutex.unlock();
+	
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	if (!priorty_list.empty())
+	{
+// [/SL:KB]
+		lockWorkers();
+	
+		for (handle_list_t::iterator iter1 = priorty_list.begin();
+			 iter1 != priorty_list.end(); ++iter1)
+		{
+			handle_t handle = *iter1;
+			handle_map_t::iterator iter2 = mWriters.find(handle);
+			if(iter2 != mWriters.end())
+			{
+				LLTextureCacheWorker* worker = iter2->second;
+				worker->setPriority(LLWorkerThread::PRIORITY_HIGH | worker->mPriority);
+			}
+		}
 
-	unlockWorkers(); 
+		unlockWorkers(); 
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	}
+// [/SL:KB]
 	
 	// call 'completed' with workers list unlocked (may call readComplete() or writeComplete()
 	for (responder_list_t::iterator iter1 = completed_list.begin();
@@ -2211,12 +2231,18 @@ void LLTextureCache::prioritizeWrite(handle_t handle)
 	//   which could create a deadlock
 	LLMutexLock lock(&mListMutex);	
 	mPrioritizeWriteList.push_back(handle);
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mPrioritizeWriteListEmpty = mPrioritizeWriteList.empty();
+// [/SL:KB]
 }
 
 void LLTextureCache::addCompleted(Responder* responder, bool success)
 {
 	LLMutexLock lock(&mListMutex);
 	mCompletedList.push_back(std::make_pair(responder,success));
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mCompletedListEmpty = mCompletedList.empty();
+// [/SL:KB]
 }
 
 //////////////////////////////////////////////////////////////////////////////

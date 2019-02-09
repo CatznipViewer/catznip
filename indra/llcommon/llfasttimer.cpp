@@ -63,6 +63,9 @@ namespace LLTrace
 bool        BlockTimer::sLog		     = false;
 std::string BlockTimer::sLogName         = "";
 bool        BlockTimer::sMetricLog       = false;
+// [SL:KB] - Patch: Viewer-OptimizationFastTimers | Checked: Catznip-6.0
+bool        BlockTimer::sEnabled         = true;
+// [/SL:KB]
 
 #if LL_LINUX || LL_SOLARIS
 U64         BlockTimer::sClockResolution = 1000000000; // Nanosecond resolution

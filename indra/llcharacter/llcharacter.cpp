@@ -94,7 +94,10 @@ LLCharacter::~LLCharacter()
 //-----------------------------------------------------------------------------
 // getJoint()
 //-----------------------------------------------------------------------------
-LLJoint *LLCharacter::getJoint( const std::string &name )
+//LLJoint *LLCharacter::getJoint( const std::string &name )
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+LLJoint *LLCharacter::getJoint(const std::string &name) const
+// [/SL:KB]
 {
 	LLJoint* joint = NULL;
 
