@@ -253,6 +253,10 @@ LLVOVolume::~LLVOVolume()
 	mTextureAnimp = NULL;
 	delete mVolumeImpl;
 	mVolumeImpl = NULL;
+// [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
+	ll_aligned_free_16(mSkinningMatCache);
+	mSkinningMatCache = nullptr;
+// [/SL:KB]
 
 	if(!mMediaImplList.empty())
 	{
@@ -3535,6 +3539,11 @@ const LLMeshSkinInfo* LLVOVolume::getSkinInfo() const
 // [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
 const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const LLVOAvatar *avatar, const LLMeshSkinInfo* skin) const
 {
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+	static size_t cntTotal = 0, cntCached = 0;
+	cntTotal++;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+
 	// Calculate this only once per frame
 	const U32 curFrameCount = LLFrameTimer::getFrameCount();
 	if (curFrameCount == mLastSkinningMatCacheFrame)
@@ -3544,7 +3553,14 @@ const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const 
 #ifndef LL_RELEASE_FOR_DOWNLOAD
 		// Returning cached result - sanity check that it matches the currently cached value
 		if (!skin)
+		{
 			skin = getSkinInfo();
+			if (!skin)
+			{
+				joint_count = 0;
+				return nullptr;
+			}
+		}
 		U32 refJointCount = LLSkinningUtil::getMeshJointCount(skin);
 		llassert(refJointCount == mSkinningMatJointCount);
 
@@ -3554,24 +3570,33 @@ const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const 
 		{
 			llassert(refMatrix[idxJoint] == mSkinningMatCache[idxJoint]);
 		}
+		cntCached++;
 #endif // LL_RELEASE_FOR_DOWNLOAD
 
 		return mSkinningMatCache;
 	}
 
 	if (!skin)
+	{
 		skin = getSkinInfo();
+		if (!skin)
+		{
+			joint_count = 0;
+			return nullptr;
+		}
+	}
 	joint_count = LLSkinningUtil::getMeshJointCount(skin);
 
 	if ( (!mSkinningMatCache) || (joint_count != mSkinningMatJointCount) )
 	{
-		delete[] mSkinningMatCache;
-		mSkinningMatCache = new LLMatrix4a[joint_count];
+		ll_aligned_free_16(mSkinningMatCache);
+		mSkinningMatCache = (LLMatrix4a*)ll_aligned_malloc_16(sizeof(LLMatrix4a) * joint_count);
 	}
 
 	LLSkinningUtil::initSkinningMatrixPalette(mSkinningMatCache, mSkinningMatJointCount, skin, avatar);
 	mSkinningMatJointCount = joint_count;
-	mLastSkinningMatCacheFrame = curFrameCount;
+	// *TODO: doesn't catch all occurrences
+	mLastSkinningMatCacheFrame = (!(mLODChanged || mSculptChanged || avatar->getIsCloud() || (avatar->isSelf() && avatar->isEditingAppearance()))) ? curFrameCount : 0;
 	return mSkinningMatCache;
 }
 // [/SL:KB]

@@ -1776,6 +1776,10 @@ void LLDrawPoolAvatar::renderRigged(LLVOAvatar* avatar, U32 type, bool glow)
 // [SL:KB] - Patch: Viewer-OptimizationSkinningMatrix | Checked: Catznip-6.0
 				U32 count;
 				const LLMatrix4a* mat = vobj->initSkinningMatrixPalette(count, avatar, skin);
+				if (!mat)
+				{
+					continue;
+				}
 // [/SL:KB]
 //                LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count, skin, avatar);
 
