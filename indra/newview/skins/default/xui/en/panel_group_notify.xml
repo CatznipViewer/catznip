@@ -43,7 +43,7 @@
          layout="topleft"
          left_pad="5"
          name="title"
-         parse_urls="false"
+         parse_urls="true"
          plain_text="true"
          text_color="GroupNotifyTextColor"
          top="5"
