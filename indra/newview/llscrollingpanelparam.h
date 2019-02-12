@@ -40,8 +40,12 @@ class LLJoint;
 class LLScrollingPanelParam : public LLScrollingPanelParamBase
 {
 public:
+//	LLScrollingPanelParam( const LLPanel::Params& panel_params,
+//			       LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints = TRUE );
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
 	LLScrollingPanelParam( const LLPanel::Params& panel_params,
-			       LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints = TRUE );
+			       LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLViewerWearable* wearable, LLJoint* jointp, BOOL use_hints = TRUE );
+// [/SL:KB]
 	virtual ~LLScrollingPanelParam();
 
 	virtual void		draw();

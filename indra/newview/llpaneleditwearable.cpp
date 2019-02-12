@@ -1238,6 +1238,56 @@ void LLPanelEditWearable::showDefaultSubpart()
         changeCamera(0);
 }
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+S32 LLPanelEditWearable::notifyParent(const LLSD& info)
+{
+	if ( (info.has("action")) && (info["action"].asStringRef() == "update_dirty") )
+	{
+		updateDirty();
+		return 0;
+	}
+	return LLPanel::notifyParent(info);
+}
+
+void LLPanelEditWearable::updateDirty()
+{
+	LLWearableType::EType wearableType = (mWearablePtr) ? mWearablePtr->getType() : LLWearableType::WT_INVALID;
+	LLPanel* curPanel = getPanel(wearableType);
+	const LLEditWearableDictionary::WearableEntry* pWearableEntry = LLEditWearableDictionary::getInstance()->getWearable(mWearablePtr->getType());
+	if (curPanel && pWearableEntry)
+	{
+		for (U8 idxSubpart = 0, cntSubpart = pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
+		{
+			const LLEditWearableDictionary::SubpartEntry* pSubpartEntry = LLEditWearableDictionary::getInstance()->getSubpart(pWearableEntry->mSubparts[idxSubpart]);
+			if (LLScrollingPanelList* pScrollingPanelList = getChild<LLScrollingPanelList>(pSubpartEntry->mParamList))
+			{
+				bool subPartDirty = false;
+				if (mWearablePtr->isDirty())
+				{
+					const LLScrollingPanelList::panel_list_t& listPanels = pScrollingPanelList->getPanelList();
+					for (LLScrollingPanelList::panel_list_t::const_iterator itPanel = listPanels.begin(); (itPanel != listPanels.end()) && (!subPartDirty); ++itPanel)
+					{
+						const LLScrollingPanelParamBase* pPanel = dynamic_cast<const LLScrollingPanelParamBase*>(*itPanel);
+						subPartDirty |= (pPanel) && (pPanel->isDirty());
+					}
+				}
+
+				if (LLAccordionCtrlTab* pPanelTab = dynamic_cast<LLAccordionCtrlTab*>(pScrollingPanelList->getParent()))
+				{
+					pPanelTab->setTitleFontStyle( (subPartDirty) ? "BOLD" : "NORMAL" );
+					pPanelTab->setTitleColor(LLUIColorTable::instance().getColor( (subPartDirty) ? "LabelSelectedColor" : "LabelTextColor" ));
+
+					std::string strTitle = pScrollingPanelList->getListLabel();
+					if (subPartDirty)
+						strTitle.append(" (*)");
+					pPanelTab->setTitle(strTitle);
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
+
 void LLPanelEditWearable::onTabExpandedCollapsed(const LLSD& param, U8 index)
 {
         bool expanded = param.asBoolean();
@@ -1488,6 +1538,9 @@ void LLPanelEditWearable::buildParamList(LLScrollingPanelList *panel_list, value
         if( panel_list )
         {
                 panel_list->clearPanels();
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+				panel_list->setListLabel(tab->getTitle());
+// [/SL:KB]
                 value_map_t::iterator end = sorted_params.end();
                 for(value_map_t::iterator it = sorted_params.begin(); it != end; ++it)
                 {
