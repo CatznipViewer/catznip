@@ -63,6 +63,10 @@ public:
 	// but is not complete yet.
 	BOOL isAssetInLoadedCallbackMap(const LLUUID& asset_uuid);
 
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	size_t getRequestedCount() const { return mRequestedList.size(); }
+// [/SL:KB]
+
 protected:
 //	void onRegionHandle(const LLUUID& landmark_id);
 // [SL:KB] - Patch: World-LandmarkList | Checked: 2012-07-30 (Catznip-3.3)

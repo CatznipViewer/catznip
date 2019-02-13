@@ -201,6 +201,7 @@ private:
 	LLFrameTimer				mLandmarkButtonTimer;
 	bool						mLandmarksDirty;
 	bool						mHasParcelLandmark;
+	bool						mCanRequestLandmarks = false;
 // [/SL:KB]
 	LLParcelChangeObserver*		mParcelChangeObserver;
 
