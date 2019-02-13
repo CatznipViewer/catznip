@@ -57,6 +57,10 @@
 #include "llwindow.h"
 #include "llworldmap.h"
 
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+#define MAX_PENDING_LANDMARK_REQUEST      250
+// [/SL:KB]
+
 void copy_slurl_to_clipboard_callback(const std::string& slurl);
 
 class LLFetchlLandmarkByPos : public LLInventoryCollectFunctor
@@ -143,14 +147,33 @@ class LLFirstAgentParcelLandmark : public LLInventoryCollectFunctor
 {
 private:	
 	bool mFounded;// to avoid unnecessary  check
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	bool mRequestUnloaded = true;
+// [/SL:KB]
 	
 public:
-	LLFirstAgentParcelLandmark(): mFounded(false){}
+//	LLFirstAgentParcelLandmark(): mFounded(false){}
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	LLFirstAgentParcelLandmark(bool request_unloaded = true)
+		: mFounded(false)
+		, mRequestUnloaded(request_unloaded)
+	{
+	}
+// [/SL:KB]
+
 	
 	/*virtual*/ bool operator()(LLInventoryCategory* cat, LLInventoryItem* item)
 	{
 		if (mFounded || !item || item->getType() != LLAssetType::AT_LANDMARK)
 			return false;
+
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+		if ( (mRequestUnloaded && gLandmarkList.getRequestedCount() > MAX_PENDING_LANDMARK_REQUEST) ||
+			 (!mRequestUnloaded && !gLandmarkList.assetExists(item->getAssetUUID())) )
+		{
+			return false;
+		}
+// [/SL:KB]
 
 		LLLandmark* landmark = gLandmarkList.getAsset(item->getAssetUUID());
 		if (!landmark) // the landmark not been loaded yet
@@ -202,9 +225,15 @@ bool LLLandmarkActions::landmarkAlreadyExists()
 }
 
 //static
-bool LLLandmarkActions::hasParcelLandmark()
+//bool LLLandmarkActions::hasParcelLandmark()
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+bool LLLandmarkActions::hasParcelLandmark(bool request_unloaded)
+// [/SL:KB]
 {
-	LLFirstAgentParcelLandmark get_first_agent_landmark;
+//	LLFirstAgentParcelLandmark get_first_agent_landmark;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	LLFirstAgentParcelLandmark get_first_agent_landmark(request_unloaded);
+// [/SL:KB]
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
 	fetch_landmarks(cats, items, get_first_agent_landmark);

@@ -634,6 +634,10 @@ void LLLocationInputCtrl::handleLoginComplete()
 	// An agent parcel update hasn't occurred yet, so we have to
 	// manually set location and the appropriate "Add landmark" icon.
 	refresh();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	// Don't start (potentially) requesting a whole load of landmarks until after login has been handled
+	mCanRequestLandmarks = true;
+// [/SL:KB]
 }
 
 //== private methods =========================================================
@@ -1165,7 +1169,7 @@ void LLLocationInputCtrl::updateAddLandmarkButton()
 // [/RLVa:KB]
 
 // [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
-	mHasParcelLandmark = LLLandmarkActions::hasParcelLandmark();
+	mHasParcelLandmark = LLLandmarkActions::hasParcelLandmark(mCanRequestLandmarks);
 	enableAddLandmarkButton(mHasParcelLandmark);
 // [/SL:KB]
 //	enableAddLandmarkButton(LLLandmarkActions::hasParcelLandmark());

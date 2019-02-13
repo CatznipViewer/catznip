@@ -57,7 +57,10 @@ public:
 	/**
 	 * @brief Checks whether landmark exists for current agent parcel.
 	 */
-	static bool hasParcelLandmark();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: Catznip-6.0
+	static bool hasParcelLandmark(bool request_unloaded = true);
+// [/SL:KB]
+//	static bool hasParcelLandmark();
 
 	/**
 	 * @brief Searches landmark for global position.
