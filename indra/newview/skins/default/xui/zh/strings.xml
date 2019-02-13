@@ -204,11 +204,11 @@ LibVLC版本：[LIBVLC_VERSION]N]
 		第二人生Beta版測試網格(Aditi)
 	</string>
 	<string name="ViewerDownloadURL">
-		http://secondlife.com/download
+		https://get.catznip.com/
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		你目前所用的 Viewer 已經無法再進入第二人生。 請到這個頁面下載最新 Viewer：
-https://get.catznip.com
+https://get.catznip.com/
 
 欲知詳情，請參閱下面的常見問題集：
 http://secondlife.com/viewer-access-faq

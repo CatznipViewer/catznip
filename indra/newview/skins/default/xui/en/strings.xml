@@ -120,10 +120,10 @@ Voice Server Version: [VOICE_VERSION]
 	<string name="AgniGridLabel">Main Grid (Agni)</string>
 	<string name="AditiGridLabel">Beta Test Grid (Aditi)</string>
 	
-	<string name="ViewerDownloadURL">http://secondlife.com/download</string>
+	<string name="ViewerDownloadURL">https://get.catznip.com/</string>
 	<string name="LoginFailedViewerNotPermitted">
 The viewer you are using can no longer access Second Life. Please visit the following page to download a new viewer:
-https://get.catznip.com
+https://get.catznip.com/
 
 For more information, see our FAQ below:
 http://secondlife.com/viewer-access-faq</string>

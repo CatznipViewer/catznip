@@ -586,7 +586,7 @@ Download til dit Program bibliotek?
 	<notification name="FailedUpdateInstall">
 		Der opstod en fejl ved installation af opdatering.
 Hent og installér venligst den nyeste version fra
-https://get.catznip.com.
+https://get.catznip.com/ .
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -594,13 +594,13 @@ https://get.catznip.com.
 Du kan ikke logge på før [APP_NAME] er blevet opdateret.
 
 Hent og installer venligst den nyeste klien fra
-https://get.catznip.com.
+https://get.catznip.com/ .
 		<usetemplate name="okbutton" yestext="Afslut"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Dette er en påkrævet opdatering af din Second Life installation.
 
-Du kan downloade opdateringen fra https://get.catznip.com
+Du kan downloade opdateringen fra https://get.catznip.com/
 eller du kan installere den nu.
 		<usetemplate name="okcancelbuttons" notext="Afslut Second Life" yestext="Hent og installér nu"/>
 	</notification>
