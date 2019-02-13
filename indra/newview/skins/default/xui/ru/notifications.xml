@@ -1584,7 +1584,7 @@
 [DOWNLOAD_PATH].
 	</notification>
 	<notification name="RequiredUpdate">
-		Для входа необходима версия \[VERSION]. Для вас обновление должно было произведено автоматически, но по какой-то причине этого не произошло. Скачайте обновление с веб-сайта https://secondlife.com/support/downloads/
+		Для входа необходима версия \[VERSION]. Для вас обновление должно было произведено автоматически, но по какой-то причине этого не произошло. Скачайте обновление с веб-сайта https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

@@ -1314,18 +1314,18 @@ Wybierz obiekt na sprzedaż i spróbuj jeszcze raz.
 	<notification name="FailedUpdateInstall">
 		Podczas aktualizacji pojawił się błąd.
 Proszę pobrać i zainstalować najnowszego klienta z
-http://secondlife.com/download
+https://get.catznip.com/
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		Nie można zainstalować wymaganej aktualizacji.
 Nie będzie można zalogować się dopóki [APP_NAME] nie zostanie zaktualizowana.
 Proszę pobrać i zainstalować najnowszą wersję z
-http://secondlife.com/download
+https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="Wyjdź" />
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Istnieje obowiązkowa aktualizacja dla Second Life.
-Możesz ją pobrać z http://www.secondlife.com/downloads
+Możesz ją pobrać z https://get.catznip.com/
 lub zainstalować teraz.
 		<usetemplate name="okcancelbuttons" notext="Opuść Second Life" yestext="Pobierz i instaluj teraz" />
 	</notification>

@@ -1614,7 +1614,7 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 [DOWNLOAD_PATH]
 	</notification>
 	<notification name="RequiredUpdate">
-		ログインするには、バージョン [VERSION] が必要です。このアップデートは自動的に行われるものですが、まだ実行されてないようです。https://secondlife.com/support/downloads/ からダウンロードしてください。
+		ログインするには、バージョン [VERSION] が必要です。このアップデートは自動的に行われるものですが、まだ実行されてないようです。https://get.catznip.com/ からダウンロードしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

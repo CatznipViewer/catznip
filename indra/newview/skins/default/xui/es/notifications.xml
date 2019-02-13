@@ -1589,7 +1589,7 @@ Por favor, pon en venta el objeto y vuelve a intentarlo.
 [DOWNLOAD_PATH].
 	</notification>
 	<notification name="RequiredUpdate">
-		La versión [VERSION] es necesaria para iniciar sesión. Esto debería haber sido actualizado, pero parece que no fue así. Por favor, descarga desde https://secondlife.com/support/downloads/
+		La versión [VERSION] es necesaria para iniciar sesión. Esto debería haber sido actualizado, pero parece que no fue así. Por favor, descarga desde https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="Aceptar"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

@@ -1585,7 +1585,7 @@ Imposta l&apos;oggetto per la vendita e riprova.
 [DOWNLOAD_PATH].
 	</notification>
 	<notification name="RequiredUpdate">
-		É richiesta la versione [VERSION] per l’accesso. Sembra che dovresti avere la versione aggiornata, ma cosí non é. Scaricala da https://secondlife.com/support/downloads/
+		É richiesta la versione [VERSION] per l’accesso. Sembra che dovresti avere la versione aggiornata, ma cosí non é. Scaricala da https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

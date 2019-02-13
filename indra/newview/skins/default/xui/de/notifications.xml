@@ -1599,7 +1599,7 @@ Geben Sie das Objekt zum Verkauf frei und versuchen Sie es erneut.
 [DOWNLOAD_PATH].
 	</notification>
 	<notification name="RequiredUpdate">
-		Für die Anmeldung ist Version [VERSION] erforderlich. Diese sollte für Sie aktualisiert worden sein, was offenbar nicht geschehen ist. Bitte laden Sie die Datei unter https://secondlife.com/support/downloads/ herunter.
+		Für die Anmeldung ist Version [VERSION] erforderlich. Diese sollte für Sie aktualisiert worden sein, was offenbar nicht geschehen ist. Bitte laden Sie die Datei unter https://get.catznip.com/ herunter.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

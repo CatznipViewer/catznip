@@ -1582,7 +1582,7 @@ Veuillez choisir un objet à vendre et réessayer.
 [DOWNLOAD_PATH].
 	</notification>
 	<notification name="RequiredUpdate">
-		La version [VERSION] est nécessaire pour vous connecter. Cette version aurait dû être mise à jour, mais visiblement, elle ne l&apos;a pas été. Veuillez télécharger la dernière version sur https://secondlife.com/support/downloads/
+		La version [VERSION] est nécessaire pour vous connecter. Cette version aurait dû être mise à jour, mais visiblement, elle ne l&apos;a pas été. Veuillez télécharger la dernière version sur https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

@@ -1576,7 +1576,7 @@ Por favor, ponha o objeto à venda e tente novamente.
 [DOWNLOAD_PATH]
 	</notification>
 	<notification name="RequiredUpdate">
-		Versão [VERSION] é obrigatório para efetuar login. Isto deveria ter sido atualizado por você, mas aparentemente não foi. Baixe a versão mais recente em https://secondlife.com/support/downloads/
+		Versão [VERSION] é obrigatório para efetuar login. Isto deveria ter sido atualizado por você, mas aparentemente não foi. Baixe a versão mais recente em https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LoginFailedUnknown">

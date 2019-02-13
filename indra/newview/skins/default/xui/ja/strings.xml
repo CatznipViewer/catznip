@@ -203,11 +203,11 @@ VFS（キャッシュ）作成時間: [VFS_TIME]
 		Second Life ベータテストグリッド (Aditi)
 	</string>
 	<string name="ViewerDownloadURL">
-		http://secondlife.com/download
+		https://get.catznip.com/
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		お使いの古いビューワでは Second Life にアクセスできません。以下のページから新しいビューワをダウンロードしてください：
-http://secondlife.com/download
+https://get.catznip.com/
 
 詳細については、FAQ を参照してください：
 http://secondlife.com/viewer-access-faq
