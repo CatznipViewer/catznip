@@ -134,6 +134,7 @@
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
 #include "boost/unordered_map.hpp"
+#include <boost/regex.hpp>
 #include "llcleanup.h"
 
 using namespace LLAvatarAppearanceDefines;
@@ -3649,9 +3650,16 @@ class LLSelfSitDown : public view_listener_t
         }
     };
 
+
+
+bool show_sitdown_self()
+{
+	return isAgentAvatarValid() && !gAgentAvatarp->isSitting();
+}
+
 bool enable_sitdown_self()
 {
-    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
+	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
 }
 
 class LLCheckPanelPeopleTab : public view_listener_t
@@ -8018,7 +8026,12 @@ void handle_report_bug(const LLSD& param)
 	LLUIString url(param.asString());
 	
 	LLStringUtil::format_map_t replace;
-	replace["[ENVIRONMENT]"] = LLURI::escape(LLAppViewer::instance()->getViewerInfoString(true));
+	std::string environment = LLAppViewer::instance()->getViewerInfoString(true);
+	boost::regex regex;
+	regex.assign("</?nolink>");
+	std::string stripped_env = boost::regex_replace(environment, regex, "");
+
+	replace["[ENVIRONMENT]"] = LLURI::escape(stripped_env);
 	LLSLURL location_url;
 	LLAgentUI::buildSLURL(location_url);
 	replace["[LOCATION]"] = LLURI::escape(location_url.getSLURLString());
@@ -9068,7 +9081,8 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLSelfStandUp(), "Self.StandUp");
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
-	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self));
+	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self)); 
+	enable.add("Self.ShowSitDown", boost::bind(&show_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");
 
 	view_listener_t::addMenu(new LLSelfEnableRemoveAllAttachments(), "Self.EnableRemoveAllAttachments");

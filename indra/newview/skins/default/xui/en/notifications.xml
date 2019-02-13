@@ -8159,6 +8159,8 @@ Failed to connect to [VOICE_CHANNEL_NAME], please try again later.  You will now
     <unique/>    
 One or more of your subscribed Voice Morphs has expired.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
   <tag>voice</tag>
   </notification>
@@ -8172,6 +8174,8 @@ One or more of your subscribed Voice Morphs has expired.
     <unique/>
 The active Voice Morph has expired, your normal voice settings have been applied.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
     <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8185,6 +8189,8 @@ The active Voice Morph has expired, your normal voice settings have been applied
     <unique/>    
 One or more of your Voice Morphs will expire in less than [INTERVAL] days.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8317,11 +8323,23 @@ Failed to save appearance to XML.
 Failed to save snapshot to [PATH]: Disk is full. [NEED_MEMORY]KB is required but only [FREE_MEMORY]KB is free.
   </notification>
 
+  <notification icon="notifytip.tga"
+    name="SnapshotToLocalDirNotExist" type="notifytip">
+Failed to save snapshot to [PATH]: Directory does not exist.
+  </notification>
+
   <notification
     icon="notifytip.tga"
     name="PresetNotSaved"
     type="notifytip">
 Error saving preset [NAME].
+  </notification>
+    
+  <notification
+    icon="notifytip.tga"
+    name="DefaultPresetNotSaved"
+    type="notifytip">
+Can not overwrite default preset.
   </notification>
 
   <notification
