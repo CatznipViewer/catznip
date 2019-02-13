@@ -37,10 +37,17 @@
 #include "llsliderctrl.h"
 #include "llagent.h"
 #include "llviewborder.h"
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+#include "llviewerwearable.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 
+//LLScrollingPanelParamBase::LLScrollingPanelParamBase( const LLPanel::Params& panel_params,
+//						      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints)
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
 LLScrollingPanelParamBase::LLScrollingPanelParamBase( const LLPanel::Params& panel_params,
-						      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints)
+						      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLViewerWearable* wearable, LLJoint* jointp, BOOL use_hints)
+// [/SL:KB]
 	: LLScrollingPanel( panel_params ),
 	  mParam(param),
 	  mAllowModify(allow_modify),
@@ -53,10 +60,17 @@ LLScrollingPanelParamBase::LLScrollingPanelParamBase( const LLPanel::Params& pan
 	
 	getChild<LLUICtrl>("param slider")->setValue(weightToPercent(param->getWeight()));
 
-	std::string display_name = LLTrans::getString(param->getDisplayName());
-	getChild<LLUICtrl>("param slider")->setLabelArg("[DESC]", display_name);
+//	std::string display_name = LLTrans::getString(param->getDisplayName());
+//	getChild<LLUICtrl>("param slider")->setLabelArg("[DESC]", display_name);
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	mLabel = LLTrans::getString(param->getDisplayName());
+	getChild<LLUICtrl>("param slider")->setLabelArg("[DESC]", mLabel);
+// [/SL:KB]
 	getChildView("param slider")->setEnabled(mAllowModify);
 	childSetCommitCallback("param slider", LLScrollingPanelParamBase::onSliderMoved, this);
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	getChild<LLSliderCtrl>("param slider")->setSliderMouseUpCallback(boost::bind(&LLScrollingPanelParamBase::refreshDirty, this));
+// [/SL:KB]
 
 	setVisible(FALSE);
 	setBorderVisible( FALSE );
@@ -79,8 +93,37 @@ void LLScrollingPanelParamBase::updatePanel(BOOL allow_modify)
 	F32 current_weight = mWearable->getVisualParamWeight( param->getID() );
 	getChild<LLUICtrl>("param slider")->setValue(weightToPercent( current_weight ) );
 	mAllowModify = allow_modify;
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	refreshDirty();
+// [/SL:KB]
 	getChildView("param slider")->setEnabled(mAllowModify);
 }
+
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+void LLScrollingPanelParamBase::refreshDirty()
+{
+	// Check if the new value differs from the saved value
+	const F32 savedWeight = mWearable->getSavedVisualParamWeight(mParam);
+	const U8 savedValue = F32_to_U8(savedWeight, mParam->getMinWeight(), mParam->getMaxWeight());
+	const U8 curValue = F32_to_U8(mWearable->getVisualParamWeight(mParam->getID()), mParam->getMinWeight(), mParam->getMaxWeight());
+	setDirty(savedValue != curValue);
+}
+
+void LLScrollingPanelParamBase::setDirty(bool is_dirty)
+{
+	if (mIsDirty != is_dirty)
+	{
+		mIsDirty = is_dirty;
+		if (LLSliderCtrl* pCtrl = getChild<LLSliderCtrl>("param slider"))
+		{
+			pCtrl->setLabelColor(LLUIColorTable::instance().getColor( (mIsDirty) ? "LabelSelectedColor" : "LabelTextColor" ));
+			pCtrl->setLabelArg("[DESC]", (mIsDirty) ? mLabel + " (*)" : mLabel);
+			pCtrl->setEnabled(pCtrl->getEnabled());
+		}
+		notifyParent(LLSD().with("action", "update_dirty"));
+	}
+}
+// [/SL:KB]
 
 // static
 void LLScrollingPanelParamBase::onSliderMoved(LLUICtrl* ctrl, void* userdata)

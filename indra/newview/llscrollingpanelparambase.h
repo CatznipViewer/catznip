@@ -33,7 +33,10 @@
 
 class LLViewerJointMesh;
 class LLViewerVisualParam;
-class LLWearable;
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+class LLViewerWearable;
+// [/SL:KB]
+//class LLWearable;
 class LLVisualParamHint;
 class LLViewerVisualParam;
 class LLJoint;
@@ -41,10 +44,21 @@ class LLJoint;
 class LLScrollingPanelParamBase : public LLScrollingPanel
 {
 public:
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
 	LLScrollingPanelParamBase( const LLPanel::Params& panel_params,
-				   LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints = FALSE );
+				   LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLViewerWearable* wearable, LLJoint* jointp, BOOL use_hints = FALSE );
+// [/SL:KB]
+//	LLScrollingPanelParamBase( const LLPanel::Params& panel_params,
+//				   LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints = FALSE );
 	virtual ~LLScrollingPanelParamBase();
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+protected:
+	void refreshDirty();
+	void setDirty(bool is_dirty);
+public:
+	BOOL isDirty() const override { return mIsDirty; }
+// [/SL:KB]
 	virtual void		updatePanel(BOOL allow_modify);
 
 	static void			onSliderMoved(LLUICtrl* ctrl, void* userdata);
@@ -59,7 +73,12 @@ public:
 	LLViewerVisualParam* mParam;
 protected:
 	BOOL mAllowModify;
-	LLWearable *mWearable;
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	bool mIsDirty = false;
+	std::string mLabel;
+	LLViewerWearable *mWearable = nullptr;
+// [/SL:KB]
+//	LLWearable *mWearable;
 }; 
 
 #endif
