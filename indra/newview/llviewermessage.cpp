@@ -1892,7 +1892,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 		//don't spam them if they are getting flooded
 		if (check_offer_throttle(mFromName, true))
 		{
-			log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+			log_message = chatHistory_string + " " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
+// [/SL:KB]
+//			log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
 			LLSD args;
 			args["MESSAGE"] = log_message;
 			LLNotificationsUtil::add("SystemMessageTip", args);
@@ -2013,7 +2016,7 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 	msg->addVector3Fast(_PREHASH_Position, gAgent.getPositionAgent());
 	LLInventoryObserver* opener = NULL;
 	
-	std::string from_string; // Used in the pop-up.
+//	std::string from_string; // Used in the pop-up.
 	std::string chatHistory_string;  // Used in chat history.
 	if (mFromObject == TRUE)
 	{
@@ -2022,18 +2025,26 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			std::string group_name;
 			if (gCacheName->getGroupName(mFromID, group_name))
 			{
-				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+"'" 
-				+ mFromName + LLTrans::getString("'") +" " + LLTrans::getString("InvOfferOwnedByGroup") 
-				+ " "+ "'" + group_name + "'";
-				
-				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByGroup") 
+//				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+"'" 
+//				+ mFromName + LLTrans::getString("'") +" " + LLTrans::getString("InvOfferOwnedByGroup") 
+//				+ " "+ "'" + group_name + "'";
+//				
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				chatHistory_string = getSanitizedName() + " " + LLTrans::getString("InvOfferOwnedByGroup") 
 				+ " " + group_name + "'";
+// [/SL:KB]
+//				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByGroup") 
+//				+ " " + group_name + "'";
 			}
 			else
 			{
-				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+"'"
-				+ mFromName +"'"+ " " + LLTrans::getString("InvOfferOwnedByUnknownGroup");
-				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByUnknownGroup");
+//				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+"'"
+//				+ mFromName +"'"+ " " + LLTrans::getString("InvOfferOwnedByUnknownGroup");
+				
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				chatHistory_string = getSanitizedName() + " " + LLTrans::getString("InvOfferOwnedByUnknownGroup");
+// [/SL:KB]
+//				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByUnknownGroup");
 			}
 		}
 		else
@@ -2041,21 +2052,30 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			LLAvatarName av_name;
 			if (LLAvatarNameCache::get(mFromID, &av_name))
 			{
-				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+ LLTrans::getString("'") + mFromName 
-					+ LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedBy") + av_name.getUserName();
-				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedBy") + " " + av_name.getUserName();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				chatHistory_string = getSanitizedName() + " " + LLTrans::getString("InvOfferOwnedBy") + " " + av_name.getUserName();
+// [/SL:KB]
+//				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+ LLTrans::getString("'") + mFromName 
+//					+ LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedBy") + av_name.getUserName();
+//				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedBy") + " " + av_name.getUserName();
 			}
 			else
 			{
-				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+LLTrans::getString("'") 
-				+ mFromName + LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedByUnknownUser");
-				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByUnknownUser");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				chatHistory_string = getSanitizedName() + " " + LLTrans::getString("InvOfferOwnedByUnknownUser");
+// [/SL:KB]
+//				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+LLTrans::getString("'") 
+//				+ mFromName + LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedByUnknownUser");
+//				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedByUnknownUser");
 			}
 		}
 	}
 	else
 	{
-		from_string = chatHistory_string = mFromName;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+		chatHistory_string = getSanitizedName();
+// [/SL:KB]
+//		from_string = chatHistory_string = mFromName;
 	}
 	
 	bool is_do_not_disturb = gAgent.isDoNotDisturb();
@@ -2093,7 +2113,10 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			//don't spam them if they are getting flooded
 			if (check_offer_throttle(mFromName, true))
 			{
-				log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				log_message = chatHistory_string + " " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
+// [/SL:KB]
+//				log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
 				LLSD args;
 				args["MESSAGE"] = log_message;
 				LLNotificationsUtil::add("SystemMessageTip", args);
@@ -2172,6 +2195,13 @@ const char* LLOfferInfo::getNotificationName() const
 	if (mFromObject)
 		return (mFromID == gAgentID) ? "OwnObjectGiveItem" : "ObjectGiveItem";
 	return "UserGiveItem";
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+std::string LLOfferInfo::getSanitizedName() const
+{
+	return llformat("<nolink>%s</nolink>", mFromName.c_str());
 }
 // [/SL:KB]
 
