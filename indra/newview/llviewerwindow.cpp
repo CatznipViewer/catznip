@@ -5013,11 +5013,23 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 	if (image->save(filepath))
 	{
 		playSnapshotAnimAndSound();
-		success_cb();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.2
+		if (!success_cb.empty())
+		{
+			success_cb();
+		}
+// [/SL:KB]
+//		success_cb();
 	}
 	else
 	{
-		failure_cb();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-5.2
+		if (!failure_cb.empty())
+		{
+			failure_cb();
+		}
+// [/SL:KB]
+//		failure_cb();
 	}
 }
 

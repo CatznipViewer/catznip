@@ -395,6 +395,8 @@ const char* RlvStrings::getStringFromReturnCode(ERlvCmdRet eRet)
 			return "no active behaviours";
 		case RLV_RET_FAILED_BLOCKED:
 			return "blocked object";
+		case RLV_RET_FAILED_THROTTLED:
+			return "throttled";
 		// The following are identified by the chat verb
 		case RLV_RET_RETAINED:
 		case RLV_RET_SUCCESS:
@@ -629,6 +631,20 @@ bool RlvUtil::sendChatReply(S32 nChannel, const std::string& strUTF8Text)
 	gAgent.sendReliableMessage();
 	add(LLStatViewer::CHAT_COUNT, 1);
 
+	return true;
+}
+
+bool RlvUtil::sendChatReplySplit(S32 nChannel, const std::string& strMsg, char chSplit)
+{
+	std::list<std::string> msgList;
+	utf8str_split(msgList, strMsg, MAX_MSG_STR_LEN, chSplit);
+	for (const std::string& strMsg : msgList)
+	{
+		if (!sendChatReply(nChannel, strMsg))
+		{
+			return false;
+		}
+	}
 	return true;
 }
 

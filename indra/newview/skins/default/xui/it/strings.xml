@@ -200,11 +200,11 @@ Versione server voce: [VOICE_VERSION]
 		Griglia per beta test di Second Life (Aditi)
 	</string>
 	<string name="ViewerDownloadURL">
-		http://secondlife.com/download.
+		https://get.catznip.com/
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Il viewer utilizzato non è più in grado di accedere a Second Life. Visita la parina seguente per scaricare un nuovo viewer:
-https://get.catznip.com.
+https://get.catznip.com/ .
 
 Per maggiori informazioni, consulta le domande frequenti alla pagina seguente:
 http://secondlife.com/viewer-access-faq

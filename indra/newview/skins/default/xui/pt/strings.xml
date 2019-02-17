@@ -195,10 +195,10 @@ Versão do servidor de voz: [VOICE_VERSION]
 		Grade de teste beta do Second Life (Aditi)
 	</string>
 	<string name="ViewerDownloadURL">
-		http://secondlife.com/download
+		https://get.catznip.com/
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
-		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: https://get.catznip.com
+		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: https://get.catznip.com/
 
 Para saber mais, visite as perguntas frequentes abaixo: http://secondlife.com/viewer-access-faq
 	</string>
