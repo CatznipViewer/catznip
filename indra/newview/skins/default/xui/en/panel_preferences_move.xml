@@ -19,7 +19,7 @@
      visible="true"
      width="18"
      left="30"
-     top="15"/>
+     top="10"/>
   <text
    type="string"
    length="1"
@@ -120,7 +120,7 @@
    layout="topleft"
    left_pad="8"
    name="Movement:"
-   top_delta="4"
+   top_delta="2"
    width="100">
     Movement
   </text>
@@ -167,6 +167,26 @@
    name="automatic_fly"
    width="237"
    top_pad="0"/>
+  <check_box
+   control_name="PlayPrejumpAnim"
+   follows="left|top"
+   height="20"
+   label="Play the pre-jump animation when you jump"
+   layout="topleft"
+   left_delta="0"
+   name="play_prejump"
+   width="237"
+   top_pad="0"/>
+  <check_box
+   control_name="PlayLandingAnim"
+   follows="left|top"
+   height="20"
+   label="Play the landing animation when you fall and hit the ground"
+   layout="topleft"
+   left_delta="0"
+   name="play_landing"
+   width="237"
+   top_pad="0"/>
   <text
    follows="left|top"
    font.style="BOLD"
@@ -177,7 +197,7 @@
    left="75"
    name="mouse_lbl"
    width="270"
-   top_pad="10">
+   top_pad="5">
     Mouse
   </text>
   <check_box
@@ -198,7 +218,7 @@
    layout="topleft"
    left_delta="3"
    name=" Mouse Sensitivity"
-   top_pad="10"
+   top_pad="5"
    width="160"
    wrap="true">
     Mouselook mouse sensitivity:
@@ -233,7 +253,7 @@
    left="86"
    name="single_click_action_lbl"
    width="150"
-   top_pad="20">
+   top_pad="10">
     Single click on land:
   </text>
   <combo_box
