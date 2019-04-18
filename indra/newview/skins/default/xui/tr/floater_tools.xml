@@ -201,6 +201,7 @@
 				<combo_box.item label="Nesneye ödeme yap" name="Payobject"/>
 				<combo_box.item label="Aç" name="Open"/>
 				<combo_box.item label="Yakınlaştır" name="Zoom"/>
+				<combo_box.item label="Yok" name="None"/>
 			</combo_box>
 			<check_box label="Satılık:" name="checkbox for sale"/>
 			<spinner label="L$" name="Edit Cost"/>
@@ -372,6 +373,7 @@
 			<text name="edit_object">
 				Nesne özelliklerini düzenleyin:
 			</text>
+			<check_box label="Animasyonlu Ağ" name="Animated Mesh Checkbox Ctrl" tool_tip="Ağ stili giydirilmiş nesnelere bağımsız olarak animasyon eklenmesine olanak sağlar."/>
 			<check_box label="Esnek Yol" name="Flexible1D Checkbox Ctrl" tool_tip="Nesnelerin Z ekseni etrafında esnemesine imkan tanır (sadece istemci tarafında)"/>
 			<spinner label="Yumuşaklık" name="FlexNumSections"/>
 			<spinner label="Yerçekimi" name="FlexGravity"/>

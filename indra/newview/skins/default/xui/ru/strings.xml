@@ -71,7 +71,7 @@ SLURL: &lt;nolink&gt;[SLURL]&lt;/nolink&gt;
 Дальность отрисовки: [DRAW_DISTANCE] м
 Ширина канала: [NET_BANDWITH] кбит/с
 Коэффициент детализации: [LOD_FACTOR]
-Качество визуализации: [RENDER_QUALITY] / 7
+Качество визуализации: [RENDER_QUALITY]
 Расширенная модель освещения: [GPU_SHADERS]
 Память текстур: [TEXTURE_MEMORY] МБ
 Время создания VFS (кэш): [VFS_TIME]
@@ -2225,6 +2225,18 @@ support@secondlife.com.
 	</string>
 	<string name="RegionInfoListTypeBannedAgents">
 		Всегда заблокированы
+	</string>
+	<string name="RegionInfoAllEstates">
+		все землевладения
+	</string>
+	<string name="RegionInfoManagedEstates">
+		управляемые землевладения
+	</string>
+	<string name="RegionInfoThisEstate">
+		это землевладение
+	</string>
+	<string name="AndNMore">
+		и \[EXTRA_COUNT] более
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Память под скрипты на участке
