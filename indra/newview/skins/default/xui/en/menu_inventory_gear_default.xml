@@ -69,12 +69,20 @@
          parameter="reset_filters" />
     </menu_item_call>
     <menu_item_call
-     label="Close All Folders"
+     label="Collapse All Folders"
      layout="topleft"
-     name="close_folders">
+     name="collapse_all_folders">
         <on_click
          function="Inventory.GearDefault.Custom.Action"
-         parameter="close_folders" />
+         parameter="collapse_all_folders" />
+    </menu_item_call>
+    <menu_item_call
+     label="Collapse To Folders"
+     layout="topleft"
+     name="collapse_to_folders">
+        <on_click
+         function="Inventory.GearDefault.Custom.Action"
+         parameter="collapse_to_folders" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft" />

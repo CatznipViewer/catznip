@@ -308,7 +308,7 @@ void LLFolderView::addFolder( LLFolderViewFolder* folder)
 }
 
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catzip-3.2
-void LLFolderView::closeAllFolders()
+void LLFolderView::collapseAllFolders()
 {
 	folders_t openTopLevel;
 	for (LLFolderViewFolder* pFolder : mFolders)
@@ -328,6 +328,17 @@ void LLFolderView::closeAllFolders()
 	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
 
 	mScrollContainer->goToTop();
+	arrangeAll();
+}
+
+void LLFolderView::collapseToFolders()
+{
+	LLCollapseToFolders f;
+	applyFunctorRecursively(f);
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
 	arrangeAll();
 }
 // [/SL:KB]

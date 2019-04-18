@@ -132,7 +132,11 @@ public:
 	bool getAllowMultiSelect() { return mAllowMultiSelect; }
 
 	// Close all folders in the view
-	void closeAllFolders();
+//	void closeAllFolders();
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catzip-3.2
+	void collapseAllFolders();
+	void collapseToFolders();
+// [/SL:KB]
 	void openTopLevelFolders();
 
 	virtual void addFolder( LLFolderViewFolder* folder);
@@ -402,6 +406,17 @@ public:
 	virtual void doFolder(LLFolderViewFolder* folder);
 	virtual void doItem(LLFolderViewItem* item);
 };
+
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+class LLCollapseToFolders : public LLFolderViewFunctor
+{
+public:
+	LLCollapseToFolders() {}
+	~LLCollapseToFolders() override {}
+	void doFolder(LLFolderViewFolder* pFolder) override {}
+	void doItem(LLFolderViewItem* pItem) override;
+};
+// [/SL:KB]
 
 class LLSaveFolderState : public LLFolderViewFunctor
 {

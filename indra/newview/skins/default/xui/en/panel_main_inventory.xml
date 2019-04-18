@@ -193,10 +193,11 @@
        layout="topleft"
        name="collapse_btn_panel"
        user_resize="false"
-       width="32">
+       width="44">
           <button
            follows="bottom|left"
            height="25"
+           image_overlay_alignment="left"
            image_hover_unselected="Toolbar_Middle_Over"
            image_overlay="Inv_Collapse"
            image_selected="Toolbar_Middle_Selected"
@@ -204,9 +205,23 @@
            layout="topleft"
            left="0"
            name="collapse_btn"
-           tool_tip="Close All Folders"
+           tool_tip="Collapse All Folders"
            top="0"
-           width="31" />
+           width="43" />
+          <menu_button
+           follows="bottom|left"
+           height="25"
+           image_hover_unselected="Toolbar_Split_Right_Over"
+           image_overlay="Arrow_Small_Down"
+           image_selected="Toolbar_Split_Right_Selected"
+           image_unselected="Toolbar_Split_Right_Off"
+           layout="topleft"
+           left_pad="-18"
+           name="collapse_flyout_btn"
+           offset_x="-25"
+           tool_tip="Show additional collapse actions"
+           top="0"
+           width="18" />
       </layout_panel>
       <layout_panel
        auto_resize="false"
@@ -292,10 +307,10 @@
           <button
            follows="bottom|left"
            height="25"
-           image_hover_unselected="Toolbar_Right_Over"
+           image_hover_unselected="Toolbar_Split_Right_Over"
            image_overlay="Arrow_Small_Down"
-           image_selected="Toolbar_Right_Selected"
-           image_unselected="Toolbar_Right_Off"
+           image_selected="Toolbar_Split_Right_Selected"
+           image_unselected="Toolbar_Split_Right_Off"
            layout="topleft"
            left_pad="-20"
            name="actions_flyout_btn"

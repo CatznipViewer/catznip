@@ -44,7 +44,11 @@ void LLMenuButton::MenuPositions::declareValues()
 
 LLMenuButton::Params::Params()
 :	menu_filename("menu_filename"),
-	position("menu_position", MP_BOTTOM_LEFT)
+	position("menu_position", MP_BOTTOM_LEFT),
+// [SL:KB] - Patch: Control-MenuButton| Checked: Catznip-6.1
+	offset_x("offset_x", 0),
+	offset_y("offset_y", 0)
+// [/SL:KB]
 {
 	addSynonym(position, "position");
 }
@@ -54,6 +58,10 @@ LLMenuButton::LLMenuButton(const LLMenuButton::Params& p)
 :	LLButton(p),
 	mIsMenuShown(false),
 	mMenuPosition(p.position),
+// [SL:KB] - Patch: Control-MenuButton| Checked: Catznip-6.1
+	mOffsetX(p.offset_x),
+	mOffsetY(p.offset_y),
+// [/SL:KB]
 	mOwnMenu(false)
 {
 	std::string menu_filename = p.menu_filename;
@@ -213,6 +221,11 @@ void LLMenuButton::updateMenuOrigin()
 			break;
 		}
 	}
+
+// [SL:KB] - Patch: Control-MenuButton| Checked: Catznip-6.1
+	mX += mOffsetX;
+	mY += mOffsetY;
+// [/SL:KB]
 }
 
 void LLMenuButton::onMenuVisibilityChange(const LLSD& param)
