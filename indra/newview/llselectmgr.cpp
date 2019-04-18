@@ -33,6 +33,7 @@
 
 // library includes
 #include "llcachename.h"
+#include "llavatarnamecache.h"
 #include "lldbstrings.h"
 #include "lleconomy.h"
 #include "llgl.h"
@@ -45,6 +46,7 @@
 #include "llundo.h"
 #include "lluuid.h"
 #include "llvolume.h"
+#include "llcontrolavatar.h"
 #include "message.h"
 #include "object_flags.h"
 #include "llquaternion.h"
@@ -132,11 +134,6 @@ LLColor4 LLSelectMgr::sHighlightParentColor;
 LLColor4 LLSelectMgr::sHighlightChildColor;
 LLColor4 LLSelectMgr::sContextSilhouetteColor;
 
-static LLObjectSelection *get_null_object_selection();
-template<> 
-	const LLSafeHandle<LLObjectSelection>::NullFunc 
-		LLSafeHandle<LLObjectSelection>::sNullFunc = get_null_object_selection;
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // struct LLDeRezInfo
 //
@@ -156,25 +153,13 @@ struct LLDeRezInfo
 //
 
 
-static LLPointer<LLObjectSelection> sNullSelection;
-
 //
 // Functions
 //
 
 void LLSelectMgr::cleanupGlobals()
 {
-	sNullSelection = NULL;
 	LLSelectMgr::getInstance()->clearSelections();
-}
-
-LLObjectSelection *get_null_object_selection()
-{
-	if (sNullSelection.isNull())
-	{
-		sNullSelection = new LLObjectSelection;
-	}
-	return sNullSelection;
 }
 
 // Build time optimization, generate this function once here
@@ -613,6 +598,12 @@ bool LLSelectMgr::linkObjects()
 		return true;
 	}
 
+	if (!LLSelectMgr::getInstance()->selectGetSameRegion())
+	{
+		LLNotificationsUtil::add("CannotLinkAcrossRegions");
+		return true;
+	}
+
 	LLSelectMgr::getInstance()->sendLink();
 
 	return true;
@@ -655,6 +646,10 @@ void LLSelectMgr::confirmUnlinkObjects(const LLSD& notification, const LLSD& res
 // otherwise. this allows the handle_link method to more finely check
 // the selection and give an error message when the uer has a
 // reasonable expectation for the link to work, but it will fail.
+//
+// For animated objects, there's additional check that if the
+// selection includes at least one animated object, the total mesh
+// triangle count cannot exceed the designated limit.
 bool LLSelectMgr::enableLinkObjects()
 {
 	bool new_value = false;
@@ -679,6 +674,10 @@ bool LLSelectMgr::enableLinkObjects()
 			new_value = LLSelectMgr::getInstance()->getSelection()->applyToRootObjects(&func, firstonly);
 		}
 	}
+    if (!LLSelectMgr::getInstance()->getSelection()->checkAnimatedObjectLinkable())
+    {
+        new_value = false;
+    }
 	return new_value;
 }
 
@@ -2090,29 +2089,33 @@ void LLSelectMgr::selectionSetGlow(F32 glow)
 	mSelectedObjects->applyToObjects( &func2 );
 }
 
-void LLSelectMgr::selectionSetMaterialParams(LLSelectedTEMaterialFunctor* material_func)
+void LLSelectMgr::selectionSetMaterialParams(LLSelectedTEMaterialFunctor* material_func, int te)
 {
 	struct f1 : public LLSelectedTEFunctor
 	{
 		LLMaterialPtr mMaterial;
-		f1(LLSelectedTEMaterialFunctor* material_func) : _material_func(material_func) {}
+		f1(LLSelectedTEMaterialFunctor* material_func, int te) : _material_func(material_func), _specific_te(te) {}
 
-		bool apply(LLViewerObject* object, S32 face)
+		bool apply(LLViewerObject* object, S32 te)
 		{
-			if (object && object->permModify() && _material_func)
-			{
-				LLTextureEntry* tep = object->getTE(face);
-				if (tep)
-				{
-					LLMaterialPtr current_material = tep->getMaterialParams();
-					_material_func->apply(object, face, tep, current_material);
-				}
-			}
+            if (_specific_te == -1 || (te == _specific_te))
+            {
+			    if (object && object->permModify() && _material_func)
+			    {
+				    LLTextureEntry* tep = object->getTE(te);
+				    if (tep)
+				    {
+					    LLMaterialPtr current_material = tep->getMaterialParams();
+					    _material_func->apply(object, te, tep, current_material);
+				    }
+			    }
+            }
 			return true;
 		}
 
 		LLSelectedTEMaterialFunctor* _material_func;
-	} func1(material_func);
+        int _specific_te;
+	} func1(material_func, te);
 	mSelectedObjects->applyToTEs( &func1 );
 
 	struct f2 : public LLSelectedObjectFunctor
@@ -2777,6 +2780,35 @@ BOOL LLSelectMgr::selectGetRootsModify()
 	return TRUE;
 }
 
+//-----------------------------------------------------------------------------
+// selectGetSameRegion() - return TRUE if all objects are in same region
+//-----------------------------------------------------------------------------
+BOOL LLSelectMgr::selectGetSameRegion()
+{
+    if (getSelection()->isEmpty())
+    {
+        return TRUE;
+    }
+    LLViewerObject* object = getSelection()->getFirstObject();
+    if (!object)
+    {
+        return FALSE;
+    }
+    LLViewerRegion* current_region = object->getRegion();
+
+    for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
+        iter != getSelection()->root_end(); iter++)
+    {
+        LLSelectNode* node = *iter;
+        object = node->getObject();
+        if (!node->mValid || !object || current_region != object->getRegion())
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
 
 //-----------------------------------------------------------------------------
 // selectGetNonPermanentEnforced() - return TRUE if all objects are not
@@ -3655,6 +3687,39 @@ void LLSelectMgr::selectForceDelete()
         logNoOp,
 		(void*)TRUE,
 		SEND_ONLY_ROOTS);
+}
+
+BOOL LLSelectMgr::selectGetEditMoveLinksetPermissions(bool &move, bool &modify)
+{
+    move = true;
+    modify = true;
+    bool selecting_linked_set = !gSavedSettings.getBOOL("EditLinkedParts");
+
+    for (LLObjectSelection::iterator iter = getSelection()->begin();
+        iter != getSelection()->end(); iter++)
+    {
+        LLSelectNode* nodep = *iter;
+        LLViewerObject* object = nodep->getObject();
+        if (!object || !nodep->mValid)
+        {
+            move = false;
+            modify = false;
+            return FALSE;
+        }
+
+        LLViewerObject *root_object = object->getRootEdit();
+        bool this_object_movable = false;
+        if (object->permMove() && !object->isPermanentEnforced() &&
+            ((root_object == NULL) || !root_object->isPermanentEnforced()) &&
+            (object->permModify() || selecting_linked_set))
+        {
+            this_object_movable = true;
+        }
+        move = move && this_object_movable;
+        modify = modify && object->permModify();
+    }
+
+    return TRUE;
 }
 
 void LLSelectMgr::selectGetAggregateSaleInfo(U32 &num_for_sale,
@@ -5385,9 +5450,9 @@ void LLSelectMgr::processObjectPropertiesFamily(LLMessageSystem* msg, void** use
 		LLFloaterReporter *reporterp = LLFloaterReg::findTypedInstance<LLFloaterReporter>("reporter");
 		if (reporterp)
 		{
-			std::string fullname;
-			gCacheName->getFullName(owner_id, fullname);
-			reporterp->setPickedObjectProperties(name, fullname, owner_id);
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(owner_id, &av_name);
+			reporterp->setPickedObjectProperties(name, av_name.getUserName(), owner_id);
 		}
 	}
 	else if (request_flags & OBJECT_PAY_REQUEST)
@@ -5772,6 +5837,7 @@ void LLSelectMgr::renderSilhouettes(BOOL for_hud)
 		gGL.translatef(-hud_bbox.getCenterLocal().mV[VX] + (depth *0.5f), 0.f, 0.f);
 		gGL.scalef(cur_zoom, cur_zoom, cur_zoom);
 	}
+
 	if (mSelectedObjects->getNumNodes())
 	{
 		LLUUID inspect_item_id= LLUUID::null;
@@ -5789,6 +5855,9 @@ void LLSelectMgr::renderSilhouettes(BOOL for_hud)
 			}
 		}
 
+		bool wireframe_selection = (gFloaterTools && gFloaterTools->getVisible()) || LLSelectMgr::sRenderHiddenSelections;
+		F32 fogCfx = (F32)llclamp((LLSelectMgr::getInstance()->getSelectionCenterGlobal() - gAgentCamera.getCameraPositionGlobal()).magVec() / (LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal().magVec() * 4), 0.0, 1.0);
+
 		LLUUID focus_item_id = LLViewerMediaFocus::getInstance()->getFocusedObjectID();
 		for (S32 pass = 0; pass < 2; pass++)
 		{
@@ -5799,35 +5868,63 @@ void LLSelectMgr::renderSilhouettes(BOOL for_hud)
 				LLViewerObject* objectp = node->getObject();
 				if (!objectp)
 					continue;
-				if (objectp->isHUDAttachment() != for_hud)
-				{
-					continue;
-				}
-				if (objectp->getID() == focus_item_id)
-				{
-					node->renderOneSilhouette(gFocusMgr.getFocusColor());
-				}
-				else if(objectp->getID() == inspect_item_id)
-				{
-					node->renderOneSilhouette(sHighlightInspectColor);
-				}
-				else if (node->isTransient())
-				{
-					BOOL oldHidden = LLSelectMgr::sRenderHiddenSelections;
-					LLSelectMgr::sRenderHiddenSelections = FALSE;
-					node->renderOneSilhouette(sContextSilhouetteColor);
-					LLSelectMgr::sRenderHiddenSelections = oldHidden;
-				}
-				else if (objectp->isRootEdit())
-				{
-					node->renderOneSilhouette(sSilhouetteParentColor);
-				}
-				else
-				{
-					node->renderOneSilhouette(sSilhouetteChildColor);
-				}
-			}
-		}
+
+                if(getTEMode() && !node->hasSelectedTE()) 
+                    continue;
+
+                if (objectp->mDrawable 
+                    && objectp->mDrawable->getVOVolume() 
+                    && objectp->mDrawable->getVOVolume()->isMesh())
+                {
+                    S32 num_tes = llmin((S32)objectp->getNumTEs(), (S32)objectp->getNumFaces()); // avatars have TEs but no faces
+                    for (S32 te = 0; te < num_tes; ++te)
+                    {
+                        if (!getTEMode())
+                        {
+                            objectp->mDrawable->getFace(te)->renderOneWireframe(
+                                LLColor4(sSilhouetteParentColor[VRED], sSilhouetteParentColor[VGREEN], sSilhouetteParentColor[VBLUE], LLSelectMgr::sHighlightAlpha * 2)
+                                , fogCfx, wireframe_selection, node->isTransient() ? FALSE : LLSelectMgr::sRenderHiddenSelections);
+                        }
+                        else if(node->isTESelected(te))
+                        {
+                            objectp->mDrawable->getFace(te)->renderOneWireframe(
+                                LLColor4(sSilhouetteParentColor[VRED], sSilhouetteParentColor[VGREEN], sSilhouetteParentColor[VBLUE], LLSelectMgr::sHighlightAlpha * 2)
+                                , fogCfx, wireframe_selection, node->isTransient() ? FALSE : LLSelectMgr::sRenderHiddenSelections);
+                        }
+                    }
+                }
+                else
+                {
+                    if (objectp->isHUDAttachment() != for_hud)
+                    {
+                        continue;
+                    }
+                    if (objectp->getID() == focus_item_id)
+                    {
+                        node->renderOneSilhouette(gFocusMgr.getFocusColor());
+                    }
+                    else if (objectp->getID() == inspect_item_id)
+                    {
+                        node->renderOneSilhouette(sHighlightInspectColor);
+                    }
+                    else if (node->isTransient())
+                    {
+                        BOOL oldHidden = LLSelectMgr::sRenderHiddenSelections;
+                        LLSelectMgr::sRenderHiddenSelections = FALSE;
+                        node->renderOneSilhouette(sContextSilhouetteColor);
+                        LLSelectMgr::sRenderHiddenSelections = oldHidden;
+                    }
+                    else if (objectp->isRootEdit())
+                    {
+                        node->renderOneSilhouette(sSilhouetteParentColor);
+                    }
+                    else
+                    {
+                        node->renderOneSilhouette(sSilhouetteChildColor);
+                    }
+                }
+			} //for all selected node's
+		} //for pass
 	}
 
 	if (mHighlightedObjects->getNumNodes())
@@ -5991,7 +6088,7 @@ void LLSelectNode::selectTE(S32 te_index, BOOL selected)
 	mLastTESelected = te_index;
 }
 
-BOOL LLSelectNode::isTESelected(S32 te_index)
+BOOL LLSelectNode::isTESelected(S32 te_index) const
 {
 	if (te_index < 0 || te_index >= mObject->getNumTEs())
 	{
@@ -6000,17 +6097,12 @@ BOOL LLSelectNode::isTESelected(S32 te_index)
 	return (mTESelectMask & (0x1 << te_index)) != 0;
 }
 
-S32 LLSelectNode::getLastSelectedTE()
+S32 LLSelectNode::getLastSelectedTE() const
 {
 	if (!isTESelected(mLastTESelected))
 	{
 		return -1;
 	}
-	return mLastTESelected;
-}
-
-S32 LLSelectNode::getLastOperatedTE()
-{
 	return mLastTESelected;
 }
 
@@ -6213,133 +6305,6 @@ BOOL LLSelectNode::allowOperationOnNode(PermissionBit op, U64 group_proxy_power)
 	return (mPermissions->allowOperationBy(op, proxy_agent_id, group_id));
 }
 
-
-//helper function for pushing relevant vertices from drawable to GL
-void pushWireframe(LLDrawable* drawable)
-{
-	LLVOVolume* vobj = drawable->getVOVolume();
-	if (vobj)
-	{
-		LLVertexBuffer::unbind();
-		gGL.pushMatrix();
-		gGL.multMatrix((F32*) vobj->getRelativeXform().mMatrix);
-
-		LLVolume* volume = NULL;
-
-		if (drawable->isState(LLDrawable::RIGGED))
-		{
-				vobj->updateRiggedVolume();
-				volume = vobj->getRiggedVolume();
-		}
-		else
-		{
-			volume = vobj->getVolume();
-		}
-
-		if (volume)
-		{
-			for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
-			{
-				const LLVolumeFace& face = volume->getVolumeFace(i);
-				LLVertexBuffer::drawElements(LLRender::TRIANGLES, face.mPositions, NULL, face.mNumIndices, face.mIndices);
-			}
-		}
-
-		gGL.popMatrix();
-	}
-	
-}
-
-void LLSelectNode::renderOneWireframe(const LLColor4& color)
-{
-	//Need to because crash on ATI 3800 (and similar cards) MAINT-5018 
-	LLGLDisable multisample(LLPipeline::RenderFSAASamples > 0 ? GL_MULTISAMPLE_ARB : 0);
-
-	LLViewerObject* objectp = getObject();
-	if (!objectp)
-	{
-		return;
-	}
-
-	LLDrawable* drawable = objectp->mDrawable;
-	if(!drawable)
-	{
-		return;
-	}
-
-	LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
-
-	if (shader)
-	{
-		gDebugProgram.bind();
-	}
-
-	gGL.matrixMode(LLRender::MM_MODELVIEW);
-	gGL.pushMatrix();
-	
-	BOOL is_hud_object = objectp->isHUDAttachment();
-
-	if (drawable->isActive())
-	{
-		gGL.loadMatrix(gGLModelView);
-		gGL.multMatrix((F32*) objectp->getRenderMatrix().mMatrix);
-	}
-	else if (!is_hud_object)
-	{
-		gGL.loadIdentity();
-		gGL.multMatrix(gGLModelView);
-		LLVector3 trans = objectp->getRegion()->getOriginAgent();		
-		gGL.translatef(trans.mV[0], trans.mV[1], trans.mV[2]);		
-	}
-	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	if (LLSelectMgr::sRenderHiddenSelections) // && gFloaterTools && gFloaterTools->getVisible())
-	{
-		gGL.blendFunc(LLRender::BF_SOURCE_COLOR, LLRender::BF_ONE);
-		LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE, GL_GEQUAL);
-		if (shader)
-		{
-			gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
-			pushWireframe(drawable);
-		}
-		else
-		{
-			LLGLEnable fog(GL_FOG);
-			glFogi(GL_FOG_MODE, GL_LINEAR);
-			float d = (LLViewerCamera::getInstance()->getPointOfInterest()-LLViewerCamera::getInstance()->getOrigin()).magVec();
-			LLColor4 fogCol = color * (F32)llclamp((LLSelectMgr::getInstance()->getSelectionCenterGlobal()-gAgentCamera.getCameraPositionGlobal()).magVec()/(LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal().magVec()*4), 0.0, 1.0);
-			glFogf(GL_FOG_START, d);
-			glFogf(GL_FOG_END, d*(1 + (LLViewerCamera::getInstance()->getView() / LLViewerCamera::getInstance()->getDefaultFOV())));
-			glFogfv(GL_FOG_COLOR, fogCol.mV);
-
-			gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
-			{
-				gGL.diffuseColor4f(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], 0.4f);
-				pushWireframe(drawable);
-			}
-		}
-	}
-
-	gGL.flush();
-	gGL.setSceneBlendType(LLRender::BT_ALPHA);
-
-	gGL.diffuseColor4f(color.mV[VRED]*2, color.mV[VGREEN]*2, color.mV[VBLUE]*2, LLSelectMgr::sHighlightAlpha*2);
-	
-	LLGLEnable offset(GL_POLYGON_OFFSET_LINE);
-	glPolygonOffset(3.f, 3.f);
-	glLineWidth(3.f);
-	pushWireframe(drawable);
-	glLineWidth(1.f);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	gGL.popMatrix();
-
-	if (shader)
-	{
-		shader->bind();
-	}
-}
-
 //-----------------------------------------------------------------------------
 // renderOneSilhouette()
 //-----------------------------------------------------------------------------
@@ -6360,7 +6325,8 @@ void LLSelectNode::renderOneSilhouette(const LLColor4 &color)
 	LLVOVolume* vobj = drawable->getVOVolume();
 	if (vobj && vobj->isMesh())
 	{
-		renderOneWireframe(color);
+		//This check (if(...)) with assert here just for ensure that this situation will not happens, and can be removed later. For example on the next release.
+		llassert(!"renderOneWireframe() was removed SL-10194");
 		return;
 	}
 
@@ -6592,7 +6558,10 @@ S32 get_family_count(LLViewerObject *parent)
 
 //-----------------------------------------------------------------------------
 // updateSelectionCenter
-//-----------------------------------------------------------------------------
+//
+// FIXME this is a grab bag of functionality only some of which has to do
+// with the selection center
+// -----------------------------------------------------------------------------
 void LLSelectMgr::updateSelectionCenter()
 {
 	const F32 MOVE_SELECTION_THRESHOLD = 1.f;		//  Movement threshold in meters for updating selection
@@ -6610,22 +6579,11 @@ void LLSelectMgr::updateSelectionCenter()
 		mSelectionCenterGlobal.clearVec();
 		mShowSelection = FALSE;
 		mSelectionBBox = LLBBox(); 
-		mPauseRequest = NULL;
 		resetAgentHUDZoom();
-
 	}
 	else
 	{
 		mSelectedObjects->mSelectType = getSelectTypeForObject(object);
-
-		if (mSelectedObjects->mSelectType == SELECT_TYPE_ATTACHMENT && isAgentAvatarValid())
-		{
-			mPauseRequest = gAgentAvatarp->requestPause();
-		}
-		else
-		{
-			mPauseRequest = NULL;
-		}
 
 		if (mSelectedObjects->mSelectType != SELECT_TYPE_HUD && isAgentAvatarValid())
 		{
@@ -6703,6 +6661,59 @@ void LLSelectMgr::updateSelectionCenter()
 	{
 		gEditMenuHandler = NULL;
 	}
+
+    pauseAssociatedAvatars();
+}
+
+//-----------------------------------------------------------------------------
+// pauseAssociatedAvatars
+//
+// If the selection includes an attachment or an animated object, the
+// associated avatars should pause their animations until they are no
+// longer selected.
+//-----------------------------------------------------------------------------
+void LLSelectMgr::pauseAssociatedAvatars()
+{
+    mPauseRequests.clear();
+
+    for (LLObjectSelection::iterator iter = mSelectedObjects->begin();
+         iter != mSelectedObjects->end(); iter++)
+    {
+        LLSelectNode* node = *iter;
+        LLViewerObject* object = node->getObject();
+        if (!object)
+            continue;
+			
+        mSelectedObjects->mSelectType = getSelectTypeForObject(object);
+
+        if (mSelectedObjects->mSelectType == SELECT_TYPE_ATTACHMENT && 
+            isAgentAvatarValid() && object->getParent() != NULL)
+        {
+            if (object->isAnimatedObject())
+            {
+                // Is an animated object attachment.
+                // Pause both the control avatar and the avatar it's attached to.
+                if (object->getControlAvatar())
+                {
+                    mPauseRequests.push_back(object->getControlAvatar()->requestPause());
+                }
+                mPauseRequests.push_back(gAgentAvatarp->requestPause());
+            }
+            else
+            {
+                // Is a regular attachment. Pause the avatar it's attached to.
+                mPauseRequests.push_back(gAgentAvatarp->requestPause());
+            }
+        }
+        else
+        {
+            if (object && object->isAnimatedObject() && object->getControlAvatar())
+            {
+                // Is a non-attached animated object. Pause the control avatar.
+                mPauseRequests.push_back(object->getControlAvatar()->requestPause());
+            }
+        }
+    }
 }
 
 void LLSelectMgr::updatePointAt()
@@ -7179,10 +7190,16 @@ F32 LLObjectSelection::getSelectedObjectStreamingCost(S32* total_bytes, S32* vis
 		
 		if (object)
 		{
-			S32 bytes = 0;
-			S32 visible = 0;
-			cost += object->getStreamingCost(&bytes, &visible);
+			cost += object->getStreamingCost();
 
+            S32 bytes = 0;
+            S32 visible = 0;
+            LLMeshCostData costs;
+            if (object->getCostData(costs))
+            {
+                bytes = costs.getSizeTotal();
+                visible = costs.getSizeByLOD(object->getLOD());
+            }
 			if (total_bytes)
 			{
 				*total_bytes += bytes;
@@ -7337,6 +7354,31 @@ bool LLObjectSelection::applyToObjects(LLSelectedObjectFunctor* func)
 		result = result && r;
 	}
 	return result;
+}
+
+bool LLObjectSelection::checkAnimatedObjectEstTris()
+{
+    F32 est_tris = 0;
+    F32 max_tris = 0;
+    S32 anim_count = 0;
+	for (root_iterator iter = root_begin(); iter != root_end(); ++iter)
+	{
+		LLViewerObject* object = (*iter)->getObject();
+		if (!object)
+			continue;
+        if (object->isAnimatedObject())
+        {
+            anim_count++;
+        }
+        est_tris += object->recursiveGetEstTrianglesMax();
+        max_tris = llmax((F32)max_tris,(F32)object->getAnimatedObjectMaxTris());
+	}
+	return anim_count==0 || est_tris <= max_tris;
+}
+
+bool LLObjectSelection::checkAnimatedObjectLinkable()
+{
+    return checkAnimatedObjectEstTris();
 }
 
 bool LLObjectSelection::applyToRootObjects(LLSelectedObjectFunctor* func, bool firstonly)
@@ -7898,3 +7940,40 @@ void LLSelectMgr::sendSelectionMove()
 
 	//saveSelectedObjectTransform(SELECT_ACTION_TYPE_PICK);
 }
+
+template<>
+bool LLCheckIdenticalFunctor<F32>::same(const F32& a, const F32& b, const F32& tolerance)
+{
+    F32 delta = (a - b);
+    F32 abs_delta = fabs(delta);
+    return abs_delta <= tolerance;
+}
+
+#define DEF_DUMMY_CHECK_FUNCTOR(T)                                                  \
+template<>                                                                          \
+bool LLCheckIdenticalFunctor<T>::same(const T& a, const T& b, const T& tolerance)   \
+{                                                                                   \
+    (void)tolerance;                                                                \
+    return a == b;                                                                  \
+}
+
+DEF_DUMMY_CHECK_FUNCTOR(LLUUID)
+DEF_DUMMY_CHECK_FUNCTOR(LLGLenum)
+DEF_DUMMY_CHECK_FUNCTOR(LLTextureEntry)
+DEF_DUMMY_CHECK_FUNCTOR(LLTextureEntry::e_texgen)
+DEF_DUMMY_CHECK_FUNCTOR(bool)
+DEF_DUMMY_CHECK_FUNCTOR(U8)
+DEF_DUMMY_CHECK_FUNCTOR(int)
+DEF_DUMMY_CHECK_FUNCTOR(LLColor4)
+DEF_DUMMY_CHECK_FUNCTOR(LLMediaEntry)
+DEF_DUMMY_CHECK_FUNCTOR(LLPointer<LLMaterial>)
+DEF_DUMMY_CHECK_FUNCTOR(std::string)
+DEF_DUMMY_CHECK_FUNCTOR(std::vector<std::string>)
+
+template<>
+bool LLCheckIdenticalFunctor<class LLFace *>::same(class LLFace* const & a, class LLFace* const & b, class LLFace* const & tolerance)   \
+{                                                                                   \
+    (void)tolerance;                                                                \
+    return a == b;                                                                  \
+}
+

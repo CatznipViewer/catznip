@@ -46,6 +46,7 @@
 #include "llfloaterreg.h"
 #include "llfloateravatarpicker.h"
 #include "llfloaterauction.h"
+#include "llfloaterbanduration.h"
 #include "llfloatergroups.h"
 #include "llfloaterscriptlimits.h"
 #include "llavataractions.h"
@@ -503,7 +504,7 @@ BOOL LLPanelLandGeneral::postBuild()
 	// note: on region change this will not be re checked, should not matter on Agni as
 	// 99% of the time all regions will return the same caps. In case of an erroneous setting
 	// to enabled the floater will just throw an error when trying to get it's cap
-	std::string url = gAgent.getRegion()->getCapability("LandResources");
+	std::string url = gAgent.getRegionCapability("LandResources");
 	if (!url.empty())
 	{
 		if(mBtnScriptLimits)
@@ -2181,17 +2182,8 @@ void LLPanelLandOptions::refreshSearch()
 			&& region
 			&& !(region->getRegionFlag(REGION_FLAGS_BLOCK_PARCEL_SEARCH));
 
-	// There is a bug with this panel whereby the Show Directory bit can be 
-	// slammed off by the Region based on an override.  Since this data is cached
-	// locally the change will not reflect in the panel, which could cause confusion
-	// A workaround for this is to flip the bit off in the locally cached version
-	// when we detect a mismatch case.
-	if(!can_change && parcel->getParcelFlag(PF_SHOW_DIRECTORY))
-	{
-		parcel->setParcelFlag(PF_SHOW_DIRECTORY, FALSE);
-	}
 	BOOL show_directory = parcel->getParcelFlag(PF_SHOW_DIRECTORY);
-	mCheckShowDirectory	->set(show_directory);
+	mCheckShowDirectory->set(show_directory);
 
 	// Set by string in case the order in UI doesn't match the order by index.
 	LLParcel::ECategory cat = parcel->getCategory();
@@ -2432,9 +2424,16 @@ void LLPanelLandAccess::refresh()
 		BOOL use_group = parcel->getParcelFlag(PF_USE_ACCESS_GROUP);
 		BOOL public_access = !use_access_list;
 		
-		getChild<LLUICtrl>("public_access")->setValue(public_access );
-		getChild<LLUICtrl>("GroupCheck")->setValue(use_group );
-
+        if (parcel->getRegionAllowAccessOverride())
+        {
+            getChild<LLUICtrl>("public_access")->setValue(public_access);
+            getChild<LLUICtrl>("GroupCheck")->setValue(use_group);
+        }
+        else
+        {
+            getChild<LLUICtrl>("public_access")->setValue(TRUE);
+            getChild<LLUICtrl>("GroupCheck")->setValue(FALSE);
+        }
 		std::string group_name;
 		gCacheName->getGroupName(parcel->getGroupID(), group_name);
 		getChild<LLUICtrl>("GroupCheck")->setLabelArg("[GROUP]", group_name );
@@ -2504,33 +2503,49 @@ void LLPanelLandAccess::refresh()
 				 cit != parcel->mBanList.end(); ++cit)
 			{
 				const LLAccessEntry& entry = (*cit).second;
-				std::string prefix;
+				std::string duration;
 				if (entry.mTime != 0)
 				{
 					LLStringUtil::format_map_t args;
 					S32 now = time(NULL);
-					S32 seconds = entry.mTime - now;
+					S32 seconds = entry.mTime - now;					
 					if (seconds < 0) seconds = 0;
-					prefix.assign(" (");
-					if (seconds >= 120)
+
+					if (seconds >= 7200)
 					{
-						args["[MINUTES]"] = llformat("%d", (seconds/60));
-						std::string buf = parent_floater->getString ("Minutes", args);
-						prefix.append(buf);
+						args["[HOURS]"] = llformat("%d", (seconds / 3600));
+						duration = parent_floater->getString("Hours", args);
+					}
+					else if (seconds >= 3600)
+					{
+						duration = "1 " + parent_floater->getString("Hour");
+					}
+					else if (seconds >= 120)
+					{
+						args["[MINUTES]"] = llformat("%d", (seconds / 60));
+						duration = parent_floater->getString("Minutes", args);
 					}
 					else if (seconds >= 60)
 					{
-						prefix.append("1 " + parent_floater->getString("Minute"));
+						duration = "1 " + parent_floater->getString("Minute");
 					}
 					else
 					{
 						args["[SECONDS]"] = llformat("%d", seconds);
-						std::string buf = parent_floater->getString ("Seconds", args);
-						prefix.append(buf);
+						duration = parent_floater->getString("Seconds", args);
 					}
-					prefix.append(" " + parent_floater->getString("Remaining") + ") ");
 				}
-				mListBanned->addNameItem(entry.mID, ADD_DEFAULT, TRUE, "",  prefix);
+				else
+				{
+					duration = parent_floater->getString("Always");
+				}
+				LLSD item;
+				item["id"] = entry.mID;
+				LLSD& columns = item["columns"];
+				columns[0]["column"] = "name"; // to be populated later
+				columns[1]["column"] = "duration";
+				columns[1]["value"] = duration;
+				mListBanned->addElement(item);
 			}
 			mListBanned->sortByName(TRUE);
 		}
@@ -2610,9 +2625,14 @@ void LLPanelLandAccess::refresh_ui()
 	LLParcel *parcel = mParcel->getParcel();
 	if (parcel && !gDisconnected)
 	{
-		BOOL can_manage_allowed = LLViewerParcelMgr::isParcelModifiableByAgent(parcel, GP_LAND_MANAGE_ALLOWED);
+        BOOL can_manage_allowed = false;
 		BOOL can_manage_banned = LLViewerParcelMgr::isParcelModifiableByAgent(parcel, GP_LAND_MANAGE_BANNED);
 	
+        if (parcel->getRegionAllowAccessOverride())
+        {   // Estate owner may have disabled allowing the parcel owner from managing access.
+            can_manage_allowed = LLViewerParcelMgr::isParcelModifiableByAgent(parcel, GP_LAND_MANAGE_ALLOWED);
+        }
+
 		getChildView("public_access")->setEnabled(can_manage_allowed);
 		BOOL public_access = getChild<LLUICtrl>("public_access")->getValue().asBoolean();
 		if (public_access)
@@ -2666,7 +2686,8 @@ void LLPanelLandAccess::refresh_ui()
 		std::string group_name;
 		if (gCacheName->getGroupName(parcel->getGroupID(), group_name))
 		{
-			getChildView("GroupCheck")->setEnabled(can_manage_allowed);
+			bool can_allow_groups = !public_access || (public_access && (getChild<LLUICtrl>("limit_payment")->getValue().asBoolean() ^ getChild<LLUICtrl>("limit_age_verified")->getValue().asBoolean()));
+			getChildView("GroupCheck")->setEnabled(can_manage_allowed && can_allow_groups);
 		}
 		getChildView("AccessList")->setEnabled(can_manage_allowed);
 		S32 allowed_list_count = parcel->mAccessList.size();
@@ -2876,7 +2897,7 @@ void LLPanelLandAccess::onClickAddBanned()
     LLView * button = findChild<LLButton>("add_banned");
     LLFloater * root_floater = gFloaterView->getParentFloater(this);
 	LLFloaterAvatarPicker* picker = LLFloaterAvatarPicker::show(
-		boost::bind(&LLPanelLandAccess::callbackAvatarCBBanned, this, _1), FALSE, FALSE, FALSE, root_floater->getName(), button);
+		boost::bind(&LLPanelLandAccess::callbackAvatarCBBanned, this, _1), TRUE, FALSE, FALSE, root_floater->getName(), button);
 	if (picker)
 	{
 		root_floater->addDependentFloater(picker);
@@ -2886,22 +2907,40 @@ void LLPanelLandAccess::onClickAddBanned()
 // static
 void LLPanelLandAccess::callbackAvatarCBBanned(const uuid_vec_t& ids)
 {
-	if (!ids.empty())
+	LLFloater * root_floater = gFloaterView->getParentFloater(this);
+	LLFloaterBanDuration* duration_floater = LLFloaterBanDuration::show(
+		boost::bind(&LLPanelLandAccess::callbackAvatarCBBanned2, this, _1, _2), ids);
+	if (duration_floater)
 	{
-		LLUUID id = ids[0];
-		LLParcel* parcel = mParcel->getParcel();
-		if (parcel && parcel->addToBanList(id, 0))
+		root_floater->addDependentFloater(duration_floater);
+	}
+}
+
+void LLPanelLandAccess::callbackAvatarCBBanned2(const uuid_vec_t& ids, S32 duration)
+{
+	LLParcel* parcel = mParcel->getParcel();
+	if (!parcel) return;
+
+	U32 lists_to_update = 0;
+
+	for (uuid_vec_t::const_iterator it = ids.begin(); it < ids.end(); it++)
+	{
+		LLUUID id = *it;
+		if (parcel->addToBanList(id, duration))
 		{
-			U32 lists_to_update = AL_BAN;
+			lists_to_update |= AL_BAN;
 			// agent was successfully added to ban list
 			// but we also need to check access list to ensure that agent will not be in two lists simultaneously
 			if (parcel->removeFromAccessList(id))
 			{
 				lists_to_update |= AL_ACCESS;
 			}
-			LLViewerParcelMgr::getInstance()->sendParcelAccessListUpdate(lists_to_update);
-			refresh();
 		}
+	}
+	if (lists_to_update > 0)
+	{
+		LLViewerParcelMgr::getInstance()->sendParcelAccessListUpdate(lists_to_update);
+		refresh();
 	}
 }
 

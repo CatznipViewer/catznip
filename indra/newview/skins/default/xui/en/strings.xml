@@ -22,7 +22,7 @@
 
 	<!-- about dialog/support string-->
 	<string name="AboutHeader">
-[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit)
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
     <string name="BuildConfig">Build Configuration [BUILD_CONFIG]</string>
@@ -53,7 +53,7 @@ UI Scaling: [UI_SCALE]
 Draw distance: [DRAW_DISTANCE]m
 Bandwidth: [NET_BANDWITH]kbit/s
 LOD factor: [LOD_FACTOR]
-Render quality: [RENDER_QUALITY] / 7
+Render quality: [RENDER_QUALITY]
 Advanced Lighting Model: [GPU_SHADERS]
 Texture memory: [TEXTURE_MEMORY]MB
 VFS (cache) creation time: [VFS_TIME]
@@ -61,7 +61,7 @@ VFS (cache) creation time: [VFS_TIME]
 	<string name="AboutLibs">
 J2C Decoder Version: [J2C_VERSION]
 Audio Driver Version: [AUDIO_DRIVER_VERSION]
-LLCEFLib/CEF Version: [LLCEFLIB_VERSION]
+[LIBCEF_VERSION]
 LibVLC Version: [LIBVLC_VERSION]
 Voice Server Version: [VOICE_VERSION]
 	</string>
@@ -150,8 +150,7 @@ support@secondlife.com.</string>
 	<string name="LoginFailedAcountSuspended">Your account is not accessible until
 [TIME] Pacific Time.</string>
 	<string name="LoginFailedAccountDisabled">We are unable to complete your request at this time.
-Please contact Second Life support for assistance at http://secondlife.com/support.
-If you are unable to change your password, please call (866) 476-9763.</string>
+Please contact Second Life support for assistance at http://support.secondlife.com.</string>
 	<string name="LoginFailedTransformError">Data inconsistency found during login.
 Please contact support@secondlife.com.</string>
 	<string name="LoginFailedAccountMaintenance">Your account is undergoing minor maintenance.
@@ -160,8 +159,7 @@ Your account is not accessible until
 If you feel this is an error, please contact support@secondlife.com.</string>
 	<string name="LoginFailedPendingLogoutFault">Request for logout responded with a fault from simulator.</string>
 	<string name="LoginFailedPendingLogout">The system is logging you out right now.
-Your Account will not be available until
-[TIME] Pacific Time.</string>
+Please wait a minute before you try logging in again.</string>
 	<string name="LoginFailedUnableToCreateSession">Unable to create valid session.</string>
 	<string name="LoginFailedUnableToConnectToSimulator">Unable to connect to a simulator.</string>
 	<string name="LoginFailedRestrictedHours">Your account can only access Second Life
@@ -359,6 +357,15 @@ Please try logging in again in a minute.</string>
 	<string name="AssetErrorCircuitGone">Circuit gone</string>
 	<string name="AssetErrorPriceMismatch">Viewer and server do not agree on price</string>
 	<string name="AssetErrorUnknownStatus">Unknown status</string>
+
+	<!-- Asset upload errors. -->
+	<string name="AssetUploadServerUnreacheble">Service unreachable.</string>
+	<string name="AssetUploadServerDifficulties">The server is experiencing unexpected difficulties.</string>
+	<string name="AssetUploadServerUnavaliable">Service not available or upload timeout was reached.</string>
+	<string name="AssetUploadRequestInvalid">
+Error in upload request.  Please visit 
+http://secondlife.com/support for help fixing this problem.
+</string>
 
 	<!-- Asset Type human readable names:  these will replace variable [TYPE] in notification FailedToFindWearable* -->
 	<!-- Will also replace [OBJECTTYPE] in notifications: UserGiveItem, ObjectGiveItem -->
@@ -2281,6 +2288,7 @@ For AI Character: Get the closest navigable point to the point provided.
 
 	<!-- inventory -->
 	<string name="InventoryNoMatchingItems">Didn't find what you're looking for? Try [secondlife:///app/search/all/[SEARCH_TERM] Search].</string>
+	<string name="InventoryNoMatchingRecentItems">Didn't find what you're looking for? Try [secondlife:///app/inventory/filters Show filters].</string>
 	<string name="PlacesNoMatchingItems">Didn't find what you're looking for? Try [secondlife:///app/search/places/[SEARCH_TERM] Search].</string>
 	<string name="FavoritesNoMatchingItems">Drag a landmark here to add it to your favorites.</string>
 	<string name="MarketplaceNoMatchingItems">No items found. Check the spelling of your search string and try again.</string>
@@ -2312,14 +2320,15 @@ We are accessing your account on the [[MARKETPLACE_CREATE_STORE_URL] Marketplace
 The [[MARKETPLACE_CREATE_STORE_URL] Marketplace store] is returning errors.
 	</string>
 	<string name="InventoryMarketplaceError">
-This feature is currently in Beta. Please add your name to this [http://goo.gl/forms/FCQ7UXkakz Google form] if you would like to participate.
+An error occurred while opening Marketplace Listings.
+If you continue to receive this message, please contact Second Life support for assistance at http://support.secondlife.com
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">Your Marketplace Listings folder is empty.</string>
 	<string name="InventoryMarketplaceListingsNoItemsTooltip"></string>
 	<string name="InventoryMarketplaceListingsNoItems">
         Drag folders to this area to list them for sale on the [[MARKETPLACE_DASHBOARD_URL] Marketplace].
 	</string>
-
+	<string name="InventoryItemsCount">( [ITEMS_COUNT] Items )</string>
 	<string name="Marketplace Validation Log"></string>
 	<string name="Marketplace Validation Warning Stock">stock folder must be contained by a version folder</string>
 	<string name="Marketplace Validation Error Mixed Stock">: Error: all items in a stock folder must be no-copy and of the same type</string>
@@ -2643,12 +2652,16 @@ This feature is currently in Beta. Please add your name to this [http://goo.gl/f
 	<string name="RegionInfoAllEstatesYouManage">
 		all estates that you manage for [OWNER]
 	</string>
-	<string name="RegionInfoAllowedResidents">Allowed Residents: ([ALLOWEDAGENTS], max [MAXACCESS])</string>
-	<string name="RegionInfoAllowedGroups">Allowed Groups: ([ALLOWEDGROUPS], max [MAXACCESS])</string>
+	<string name="RegionInfoAllowedResidents">Always allowed: ([ALLOWEDAGENTS], max [MAXACCESS])</string>
+	<string name="RegionInfoAllowedGroups">Groups always allowed: ([ALLOWEDGROUPS], max [MAXACCESS])</string>
 	<string name="RegionInfoEstateManagers">Estate Managers: ([ESTATEMANAGERS], max [MAXMANAGERS])</string>
-	<string name="RegionInfoBannedResidents">Banned Residents: ([BANNEDAGENTS], max [MAXBANNED])</string>
-	<string name="RegionInfoListTypeAllowedAgents">Allowed Residents</string>
-	<string name="RegionInfoListTypeBannedAgents">Banned Residents</string>
+	<string name="RegionInfoBannedResidents">Always banned: ([BANNEDAGENTS], max [MAXBANNED])</string>
+	<string name="RegionInfoListTypeAllowedAgents">Always allowed</string>
+	<string name="RegionInfoListTypeBannedAgents">Always banned</string>
+	<string name="RegionInfoAllEstates">all estates</string>
+	<string name="RegionInfoManagedEstates">managed estates</string>
+	<string name="RegionInfoThisEstate">this estate</string>
+	<string name="AndNMore">and [EXTRA_COUNT] more</string>
 
 	<!-- script limits floater -->
 	<string name="ScriptLimitsParcelScriptMemory">Parcel Script Memory</string>
@@ -3628,7 +3641,10 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
     Conference with [AGENT_NAME]
   </string>
   <string name="inventory_item_offered-im">
-    Inventory item offered
+    Inventory item '[ITEM_NAME]' offered
+  </string>
+  <string name="inventory_folder_offered-im">
+    Inventory folder '[ITEM_NAME]' offered
   </string>
   <string name="share_alert">
     Drag items from inventory here
@@ -3736,7 +3752,8 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 
   <string name="Home position set.">Home position set.</string>
 
-  <string name="voice_morphing_url">http://secondlife.com/landing/voicemorphing</string>
+  <string name="voice_morphing_url">https://secondlife.com/destination/voice-island</string>
+  <string name="premium_voice_morphing_url">https://secondlife.com/destination/voice-morphing-premium</string>
 
   <!-- Financial operations strings -->
   <string name="paid_you_ldollars">[NAME] paid you L$[AMOUNT] [REASON].</string>
@@ -3879,9 +3896,9 @@ Abuse Report</string>
   <string name="words_separator" value=", "/>
 
   <string name="server_is_down">
-	Despite our best efforts, something unexpected has gone wrong.
+  Despite our best efforts, something unexpected has gone wrong.
 
-	Please check status.secondlifegrid.net to see if there is a known problem with the service.
+Please check http://status.secondlifegrid.net to see if there is a known problem with the service.
         If you continue to experience problems, please check your network and firewall setup.
   </string>
 
@@ -4070,6 +4087,7 @@ Try enclosing path to the editor with double quotes.
   <string name="Command_Facebook_Label">Facebook</string>
   <string name="Command_Flickr_Label">Flickr</string>
   <string name="Command_Gestures_Label">Gestures</string>
+  <string name="Command_Grid_Status_Label">Grid status</string>
   <string name="Command_HowTo_Label">How to</string>
   <string name="Command_Inventory_Label">Inventory</string>
   <string name="Command_Map_Label">Map</string>
@@ -4102,6 +4120,7 @@ Try enclosing path to the editor with double quotes.
   <string name="Command_Facebook_Tooltip">Post to Facebook</string>
   <string name="Command_Flickr_Tooltip">Upload to Flickr</string>
   <string name="Command_Gestures_Tooltip">Gestures for your avatar</string>
+  <string name="Command_Grid_Status_Tooltip">Show current Grid status</string>
   <string name="Command_HowTo_Tooltip">How to do common tasks</string>
   <string name="Command_Inventory_Tooltip">View and use your belongings</string>
   <string name="Command_Map_Tooltip">Map of the world</string>
@@ -4184,8 +4203,7 @@ Try enclosing path to the editor with double quotes.
   <string name="ExperiencePermissionShort10">Control Camera</string>
   <string name="ExperiencePermissionShort11">Teleport</string>
   <string name="ExperiencePermissionShort12">Permission</string>
-  <string name="ExperiencePermissionShortUnknown">Unknown: [Permission]</string>
-  
+
   <!-- Conversation log messages -->
   <string name="logging_calls_disabled_log_empty">
     Conversations are not being logged. To begin keeping a log, choose "Save: Log only" or "Save: Log and transcripts" under Preferences > Chat.

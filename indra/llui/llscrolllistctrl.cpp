@@ -199,7 +199,8 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mHoveredColor(p.hovered_color()),
 	mSearchColumn(p.search_column),
 	mColumnPadding(p.column_padding),
-	mContextMenuType(MENU_NONE)
+	mContextMenuType(MENU_NONE),
+	mIsFriendSignal(NULL)
 {
 	mItemListRect.setOriginAndSize(
 		mBorderThickness,
@@ -323,6 +324,7 @@ LLScrollListCtrl::~LLScrollListCtrl()
 	mItemList.clear();
 	std::for_each(mColumns.begin(), mColumns.end(), DeletePairedPointer());
 	mColumns.clear();
+	delete mIsFriendSignal;
 }
 
 
@@ -343,6 +345,21 @@ S32 LLScrollListCtrl::isEmpty() const
 S32 LLScrollListCtrl::getItemCount() const
 {
 	return mItemList.size();
+}
+
+BOOL LLScrollListCtrl::hasSelectedItem() const
+{
+	item_list::iterator iter;
+	for (iter = mItemList.begin(); iter < mItemList.end(); )
+	{
+		LLScrollListItem* itemp = *iter;
+		if (itemp && itemp->getSelected())
+		{
+			return TRUE;
+		}
+		iter++;
+	}
+	return FALSE;
 }
 
 // virtual LLScrolListInterface function (was deleteAllItems)
@@ -1808,6 +1825,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 			registrar.add("Url.ShowProfile", boost::bind(&LLScrollListCtrl::showProfile, id, is_group));
 			registrar.add("Url.SendIM", boost::bind(&LLScrollListCtrl::sendIM, id));
 			registrar.add("Url.AddFriend", boost::bind(&LLScrollListCtrl::addFriend, id));
+			registrar.add("Url.RemoveFriend", boost::bind(&LLScrollListCtrl::removeFriend, id));
 			registrar.add("Url.Execute", boost::bind(&LLScrollListCtrl::showNameDetails, id, is_group));
 			registrar.add("Url.CopyLabel", boost::bind(&LLScrollListCtrl::copyNameToClipboard, id, is_group));
 			registrar.add("Url.CopyUrl", boost::bind(&LLScrollListCtrl::copySLURLToClipboard, id, is_group));
@@ -1820,6 +1838,19 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 				menu_name, LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
 			if (mPopupMenu)
 			{
+				if (mIsFriendSignal)
+				{
+					bool isFriend = *(*mIsFriendSignal)(uuid);
+					LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
+					LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
+
+					if (addFriendButton && removeFriendButton)
+					{
+						addFriendButton->setEnabled(!isFriend);
+						removeFriendButton->setEnabled(isFriend);
+					}
+				}
+
 				mPopupMenu->show(x, y);
 				LLMenuGL::showPopup(this, mPopupMenu, x, y);
 				return TRUE;
@@ -1850,6 +1881,12 @@ void LLScrollListCtrl::addFriend(std::string id)
 	// add resident to friends list
 	std::string slurl = "secondlife:///app/agent/" + id + "/about";
 	LLUrlAction::addFriend(slurl);
+}
+
+void LLScrollListCtrl::removeFriend(std::string id)
+{
+	std::string slurl = "secondlife:///app/agent/" + id + "/about";
+	LLUrlAction::removeFriend(slurl);
 }
 
 void LLScrollListCtrl::showNameDetails(std::string id, bool is_group)
@@ -1942,6 +1979,10 @@ BOOL LLScrollListCtrl::handleClick(S32 x, S32 y, MASK mask)
 					LLScrollListCell* cellp = item->getColumn(column_index);
 					cellp->setValue(item_value);
 					cellp->onCommit();
+					if (mLastSelected == NULL)
+					{
+						break;
+					}
 				}
 			}
 			//FIXME: find a better way to signal cell changes
@@ -2758,7 +2799,6 @@ void LLScrollListCtrl::onClickColumn(void *userdata)
 	}
 
 	// if this column is the primary sort key, reverse the direction
-	sort_column_t cur_sort_column;
 	if (!parent->mSortColumns.empty() && parent->mSortColumns.back().first == column_index)
 	{
 		ascending = !parent->mSortColumns.back().second;
@@ -3085,3 +3125,11 @@ void LLScrollListCtrl::onFocusLost()
 	LLUICtrl::onFocusLost();
 }
 
+boost::signals2::connection LLScrollListCtrl::setIsFriendCallback(const is_friend_signal_t::slot_type& cb)
+{
+	if (!mIsFriendSignal)
+	{
+		mIsFriendSignal = new is_friend_signal_t();
+	}
+	return mIsFriendSignal->connect(cb);
+}

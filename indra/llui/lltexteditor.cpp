@@ -1459,6 +1459,10 @@ void LLTextEditor::pasteHelper(bool is_primary)
 // Clean up string (replace tabs and remove characters that our fonts don't support).
 void LLTextEditor::cleanStringForPaste(LLWString & clean_string)
 {
+	std::string clean_string_utf = wstring_to_utf8str(clean_string);
+	std::replace( clean_string_utf.begin(), clean_string_utf.end(), '\r', '\n');
+	clean_string = utf8str_to_wstring(clean_string_utf);
+
 	LLWStringUtil::replaceTabsWithSpaces(clean_string, SPACES_PER_TAB);
 	if( mAllowEmbeddedItems )
 	{
@@ -2489,11 +2493,11 @@ void LLTextEditor::updateLinkSegments()
 					}
 				}
 			}
-
+			
 			// if the link's label (what the user can edit) is a valid Url,
 			// then update the link's HREF to be the same as the label text.
 			// This lets users edit Urls in-place.
-			if (LLUrlRegistry::instance().hasUrl(url_label))
+			if (acceptsTextInput() && LLUrlRegistry::instance().hasUrl(url_label))
 			{
 				std::string new_url = wstring_to_utf8str(url_label);
 				LLStringUtil::trim(new_url);

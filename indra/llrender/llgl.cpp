@@ -55,7 +55,6 @@
 
 
 BOOL gDebugSession = FALSE;
-BOOL gDebugGL = FALSE;
 BOOL gClothRipple = FALSE;
 BOOL gHeadlessClient = FALSE;
 BOOL gGLActive = FALSE;
@@ -65,7 +64,7 @@ static const std::string HEADLESS_VENDOR_STRING("Linden Lab");
 static const std::string HEADLESS_RENDERER_STRING("Headless");
 static const std::string HEADLESS_VERSION_STRING("1.0");
 
-std::ofstream gFailLog;
+llofstream gFailLog;
 
 #if GL_ARB_debug_output
 
@@ -1349,8 +1348,19 @@ void LLGLManager::initExtensions()
 	if (mHasVertexShader)
 	{
 		LL_INFOS() << "initExtensions() VertexShader-related procs..." << LL_ENDL;
+
+        // nSight doesn't support use of ARB funcs that have been normalized in the API
+        if (!LLRender::sNsightDebugSupport)
+        {
 		glGetAttribLocationARB = (PFNGLGETATTRIBLOCATIONARBPROC) GLH_EXT_GET_PROC_ADDRESS("glGetAttribLocationARB");
 		glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC) GLH_EXT_GET_PROC_ADDRESS("glBindAttribLocationARB");
+        }
+        else
+        {
+            glGetAttribLocationARB = (PFNGLGETATTRIBLOCATIONARBPROC)GLH_EXT_GET_PROC_ADDRESS("glGetAttribLocation");
+            glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)GLH_EXT_GET_PROC_ADDRESS("glBindAttribLocation");
+        }
+
 		glGetActiveAttribARB = (PFNGLGETACTIVEATTRIBARBPROC) GLH_EXT_GET_PROC_ADDRESS("glGetActiveAttribARB");
 		glVertexAttrib1dARB = (PFNGLVERTEXATTRIB1DARBPROC) GLH_EXT_GET_PROC_ADDRESS("glVertexAttrib1dARB");
 		glVertexAttrib1dvARB = (PFNGLVERTEXATTRIB1DVARBPROC) GLH_EXT_GET_PROC_ADDRESS("glVertexAttrib1dvARB");
@@ -1880,7 +1890,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 		GL_TEXTURE_COORD_ARRAY
 	};
 
-	 U32 mask[] = 
+	static const U32 mask[] = 
 	{ //copied from llvertexbuffer.h
 		0x0001, //MAP_VERTEX,
 		0x0002, //MAP_NORMAL,
@@ -2551,5 +2561,11 @@ void LLGLSyncFence::wait()
 #endif
 }
 
-
+#if LL_WINDOWS
+// Expose desired use of high-performance graphics processor to Optimus driver
+extern "C" 
+{ 
+    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; 
+}
+#endif
 
