@@ -71,7 +71,7 @@
 描繪距離：[DRAW_DISTANCE]公尺
 頻寬：[NET_BANDWITH]千位元/秒
 細節層次率：[LOD_FACTOR]
-呈像品質：[RENDER_QUALITY] / 7
+呈像品質：[RENDER_QUALITY]
 進階照明模型：[GPU_SHADERS]
 材質記憶體：[TEXTURE_MEMORY]MB
 VFS（快取）建立時間：[VFS_TIME]
@@ -2232,6 +2232,18 @@ http://secondlife.com/support 求助解決問題。
 	</string>
 	<string name="RegionInfoListTypeBannedAgents">
 		永遠封鎖
+	</string>
+	<string name="RegionInfoAllEstates">
+		全部領地
+	</string>
+	<string name="RegionInfoManagedEstates">
+		受管領地
+	</string>
+	<string name="RegionInfoThisEstate">
+		這個領地
+	</string>
+	<string name="AndNMore">
+		及其他[EXTRA_COUNT]個
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		地段腳本記憶體
