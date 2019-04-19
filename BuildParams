@@ -14,7 +14,7 @@ build_docs = true
 build_Linux_Doxygen = true
 
 # Need viewer-build-variables as well as other shared repositories
-buildscripts_shared_more_NAMEs="build_variables"
+buildscripts_shared_more_NAMEs="build_secrets build_variables"
 
 ################################################################
 ####      Examples of how to set the viewer_channel         ####
@@ -56,11 +56,6 @@ sourceid = ""
 ################################################################
 additional_packages = "EDU"
 Linux.additional_packages = ""
-
-# The EDU package allows us to create a separate release channel whose expirations
-# are synchronized as much as possible with the academic year
-EDU_sourceid = ""
-EDU_viewer_channel_suffix = "edu"
 
 # The EDU package allows us to create a separate release channel whose expirations
 # are synchronized as much as possible with the academic year

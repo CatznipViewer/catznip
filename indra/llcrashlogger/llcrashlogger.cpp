@@ -1038,7 +1038,7 @@ bool LLCrashLogger::init()
 // [/SL:KB]
 //	gDirUtilp->initAppDirs("SecondLife");
 
-	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
+	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, ""), gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 
 	// Default to the product name "Second Life" (this is overridden by the -name argument)
 // [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)

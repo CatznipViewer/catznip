@@ -53,7 +53,7 @@ UI Scaling: [UI_SCALE]
 Draw distance: [DRAW_DISTANCE]m
 Bandwidth: [NET_BANDWITH]kbit/s
 LOD factor: [LOD_FACTOR]
-Render quality: [RENDER_QUALITY] / 7
+Render quality: [RENDER_QUALITY]
 Advanced Lighting Model: [GPU_SHADERS]
 Texture memory: [TEXTURE_MEMORY]MB
 VFS (cache) creation time: [VFS_TIME]
@@ -114,10 +114,10 @@ Voice Server Version: [VOICE_VERSION]
 	<string name="AgniGridLabel">Second Life Main Grid (Agni)</string>
 	<string name="AditiGridLabel">Second Life Beta Test Grid (Aditi)</string>
 	
-	<string name="ViewerDownloadURL">http://secondlife.com/download</string>
+	<string name="ViewerDownloadURL">https://get.catznip.com/</string>
 	<string name="LoginFailedViewerNotPermitted">
 The viewer you are using can no longer access Second Life. Please visit the following page to download a new viewer:
-http://secondlife.com/download
+https://get.catznip.com/
 
 For more information, see our FAQ below:
 http://secondlife.com/viewer-access-faq</string>
@@ -159,8 +159,7 @@ Your account is not accessible until
 If you feel this is an error, please contact support@secondlife.com.</string>
 	<string name="LoginFailedPendingLogoutFault">Request for logout responded with a fault from simulator.</string>
 	<string name="LoginFailedPendingLogout">The system is logging you out right now.
-Your Account will not be available until
-[TIME] Pacific Time.</string>
+Please wait a minute before you try logging in again.</string>
 	<string name="LoginFailedUnableToCreateSession">Unable to create valid session.</string>
 	<string name="LoginFailedUnableToConnectToSimulator">Unable to connect to a simulator.</string>
 	<string name="LoginFailedRestrictedHours">Your account can only access Second Life
@@ -2329,7 +2328,7 @@ If you continue to receive this message, please contact Second Life support for 
 	<string name="InventoryMarketplaceListingsNoItems">
         Drag folders to this area to list them for sale on the [[MARKETPLACE_DASHBOARD_URL] Marketplace].
 	</string>
-
+	<string name="InventoryItemsCount">( [ITEMS_COUNT] Items )</string>
 	<string name="Marketplace Validation Log"></string>
 	<string name="Marketplace Validation Warning Stock">stock folder must be contained by a version folder</string>
 	<string name="Marketplace Validation Error Mixed Stock">: Error: all items in a stock folder must be no-copy and of the same type</string>
@@ -2659,6 +2658,10 @@ If you continue to receive this message, please contact Second Life support for 
 	<string name="RegionInfoBannedResidents">Always banned: ([BANNEDAGENTS], max [MAXBANNED])</string>
 	<string name="RegionInfoListTypeAllowedAgents">Always allowed</string>
 	<string name="RegionInfoListTypeBannedAgents">Always banned</string>
+	<string name="RegionInfoAllEstates">all estates</string>
+	<string name="RegionInfoManagedEstates">managed estates</string>
+	<string name="RegionInfoThisEstate">this estate</string>
+	<string name="AndNMore">and [EXTRA_COUNT] more</string>
 
 	<!-- script limits floater -->
 	<string name="ScriptLimitsParcelScriptMemory">Parcel Script Memory</string>
@@ -4200,8 +4203,7 @@ Try enclosing path to the editor with double quotes.
   <string name="ExperiencePermissionShort10">Control Camera</string>
   <string name="ExperiencePermissionShort11">Teleport</string>
   <string name="ExperiencePermissionShort12">Permission</string>
-  <string name="ExperiencePermissionShortUnknown">Unknown: [Permission]</string>
-  
+
   <!-- Conversation log messages -->
   <string name="logging_calls_disabled_log_empty">
     Conversations are not being logged. To begin keeping a log, choose "Save: Log only" or "Save: Log and transcripts" under Preferences > Chat.

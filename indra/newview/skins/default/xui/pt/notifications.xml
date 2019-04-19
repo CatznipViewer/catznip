@@ -678,6 +678,9 @@ Consultar [_URL] para mais informações?
 		</url>
 		<usetemplate ignoretext="O hardware do meu computador não é suportado" name="okcancelignore" notext="Não" yestext="Sim"/>
 	</notification>
+	<notification name="RunLauncher">
+		Não executar diretamente o visualizador executável. Atualizar quaisquer atalhos existentes para executar o SL_Launcher.
+	</notification>
 	<notification name="OldGPUDriver">
 		Provavelmente, há um driver mais recente para o seu chip gráfico.  A atualização dos drivers gráficos pode melhorar significativamente o desempenho.
 
@@ -1558,6 +1561,30 @@ Ultrapassa o limite de [MAX_AGENTS] [LIST_TYPE] de [NUM_EXCESS].
 	<notification name="ProblemAddingEstateManagerBanned">
 		Não foi possível adicionar residentes banidos à lista de gerentes de propriedades.
 	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Não foi possível adicionar o gerente [AGENT] à lista de banimento.
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;[GROUP]&lt;/nolink&gt; já está na lista de Grupos permitidos.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] já está na sua [LIST_TYPE] lista.
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] já está na sua [LIST_TYPE] lista.
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] foi adicionado na [LIST_TYPE] lista de [ESTATE].
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] foi adicionado na [LIST_TYPE] lista de [ESTATE].
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] foi removido da [LIST_TYPE] lista de [ESTATE].
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] foi removido da [LIST_TYPE] lista de [ESTATE].
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Não é possível alterar a aparência até que as roupas e formas estejam carregadas.
 	</notification>
@@ -1572,95 +1599,13 @@ Por favor, ponha o objeto à venda e tente novamente.
 		Download do arquivo de terreno RAW concluído em:
 [DOWNLOAD_PATH]
 	</notification>
-	<notification name="FailedUpdateInstall">
-		Ocorreu um erro de atualização do visualizador. 
-Baixe e instale a versão mais recente do visualizador em 
-https://get.catznip.com
+	<notification name="RequiredUpdate">
+		Versão [VERSION] é obrigatório para efetuar login. Isto deveria ter sido atualizado por você, mas aparentemente não foi. Baixe a versão mais recente em https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="FailedRequiredUpdateInstall">
-		Não foi possível instalar uma atualização necessária. 
-Não será possível acessar a sua conta até que você atualize o [APP_NAME].
-
-Baixe e instale a versão mais recente do visualizador em 
-https://get.catznip.com
+	<notification name="LoginFailedUnknown">
+		Desculpe, motivo de falha de login desconhecido. Se você continuar a receber esta mensagem, por favor consulte o [SUPPORT_SITE].
 		<usetemplate name="okbutton" yestext="Sair"/>
-	</notification>
-	<notification name="UpdaterServiceNotRunning">
-		A instalação do Second Life requer uma atualização.
-
-Baixe a atualização em https://get.catznip.com
-ou você pode instalar a instalação agora.
-		<usetemplate name="okcancelbuttons" notext="Sair do Second Life" yestext="Baixar e instalar agora"/>
-	</notification>
-	<notification name="DownloadBackgroundTip">
-		Baixamos uma atualização para a instalação do [APP_NAME].
-Versão [VERSION] [[INFO_URL] sobre esta atualização]
-		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
-	</notification>
-	<notification name="DownloadBackgroundDialog">
-		Baixamos uma atualização para a instalação do [APP_NAME].
-Versão [VERSION] [[INFO_URL] sobre esta atualização]
-		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedVerboseDialog">
-		O software requer uma atualização que já foi baixada.
-Versão [VERSION] Informação [[INFO_URL] sobre essa atualização]
-
-Para instalar a atualização, será preciso reiniciar o [APP_NAME].
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedDialog">
-		Para instalar a atualização, será preciso reiniciar o [APP_NAME].
-Informação [[INFO_URL] sobre essa atualização]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundTip">
-		Baixamos uma atualização para a instalação do [APP_NAME].
-Versão [VERSION] 
-O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
-consulte [[INFO_URL] para obter mais detalhes sobre essa atualização]
-		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundDialog">
-		Baixamos uma atualização para a instalação do [APP_NAME].
-Versão [VERSION]
-O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
-consulte a informação [[INFO_URL] sobre essa atualização]
-		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
-		O software requer uma atualização que já foi baixada.
-Versão [VERSION]
-O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
-consulte a informação [[INFO_URL] sobre essa atualização]
-
-Para instalar a atualização, será preciso reiniciar o [APP_NAME].
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
-		Para instalar a atualização, será preciso reiniciar o [APP_NAME].
-O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
-consulte a informação [[INFO_URL] sobre essa atualização]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadInProgress">
-		Uma atualização está disponível!
-O download está ocorrendo em segundo plano e reiniciaremos seu visualizador automaticamente para terminar a instalação assim que ele estiver concluído.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadComplete">
-		Uma atualização foi baixada. Ela será instalada durante a reinicialização.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateCheckError">
-		Erro ao verificar atualizações.
-Tente novamente mais tarde.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateViewerUpToDate">
-		Seu visualizador está atualizado!
-		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		Delegar este objeto causará ao grupo:
@@ -1670,10 +1615,6 @@ Tente novamente mais tarde.
 	<notification name="WebLaunchExternalTarget">
 		Abrir uma janela do navegador para ver essas informações?
 		<usetemplate ignoretext="Abrir o navegador para acessar uma página na web" name="okcancelignore" notext="Cancelar" yestext="OK"/>
-	</notification>
-	<notification name="SystemUIScaleFactorChanged">
-		O fator de tamanho da interface do sistema foi alterado desde a última execução. Deseja abrir a página de configurações de ajuste de tamanho da interface?
-		<usetemplate name="okcancelbuttons" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchJoinNow">
 		Deseja abrir o [http://secondlife.com/account/ Painel] para gerenciar sua conta?
@@ -1943,7 +1884,7 @@ Isto mudará milhares de regiões e fará o spaceserver soluçar.
 		<usetemplate canceltext="Cancelar" name="yesnocancelbuttons" notext="Todas as Propriedades" yestext="Esta Propriedade"/>
 	</notification>
 	<notification label="Selecione a propriedade" name="EstateBannedAgentRemove">
-		Remover este residente da lista de banidos para acesso a esta propriedade apenas ou para [ALL_ESTATES]?
+		Remover este Residente da lista de banimento para acessar este estado somente ou para [ALL_ESTATES]?
 		<usetemplate canceltext="Cancelar" name="yesnocancelbuttons" notext="Todas as Propriedades" yestext="Esta Propriedade"/>
 	</notification>
 	<notification label="Selecione a propriedade" name="EstateManagerAdd">
@@ -2423,7 +2364,7 @@ Deseja desativar o Não perturbe antes de concluir esta transação?
 		<usetemplate name="okcancelbuttons" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmEmptyTrash">
-		[COUNT] itens serão excluídos permanentemente. Tem certeza de que deseja excluir o conteúdo da Lixeira? Para sempre?
+		[COUNT] itens e pastas serão excluídas permanentemente. Tem certeza de que deseja excluir o conteúdo da Lixeira? Para sempre?
 		<usetemplate name="okcancelbuttons" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="TrashIsFull">
@@ -3231,20 +3172,23 @@ Clique em Aceitar para atender ou em Recusar para recusar este convite.  Clique 
 	<notification name="VoiceChannelJoinFailed">
 		Falha de conexão com [VOICE_CHANNEL_NAME]. Tente novamente mais tarde.   Agora você será reconectado ao bate-papo local.
 	</notification>
-	<notification name="VoiceLoginRetry">
-		Estamos criando uma canal de voz para você. Isto pode levar até um minuto.
-	</notification>
 	<notification name="VoiceEffectsExpired">
-		Um ou mais serviços de distorção de voz que você assinou veceu.
-[[URL] Clique aqui] para renovar o serviço.
+		Um ou mais serviços de distorção de voz que você assinou venceu. 
+[[URL] Clique aqui] para renovar o serviço. 
+
+Se você é um Membro Premium, [[PREMIUM_URL] clique aqui] para receber o seu app de distorção de voz.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
-		A Distorção de voz ativa expirou. Suas configurações de voz padrão foram ativadas.
-[[URL] Clique aqui] para renovar o serviço.
+		A Distorção de voz ativa expirou. Suas configurações de voz padrão foram ativadas. 
+[[URL] Clique aqui] para renovar o serviço. 
+
+Se você é um Membro Premium, [[PREMIUM_URL] clique aqui] para receber o seu app de distorção de voz.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Uma ou mais das suas distorções de voz tem vencimento em menos de [INTERVAL] dias.
-[[URL] Clique aqui] para renovar o serviço.
+		Uma ou mais das suas distorções de voz tem vencimento em menos de [INTERVAL] dias. 
+[[URL] Clique aqui] para renovar o serviço. 
+
+Se você é um Membro Premium, [[PREMIUM_URL] clique aqui] para receber o seu app de distorção de voz.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		Novas Distorções de voz!
@@ -3296,8 +3240,14 @@ Para sua segurança, os SLurls serão bloqueados por alguns instantes.
 	<notification name="SnapshotToComputerFailed">
 		Falha ao salvar fotografia em [PATH]: Disco cheio. [NEED_MEMORY]KB é necessário, mas somente [FREE_MEMORY]KB está livre.
 	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Falha ao salvar fotografia em [PATH]: O diretório não existe.
+	</notification>
 	<notification name="PresetNotSaved">
 		Erro ao salvar predefinição [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Não é possível sobrescrever o padrão definido.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Erro ao excluir a predefinição [NAME].
@@ -3428,12 +3378,22 @@ Verifique a configuração da sua rede e firewall.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		Estamos tendo problemas de conexão com o seu servidor de voz:
+		Não conseguimos conectar ao servidor de voz:
 
 [HOSTID]
 
+As portas que devem ter permissão para voz são: 
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Verifique a configuração da sua rede e firewall. 
+Desativar qualquer configuração SIP ALG em seu router. 
+
 Talvez não seja possível se comunicar via voz.
-Verifique a configuração da sua rede e firewall.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Estamos tendo problemas de conexão com o seu servidor de voz: Talvez não seja possível se comunicar via voz. Verifique a configuração da sua rede e firewall.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -4052,6 +4012,9 @@ Tente novamente em instantes.
 	<notification name="CantCreateObjectRegionFull">
 		Não foi possível criar o objeto solicitado. A região está cheia.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Não é possível criar o objeto animado solicitado porque excede o limite triangular manipulado.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Não é possível anexar vários objetos a um local.
 	</notification>
@@ -4099,6 +4062,21 @@ Tente novamente em instantes.
 	</notification>
 	<notification name="CantChangeShape">
 		Você não está autorizado a alterar essa forma.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		A operação faria com que o número de objetos animados anexados excedesse o limite.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Não é possível vincular esses objetos porque o objeto animado resultante excederia o limite triangular manipulado.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Não é possível tornar este objeto em animado porque excederia o limite triangular manipulado.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Não é possível mudar o estado do objeto animado para este objeto, porque faria o limite do lote ser excedido.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Erro do servidor: não foi possível completar esta operação porque os dados mesh não está carregado.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Seus privilégios de acesso não permitem que você reivindique objetos aqui.
@@ -4361,7 +4339,7 @@ Tente selecionar uma quantidade menor de terreno.
 		Um erro interno impediu que seu visualizador fosse atualizado corretamente.  O saldo em L$ ou a propriedade de lotes exibidos em seu visualizador pode não refletir o saldo real nos servidores.
 	</notification>
 	<notification name="LargePrimAgentIntersect">
-		Não é possível criar grandes prims que interceptam outros jogadores.  Tente novamente quando os outros jogadores tiverem se movido.
+		Não é possível prims maiores que cruzam com outros residentes. Tente novamente quando os outros residentes tiverem mudado.
 	</notification>
 	<notification name="PreferenceChatClearLog">
 		Isso excluirá os registros das conversas anteriores e qualquer backup desse arquivo.
