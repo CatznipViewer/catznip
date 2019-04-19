@@ -182,6 +182,7 @@
 		<menu_item_call label="Kötüye Kullanımı Bildir" name="Report Abuse"/>
 		<menu_item_call label="Hata Bildir" name="Report Bug"/>
 		<menu_item_call label="Toslamalar, İtmeler ve Vurmalar" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_call label="Güncellemeleri Kontrol Et" name="Check for Updates"/>
 		<menu_item_call label="[APP_NAME] Hakkında" name="About Second Life"/>
 	</menu>
 	<menu label="Gelişmiş" name="Advanced">
