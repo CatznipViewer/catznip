@@ -1139,23 +1139,24 @@
              width="75">
                 Group:
             </text>
-            <name_box
+            <text
              follows="left|top"
              height="18"
              initial_value="Loading..."
              layout="topleft"
-             left_pad="23"
+             left_pad="12"
              name="Group Name Proxy"
-             width="142" />
+             width="164" />
             <button
 			 follows="top|left"
 			 height="23"
 			 image_overlay="Edit_Wrench"
 			 layout="topleft"
-			 left_pad="13"
+			 right="-10"
 			 name="button set group"
 			 tab_stop="false"
 			 tool_tip="Choose a group to share this object's permissions"
+			 top_delta="-2"
 			 width="23" />
             <check_box
              height="19"

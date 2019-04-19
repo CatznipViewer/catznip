@@ -877,7 +877,7 @@ bool LLLocalBitmapMgr::addUnit()
 
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
 			const LLUUID idTracking = addUnit(filename);
-			add_successful &= (idTracking.notNull());
+			add_successful &= !idTracking.isNull();
 // [/SL:KB]
 //			LLLocalBitmap* unit = new LLLocalBitmap(filename);
 //
