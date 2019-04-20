@@ -152,19 +152,6 @@ class ViewerManifest(LLManifest):
                     print "Put ClientSettingsFileOverride override '%s' in %s" % (settings_install, settings_install)
 # [/SL:KB]
 
-                
-                # Store the override in settings_install.xml
-                if settings_file:
-                    content = dict(ClientSettingsFileOverride=dict(Comment='Client settings file name (per install).',
-                                                 Persist=0,
-                                                 Type='String',
-                                                 Value=settings_file))
-                    settings_install = self.put_in_file(llsd.format_pretty_xml(content),
-                                                        "settings_install.xml",
-                                                        src="environment")
-                    print "Put ClientSettingsFileOverride override '%s' in %s" % (settings_install, settings_install)
-# [/SL:KB]
-
 
             with self.prefix(src_dst="character"):
                 self.path("*.llm")
@@ -267,6 +254,8 @@ class ViewerManifest(LLManifest):
             channel_type='project'
         elif channel_qualifier.startswith('develop'):
             channel_type='develop'
+        elif channel_qualifier.startswith('homebrew'):
+            channel_type='homebrew'
         else:
             channel_type='test'
         return channel_type
@@ -537,18 +526,22 @@ class WindowsManifest(ViewerManifest):
         if self.is_packaging_viewer():
             # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
             self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
-
-            with self.prefix(src=os.path.join(pkgdir, "VMP")):
-                # include the compiled launcher scripts so that it gets included in the file_list
-                self.path('SLVersionChecker.exe')
-
-            with self.prefix(dst="vmp_icons"):
-                with self.prefix(src=self.icon_path()):
-                    self.path("secondlife.ico")
-                #VMP  Tkinter icons
-                with self.prefix(src="vmp_icons"):
-                    self.path("*.png")
-                    self.path("*.gif")
+        
+            # [SL:KB]
+            with self.prefix(src=self.icon_path()):
+                self.path("catznip.ico")
+            # [/SL:KB]
+            #with self.prefix(src=os.path.join(pkgdir, "VMP")):
+            #    # include the compiled launcher scripts so that it gets included in the file_list
+            #    self.path('SLVersionChecker.exe')
+            #
+            #with self.prefix(dst="vmp_icons"):
+            #    with self.prefix(src=self.icon_path()):
+            #        self.path("secondlife.ico")
+            #    #VMP  Tkinter icons
+            #    with self.prefix(src="vmp_icons"):
+            #        self.path("*.png")
+            #        self.path("*.gif")
 
         # Plugin host application
         self.path2basename(os.path.join(os.pardir,
@@ -823,6 +816,9 @@ class WindowsManifest(ViewerManifest):
             'app_name_oneword':self.app_name_oneword()
             }
 
+        if self.args['version'][1] != '0':
+            substitution_strings['version_release'] += '.' + self.args['version'][1]
+
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
         
@@ -888,8 +884,6 @@ class WindowsManifest(ViewerManifest):
             NSIS_path = os.path.expandvars(r'${%s}\NSIS\makensis.exe' % ProgramFiles)
             if os.path.exists(NSIS_path):
                 break
-        if not os.path.exists(NSIS_path):
-            NSIS_path = 'd:\\Tools\\NSIS\\Unicode\\makensis.exe'
         if not os.path.exists(NSIS_path):
             NSIS_path = 'd:\\Tools\\NSIS\\Unicode\\makensis.exe'
         installer_created=False
@@ -1032,16 +1026,16 @@ class DarwinManifest(ViewerManifest):
 
                 # need .icns file referenced by Info.plist
                 with self.prefix(src=self.icon_path(), dst="") :
-                    self.path("secondlife.icns")
+                    self.path("catznip.icns")
 
-                # Copy in the updater script and helper modules
-                self.path(src=os.path.join(pkgdir, 'VMP'), dst="updater")
+                ## Copy in the updater script and helper modules
+                #self.path(src=os.path.join(pkgdir, 'VMP'), dst="updater")
 
                 with self.prefix(src="", dst=os.path.join("updater", "icons")):
-                    self.path2basename(self.icon_path(), "secondlife.ico")
-                    with self.prefix(src="vmp_icons", dst=""):
-                        self.path("*.png")
-                        self.path("*.gif")
+                    self.path2basename(self.icon_path(), "catznip.ico")
+                #    with self.prefix(src="vmp_icons", dst=""):
+                #        self.path("*.png")
+                #        self.path("*.gif")
 
                 with self.prefix(src=relpkgdir, dst=""):
                     self.path("libndofdev.dylib")
@@ -1321,7 +1315,6 @@ class DarwinManifest(ViewerManifest):
                 dmg_template = os.path.join ('installers', 'darwin', 'release-dmg')
 
             for s,d in {self.get_dst_prefix():app_name + ".app",
-                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
                         os.path.join(dmg_template, "background.jpg"): "background.jpg"}.items():
 #                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
 #                        os.path.join(dmg_template, "background.jpg"): "background.jpg",
@@ -1329,12 +1322,12 @@ class DarwinManifest(ViewerManifest):
                 print "Copying to dmg", s, d
                 self.copy_action(self.src_path_of(s), os.path.join(volpath, d))
 
+# [SL:FS]
             # Create the alias file (which is a resource file) from the .r
             self.run_command('Rez %r -o %r' %
                              (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
                               os.path.join(volpath, "Applications")))
 
-# [SL:FS]
             # Set up the installer disk image: set icon positions, folder view
             #  options, and icon label colors -- TS
             self.run_command('osascript -s o %r %r' % 

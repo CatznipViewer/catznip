@@ -99,8 +99,8 @@ SetOverwrite on							# Overwrite files by default
 AutoCloseWindow true					# After all files install, close window
 
 # Registry key paths, ours and Microsoft's
-!define LINDEN_KEY      "SOFTWARE\Linden Research, Inc."
-!define INSTNAME_KEY    "${LINDEN_KEY}\${INSTNAME}"
+!define CATZNIP_KEY      "SOFTWARE\${PRODUCT_SHORT}"
+!define INSTNAME_KEY    "${CATZNIP_KEY}\${INSTNAME}"
 !define MSCURRVER_KEY   "SOFTWARE\Microsoft\Windows\CurrentVersion"
 !define MSNTCURRVER_KEY "SOFTWARE\Microsoft\Windows NT\CurrentVersion"
 !define MSUNINSTALL_KEY "${MSCURRVER_KEY}\Uninstall\${INSTNAME}"
@@ -134,6 +134,7 @@ AutoCloseWindow true					# After all files install, close window
 UninstallText $(UninstallTextMsg)
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 ##!insertmacro MULTIUSER_PAGE_INSTALLMODE
+!insertmacro MUI_PAGE_LICENSE "licenses-installer.rtf"
 !define MUI_PAGE_CUSTOMFUNCTION_PRE dirPre
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -191,7 +192,7 @@ Function .onInit
 # is adapted from before we introduced MultiUser.nsh.
 
 # if $0 is empty, this is the first time for this viewer name
-ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
+ReadRegStr $0 SHELL_CONTEXT "${INSTNAME_KEY}" ""
 
 # viewer with this name was installed before
 ${If} $0 != ""
@@ -223,7 +224,7 @@ Call CheckWindowsVersion					# Don't install On unsupported systems
 lbl_configure_default_lang:
 # If we currently have a version of SL installed, default to the language of that install
 # Otherwise don't change $LANGUAGE and it will default to the OS UI language.
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
+    ReadRegStr $0 SHELL_CONTEXT "${INSTNAME_KEY}" "InstallerLanguage"
     IfErrors +2 0	# If error skip the copy instruction 
 	StrCpy $LANGUAGE $0
 
@@ -245,7 +246,7 @@ lbl_configure_default_lang:
     StrCpy $LANGUAGE $0
 
 # Save language in registry		
-	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage" $LANGUAGE
+	WriteRegStr SHELL_CONTEXT "${INSTNAME_KEY}" "InstallerLanguage" $LANGUAGE
 lbl_return:
     Pop $0
     Return
@@ -275,7 +276,7 @@ skipread:
 %%ENGAGEREGISTRY%%
 
 # Read language from registry and set for uninstaller. Key will be removed on successful uninstall
-	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
+	ReadRegStr $0 SHELL_CONTEXT "${INSTNAME_KEY}" "InstallerLanguage"
     IfErrors lbl_end
 	StrCpy $LANGUAGE $0
 lbl_end:
@@ -383,14 +384,14 @@ CreateShortCut "$INSTDIR\Uninstall $INSTSHORTCUT.lnk" \
 				'"$INSTDIR\uninst.exe"' ''
 
 # Write registry
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "" "$INSTDIR"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version" "${VERSION_LONG}"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Exe" "$INSTEXE"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "Publisher" "${PUBLISHER}"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLInfoAbout" "${URL_ABOUT}"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLUpdateInfo" "${URL_DOWNLOAD}"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "HelpLink" "${URL_ABOUT}"
+WriteRegStr SHELL_CONTEXT "${INSTNAME}" "" "$INSTDIR"
+WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Version" "${VERSION_LONG}"
+WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Shortcut" "$INSTSHORTCUT"
+WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Exe" "$INSTEXE"
+WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
+WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "URLInfoAbout" "${URL_ABOUT}"
+WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "URLUpdateInfo" "${URL_DOWNLOAD}"
+WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "HelpLink" "${URL_ABOUT}"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayName" "$INSTNAME"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "UninstallString" '"$INSTDIR\uninst.exe"'
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayVersion" "${VERSION_LONG}"
@@ -417,9 +418,8 @@ WriteRegStr HKEY_CLASSES_ROOT "x-grid-location-info\DefaultIcon" "" '"$INSTDIR\$
 # URL param must be last item passed to viewer, it ignores subsequent params to avoid parameter injection attacks.
 WriteRegExpandStr HKEY_CLASSES_ROOT "x-grid-location-info\shell\open\command" "" '"$INSTDIR\$VIEWER_EXE" -url "%1"'
 
-;# Only allow Launcher to be the icon
-;WriteRegStr HKEY_CLASSES_ROOT "Applications\$INSTEXE" "IsHostApp" ""
-;WriteRegStr HKEY_CLASSES_ROOT "Applications\${VIEWER_EXE}" "NoStartPage" ""
+##WriteRegStr HKEY_CLASSES_ROOT "Applications\$VIEWER_EXE" "IsHostApp" ""
+##WriteRegStr HKEY_CLASSES_ROOT "Applications\${VIEWER_EXE}" "NoStartPage" ""
 
 # Write out uninstaller
 WriteUninstaller "$INSTDIR\uninst.exe"
@@ -461,7 +461,7 @@ ${EndIf}
 Call un.CloseSecondLife
 
 # Clean up registry keys and subkeys (these should all be !defines somewhere)
-DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG"
+DeleteRegKey SHELL_CONTEXT "${INSTNAME}"
 DeleteRegKey SHELL_CONTEXT "${MSCURRVER_KEY}\Uninstall\$INSTNAME"
 # BUG-2707 Remove entry that disabled SEHOP
 DeleteRegKey SHELL_CONTEXT "${MSNTCURRVER_KEY}\Image File Execution Options\$VIEWER_EXE"

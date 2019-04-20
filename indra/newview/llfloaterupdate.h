@@ -36,13 +36,13 @@ class LLFloaterUpdate : public LLModalDialog
 	friend class LLFloaterReg;
 private:
 	LLFloaterUpdate(const LLSD& sdData);
-	virtual ~LLFloaterUpdate() {}
+	~LLFloaterUpdate() override {}
 
 	/*
 	 * LLView overrides
 	 */
 public:
-	/*virtual*/ BOOL postBuild();
+	BOOL postBuild() override;
 
 	/*
 	 * Event handlers
@@ -72,14 +72,14 @@ class LLFloaterUpdateProgress : public LLModalDialog
 	friend class LLFloaterReg;
 private:
 	LLFloaterUpdateProgress(const LLSD& sdKey, bool fModal);
-	virtual ~LLFloaterUpdateProgress();
+	~LLFloaterUpdateProgress() override;
 
 	/*
 	 * LLView overrides
 	 */
 public:
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& sdKey);
+	BOOL postBuild() override;
+	void onOpen(const LLSD& sdKey) override;
 
 	/*
 	 * Event handlers
@@ -93,10 +93,10 @@ public:
 	 * Member variables
 	 */
 protected:
-	bool           m_fRequired;
-	LLProgressBar* m_pProgressBar;
-	LLTextBox*     m_pProgressText;
-	LLButton*      m_pInstallBtn;
+	bool           m_fRequired = false;
+	LLProgressBar* m_pProgressBar = nullptr;
+	LLTextBox*     m_pProgressText = nullptr;
+	LLButton*      m_pInstallBtn = nullptr;
 };
 
 // ====================================================================================

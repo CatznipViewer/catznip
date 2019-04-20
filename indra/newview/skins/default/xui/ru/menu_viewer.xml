@@ -182,6 +182,7 @@
 		<menu_item_call label="Жалоба" name="Report Abuse"/>
 		<menu_item_call label="Сообщить об ошибке" name="Report Bug"/>
 		<menu_item_call label="Столкновения, толчки и удары" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_call label="Проверить наличие обновлений" name="Check for Updates"/>
 		<menu_item_call label="О [APP_NAME]" name="About Second Life"/>
 	</menu>
 	<menu label="Дополнительно" name="Advanced">

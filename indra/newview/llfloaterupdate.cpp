@@ -75,10 +75,6 @@ void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 
 LLFloaterUpdateProgress::LLFloaterUpdateProgress(const LLSD& sdKey, bool fModal)
 	: LLModalDialog(LLSD(), fModal)
-	, m_fRequired(false)
-	, m_pProgressBar(NULL)
-	, m_pProgressText(NULL)
-	, m_pInstallBtn(NULL)
 {
 }
 
