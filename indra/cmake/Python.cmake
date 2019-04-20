@@ -46,8 +46,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     NO_DEFAULT_PATH # Avoid searching non-standard locations first
     PATHS
     /bin
-    /usr/bin
     /usr/local/bin
+    /usr/bin
     ${PATH_LIST}
     )
 
