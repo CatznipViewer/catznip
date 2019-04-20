@@ -2134,7 +2134,7 @@ if (DARWIN)
   set(MACOSX_BUNDLE_BUNDLE_NAME "Catznip")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2018, portions by Kitty Barnett, portions by Linden Research, Inc")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2019, portions by Kitty Barnett, portions by Linden Research, Inc")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "Catznip.nib")
   set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
 
@@ -2306,8 +2306,8 @@ if (PACKAGE AND (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING) AND VIE
           "${VIEWER_SYMBOL_FILE_CYGWIN}"
           "-C"
           "${PARENT_DIRECTORY_CYGWIN}"
-          "secondlife-bin.pdb"
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-bin.pdb"
+          "catznip-bin.pdb"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/catznip-bin.pdb"
         COMMENT "Packing viewer PDB into ${VIEWER_SYMBOL_FILE_CYGWIN}"
         )
       add_custom_target(generate_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" ${VIEWER_BINARY_NAME})
