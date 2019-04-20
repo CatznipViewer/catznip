@@ -526,9 +526,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>118987b1a5b56214cfdbd0c763e180da</string>
+              <string>23aeaf23e7db2484a1850017141860dd</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/15127/97748/dullahan-1.1.1080_3.3325.1750.gaabe4c4-darwin64-513449.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/34069/283470/dullahan-1.1.1320_3.3626.1895.g7001d56-darwin64-525361.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -538,9 +538,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>2ecc71350b30a1057091b9cd7af18b1c</string>
+              <string>71fa66203326aca918796e874976c080</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/15128/97755/dullahan-1.1.1080_3.3325.1750.gaabe4c4-windows-513449.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/34070/283477/dullahan-1.1.1320_3.3626.1895.g7001d56-windows-525361.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -550,16 +550,16 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>2ed3e49388514dafb907c59a209d580e</string>
+              <string>c7162e4805f50a3609f5dc63d0cf2bc0</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/15129/97760/dullahan-1.1.1080_3.3325.1750.gaabe4c4-windows64-513449.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/34071/283480/dullahan-1.1.1320_3.3626.1895.g7001d56-windows64-525361.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
           </map>
         </map>
         <key>version</key>
-        <string>1.1.1080_3.3325.1750.gaabe4c4</string>
+        <string>1.1.1320_3.3626.1895.g7001d56</string>
       </map>
       <key>elfio</key>
       <map>
@@ -2112,46 +2112,6 @@
         </map>
         <key>version</key>
         <string>0.0.1</string>
-      </map>
-      <key>llbase</key>
-      <map>
-        <key>copyright</key>
-        <string>Copyright (c) 2010, Linden Research, Inc.</string>
-        <key>license</key>
-        <string>mit</string>
-        <key>license_file</key>
-        <string>LICENSES/llbase-license.txt</string>
-        <key>name</key>
-        <string>llbase</string>
-        <key>platforms</key>
-        <map>
-          <key>darwin64</key>
-          <map>
-            <key>archive</key>
-            <map>
-              <key>hash</key>
-              <string>e18eeb0691af053b83bd46b76c6ee86a</string>
-              <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/6299/21982/llbase-0.9.3.506286-darwin64-506286.tar.bz2</string>
-            </map>
-            <key>name</key>
-            <string>darwin64</string>
-          </map>
-          <key>windows</key>
-          <map>
-            <key>archive</key>
-            <map>
-              <key>hash</key>
-              <string>e6865670f9bca1c82fb8b91db3ea515c</string>
-              <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/6301/21994/llbase-0.9.3.506286-windows-506286.tar.bz2</string>
-            </map>
-            <key>name</key>
-            <string>windows</string>
-          </map>
-        </map>
-        <key>version</key>
-        <string>0.9.3.506286</string>
       </map>
       <key>llca</key>
       <map>

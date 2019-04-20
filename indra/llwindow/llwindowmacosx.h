@@ -122,6 +122,7 @@ public:
 	/*virtual*/ void allowLanguageTextInput(LLPreeditor *preeditor, BOOL b);
 	/*virtual*/ void interruptLanguageTextInput();
 	/*virtual*/ void spawnWebBrowser(const std::string& escaped_url, bool async);
+	/*virtual*/ F32 getSystemUISize();
 
 	static std::vector<std::string> getDynamicFallbackFontList();
 
@@ -145,7 +146,7 @@ protected:
 		BOOL fullscreen, BOOL clearBg, BOOL disable_vsync, BOOL use_gl,
 		BOOL ignore_pixel_depth,
 		U32 fsaa_samples);
-	~LLWindowMacOSX();
+		~LLWindowMacOSX();
 
 	void	initCursors();
 	BOOL	isValid();

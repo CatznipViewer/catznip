@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+				<combo_box.item label="無" name="None"/>
 			<check_box label="動作網面" name="Animated Mesh Checkbox Ctrl" tool_tip="允許架設網面物件獨立動作"/>
 		<panel label="內容" name="Contents">
 			<button label="新腳本" label_selected="新腳本" name="button new script"/>

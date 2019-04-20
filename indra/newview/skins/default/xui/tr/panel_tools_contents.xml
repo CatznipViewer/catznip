@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+				<combo_box.item label="Yok" name="None"/>
 			<check_box label="Animasyonlu Ağ" name="Animated Mesh Checkbox Ctrl" tool_tip="Ağ stili giydirilmiş nesnelere bağımsız olarak animasyon eklenmesine olanak sağlar."/>
 		<panel label="İçerik" name="Contents">
 			<button label="Yeni Komut Dosyası" label_selected="Yeni Komut Dosyası" name="button new script"/>

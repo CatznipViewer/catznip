@@ -3929,6 +3929,62 @@ Can&apos;t add estate owner to estate &apos;Banned Resident&apos; list.
    type="alertmodal">
 Unable to add banned resident to estate manager list.
   </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="ProblemBanningEstateManager"
+   type="alertmodal">
+Unable to add estate manager [AGENT] to banned list.
+  </notification>
+  
+  <notification
+   icon="alertmodal.tga"
+   name="GroupIsAlreadyInList"
+   type="alertmodal">
+&lt;nolink&gt;[GROUP]&lt;/nolink&gt; is already in the Allowed Groups list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentIsAlreadyInList"
+   type="alertmodal">
+[AGENT] is already in your [LIST_TYPE] list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsAreAlreadyInList"
+   type="alertmodal">
+[AGENT] are already in your [LIST_TYPE] list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentWasAddedToList"
+   type="alertmodal">
+[AGENT] was added to [LIST_TYPE] list of [ESTATE].
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsWereAddedToList"
+   type="alertmodal">
+[AGENT] were added to [LIST_TYPE] list of [ESTATE].
+
+  </notification>
+      <notification
+   icon="alertmodal.tga"
+   name="AgentWasRemovedFromList"
+   type="alertmodal">
+[AGENT] was removed from [LIST_TYPE] list of [ESTATE].
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsWereRemovedFromList"
+   type="alertmodal">
+[AGENT] were removed from [LIST_TYPE] list of [ESTATE].
+  </notification>
 
   <notification
    icon="alertmodal.tga"
@@ -3965,7 +4021,6 @@ Finished download of raw terrain file to:
    name="RequiredUpdate"
    type="alertmodal">
 Version [VERSION] is required for login.
-This should have been updated for you but apparently was not.
 Please download from https://get.catznip.com/
     <tag>confirm</tag>
     <usetemplate
@@ -4152,6 +4207,44 @@ Please try again later.
 
   <notification
    icon="alertmodal.tga"
+   name="PauseForUpdate"
+   type="alertmodal">
+Version [VERSION] is required for login.
+Click OK to download and install.
+    <tag>confirm</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="OptionalUpdateReady"
+   type="alertmodal">
+Version [VERSION] has been downloaded and is ready to install.
+Click OK to install.
+    <tag>confirm</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="PromptOptionalUpdate"
+   type="alertmodal">
+Version [VERSION] has been downloaded and is ready to install.
+Proceed?
+    <tag>confirm</tag>
+    <usetemplate
+     canceltext="Not Now"
+     name="yesnocancelbuttons"
+     notext="Skip"
+     yestext="Install"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="LoginFailedUnknown"
    type="alertmodal">
 Sorry, login failed for an unrecognized reason.
@@ -4316,18 +4409,6 @@ Do you want to open your Web browser to view this content?
     <usetemplate
      ignoretext="Launch my browser to view a web page"
      name="okcancelignore"
-     notext="Cancel"
-     yestext="OK"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="SystemUIScaleFactorChanged"
-   type="alertmodal">
-System UI size factor has changed since last run. Do you want to open UI size adjustment settings page?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
      notext="Cancel"
      yestext="OK"/>
   </notification>
@@ -5012,7 +5093,8 @@ Add to allowed list for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateAllowedAgentRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove from allowed list for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
@@ -5041,7 +5123,8 @@ Add to group allowed list for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateAllowedGroupRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove from group allowed list for this estate only or [ALL_ESTATES]?
     <tag>group</tag>
     <tag>confirm</tag>
@@ -5070,8 +5153,9 @@ Deny access for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateBannedAgentRemove"
-   type="alert">
-Remove this Resident from the ban list for  access for this estate only or for [ALL_ESTATES]?
+   type="alertmodal">
+    <unique/>
+Remove this Resident from the ban list for access for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
      canceltext="Cancel"
@@ -5098,7 +5182,8 @@ Add estate manager for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateManagerRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove estate manager for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
