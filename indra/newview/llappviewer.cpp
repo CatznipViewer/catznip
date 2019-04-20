@@ -3960,7 +3960,7 @@ void LLAppViewer::writeSystemInfo()
 		gDebugInfo["RAMInfo"]["VirtualTotal"] = (LLSD::Integer)(memStatus.ullTotalVirtual >> 10);
 	}
 #else
-	gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
+	gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB().value());
 #endif // LL_WINDOWS
 // [/SL:KB]
 //	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
