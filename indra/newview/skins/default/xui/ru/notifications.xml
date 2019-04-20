@@ -684,6 +684,9 @@
 		</url>
 		<usetemplate ignoretext="Оборудование моего компьютера не поддерживается" name="okcancelignore" notext="Нет" yestext="Да"/>
 	</notification>
+	<notification name="RunLauncher">
+		Пожалуйста, не запускайте напрямую исполняемый файл просмотра. Обновите все имеющиеся ярлыки, чтобы вместо этого запускать SL_Launcher.
+	</notification>
 	<notification name="OldGPUDriver">
 		Возможно, для вашей видеокарты имеется более новый драйвер.  Обновление драйвера может существенно повысить быстродействие.
 
@@ -1566,6 +1569,30 @@
 	<notification name="ProblemAddingEstateManagerBanned">
 		Невозможно добавить заблокированного жителя в список менеджеров землевладения.
 	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Невозможно добавить заблокированного жителя в список менеджеров землевладения [AGENT].
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;\[GROUP]&lt;/nolink&gt; уже находится в списке допущенных групп.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] уже находится на вашем [LIST_TYPE] листе.
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] уже находится на вашем [LIST_TYPE] листе.
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] был добавлен в [LIST_TYPE] лист [ESTATE].
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] был добавлен в [LIST_TYPE] лист [ESTATE].
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] был удален из [LIST_TYPE] листа [ESTATE].
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] был удален из [LIST_TYPE] листа [ESTATE].
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Нельзя изменять внешность, пока загружаются одежда и фигура.
 	</notification>
@@ -1580,95 +1607,13 @@
 		Завершена загрузка файла ландшафта:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="FailedUpdateInstall">
-		Произошла ошибка при установке обновления.
-Загрузите новую версию программы на сайте
-https://get.catznip.com
+	<notification name="RequiredUpdate">
+		Для входа необходима версия \[VERSION]. Для вас обновление должно было произведено автоматически, но по какой-то причине этого не произошло. Скачайте обновление с веб-сайта https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="FailedRequiredUpdateInstall">
-		Не удалось установить обязательное обновление. 
-Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
-
-Загрузите новую версию программы на сайте
-https://get.catznip.com
+	<notification name="LoginFailedUnknown">
+		Извините, ошибка входа по неустановленной причине. Если данное сообщение повторится, посетите веб-сайт [SUPPORT_SITE].
 		<usetemplate name="okbutton" yestext="Выйти"/>
-	</notification>
-	<notification name="UpdaterServiceNotRunning">
-		Появились обязательные обновления для вашей версии Second Life.
-
-Загрузите это обновление на сайте https://get.catznip.com
-или установите его сейчас.
-		<usetemplate name="okcancelbuttons" notext="Выйти из Second Life" yestext="Загрузить и установить сейчас"/>
-	</notification>
-	<notification name="DownloadBackgroundTip">
-		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
-		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
-	</notification>
-	<notification name="DownloadBackgroundDialog">
-		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
-		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedVerboseDialog">
-		Загружено обязательное обновление.
-Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
-
-Необходимо перезапустить [APP_NAME] для установки обновления.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedDialog">
-		Необходимо перезапустить [APP_NAME] для установки обновления.
-[[INFO_URL] Сведения об этом обновлении]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundTip">
-		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION] 
-На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] об этом обновлении]
-		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundDialog">
-		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]
-На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
-		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
-		Загружено обязательное обновление.
-Версия [VERSION]
-На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
-
-Необходимо перезапустить [APP_NAME] для установки обновления.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
-		Необходимо перезапустить [APP_NAME] для установки обновления.
-На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadInProgress">
-		Появилось обновление!
-Оно сейчас загружается в фоновом режиме и, как только будет готово, вам будет предложено перезапустить клиент для завершения установки.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadComplete">
-		Обновление загружено. Оно будет установлено после перезапуска.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateCheckError">
-		При поиске обновлений произошла ошибка.
-Повторите попытку позже.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateViewerUpToDate">
-		Ваш клиент уже обновлен!
-		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		В результате передачи этого объекта группа:
@@ -1678,10 +1623,6 @@ https://get.catznip.com
 	<notification name="WebLaunchExternalTarget">
 		Открыть браузер для просмотра этого контента?
 		<usetemplate ignoretext="Запустить браузер для просмотра веб-страницы" name="okcancelignore" notext="Отмена" yestext="OK"/>
-	</notification>
-	<notification name="SystemUIScaleFactorChanged">
-		Со времени последнего запуска изменился системный коэффициент размера интерфейса. Открыть страницу настроек размера интерфейса?
-		<usetemplate name="okcancelbuttons" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchJoinNow">
 		Перейти на [http://secondlife.com/account/ информационную панель] для управления вашим аккаунтом?
@@ -1955,7 +1896,7 @@ https://get.catznip.com
 		<usetemplate canceltext="Отмена" name="yesnocancelbuttons" notext="Для всех землевладений" yestext="Для этого землевладения"/>
 	</notification>
 	<notification label="Выбрать землевладение" name="EstateBannedAgentRemove">
-		Удалить этого жителя из списка запрета доступа только для этого землевладения или для [ALL_ESTATES]?
+		Удалить этого жителя из списка заблокированного доступа только для этого землевладения или для [ALL_ESTATES]?
 		<usetemplate canceltext="Отмена" name="yesnocancelbuttons" notext="Для всех землевладений" yestext="Для этого землевладения"/>
 	</notification>
 	<notification label="Выбрать землевладение" name="EstateManagerAdd">
@@ -2434,7 +2375,7 @@ https://get.catznip.com
 		<usetemplate name="okcancelbuttons" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmEmptyTrash">
-		Предметы [COUNT] будут удалены навсегда. Вы действительно хотите удалить содержимое корзины без возможности восстановления?
+		[COUNT] предметов(а) и папки будут окончательно удалены. Вы действительно хотите удалить содержимое корзины без возможности восстановления?
 		<usetemplate name="okcancelbuttons" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="TrashIsFull">
@@ -3246,20 +3187,23 @@ https://get.catznip.com
 	<notification name="VoiceChannelJoinFailed">
 		Не удалось подключиться к [VOICE_CHANNEL_NAME], повторите попытку позже.  Будет установлено подключение к локальному голосовому чату.
 	</notification>
-	<notification name="VoiceLoginRetry">
-		Создается голосовой канал для вас. Создание займет не больше минуты.
-	</notification>
 	<notification name="VoiceEffectsExpired">
-		Истек срок действия одного или нескольких типов изменения голоса, на которые вы подписаны.
-[[URL] Щелкните здесь], чтобы обновить подписку.
+		Истек срок действия подписки на один или несколько типов анимационного изменения голоса. 
+[[URL] Щелкните здесь], чтобы обновить подписку. 
+
+Если вы - владелец премиум-аккаунта, [[PREMIUM_URL] щелкните здесь], чтобы получить право на анимационное изменение голоса.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
-		Истек срок действия активного типа изменения голоса, применены настройки вашего обычного голоса.
-[[URL] Щелкните здесь], чтобы обновить подписку.
+		Истек срок действия анимационного изменения голоса, действуют настройки вашего обычного голоса. 
+[[URL] Щелкните здесь], чтобы обновить подписку. 
+
+Если вы - владелец премиум-аккаунта, [[PREMIUM_URL] щелкните здесь], чтобы получить право на анимационное изменение голоса.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Срок действия одного или нескольких ваших типов изменения голоса истекает через [INTERVAL] дней или раньше.
-[[URL] Щелкните здесь], чтобы обновить подписку.
+		Срок действия одного или нескольких ваших типов анимационного изменения голоса истекает через [INTERVAL] дней или раньше. 
+[[URL] Щелкните здесь], чтобы обновить подписку. 
+
+Если вы - владелец премиум-аккаунта, [[PREMIUM_URL] щелкните здесь], чтобы получить право на анимационное изменение голоса.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		Появились новые типы изменения голоса!
@@ -3311,8 +3255,14 @@ https://get.catznip.com
 	<notification name="SnapshotToComputerFailed">
 		Не удалось сохранить моментальный снимок на [PATH]: Диск переполнен. Необходимо [NEED_MEMORY] Кбайт, но доступно только  [FREE_MEMORY] Кбайт.
 	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Не удалось сохранить моментальный снимок на [PATH]: Каталог не существует.
+	</notification>
 	<notification name="PresetNotSaved">
 		Ошибка при сохранении пресета [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Невозможно изменить настройку по умолчанию.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Ошибка при удалении пресета [NAME].
@@ -3443,12 +3393,22 @@ https://get.catznip.com
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		Возникли проблемы соединения с голосовым сервером:
+		Нет связи с речевым сервером: порты 
 
-[HOSTID]
+[HOSTID],
 
-Голосовая связь будет недоступна.
-Проверьте настройки сети и брандмауэра.
+выделенные для голосового соединения: 
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Проверьте настройки сети и брандмауэра. 
+Отключите любую функцию SIP ALG в маршрутизаторе. 
+
+Голосовое общение будет недоступно.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Проблемы соединения с речевым сервером: Голосовое общение будет недоступно. Проверьте настройки сети и брандмауэра.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -4069,6 +4029,9 @@ https://get.catznip.com
 	<notification name="CantCreateObjectRegionFull">
 		Невозможно создать запрошенный объект. Регион уже заполнен.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Невозможно создать необходимый анимированный объект, так как он превышает предел риг-структурированных треугольников.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Нельзя присоединить несколько объектов к одной точке.
 	</notification>
@@ -4116,6 +4079,21 @@ https://get.catznip.com
 	</notification>
 	<notification name="CantChangeShape">
 		Вам не разрешено изменять эту фигуру.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		Действие приведёт к превышению лимита по количеству добавленных анимированных объектов.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Невозможно связать эти объекты, поскольку полученный анимированный объект превысит предел риг-структурированных треугольников.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Невозможно преобразовать этот объект в анимированный объект, потому что будет превышен лимит риг-структурированных треугольников.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Невозможно изменить состояние анимированного объекта для этого объекта, так как это приведет к превышению лимита участка.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Ошибка сервера: не удается завершить действие, так как данные сетки не загружается.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Ваши привилегии доступа не разрешают претендовать на объекты на этом месте.
@@ -4378,7 +4356,7 @@ https://get.catznip.com
 		Не удалось обновить клиент из-за внутренней ошибки.  Отображаемый в клиенте баланс L$ или владение участками могут не соответствовать действительному балансу на серверах.
 	</notification>
 	<notification name="LargePrimAgentIntersect">
-		Нельзя создавать большие примитивы, которые пересекаются с другими игроками.  Повторите попытку, когда другие игроки уйдут.
+		Невозможно создать большие примитивы, которые пересекаются с другими жителями. Пожалуйста, повторите попытку, когда другие жители переедут.
 	</notification>
 	<notification name="PreferenceChatClearLog">
 		Будут удалены журналы предыдущих разговоров и все резервные копии этих файлов.

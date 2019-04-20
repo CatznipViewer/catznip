@@ -74,10 +74,18 @@ LLVoiceChannel::LLVoiceChannel(const LLUUID& session_id, const std::string& sess
 
 LLVoiceChannel::~LLVoiceChannel()
 {
-	// Must check instance exists here, the singleton MAY have already been destroyed.
-	if(LLVoiceClient::instanceExists())
+	if (sSuspendedVoiceChannel == this)
 	{
-		LLVoiceClient::getInstance()->removeObserver(this);
+		sSuspendedVoiceChannel = NULL;
+	}
+	if (sCurrentVoiceChannel == this)
+	{
+		sCurrentVoiceChannel = NULL;
+		// Must check instance exists here, the singleton MAY have already been destroyed.
+		if(LLVoiceClient::instanceExists())
+		{
+			LLVoiceClient::getInstance()->removeObserver(this);
+		}
 	}
 	
 	sVoiceChannelMap.erase(mSessionID);
@@ -145,19 +153,9 @@ void LLVoiceChannel::handleStatusChange(EStatusType type)
 	switch(type)
 	{
 	case STATUS_LOGIN_RETRY:
-		//mLoginNotificationHandle = LLNotifyBox::showXml("VoiceLoginRetry")->getHandle();
-		LLNotificationsUtil::add("VoiceLoginRetry");
+        // no user notice
 		break;
 	case STATUS_LOGGED_IN:
-		//if (!mLoginNotificationHandle.isDead())
-		//{
-		//	LLNotifyBox* notifyp = (LLNotifyBox*)mLoginNotificationHandle.get();
-		//	if (notifyp)
-		//	{
-		//		notifyp->close();
-		//	}
-		//	mLoginNotificationHandle.markDead();
-		//}
 		break;
 	case STATUS_LEFT_CHANNEL:
 		if (callStarted() && !mIgnoreNextSessionLeave && !sSuspended)

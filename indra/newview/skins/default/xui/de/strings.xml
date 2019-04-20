@@ -66,12 +66,12 @@ Grafikkarte: [GRAPHICS_CARD]
 	</string>
 	<string name="AboutSettings">
 		Fenstergröße: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
-Schriftgrößenanpassung [FONT_SIZE_ADJUSTMENT] Pt
+Schriftgrößenanpassung: [FONT_SIZE_ADJUSTMENT] pt
 UI-Skalierung: [UI_SCALE]
 Sichtweite: [DRAW_DISTANCE] m
 Bandbreite: [NET_BANDWITH] kbit/s
 LOD-Faktor: [LOD_FACTOR]
-Darstellungsqualität: [RENDER_QUALITY] / 7
+Darstellungsqualität: [RENDER_QUALITY]
 Erweitertes Beleuchtungsmodell: [GPU_SHADERS]
 Texturspeicher: [TEXTURE_MEMORY] MB
 Erstellungszeit VFS (Cache): [VFS_TIME]
@@ -79,7 +79,7 @@ Erstellungszeit VFS (Cache): [VFS_TIME]
 	<string name="AboutLibs">
 		J2C-Decoderversion: [J2C_VERSION]
 Audiotreiberversion: [AUDIO_DRIVER_VERSION]
-CEF-Version: [LIBCEF_VERSION]
+[LIBCEF_VERSION]
 LibVLC-Version: [LIBVLC_VERSION]
 Voice-Server-Version: [VOICE_VERSION]
 	</string>
@@ -204,11 +204,11 @@ Voice-Server-Version: [VOICE_VERSION]
 		Second Life Beta Test Grid (Aditi)
 	</string>
 	<string name="ViewerDownloadURL">
-		http://secondlife.com/download
+		https://get.catznip.com/
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Mit dem von Ihnen verwendeten Viewer ist der Zugriff auf Second Life nicht mehr möglich. Laden Sie von den folgenden Seite einen neuen Viewer herunter:
-https://get.catznip.com
+https://get.catznip.com/
 
 Weitere Informationen finden Sie auf der folgenden FAQ-Seite: 
 http://secondlife.com/viewer-access-faq
@@ -278,9 +278,8 @@ Wenn Sie der Ansicht sind, dass Sie diese Meldung fälschlicherweise erhalten ha
 		Abmeldeanforderung führte zu einem Simulatorfehler.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		Das System meldet Sie gerade ab.
-Ihr Konto ist erst ab
-[TIME] Pacific Time wieder verfügbar.
+		Das System meldet Sie gerade ab. 
+Bitte warten Sie eine Minute, bevor Sie sich erneut einloggen.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		Es kann keine gültige Sitzung erstellt werden.
@@ -1446,6 +1445,9 @@ besuchen Sie bitte http://secondlife.com/support
 	<string name="InventoryNoMatchingItems">
 		Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/all/[SEARCH_TERM] Suche].
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Sie haben nicht das Richtige gefunden? Versuchen Sie [secondlife:///app/inventory/filters Show filters].
+	</string>
 	<string name="PlacesNoMatchingItems">
 		Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/places/[SEARCH_TERM] Suche].
 	</string>
@@ -1511,6 +1513,9 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Ziehen Sie Ordner in diesen Bereich, um sie im [[MARKETPLACE_DASHBOARD_URL] Marktplatz] zum Verkauf anzubieten.
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Artikel )
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		Bestandsordner müssen in einem Versionsordner gespeichert sein
@@ -2223,6 +2228,18 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 	</string>
 	<string name="RegionInfoListTypeBannedAgents">
 		Immer verbannt
+	</string>
+	<string name="RegionInfoAllEstates">
+		alle Grundbesitze
+	</string>
+	<string name="RegionInfoManagedEstates">
+		verwaltete Grundbesitze
+	</string>
+	<string name="RegionInfoThisEstate">
+		dieser Grundbesitz
+	</string>
+	<string name="AndNMore">
+		und [EXTRA_COUNT] weitere
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Parzellenskript-Speicher

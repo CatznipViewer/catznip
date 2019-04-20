@@ -137,6 +137,12 @@ void LLCrashLoggerHandler::onFailure(LLCore::HttpResponse * response, LLCore::Ht
 {
     LL_WARNS("CRASHREPORT") << "Request to " << response->getRequestURL()
                             << " failed: " << status.toString() << LL_ENDL;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.3
+	if ( (status.getStatus() >= 400) && (status.getStatus() <= 499) )
+	{
+		gSent = true;
+	}
+// [/SL:KB]
     gBreak = true;
 }
 
@@ -1032,7 +1038,7 @@ bool LLCrashLogger::init()
 // [/SL:KB]
 //	gDirUtilp->initAppDirs("SecondLife");
 
-	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
+	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, ""), gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 
 	// Default to the product name "Second Life" (this is overridden by the -name argument)
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.7

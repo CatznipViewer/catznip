@@ -684,6 +684,9 @@ Consulter [_URL] pour en savoir plus ?
 		</url>
 		<usetemplate ignoretext="Mon matériel n&apos;est pas pris en charge" name="okcancelignore" notext="Non" yestext="Oui"/>
 	</notification>
+	<notification name="RunLauncher">
+		Veuillez ne pas exécuter la visionneuse directement. Actualiser tout raccourci existant pour lancer SL_Launcher
+	</notification>
 	<notification name="OldGPUDriver">
 		Il existe probablement un pilote plus récent pour votre puce graphique.  La mise à jour des pilotes graphiques est susceptible d’améliorer considérablement les performances.
 
@@ -1564,6 +1567,30 @@ Dépasse la limite fixée à [MAX_AGENTS] [LIST_TYPE] de [NUM_EXCESS].
 	<notification name="ProblemAddingEstateManagerBanned">
 		Impossible d’ajouter un résident banni à la liste des gérants de domaine.
 	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Impossible d&apos;ajouter le gérant de domaine à la liste interdite.
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;[GROUP]&lt;/nolink&gt; est déjà dans la liste des groupes autorisés.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] est déjà dans votre liste [LIST_TYPE].
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] sont déjà dans votre liste [LIST_TYPE].
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] a été ajouté à la liste [LIST_TYPE] de [ESTATE].
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] ont été ajoutéq à la liste [LIST_TYPE] de [ESTATE].
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] a été supprimé de la liste [LIST_TYPE] de [ESTATE].
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] ont été supprimés de la liste [LIST_TYPE] de [ESTATE].
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Impossible de changer d&apos;apparence jusqu&apos;à ce que les habits et la silhouette soient chargés.
 	</notification>
@@ -1578,95 +1605,13 @@ Veuillez choisir un objet à vendre et réessayer.
 		Téléchargement du fichier de terrain raw effectué vers :
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="FailedUpdateInstall">
-		Une erreur est survenue lors de l&apos;installation de la mise à jour du client.
-Veuillez télécharger et installer la dernière version du client à la page Web
-https://get.catznip.com
+	<notification name="RequiredUpdate">
+		La version [VERSION] est nécessaire pour vous connecter. Cette version aurait dû être mise à jour, mais visiblement, elle ne l&apos;a pas été. Veuillez télécharger la dernière version sur https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="FailedRequiredUpdateInstall">
-		Impossible d&apos;installer une mise à jour requise. 
-Vous ne pourrez pas vous connecter tant que [APP_NAME] ne sera pas mis à jour.
-
-Veuillez télécharger et installer la dernière version du client à la page Web
-https://get.catznip.com
+	<notification name="LoginFailedUnknown">
+		Désolé, la connexion a échoué pour un raison non reconnue. Si ce message persiste, veuillez consulter la page [SUPPORT_SITE].
 		<usetemplate name="okbutton" yestext="Quitter"/>
-	</notification>
-	<notification name="UpdaterServiceNotRunning">
-		Une mise à jour requise pour votre installation Second Life existe.
-
-Pour la télécharger, accédez à https://get.catznip.com .
-Vous pouvez également l&apos;installer dès maintenant.
-		<usetemplate name="okcancelbuttons" notext="Quitter Second Life" yestext="Télécharger et installer maintenant"/>
-	</notification>
-	<notification name="DownloadBackgroundTip">
-		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[INFO_URL] Informations relatives à cette mise à jour]
-		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
-	</notification>
-	<notification name="DownloadBackgroundDialog">
-		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[INFO_URL] Informations relatives à cette mise à jour]
-		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedVerboseDialog">
-		Nous avons téléchargé une mise à jour logicielle requise.
-Version [VERSION] [Informations au sujet de cette mise à jour [INFO_URL]]
-
-[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedDialog">
-		[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
-[Informations au sujet de cette mise à jour [INFO_URL]]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundTip">
-		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] 
-Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [[INFO_URL] pour en savoir plus sur cette mise à jour]
-		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundDialog">
-		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION]
-Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
-		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
-		Nous avons téléchargé une mise à jour logicielle requise.
-Version [VERSION]
-Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
-
-[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
-		[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
-Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadInProgress">
-		Une mise à jour est disponible.
-Elle est en cours de téléchargement en arrière-plan et nous vous inviterons à redémarrer votre client pour terminer son installation dès qu’elle est prête.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadComplete">
-		Une mise à jour a été téléchargée. Elle sera installée au redémarrage.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateCheckError">
-		Une erreur est survenue lors de la recherche de mises à jour.
-Veuillez réessayer ultérieurement.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateViewerUpToDate">
-		Votre client est à jour.
-		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		Si vous cédez cet objet, le groupe :
@@ -1676,10 +1621,6 @@ Veuillez réessayer ultérieurement.
 	<notification name="WebLaunchExternalTarget">
 		Voulez-vous ouvrir votre navigateur web système pour afficher ce contenu ?
 		<usetemplate ignoretext="Ouvrir mon navigateur pour consulter une page web" name="okcancelignore" notext="Annuler" yestext="OK"/>
-	</notification>
-	<notification name="SystemUIScaleFactorChanged">
-		Le facteur de taille de l’interface système a changé depuis la dernière exécution. Voulez-vous ouvrir la page des paramètres d’ajustement de la taille de l’interface ?
-		<usetemplate name="okcancelbuttons" notext="Annuler" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchJoinNow">
 		Accéder à votre [http://secondlife.com/account/ Page d&apos;accueil] pour gérer votre compte ?
@@ -1955,7 +1896,7 @@ Cette action modifiera des milliers de régions et sera difficile à digérer po
 		<usetemplate canceltext="Annuler" name="yesnocancelbuttons" notext="Tous les domaines" yestext="Ce domaine"/>
 	</notification>
 	<notification label="Choisir le domaine" name="EstateBannedAgentRemove">
-		Supprimer ce résident de la liste des résidents bannis pour ce domaine uniquement ou pour [ALL_ESTATES] ?
+		Supprimer ce résident de la liste des résidents interdits pour ce domaine uniquement ou pour [ALL_ESTATES] ?
 		<usetemplate canceltext="Annuler" name="yesnocancelbuttons" notext="Tous les domaines" yestext="Ce domaine"/>
 	</notification>
 	<notification label="Choisir le domaine" name="EstateManagerAdd">
@@ -2435,7 +2376,7 @@ Voulez-vous désactiver Ne pas déranger avant de terminer cette transaction ?
 		<usetemplate name="okcancelbuttons" notext="Annuler" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmEmptyTrash">
-		[COUNT] objets seront supprimés définitivement. Êtes-vous certain de vouloir supprimer le contenu de votre corbeille de manière permanente ?
+		[COUNT] les objets et les dossiers seront supprimés définitivement. Êtes-vous certain de vouloir supprimer le contenu de votre corbeille de manière permanente ?
 		<usetemplate name="okcancelbuttons" notext="Annuler" yestext="OK"/>
 	</notification>
 	<notification name="TrashIsFull">
@@ -3247,20 +3188,23 @@ Pour y participer, cliquez sur Accepter. Sinon, cliquez sur Refuser. Pour ignore
 	<notification name="VoiceChannelJoinFailed">
 		Échec de la connexion avec [VOICE_CHANNEL_NAME], veuillez réessayer ultérieurement.  Vous allez maintenant être reconnecté(e) au chat vocal près de vous.
 	</notification>
-	<notification name="VoiceLoginRetry">
-		Nous sommes en train de créer un canal vocal pour vous. Veuillez patienter quelques instants.
-	</notification>
 	<notification name="VoiceEffectsExpired">
-		Au moins l&apos;un des effets de voix auxquels vous êtes abonné a expiré.
-[[URL] Cliquez ici] pour renouveler votre abonnement.
+		Au moins l&apos;un des effets de voix auxquels vous êtes abonné a expiré. 
+[[URL] Cliquez ici] pour renouveler votre abonnement. 
+
+Si vous êtes un membre Premium,  [[PREMIUM_URL] cliquez ici] pour recevoir votre effet de voix.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
 		L&apos;effet de voix actif a expiré. Vos paramètres de voix normaux ont été rétablis.
-[[URL] Cliquez ici] pour renouveler votre abonnement.
+[[URL] Cliquez ici] pour renouveler votre abonnement. 
+
+Si vous êtes un membre Premium, [[PREMIUM_URL] cliquez ici] pour recevoir votre effet de voix.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Au moins l&apos;un de vos effets de voix expirera dans moins de [INTERVAL] jours.
-[[URL] Cliquez ici] pour renouveler votre abonnement.
+		Au moins l&apos;un de vos effets de voix expirera dans moins de [INTERVAL] jours.  
+[[URL] Cliquez ici] pour renouveler votre abonnement. 
+
+Si vous êtes un membre Premium,  [[PREMIUM_URL] cliquez ici] pour recevoir votre effet de voix.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		De nouveaux effets de voix sont disponibles !
@@ -3312,8 +3256,14 @@ Elles vont être bloquées pendant quelques secondes pour votre sécurité.
 	<notification name="SnapshotToComputerFailed">
 		Échec d’enregistrement de la photo dans [PATH] : Le disque est plein. [NEED_MEMORY]KB est nécessaire mais l&apos;espace libre est de seulement [FREE_MEMORY]KB.
 	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Échec d’enregistrement de la photo dans [PATH] : Le répertoire n&apos;existe pas.
+	</notification>
 	<notification name="PresetNotSaved">
 		Erreur d’enregistrement du préréglage [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Impossible de remplacer le préréglage par défaut.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Erreur de suppression du préréglage [NAME].
@@ -3444,12 +3394,22 @@ Veuillez vérifier la configuration de votre réseau et de votre pare-feu.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		Problèmes de connexion à votre serveur vocal :
+		La connexion au serveur vocal est impossible : 
 
 [HOSTID]
 
+Les ports autorisés pour la voix sont :
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Veuillez vérifier la configuration de votre réseau et de votre pare-feu. 
+Veuillez désactiver toute  fonctionnalité SIP ALG dans votre routeur. 
+
 Aucune communication vocale n&apos;est disponible.
-Veuillez vérifier la configuration de votre réseau et de votre pare-feu.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Nous rencontrons des difficultés pour vous connecter à votre serveur vocal. Aucune communication vocale n&apos;est disponible. Veuillez vérifier la configuration de votre réseau et de votre pare-feu.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -4069,6 +4029,9 @@ Veuillez réessayer dans une minute.
 	<notification name="CantCreateObjectRegionFull">
 		Création de l&apos;objet demandé impossible. La région est pleine.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Impossible de créer l&apos;objet animé demandé car il dépasserait la limite de triangle calé.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Vous ne pouvez pas attacher plusieurs objets au même endroit.
 	</notification>
@@ -4116,6 +4079,21 @@ Veuillez réessayer dans une minute.
 	</notification>
 	<notification name="CantChangeShape">
 		Vous n’êtes pas autorisé à modifier cette forme.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		Une opération entraînerait le dépassement du nombre d&apos;objets animés attachés.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Impossible de lier ces objets car l&apos;objet animé résultant dépasserait la limite de triangle calé.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Impossible de transformer cet objet en objet animé car il dépasserait la limite de triangle calé.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Impossible de modifier l&apos;état de l&apos;objet animé pour cet objet, car cela entraînerait un dépassement de la limite de parcelles.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Erreur de serveur : impossible d&apos;effectuer cette opération car les données de maillage ne sont pas chargées.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Vos privilèges d&apos;accès ne vous autorisent pas à revendiquer des objets ici.
@@ -4378,7 +4356,7 @@ Veuillez sélectionner un terrain plus petit.
 		Une erreur interne nous a empêchés de mettre votre client à jour correctement.  Le solde de L$ et le patrimoine affichés dans votre client peuvent ne pas correspondre à votre solde réel sur les serveurs.
 	</notification>
 	<notification name="LargePrimAgentIntersect">
-		Impossible de créer de grandes prims qui coupent d&apos;autres joueurs.  Réessayez une fois que les autres joueurs se seront déplacés.
+		Impossible de créer de grands prims qui rejoignent d&apos;autres résidents. Veuillez essayer à nouveau lorsque les autres résidents seront partis.
 	</notification>
 	<notification name="PreferenceChatClearLog">
 		Cela supprimera les journaux des conversations précédentes, ainsi que toute copie de sauvegarde de ce fichier.
