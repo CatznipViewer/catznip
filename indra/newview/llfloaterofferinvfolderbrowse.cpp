@@ -94,7 +94,11 @@ void LLFloaterInventoryOfferFolderBrowse::onCancel()
 
 void LLFloaterInventoryOfferFolderBrowse::onCloseAllFolders()
 {
+#ifndef CATZNIP
 	m_pInvPanel->getRootFolder()->closeAllFolders();
+#else
+	m_pInvPanel->getRootFolder()->collapseAllFolders();
+#endif // CATZNIP
 }
 
 void LLFloaterInventoryOfferFolderBrowse::onFilterEdit(const std::string& strFilter)
