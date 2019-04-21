@@ -29,6 +29,7 @@
 
 #include "llerror.h"
 #include "llerrorcontrol.h"
+#include "llsdutil.h"
 
 #include <cctype>
 #ifdef __GNUC__
@@ -89,9 +90,14 @@ namespace {
 		{
 			closelog();
 		}
-		
+
+        virtual bool enabled() override
+        {
+            return LLError::getEnabledLogTypesMask() & 0x01;
+        }
+        
 		virtual void recordMessage(LLError::ELevel level,
-									const std::string& message)
+									const std::string& message) override
 		{
 			int syslogPriority = LOG_CRIT;
 			switch (level) {
@@ -119,8 +125,13 @@ namespace {
 			{
 				LL_INFOS() << "Error setting log file to " << filename << LL_ENDL;
 			}
-			mWantsTime = true;
-            mWantsTags = true;
+            else
+            {
+                if (!LLError::getAlwaysFlush())
+                {
+                    mFile.sync_with_stdio(false);
+                }
+            }
 		}
 		
 		~RecordToFile()
@@ -128,12 +139,28 @@ namespace {
 			mFile.close();
 		}
 		
+        virtual bool enabled() override
+        {
+#ifdef LL_RELEASE_FOR_DOWNLOAD
+            return 1;
+#else
+            return LLError::getEnabledLogTypesMask() & 0x02;
+#endif
+        }
+        
 		bool okay() { return mFile.good(); }
 		
 		virtual void recordMessage(LLError::ELevel level,
-									const std::string& message)
+									const std::string& message) override
 		{
-			mFile << message << std::endl;
+            if (LLError::getAlwaysFlush())
+            {
+                mFile << message << std::endl;
+            }
+            else
+            {
+                mFile << message << "\n";
+            }
 		}
 	
 	private:
@@ -146,11 +173,16 @@ namespace {
 	public:
 		RecordToStderr(bool timestamp) : mUseANSI(ANSI_PROBE) 
 		{
-			mWantsTime = timestamp;
+            this->showMultiline(true);
 		}
 		
+        virtual bool enabled() override
+        {
+            return LLError::getEnabledLogTypesMask() & 0x04;
+        }
+        
 		virtual void recordMessage(LLError::ELevel level,
-					   const std::string& message)
+					   const std::string& message) override
 		{
 			if (ANSI_PROBE == mUseANSI)
 				mUseANSI = (checkANSI() ? ANSI_YES : ANSI_NO);
@@ -207,10 +239,21 @@ namespace {
 	class RecordToFixedBuffer : public LLError::Recorder
 	{
 	public:
-		RecordToFixedBuffer(LLLineBuffer* buffer) : mBuffer(buffer) { }
+		RecordToFixedBuffer(LLLineBuffer* buffer)
+            : mBuffer(buffer)
+            {
+                this->showMultiline(true);
+                this->showTags(false);
+                this->showLocation(false);
+            }
 		
+        virtual bool enabled() override
+        {
+            return LLError::getEnabledLogTypesMask() & 0x08;
+        }
+        
 		virtual void recordMessage(LLError::ELevel level,
-								   const std::string& message)
+								   const std::string& message) override
 		{
 			mBuffer->addLine(message);
 		}
@@ -224,10 +267,19 @@ namespace {
 	{
 	public:
 		RecordToWinDebug()
-		{}
+		{
+            this->showMultiline(true);
+            this->showTags(false);
+            this->showLocation(false);
+        }
 
+        virtual bool enabled() override
+        {
+            return LLError::getEnabledLogTypesMask() & 0x10;
+        }
+        
 		virtual void recordMessage(LLError::ELevel level,
-								   const std::string& message)
+								   const std::string& message) override
 		{
 			debugger_print(message);
 		}
@@ -368,6 +420,7 @@ namespace
 	public:
 		std::ostringstream messageStream;
 		bool messageStreamInUse;
+		std::string mFatalMessage;
 
 		void addCallSite(LLError::CallSite&);
 		void invalidateCallSites();
@@ -394,7 +447,7 @@ namespace
 			 i != callSites.end();
 			 ++i)
 		{
-			(*i)->invalidate();
+            (*i)->invalidate();
 		}
 		
 		callSites.clear();
@@ -410,10 +463,12 @@ namespace LLError
 	public:
 		virtual ~SettingsConfig();
 
-		bool                                mPrintLocation;
-
 		LLError::ELevel                     mDefaultLevel;
-		
+
+        bool 								mLogAlwaysFlush;
+
+        U32 								mEnabledLogTypesMask;
+
 		LevelMap                            mFunctionLevelMap;
 		LevelMap                            mClassLevelMap;
 		LevelMap                            mFileLevelMap;
@@ -452,8 +507,9 @@ namespace LLError
 
 	SettingsConfig::SettingsConfig()
 		: LLRefCount(),
-		mPrintLocation(false),
 		mDefaultLevel(LLError::LEVEL_DEBUG),
+		mLogAlwaysFlush(true),
+		mEnabledLogTypesMask(255),
 		mFunctionLevelMap(),
 		mClassLevelMap(),
 		mFileLevelMap(),
@@ -618,6 +674,8 @@ namespace
 		LLError::Settings::getInstance()->reset();
 		
 		LLError::setDefaultLevel(LLError::LEVEL_INFO);
+        LLError::setAlwaysFlush(true);
+        LLError::setEnabledLogTypesMask(0xFFFFFFFF);
 		LLError::setFatalFunction(LLError::crashAndLoop);
 		LLError::setTimeFunction(LLError::utcTime);
 
@@ -654,23 +712,22 @@ namespace LLError
 		commonInit(user_dir, app_dir, log_to_stderr);
 	}
 
-	void setPrintLocation(bool print)
-	{
-		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
-		s->mPrintLocation = print;
-	}
-
 	void setFatalFunction(const FatalFunction& f)
 	{
 		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
 		s->mCrashFunction = f;
 	}
 
-    FatalFunction getFatalFunction()
-    {
+	FatalFunction getFatalFunction()
+	{
 		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
-        return s->mCrashFunction;
-    }
+		return s->mCrashFunction;
+	}
+
+	std::string getFatalMessage()
+	{
+		return Globals::getInstance()->mFatalMessage;
+	}
 
 	void setTimeFunction(TimeFunction f)
 	{
@@ -689,6 +746,30 @@ namespace LLError
 	{
 		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
 		return s->mDefaultLevel;
+	}
+
+	void setAlwaysFlush(bool flush)
+	{
+		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
+		s->mLogAlwaysFlush = flush;
+	}
+
+	bool getAlwaysFlush()
+	{
+		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
+		return s->mLogAlwaysFlush;
+	}
+
+	void setEnabledLogTypesMask(U32 mask)
+	{
+		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
+		s->mEnabledLogTypesMask = mask;
+	}
+
+	U32 getEnabledLogTypesMask()
+	{
+		SettingsConfigPtr s = Settings::getInstance()->getSettingsConfig();
+		return s->mEnabledLogTypesMask;
 	}
 
 	void setFunctionLevel(const std::string& function_name, ELevel level)
@@ -769,9 +850,16 @@ namespace LLError
 		s->mTagLevelMap.clear();
 		s->mUniqueLogMessages.clear();
 		
-		setPrintLocation(config["print-location"]);
 		setDefaultLevel(decodeLevel(config["default-level"]));
-		
+        if (config.has("log-always-flush"))
+        {
+            setAlwaysFlush(config["log-always-flush"]);
+        }
+        if (config.has("enabled-log-types-mask"))
+        {
+            setEnabledLogTypesMask(config["enabled-log-types-mask"].asInteger());
+        }
+        
 		LLSD sets = config["settings"];
 		LLSD::array_const_iterator a, end;
 		for (a = sets.beginArray(), end = sets.endArray(); a != end; ++a)
@@ -792,11 +880,12 @@ namespace LLError
 namespace LLError
 {
 	Recorder::Recorder()
-	:	mWantsTime(false),
-		mWantsTags(false),
-		mWantsLevel(true),
-		mWantsLocation(false),
-		mWantsFunctionName(true)
+    	: mWantsTime(true)
+        , mWantsTags(true)
+        , mWantsLevel(true)
+        , mWantsLocation(true)
+        , mWantsFunctionName(true)
+        , mWantsMultiline(false)
 	{
 	}
 
@@ -833,6 +922,42 @@ namespace LLError
 		return mWantsFunctionName;
 	}
 
+	// virtual 
+	bool Recorder::wantsMultiline() 
+	{ 
+		return mWantsMultiline;
+	}
+
+    void Recorder::showTime(bool show)
+    {
+        mWantsTime = show;
+    }
+    
+    void Recorder::showTags(bool show)
+    {
+        mWantsTags = show;
+    }
+
+    void Recorder::showLevel(bool show)
+    {
+        mWantsLevel = show;
+    }
+
+    void Recorder::showLocation(bool show)
+    {
+        mWantsLocation = show;
+    }
+
+    void Recorder::showFunctionName(bool show)
+    {
+        mWantsFunctionName = show;
+    }
+
+    void Recorder::showMultiline(bool show)
+    {
+        mWantsMultiline = show;
+    }
+
 	void addRecorder(RecorderPtr recorder)
 	{
 		if (!recorder)
@@ -865,17 +990,15 @@ namespace LLError
 		s->mFileRecorder.reset();
 		s->mFileRecorderFileName.clear();
 		
-		if (file_name.empty())
+		if (!file_name.empty())
 		{
-			return;
-		}
-		
-		RecorderPtr recordToFile(new RecordToFile(file_name));
-		if (boost::dynamic_pointer_cast<RecordToFile>(recordToFile)->okay())
-		{
-			s->mFileRecorderFileName = file_name;
-			s->mFileRecorder = recordToFile;
-			addRecorder(recordToFile);
+            RecorderPtr recordToFile(new RecordToFile(file_name));
+            if (boost::dynamic_pointer_cast<RecordToFile>(recordToFile)->okay())
+            {
+                s->mFileRecorderFileName = file_name;
+                s->mFileRecorder = recordToFile;
+                addRecorder(recordToFile);
+            }
 		}
 	}
 	
@@ -886,14 +1009,12 @@ namespace LLError
 		removeRecorder(s->mFixedBufferRecorder);
 		s->mFixedBufferRecorder.reset();
 		
-		if (!fixedBuffer)
+		if (fixedBuffer)
 		{
-			return;
-		}
-		
-		RecorderPtr recordToFixedBuffer(new RecordToFixedBuffer(fixedBuffer));
-		s->mFixedBufferRecorder = recordToFixedBuffer;
-		addRecorder(recordToFixedBuffer);
+            RecorderPtr recordToFixedBuffer(new RecordToFixedBuffer(fixedBuffer));
+            s->mFixedBufferRecorder = recordToFixedBuffer;
+            addRecorder(recordToFixedBuffer);
+        }
 	}
 
 	std::string logFileName()
@@ -905,8 +1026,9 @@ namespace LLError
 
 namespace
 {
-    void addEscapedMessage(std::ostream& out, const std::string& message)
+    std::string escapedMessageLines(const std::string& message)
     {
+        std::ostringstream out;
         size_t written_out = 0;
         size_t all_content = message.length();
         size_t escape_char_index; // always relative to start of message
@@ -942,19 +1064,27 @@ namespace
             // write whatever was left
             out << message.substr(written_out, std::string::npos);
         }
+        return out.str();
     }
 
-	void writeToRecorders(const LLError::CallSite& site, const std::string& escaped_message, bool show_location = true, bool show_time = true, bool show_tags = true, bool show_level = true, bool show_function = true)
+	void writeToRecorders(const LLError::CallSite& site, const std::string& message)
 	{
 		LLError::ELevel level = site.mLevel;
 		LLError::SettingsConfigPtr s = LLError::Settings::getInstance()->getSettingsConfig();
-	
+
+        std::string escaped_message;
+        
 		for (Recorders::const_iterator i = s->mRecorders.begin();
 			i != s->mRecorders.end();
 			++i)
 		{
 			LLError::RecorderPtr r = *i;
-			
+
+            if (!r->enabled())
+            {
+                continue;
+            }
+            
 			std::ostringstream message_stream;
 
 			if (r->wantsTime() && s->mTimeFunction != NULL)
@@ -963,7 +1093,7 @@ namespace
 			}
             message_stream << " ";
             
-			if (show_level && r->wantsLevel())
+			if (r->wantsLevel())
             {
 				message_stream << site.mLevelString;
             }
@@ -975,19 +1105,30 @@ namespace
 			}
             message_stream << " ";
 
-            if (r->wantsLocation() || level == LLError::LEVEL_ERROR || s->mPrintLocation)
+            if (r->wantsLocation() || level == LLError::LEVEL_ERROR)
             {
                 message_stream << site.mLocationString;
             }
             message_stream << " ";
 
-			if (show_function && r->wantsFunctionName())
+			if (r->wantsFunctionName())
 			{
 				message_stream << site.mFunctionString;
 			}
             message_stream << " : ";
 
-			message_stream << escaped_message;
+            if (r->wantsMultiline())
+            {
+                message_stream << message;
+            }
+            else
+            {
+                if (escaped_message.empty())
+                {
+                    escaped_message = escapedMessageLines(message);
+                }
+                message_stream << escaped_message;
+            }
 
 			r->recordMessage(level, message_stream.str());
 		}
@@ -1088,6 +1229,7 @@ namespace {
 
 namespace LLError
 {
+
 	bool Log::shouldLog(CallSite& site)
 	{
 		LogLock lock;
@@ -1230,10 +1372,11 @@ namespace LLError
 			delete out;
 		}
 
-		std::ostringstream message_stream;
 
 		if (site.mPrintOnce)
 		{
+            std::ostringstream message_stream;
+
 			std::map<std::string, unsigned int>::iterator messageIter = s->mUniqueLogMessages.find(message);
 			if (messageIter != s->mUniqueLogMessages.end())
 			{
@@ -1253,15 +1396,19 @@ namespace LLError
 				message_stream << "ONCE: ";
 				s->mUniqueLogMessages[message] = 1;
 			}
+            message_stream << message;
+            message = message_stream.str();
 		}
 		
-		addEscapedMessage(message_stream, message);
+		writeToRecorders(site, message);
 
-		writeToRecorders(site, message_stream.str());
-		
-		if (site.mLevel == LEVEL_ERROR  &&  s->mCrashFunction)
+		if (site.mLevel == LEVEL_ERROR)
 		{
-			s->mCrashFunction(message_stream.str());
+			g->mFatalMessage = message;
+			if (s->mCrashFunction)
+			{
+				s->mCrashFunction(message);
+			}
 		}
 	}
 }
@@ -1553,18 +1700,17 @@ namespace LLError
 
 bool debugLoggingEnabled(const std::string& tag)
 {
-    const char* tags[] = {tag.c_str()};
-    ::size_t tag_count = 1;
-    LLError::CallSite _site(LLError::LEVEL_DEBUG, __FILE__, __LINE__, 
-                            typeid(_LL_CLASS_TO_LOG), __FUNCTION__, false, tags, tag_count);
-    if (LL_UNLIKELY(_site.shouldLog()))
-    {
-        return true;
-    }
-    else
+    LogLock lock;
+    if (!lock.ok())
     {
         return false;
     }
+        
+    LLError::SettingsConfigPtr s = LLError::Settings::getInstance()->getSettingsConfig();
+    LLError::ELevel level = LLError::LEVEL_DEBUG;
+    bool res = checkLevelMap(s->mTagLevelMap, tag, level);
+    return res;
 }
+
 
 

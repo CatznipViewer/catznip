@@ -480,8 +480,7 @@ bool idle_startup()
 			if (!found_template)
 			{
 				message_template_path =
-					gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE,
-												   "../Resources/app_settings",
+					gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,
 												   "message_template.msg");
 				found_template = LLFile::fopen(message_template_path.c_str(), "r");		/* Flawfinder: ignore */
 			}		
@@ -793,10 +792,6 @@ bool idle_startup()
 				}
 			}
 			display_startup();
-			if (gViewerWindow->getSystemUIScaleFactorChanged())
-			{
-				LLViewerWindow::showSystemUIScaleFactorChanged();
-			}
 			LLStartUp::setStartupState( STATE_LOGIN_WAIT );		// Wait for user input
 		}
 		else
@@ -2397,6 +2392,7 @@ void register_viewer_callbacks(LLMessageSystem* msg)
 	msg->setHandlerFuncFast(_PREHASH_NameValuePair,			process_name_value);
 	msg->setHandlerFuncFast(_PREHASH_RemoveNameValuePair,	process_remove_name_value);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAnimation,		process_avatar_animation);
+	msg->setHandlerFuncFast(_PREHASH_ObjectAnimation,		process_object_animation);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAppearance,		process_avatar_appearance);
 	msg->setHandlerFuncFast(_PREHASH_CameraConstraint,		process_camera_constraint);
 	msg->setHandlerFuncFast(_PREHASH_AvatarSitResponse,		process_avatar_sit_response);

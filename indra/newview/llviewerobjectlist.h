@@ -70,7 +70,7 @@ public:
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
 	bool findOwnObjects(const LLUUID& region_id, const LLVector3& region_pos, std::list<LLViewerObject*>& object_list) const;
 // [/SL:KB]
-	LLViewerObject *createObjectViewer(const LLPCode pcode, LLViewerRegion *regionp); // Create a viewer-side object
+	LLViewerObject *createObjectViewer(const LLPCode pcode, LLViewerRegion *regionp, S32 flags = 0); // Create a viewer-side object
 	LLViewerObject *createObjectFromCache(const LLPCode pcode, LLViewerRegion *regionp, const LLUUID &uuid, const U32 local_id);
 	LLViewerObject *createObject(const LLPCode pcode, LLViewerRegion *regionp,
 								 const LLUUID &uuid, const U32 local_id, const LLHost &sender);
