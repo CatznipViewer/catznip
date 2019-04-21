@@ -42,6 +42,7 @@
 
 #include "lldiriterator.h"
 #include "stringize.h"
+#include "llstring.h"
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/range/begin.hpp>
@@ -349,9 +350,9 @@ const std::string &LLDir::getSnapshotDir() const
 void LLDir::setDumpDir( const std::string& path )
 {
     LLDir::sDumpDir = path;
-    if (! sDumpDir.empty() && sDumpDir.rbegin() == mDirDelimiter.rbegin() )
+    if (LLStringUtil::endsWith(sDumpDir, mDirDelimiter))
     {
-        sDumpDir.erase(sDumpDir.size() -1);
+        sDumpDir.erase(sDumpDir.size() - mDirDelimiter.size());
     }
 }
 
@@ -417,11 +418,11 @@ std::string LLDir::buildSLOSCacheDir() const
 	else
 	{
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.4
-#if ADDRESS_SIZE == 64
+#if LL_WINDOWS && ADDRESS_SIZE == 64
 		res = add(getOSCacheDir(), "Catznip64");
 #else
 		res = add(getOSCacheDir(), "Catznip");
-#endif
+#endif // LL_WINDOWS && ADDRESS_SIZE == 64
 // [/SL:KB]
 //		res = add(getOSCacheDir(), "SecondLife");
 	}

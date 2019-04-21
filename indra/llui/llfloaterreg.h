@@ -106,12 +106,12 @@ public:
 	}
 	
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
-	template <class T>
+	template <typename T, typename = typename std::enable_if<std::is_base_of<LLModalDialog, T>::value, T>::type>
 	static LLFloater* buildModal(const LLSD& key)
 	{
 		LLSD key_copy = key;
 		key_copy.erase("modal");
-		LLModalDialog* floater = new T(key_copy, key["modal"].asBoolean());
+		LLFloater* floater = new T(key_copy, key["modal"].asBoolean());
 		return floater;
 	}
 // [/SL:KB]

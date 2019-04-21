@@ -13,6 +13,7 @@
 		<menu_item_call label="Управление камерой..." name="Camera Controls"/>
 		<menu label="Движение" name="Movement">
 			<menu_item_call label="Сесть" name="Sit Down Here"/>
+			<menu_item_call label="Встать" name="Stand up"/>
 			<menu_item_check label="Полет" name="Fly"/>
 			<menu_item_check label="Всегда бегать" name="Always Run"/>
 			<menu_item_call label="Остановить анимацию" name="Stop Animating My Avatar"/>
@@ -181,6 +182,7 @@
 		<menu_item_call label="Жалоба" name="Report Abuse"/>
 		<menu_item_call label="Сообщить об ошибке" name="Report Bug"/>
 		<menu_item_call label="Столкновения, толчки и удары" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_call label="Проверить наличие обновлений" name="Check for Updates"/>
 		<menu_item_call label="О [APP_NAME]" name="About Second Life"/>
 	</menu>
 	<menu label="Дополнительно" name="Advanced">

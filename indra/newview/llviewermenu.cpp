@@ -10385,7 +10385,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedCheckShowObjectUpdates(), "Advanced.CheckShowObjectUpdates");
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 	commit.add("Advanced.CheckViewerUpdates", boost::bind(&handle_updater_check));
-	// [/SL:KB]
+// [/SL:KB]
 //	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");

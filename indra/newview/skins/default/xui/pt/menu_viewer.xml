@@ -13,6 +13,7 @@
 		<menu_item_call label="Controles da câmera..." name="Camera Controls"/>
 		<menu label="Movimentos" name="Movement">
 			<menu_item_call label="Sentar" name="Sit Down Here"/>
+			<menu_item_call label="Ficar de pé" name="Stand up"/>
 			<menu_item_check label="Voar" name="Fly"/>
 			<menu_item_check label="Correr sempre" name="Always Run"/>
 			<menu_item_call label="Parar minha animação" name="Stop Animating My Avatar"/>
@@ -184,6 +185,7 @@
 		<menu_item_call label="Denunciar abuso" name="Report Abuse"/>
 		<menu_item_call label="Relatar bug" name="Report Bug"/>
 		<menu_item_call label="Bumps, Pushes &amp; Hits" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_call label="Verificar atualizações" name="Check for Updates"/>
 		<menu_item_call label="Sobre [APP_NAME]" name="About Second Life"/>
 	</menu>
 	<menu label="Avançado" name="Advanced">

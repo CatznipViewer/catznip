@@ -46,6 +46,7 @@
 #include "llfloateravatarpicker.h"
 #include "llfloateravatarrendersettings.h"
 #include "llfloateravatartextures.h"
+#include "llfloaterbanduration.h"
 #include "llfloaterbigpreview.h"
 #include "llfloaterbeacons.h"
 // [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
@@ -258,6 +259,7 @@ void LLViewerFloaterReg::registerFloaters()
 //	LLFloaterReg::add("avatar_render_settings", "floater_avatar_render_settings.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatarRenderSettings>);
 	LLFloaterReg::add("avatar_textures", "floater_avatar_textures.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatarTextures>);
 
+	LLFloaterReg::add("ban_duration", "floater_ban_duration.xml", &LLFloaterReg::build<LLFloaterBanDuration>);
 	LLFloaterReg::add("beacons", "floater_beacons.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBeacons>);
 // [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
 	LLFloaterReg::add("blocked", "floater_blocked.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBlocked>);

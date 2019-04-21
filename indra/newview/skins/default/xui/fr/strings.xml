@@ -39,7 +39,7 @@
 	</string>
 	<string name="AboutHeader">
 [APP_NAME] [VIEWER_VERSION_STR] [BUILD_DATE] [BUILD_TIME] ([ADDRESS_SIZE]bit) ([CHANNEL])
-[[VIEWER_RELEASE_NOTES_URL] [Notes de version]]
+[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
 		Configuration de la construction [BUILD_CONFIG]
@@ -2260,6 +2260,30 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 	</string>
 	<string name="RegionInfoListTypeBannedAgents">
 		Toujours interdit
+	</string>
+	<string name="RegionInfoAllEstates">
+		tous les domaines
+	</string>
+	<string name="RegionInfoManagedEstates">
+		domaines gérés
+	</string>
+	<string name="RegionInfoThisEstate">
+		ce domaine
+	</string>
+	<string name="AndNMore">
+		et [EXTRA_COUNT] plus
+	</string>
+	<string name="RegionInfoAllEstates">
+		tous les domaines
+	</string>
+	<string name="RegionInfoManagedEstates">
+		domaines gérés
+	</string>
+	<string name="RegionInfoThisEstate">
+		ce domaine
+	</string>
+	<string name="AndNMore">
+		et [EXTRA_COUNT] plus
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Mémoire des scripts de parcelles
