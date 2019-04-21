@@ -39,7 +39,7 @@
 
 class LLAvatarName;
 class LLTextBox;
-class LLNameBox;
+//class LLNameBox;
 class LLViewerInventoryItem;
 
 class LLPanelPermissions : public LLPanel
@@ -88,9 +88,12 @@ protected:
 	void disableAll();
 	
 private:
-	LLNameBox*		mLabelGroupName;		// group name
+//	LLNameBox*		mLabelGroupName;		// group name
 	LLTextBox*		mLabelOwnerName;
 	LLTextBox*		mLabelCreatorName;
+// [SL:KB]
+	LLTextBox*      mLabelGroupName = nullptr;
+// [/SL:KB]
 	LLUUID			mCreatorID;
 	LLUUID			mOwnerID;
 	LLUUID			mLastOwnerID;
