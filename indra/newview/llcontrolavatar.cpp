@@ -338,6 +338,9 @@ LLControlAvatar *LLControlAvatar::createControlAvatar(LLVOVolume *obj)
 void LLControlAvatar::markForDeath()
 {
     mMarkedForDeath = true;
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.0
+	mRootVolp = nullptr;
+// [/SL:KB]
 }
 
 void LLControlAvatar::idleUpdate(LLAgent &agent, const F64 &time)
