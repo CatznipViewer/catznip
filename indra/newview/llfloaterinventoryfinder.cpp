@@ -152,6 +152,17 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	return TRUE;
 }
 
+// virtual
+void LLFloaterInventoryFinder::closeFloater(bool fAppQuitting)
+{
+	if ( (!fAppQuitting) && (gSavedSettings.getBOOL("InventoryResetFilterOnFinderClose")) )
+	{
+		m_pPanelMainInventory->resetFilters();
+	}
+
+	LLFloater::closeFloater(fAppQuitting);
+}
+
 // ====================================================================================
 // LLFloaterInventoryFinder member functions
 //

@@ -60,6 +60,10 @@ public:
 		// filename for it's toggleable menu
 		Optional<std::string>	menu_filename;
 		Optional<EMenuPosition, MenuPositions>	position;
+// [SL:KB] - Patch: Control-MenuButton| Checked: Catznip-6.1
+		Optional<S32>           offset_x;
+		Optional<S32>           offset_y;
+// [/SL:KB]
 	
 		Params();
 	};
@@ -100,6 +104,10 @@ private:
 	EMenuPosition			mMenuPosition;
 	S32						mX;
 	S32						mY;
+// [SL:KB] - Patch: Control-MenuButton| Checked: Catznip-6.1
+	S32                     mOffsetX = 0;
+	S32                     mOffsetY = 0;
+// [/SL:KB]
 	bool					mOwnMenu; // true if we manage the menu lifetime
 };
 

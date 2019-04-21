@@ -158,6 +158,16 @@
              top_delta="0"
              width="60" />
 
+            <check_box
+             control_name="InventoryResetFilterOnFinderClose"
+             height="16"
+             label="Reset filter on close"
+             layout="topleft"
+             left="8"
+             name="check_close_resets_filter"
+             top_pad="18"
+             width="144" />
+
         </panel>
 
         <panel
@@ -270,7 +280,7 @@
              name="check_notecard"
              top_delta="2"
              width="126" />
-            
+
             <icon
              height="16"
              image_name="Inv_Object"
@@ -356,7 +366,7 @@
              name="check_texture"
              top_delta="2"
              width="126" />
-            
+
             <button
              commit_callback.function="Filter.SelectAllTypes"
              follows="left|top"
@@ -389,7 +399,7 @@
          name="By Date"
          top="5"
          width="290">
-            
+
             <!-- Since logoff -->
             <check_box
              height="16"
@@ -399,7 +409,7 @@
              name="check_since_logoff"
              top="12"
              width="144" />
-            
+
             <!-- Older than X [hours|days] -->
             <check_box
              height="16"
@@ -442,7 +452,7 @@
                  name="days"
                  value="days" />
             </combo_box>
-            
+
             <!-- Newer than X [hours|days] -->
             <check_box
              height="16"
@@ -553,7 +563,7 @@
                  value="days" />
             </combo_box>
         </panel>
-        
+
     </tab_container>
 
     <check_box
@@ -583,7 +593,7 @@
      top_delta="-8"
      width="27" />
 
-	<button
+    <button
      commit_callback.function="Filter.Reset"
      follows="top|right"
      height="20"

@@ -133,7 +133,11 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 {
 	// Menu Callbacks (non contex menus)
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLPanelMainInventory::doToSelected, this, _2));
-	mCommitCallbackRegistrar.add("Inventory.CloseAllFolders", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+	mCommitCallbackRegistrar.add("Inventory.CollapseAllFolders", boost::bind(&LLPanelMainInventory::collapseAllFolders, this));
+	mCommitCallbackRegistrar.add("Inventory.CollapseToFolders", boost::bind(&LLPanelMainInventory::collapseToFolders, this));
+// [/SL:KB]
+//	mCommitCallbackRegistrar.add("Inventory.CloseAllFolders", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
 //	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLPanelMainInventory::doCreate, this, _2));
@@ -281,10 +285,9 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 
 	mGearMenuButton = getChild<LLMenuButton>("options_gear_btn");
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-3.3
+	mCollapseMenuButton = getChild<LLMenuButton>("collapse_flyout_btn");
 	mAddMenuButton = getChild<LLMenuButton>("add_btn");
-// [/SL:KB]
-// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
 	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
 // [/SL:KB]
 
@@ -425,10 +428,22 @@ void LLPanelMainInventory::doToSelected(const LLSD& userdata)
 	getPanel()->doToSelected(userdata);
 }
 
-void LLPanelMainInventory::closeAllFolders()
+//void LLPanelMainInventory::closeAllFolders()
+//{
+//	getPanel()->getRootFolder()->closeAllFolders();
+//}
+
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+void LLPanelMainInventory::collapseAllFolders()
 {
-	getPanel()->getRootFolder()->closeAllFolders();
+	getPanel()->getRootFolder()->collapseAllFolders();
 }
+
+void LLPanelMainInventory::collapseToFolders()
+{
+	getPanel()->getRootFolder()->collapseToFolders();
+}
+// [/SL:KB]
 
 //void LLPanelMainInventory::newWindow()
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-3.2
@@ -887,7 +902,7 @@ LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 		pInvPanel = mSpareInvPanel;
 		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
 		pInvPanel->getFilter().resetDefault();
-		pInvPanel->getRootFolder()->closeAllFolders();
+		pInvPanel->getRootFolder()->collapseAllFolders();
 		mSpareInvPanel = NULL;
 	}
 
@@ -1567,7 +1582,7 @@ void LLPanelMainInventory::initListCommandsHandlers()
 {
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2)
-	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
+	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::collapseAllFolders, this));
 	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 // [/SL:KB]
 //	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
@@ -1593,10 +1608,14 @@ void LLPanelMainInventory::initListCommandsHandlers()
 	mSortMenuButton->setMenu(pToggleMenu);
 // [/SL:KB]
 
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-3.3
 	pToggleMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_gear_default.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	mMenuGearHandle = pToggleMenu->getHandle();
 	mGearMenuButton->setMenu(pToggleMenu);
+
+	pToggleMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_collapse.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	mMenuCollapseHandle = pToggleMenu->getHandle();
+	mCollapseMenuButton->setMenu(pToggleMenu);
 
 	pToggleMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	mMenuAddHandle = pToggleMenu->getHandle();
@@ -1740,10 +1759,20 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 	{
 		resetFilters();
 	}
-	if (command_name == "close_folders")
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+	if (command_name == "collapse_all_folders")
 	{
-		closeAllFolders();
+		collapseAllFolders();
 	}
+	else if (command_name == "collapse_to_folders")
+	{
+		collapseToFolders();
+	}
+// [/SL:KB]
+//	if (command_name == "close_folders")
+//	{
+//		closeAllFolders();
+//	}
 	if (command_name == "empty_trash")
 	{
 		const std::string notification = "ConfirmEmptyTrash";

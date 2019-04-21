@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  can_minimize="false"
- height="475"
+ height="495"
  help_topic="inventory_finder"
  layout="topleft"
  name="Inventory Finder"
@@ -159,7 +159,7 @@
          mouse_opaque="false"
          name="divisor1"
          top_pad="7" />
-			 
+
         <panel
          follows="all"
          height="155"
@@ -271,7 +271,7 @@
              name="check_notecard"
              top_delta="2"
              width="126" />
-            
+
             <icon
              height="16"
              image_name="Inv_Object"
@@ -357,7 +357,7 @@
              name="check_texture"
              top_delta="2"
              width="126" />
-            
+
             <button
              commit_callback.function="Filter.SelectAllTypes"
              follows="left|top"
@@ -393,7 +393,7 @@
          mouse_opaque="false"
          name="divisor2"
          top_pad="7" />
-			 
+
         <panel
          follows="all"
          height="103"
@@ -403,7 +403,7 @@
          name="By Date"
          top_pad="-3"
          width="290">
-            
+
             <!-- Since logoff -->
             <check_box
              height="16"
@@ -413,7 +413,7 @@
              name="check_since_logoff"
              top="12"
              width="144" />
-            
+
             <!-- Older than X [hours|days] -->
             <check_box
              height="16"
@@ -456,7 +456,7 @@
                  name="days"
                  value="days" />
             </combo_box>
-            
+
             <!-- Newer than X [hours|days] -->
             <check_box
              height="16"
@@ -564,7 +564,7 @@
                  value="days" />
             </combo_box>
         </panel>
-        
+
     <view_border
      bevel_style="none"
      border_thickness="1"
@@ -576,7 +576,7 @@
      mouse_opaque="false"
      name="divisor3"
      top_pad="7" />
-			 
+
     <check_box
      height="16"
      label="Always show folders"
@@ -593,8 +593,17 @@
      name="check_show_links"
      top_pad="3"
      width="144" />
+    <check_box
+     control_name="InventoryResetFilterOnFinderClose"
+     height="16"
+     label="Reset filter on close"
+     layout="topleft"
+     left="17"
+     name="check_close_resets_filter"
+     top_pad="3"
+     width="144" />
 
-	<button
+    <button
      commit_callback.function="Filter.Reset"
      follows="top|right"
      height="20"

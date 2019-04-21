@@ -2603,6 +2603,29 @@ void LLOpenFilteredFolders::doFolder(LLFolderViewFolder* folder)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+void LLCollapseToFolders::doItem(LLFolderViewItem* pItem)
+{
+	// We only want to see folders so each item that passed the current filter asks its immediate parent to close
+	if (pItem->passedFilter())
+	{
+		LLFolderViewFolder* pParentFolder = pItem->getParentFolder();
+		if (pParentFolder->isOpen())
+		{
+			// NOTE: we don't want one or two items under the Clothing folder causing it to collapse so we make a special
+			//       (convenience) exception for user or system protected folders that have at least 2 folders in them
+			LLInvFVBridge* pItemBridge = pParentFolder->getViewModelItem<LLInvFVBridge>();
+			if ( (!pItemBridge) ||
+				 (!LLFolderType::lookupIsProtectedType(pItemBridge->getPreferredType(), pItemBridge->getUUID())) ||
+				 (pParentFolder->getFoldersCount() < 2) )
+			{
+				pItem->getParentFolder()->setOpenArrangeRecursively(false, LLFolderViewFolder::RECURSE_NO);
+			}
+		}
+	}
+}
+// [/SL:KB]
+
 void LLSelectFirstFilteredItem::doItem(LLFolderViewItem *item)
 {
 	if (item->passedFilter() && !mItemSelected)
