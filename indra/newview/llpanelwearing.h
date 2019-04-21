@@ -184,4 +184,11 @@ private:
 	bool							mIsInitialized;
 };
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.5
+namespace LLListContextMenuUtil
+{
+	LLListContextMenu* createWearingContextMenu();
+}
+// [/SL:KB]
+
 #endif //LL_LLPANELWEARING_H

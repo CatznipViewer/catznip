@@ -140,7 +140,11 @@ bool LLOutfitsView::onIdle()
 
 		mInvPanel->getFilter().markDefault();
 		mInvPanel->getRootFolder()->setAutoSelectOverride(true);
+#ifndef CATZNIP
 		mInvPanel->getRootFolder()->closeAllFolders();
+#else
+		mInvPanel->getRootFolder()->collapseAllFolders;
+#endif // CATZNIP
 		highlightBaseOutfit();
 
 		pInvPanelPlaceholder->setVisible(FALSE);
@@ -174,7 +178,11 @@ void LLOutfitsView::onOpen(const LLSD& /*info*/)
 		// Select and open the current base outfit
 		if (mInvPanel)
 		{
+#ifndef CATZNIP
 			mInvPanel->getRootFolder()->closeAllFolders();
+#else
+			mInvPanel->getRootFolder()->collapseAllFolders;
+#endif // CATZNIP
 			highlightBaseOutfit();
 		}
 		LLOutfitObserver::instance().addBOFChangedCallback(boost::bind(&LLOutfitsView::highlightBaseOutfit, this));

@@ -124,6 +124,17 @@ void LLPanelOutfitsInventory::onOpen(const LLSD& key)
 		mInitialized = true;
 	}
 
+// [SL:KB] - Patch: Appearance-QuickPrefsWearing | Checked: Catznip-5.5
+	if (key.asStringRef() == "my_outfits")
+	{
+		mAppearanceTabs->selectTabPanel(mMyOutfitsPanel);
+	}
+	else if (key.asStringRef() == "current_outfit")
+	{
+		mAppearanceTabs->selectTabPanel(mCurrentOutfitPanel);
+	}
+// [/SL:KB]
+
 	// Make sure we know which tab is selected, update the filter,
 	// and update verbs.
 	onTabChange();
