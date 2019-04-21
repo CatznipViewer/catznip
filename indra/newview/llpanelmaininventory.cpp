@@ -515,12 +515,6 @@ void LLPanelMainInventory::shareWithAvatars()
 	LLAvatarActions::shareWithAvatars(getPanel());
 }
 // [/SL:KB]
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
-	else if (command_name == "show_derezzed_objects")
-	{
-		gSavedSettings.setBOOL("ShowDerezzedInventory", !gSavedSettings.getBOOL("ShowDerezzedInventory"));
-	}
-// [/SL:KB]
 
 void LLPanelMainInventory::onSelectSearchType()
 {
@@ -1426,6 +1420,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		mFilterEditor->setText(item_name);
 		mFilterEditor->setFocus(TRUE);
 	}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.4
+	else if (command_name == "show_derezzed_objects")
+	{
+		gSavedSettings.setBOOL("ShowDerezzedInventory", !gSavedSettings.getBOOL("ShowDerezzedInventory"));
+	}
+// [/SL:KB]
 
 	if (command_name == "replace_links")
 	{
