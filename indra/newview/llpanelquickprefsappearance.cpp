@@ -33,6 +33,8 @@
 #include "llcategoryitemslist.h"
 #ifdef CATZNIP
 #include "llfloaterofferinvfolderbrowse.h"
+#else
+#include "llinventorypanel.h"
 #endif // CATZNIP
 
 // Render Others As panel
@@ -341,7 +343,11 @@ void LLQuickPrefsInventoryPanel::onShowInInventory()
 	const LLUUID& idFolder = m_pItemsList->getFolderId();
 	if (idFolder.notNull())
 	{
+#ifndef CATZNIP
+		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, idFolder, TRUE);
+#else
 		show_item(idFolder, EShowItemOptions::TAKE_FOCUS_YES);
+#endif // CATZNIP
 	}
 }
 
