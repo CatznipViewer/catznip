@@ -33,6 +33,8 @@
 #include "llcategoryitemslist.h"
 #ifdef CATZNIP
 #include "llfloaterofferinvfolderbrowse.h"
+#else
+#include "llinventorypanel.h"
 #endif // CATZNIP
 
 // Render Others As panel
@@ -41,6 +43,8 @@
 
 // Wearing panel
 #include "llfiltereditor.h"
+#include "llfloatersidepanelcontainer.h"
+#include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
@@ -260,6 +264,9 @@ BOOL LLQuickPrefsInventoryPanel::postBuild()
 	m_pItemsList = findChild<LLCategoryItemsList>("items_list");
 	m_pItemsList->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onFolderChanged, this));
 
+	m_pShowInInventoryBtn = findChild<LLButton>("open_inv_folder_btn");
+	m_pShowInInventoryBtn->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onShowInInventory, this));
+
 	m_pFolderBrowseBtn = findChild<LLButton>("inv_folder_btn");
 	m_pFolderBrowseBtn->setCommitCallback(boost::bind(&LLQuickPrefsInventoryPanel::onBrowseFolder, this));
 
@@ -274,6 +281,7 @@ void LLQuickPrefsInventoryPanel::onVisibilityChange(BOOL fVisible)
 		if (!isInitialized())
 		{
 			m_pItemsList->setFolderId(LLUUID(gSavedSettings.getString("QuickPrefsInventoryFolder")));
+			m_pShowInInventoryBtn->setEnabled(m_pItemsList->getFolderId().notNull());
 			onFolderChanged();
 
 			setInitialized();
@@ -300,6 +308,7 @@ void LLQuickPrefsInventoryPanel::onBrowseFolder()
 void LLQuickPrefsInventoryPanel::onBrowseFolderCb(const LLSD& sdData)
 {
 	m_pItemsList->setFolderId(sdData["uuid"].asUUID());
+	m_pShowInInventoryBtn->setEnabled(m_pItemsList->getFolderId().notNull());
 }
 
 void LLQuickPrefsInventoryPanel::onFilterEdit(std::string strFilter)
@@ -327,6 +336,19 @@ void LLQuickPrefsInventoryPanel::onFolderChanged()
 		m_pFolderBrowseBtn->setLabel(getString("folder_select_label"));
 	}
 	gSavedSettings.setString("QuickPrefsInventoryFolder", idFolder.asString());
+}
+
+void LLQuickPrefsInventoryPanel::onShowInInventory()
+{
+	const LLUUID& idFolder = m_pItemsList->getFolderId();
+	if (idFolder.notNull())
+	{
+#ifndef CATZNIP
+		LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, idFolder, TRUE);
+#else
+		show_item(idFolder, EShowItemOptions::TAKE_FOCUS_YES);
+#endif // CATZNIP
+	}
 }
 
 void LLQuickPrefsInventoryPanel::onSortOrderChanged(const LLSD& sdParam)
@@ -366,6 +388,7 @@ LLQuickPrefsWearingPanel::LLQuickPrefsWearingPanel()
 	mEnableCallbackRegistrar.add("Inventory.CheckSort", boost::bind(&LLQuickPrefsWearingPanel::onSortOrderCheck, this, _2));
 
 	m_pCofObserver = new LLInventoryCategoriesObserver();
+	m_pListContextMenu = LLListContextMenuUtil::createWearingContextMenu();
 }
 
 LLQuickPrefsWearingPanel::~LLQuickPrefsWearingPanel()
@@ -374,6 +397,8 @@ LLQuickPrefsWearingPanel::~LLQuickPrefsWearingPanel()
 		gInventory.removeObserver(m_pCofObserver);
 	delete m_pCofObserver;
 	m_pCofObserver = nullptr;
+	delete m_pListContextMenu;
+	m_pListContextMenu = nullptr;
 }
 
 // virtual
@@ -382,10 +407,13 @@ BOOL LLQuickPrefsWearingPanel::postBuild()
 	if (m_idCOF.isNull())
 		m_idCOF = gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
 
+	getChild<LLButton>("wearning_panel_btn")->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onShowWearingPanel));
+
 	m_pFilterEditor = getChild<LLFilterEditor>("filter_editor");
 	m_pFilterEditor->setCommitCallback(boost::bind(&LLQuickPrefsWearingPanel::onFilterEdit, this, _2));
 
 	m_pWornItemsList = getChild<LLWornItemsList>("cof_items_list");
+	m_pWornItemsList->setRightMouseDownCallback(boost::bind(&LLQuickPrefsWearingPanel::onItemRightClick, this, _1, _2, _3));
 	m_pWornItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("QuickPrefsWearingSort"));
 
 	return LLQuickPrefsPanel::postBuild();
@@ -399,6 +427,27 @@ void LLQuickPrefsWearingPanel::onFilterEdit(std::string strFilter)
 	if (strFilter != m_pWornItemsList->getFilterSubString())
 	{
 		m_pWornItemsList->setFilterSubString(strFilter);
+	}
+}
+
+void LLQuickPrefsWearingPanel::onItemRightClick(LLUICtrl* pCtrl, S32 x, S32 y)
+{
+	LLWearableItemsList* pWearableList = dynamic_cast<LLWearableItemsList*>(pCtrl);
+	if (!pWearableList)
+		return;
+
+	uuid_vec_t idItems;
+	pWearableList->getSelectedUUIDs(idItems);
+	m_pListContextMenu->show(pWearableList, idItems, x, y);
+}
+
+void LLQuickPrefsWearingPanel::onShowWearingPanel()
+{
+	LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "current_outfit"));
+	if (LLFloater* pAppearanceFloater = LLFloaterReg::findInstance("appearance"))
+	{
+		if (pAppearanceFloater->getVisible())
+			pAppearanceFloater->setFrontmost(true);
 	}
 }
 
@@ -447,6 +496,8 @@ void LLQuickPrefsWearingPanel::onVisibilityChange(BOOL fVisible)
 
 			gInventory.addObserver(m_pCofObserver);
 			m_pCofObserver->addCategory(m_idCOF, boost::bind(&LLQuickPrefsWearingPanel::onCOFChanged, this));
+
+			m_ComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLWornItemsList::setNeedsRefresh, m_pWornItemsList, true));
 
 			setInitialized();
 		}

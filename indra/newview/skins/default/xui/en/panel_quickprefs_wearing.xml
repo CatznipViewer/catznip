@@ -20,6 +20,19 @@
 	 tool_tip="Show sorting options"
 	 top="0"
 	 width="31" />
+  <button
+	 follows="top|left"
+	 height="25"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_overlay="Command_Appearance_Icon"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 layout="topleft"
+	 left_pad="1"
+	 name="wearning_panel_btn"
+	 tool_tip="Open wearing panel"
+	 top="0"
+	 width="31" />
 	<button
 	 enabled="false"
 	 follows="top|left"
@@ -32,7 +45,7 @@
 	 left_pad="1"
 	 name="inv_folder_btn"
 	 top="0"
-	 width="135" />
+	 width="103" />
 	<icon
 	 follows="top|left|right"
 	 height="25"

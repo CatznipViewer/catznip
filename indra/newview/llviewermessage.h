@@ -284,6 +284,9 @@ public:
 private:
 
 	void initRespondFunctionMap();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	std::string getSanitizedName() const;
+// [/SL:KB]
 	std::string getSanitizedDescription();
 
 	typedef boost::function<bool (const LLSD&, const LLSD&)> respond_function_t;

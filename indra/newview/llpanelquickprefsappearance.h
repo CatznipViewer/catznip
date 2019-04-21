@@ -17,6 +17,7 @@
 #pragma once
 
 #include "llfloaterquickprefs.h"
+#include "lllistcontextmenu.h"
 
 // ====================================================================================
 // Foward declarations
@@ -115,6 +116,7 @@ public:
 	void onBrowseFolderCb(const LLSD& sdData);
 	void onFilterEdit(std::string strFilter);
 	void onFolderChanged();
+	void onShowInInventory();
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
 
@@ -122,6 +124,7 @@ public:
 	* Member variables
 	*/
 protected:
+	LLButton*            m_pShowInInventoryBtn = nullptr;
 	LLButton*            m_pFolderBrowseBtn = nullptr;
 	LLFilterEditor*      m_pFilterEditor = nullptr;
 	LLHandle<LLFloater>  m_BrowseFloaterHandle;
@@ -145,9 +148,11 @@ public:
 public:
 	BOOL postBuild() override;
 	void onFilterEdit(std::string strFilter);
+	void onItemRightClick(LLUICtrl* pCtrl, S32 x, S32 y);
 	void onSortOrderChanged(const LLSD& sdParam);
 	bool onSortOrderCheck(const LLSD& sdParam);
 	void onVisibilityChange(BOOL fVisible) override;
+	static void onShowWearingPanel();
 
 	/*
 	 * Event handlers
@@ -163,6 +168,8 @@ protected:
 	LLFilterEditor*                m_pFilterEditor = nullptr;
 	LLInventoryCategoriesObserver* m_pCofObserver = nullptr;
 	LLWornItemsList*               m_pWornItemsList = nullptr;
+	LLListContextMenu*             m_pListContextMenu = nullptr;
+	boost::signals2::scoped_connection m_ComplexityChangedSlot;
 };
 
 // ====================================================================================

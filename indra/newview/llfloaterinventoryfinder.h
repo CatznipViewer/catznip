@@ -48,6 +48,7 @@ public:
 	 */
 public:
 	BOOL        postBuild() override;
+	void        closeFloater(bool fAppQuitting = false) override;
 
 	/*
 	 * Member functions

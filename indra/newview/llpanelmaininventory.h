@@ -150,7 +150,11 @@ protected:
 
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
-	void closeAllFolders();
+//	void closeAllFolders();
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-6.1
+	void collapseAllFolders();
+	void collapseToFolders();
+// [/SL:KB]
 	void doCreate(const LLSD& userdata);
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
 	bool checkCreate(const LLSD& sdParam);
@@ -226,15 +230,17 @@ protected:
 private:
 	LLDragAndDropButton*		mTrashButton;
 //	LLToggleableMenu*			mMenuGearDefault;
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-3.3
 	LLHandle<LLToggleableMenu>	mMenuGearHandle;
+	LLHandle<LLToggleableMenu>  mMenuCollapseHandle;
 	LLHandle<LLToggleableMenu>	mMenuAddHandle;
 	LLHandle<LLToggleableMenu>	mMenuSortHandle;
 // [/SL:KB]
 	LLMenuButton*				mGearMenuButton;
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
-	LLMenuButton*				mAddMenuButton;
-	LLMenuButton*				mSortMenuButton;
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-3.3
+	LLMenuButton*               mCollapseMenuButton = nullptr;
+	LLMenuButton*				mAddMenuButton = nullptr;
+	LLMenuButton*				mSortMenuButton = nullptr;
 // [/SL:KB]
 //	LLHandle<LLView>			mMenuAddHandle;
 // [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2

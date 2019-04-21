@@ -57,7 +57,7 @@
 #include "llfloaterreg.h"
 #include "llavataractions.h"
 #include "llavatariconctrl.h"
-#include "llnamebox.h"
+//#include "llnamebox.h"
 #include "llviewercontrol.h"
 #include "lluictrlfactory.h"
 #include "llspinctrl.h"
@@ -182,9 +182,12 @@ BOOL LLPanelPermissions::postBuild()
 	childSetCommitCallback("clickaction",LLPanelPermissions::onCommitClickAction,this);
 	childSetCommitCallback("search_check",LLPanelPermissions::onCommitIncludeInSearch,this);
 	
-	mLabelGroupName = getChild<LLNameBox>("Group Name Proxy");
+//	mLabelGroupName = getChild<LLNameBox>("Group Name Proxy");
 	mLabelOwnerName = getChild<LLTextBox>("Owner Name");
 	mLabelCreatorName = getChild<LLTextBox>("Creator Name");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.1
+	mLabelGroupName = getChild<LLTextBox>("Group Name Proxy");
+// [/SL:KB]
 
 	return TRUE;
 }
@@ -522,7 +525,10 @@ void LLPanelPermissions::refresh()
 	{
 		if (mLabelGroupName)
 		{
-			mLabelGroupName->setNameID(group_id,TRUE);
+//			mLabelGroupName->setNameID(group_id,TRUE);
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.1
+			mLabelGroupName->setText(llformat("secondlife:///app/group/%s/about", group_id.asString().c_str()));
+// [/SL:KB]
 			mLabelGroupName->setEnabled(TRUE);
 		}
 	}
@@ -530,8 +536,11 @@ void LLPanelPermissions::refresh()
 	{
 		if (mLabelGroupName)
 		{
-			mLabelGroupName->setNameID(LLUUID::null, TRUE);
-			mLabelGroupName->refresh(LLUUID::null, std::string(), true);
+//			mLabelGroupName->setNameID(LLUUID::null, TRUE);
+//			mLabelGroupName->refresh(LLUUID::null, std::string(), true);
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.1
+			mLabelGroupName->setText(LLStringUtil::null);
+// [/SL:KB]
 			mLabelGroupName->setEnabled(FALSE);
 		}
 	}
@@ -1060,7 +1069,10 @@ void LLPanelPermissions::cbGroupID(LLUUID group_id)
 {
 	if(mLabelGroupName)
 	{
-		mLabelGroupName->setNameID(group_id, TRUE);
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.1
+		mLabelGroupName->setText(llformat("secondlife:///app/group/%s/about", group_id.asString().c_str()));
+// [/SL:KB]
+//		mLabelGroupName->setNameID(group_id, TRUE);
 	}
 	LLSelectMgr::getInstance()->sendGroup(group_id);
 }

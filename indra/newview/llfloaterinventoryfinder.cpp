@@ -152,6 +152,17 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	return TRUE;
 }
 
+// virtual
+void LLFloaterInventoryFinder::closeFloater(bool fAppQuitting)
+{
+	if ( (!fAppQuitting) && (gSavedSettings.getBOOL("InventoryResetFilterOnFinderClose")) )
+	{
+		m_pPanelMainInventory->resetFilters();
+	}
+
+	LLFloater::closeFloater(fAppQuitting);
+}
+
 // ====================================================================================
 // LLFloaterInventoryFinder member functions
 //
@@ -202,8 +213,7 @@ void LLFloaterInventoryFinder::refreshControls()
 	{
 		m_pFilterAgeRangeCheck->set(true);
 
-		time_t timeCurrent;
-		time(&timeCurrent);
+		time_t timeCurrent = time_corrected();
 
 		U32 nSecondsStart = (U32)llmax(timeCurrent - m_pFilter->getMinDate(), (time_t)0) + 30 * 60;
 		U32 nSecondsEnd = (U32)llmax(timeCurrent - m_pFilter->getMaxDate(), (time_t)0) + 30 * 60;
@@ -330,8 +340,7 @@ void LLFloaterInventoryFinder::refreshFilter(const LLUICtrl* pCtrl /*=nullptr*/)
 		else if ( (pCtrl == m_pFilterAgeRangeEnd) && (nValueEnd < nValueStart) )
 			nValueStart = nValueEnd;
 
-		time_t timeCurrent;
-		time(&timeCurrent);
+		time_t timeCurrent = time_corrected();
 
 		time_t timeStart = time_min(), timeEnd = time_max();
 		if (m_pFilterAgeRangeType->getSelectedValue().asString() == "hours")
@@ -344,6 +353,10 @@ void LLFloaterInventoryFinder::refreshFilter(const LLUICtrl* pCtrl /*=nullptr*/)
 			timeStart = timeCurrent - (llmax(nValueStart, nValueEnd) * 24 * 60 * 60);
 			timeEnd = timeCurrent - (llmin(nValueStart, nValueEnd) * 24 * 60 * 60);
 		}
+
+		// If we filter [0, 10] hours then new items that arrive will be excluded so we cheat and make it [-24, 10] instead
+		if ( (timeStart != timeCurrent) && (timeEnd == timeCurrent) )
+			timeEnd += 24 * 60 * 60;
 
 		pInvPanel->setDateRange(timeStart, timeEnd);
 	}
