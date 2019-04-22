@@ -1467,6 +1467,12 @@ void LLIMProcessing::requestOfflineMessages()
         && gAgent.getRegion()->capabilitiesReceived())
     {
         std::string cap_url = gAgent.getRegionCapability("ReadOfflineMsgs");
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-6.1
+		if (!gSavedSettings.getBOOL("UseOfflineMsgsCap"))
+		{
+			cap_url.clear();
+		}
+// [/SL:KB]
 
         // Auto-accepted inventory items may require the avatar object
         // to build a correct name.  Likewise, inventory offers from
