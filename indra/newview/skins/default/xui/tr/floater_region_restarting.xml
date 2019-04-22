@@ -11,8 +11,9 @@ Bu bölgede kalmaya devam ederseniz oturumunuz sonlandırılacak.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			Şu anda içinde bulunduğunuz bölge (-Bölgenin uzun adı-) yeniden başlatılmak üzere.
-
+			Şu anda içinde bulunduğunuz bölge yeniden başlatılmak üzere.
+		</text>
+		<text name="region_name_bottom">
 Bu bölgede kalmaya devam ederseniz oturumunuz sonlandırılacak.
 		</text>
 		<text name="restart_seconds">

@@ -11,8 +11,10 @@ Wenn Sie in dieser Region bleiben, werden Sie abgemeldet.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			Die Region, in der Sie sich gerade befinden (-längster Regionsname-), wird gleich neu gestartet.
+			Die Region, in der Sie sich gerade befinden, wird gleich neu gestartet.
 
+		</text>
+		<text name="region_name_bottom">
 Wenn Sie in dieser Region bleiben, werden Sie abgemeldet.
 		</text>
 		<text name="restart_seconds">

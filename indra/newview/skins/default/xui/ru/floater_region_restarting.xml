@@ -11,8 +11,9 @@
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			Регион, в котором вы находитесь (-длинное название региона-), будет перезапущен.
-
+			Регион, в котором вы находитесь, будет перезапущен.
+		</text>
+		<text name="region_name_bottom">
 Если вы останетесь в этом регионе, вы выйдете из системы.
 		</text>
 		<text name="restart_seconds">

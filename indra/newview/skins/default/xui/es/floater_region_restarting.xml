@@ -11,8 +11,9 @@ Si permaneces en esta región serás desconectado.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			La región en la que te encuentras (-el nombre de región más largo-) se va a reiniciar.
-
+			La región en la que te encuentras se va a reiniciar.
+		</text>
+		<text name="region_name_bottom">
 Si permaneces en esta región serás desconectado.
 		</text>
 		<text name="restart_seconds">

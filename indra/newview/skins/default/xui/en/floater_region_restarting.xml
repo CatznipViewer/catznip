@@ -15,7 +15,7 @@
     <string name="RestartSeconds">[MINUTES]m [SECONDS]s</string>
     <panel
      name="layout_panel_1"
-     height="150"
+     height="155"
      right="-4"
      follows="right|top"
      top="0"
@@ -27,7 +27,7 @@
      width="32"
      height="32"
      left="30"
-     top="4"
+     top="8"
      image_name="Warning_Yellow"
      follows="left|top">
     </icon>
@@ -40,10 +40,11 @@
      layout="topleft"
      name="region_name"
      word_wrap="true"
-     height="50"
-     top="14"
+     height="40"
+     top="4"
      left="75" 
-     right="-15">
+     right="-15"
+	 valign="center">
     This region is about to restart..
     </text>
     <panel
@@ -80,12 +81,13 @@
      font="DejaVu"
      text_color="White"
      layout="topleft"
-     name="region_name"
+     name="region_name_bottom"
      word_wrap="true"
-     height="40"
-     top_pad="14"
+     height="30"
+     top_pad="4"
      left="30"
-     right="-15">
+     right="-15"
+	 valign="center">
 ..you will be logged out if you remain here.
     </text>
     <combo_box
@@ -94,7 +96,7 @@
      height="23"
      label="My Landmarks"
      layout="topleft"
-     top_delta="24"
+     top_pad="4"
      left="30"
      max_chars="64"
      name="landmark combo"
