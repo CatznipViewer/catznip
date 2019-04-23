@@ -263,21 +263,21 @@ LLOSInfo::LLOSInfo() :
 		// If OSVERSIONINFOEX doesn't work, try OSVERSIONINFO.
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if (GetVersionEx((OSVERSIONINFO *)&osvi))
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
-#ifdef _WIN64
-			mPlatform = "Win64";
-#else
-			BOOL fIs64Bit = false;
-			IsWow64Process(GetCurrentProcess(), &fIs64Bit);
-			mPlatform = (fIs64Bit) ? "Win64" : "Win32";
-#endif // _WIN64
-// [/SL:KB]
 		{
 			mBuild = osvi.dwBuildNumber & 0xffff;
 		}
 	}
 
 	mOSString = mOSStringSimple;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: Catznip-5.2
+#ifdef _WIN64
+	mPlatform = "Win64";
+#else
+	BOOL fIs64Bit = false;
+	IsWow64Process(GetCurrentProcess(), &fIs64Bit);
+	mPlatform = (fIs64Bit) ? "Win64" : "Win32";
+#endif // _WIN64
+// [/SL:KB]
 	if (mBuild > 0)
 	{
 		mOSString += llformat("(Build %d)", mBuild);

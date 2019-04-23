@@ -11,8 +11,9 @@ Se permanecer aqui, você será desconectado.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			A região na qual você está (-Nome mais longo da região-) está prestes a ser reiniciada.
-
+			A região na qual você está está prestes a ser reiniciada.
+		</text>
+		<text name="region_name_bottom">
 Se permanecer aqui, você será desconectado.
 		</text>
 		<text name="restart_seconds">

@@ -11,8 +11,9 @@ Si vous restez dans cette région, vous serez déconnecté(e).
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			La région dans laquelle vous vous trouvez actuellement (-le nom de région le plus long-) est sur le point de redémarrer.
-
+			La région dans laquelle vous vous trouvez actuellement est sur le point de redémarrer.
+		</text>
+		<text name="region_name_bottom">
 Si vous restez dans cette région, vous serez déconnecté(e).
 		</text>
 		<text name="restart_seconds">

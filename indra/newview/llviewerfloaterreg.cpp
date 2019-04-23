@@ -550,7 +550,8 @@ void LLFloaterReg::cycleFloaters(const std::string& floater_name)
 		}
 		else
 		{
-			for (LLFloater* pFloater : LLFloaterReg::getFloaterList(floater_name))
+			LLFloaterReg::const_instance_list_t floaters = LLFloaterReg::getFloaterList(floater_name);
+			for (LLFloater* pFloater : floaters)
 				if (pFloater)
 					pFloater->closeHostedFloater();
 		}

@@ -143,7 +143,7 @@ bool LLOutfitsView::onIdle()
 #ifndef CATZNIP
 		mInvPanel->getRootFolder()->closeAllFolders();
 #else
-		mInvPanel->getRootFolder()->collapseAllFolders;
+		mInvPanel->getRootFolder()->collapseAllFolders();
 #endif // CATZNIP
 		highlightBaseOutfit();
 
@@ -181,7 +181,7 @@ void LLOutfitsView::onOpen(const LLSD& /*info*/)
 #ifndef CATZNIP
 			mInvPanel->getRootFolder()->closeAllFolders();
 #else
-			mInvPanel->getRootFolder()->collapseAllFolders;
+			mInvPanel->getRootFolder()->collapseAllFolders();
 #endif // CATZNIP
 			highlightBaseOutfit();
 		}

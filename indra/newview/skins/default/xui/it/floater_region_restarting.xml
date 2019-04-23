@@ -11,8 +11,9 @@ Se rimani in questa regione verrai scollegato da Second Life.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			La regione in cui ti trovi (il nome di regione più lungo) verrà riavviata tra breve.
-
+			La regione in cui ti trovi verrà riavviata tra breve.
+		</text>
+		<text name="region_name_bottom">
 Se rimani in questa regione verrai scollegato da Second Life.
 		</text>
 		<text name="restart_seconds">

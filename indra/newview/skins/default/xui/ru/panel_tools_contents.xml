@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-				<combo_box.item label="Нет" name="None"/>
-			<check_box label="Анимированная сетка" name="Animated Mesh Checkbox Ctrl" tool_tip="Позволяет анимировать риг-структурированные объекты с форматом сетки независимо друг от друга"/>
 		<panel label="Контент" name="Contents">
 			<button label="Создать скрипт" label_selected="Создать скрипт" name="button new script"/>
 			<button label="Разрешения" name="button permissions"/>

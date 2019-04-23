@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-				<combo_box.item label="Ninguno" name="None"/>
 		<panel label="Contenido " name="Contents">
 			<button label="Script nuevo" label_selected="Script nuevo" name="button new script"/>
 			<button label="Permisos" name="button permissions"/>
