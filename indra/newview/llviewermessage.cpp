@@ -2230,8 +2230,6 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				name_slurl = LLSLURL("agent", mFromID, "rlvanonym").getSLURLString();
 // [/RLVa:KB]
 
-			from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+ LLTrans::getString("'") + mFromName 
-				+ LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedBy") + name_slurl;
 			chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedBy") + " " + name_slurl;
 // [/SL:KB]
 		}
