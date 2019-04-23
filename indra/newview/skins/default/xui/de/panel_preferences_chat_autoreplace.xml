@@ -22,4 +22,4 @@
 	<button label="Eintrag speichern" name="autoreplace_save_entry" tool_tip="Diesen Eintrag speichern."/>
 	<button label="Änderungen speichern" name="autoreplace_save_changes" tool_tip="Alle Änderungen speichern."/>
 	<button label="Abbrechen" name="autoreplace_cancel" tool_tip="Alle Änderungen löschen."/>
-</floater>
+</panel>
