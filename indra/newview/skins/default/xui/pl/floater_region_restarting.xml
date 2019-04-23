@@ -11,8 +11,9 @@ Jeśli w nim zostaniesz, to symulator Cię wyloguje.
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			Region, w którym teraz jesteś (-The longest region name-) zostanie za chwilę zrestartowany.
-
+			Region, w którym teraz jesteś zostanie za chwilę zrestartowany.
+		</text>
+		<text name="region_name_bottom">
 Jeśli w nim zostaniesz, to symulator Cię wyloguje.
 		</text>
 		<text name="restart_seconds">

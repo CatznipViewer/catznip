@@ -11,8 +11,9 @@
 	</string>
 	<panel name="layout_panel_1">
 		<text name="region_name">
-			今 (-最長リージョン名-) がいるリージョンを再起動しようとしています。
-
+			今 がいるリージョンを再起動しようとしています。
+		</text>
+		<text name="region_name_bottom">
 このままここにいるとログアウトされます。
 		</text>
 		<text name="restart_seconds">
