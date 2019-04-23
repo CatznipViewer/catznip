@@ -618,7 +618,12 @@ void LLFloater::storeRectControl()
 
 void LLFloater::storeVisibilityControl()
 {
-	if( !sQuitting && mVisibilityControl.size() > 1 )
+//	if( !sQuitting && mVisibilityControl.size() > 1 )
+// [SL:KB] - Patch: Control-Floater | Checked: Catznip-6.1
+	// NOTE: 'sQuitting' is only set when quitting the viewer while logged in (because gFloaterView->closeAllChildren(true) happens way 
+	//       before the eventual call to LLApp::setQuitting()) so we still need to check for LLApp::isExiting()
+	if (!sQuitting && !LLApp::isExiting() && mVisibilityControl.size() > 1)
+// [/SL:KB]
 	{
 		getControlGroup()->setBOOL( mVisibilityControl, getVisible() );
 	}
@@ -626,7 +631,12 @@ void LLFloater::storeVisibilityControl()
 
 void LLFloater::storeDockStateControl()
 {
-	if( !sQuitting && mDocStateControl.size() > 1 )
+//	if( !sQuitting && mDocStateControl.size() > 1 )
+// [SL:KB] - Patch: Control-Floater | Checked: Catznip-6.1
+	// NOTE: 'sQuitting' is only set when quitting the viewer while logged in (because gFloaterView->closeAllChildren(true) happens way 
+	//       before the eventual call to LLApp::setQuitting()) so we still need to check for LLApp::isExiting()
+	if (!sQuitting && !LLApp::isExiting() && mDocStateControl.size() > 1)
+// [/SL:KB]
 	{
 		getControlGroup()->setBOOL( mDocStateControl, isDocked() );
 	}
