@@ -1602,7 +1602,7 @@ Por favor, ponha o objeto à venda e tente novamente.
 	<notification name="FailedUpdateInstall">
 		Ocorreu um erro de atualização do visualizador. 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1610,13 +1610,13 @@ http://secondlife.com/download.
 Não será possível acessar a sua conta até que você atualize o [APP_NAME].
 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Sair"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		A instalação do Second Life requer uma atualização.
 
-Baixe a atualização em http://www.secondlife.com/downloads
+Baixe a atualização em https://get.catznip.com
 ou você pode instalar a instalação agora.
 		<usetemplate name="okcancelbuttons" notext="Sair do Second Life" yestext="Baixar e instalar agora"/>
 	</notification>

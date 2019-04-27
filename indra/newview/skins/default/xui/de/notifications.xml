@@ -1624,20 +1624,20 @@ Geben Sie das Objekt zum Verkauf frei und versuchen Sie es erneut.
 	</notification>
 	<notification name="FailedUpdateInstall">
 		Beim Installieren des Viewer-Updates ist ein Fehler aufgetreten.
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von https://get.catznip.com herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		Ein erforderliches Update konnte nicht installiert werden. 
 Sie können sich erst anmelden, wenn [APP_NAME] aktualisiert wurde.
 
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von https://get.catznip.com herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="Beenden"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Für Ihre SecondLife-Installation ist ein Update erforderlich.
 
-Sie können dieses Update von http://www.secondlife.com/downloads herunterladen oder jetzt installieren.
+Sie können dieses Update von https://get.catznip.com herunterladen oder jetzt installieren.
 		<usetemplate name="okcancelbuttons" notext="Second Life beenden" yestext="Jetzt herunterladen und installieren"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">

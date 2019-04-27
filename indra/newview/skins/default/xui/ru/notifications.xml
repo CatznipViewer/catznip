@@ -1610,7 +1610,7 @@
 	<notification name="FailedUpdateInstall">
 		Произошла ошибка при установке обновления.
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1618,13 +1618,13 @@ http://secondlife.com/download.
 Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
 
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Выйти"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Появились обязательные обновления для вашей версии Second Life.
 
-Загрузите это обновление на сайте http://www.secondlife.com/downloads
+Загрузите это обновление на сайте https://get.catznip.com
 или установите его сейчас.
 		<usetemplate name="okcancelbuttons" notext="Выйти из Second Life" yestext="Загрузить и установить сейчас"/>
 	</notification>

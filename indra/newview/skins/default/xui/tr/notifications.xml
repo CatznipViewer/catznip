@@ -1611,7 +1611,7 @@ Nesneyi satılık olarak ayarlayıp tekrar deneyin.
 	<notification name="FailedUpdateInstall">
 		Görüntüleyici güncellemesi yüklenirken bir hata oluştu.
 Lütfen en son görüntüleyiciyi şu adresten karşıdan yükleyin ve kurun: 
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1619,13 +1619,13 @@ http://secondlife.com/download.
 [APP_NAME] güncellenene kadar oturum açamayacaksınız.
 
 Lütfen en son görüntüleyiciyi şu adresten karşıdan yükleyin ve kurun: 
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Çık"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Second Life kurulumunuz için gerekli bir güncelleme var.
 
-Bu güncellemeyi http://www.secondlife.com/downloads adresinden karşıdan yükleyebilir
+Bu güncellemeyi https://get.catznip.com adresinden karşıdan yükleyebilir
 veya şimdi kurabilirsiniz.
 		<usetemplate name="okcancelbuttons" notext="Second Life&apos;tan çık" yestext="Karşıdan yükle ve şimdi kur"/>
 	</notification>

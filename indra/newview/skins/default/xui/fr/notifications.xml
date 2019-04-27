@@ -1608,7 +1608,7 @@ Veuillez choisir un objet à vendre et réessayer.
 	<notification name="FailedUpdateInstall">
 		Une erreur est survenue lors de l&apos;installation de la mise à jour du client.
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1616,13 +1616,13 @@ http://secondlife.com/download.
 Vous ne pourrez pas vous connecter tant que [APP_NAME] ne sera pas mis à jour.
 
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Quitter"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Une mise à jour requise pour votre installation Second Life existe.
 
-Pour la télécharger, accédez à http://www.secondlife.com/downloads.
+Pour la télécharger, accédez à https://get.catznip.com.
 Vous pouvez également l&apos;installer dès maintenant.
 		<usetemplate name="okcancelbuttons" notext="Quitter Second Life" yestext="Télécharger et installer maintenant"/>
 	</notification>
