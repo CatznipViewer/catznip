@@ -1607,6 +1607,97 @@
 		Завершена загрузка файла ландшафта:
 [DOWNLOAD_PATH].
 	</notification>
+	<notification name="FailedUpdateInstall">
+		Произошла ошибка при установке обновления.
+Загрузите новую версию программы на сайте
+http://secondlife.com/download.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="FailedRequiredUpdateInstall">
+		Не удалось установить обязательное обновление. 
+Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
+
+Загрузите новую версию программы на сайте
+http://secondlife.com/download.
+		<usetemplate name="okbutton" yestext="Выйти"/>
+	</notification>
+	<notification name="UpdaterServiceNotRunning">
+		Появились обязательные обновления для вашей версии Second Life.
+
+Загрузите это обновление на сайте http://www.secondlife.com/downloads
+или установите его сейчас.
+		<usetemplate name="okcancelbuttons" notext="Выйти из Second Life" yestext="Загрузить и установить сейчас"/>
+	</notification>
+	<notification name="DownloadBackgroundTip">
+		Загружено обновление для вашей версии [APP_NAME].
+Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
+	</notification>
+	<notification name="DownloadBackgroundDialog">
+		Загружено обновление для вашей версии [APP_NAME].
+Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
+	</notification>
+	<notification name="RequiredUpdateDownloadedVerboseDialog">
+		Загружено обязательное обновление.
+Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
+
+Необходимо перезапустить [APP_NAME] для установки обновления.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="RequiredUpdateDownloadedDialog">
+		Необходимо перезапустить [APP_NAME] для установки обновления.
+[[INFO_URL] Сведения об этом обновлении]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="OtherChannelDownloadBackgroundTip">
+		Загружено обновление для вашей версии [APP_NAME].
+Версия [VERSION] 
+На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
+см. [[INFO_URL] об этом обновлении]
+		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
+	</notification>
+	<notification name="OtherChannelDownloadBackgroundDialog">
+		Загружено обновление для вашей версии [APP_NAME].
+Версия [VERSION]
+На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
+см. [[INFO_URL] Сведения об этом обновлении]
+		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
+	</notification>
+	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
+		Загружено обязательное обновление.
+Версия [VERSION]
+На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
+см. [[INFO_URL] Сведения об этом обновлении]
+
+Необходимо перезапустить [APP_NAME] для установки обновления.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
+		Необходимо перезапустить [APP_NAME] для установки обновления.
+На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
+см. [[INFO_URL] Сведения об этом обновлении]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateDownloadInProgress">
+		Появилось обновление!
+Оно сейчас загружается в фоновом режиме и, как только будет готово, вам будет предложено перезапустить клиент для завершения установки.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateDownloadComplete">
+		Обновление загружено. Оно будет установлено после перезапуска.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateCheckError">
+		При поиске обновлений произошла ошибка.
+Повторите попытку позже.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateViewerUpToDate">
+		Ваш клиент уже обновлен!
+Если вы хотите немедленно испробовать наши новейшие функции и исправления, обратитесь на страницу «Альтернативные клиенты»: http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="RequiredUpdate">
 		Для входа необходима версия \[VERSION]. Для вас обновление должно было произведено автоматически, но по какой-то причине этого не произошло. Скачайте обновление с веб-сайта https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>

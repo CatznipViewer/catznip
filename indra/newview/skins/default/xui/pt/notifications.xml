@@ -1599,6 +1599,97 @@ Por favor, ponha o objeto à venda e tente novamente.
 		Download do arquivo de terreno RAW concluído em:
 [DOWNLOAD_PATH]
 	</notification>
+	<notification name="FailedUpdateInstall">
+		Ocorreu um erro de atualização do visualizador. 
+Baixe e instale a versão mais recente do visualizador em 
+http://secondlife.com/download.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="FailedRequiredUpdateInstall">
+		Não foi possível instalar uma atualização necessária. 
+Não será possível acessar a sua conta até que você atualize o [APP_NAME].
+
+Baixe e instale a versão mais recente do visualizador em 
+http://secondlife.com/download.
+		<usetemplate name="okbutton" yestext="Sair"/>
+	</notification>
+	<notification name="UpdaterServiceNotRunning">
+		A instalação do Second Life requer uma atualização.
+
+Baixe a atualização em http://www.secondlife.com/downloads
+ou você pode instalar a instalação agora.
+		<usetemplate name="okcancelbuttons" notext="Sair do Second Life" yestext="Baixar e instalar agora"/>
+	</notification>
+	<notification name="DownloadBackgroundTip">
+		Baixamos uma atualização para a instalação do [APP_NAME].
+Versão [VERSION] [[RELEASE_NOTES_FULL_URL] sobre esta atualização]
+		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
+	</notification>
+	<notification name="DownloadBackgroundDialog">
+		Baixamos uma atualização para a instalação do [APP_NAME].
+Versão [VERSION] [[RELEASE_NOTES_FULL_URL] sobre esta atualização]
+		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
+	</notification>
+	<notification name="RequiredUpdateDownloadedVerboseDialog">
+		O software requer uma atualização que já foi baixada.
+Versão [VERSION] Informação [[INFO_URL] sobre essa atualização]
+
+Para instalar a atualização, será preciso reiniciar o [APP_NAME].
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="RequiredUpdateDownloadedDialog">
+		Para instalar a atualização, será preciso reiniciar o [APP_NAME].
+Informação [[INFO_URL] sobre essa atualização]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="OtherChannelDownloadBackgroundTip">
+		Baixamos uma atualização para a instalação do [APP_NAME].
+Versão [VERSION] 
+O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
+consulte [[INFO_URL] para obter mais detalhes sobre essa atualização]
+		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
+	</notification>
+	<notification name="OtherChannelDownloadBackgroundDialog">
+		Baixamos uma atualização para a instalação do [APP_NAME].
+Versão [VERSION]
+O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
+consulte a informação [[INFO_URL] sobre essa atualização]
+		<usetemplate name="okcancelbuttons" notext="Depois..." yestext="Instalar agora e reiniciar o [APP_NAME]"/>
+	</notification>
+	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
+		O software requer uma atualização que já foi baixada.
+Versão [VERSION]
+O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
+consulte a informação [[INFO_URL] sobre essa atualização]
+
+Para instalar a atualização, será preciso reiniciar o [APP_NAME].
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
+		Para instalar a atualização, será preciso reiniciar o [APP_NAME].
+O visualizador experimental foi substituído por um visualizador [NEW_CHANNEL];
+consulte a informação [[INFO_URL] sobre essa atualização]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateDownloadInProgress">
+		Uma atualização está disponível!
+O download está ocorrendo em segundo plano e reiniciaremos seu visualizador automaticamente para terminar a instalação assim que ele estiver concluído.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateDownloadComplete">
+		Uma atualização foi baixada. Ela será instalada durante a reinicialização.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateCheckError">
+		Erro ao verificar atualizações.
+Tente novamente mais tarde.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="UpdateViewerUpToDate">
+		Seu visualizador está atualizado!
+Se você estiver muito ansioso para experimentar os novos recursos e correções, consulte a página de visualizadores alternativos. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="RequiredUpdate">
 		Versão [VERSION] é obrigatório para efetuar login. Isto deveria ter sido atualizado por você, mas aparentemente não foi. Baixe a versão mais recente em https://get.catznip.com/
 		<usetemplate name="okbutton" yestext="OK"/>
