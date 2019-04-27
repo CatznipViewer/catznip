@@ -529,60 +529,6 @@ Subject Key Identifier: [SUBJECTKEYIDENTIFIER]
 	<notification name="BuyOneObjectOnly">
 		Ikke muligt at købe mere end et objekt ad gangen. Vælg kun ét objekt og prøv igen.
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		En ny version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Du skal hente denne version for at bruge [APP_NAME].
-	</notification>
-	<notification name="DownloadWindows">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		En ny version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Du skal hente denne version for at kunne benytte [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Afslut" yestext="Hent"/>
-	</notification>
-	<notification name="DownloadLinux">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-		<usetemplate name="okcancelbuttons" notext="Fortsæt" yestext="Hent"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-		<usetemplate name="okcancelbuttons" notext="Fortsæt" yestext="Hent"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		En ny version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Du skal hente denne opdatering for at bruge [APP_NAME].
-
-Download til dit Program bibliotek?
-	</notification>
-	<notification name="DownloadMac">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-
-Download til dit Program bibliotek?
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		En opdateret version af [APP_NAME] er tilgængelig.
-[MESSAGE]
-Denne opdatering er ikke påkrævet, men det anbefales at installere den for at opnå øget hastighed og forbedret stabilitet.
-
-Download til dit Program bibliotek?
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Der opstod en fejl ved installation af opdatering.
 Hent og installér venligst den nyeste version fra
