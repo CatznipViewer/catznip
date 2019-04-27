@@ -1622,82 +1622,22 @@ Geben Sie das Objekt zum Verkauf frei und versuchen Sie es erneut.
 		Raw-Terrain-Datei wurde heruntergeladen nach:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadWindows">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinux">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMac">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Beim Installieren des Viewer-Updates ist ein Fehler aufgetreten.
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von https://get.catznip.com herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		Ein erforderliches Update konnte nicht installiert werden. 
 Sie können sich erst anmelden, wenn [APP_NAME] aktualisiert wurde.
 
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von https://get.catznip.com herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="Beenden"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Für Ihre SecondLife-Installation ist ein Update erforderlich.
 
-Sie können dieses Update von http://www.secondlife.com/downloads herunterladen oder jetzt installieren.
+Sie können dieses Update von https://get.catznip.com herunterladen oder jetzt installieren.
 		<usetemplate name="okcancelbuttons" notext="Second Life beenden" yestext="Jetzt herunterladen und installieren"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -1769,6 +1709,14 @@ Versuchen Sie es später erneut.
 		Ihr Viewer ist auf dem neuesten Stand.
 Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Seite „Alternate Viewers“. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="RequiredUpdate">
+		Für die Anmeldung ist Version [VERSION] erforderlich. Diese sollte für Sie aktualisiert worden sein, was offenbar nicht geschehen ist. Bitte laden Sie die Datei unter https://get.catznip.com/ herunter.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="LoginFailedUnknown">
+		Die Anmeldung ist aus nicht bekannten Gründen leider fehlgeschlagen. Falls diese Meldung weiterhin angezeigt wird, besuchen Sie bitte die [SUPPORT_SITE].
+		<usetemplate name="okbutton" yestext="Beenden"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		Bei Übertragung dieses Objekts erhält die Gruppe:
