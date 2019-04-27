@@ -1637,82 +1637,22 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 		未加工の地形ファイルをダウンロードしました：
 [DOWNLOAD_PATH]
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadWindows">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinux">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-		<usetemplate name="okcancelbuttons" notext="続ける" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		[APP_NAME] の最新バージョンがご利用可能です。
-[MESSAGE]
-[APP_NAME] をご利用になるにはこのアップデートは必須です。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="終了" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMac">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		[APP_NAME] のアップデートバージョンがご利用可能です。
-[MESSAGE]
-このアップデートは必須ではありませんが、パフォーマンス向上のためにインストールをおすすめします。
-
-あなたのアプリケーションフォルダにダウンロードしますか？
-		<usetemplate name="okcancelbuttons" notext="続行" yestext="ダウンロード"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		ビューワのアップデートをインストール中にエラーが発生しました。
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		必要なアップデートをインストールできませんでした。 
 [APP_NAME] がアップデートされるまでログインできません。
 
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+https://get.catznip.com から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、http://www.secondlife.com/downloads からダウンロードして、今すぐインストールできます。
+このアップデートは、https://get.catznip.com からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -1784,6 +1724,14 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 		ご利用のビューワは最新です!
 最新の機能と修正を今すぐ試したい場合は、代替ビューワページ (http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers) をチェックしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="RequiredUpdate">
+		ログインするには、バージョン [VERSION] が必要です。このアップデートは自動的に行われるものですが、まだ実行されてないようです。https://get.catznip.com/ からダウンロードしてください。
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="LoginFailedUnknown">
+		申し訳ありませんが、不明な理由によってログインに失敗しました。このメッセージが何度も出る場合は、[SUPPORT_SITE] をご確認ください。
+		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		このオブジェクトを譲渡するとグループは以下のことが可能です：

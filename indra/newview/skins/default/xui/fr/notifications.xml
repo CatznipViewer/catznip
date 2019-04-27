@@ -1605,70 +1605,10 @@ Veuillez choisir un objet à vendre et réessayer.
 		Téléchargement du fichier de terrain raw effectué vers :
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		Une nouvelle version de [APP_NAME] est disponible.
-[MESSAGE]
-Pour utiliser [APP_NAME], vous devez télécharger cette mise à jour.
-		<usetemplate name="okcancelbuttons" notext="Quitter" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadWindows">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		Une nouvelle version de [APP_NAME] est disponible.
-[MESSAGE]
-Pour utiliser [APP_NAME], vous devez télécharger cette mise à jour.
-		<usetemplate name="okcancelbuttons" notext="Quitter" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadLinux">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		Une nouvelle version de [APP_NAME] est disponible.
-[MESSAGE]
-Pour utiliser [APP_NAME], vous devez télécharger cette mise à jour.
-
-Télécharger vers le dossier Applications ?
-		<usetemplate name="okcancelbuttons" notext="Quitter" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadMac">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-
-Télécharger vers le dossier Applications ?
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		Une mise à jour de [APP_NAME] est disponible.
-[MESSAGE]
-Cette mise à jour n&apos;est pas requise mais si vous voulez une meilleure performance et plus de stabilité, nous vous recommandons de l&apos;installer.
-
-Télécharger vers le dossier Applications ?
-		<usetemplate name="okcancelbuttons" notext="Continuer" yestext="Télécharger"/>
-	</notification>
 	<notification name="FailedUpdateInstall">
 		Une erreur est survenue lors de l&apos;installation de la mise à jour du client.
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1676,13 +1616,13 @@ http://secondlife.com/download.
 Vous ne pourrez pas vous connecter tant que [APP_NAME] ne sera pas mis à jour.
 
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+https://get.catznip.com.
 		<usetemplate name="okbutton" yestext="Quitter"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Une mise à jour requise pour votre installation Second Life existe.
 
-Pour la télécharger, accédez à http://www.secondlife.com/downloads.
+Pour la télécharger, accédez à https://get.catznip.com.
 Vous pouvez également l&apos;installer dès maintenant.
 		<usetemplate name="okcancelbuttons" notext="Quitter Second Life" yestext="Télécharger et installer maintenant"/>
 	</notification>
@@ -1755,6 +1695,14 @@ Veuillez réessayer ultérieurement.
 		Votre client est à jour.
 Si vous êtes impatients de découvrir les dernières fonctionnalités et corrections, consultez la page Autres clients. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="RequiredUpdate">
+		La version [VERSION] est nécessaire pour vous connecter. Cette version aurait dû être mise à jour, mais visiblement, elle ne l&apos;a pas été. Veuillez télécharger la dernière version sur https://get.catznip.com/
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="LoginFailedUnknown">
+		Désolé, la connexion a échoué pour un raison non reconnue. Si ce message persiste, veuillez consulter la page [SUPPORT_SITE].
+		<usetemplate name="okbutton" yestext="Quitter"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		Si vous cédez cet objet, le groupe :
