@@ -222,8 +222,8 @@ LLAssetRecoverQueue::LLAssetRecoverQueue(const LLSD& sdFiles)
 		if (LLFile::isfile(sdFile["path"]))
 		{
 			LLAssetRecoverItem recoveryItem;
-			recoveryItem.strPath = sdFile["path"];
-			recoveryItem.strName = sdFile["name"];
+			recoveryItem.strPath = sdFile["path"].asString();
+			recoveryItem.strName = sdFile["name"].asString();
 
 			// Figure out the asset type
 			if ("script" == sdFile["type"].asString())
