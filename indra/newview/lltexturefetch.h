@@ -347,7 +347,7 @@ private:
 
 	// XXX possible delete
 // [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
-	std::atomic<U32Bits> mHTTPTextureBits = (U32Bits)0;
+	std::atomic<U32Bits> mHTTPTextureBits;
 // [/SL:KB]
 //	U32Bits mHTTPTextureBits;												// Mfnq
 
@@ -362,7 +362,7 @@ private:
 	typedef std::vector<TFRequest *> command_queue_t;
 	command_queue_t mCommands;											// Mfq
 // [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
-	std::atomic<int> mCommandsSize = 0;
+	std::atomic<int> mCommandsSize;
 // [/SL:KB]
 
 	// If true, modifies some behaviors that help with QA tasks.

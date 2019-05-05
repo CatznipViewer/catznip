@@ -82,7 +82,7 @@ private:
 	typedef std::list<LLWorkerClass*> delete_list_t;
 	delete_list_t mDeleteList;
 // [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
-	std::atomic<int> mDeleteCount = 0;
+	std::atomic<int> mDeleteCount;
 // [/SL:KB]
 	LLMutex* mDeleteMutex;
 	

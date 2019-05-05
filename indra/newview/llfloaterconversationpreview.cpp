@@ -100,8 +100,8 @@ BOOL LLFloaterConversationPreview::postBuild()
 	const LLSD& sdKey = getKey();
 	if (sdKey.isMap())
 	{
-		name = sdKey[LL_FCP_COMPLETE_NAME];
-		file = sdKey[LL_FCP_CONVERSATION_PATH];
+		name = sdKey[LL_FCP_COMPLETE_NAME].asString();
+		file = sdKey[LL_FCP_CONVERSATION_PATH].asString();
 	}
 // [/SL:KB]
 	else if (mSessionID != LLUUID::null && conv)

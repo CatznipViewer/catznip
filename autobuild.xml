@@ -704,9 +704,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>93257fce19120c01751362775a01b925</string>
+              <string>cba1feed7f6bb671d791a517fddf205a</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/1545/3481/fmodex-4.44.64.501533-darwin64-501533.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/fmodex-44461-darwin-201601300040-r23.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -2616,9 +2616,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>f7013e1f0b6a877090622fd73ec72cbc</string>
+              <string>2a0ba77dc63ccb25628e3f8ea24b162a</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/1114/2576/openjpeg-1.5.1.501102-darwin64-501102.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.191241713-darwin64-191241713.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>

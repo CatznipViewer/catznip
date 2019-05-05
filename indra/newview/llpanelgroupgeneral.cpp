@@ -188,7 +188,7 @@ BOOL LLPanelGroupGeneral::postBuild()
 	if (mCtrlSnoozeDuration)
 	{
 		mCtrlSnoozeDuration->setCommitCallback(onCommitUserOnly, this);
-		mCtrlSnoozeDuration->setValue( (pOptions) ? pOptions->mSnoozeDuration : LLSD() );
+		mCtrlSnoozeDuration->setValue( (pOptions) ? LLSD(pOptions->mSnoozeDuration) : LLSD() );
 		mCtrlSnoozeDuration->setEnabled( (nullptr != pOptions) && (pOptions->mSnoozeOnClose) );
 	}
 // [/SL:KB]
@@ -899,7 +899,7 @@ void LLPanelGroupGeneral::setGroupID(const LLUUID& id)
 	mCtrlSnoozeDuration = getChild<LLComboBox>("snooze_chat_duration");
 	if (mCtrlSnoozeDuration)
 	{
-		mCtrlSnoozeDuration->setValue( (pOptions) ? pOptions->mSnoozeDuration : LLSD() );
+		mCtrlSnoozeDuration->setValue( (pOptions) ? LLSD(pOptions->mSnoozeDuration) : LLSD() );
 		mCtrlSnoozeDuration->setEnabled( (nullptr != pOptions) && (pOptions->mSnoozeOnClose) );
 	}
 // [/SL:KB]

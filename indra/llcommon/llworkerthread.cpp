@@ -35,7 +35,10 @@
 // Run on MAIN thread
 
 LLWorkerThread::LLWorkerThread(const std::string& name, bool threaded, bool should_pause) :
-	LLQueuedThread(name, threaded, should_pause)
+	LLQueuedThread(name, threaded, should_pause),
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mDeleteCount(0)
+// [/SL:KB]
 {
 	mDeleteMutex = new LLMutex(NULL);
 

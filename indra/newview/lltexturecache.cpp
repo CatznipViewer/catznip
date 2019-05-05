@@ -835,7 +835,11 @@ LLTextureCache::LLTextureCache(bool threaded)
 	  mDoPurge(FALSE),
 	  mFastCachep(NULL),
 	  mFastCachePoolp(NULL),
-	  mFastCachePadBuffer(NULL)
+	  mFastCachePadBuffer(NULL),
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	  mPrioritizeWriteListEmpty(true),
+	  mCompletedListEmpty(true)
+// [/SL:KB]
 {
 }
 
