@@ -2580,7 +2580,11 @@ LLTextureFetch::LLTextureFetch(LLTextureCache* cache, LLImageDecodeThread* image
 	  mFetchSource(LLTextureFetch::FROM_ALL),
 	  mOriginFetchSource(LLTextureFetch::FROM_ALL),
 	  mFetcherLocked(FALSE),
-	  mTextureInfoMainThread(false)
+	  mTextureInfoMainThread(false),
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	  mCommandsSize(0),
+	  mHTTPTextureBits((U32Bits)0)
+// [/SL:KB]
 {
 	mMaxBandwidth = gSavedSettings.getF32("ThrottleBandwidthKBPS");
 	mTextureInfo.setLogging(true);

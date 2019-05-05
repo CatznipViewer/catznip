@@ -34,6 +34,9 @@
 // MAIN THREAD
 LLImageDecodeThread::LLImageDecodeThread(bool threaded)
 	: LLQueuedThread("imagedecode", threaded)
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	, mCreationCount(0)
+// [/SL:KB]
 {
 	mCreationMutex = new LLMutex(getAPRPool());
 }

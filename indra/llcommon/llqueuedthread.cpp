@@ -38,7 +38,10 @@ LLQueuedThread::LLQueuedThread(const std::string& name, bool threaded, bool shou
 	mThreaded(threaded),
 	mIdleThread(TRUE),
 	mNextHandle(0),
-	mStarted(FALSE)
+	mStarted(FALSE),
+// [SL:KB] - Patch: Viewer-OptimizationThreadLock | Checked: Catznip-6.0
+	mRequestQueueSize(0)
+// [/SL:KB]
 {
 	if (mThreaded)
 	{
