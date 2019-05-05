@@ -71,7 +71,7 @@ protected:
 	static void handleMultiple(functor_t functor, const uuid_vec_t& ids);
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-	static void LLListContextMenu::handlePerFolder(LLListContextMenu::functor_t functor, const uuid_vec_t& item_ids);
+	static void handlePerFolder(LLListContextMenu::functor_t functor, const uuid_vec_t& item_ids);
 // [/SL:KB]
 
 	uuid_vec_t			mUUIDs;
