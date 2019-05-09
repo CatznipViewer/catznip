@@ -54,6 +54,7 @@
 #include "llagentcamera.h"
 #include "llcallingcard.h"
 #include "llbuycurrencyhtml.h"
+#include "llcontrolavatar.h"
 #include "llfirstuse.h"
 #include "llfloaterbump.h"
 #include "llfloaterbuyland.h"
@@ -102,6 +103,7 @@
 #include "llviewerwindow.h"
 #include "llvlmanager.h"
 #include "llvoavatarself.h"
+#include "llvovolume.h"
 #include "llworld.h"
 #include "pipeline.h"
 #include "llfloaterworldmap.h"
@@ -4023,23 +4025,27 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 	LLUUID	animation_id;
 	LLUUID	uuid;
 	S32		anim_sequence_id;
-	LLVOAvatar *avatarp;
+	LLVOAvatar *avatarp = NULL;
 	
 	mesgsys->getUUIDFast(_PREHASH_Sender, _PREHASH_ID, uuid);
 
-	//clear animation flags
-	avatarp = (LLVOAvatar *)gObjectList.findObject(uuid);
+	LLViewerObject *objp = gObjectList.findObject(uuid);
+    if (objp)
+    {
+        avatarp =  objp->asAvatar();
+    }
 
 	if (!avatarp)
 	{
 		// no agent by this ID...error?
-		LL_WARNS("Messaging") << "Received animation state for unknown avatar" << uuid << LL_ENDL;
+		LL_WARNS("Messaging") << "Received animation state for unknown avatar " << uuid << LL_ENDL;
 		return;
 	}
 
 	S32 num_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationList);
 	S32 num_source_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationSourceList);
 
+	//clear animation flags
 	avatarp->mSignaledAnimations.clear();
 	
 	if (avatarp->isSelf())
@@ -4109,6 +4115,72 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 		avatarp->processAnimationStateChanges();
 	}
 }
+
+
+void process_object_animation(LLMessageSystem *mesgsys, void **user_data)
+{
+	LLUUID	animation_id;
+	LLUUID	uuid;
+	S32		anim_sequence_id;
+	
+	mesgsys->getUUIDFast(_PREHASH_Sender, _PREHASH_ID, uuid);
+
+    LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for object " << uuid << LL_ENDL;
+
+    signaled_animation_map_t signaled_anims;
+	S32 num_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationList);
+	LL_DEBUGS("AnimatedObjectsNotify") << "processing object animation requests, num_blocks " << num_blocks << " uuid " << uuid << LL_ENDL;
+    for( S32 i = 0; i < num_blocks; i++ )
+    {
+        mesgsys->getUUIDFast(_PREHASH_AnimationList, _PREHASH_AnimID, animation_id, i);
+        mesgsys->getS32Fast(_PREHASH_AnimationList, _PREHASH_AnimSequenceID, anim_sequence_id, i);
+        signaled_anims[animation_id] = anim_sequence_id;
+        LL_DEBUGS("AnimatedObjectsNotify") << "added signaled_anims animation request for object " 
+                                    << uuid << " animation id " << animation_id << LL_ENDL;
+    }
+    LLObjectSignaledAnimationMap::instance().getMap()[uuid] = signaled_anims;
+    
+    LLViewerObject *objp = gObjectList.findObject(uuid);
+    if (!objp)
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for unknown object " << uuid << LL_ENDL;
+        return;
+    }
+    
+	LLVOVolume *volp = dynamic_cast<LLVOVolume*>(objp);
+    if (!volp)
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for non-volume object " << uuid << LL_ENDL;
+        return;
+    }
+
+    if (!volp->isAnimatedObject())
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for non-animated object " << uuid << LL_ENDL;
+        return;
+    }
+
+    volp->updateControlAvatar();
+    LLControlAvatar *avatarp = volp->getControlAvatar();
+    if (!avatarp)
+    {
+        LL_DEBUGS("AnimatedObjectsNotify") << "Received animation request for object with no control avatar, ignoring " << uuid << LL_ENDL;
+        return;
+    }
+    
+    if (!avatarp->mPlaying)
+    {
+        avatarp->mPlaying = true;
+        //if (!avatarp->mRootVolp->isAnySelected())
+        {
+            avatarp->updateVolumeGeom();
+            avatarp->mRootVolp->recursiveMarkForUpdate(TRUE);
+        }
+    }
+        
+    avatarp->updateAnimations();
+}
+
 
 void process_avatar_appearance(LLMessageSystem *mesgsys, void **user_data)
 {
@@ -5459,17 +5531,6 @@ void notify_cautioned_script_question(const LLSD& notification, const LLSD& resp
 
 void script_question_mute(const LLUUID& item_id, const std::string& object_name);
 
-bool unknown_script_question_cb(const LLSD& notification, const LLSD& response)
-{
-	// Only care if they muted the object here.
-	if ( response["Mute"] ) // mute
-	{
-		LLUUID task_id = notification["payload"]["task_id"].asUUID();
-		script_question_mute(task_id,notification["payload"]["object_name"].asString());
-	}
-	return false;
-}
-
 void experiencePermissionBlock(LLUUID experience, LLSD result)
 {
     LLSD permission;
@@ -5575,8 +5636,7 @@ void script_question_mute(const LLUUID& task_id, const std::string& object_name)
       	bool matches(const LLNotificationPtr notification) const
         {
             if (notification->getName() == "ScriptQuestionCaution"
-                || notification->getName() == "ScriptQuestion"
-				|| notification->getName() == "UnknownScriptQuestion")
+                || notification->getName() == "ScriptQuestion")
             {
                 return (notification->getPayload()["task_id"].asUUID() == blocked_id);
             }
@@ -5593,7 +5653,6 @@ void script_question_mute(const LLUUID& task_id, const std::string& object_name)
 static LLNotificationFunctorRegistration script_question_cb_reg_1("ScriptQuestion", script_question_cb);
 static LLNotificationFunctorRegistration script_question_cb_reg_2("ScriptQuestionCaution", script_question_cb);
 static LLNotificationFunctorRegistration script_question_cb_reg_3("ScriptQuestionExperience", script_question_cb);
-static LLNotificationFunctorRegistration unknown_script_question_cb_reg("UnknownScriptQuestion", unknown_script_question_cb);
 
 void process_script_experience_details(const LLSD& experience_details, LLSD args, LLSD payload)
 {
@@ -5706,14 +5765,12 @@ void process_script_question(LLMessageSystem *msg, void **user_data)
 		args["QUESTIONS"] = script_question;
 
 		if (known_questions != questions)
-		{	// This is in addition to the normal dialog.
-			LLSD payload;
-			payload["task_id"] = taskid;
-			payload["item_id"] = itemid;
-			payload["object_name"] = object_name;
-			
-			args["DOWNLOADURL"] = LLTrans::getString("ViewerDownloadURL");
-			LLNotificationsUtil::add("UnknownScriptQuestion",args,payload);
+		{
+			// This is in addition to the normal dialog.
+			// Viewer got a request for not supported/implemented permission 
+			LL_WARNS("Messaging") << "Object \"" << object_name << "\" requested " << script_question
+								<< " permission. Permission is unknown and can't be granted. Item id: " << itemid
+								<< " taskid:" << taskid << LL_ENDL;
 		}
 		
 		if (known_questions)

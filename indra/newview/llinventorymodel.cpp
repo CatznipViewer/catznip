@@ -1820,9 +1820,19 @@ void LLInventoryModel::addItem(LLViewerInventoryItem* item)
 
 		if (LLAssetType::lookup(item->getType()) == LLAssetType::badLookup())
 		{
-			LL_WARNS(LOG_INV) << "Got unknown asset type for item [ name: " << item->getName()
-				<< " type: " << item->getType()
-				<< " inv-type: " << item->getInventoryType() << " ]." << LL_ENDL;
+			if (item->getType() >= LLAssetType::AT_COUNT)
+			{
+				// Not yet supported.
+				LL_DEBUGS(LOG_INV) << "Got unknown asset type for item [ name: " << item->getName()
+					<< " type: " << item->getType()
+					<< " inv-type: " << item->getInventoryType() << " ]." << LL_ENDL;
+			}
+			else
+			{
+				LL_WARNS(LOG_INV) << "Got unknown asset type for item [ name: " << item->getName()
+					<< " type: " << item->getType()
+					<< " inv-type: " << item->getInventoryType() << " ]." << LL_ENDL;
+			}
 		}
 
 		// This condition means that we tried to add a link without the baseobj being in memory.
@@ -2368,7 +2378,11 @@ void LLInventoryModel::buildParentChildMap()
 		}
 		// FIXME note that updateServer() fails with protected
 		// types, so this will not work as intended in that case.
-		cat->updateServer(TRUE);
+		// UpdateServer uses AIS, AIS cat move is not implemented yet
+		// cat->updateServer(TRUE);
+
+		// MoveInventoryFolder message, intentionally per item
+		cat->updateParentOnServer(FALSE);
 		catsp = getUnlockedCatArray(cat->getParentUUID());
 		if(catsp)
 		{

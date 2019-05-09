@@ -36,6 +36,7 @@
 #include "llfloater.h"
 #include "llavatarpropertiesprocessor.h"
 #include "llconversationlog.h"
+#include "llsearcheditor.h"
 
 class LLConversationLogObserver;
 class LLPanelPreference;
@@ -46,6 +47,14 @@ class LLScrollListCtrl;
 class LLSliderCtrl;
 class LLSD;
 class LLTextBox;
+
+namespace ll
+{
+	namespace prefs
+	{
+		struct SearchData;
+	}
+}
 
 typedef std::map<std::string, std::string> notifications_map;
 
@@ -189,6 +198,7 @@ private:
 	void onDeleteTranscriptsResponse(const LLSD& notification, const LLSD& response);
 	void updateDeleteTranscriptsButton();
 	void updateMaxComplexity();
+	static bool loadFromFilename(const std::string& filename, std::map<std::string, std::string> &label_map);
 
 	static std::string sSkin;
 	notifications_map mNotificationOptions;
@@ -205,6 +215,12 @@ private:
 	LLAvatarData mAvatarProperties;
 	std::string mSavedGraphicsPreset;
 	LOG_CLASS(LLFloaterPreference);
+
+	LLSearchEditor *mFilterEdit;
+	std::unique_ptr< ll::prefs::SearchData > mSearchData;
+
+	void onUpdateFilterTerm( bool force = false );
+	void collectSearchableItems();
 };
 
 class LLPanelPreference : public LLPanel
@@ -241,9 +257,12 @@ protected:
 private:
 	//for "Only friends and groups can call or IM me"
 	static void showFriendsOnlyWarning(LLUICtrl*, const LLSD&);
+    //for  "Allow Multiple Viewers"
+    static void showMultipleViewersWarning(LLUICtrl*, const LLSD&);
 	//for "Show my Favorite Landmarks at Login"
 	static void handleFavoritesOnLoginChanged(LLUICtrl* checkbox, const LLSD& value);
 
+	static void toggleMuteWhenMinimized();
 	typedef std::map<std::string, LLColor4> string_color_map_t;
 	string_color_map_t mSavedColors;
 

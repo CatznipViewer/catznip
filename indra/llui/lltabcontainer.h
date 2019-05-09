@@ -223,6 +223,8 @@ public:
 	bool		isVertical() const { return mIsVertical; }
 // [/SL:KB]
 
+	void setTabVisibility( LLPanel const *aPanel, bool );
+
 	void		startDragAndDropDelayTimer() { mDragAndDropDelayTimer.start(); }
 	
 	void onTabBtn( const LLSD& data, LLPanel* panel );
