@@ -221,9 +221,16 @@ void LLSidepanelAppearance::updateComplexityTitle()
 		if (mFloaterTitle.empty())
 			mFloaterTitle = pFloater->getTitle();
 
-		LLStringUtil::format_map_t args;
-		args["[COMPLEXITY]"] = std::to_string(gAgentAvatarp->getVisualComplexity());
-		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), getString("Complexity", args).c_str()));
+		if (isAgentAvatarValid())
+		{
+			LLStringUtil::format_map_t args;
+			args["[COMPLEXITY]"] = std::to_string(gAgentAvatarp->getVisualComplexity());
+			pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), getString("Complexity", args).c_str()));
+		}
+		else
+		{
+			pFloater->setTitle(mFloaterTitle);
+		}
 	}
 }
 // [/SL:KB]
