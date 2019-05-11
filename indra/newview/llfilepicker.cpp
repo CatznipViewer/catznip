@@ -120,7 +120,7 @@ public:
 					break;
 			}
 		}
-		else
+		else if (!mFailureCb.empty())
 		{
 			mFailureCb();
 		}
