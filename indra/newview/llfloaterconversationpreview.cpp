@@ -121,6 +121,7 @@ BOOL LLFloaterConversationPreview::postBuild()
 
 void LLFloaterConversationPreview::setPages(std::list<LLSD>* messages, const std::string& file_name)
 {
+	// [SL:KB] - NOTE: This runs in the context of the LLLoadHistoryThread and *not* the main thread
 	if(file_name == mChatHistoryFileName && messages)
 	{
 		// additional protection to avoid changes of mMessages in setPages()
@@ -130,24 +131,18 @@ void LLFloaterConversationPreview::setPages(std::list<LLSD>* messages, const std
 			delete mMessages; // Clean up temporary message list with "Loading..." text
 		}
 		mMessages = messages;
-// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
-		refreshMonthFilter();
-// [/SL:KB]
 //		mCurrentPage = (mMessages->size() ? (mMessages->size() - 1) / mPageSize : 0);
 
 		mPageSpinner->setEnabled(true);
 //		mPageSpinner->setMaxValue(mCurrentPage+1);
-// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
-		mPageSpinner->forceSetValue(mCurrentPage+1);
-// [/SL:KB]
 //		mPageSpinner->set(mCurrentPage+1);
 //
 //		std::string total_page_num = llformat("/ %d", mCurrentPage+1);
 //		getChild<LLTextBox>("page_num_label")->setValue(total_page_num);
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
-		onMonthFilterChanged();
+		mRefreshMonthFilter = true;
 // [/SL:KB]
-//		mShowHistory = true;
+		mShowHistory = true;
 	}
 	LLLoadHistoryThread* loadThread = LLLogChat::getLoadHistoryThread(mSessionID);
 	if (loadThread)
@@ -290,8 +285,10 @@ void LLFloaterConversationPreview::refreshMonthFilter()
 		mFilterCombo->add(strItem, LLSD().with("year", kvYearMonth.first.first).with("month", kvYearMonth.first.second));
 	}
 	mFilterCombo->selectFirstItem();
-// [/SL:KB]
+
+	mRefreshMonthFilter = false;
 }
+// [/SL:KB]
 
 void LLFloaterConversationPreview::draw()
 {
@@ -373,6 +370,15 @@ void LLFloaterConversationPreview::showHistory()
 {
 	// additional protection to avoid changes of mMessages in setPages
 	LLMutexLock lock(&mMutex);
+
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	if (mRefreshMonthFilter)
+	{
+		refreshMonthFilter();
+		onMonthFilterChanged();
+	}
+// [/SL:KB]
+
 	if(mMessages == NULL || !mMessages->size() || mCurrentPage * mPageSize >= mMessages->size())
 	{
 		return;
