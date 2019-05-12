@@ -103,7 +103,7 @@ public:
 	{
 	}
 
-	/*virtual*/ void notify(const std::vector<std::string>& files)
+	void notify(const std::vector<std::string>& files) override
 	{
 		if (!files.empty())
 		{
@@ -120,7 +120,7 @@ public:
 					break;
 			}
 		}
-		else
+		else if (!mFailureCb.empty())
 		{
 			mFailureCb();
 		}

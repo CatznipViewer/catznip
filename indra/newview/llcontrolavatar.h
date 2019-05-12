@@ -53,6 +53,9 @@ public:
     void markForDeath();
 
     virtual void idleUpdate(LLAgent &agent, const F64 &time);
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.0
+	void markDead() override;
+// [/SL:KB]
 	virtual BOOL updateCharacter(LLAgent &agent);
 
     void getAnimatedVolumes(std::vector<LLVOVolume*>& volumes);

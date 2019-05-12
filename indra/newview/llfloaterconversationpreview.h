@@ -86,6 +86,7 @@ private:
 	typedef std::map<monthyear_pair_t, message_filter_t> month_lookup_type_t;
 	message_filter_t    mMessageFilter = std::make_pair(0, 0);
 	month_lookup_type_t mMonthLookup;
+	bool            mRefreshMonthFilter = false;
 // [/SL:KB]
 //	std::string		mAccountName;
 //	std::string		mCompleteName;
