@@ -7912,6 +7912,30 @@ bool enable_attachment_detach_folder()
 	}
 	return false;
 }
+
+void handle_attachment_find_original()
+{
+	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
+	if ( (SELECT_TYPE_ATTACHMENT == hSelection->getSelectType()) || (SELECT_TYPE_HUD == hSelection->getSelectType()) )
+	{
+		const LLViewerObject* pAttachObj = hSelection->getPrimaryObject();
+		if ( (pAttachObj) && (!pAttachObj->isTempAttachment()) )
+		{
+			const LLUUID& idAttachItem = pAttachObj->getAttachmentItemID();
+			show_item_original(idAttachItem, EShowItemOptions::TAKE_FOCUS_YES, nullptr);
+		}
+	}
+}
+
+bool enable_attachment_find_original()
+{
+	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
+	if ( (SELECT_TYPE_ATTACHMENT != hSelection->getSelectType()) && (SELECT_TYPE_HUD != hSelection->getSelectType()) )
+		return false;
+
+	const LLViewerObject* pAttachObj = hSelection->getPrimaryObject();
+	return (pAttachObj) && (!pAttachObj->isTempAttachment());
+}
 // [/SL:KB]
 
 //Adding an observer for a Jira 2422 and needs to be a fetch observer
@@ -10548,6 +10572,8 @@ void initialize_menus()
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
 	commit.add("Attachment.DetachFolder", boost::bind(&handle_attachment_detach_folder));
 	enable.add("Attachment.EnableDetachFolder", boost::bind(&enable_attachment_detach_folder));
+	commit.add("Attachment.FindOriginal", boost::bind(&handle_attachment_find_original));
+	enable.add("Attachment.EnableFindOriginal", boost::bind(&enable_attachment_find_original));
 // [/SL:KB]
 
 	// Land pie menu

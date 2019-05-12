@@ -53,6 +53,16 @@
         <menu_item_call.on_enable
          function="Attachment.EnableDetachFolder" />
     </menu_item_call>
+    <menu_item_call
+     enabled="false"
+     label="Show in Inventory"
+     layout="topleft"
+     name="Find Original">
+        <menu_item_call.on_click
+         function="Attachment.FindOriginal" />
+        <menu_item_call.on_enable
+         function="Attachment.EnableFindOriginal" />
+    </menu_item_call>
   <menu_item_separator
     layout="topleft" />
 
