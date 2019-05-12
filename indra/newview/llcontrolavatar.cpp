@@ -343,6 +343,22 @@ void LLControlAvatar::markForDeath()
 // [/SL:KB]
 }
 
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.0
+void LLControlAvatar::markDead()
+{
+	// NOTE: this can happen when the control avatar and root volume are on different regions and we're
+	//       being called from the LLViewerRegion destructor due the region being dropped
+	//       (due to being used as a vehicle and the move not yet being processed?)
+	if (mRootVolp)
+	{
+		mRootVolp->unlinkControlAvatar();
+		mRootVolp = nullptr;
+	}
+
+	LLVOAvatar::markDead();
+}
+// [/SL:KB]
+
 void LLControlAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 {
     if (mMarkedForDeath)

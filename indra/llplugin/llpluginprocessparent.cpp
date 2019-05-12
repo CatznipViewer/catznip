@@ -888,14 +888,21 @@ void LLPluginProcessParent::poll(F64 timeout)
 	}
 
     // Remove instances in the done state from the sInstances map.
-    mapInstances_t::iterator itClean = sInstances.begin();
-    while (itClean != sInstances.end())
-    {
-        if ((*itClean).second->isDone())
-            sInstances.erase(itClean++);
-        else
-            ++itClean;
-    }
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.1
+	{
+		LLMutexLock lock(sInstancesMutex);
+// [/SL:KB]
+        mapInstances_t::iterator itClean = sInstances.begin();
+        while (itClean != sInstances.end())
+        {
+            if ((*itClean).second->isDone())
+                sInstances.erase(itClean++);
+            else
+                ++itClean;
+        }
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.1
+	}
+// [/SL:KB]
 }
 
 void LLPluginProcessParent::servicePoll()
