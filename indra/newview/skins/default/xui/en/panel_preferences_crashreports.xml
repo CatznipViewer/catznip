@@ -110,7 +110,7 @@
          width="160" />
     </scroll_list>
     <button
-     follows="left|top" 
+     follows="bottom|left" 
      label="Copy selected"
      layout="topleft"
      name="crashes_copysel_btn"
@@ -119,7 +119,7 @@
      height="25"
      width="145" />
     <button
-     follows="left|top" 
+     follows="bottom|left" 
      label="Clear list"
      layout="topleft"
      name="crashes_clearall_btn"
@@ -129,7 +129,7 @@
      width="145" />
 
     <text
-     follows="top|left"
+     follows="bottom|left" 
      height="15"
      layout="topleft"
      left="30"
@@ -142,7 +142,7 @@
         Unless checked above crash reports only contain information relevant to the crash.
     </text>
     <text
-     follows="top|left"
+     follows="bottom|left" 
      height="15"
      layout="topleft"
      left="30"
