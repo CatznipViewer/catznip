@@ -38,7 +38,7 @@ LLImageDecodeThread::LLImageDecodeThread(bool threaded)
 	, mCreationCount(0)
 // [/SL:KB]
 {
-	mCreationMutex = new LLMutex(getAPRPool());
+	mCreationMutex = new LLMutex();
 }
 
 //virtual 
