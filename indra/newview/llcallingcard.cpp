@@ -574,7 +574,9 @@ bool LLAvatarTracker::updateCallingCards(const LLUUID& buddy_id)
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
 	LLParticularBuddyCollector f(buddy_id);
-	gInventory.collectDescendentsIf(gInventory.getRootFolderID(), cats, items, LLInventoryModel::INCLUDE_TRASH, f);
+
+	const LLUUID idCallingCards = gInventory.findCategoryUUIDForType(LLFolderType::FT_CALLINGCARD);
+	gInventory.collectDescendentsIf(idCallingCards, cats, items, LLInventoryModel::EXCLUDE_TRASH, f);
 
 	for (LLInventoryModel::item_array_t::iterator itItem = items.begin(); itItem != items.end(); ++itItem)
 		gInventory.addChangedMask(LLInventoryObserver::LABEL, (*itItem)->getUUID());
