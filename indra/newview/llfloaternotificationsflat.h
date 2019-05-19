@@ -44,7 +44,8 @@ public:
 	 * Base class overrides
 	 */
 public:
-    /*virtual*/ BOOL postBuild();
+	BOOL postBuild() override;
+	void onVisibilityChange(BOOL isVisible) override;
 
 	/*
 	 * Helper functions
@@ -62,6 +63,7 @@ protected:
 
 	bool checkFilter(const LLNotificationListItem* pItem) const;
 	void refreshFilter();
+	void refreshSort();
 
 	/*
 	 * Pure virtual functions
@@ -86,6 +88,7 @@ private:
 	LLComboBox*     m_pFilterType;
 	LLFilterEditor* m_pFilterText;
 
+	bool            m_NeedsSort = false;
 	bool            m_fSinceLogoff = false;
 	std::string     m_strFilterText;
 	std::string     m_strFilterType;
