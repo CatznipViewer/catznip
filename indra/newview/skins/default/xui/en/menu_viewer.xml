@@ -3640,6 +3640,10 @@
            label="Media Browser"
            name="Media Browser"
            shortcut="control|alt|shift|Z">
+            <menu_item_call.on_click
+             function="Advanced.WebContentTest"
+             parameter="http://duckduckgo.com"/>
+          </menu_item_call>
           <menu_item_check
            label="Region Restart Test..."
            name="Region Restart Test">
@@ -3650,10 +3654,6 @@
                function="Floater.Toggle"
                parameter="region_restarting" />
           </menu_item_check>
-            <menu_item_call.on_click
-             function="Advanced.WebContentTest"
-             parameter="http://duckduckgo.com"/>
-          </menu_item_call>
           <menu_item_call
            label="FB Connect Test"
            name="FB Connect Test">
