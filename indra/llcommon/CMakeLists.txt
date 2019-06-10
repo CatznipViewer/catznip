@@ -10,7 +10,6 @@ include(Boost)
 include(LLSharedLibs)
 include(JsonCpp)
 include(GoogleBreakpad)
-include(GooglePerfTools)
 include(Copy3rdPartyLibs)
 include(ZLIB)
 include(URIPARSER)
@@ -227,6 +226,7 @@ set(llcommon_HEADER_FILES
     llstring.h
     llstringtable.h
     llstaticstringtable.h
+    llstatsaccumulator.h
     llsys.h
     llthread.h
     llthreadlocalstorage.h
@@ -255,17 +255,22 @@ set(llcommon_HEADER_FILES
 set_source_files_properties(${llcommon_HEADER_FILES}
                             PROPERTIES HEADER_FILE_ONLY TRUE)
 
+if (BUGSPLAT_DB)
+  set_source_files_properties(llapp.cpp
+    PROPERTIES COMPILE_DEFINITIONS "LL_BUGSPLAT")
+endif (BUGSPLAT_DB)
+
 list(APPEND llcommon_SOURCE_FILES ${llcommon_HEADER_FILES})
 
 if(LLCOMMON_LINK_SHARED)
   add_library (llcommon SHARED ${llcommon_SOURCE_FILES})
-  if(NOT WORD_SIZE EQUAL 32)
+  if(NOT ADDRESS_SIZE EQUAL 32)
     if(WINDOWS)
-      add_definitions(/FIXED:NO)
+      ##add_definitions(/FIXED:NO)
     else(WINDOWS) # not windows therefore gcc LINUX and DARWIN
       add_definitions(-fPIC)
     endif(WINDOWS)
-  endif(NOT WORD_SIZE EQUAL 32)
+  endif(NOT ADDRESS_SIZE EQUAL 32)
   if(WINDOWS)
     # always generate llcommon.pdb, even for "Release" builds
     set_target_properties(llcommon PROPERTIES LINK_FLAGS "/DEBUG")
@@ -324,34 +329,31 @@ if (LL_TESTS)
   LL_ADD_INTEGRATION_TEST(lldeadmantimer "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lldependencies "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llerror "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventfilter "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llframetimer "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llheteromap "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llinstancetracker "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llpounceable "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llprocessor "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llprocinfo "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llrand "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llsdserialize "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llsingleton "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llstring "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lltrace "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lltreeiterators "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lluri "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llunits "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(stringize "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llpounceable "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llheteromap "" "${test_libs}")
 
 ## llexception_test.cpp isn't a regression test, and doesn't need to be run
 ## every build. It's to help a developer make implementation choices about
 ## throwing and catching exceptions.
 ##LL_ADD_INTEGRATION_TEST(llexception "" "${test_libs}")
 
-  # *TODO - reenable these once tcmalloc libs no longer break the build.
-  #ADD_BUILD_TEST(llallocator llcommon)
-  #ADD_BUILD_TEST(llallocator_heap_profile llcommon)
-  #ADD_BUILD_TEST(llmemtype llcommon)
 endif (LL_TESTS)

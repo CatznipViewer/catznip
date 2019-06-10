@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="事物" name="main inventory panel">
 	<panel.string name="ItemcountFetching">
-		正在擷取 [ITEM_COUNT] 個物項… [FILTER]
+		正在擷取[ITEM_COUNT]個物項及[CATEGORY_COUNT]個資料夾… [FILTER]
 	</panel.string>
 	<panel.string name="ItemcountCompleted">
-		[ITEM_COUNT] 物品 [FILTER]
+		[ITEM_COUNT]個物項及[CATEGORY_COUNT]個資料夾[FILTER]
 	</panel.string>
 	<panel.string name="ItemcountUnknown">
-		已取得 [ITEM_COUNT] 物品 [FILTER]
+		擷取了[ITEM_COUNT]個物項及[CATEGORY_COUNT]個資料夾[FILTER]
 	</panel.string>
 	<text name="ItemcountText">
 		物品：
 	</text>
-	<filter_editor label="收納區過濾器" name="inventory search editor"/>
+	<filter_editor label="輸入搜尋文字" name="inventory search editor"/>
+	<combo_box name="search_type">
+		<item label="名稱" name="Name" value="search_by_name"/>
+		<item label="創造者" name="Creator" value="search_by_creator"/>
+		<item label="描述" name="Description" value="search_by_description"/>
+		<item label="UUID" name="UUID" value="search_by_UUID"/>
+	</combo_box>
 	<tab_container name="inventory filter tabs">
 		<inventory_panel label="我的收納區" name="All Items"/>
 		<recent_inventory_panel label="最近" name="Recent Items"/>
+		<inventory_panel label="已穿戴" name="Worn Items"/>
 	</tab_container>
 	<layout_stack name="bottom_panel">
 		<layout_panel name="options_gear_btn_panel">

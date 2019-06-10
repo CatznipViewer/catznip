@@ -177,9 +177,6 @@ BOOL LLSidepanelInventory::postBuild()
 		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
 		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
 		
-		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
-		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
-		
 		mPanelMainInventory = mInventoryPanel->getChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
 		LLTabContainer* tabs = mPanelMainInventory->getChild<LLTabContainer>("inventory filter tabs");
@@ -515,10 +512,6 @@ void LLSidepanelInventory::onTeleportButtonClicked()
 	performActionOnSelection("teleport");
 }
 
-void LLSidepanelInventory::onOverflowButtonClicked()
-{
-}
-
 void LLSidepanelInventory::onBackButtonClicked()
 {
 	showInventoryPanel();
@@ -694,6 +687,19 @@ LLInventoryPanel *LLSidepanelInventory::getActivePanel()
 		return mPanelMainInventory->getActivePanel();
 	}
 	return NULL;
+}
+
+void LLSidepanelInventory::selectAllItemsPanel()
+{
+	if (!getVisible())
+	{
+		return;
+	}
+	if (mInventoryPanel->getVisible())
+	{
+		 mPanelMainInventory->selectAllItemsPanel();
+	}
+
 }
 
 BOOL LLSidepanelInventory::isMainInventoryPanelActive() const

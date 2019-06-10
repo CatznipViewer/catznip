@@ -3,6 +3,10 @@
 	<global name="skipnexttime">
 		Nicht mehr anzeigen
 	</global>
+	<global name="skipnexttimesessiononly">
+		Nicht mehr anzeigen 
+(während der aktuellen Sitzung)
+	</global>
 	<global name="alwayschoose">
 		Diese Option immer auswählen
 	</global>
@@ -144,8 +148,7 @@ Marktplatzinitialisierung aufgrund eines System- oder Netzwerkfehlers fehlgeschl
 	<notification name="MerchantTransactionFailed">
 		Marktplatztransaktion fehlgeschlagen mit Fehler:
         
-        Grund: „[ERROR_REASON]“
-        [ERROR_DESCRIPTION]
+        [ERROR_REASON][ERROR_DESCRIPTION]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="MerchantUnprocessableEntity">
@@ -350,7 +353,7 @@ Fortfahren?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="Beitreten"/>
 	</notification>
 	<notification name="JoinGroupNoCost">
-		Sie treten der Gruppe [NAME] bei.
+		Sie treten der Gruppe &lt;nolink&gt;[NAME]&lt;/nolink&gt; bei. 
 Fortfahren?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="Beitreten"/>
 	</notification>
@@ -363,6 +366,40 @@ Sie haben nicht genug L$, um dieser Gruppe beizutreten.
 Gruppen müssen mehr als ein Mitglied haben oder sie werden gelöscht.
 Bitte laden Sie innerhalb von 48 Stunden Mitglieder in Ihre Gruppe ein.
 		<usetemplate canceltext="Abbrechen" name="okcancelbuttons" notext="Abbrechen" yestext="Gruppe für 100 L$ erstellen"/>
+	</notification>
+	<notification name="JoinGroupInaccessible">
+		Diese Gruppe ist für Sie nicht verfügbar.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupError">
+		Fehler bei der Verarbeitung Ihrer Anfrage zur Gruppenmitgliedschaft.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupErrorReason">
+		Beitritt zur Gruppe nicht möglich: [reason]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupTrialUser">
+		Leider können Testbenutzer keinen Gruppen beitreten.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupMaxGroups">
+		Sie können &quot;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&quot; nicht beitreten: 
+Sie sind bereits Mitglied in [group_count] Gruppen, die maximale zulässige Anzahl beträgt [max_groups]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupClosedEnrollment">
+		Sie können &quot;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&quot; nicht beitreten: 
+Die Gruppe steht für freie Registrierungen nicht mehr zur Verfügung.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupSuccess">
+		Sie wurden der Gruppe hinzugefügt.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupInsufficientFunds">
+		Die erforderliche L$ [membership_fee] Mitgliedschaftsgebühr kann nicht übertragen werden.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LandBuyPass">
 		Sie können dieses Land („[PARCEL_NAME]“) für [COST] L$
@@ -386,9 +423,9 @@ Der Verkaufspreis beträgt [SALE_PRICE] L$. Der Verkauf an [NAME] wird zu diesem
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="ReturnObjectsDeededToGroup">
-		Möchten Sie alle Ihre Objekte auf dieser Parzelle, die der Gruppe „[NAME]“ gehören, zurück in das jeweilige Inventar ihrer vorherigen Eigentümer transferieren?
+		Möchten Sie alle Ihre Objekte auf dieser Parzelle, die gemeinsam mit der Gruppe &quot;&lt;nolink&gt;[NAME]&lt;/nolink&gt;&quot; verwendet werden, zurück in das Inventar ihrer vorherigen Eigentümer transferieren? 
 
-*WARNUNG* Alle nicht transferierbaren Objekte, die der Gruppe übertragen wurden, werden dabei gelöscht!
+*WARNUNG* Hierdurch werden alle nicht transferierbaren Objekte gelöscht, die der Gruppe übertragen wurden. 
 
 Objekte: [N]
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
@@ -432,7 +469,7 @@ Objekte: [N]
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="ReturnObjectsNotOwnedByGroup">
-		Objekte auf dieser Parzelle, die von der Gruppe [NAME] nicht gemeinsam genutzt werden, an ihre Eigentümer zurückgeben?
+		Möchten Sie die Objekte auf dieser Parzelle, die NICHT gemeinsam mit der Gruppe &lt;nolink&gt;[NAME]&lt;/nolink&gt; verwendet werden, an ihre Eigentümer zurückgeben? 
 
 Objekte: [N]
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
@@ -480,7 +517,7 @@ Um Medien nur auf einer Fläche einzufügen, wählen Sie „Oberfläche auswähl
 		Ein Report-Screenshot konnte aus folgendem Grund nicht hochgeladen werden: [REASON]
 	</notification>
 	<notification name="MustAgreeToLogIn">
-		Bevor Sie sich in [SECOND_LIFE] anmelden können, müssen Sie den Nutzungsbedingungen zustimmen.
+		Bevor Sie sich weiterhin in [SECOND_LIFE] anmelden können, müssen Sie den Allgemeinen Geschäftsbedingungen, der Datenschutzrichtlinien sowie den Servicebedingungen zustimmen.
 	</notification>
 	<notification name="CouldNotPutOnOutfit">
 		Outfit konnte nicht angezogen werden.
@@ -655,6 +692,9 @@ Weitere Informationen finden Sie auf [_URL].
 		</url>
 		<usetemplate ignoretext="Meine Hardware wird nicht unterstützt" name="okcancelignore" notext="Nein" yestext="Ja"/>
 	</notification>
+	<notification name="RunLauncher">
+		Bitte starten Sie die ausführbare Viewer-Datei nicht direkt. Aktualisieren Sie alle bestehenden Verknüpfungen, um stattdessen den LS_Launcher zu starten.
+	</notification>
 	<notification name="OldGPUDriver">
 		Wahrscheinlich gibt es einen neueren Treiber für Ihren Grafikchip.  Durch Aktualisieren der Grafiktreiber lässt sich die Leistung u. U. beträchtlich verbessern.
 
@@ -733,7 +773,7 @@ Der Avatar wird außer Gefecht gesetzt und kann sich nicht mehr bewegen, chatten
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="Hinauswerfen"/>
 	</notification>
 	<notification name="EjectAvatarFromGroup">
-		Sie haben [AVATAR_NAME] aus der Gruppe [GROUP_NAME] geworfen.
+		Sie haben [AVATAR_NAME] aus der Gruppe &lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt; entfernt.
 	</notification>
 	<notification name="AcquireErrorTooManyObjects">
 		FEHLER: Zu viele Objekte ausgewählt.
@@ -767,6 +807,9 @@ Sie können maximal [MAX] Objekte verknüpfen.
 Stellen Sie sicher, dass kein Objekt gesperrt ist und alle Objekte Ihnen gehören.
 	</notification>
 	<notification name="CannotLinkPermanent">
+		Objekte können nicht über Regionsgrenzen hinweg verknüpft werden.
+	</notification>
+	<notification name="CannotLinkAcrossRegions">
 		Objekte können nicht über Regionsgrenzen hinweg verknüpft werden.
 	</notification>
 	<notification name="CannotLinkDifferentOwners">
@@ -1334,19 +1377,18 @@ Möchten Sie diese Objekte nehmen?
 Wählen Sie ein kleineres Gebiet und versuchen Sie es erneut.
 	</notification>
 	<notification name="DeedLandToGroup">
-		Die Schenkung dieser Parzelle setzt voraus, dass die Gruppe über ausreichende Landnutzungsrechte verfügt.
-Dem Eigentümer wird der Kaufpreis für das Land nicht rückerstattet. Bei Verkauf der übertragenen Parzelle wird der Erlös zwischen den Gruppenmitgliedern aufgeteilt.
+		Die Schenkung dieser Parzelle setzt voraus, dass die Gruppe über ausreichende Landnutzungsrechte verfügt. 
+Dem Eigentümer wird der Kaufpreis für das Land nicht zurückerstattet. Bei einem Verkauf der übertragenen Parzelle wird der Erlös zu gleichen Teilen unter den Gruppenmitgliedern aufgeteilt. 
 
-Der Gruppe „[GROUP_NAME]“
- [AREA] m² Land schenken?
+Der Gruppe &quot;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&quot; diese [AREA] m² Land schenken?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="DeedLandToGroupWithContribution">
-		Die Schenkung dieser Parzelle setzt voraus, dass die Gruppe über ausreichende Landnutzungsrechte verfügt.
-Die Schenkung beinhaltet eine Landübertragung an die Gruppe von „[NAME]“.
-Dem Eigentümer wird der Kaufpreis für das Land nicht rückerstattet. Bei Verkauf der übertragenen Parzelle wird der Erlös zwischen den Gruppenmitgliedern aufgeteilt.
+		Die Schenkung dieser Parzelle setzt voraus, dass die Gruppe über ausreichende Landnutzungsrechte verfügt. 
+Die Schenkung beinhaltet eine Landübertragung an die Gruppe von &quot;[NAME]&quot;. 
+Dem Eigentümer wird der Kaufpreis für das Land nicht zurückerstattet. Bei einem Verkauf der übertragenen Parzelle wird der Erlös zu gleichen Teilen unter den Gruppenmitgliedern aufgeteilt. 
 
-Der Gruppe „[GROUP_NAME]“ [AREA] m² an Land schenken?
+Der Gruppe &quot;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&quot; diese [AREA] m² Land schenken?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="DisplaySetToSafe">
@@ -1542,6 +1584,30 @@ Ersetzen Sie die Textur [TEXTURE_NUM] mit einer Bilddatei von maximal 512x512 un
 	<notification name="ProblemAddingEstateManagerBanned">
 		Verbannter Einwohner kann nicht zur Grundbesitzverwalterliste hinzugefügt werden.
 	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Grundbesitzverwalter [AGENT] kann nicht zur Bannliste hinzugefügt werden.
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;[GROUP]&lt;/nolink&gt; befindet sich bereits auf der Liste der zulässigen Gruppen.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] befindet sich bereits auf Ihrer [LIST_TYPE]-Liste.
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] befinden sich bereits auf Ihrer [LIST_TYPE]-Liste.
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] wurde der [LIST_TYPE]-Liste von [ESTATE] hinzugefügt.
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] wurden zur [LIST_TYPE]-Liste von [ESTATE] hinzugefügt.
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] wurden von der [LIST_TYPE]-Liste von [ESTATE] entfernt.
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] wurden von der [LIST_TYPE]-Liste von [ESTATE] entfernt.
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Das Aussehen lässt sich erst ändern, wenn Kleider und Form/Gestalt geladen sind.
 	</notification>
@@ -1556,153 +1622,13 @@ Geben Sie das Objekt zum Verkauf frei und versuchen Sie es erneut.
 		Raw-Terrain-Datei wurde heruntergeladen nach:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadWindows">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinux">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		Eine neue Version von [SUPPORT_SITE] ist verfügbar.
-[MESSAGE]
-Sie müssen das Update herunterladen, um [APP_NAME] weiter verwenden zu können.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Beenden" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMac">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		Eine neue Version von [APP_NAME] ist verfügbar.
-[MESSAGE]
-Dieses Update ist nicht erforderlich, für bessere Leistung und Stabilität sollte es jedoch installiert werden.
-
-In Ihren Anwendungsordner herunterladen?
-		<usetemplate name="okcancelbuttons" notext="Weiter" yestext="Herunterladen"/>
-	</notification>
-	<notification name="FailedUpdateInstall">
-		Beim Installieren des Viewer-Updates ist ein Fehler aufgetreten.
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+	<notification name="RequiredUpdate">
+		Für die Anmeldung ist Version [VERSION] erforderlich. Diese sollte für Sie aktualisiert worden sein, was offenbar nicht geschehen ist. Bitte laden Sie die Datei unter https://secondlife.com/support/downloads/ herunter.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="FailedRequiredUpdateInstall">
-		Ein erforderliches Update konnte nicht installiert werden. 
-Sie können sich erst anmelden, wenn [APP_NAME] aktualisiert wurde.
-
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+	<notification name="LoginFailedUnknown">
+		Die Anmeldung ist aus nicht bekannten Gründen leider fehlgeschlagen. Falls diese Meldung weiterhin angezeigt wird, besuchen Sie bitte die [SUPPORT_SITE].
 		<usetemplate name="okbutton" yestext="Beenden"/>
-	</notification>
-	<notification name="UpdaterServiceNotRunning">
-		Für Ihre SecondLife-Installation ist ein Update erforderlich.
-
-Sie können dieses Update von http://www.secondlife.com/downloads herunterladen oder jetzt installieren.
-		<usetemplate name="okcancelbuttons" notext="Second Life beenden" yestext="Jetzt herunterladen und installieren"/>
-	</notification>
-	<notification name="DownloadBackgroundTip">
-		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
-		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
-	</notification>
-	<notification name="DownloadBackgroundDialog">
-		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
-		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedVerboseDialog">
-		Ein erforderliches Softwareupdate wurde heruntergeladen.
-Version [VERSION] [[INFO_URL] Infos zu diesem Update]
-
-Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedDialog">
-		Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
-[[INFO_URL] Infos zu diesem Update]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundTip">
-		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] 
-Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Details zu diesem Update finden Sie [[INFO_URL] hier].
-		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
-	</notification>
-	<notification name="OtherChannelDownloadBackgroundDialog">
-		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION]
-Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
-		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
-		Ein erforderliches Softwareupdate wurde heruntergeladen.
-Version [VERSION]
-Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
-
-Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
-		Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
-Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadInProgress">
-		Ein Update ist verfügbar.
-Es wird im Hintergrund heruntergeladen. Wenn der Download fertig ist, werden Sie aufgefordert, den Viewer neu zu starten, damit die Installation abgeschlossen werden kann.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadComplete">
-		Ein Update wurde heruntergeladen. Es wird beim Neustart installiert.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateCheckError">
-		Beim Suchen nach einem Update ist ein Fehler aufgetreten.
-Versuchen Sie es später erneut.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateViewerUpToDate">
-		Ihr Viewer ist auf dem neuesten Stand.
-Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Seite „Alternate Viewers“. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
-		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		Bei Übertragung dieses Objekts erhält die Gruppe:
@@ -1712,10 +1638,6 @@ Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Se
 	<notification name="WebLaunchExternalTarget">
 		Möchten Sie Ihren Internetbrowser öffnen, um diesen Inhalt anzuzeigen?
 		<usetemplate ignoretext="Meinen Browser starten, um eine Webseite anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
-	</notification>
-	<notification name="SystemUIScaleFactorChanged">
-		Der UI-Größenfaktor des Systems hat sich seit der letzten Ausführung geändert. Möchten Sie die Seite mit den UI-Größeneinstellungen öffnen?
-		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchJoinNow">
 		Möchten Sie Ihre [http://secondlife.com/account/ Startseite] aufrufen, um Ihr Konto zu verwalten?
@@ -1757,7 +1679,7 @@ Diese Gruppe verlassen?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="GroupDepart">
-		Sie haben die Gruppe „[group_name]“ verlassen.
+		Sie haben die Gruppe &quot;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&quot; verlassen.
 	</notification>
 	<notification name="OwnerCannotLeaveGroup">
 		Sie können die Gruppe nicht verlassen, da Sie der letzte Besitzer der Gruppe sind. Weisen Sie die Besitzerrolle zuerst einem anderen Mitglied zu.
@@ -1798,7 +1720,6 @@ Diese Gruppe verlassen?
 		Nicht-stören-Modus ist aktiviert:  Sie erhalten keine Benachrichtigung über eingehende Kommunikation.
 
 - Andere Einwohner erhalten Ihre Nicht-stören-Antwort (festgelegt in Einstellungen &gt; Allgemein).
-- Teleport-Angebote werden abgelehnt.
 - Voice-Anrufe werden abgelehnt.
 		<usetemplate ignoretext="Ich ändere meinen Status zu „Nicht stören“" name="okignore" yestext="OK"/>
 	</notification>
@@ -1988,7 +1909,7 @@ Tausende Regionen werden verändert und der Spaceserver wird dadurch stark belas
 		<usetemplate canceltext="Abbrechen" name="yesnocancelbuttons" notext="Alle Grundbesitze" yestext="Diesen Grundbesitz"/>
 	</notification>
 	<notification label="Grundbesitz wählen" name="EstateBannedAgentRemove">
-		Einwohner nur für diesen Grundbesitz oder für alle [ALL_ESTATES] von der Bannliste entfernen?
+		Den Einwohner nur für diesen Grundbesitz oder für [ALL_ESTATES] von der Bannliste entfernen?
 		<usetemplate canceltext="Abbrechen" name="yesnocancelbuttons" notext="Alle Grundbesitze" yestext="Diesen Grundbesitz"/>
 	</notification>
 	<notification label="Grundbesitz wählen" name="EstateManagerAdd">
@@ -2030,6 +1951,10 @@ Tausende Regionen werden verändert und der Spaceserver wird dadurch stark belas
 	<notification name="EstateChangeCovenant">
 		Möchten Sie den Grundbesitzvertrag wirklich ändern?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
+	</notification>
+	<notification name="EstateParcelAccessOverride">
+		Durch Deaktivieren dieser Option können Einstellungen der Parzellenbesitzer zum Schutz vor Belästigungen, zur Aufrechterhaltung der Privatsphäre oder zum Schutz von Minderjährigen vor nicht altersgemäßen Inhalten aufgehoben werden. Bitte sprechen Sie mit den Parzellenbesitzern, falls erforderlich.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RegionEntryAccessBlocked">
 		Die Region, die Sie besuchen möchten, enthält Inhalte, die Ihre aktuellen Einstellungen überschreiten. Sie können Ihre Einstellungen unter „Ich“ &gt; „Einstellungen“ &gt; „Allgemein“ ändern.
@@ -2372,7 +2297,17 @@ Diese Aktion kann nicht rückgängig gemacht werden.
 	</notification>
 	<notification name="DeleteItems">
 		[QUESTION]
-		<usetemplate ignoretext="Vor dem Löschen von Objekten bestätigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
+		<form name="form">
+			<ignore name="ignore" text="Vor dem Löschen von Objekten bestätigen"/>
+			<button name="Yes" text="OK"/>
+			<button name="No" text="Abbrechen"/>
+		</form>
+	</notification>
+	<notification name="DeleteFilteredItems">
+		Ihr Inventar wird zur Zeit gefiltert, und nicht alle Objekte, die gelöscht werden sollen, sind momentan sichtbar. 
+
+Möchten Sie diese Objekte wirklich löschen?
+		<usetemplate ignoretext="Vor dem Löschen gefilterter Objekte bestätigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmUnlink">
 		Dies ist eine große Auswahl mit Linksets. Wenn Sie die Verknüpfung auflösen, kann sie möglicherweise nicht erneut hergestellt werden. Als Vorsichtsmaßnahme empfiehlt es sich, Kopien von Linksets in Ihr Inventar aufzunehmen.
@@ -2448,13 +2383,17 @@ Möchten Sie den Nicht-stören-Modus deaktivieren, bevor Sie diese Transaktion a
 		Der Ordner „[FOLDERNAME]“ ist ein Systemordner. Das Löschen von Systemordnern kann zu instabiler Leistung führen.  Möchten Sie fortfahren?
 		<usetemplate ignoretext="Bestätigen, bevor ich einen Systemordner lösche." name="okcancelignore" notext="Abbrechen" yestext="OK"/>
 	</notification>
+	<notification name="PurgeSelectedItems">
+		[COUNT] Objekt(e) wird/werden dauerhaft gelöscht. Möchten Sie das/die ausgewählte(n) Objekt(e) wirklich dauerhaft aus dem Papierkorb löschen?
+		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
+	</notification>
 	<notification name="ConfirmEmptyTrash">
-		Sind Sie sicher, dass Sie den Inhalt Ihres Papierkorbs löschen möchten?
-		<usetemplate ignoretext="Bestätigen, bevor der Ordner Papierkorb im Inventar geleert wird" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
+		[COUNT] Bestellungen und Ordner werden dauerhaft gelöscht. Sind Sie sicher, dass Sie den Inhalt Ihres Papierkorbs dauerhaft löschen möchten?
+		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="TrashIsFull">
 		Ihr Papierkorb läuft über. Dies kann zu Anmeldeproblemen führen.
-		<usetemplate name="okcancelbuttons" notext="Papierkorb später leeren" yestext="Papierkorb jetzt leeren"/>
+		<usetemplate name="okcancelbuttons" notext="Papierkorb später leeren" yestext="Papierkorb ansehen"/>
 	</notification>
 	<notification name="ConfirmClearBrowserCache">
 		Sind Sie sicher, dass Sie Ihren Reise-, Internet- und Suchverlauf löschen möchten?
@@ -2568,9 +2507,6 @@ Von einer Webseite zu diesem Formular linken, um anderen leichten Zugang zu dies
 	<notification name="Cancelled">
 		Abgebrochen
 	</notification>
-	<notification name="CancelledSit">
-		Sitzen beendet
-	</notification>
 	<notification name="CancelledAttach">
 		Anhängen abgebrochen
 	</notification>
@@ -2585,6 +2521,9 @@ Von einer Webseite zu diesem Formular linken, um anderen leichten Zugang zu dies
 	</notification>
 	<notification name="AddSelfFriend">
 		Obwohl Sie ein sehr netter Mensch sind, können Sie sich nicht selbst als Freund hinzufügen.
+	</notification>
+	<notification name="AddSelfRenderExceptions">
+		Sie können sich nicht selbst der Rendering-Ausnahmeliste hinzufügen.
 	</notification>
 	<notification name="UploadingAuctionSnapshot">
 		In-Welt- und Website-Fotos werden hochgeladen...
@@ -2779,9 +2718,9 @@ Bitte installieren Sie das Plugin erneut. Falls weiterhin Problem auftreten, kon
 		Alle Objekte auf der ausgewählten Parzelle, die Einwohner &apos;[NAME]&apos; gehören, wurden an ihren Eigentümern zurückgegeben.
 	</notification>
 	<notification name="GroupObjectsReturned">
-		Die mit der Gruppe [GROUPNAME] gemeinsam genutzten Objekte auf dieser Parzelle wurden in das Inventar ihrer Eigentümer transferiert.
-Transferierbare übertragene Objekte wurden an ihre früheren Eigentümer zurückgegeben.
-Nicht transferierbare an die Gruppe übertragene Objekte wurden gelöscht.
+		Die mit der Gruppe &lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt; gemeinsam verwendeten Objekte auf dieser Parzelle wurden zurück in das Inventar ihrer Eigentümer transferiert.
+Transferierbare, an die Gruppe übertragene Objekte wurden an ihre früheren Eigentümer zurückgegeben.
+Nicht transferierbare, an die Gruppe übertragene Objekte wurden gelöscht.
 	</notification>
 	<notification name="UnOwnedObjectsReturned">
 		Alle Objekte auf der ausgewählten Parzelle, die NICHT Ihnen gehören, wurden ihren Eigentümern zurückgegeben.
@@ -3166,7 +3105,7 @@ Um diese Berechtigung zu gewähren, laden Sie die neueste Version des Viewers vo
 		</form>
 	</notification>
 	<notification name="ScriptDialogGroup">
-		„&lt;nolink&gt;[TITLE]&lt;/nolink&gt;“ von [GROUPNAME]
+		&lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt;s &quot;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&quot; 
 [MESSAGE]
 		<form name="form">
 			<button name="Client_Side_Mute" text="Blockieren"/>
@@ -3214,8 +3153,8 @@ Klicken Sie auf  &apos;Akzeptieren &apos;, um dem Gespräch beizutreten, oder au
 		[NAME] wurde ein Inventarobjekt angeboten und wird nicht länger ignoriert.
 	</notification>
 	<notification name="VoiceInviteGroup">
-		[NAME] ist einem Voice-Chat mit der Gruppe [GROUP] beigetreten.
-Klicken Sie auf  &apos;Akzeptieren &apos;, um dem Gespräch beizutreten, oder auf  &apos;Ablehnen &apos;, um die Einladung auszuschlagen. Klicken Sie auf Ignorieren, um diesen Anrufer zu ignorieren.
+		[NAME] ist einem Voice-Chat mit der Gruppe &lt;nolink&gt;[GROUP]&lt;/nolink&gt; beigetreten. 
+Klicken Sie auf „Annehmen“, um die Einladung zu akzeptieren, oder auf „Ablehnen“, um die Einladung nicht zu akzeptieren. Klicken Sie auf „Ignorieren“, um diesen Anrufer zu ignorieren.
 		<form name="form">
 			<button name="Accept" text="Akzeptieren"/>
 			<button name="Decline" text="Ablehnen"/>
@@ -3261,20 +3200,23 @@ Klicken Sie auf  &apos;Akzeptieren &apos;, um dem Chat beizutreten, oder auf  &a
 	<notification name="VoiceChannelJoinFailed">
 		Verbindung zu [VOICE_CHANNEL_NAME] nicht möglich. Bitte versuchen Sie es später.  Sie werden nun wieder mit dem Chat in Ihrer Nähe verbunden.
 	</notification>
-	<notification name="VoiceLoginRetry">
-		Wir erstellen einen Voice-Kanal für Sie. Bitte warten Sie einen Moment.
-	</notification>
 	<notification name="VoiceEffectsExpired">
-		Ein oder mehrere Ihrer Voice-Morph-Abos ist/sind abgelaufen.
-[[URL] Hier klicken], um Ihr Abo zu erneuern.
+		Ein oder mehrere Ihrer Voice-Morph-Abos sind abgelaufen. 
+[[URL] Klicken Sie hier], um Ihr Abo zu erneuern. 
+
+Wenn Sie Premium-Mitglied sind, [[PREMIUM_URL] klicken Sie hier], um Ihren Voice-Morphing-Vorteil zu nutzen.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
-		Das aktive Voice-Morph-Abo ist abgelaufen. Ihre normalen Voice-Einstellungen werden angewendet.
-[[URL] Hier klicken], um Ihr Abo zu erneuern.
+		Das aktive Voice-Morph-Abo ist abgelaufen. Ihre normalen Voice-Einstellungen werden angewendet. 
+[[URL] Klicken Sie hier], um Ihr Abo zu erneuern. 
+
+Wenn Sie Premium-Mitglied sind, [[PREMIUM_URL] klicken Sie hier], um Ihren Voice-Morphing-Vorteil zu nutzen.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Ein oder mehrere Ihrer Voice-Morph-Abos werden in weniger als [INTERVAL] Tagen ablaufen.
-[[URL] Hier klicken], um Ihr Abo zu erneuern.
+		Ein oder mehrere Ihrer Voice-Morph-Abos laufen in weniger als [INTERVAL] Tagen ab. 
+[[URL] Klicken Sie hier], um Ihr Abo zu erneuern. 
+
+Wenn Sie Premium-Mitglied sind, [[PREMIUM_URL] klicken Sie hier], um Ihren Voice-Morphing-Vorteil zu nutzen.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		Neue Voice-Morph-Effekte sind erhältlich!
@@ -3323,8 +3265,17 @@ Diese werden für ein paar Sekunden sicherheitshalber gesperrt.
 	<notification name="AppearanceToXMLFailed">
 		Fehler beim Speichern des Erscheinungsbilds als XML.
 	</notification>
+	<notification name="SnapshotToComputerFailed">
+		Fehler beim Speichern des Bildes unter [PATH]: Zu wenig Speicherplatz auf dem Medium. [NEED_MEMORY]KB werden benötigt, es stehen jedoch nur [FREE_MEMORY]KB zur Verfügung.
+	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Fehler beim Speichern des Bildes unter [PATH]: Verzeichnis nicht vorhanden.
+	</notification>
 	<notification name="PresetNotSaved">
 		Fehler beim Speichern der Voreinstellung [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Die Standart-Voreinstellung kann nicht überschrieben werden.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Fehler beim Löschen der Voreinstellung [NAME].
@@ -3360,9 +3311,14 @@ Die Schaltfläche wird angezeigt, wenn genügend Platz vorhanden ist.
 	<notification name="ShareNotification">
 		Wählen Sie Einwohner aus, für die Sie das Objekt freigeben möchten.
 	</notification>
+	<notification name="MeshUploadErrorDetails">
+		[LABEL] konnte nicht hochgeladen werden: [MESSAGE]
+[DETAILS]Siehe SecondLife.log für weitere Details
+	</notification>
 	<notification name="MeshUploadError">
-		[LABEL] konnte nicht hochgeladen werden: [MESSAGE] [IDENTIFIER]
-[DETAILS]Details finden Sie in SecondLife.log.
+		[LABEL] konnte nicht hochgeladen werden: [MESSAGE] 
+			
+Siehe SecondLife.log für weitere Details
 	</notification>
 	<notification name="MeshUploadPermError">
 		Fehler beim Anfordern der Berechtigungen zum Hochladen des Netzes
@@ -3450,12 +3406,22 @@ Bitte überprüfen Sie Ihre Netzwerk- und Firewalleinstellungen.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		Verbindung mit Voice-Server ist leider nicht möglich:
+		Wir können uns nicht mit dem Voice-Server verbinden: 
 
 [HOSTID]
 
-Voice-Kommunikation ist leider nicht verfügbar.
-Bitte überprüfen Sie Ihr Netzwerk- und Firewall-Setup.
+Ports, die für Sprache erlaubt sein müssen, sind:
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Bitte überprüfen Sie Ihre Netzwerk- und Firewall-Einstellungen. 
+Deaktivieren Sie alle SIP-ALG-Funktionen in Ihrem Router. 
+
+Sprachkommunikation ist nicht möglich.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Es gibt Probleme mit der Verbindung zu Ihrem Voice-Server. Voice-Kommunikation ist leider nicht verfügbar. Überprüfen Sie Ihre Netzwerk- und Firewall-Konfiguration.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -3897,32 +3863,32 @@ Warten Sie kurz und versuchen Sie es noch einmal.
 	<notification name="AvatarEjectFailed">
 		Hinauswerfen fehlgeschlagen, da Sie keine Admin-Berechtigung für diese Parzelle haben.
 	</notification>
-	<notification name="CantMoveObjectParcelFull">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da die Parzelle voll ist.
+	<notification name="CMOParcelFull">
+		Objekt „[O]“ kann nicht nach
+[P] in Region [R] verschoben werden, da die Parzelle voll ist.
 	</notification>
-	<notification name="CantMoveObjectParcelPerms">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da Ihre Objekte auf dieser Parzelle nicht gestattet sind.
+	<notification name="CMOParcelPerms">
+		Objekt „[O]“ kann nicht nach
+[P] in Region [R] verschoben werden, da Ihre Objekte auf dieser Parzelle nicht gestattet sind.
 	</notification>
-	<notification name="CantMoveObjectParcelResources">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da nicht genügend Ressourcen für dieses Objekt auf dieser Parzelle vorhanden sind.
+	<notification name="CMOParcelResources">
+		Objekt „[O]“ kann nicht nach
+[P] in Region [R] verschoben werden, da nicht genügend Ressourcen für dieses Objekt auf dieser Parzelle vorhanden sind.
 	</notification>
 	<notification name="NoParcelPermsNoObject">
 		Kopiervorgang fehlgeschlagen, da Sie keinen Zugriff auf diese Parzelle haben.
 	</notification>
-	<notification name="CantMoveObjectRegionVersion">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da die andere Region eine ältere Version verwendet, die das Empfangen dieses Objekts per Regionswechsel nicht unterstützt.
+	<notification name="CMORegionVersion">
+		Objekt „[O]“ kann nicht nach
+    [P] in Region [R] verschoben werden, da die andere Region eine ältere Version verwendet, die das Empfangen dieses Objekts per Regionswechsel nicht unterstützt.
 	</notification>
-	<notification name="CantMoveObjectNavMesh">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da Sie das Navmesh nicht regionsübergreifend modifizieren können.
+	<notification name="CMONavMesh">
+		Objekt „[O]“ kann nicht nach
+[P] in Region [R] verschoben werden, da Sie das Navmesh nicht regionsübergreifend modifizieren können.
 	</notification>
-	<notification name="CantMoveObjectWTF">
-		Objekt „[OBJECT_NAME]“ kann nicht nach
-[OBJ_POSITION] in Region [REGION_NAME] verschoben werden, da ein unbekannter Fehler vorliegt. ([FAILURE_TYPE])
+	<notification name="CMOWTF">
+		Objekt „[O]“ kann nicht nach
+[P] in Region [R] verschoben werden, da ein unbekannter Fehler vorliegt. ([F])
 	</notification>
 	<notification name="NoPermModifyObject">
 		Ihnen fehlt die Berechtigung zum Modifizieren dieses Objekts.
@@ -4074,6 +4040,9 @@ Warten Sie kurz und versuchen Sie es noch einmal.
 	<notification name="CantCreateObjectRegionFull">
 		Angefordertes Objekt kann nicht erstellt werden. Die Region ist voll.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Das gewünschte animierte Objekt kann nicht erstellt werden, da es das Limit für geriggte Dreiecke überschreitet.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Sie können nicht mehrere Objekte an ein und derselben Stelle anhängen.
 	</notification>
@@ -4121,6 +4090,21 @@ Warten Sie kurz und versuchen Sie es noch einmal.
 	</notification>
 	<notification name="CantChangeShape">
 		Sie können diese Form nicht ändern.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		Durch den Vorgang würde die Anzahl der angehängten animierten Objekte das zulässige Limit überschreiten.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Diese Objekte können nicht verknüpft werden, da das hieraus resultierende animierte Objekt das Limit für geriggte Dreiecke überschreiten würde.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Dieses Objekt kann nicht in ein animiertes Objekt umgewandelt werden, da es das Limit für geriggte Dreiecke überschreiten würde.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Der Status der animierten Objekte für dieses Objekt kann nicht geändert werden, da hierdurch die Parzellenlimits überschritten würden.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Serverfehler: Dieser Vorgang kann nicht abgeschlossen werden, da die Netzdaten nicht geladen sind.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Ihr Zugangsberechtigungen gestatten nicht das Beanspruchen von Objekten an dieser Stelle.
@@ -4383,7 +4367,7 @@ Wählen Sie eine kleinere Landfläche aus.
 		Aufgrund eines internen Fehlers konnte Ihr Viewer nicht ordnungsgemäß aktualisiert werden.  Der in Ihrem Viewer angezeigte L$-Kontostand oder Parzellenbesitz stimmt möglicherweise nicht mit dem aktuellen Stand auf den Servern überein.
 	</notification>
 	<notification name="LargePrimAgentIntersect">
-		Große Prims, die sich mit anderen Spielern überschneiden, können nicht erstellt werden.  Bitte erneut versuchen, wenn sich die anderen Spieler bewegt haben.
+		Große Prims, die sich mit anderen Einwohnern überschneiden, können nicht erstellt werden. Bitte erneut versuchen, wenn sich die anderen Einwohner fort bewegt haben.
 	</notification>
 	<notification name="PreferenceChatClearLog">
 		Dadurch werden die Protokolle vorheriger Unterhaltungen und alle Backups dieser Datei gelöscht.

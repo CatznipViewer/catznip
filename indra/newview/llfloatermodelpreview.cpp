@@ -218,9 +218,17 @@ LLMeshFilePicker::LLMeshFilePicker(LLModelPreview* mp, S32 lod)
 		mLOD = lod;
 	}
 
-void LLMeshFilePicker::notify(const std::string& filename)
+void LLMeshFilePicker::notify(const std::vector<std::string>& filenames)
 {
-	mMP->loadModel(mFile, mLOD);
+	if (filenames.size() > 0)
+	{
+		mMP->loadModel(filenames[0], mLOD);
+	}
+	else
+	{
+		//closes floater
+		mMP->loadModel(std::string(), mLOD);
+	}
 }
 
 void FindModel(LLModelLoader::scene& scene, const std::string& name_to_match, LLModel*& baseModelOut, LLMatrix4& matOut)
@@ -677,6 +685,11 @@ void LLFloaterModelPreview::draw()
 			childSetTextArg("status", "[STATUS]", getString("status_parse_error"));
 			toggleCalculateButton(false);
 		}
+        else
+        if (mModelPreview->getLoadState() == LLModelLoader::WARNING_BIND_SHAPE_ORIENTATION)
+        {
+			childSetTextArg("status", "[STATUS]", getString("status_bind_shape_orientation"));
+        }
 		else
 		{
 			childSetTextArg("status", "[STATUS]", getString("status_idle"));
@@ -1262,6 +1275,10 @@ LLModelPreview::~LLModelPreview()
 	// glod.dll!glodShutdown()  + 0x77 bytes	
 	//
 	//glodShutdown();
+	if(mModelLoader)
+	{
+		mModelLoader->shutdown();
+	}
 }
 
 U32 LLModelPreview::calcResourceCost()
@@ -1356,7 +1373,11 @@ U32 LLModelPreview::calcResourceCost()
 
 			F32 radius = scale.length()*0.5f*debug_scale;
 
-			streaming_cost += LLMeshRepository::getStreamingCost(ret, radius);
+            LLMeshCostData costs;
+            if (gMeshRepo.getCostData(ret, costs))
+            {
+                streaming_cost += costs.getRadiusBasedStreamingCost(radius);
+            }
 		}
 	}
 
@@ -1606,6 +1627,19 @@ void LLModelPreview::rebuildUploadData()
 						mFMP->childDisable( "calculate_btn" );
 					}
 				}
+                LLFloaterModelPreview* fmp = (LLFloaterModelPreview*) mFMP;
+                bool upload_skinweights = fmp && fmp->childGetValue("upload_skin").asBoolean();
+                if (upload_skinweights && high_lod_model->mSkinInfo.mJointNames.size() > 0)
+                {
+                    LLQuaternion bind_rot = LLSkinningUtil::getUnscaledQuaternion(high_lod_model->mSkinInfo.mBindShapeMatrix);
+                    LLQuaternion identity;
+                    if (!bind_rot.isEqualEps(identity,0.01))
+                    {
+                        LL_WARNS() << "non-identity bind shape rot. mat is " << high_lod_model->mSkinInfo.mBindShapeMatrix 
+                                   << " bind_rot " << bind_rot << LL_ENDL;
+                        setLoadState( LLModelLoader::WARNING_BIND_SHAPE_ORIENTATION );
+                    }
+                }
 			}
 			instance.mTransform = mat;
 			mUploadData.push_back(instance);
@@ -1751,9 +1785,17 @@ void LLModelPreview::getJointAliases( JointMap& joint_map)
     //Joint names and aliases come from avatar_skeleton.xml
     
     joint_map = av->getJointAliases();
-    for (S32 i = 0; i < av->mNumCollisionVolumes; i++)
+
+    std::vector<std::string> cv_names, attach_names;
+    av->getSortedJointNames(1, cv_names);
+    av->getSortedJointNames(2, attach_names);
+    for (std::vector<std::string>::iterator it = cv_names.begin(); it != cv_names.end(); ++it)
     {
-        joint_map[av->mCollisionVolumes[i].getName()] = av->mCollisionVolumes[i].getName();
+        joint_map[*it] = *it;
+    }
+    for (std::vector<std::string>::iterator it = attach_names.begin(); it != attach_names.end(); ++it)
+    {
+        joint_map[*it] = *it;
     }
 }
 
@@ -2564,13 +2606,21 @@ void LLModelPreview::genLODs(S32 which_lod, U32 decimation, bool enforce_tri_lim
 
 				if (sizes[i*2+1] > 0 && sizes[i*2] > 0)
 				{
-					buff->allocateBuffer(sizes[i*2+1], sizes[i*2], true);
+					if (!buff->allocateBuffer(sizes[i * 2 + 1], sizes[i * 2], true))
+					{
+						// Todo: find a way to stop preview in this case instead of crashing
+						LL_ERRS() << "Failed buffer allocation during preview LOD generation."
+							<< " Vertices: " << sizes[i * 2 + 1]
+							<< " Indices: " << sizes[i * 2] << LL_ENDL;
+					}
 					buff->setBuffer(type_mask);
 					glodFillElements(mObject[base], names[i], GL_UNSIGNED_SHORT, (U8*) buff->getIndicesPointer());
 					stop_gloderror();
 				}
 				else
-				{ //this face was eliminated, create a dummy triangle (one vertex, 3 indices, all 0)
+				{
+					// This face was eliminated or we failed to allocate buffer,
+					// attempt to create a dummy triangle (one vertex, 3 indices, all 0)
 					buff->allocateBuffer(1, 3, true);
 					memset((U8*) buff->getMappedData(), 0, buff->getSize());
 					memset((U8*) buff->getIndicesPointer(), 0, buff->getIndicesSize());
@@ -3318,7 +3368,13 @@ void LLModelPreview::genBuffers(S32 lod, bool include_skin_weights)
 
 			vb = new LLVertexBuffer(mask, 0);
 
-			vb->allocateBuffer(num_vertices, num_indices, TRUE);
+			if (!vb->allocateBuffer(num_vertices, num_indices, TRUE))
+			{
+				// We are likely to crash due this failure, if this happens, find a way to gracefully stop preview
+				LL_WARNS() << "Failed to allocate Vertex Buffer for model preview "
+					<< num_vertices << " vertices and "
+					<< num_indices << " indices" << LL_ENDL;
+			}
 
 			LLStrider<LLVector3> vertex_strider;
 			LLStrider<LLVector3> normal_strider;
@@ -3425,16 +3481,11 @@ void LLModelPreview::update()
 //-----------------------------------------------------------------------------
 void LLModelPreview::createPreviewAvatar( void )
 {
-	mPreviewAvatar = (LLVOAvatar*)gObjectList.createObjectViewer( LL_PCODE_LEGACY_AVATAR, gAgent.getRegion() );
+	mPreviewAvatar = (LLVOAvatar*)gObjectList.createObjectViewer( LL_PCODE_LEGACY_AVATAR, gAgent.getRegion(), LLViewerObject::CO_FLAG_UI_AVATAR );
 	if ( mPreviewAvatar )
 	{
 		mPreviewAvatar->createDrawable( &gPipeline );
-		mPreviewAvatar->mIsDummy = TRUE;
 		mPreviewAvatar->mSpecialRenderMode = 1;
-		mPreviewAvatar->setPositionAgent( LLVector3::zero );
-		mPreviewAvatar->slamPosition();
-		mPreviewAvatar->updateJointLODs();
-		mPreviewAvatar->updateGeometry( mPreviewAvatar->mDrawable );
 		mPreviewAvatar->startMotion( ANIM_AGENT_STAND );
 		mPreviewAvatar->hideSkirt();
 	}

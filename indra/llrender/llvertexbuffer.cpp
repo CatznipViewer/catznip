@@ -98,7 +98,6 @@ U32 LLVertexBuffer::sCurVAOName = 1;
 U32 LLVertexBuffer::sAllocatedIndexBytes = 0;
 U32 LLVertexBuffer::sIndexCount = 0;
 
-LLPrivateMemoryPool* LLVertexBuffer::sPrivatePoolp = NULL;
 U32 LLVertexBuffer::sBindCount = 0;
 U32 LLVertexBuffer::sSetCount = 0;
 S32 LLVertexBuffer::sCount = 0;
@@ -191,6 +190,16 @@ volatile U8* LLVBOPool::allocate(U32& name, U32 size, bool for_seed)
 			if (mUsage != GL_DYNAMIC_COPY_ARB)
 			{ //data will be provided by application
 				ret = (U8*) ll_aligned_malloc<64>(size);
+				if (!ret)
+				{
+					LL_ERRS() << "Failed to allocate "<< size << " bytes for LLVBOPool buffer " << name <<"." << LL_NEWLINE
+							  << "Free list size: " << mFreeList.size() // this happens if we are out of memory so a solution might be to clear some from freelist
+							  << " Allocated Bytes: " << LLVertexBuffer::sAllocatedBytes
+							  << " Allocated Index Bytes: " << LLVertexBuffer::sAllocatedIndexBytes
+							  << " Pooled Bytes: " << sBytesPooled
+							  << " Pooled Index Bytes: " << sIndexBytesPooled
+							  << LL_ENDL;
+				}
 			}
 		}
 		else
@@ -324,7 +333,7 @@ void LLVBOPool::cleanup()
 
 
 //NOTE: each component must be AT LEAST 4 bytes in size to avoid a performance penalty on AMD hardware
-S32 LLVertexBuffer::sTypeSize[LLVertexBuffer::TYPE_MAX] =
+const S32 LLVertexBuffer::sTypeSize[LLVertexBuffer::TYPE_MAX] =
 {
 	sizeof(LLVector4), // TYPE_VERTEX,
 	sizeof(LLVector4), // TYPE_NORMAL,
@@ -341,7 +350,7 @@ S32 LLVertexBuffer::sTypeSize[LLVertexBuffer::TYPE_MAX] =
 	sizeof(LLVector4), // TYPE_TEXTURE_INDEX (actually exists as position.w), no extra data, but stride is 16 bytes
 };
 
-static std::string vb_type_name[] =
+static const std::string vb_type_name[] =
 {
 	"TYPE_VERTEX",
 	"TYPE_NORMAL",
@@ -360,7 +369,7 @@ static std::string vb_type_name[] =
 	"TYPE_INDEX",	
 };
 
-U32 LLVertexBuffer::sGLMode[LLRender::NUM_MODES] = 
+const U32 LLVertexBuffer::sGLMode[LLRender::NUM_MODES] =
 {
 	GL_TRIANGLES,
 	GL_TRIANGLE_STRIP,
@@ -509,7 +518,7 @@ void LLVertexBuffer::setupClientArrays(U32 data_mask)
 				}
 			}
 		
-			U32 map_tc[] = 
+			static const U32 map_tc[] = 
 			{
 				MAP_TEXCOORD1,
 				MAP_TEXCOORD2,
@@ -859,11 +868,6 @@ void LLVertexBuffer::initClass(bool use_vbo, bool no_vbo_mapping)
 {
 	sEnableVBOs = use_vbo && gGLManager.mHasVertexBufferObject;
 	sDisableVBOMapping = sEnableVBOs && no_vbo_mapping;
-
-	if (!sPrivatePoolp)
-	{ 
-		sPrivatePoolp = LLPrivateMemoryPoolManager::getInstance()->newPool(LLPrivateMemoryPool::STATIC);
-	}
 }
 
 //static 
@@ -906,12 +910,6 @@ void LLVertexBuffer::cleanupClass()
 	sStreamVBOPool.cleanup();
 	sDynamicVBOPool.cleanup();
 	sDynamicCopyVBOPool.cleanup();
-
-	if(sPrivatePoolp)
-	{
-		LLPrivateMemoryPoolManager::getInstance()->deletePool(sPrivatePoolp);
-		sPrivatePoolp = NULL;
-	}
 }
 
 //----------------------------------------------------------------------------
@@ -1057,15 +1055,24 @@ LLVertexBuffer::~LLVertexBuffer()
 
 	if (mFence)
 	{
+		// Sanity check. We have weird crashes in this destructor (on delete). Yet mFence is disabled.
+		// TODO: mFence was added in scope of SH-2038, but was never enabled, consider removing mFence.
+		LL_ERRS() << "LLVertexBuffer destruction failed" << LL_ENDL;
 		delete mFence;
+		mFence = NULL;
 	}
-	
-	mFence = NULL;
 
 	sVertexCount -= mNumVerts;
 	sIndexCount -= mNumIndices;
 
-	llassert_always(!mMappedData && !mMappedIndexData);
+	if (mMappedData)
+	{
+		LL_ERRS() << "Failed to clear vertex buffer's vertices" << LL_ENDL;
+	}
+	if (mMappedIndexData)
+	{
+		LL_ERRS() << "Failed to clear vertex buffer's indices" << LL_ENDL;
+	}
 };
 
 void LLVertexBuffer::placeFence() const
@@ -1167,7 +1174,7 @@ void LLVertexBuffer::releaseIndices()
 	sGLCount--;
 }
 
-void LLVertexBuffer::createGLBuffer(U32 size)
+bool LLVertexBuffer::createGLBuffer(U32 size)
 {
 	if (mGLBuffer)
 	{
@@ -1176,8 +1183,10 @@ void LLVertexBuffer::createGLBuffer(U32 size)
 
 	if (size == 0)
 	{
-		return;
+		return true;
 	}
+
+	bool sucsess = true;
 
 	mEmpty = true;
 
@@ -1191,14 +1200,20 @@ void LLVertexBuffer::createGLBuffer(U32 size)
 	{
 		static int gl_buffer_idx = 0;
 		mGLBuffer = ++gl_buffer_idx;
-		mMappedData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mMappedData = (U8*)ll_aligned_malloc_16(size);
 		disclaimMem(mSize);
 		mSize = size;
 		claimMem(mSize);
 	}
+
+	if (!mMappedData)
+	{
+		sucsess = false;
+	}
+	return sucsess;
 }
 
-void LLVertexBuffer::createGLIndices(U32 size)
+bool LLVertexBuffer::createGLIndices(U32 size)
 {
 	if (mGLIndices)
 	{
@@ -1207,8 +1222,10 @@ void LLVertexBuffer::createGLIndices(U32 size)
 	
 	if (size == 0)
 	{
-		return;
+		return true;
 	}
+
+	bool sucsess = true;
 
 	mEmpty = true;
 
@@ -1225,16 +1242,22 @@ void LLVertexBuffer::createGLIndices(U32 size)
 	}
 	else
 	{
-		mMappedIndexData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mMappedIndexData = (U8*)ll_aligned_malloc_16(size);
 		static int gl_buffer_idx = 0;
 		mGLIndices = ++gl_buffer_idx;
 		mIndicesSize = size;
 	}
+
+	if (!mMappedIndexData)
+	{
+		sucsess = false;
+	}
+	return sucsess;
 }
 
 void LLVertexBuffer::destroyGLBuffer()
 {
-	if (mGLBuffer)
+	if (mGLBuffer || mMappedData)
 	{
 		if (mMappedDataUsingVBOs)
 		{
@@ -1242,7 +1265,7 @@ void LLVertexBuffer::destroyGLBuffer()
 		}
 		else
 		{
-			FREE_MEM(sPrivatePoolp, (void*) mMappedData);
+			ll_aligned_free_16((void*)mMappedData);
 			mMappedData = NULL;
 			mEmpty = true;
 		}
@@ -1254,7 +1277,7 @@ void LLVertexBuffer::destroyGLBuffer()
 
 void LLVertexBuffer::destroyGLIndices()
 {
-	if (mGLIndices)
+	if (mGLIndices || mMappedIndexData)
 	{
 		if (mMappedIndexDataUsingVBOs)
 		{
@@ -1262,7 +1285,7 @@ void LLVertexBuffer::destroyGLIndices()
 		}
 		else
 		{
-			FREE_MEM(sPrivatePoolp, (void*) mMappedIndexData);
+			ll_aligned_free_16((void*)mMappedIndexData);
 			mMappedIndexData = NULL;
 			mEmpty = true;
 		}
@@ -1272,9 +1295,11 @@ void LLVertexBuffer::destroyGLIndices()
 	//unbind();
 }
 
-void LLVertexBuffer::updateNumVerts(S32 nverts)
+bool LLVertexBuffer::updateNumVerts(S32 nverts)
 {
 	llassert(nverts >= 0);
+
+	bool sucsess = true;
 
 	if (nverts > 65536)
 	{
@@ -1286,31 +1311,37 @@ void LLVertexBuffer::updateNumVerts(S32 nverts)
 
 	if (needed_size > mSize || needed_size <= mSize/2)
 	{
-		createGLBuffer(needed_size);
+		sucsess &= createGLBuffer(needed_size);
 	}
 
 	sVertexCount -= mNumVerts;
 	mNumVerts = nverts;
 	sVertexCount += mNumVerts;
+
+	return sucsess;
 }
 
-void LLVertexBuffer::updateNumIndices(S32 nindices)
+bool LLVertexBuffer::updateNumIndices(S32 nindices)
 {
 	llassert(nindices >= 0);
+
+	bool sucsess = true;
 
 	U32 needed_size = sizeof(U16) * nindices;
 
 	if (needed_size > mIndicesSize || needed_size <= mIndicesSize/2)
 	{
-		createGLIndices(needed_size);
+		sucsess &= createGLIndices(needed_size);
 	}
 
 	sIndexCount -= mNumIndices;
 	mNumIndices = nindices;
 	sIndexCount += mNumIndices;
+
+	return sucsess;
 }
 
-void LLVertexBuffer::allocateBuffer(S32 nverts, S32 nindices, bool create)
+bool LLVertexBuffer::allocateBuffer(S32 nverts, S32 nindices, bool create)
 {
 	stop_glerror();
 
@@ -1320,13 +1351,15 @@ void LLVertexBuffer::allocateBuffer(S32 nverts, S32 nindices, bool create)
 		LL_ERRS() << "Bad vertex buffer allocation: " << nverts << " : " << nindices << LL_ENDL;
 	}
 
-	updateNumVerts(nverts);
-	updateNumIndices(nindices);
+	bool sucsess = true;
+
+	sucsess &= updateNumVerts(nverts);
+	sucsess &= updateNumIndices(nindices);
 	
 	if (create && (nverts || nindices))
 	{
 		//actually allocate space for the vertex buffer if using VBO mapping
-		flush();
+		flush(); //unmap
 
 		if (gGLManager.mHasVertexArrayObject && useVBOs() && sUseVAO)
 		{
@@ -1336,6 +1369,8 @@ void LLVertexBuffer::allocateBuffer(S32 nverts, S32 nindices, bool create)
 			setupVertexArray();
 		}
 	}
+
+	return sucsess;
 }
 
 static LLTrace::BlockTimerStatHandle FTM_SETUP_VERTEX_ARRAY("Setup VAO");
@@ -1353,7 +1388,7 @@ void LLVertexBuffer::setupVertexArray()
 #endif
 	sGLRenderArray = mGLArray;
 
-	U32 attrib_size[] = 
+	static const U32 attrib_size[] = 
 	{
 		3, //TYPE_VERTEX,
 		3, //TYPE_NORMAL,
@@ -1370,7 +1405,7 @@ void LLVertexBuffer::setupVertexArray()
 		1, //TYPE_TEXTURE_INDEX
 	};
 
-	U32 attrib_type[] =
+	static const U32 attrib_type[] =
 	{
 		GL_FLOAT, //TYPE_VERTEX,
 		GL_FLOAT, //TYPE_NORMAL,
@@ -1387,7 +1422,7 @@ void LLVertexBuffer::setupVertexArray()
 		GL_UNSIGNED_INT, //TYPE_TEXTURE_INDEX
 	};
 
-	bool attrib_integer[] = 
+	static const bool attrib_integer[] =
 	{
 		false, //TYPE_VERTEX,
 		false, //TYPE_NORMAL,
@@ -1404,7 +1439,7 @@ void LLVertexBuffer::setupVertexArray()
 		true, //TYPE_TEXTURE_INDEX
 	};
 
-	U32 attrib_normalized[] =
+	static const U32 attrib_normalized[] =
 	{
 		GL_FALSE, //TYPE_VERTEX,
 		GL_FALSE, //TYPE_NORMAL,
@@ -1436,13 +1471,22 @@ void LLVertexBuffer::setupVertexArray()
 				//glVertexattribIPointer requires GLSL 1.30 or later
 				if (gGLManager.mGLSLVersionMajor > 1 || gGLManager.mGLSLVersionMinor >= 30)
 				{
-					glVertexAttribIPointer(i, attrib_size[i], attrib_type[i], sTypeSize[i], (void*) mOffsets[i]); 
+					glVertexAttribIPointer(i, attrib_size[i], attrib_type[i], sTypeSize[i], (const GLvoid*) mOffsets[i]); 
 				}
 #endif
 			}
 			else
 			{
-				glVertexAttribPointerARB(i, attrib_size[i], attrib_type[i], attrib_normalized[i], sTypeSize[i], (void*) mOffsets[i]); 
+				// nat 2016-12-16: With 64-bit clang compile, the compiler
+				// produces an error if we simply cast mOffsets[i] -- an S32
+				// -- to (GLvoid *), the type of the parameter. It correctly
+				// points out that there's no way an S32 could fit a real
+				// pointer value. Ruslan asserts that in this case the last
+				// param is interpreted as an array data offset within the VBO
+				// rather than as an actual pointer, so it's okay.
+				glVertexAttribPointerARB(i, attrib_size[i], attrib_type[i],
+										 attrib_normalized[i], sTypeSize[i],
+										 reinterpret_cast<GLvoid*>(mOffsets[i])); 
 			}
 		}
 		else
@@ -1457,23 +1501,27 @@ void LLVertexBuffer::setupVertexArray()
 	unbind();
 }
 
-void LLVertexBuffer::resizeBuffer(S32 newnverts, S32 newnindices)
+bool LLVertexBuffer::resizeBuffer(S32 newnverts, S32 newnindices)
 {
 	llassert(newnverts >= 0);
 	llassert(newnindices >= 0);
 
-	updateNumVerts(newnverts);		
-	updateNumIndices(newnindices);
+	bool sucsess = true;
+
+	sucsess &= updateNumVerts(newnverts);		
+	sucsess &= updateNumIndices(newnindices);
 	
 	if (useVBOs())
 	{
-		flush();
+		flush(); //unmap
 
 		if (mGLArray)
 		{ //if size changed, offsets changed
 			setupVertexArray();
 		}
 	}
+
+	return sucsess;
 }
 
 bool LLVertexBuffer::useVBOs() const
@@ -1882,7 +1930,21 @@ void LLVertexBuffer::unmapBuffer()
 					const MappedRegion& region = mMappedVertexRegions[i];
 					S32 offset = region.mIndex >= 0 ? mOffsets[region.mType]+sTypeSize[region.mType]*region.mIndex : 0;
 					S32 length = sTypeSize[region.mType]*region.mCount;
-					glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedData+offset);
+					if (mSize >= length + offset)
+					{
+						glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, length, (U8*)mMappedData + offset);
+					}
+					else
+					{
+						GLint size = 0;
+						glGetBufferParameterivARB(GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &size);
+						LL_WARNS() << "Attempted to map regions to a buffer that is too small, " 
+							<< "mapped size: " << mSize
+							<< ", gl buffer size: " << size
+							<< ", length: " << length
+							<< ", offset: " << offset
+							<< LL_ENDL;
+					}
 					stop_glerror();
 				}
 
@@ -1950,7 +2012,21 @@ void LLVertexBuffer::unmapBuffer()
 					const MappedRegion& region = mMappedIndexRegions[i];
 					S32 offset = region.mIndex >= 0 ? sizeof(U16)*region.mIndex : 0;
 					S32 length = sizeof(U16)*region.mCount;
-					glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedIndexData+offset);
+					if (mIndicesSize >= length + offset)
+					{
+						glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, offset, length, (U8*) mMappedIndexData+offset);
+					}
+					else
+					{
+						GLint size = 0;
+						glGetBufferParameterivARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, &size);
+						LL_WARNS() << "Attempted to map regions to a buffer that is too small, " 
+							<< "mapped size: " << mIndicesSize
+							<< ", gl buffer size: " << size
+							<< ", length: " << length
+							<< ", offset: " << offset
+							<< LL_ENDL;
+					}
 					stop_glerror();
 				}
 

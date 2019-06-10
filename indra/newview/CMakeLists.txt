@@ -3,7 +3,14 @@
 project(viewer)
 
 include(00-Common)
+# DON'T move Linking.cmake to its place in the alphabetized list below: it
+# sets variables on which the 3p .cmake files depend.
+include(Linking)
+
 include(Boost)
+if (BUGSPLAT_DB)
+  include(bugsplat)
+endif (BUGSPLAT_DB)
 include(BuildPackagesInfo)
 include(BuildVersion)
 include(CMakeCopyIfDifferent)
@@ -13,11 +20,11 @@ include(DragDrop)
 include(EXPAT)
 include(FMODEX)
 include(GLOD)
-include(GooglePerfTools)
 include(Hunspell)
 include(JsonCpp)
 include(LLAppearance)
 include(LLAudio)
+include(LLCA)
 include(LLCharacter)
 include(LLCommon)
 include(LLCoreHttp)
@@ -36,7 +43,6 @@ include(LLUI)
 include(LLVFS)
 include(LLWindow)
 include(LLXML)
-include(Linking)
 include(NDOF)
 include(NVAPI)
 include(OPENAL)
@@ -47,6 +53,7 @@ include(TemplateCheck)
 include(UI)
 include(UnixInstall)
 include(ViewerMiscLibs)
+include(ViewerManager)
 include(VisualLeakDetector)
 include(ZLIB)
 include(URIPARSER)
@@ -82,7 +89,6 @@ include_directories(
     ${LLWINDOW_INCLUDE_DIRS}
     ${LLXML_INCLUDE_DIRS}
     ${LLLOGIN_INCLUDE_DIRS}
-    ${UPDATER_INCLUDE_DIRS}
     ${LIBS_PREBUILT_DIR}/include/collada
     ${LIBS_PREBUILD_DIR}/include/hunspell
     ${OPENAL_LIB_INCLUDE_DIRS}
@@ -90,6 +96,12 @@ include_directories(
     ${LLAPPEARANCE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     )
+
+if (BUGSPLAT_DB)
+  include_directories(
+    ${BUGSPLAT_INCLUDE_DIR}
+    )
+endif (BUGSPLAT_DB)
 
 include_directories(SYSTEM
     ${LLCOMMON_SYSTEM_INCLUDE_DIRS}
@@ -149,6 +161,7 @@ set(viewer_SOURCE_FILES
     llcommunicationchannel.cpp
     llcompilequeue.cpp
     llconfirmationmanager.cpp
+    llcontrolavatar.cpp
     llconversationlog.cpp
     llconversationloglist.cpp
     llconversationloglistitem.cpp
@@ -203,7 +216,9 @@ set(viewer_SOURCE_FILES
     llfloaterautoreplacesettings.cpp
     llfloateravatar.cpp
     llfloateravatarpicker.cpp
+    llfloateravatarrendersettings.cpp
     llfloateravatartextures.cpp
+    llfloaterbanduration.cpp
     llfloaterbeacons.cpp
     llfloaterbigpreview.cpp
     llfloaterbuildoptions.cpp
@@ -236,6 +251,7 @@ set(viewer_SOURCE_FILES
     llfloatergesture.cpp
     llfloatergodtools.cpp
     llfloatergotoline.cpp
+    llfloatergridstatus.cpp
     llfloatergroupbulkban.cpp
     llfloatergroupinvite.cpp
     llfloatergroups.cpp
@@ -252,6 +268,7 @@ set(viewer_SOURCE_FILES
     llfloaterlagmeter.cpp
     llfloaterland.cpp
     llfloaterlandholdings.cpp
+    llfloaterlinkreplace.cpp
     llfloaterloadprefpreset.cpp
     llfloatermarketplacelistings.cpp
     llfloatermap.cpp
@@ -274,6 +291,7 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
+    llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterregiondebugconsole.cpp
     llfloaterregioninfo.cpp
@@ -339,6 +357,7 @@ set(viewer_SOURCE_FILES
     llhudview.cpp
     llimagefiltersmanager.cpp
     llimhandler.cpp
+    llimprocessing.cpp
     llimview.cpp
     llinspect.cpp
     llinspectavatar.cpp
@@ -523,6 +542,7 @@ set(viewer_SOURCE_FILES
     llscriptfloater.cpp
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
+    llsculptidsize.cpp
     llsearchcombobox.cpp
     llsearchhistory.cpp
     llsecapi.cpp
@@ -596,6 +616,7 @@ set(viewer_SOURCE_FILES
     lltransientfloatermgr.cpp
     lltranslate.cpp
     lltwitterconnect.cpp
+    lluiavatar.cpp
     lluilistener.cpp
     lluploaddialog.cpp
     llurl.cpp
@@ -765,6 +786,7 @@ set(viewer_HEADER_FILES
     llcommunicationchannel.h
     llcompilequeue.h
     llconfirmationmanager.h
+    llcontrolavatar.h
     llconversationlog.h
     llconversationloglist.h
     llconversationloglistitem.h
@@ -819,7 +841,9 @@ set(viewer_HEADER_FILES
     llfloaterautoreplacesettings.h
     llfloateravatar.h
     llfloateravatarpicker.h
+    llfloateravatarrendersettings.h
     llfloateravatartextures.h
+    llfloaterbanduration.h
     llfloaterbeacons.h
     llfloaterbigpreview.h
     llfloaterbuildoptions.h
@@ -852,6 +876,7 @@ set(viewer_HEADER_FILES
     llfloatergesture.h
     llfloatergodtools.h
     llfloatergotoline.h
+    llfloatergridstatus.h
     llfloatergroupbulkban.h
     llfloatergroupinvite.h
     llfloatergroups.h
@@ -871,6 +896,7 @@ set(viewer_HEADER_FILES
     llfloaterlagmeter.h
     llfloaterland.h
     llfloaterlandholdings.h
+    llfloaterlinkreplace.h
     llfloaterloadprefpreset.h
     llfloatermap.h
     llfloatermarketplacelistings.h
@@ -893,6 +919,7 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
+    llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterregiondebugconsole.h
     llfloaterregioninfo.h
@@ -956,6 +983,7 @@ set(viewer_HEADER_FILES
     llhudtext.h
     llhudview.h
     llimagefiltersmanager.h
+    llimprocessing.h
     llimview.h
     llinspect.h
     llinspectavatar.h
@@ -1131,6 +1159,7 @@ set(viewer_HEADER_FILES
     llscriptruntimeperms.h
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
+    llsculptidsize.h
     llsearchcombobox.h
     llsearchhistory.h
     llsecapi.h
@@ -1206,6 +1235,7 @@ set(viewer_HEADER_FILES
     lltranslate.h
     lltwitterconnect.h
     lluiconstants.h
+    lluiavatar.h
     lluilistener.h
     lluploaddialog.h
     lluploadfloaterobservers.h
@@ -1322,7 +1352,7 @@ set(viewer_HEADER_FILES
 
 source_group("CMake Rules" FILES ViewerInstall.cmake)
 
-#summary.json creation moved to viewer_manifest.py MAINT-6413
+#build_data.json creation moved to viewer_manifest.py MAINT-6413
 # the viewer_version.txt file created here is for passing to viewer_manifest and autobuild
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt"
            "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}\n")
@@ -1342,6 +1372,14 @@ if (DARWIN)
 
   # This should be compiled with the viewer.
   LIST(APPEND viewer_SOURCE_FILES llappdelegate-objc.mm)
+  set_source_files_properties(
+    llappdelegate-objc.mm
+    PROPERTIES
+    COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}"
+    # BugsplatMac is a module, imported with @import. That language feature
+    # demands these switches.
+    COMPILE_FLAGS "-fmodules -fcxx-modules"
+    )
 
   find_library(AGL_LIBRARY AGL)
   find_library(APPKIT_LIBRARY AppKit)
@@ -1355,6 +1393,12 @@ if (DARWIN)
     ${IOKIT_LIBRARY}
     ${COREAUDIO_LIBRARY}
     )
+
+  if (BUGSPLAT_DB)
+    list(APPEND viewer_LIBRARIES
+      ${BUGSPLAT_LIBRARIES}
+      )
+  endif (BUGSPLAT_DB)
 
   # Add resource files to the project.
   set(viewer_RESOURCE_FILES
@@ -1381,6 +1425,11 @@ endif (DARWIN)
 
 if (LINUX)
     LIST(APPEND viewer_SOURCE_FILES llappviewerlinux.cpp)
+    set_source_files_properties(
+      llappviewerlinux.cpp
+      PROPERTIES
+      COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}"
+      )
     LIST(APPEND viewer_SOURCE_FILES llappviewerlinux_api_dbus.cpp)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 
@@ -1397,6 +1446,11 @@ if (WINDOWS)
          llappviewerwin32.cpp
          llwindebug.cpp
          )
+    set_source_files_properties(
+      llappviewerwin32.cpp
+      PROPERTIES
+      COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}"
+      )
 
     list(APPEND viewer_HEADER_FILES
          llappviewerwin32.h
@@ -1431,7 +1485,7 @@ if (WINDOWS)
         set(ICON_PATH "project")
         set(VIEWER_MACOSX_PHASE "a")
     endif()
-    message("Copying icons for ${ICON_PATH}")
+    message(STATUS "Copying icons for ${ICON_PATH}")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/secondlife.ico"
@@ -1533,7 +1587,6 @@ if (WINDOWS)
         kernel32
         odbc32
         odbccp32
-        ole32
         oleaut32
         shell32
         Vfw32
@@ -1552,6 +1605,15 @@ if (WINDOWS)
     if (INTEL_MEMOPS_LIBRARY)
       list(APPEND viewer_LIBRARIES ${INTEL_MEMOPS_LIBRARY})
     endif (INTEL_MEMOPS_LIBRARY)
+
+    if (ADDRESS_SIZE EQUAL 64)
+        # We deliberately omit this from the 32bit build because it declares that
+        # the viewer is compatible with Windows 10; we need that to properly detect
+        # the Windows version, but doing so causes systems with certain HD video
+        # cards to fail because Windows 10 does not support them.  Leaving this out
+        # causes those systems to run in a Windows 8 compatibility mode, which works.
+        LIST(APPEND viewer_SOURCE_FILES windows.manifest)
+    endif (ADDRESS_SIZE EQUAL 64)
 endif (WINDOWS)
 
 # Add the xui files. This is handy for searching for xui elements
@@ -1670,6 +1732,11 @@ if (SDL_FOUND)
     )
 endif (SDL_FOUND)
 
+if (BUGSPLAT_DB)
+  set_property(TARGET ${VIEWER_BINARY_NAME}
+    PROPERTY COMPILE_DEFINITIONS "LL_BUGSPLAT")
+endif (BUGSPLAT_DB)
+
 # add package files
 file(GLOB EVENT_HOST_SCRIPT_GLOB_LIST
      ${CMAKE_CURRENT_SOURCE_DIR}/../viewer_components/*.py)
@@ -1682,7 +1749,7 @@ if (WINDOWS)
     set_target_properties(${VIEWER_BINARY_NAME}
         PROPERTIES
         # *TODO -reenable this once we get server usage sorted out
-        LINK_FLAGS "/debug /NODEFAULTLIB:LIBCMT /SUBSYSTEM:WINDOWS ${TCMALLOC_LINK_FLAGS} /LARGEADDRESSAWARE"
+        LINK_FLAGS "/debug /NODEFAULTLIB:LIBCMT /SUBSYSTEM:WINDOWS /LARGEADDRESSAWARE"
         LINK_FLAGS_DEBUG "/NODEFAULTLIB:\"LIBCMT;LIBCMTD;MSVCRT\" /INCREMENTAL:NO /LARGEADDRESSAWARE"
         LINK_FLAGS_RELEASE "/MAP\"secondlife-bin.MAP\" /OPT:REF /LARGEADDRESSAWARE"
         )
@@ -1702,20 +1769,8 @@ if (WINDOWS)
     # In the meantime, if you have any ideas on how to easily maintain one list, either here or in viewer_manifest.py
     # and have the build deps get tracked *please* tell me about it.
 
-    if(USE_TCMALLOC)
-      # Configure a var for tcmalloc location, if used.
-      # Note the need to specify multiple names explicitly.
-      set(GOOGLE_PERF_TOOLS_SOURCE
-        ${SHARED_LIB_STAGING_DIR}/Release/libtcmalloc_minimal.dll
-        ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libtcmalloc_minimal.dll
-        ${SHARED_LIB_STAGING_DIR}/Debug/libtcmalloc_minimal-debug.dll
-        )
-     endif(USE_TCMALLOC)
-
-
     set(COPY_INPUT_DEPENDENCIES
       # The following commented dependencies are determined at variably at build time. Can't do this here.
-      #${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libtcmalloc_minimal.dll => None ... Skipping libtcmalloc_minimal.dll
       ${CMAKE_SOURCE_DIR}/../etc/message.xml
       ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/llcommon.dll
@@ -1741,8 +1796,6 @@ if (WINDOWS)
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ca-bundle.crt
@@ -1754,13 +1807,26 @@ if (WINDOWS)
       ${ARCH_PREBUILT_DIRS_RELEASE}/ssleay32.dll
       ${ARCH_PREBUILT_DIRS_DEBUG}/libeay32.dll
       ${ARCH_PREBUILT_DIRS_DEBUG}/ssleay32.dll
+      ${viewer_APPSETTINGS_FILES}
       SLPlugin
-      media_plugin_quicktime
       media_plugin_cef
       media_plugin_libvlc
+      media_plugin_example
       winmm_shim
       windows-crash-logger
       )
+
+    if (ADDRESS_SIZE EQUAL 64)
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk_x64.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp_x64.dll
+            )
+    else (ADDRESS_SIZE EQUAL 64)
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
+            )
+    endif (ADDRESS_SIZE EQUAL 64)
 
     if (FMODEX)
       list(APPEND COPY_INPUT_DEPENDENCIES
@@ -1769,7 +1835,7 @@ if (WINDOWS)
            ${SHARED_LIB_STAGING_DIR}/Debug/fmodexL.dll
           )
     endif (FMODEX)
-    
+
     add_custom_command(
       OUTPUT  ${CMAKE_CFG_INTDIR}/copy_touched.bat
       COMMAND ${PYTHON_EXECUTABLE}
@@ -1778,15 +1844,16 @@ if (WINDOWS)
         --actions=copy
         --arch=${ARCH}
         --artwork=${ARTWORK_DIR}
+        "--bugsplat=${BUGSPLAT_DB}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
+        "--channel=${VIEWER_CHANNEL}"
         --configuration=${CMAKE_CFG_INTDIR}
         --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
         --grid=${GRID}
-        --channel=${VIEWER_CHANNEL}
-        --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
         --source=${CMAKE_CURRENT_SOURCE_DIR}
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/copy_touched.bat
+        --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         stage_third_party_libs
@@ -1804,7 +1871,7 @@ if (WINDOWS)
 
     add_dependencies(${VIEWER_BINARY_NAME}
       SLPlugin
-   windows-crash-logger
+      windows-crash-logger
     )
 
     # sets the 'working directory' for debugging from visual studio.
@@ -1844,15 +1911,16 @@ if (WINDOWS)
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
           --arch=${ARCH}
           --artwork=${ARTWORK_DIR}
+          "--bugsplat=${BUGSPLAT_DB}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
-          --channel=${VIEWER_CHANNEL}
-          --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+          "--channel=${VIEWER_CHANNEL}"
           --configuration=${CMAKE_CFG_INTDIR}
           --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/touched.bat
+          --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
         DEPENDS
             ${VIEWER_BINARY_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -1883,8 +1951,8 @@ else (WINDOWS)
 endif (WINDOWS)
 
 # *NOTE: - this list is very sensitive to ordering, test carefully on all
-# platforms if you change the releative order of the entries here.
-# In particular, cmake 2.6.4 (when buidling with linux/makefile generators)
+# platforms if you change the relative order of the entries here.
+# In particular, cmake 2.6.4 (when building with linux/makefile generators)
 # appears to sometimes de-duplicate redundantly listed dependencies improperly.
 # To work around this, higher level modules should be listed before the modules
 # that they depend upon. -brad
@@ -1914,7 +1982,6 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${PNG_PRELOAD_ARCHIVES}
     ${ZLIB_PRELOAD_ARCHIVES}
     ${URIPARSER_PRELOAD_ARCHIVES}
-    ${UPDATER_LIBRARIES}
     ${GOOGLE_PERFTOOLS_LIBRARIES}
     ${LLAUDIO_LIBRARIES}
     ${LLCHARACTER_LIBRARIES}
@@ -1957,9 +2024,14 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${LLLOGIN_LIBRARIES}
     ${LLPHYSICS_LIBRARIES}
     ${LLPHYSICSEXTENSIONS_LIBRARIES}
-    ${TCMALLOC_LIBRARIES}
     ${LLAPPEARANCE_LIBRARIES}
     )
+
+if (BUGSPLAT_DB)
+  target_link_libraries(${VIEWER_BINARY_NAME}
+    ${BUGSPLAT_LIBRARIES}
+    )
+endif (BUGSPLAT_DB)
 
 set(ARTWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH
     "Path to artwork files.")
@@ -1984,15 +2056,16 @@ if (LINUX)
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         --arch=${ARCH}
         --artwork=${ARTWORK_DIR}
+        "--bugsplat=${BUGSPLAT_DB}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
-        --channel=${VIEWER_CHANNEL}
-        --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+        "--channel=${VIEWER_CHANNEL}"
         --configuration=${CMAKE_CFG_INTDIR}
         --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
         --grid=${GRID}
         --source=${CMAKE_CURRENT_SOURCE_DIR}
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
+        --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         ${COPY_INPUT_DEPENDENCIES}
@@ -2006,17 +2079,18 @@ if (LINUX)
     COMMAND ${PYTHON_EXECUTABLE}
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
-      --arch=${ARCH}
       --actions=copy
+      --arch=${ARCH}
       --artwork=${ARTWORK_DIR}
+      "--bugsplat=${BUGSPLAT_DB}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
+      "--channel=${VIEWER_CHANNEL}"
       --configuration=${CMAKE_CFG_INTDIR}
       --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
       --grid=${GRID}
-      --channel=${VIEWER_CHANNEL}
-      --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
       --source=${CMAKE_CURRENT_SOURCE_DIR}
+      --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
     DEPENDS
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
       ${COPY_INPUT_DEPENDENCIES}
@@ -2034,30 +2108,46 @@ if (LINUX)
 endif (LINUX)
 
 if (DARWIN)
-  # These all get set with PROPERTIES
-  set(product "Second Life")
-  set(MACOSX_BUNDLE_INFO_STRING "Second Life Viewer")
+  # These all get set with PROPERTIES. It's not that the property names are
+  # magically known to CMake -- it's that these names are referenced in the
+  # Info-SecondLife.plist file in the configure_file() directive below.
+  set(product "${VIEWER_CHANNEL}")
+  set(MACOSX_EXECUTABLE_NAME "${VIEWER_CHANNEL}")
+  set(MACOSX_BUNDLE_INFO_STRING "${VIEWER_CHANNEL}")
   set(MACOSX_BUNDLE_ICON_FILE "secondlife.icns")
   set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.secondlife.indra.viewer")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${VIEWER_CHANNEL} ${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_NAME "SecondLife")
-  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}")
+  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
   set(MACOSX_BUNDLE_COPYRIGHT "Copyright © Linden Research, Inc. 2007")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "SecondLife.nib")
   set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
+
+  # https://blog.kitware.com/upcoming-in-cmake-2-8-12-osx-rpath-support/
+  set(CMAKE_MACOSX_RPATH 1)
   
   set_target_properties(
     ${VIEWER_BINARY_NAME}
     PROPERTIES
     OUTPUT_NAME "${product}"
+    # From Contents/MacOS/SecondLife, look in Contents/Frameworks
+    INSTALL_RPATH "@loader_path/../Frameworks"
+    # SIGH, as of 2018-05-24 (cmake 3.11.1) the INSTALL_RPATH property simply
+    # does not work. Try this:
+    LINK_FLAGS "-rpath @loader_path/../Frameworks"
     MACOSX_BUNDLE_INFO_PLIST
     "${CMAKE_CURRENT_SOURCE_DIR}/Info-SecondLife.plist"
     )
 
+  set(VIEWER_APP_BUNDLE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app")
+  set(VIEWER_APP_EXE "${VIEWER_APP_BUNDLE}/Contents/MacOS/${product}")
+  set(VIEWER_APP_DSYM "${VIEWER_APP_EXE}.dSYM")
+  set(VIEWER_APP_XCARCHIVE "${VIEWER_APP_BUNDLE}/../${product}.xcarchive.zip")
+
   configure_file(
      "${CMAKE_CURRENT_SOURCE_DIR}/Info-SecondLife.plist"
-     "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app/Contents/Info.plist"
+     "${VIEWER_APP_BUNDLE}/Contents/Info.plist"
     )
 
   add_custom_command(
@@ -2068,20 +2158,22 @@ if (DARWIN)
       --actions=copy
       --arch=${ARCH}
       --artwork=${ARTWORK_DIR}
+      "--bugsplat=${BUGSPLAT_DB}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
+      --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
+      "--channel=${VIEWER_CHANNEL}"
       --configuration=${CMAKE_CFG_INTDIR}
-      --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app
+      --dest=${VIEWER_APP_BUNDLE}
       --grid=${GRID}
-      --channel=${VIEWER_CHANNEL}
-      --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
       --source=${CMAKE_CURRENT_SOURCE_DIR}
+      --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
     DEPENDS
       ${VIEWER_BINARY_NAME}
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
     )
 
-  add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_quicktime media_plugin_libvlc media_plugin_cef mac-crash-logger)
+  add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_libvlc media_plugin_cef mac-crash-logger)
   add_dependencies(${VIEWER_BINARY_NAME} mac-crash-logger)
 
   if (ENABLE_SIGNING)
@@ -2100,16 +2192,16 @@ if (DARWIN)
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
           --arch=${ARCH}
           --artwork=${ARTWORK_DIR}
+          "--bugsplat=${BUGSPLAT_DB}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
-          --channel=${VIEWER_CHANNEL}
+          "--channel=${VIEWER_CHANNEL}"
           --configuration=${CMAKE_CFG_INTDIR}
-          --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app
+          --dest=${VIEWER_APP_BUNDLE}
           --grid=${GRID}
-          --channel=${VIEWER_CHANNEL}
-          --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
           --source=${CMAKE_CURRENT_SOURCE_DIR}
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
+          --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
           ${SIGNING_SETTING}
         DEPENDS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2121,67 +2213,152 @@ if (INSTALL)
   include(${CMAKE_CURRENT_SOURCE_DIR}/ViewerInstall.cmake)
 endif (INSTALL)
 
-if (PACKAGE)
-  set(SYMBOL_SEARCH_DIRS "")
-  if (WINDOWS)
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}")
-    set(VIEWER_SYMBOL_FILE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-symbols-windows.tar.bz2")
-    # slplugin.exe failing symbols dump - need to debug, might have to do with updated version of google breakpad
-    # set(VIEWER_EXE_GLOBS "${VIEWER_BINARY_NAME}${CMAKE_EXECUTABLE_SUFFIX} slplugin.exe")
-    set(VIEWER_EXE_GLOBS "${VIEWER_BINARY_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
-    set(VIEWER_LIB_GLOB "*${CMAKE_SHARED_MODULE_SUFFIX}")
-    set(VIEWER_COPY_MANIFEST copy_w_viewer_manifest)
-  endif (WINDOWS)
-  if (DARWIN)
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}")
-    # *TODO: Generate these search dirs in the cmake files related to each binary.
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/llplugin/slplugin/${CMAKE_CFG_INTDIR}")
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/mac_crash_logger/${CMAKE_CFG_INTDIR}")
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/media_plugins/gstreamer010/${CMAKE_CFG_INTDIR}")
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/media_plugins/quicktime/${CMAKE_CFG_INTDIR}")
-    set(VIEWER_SYMBOL_FILE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-symbols-darwin.tar.bz2")
-    set(VIEWER_EXE_GLOBS "'Second Life' SLPlugin mac-crash-logger")
-    set(VIEWER_EXE_GLOBS "'Second Life' mac-crash-logger")
-    set(VIEWER_LIB_GLOB "*.dylib")
-  endif (DARWIN)
-  if (LINUX)
-    list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/packaged")
-    set(VIEWER_SYMBOL_FILE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-symbols-linux.tar.bz2")
-    set(VIEWER_EXE_GLOBS "do-not-directly-run-secondlife-bin SLPlugin")
-    set(VIEWER_EXE_GLOBS "do-not-directly-run-secondlife-bin")
-    set(VIEWER_LIB_GLOB "*${CMAKE_SHARED_MODULE_SUFFIX}*")
-    set(VIEWER_COPY_MANIFEST copy_l_viewer_manifest)
-  endif (LINUX)
+# Note that the conventional VIEWER_SYMBOL_FILE is set by ../../build.sh
+if (PACKAGE AND (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING) AND VIEWER_SYMBOL_FILE)
+  if (NOT BUGSPLAT_DB)
+    # Breakpad symbol-file generation
+    set(SYMBOL_SEARCH_DIRS "")
+    if (WINDOWS)
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}")
+      # slplugin.exe failing symbols dump - need to debug, might have to do with updated version of google breakpad
+      # set(VIEWER_EXE_GLOBS "${VIEWER_BINARY_NAME}${CMAKE_EXECUTABLE_SUFFIX} slplugin.exe")
+      set(VIEWER_EXE_GLOBS "${VIEWER_BINARY_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
+      set(VIEWER_LIB_GLOB "*${CMAKE_SHARED_MODULE_SUFFIX}")
+      set(VIEWER_COPY_MANIFEST copy_w_viewer_manifest)
+    endif (WINDOWS)
+    if (DARWIN)
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}")
+      # *TODO: Generate these search dirs in the cmake files related to each binary.
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/llplugin/slplugin/${CMAKE_CFG_INTDIR}")
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/mac_crash_logger/${CMAKE_CFG_INTDIR}")
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/media_plugins/gstreamer010/${CMAKE_CFG_INTDIR}")
+      set(VIEWER_EXE_GLOBS "'${product}' SLPlugin mac-crash-logger")
+      set(VIEWER_EXE_GLOBS "'${product}' mac-crash-logger")
+      set(VIEWER_LIB_GLOB "*.dylib")
+    endif (DARWIN)
+    if (LINUX)
+      list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/packaged")
+      set(VIEWER_EXE_GLOBS "do-not-directly-run-secondlife-bin SLPlugin")
+      set(VIEWER_EXE_GLOBS "do-not-directly-run-secondlife-bin")
+      set(VIEWER_LIB_GLOB "*${CMAKE_SHARED_MODULE_SUFFIX}*")
+      set(VIEWER_COPY_MANIFEST copy_l_viewer_manifest)
+    endif (LINUX)
 
-  if(RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING)
-  if(CMAKE_CFG_INTDIR STREQUAL ".")
-      set(LLBUILD_CONFIG ${CMAKE_BUILD_TYPE})
-  else(CMAKE_CFG_INTDIR STREQUAL ".")
-      # set LLBUILD_CONFIG to be a shell variable evaluated at build time
-      # reflecting the configuration we are currently building.
-      set(LLBUILD_CONFIG ${CMAKE_CFG_INTDIR})
-  endif(CMAKE_CFG_INTDIR STREQUAL ".")
-  add_custom_command(OUTPUT "${VIEWER_SYMBOL_FILE}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-    ARGS
-      "${CMAKE_CURRENT_SOURCE_DIR}/generate_breakpad_symbols.py"
-      "${LLBUILD_CONFIG}"
-      "${SYMBOL_SEARCH_DIRS}"
-      "${VIEWER_EXE_GLOBS}"
-      "${VIEWER_LIB_GLOB}"
-      "${AUTOBUILD_INSTALL_DIR}/bin/dump_syms"
-      "${VIEWER_SYMBOL_FILE}"
-    DEPENDS generate_breakpad_symbols.py
-        VERBATIM)
+    if(CMAKE_CFG_INTDIR STREQUAL ".")
+        set(LLBUILD_CONFIG ${CMAKE_BUILD_TYPE})
+    else(CMAKE_CFG_INTDIR STREQUAL ".")
+        # set LLBUILD_CONFIG to be a shell variable evaluated at build time
+        # reflecting the configuration we are currently building.
+        set(LLBUILD_CONFIG ${CMAKE_CFG_INTDIR})
+    endif(CMAKE_CFG_INTDIR STREQUAL ".")
+    add_custom_command(OUTPUT "${VIEWER_SYMBOL_FILE}"
+      COMMAND "${PYTHON_EXECUTABLE}"
+      ARGS
+        "${CMAKE_CURRENT_SOURCE_DIR}/generate_breakpad_symbols.py"
+        "${LLBUILD_CONFIG}"
+        "${SYMBOL_SEARCH_DIRS}"
+        "${VIEWER_EXE_GLOBS}"
+        "${VIEWER_LIB_GLOB}"
+        "${AUTOBUILD_INSTALL_DIR}/bin/dump_syms"
+        "${VIEWER_SYMBOL_FILE}"
+      DEPENDS generate_breakpad_symbols.py
+          VERBATIM)
 
-  add_custom_target(generate_breakpad_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" "${VIEWER_BINARY_NAME}" "${VIEWER_COPY_MANIFEST}")
-  add_dependencies(generate_breakpad_symbols "${VIEWER_BINARY_NAME}")
-  if (WINDOWS OR LINUX)
-    add_dependencies(generate_breakpad_symbols "${VIEWER_COPY_MANIFEST}")
-  endif (WINDOWS OR LINUX)
-  add_dependencies(llpackage generate_breakpad_symbols)
-  endif(RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING)
-endif (PACKAGE)
+    add_custom_target(generate_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" ${VIEWER_BINARY_NAME} "${VIEWER_COPY_MANIFEST}")
+    add_dependencies(generate_symbols ${VIEWER_BINARY_NAME})
+    if (WINDOWS OR LINUX)
+      add_dependencies(generate_symbols "${VIEWER_COPY_MANIFEST}")
+    endif (WINDOWS OR LINUX)
+
+  else (NOT BUGSPLAT_DB)
+    # BugSplat symbol-file generation
+    if (WINDOWS)
+      # Just pack up a tarball containing only the .pdb file for the
+      # executable. Because we intend to use cygwin tar, we must render
+      # VIEWER_SYMBOL_FILE in cygwin path syntax.
+      execute_process(COMMAND "cygpath" "-u" "${VIEWER_SYMBOL_FILE}"
+        OUTPUT_VARIABLE VIEWER_SYMBOL_FILE_CYGWIN
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      execute_process(COMMAND "cygpath" "-u" "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
+        OUTPUT_VARIABLE PARENT_DIRECTORY_CYGWIN
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      add_custom_command(OUTPUT "${VIEWER_SYMBOL_FILE}"
+        # Use of 'tar ...j' here assumes VIEWER_SYMBOL_FILE endswith .tar.bz2;
+        # testing a string suffix is painful enough in CMake language that
+        # we'll continue assuming it until forced to generalize.
+        COMMAND "tar"
+        ARGS
+          "cjf"
+          "${VIEWER_SYMBOL_FILE_CYGWIN}"
+          "-C"
+          "${PARENT_DIRECTORY_CYGWIN}"
+          "secondlife-bin.pdb"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-bin.pdb"
+        COMMENT "Packing viewer PDB into ${VIEWER_SYMBOL_FILE_CYGWIN}"
+        )
+      add_custom_target(generate_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" ${VIEWER_BINARY_NAME})
+      add_dependencies(generate_symbols ${VIEWER_BINARY_NAME})
+    endif (WINDOWS)
+    if (DARWIN)
+      # Have to run dsymutil first, then pack up the resulting .dSYM directory
+      add_custom_command(OUTPUT "${VIEWER_APP_DSYM}"
+        COMMAND "dsymutil"
+        ARGS
+          ${VIEWER_APP_EXE}
+        COMMENT "Generating ${VIEWER_APP_DSYM}"
+        )
+      add_custom_target(dsym_generate DEPENDS "${VIEWER_APP_DSYM}")
+      add_dependencies(dsym_generate ${VIEWER_BINARY_NAME})
+      add_custom_command(OUTPUT "${VIEWER_SYMBOL_FILE}"
+        # See above comments about "tar ...j"
+        COMMAND "tar"
+        ARGS
+          "cjf"
+          "${VIEWER_SYMBOL_FILE}"
+          "-C"
+          "${VIEWER_APP_DSYM}/.."
+          "${product}.dSYM"
+        DEPENDS "${VIEWER_APP_DSYM}"
+        COMMENT "Packing dSYM into ${VIEWER_SYMBOL_FILE}"
+        )
+      add_custom_target(dsym_tarball DEPENDS "${VIEWER_SYMBOL_FILE}")
+      add_dependencies(dsym_tarball dsym_generate)
+      add_custom_command(OUTPUT "${VIEWER_APP_XCARCHIVE}"
+        COMMAND "zip"
+        ARGS
+          "-r"
+          "${VIEWER_APP_XCARCHIVE}"
+          "."
+        WORKING_DIRECTORY "${VIEWER_APP_DSYM}/.."
+        DEPENDS "${VIEWER_APP_DSYM}"
+        COMMENT "Generating xcarchive.zip for upload to BugSplat"
+        )
+      add_custom_target(dsym_xcarchive DEPENDS "${VIEWER_APP_XCARCHIVE}")
+      add_dependencies(dsym_xcarchive dsym_generate)
+      # Have to create a stamp file, and depend on it, to force CMake to run
+      # the cleanup step.
+      add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/dsym.stamp"
+        COMMAND rm -rf "${VIEWER_APP_DSYM}"
+        COMMAND touch "${CMAKE_CURRENT_BINARY_DIR}/dsym.stamp"
+        DEPENDS "${VIEWER_SYMBOL_FILE}" "${VIEWER_APP_XCARCHIVE}"
+        COMMENT "Cleaning up dSYM"
+        )
+      add_custom_target(generate_symbols DEPENDS
+        "${VIEWER_APP_DSYM}"
+        "${VIEWER_SYMBOL_FILE}"
+        "${VIEWER_APP_XCARCHIVE}"
+        "${CMAKE_CURRENT_BINARY_DIR}/dsym.stamp"
+        )
+      add_dependencies(generate_symbols dsym_tarball dsym_xcarchive)
+    endif (DARWIN)
+    if (LINUX)
+      # TBD
+    endif (LINUX)
+  endif (NOT BUGSPLAT_DB)
+
+  # for both BUGSPLAT_DB and Breakpad
+  add_dependencies(llpackage generate_symbols)
+endif ()
 
 if (LL_TESTS)
   # To add a viewer unit test, just add the test .cpp file below
@@ -2212,6 +2389,7 @@ if (LL_TESTS)
     ${LLCOMMON_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     ${CURL_LIBRARIES}
+    ${NGHTTP2_LIBRARIES}
     )
 
   set_source_files_properties(

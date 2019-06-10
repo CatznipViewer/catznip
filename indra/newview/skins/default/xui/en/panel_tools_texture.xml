@@ -11,14 +11,6 @@
          name="Texture"
          top="0"
          width="295">
-            <panel.string
-             name="string repeats per meter">
-                Repeats Per Meter
-            </panel.string>
-            <panel.string
-             name="string repeats per face">
-                Repeats Per Face
-            </panel.string>
             <text
              type="string"
              length="1"
@@ -148,6 +140,18 @@
                 top_pad="1"
                 value="2"/>
             </radio_group> 
+            <check_box
+             control_name="SyncMaterialSettings"
+             follows="top|left"
+             height="20"
+             initial_value="false"
+             label="Lock repeat"
+             layout="topleft"
+             left="8"
+             name="checkbox_sync_settings"
+             tool_tip="Adjust all maps repeats simultaneously"
+             top_pad="-16"
+             width="160" />
             <texture_picker
              can_apply_immediately="true"
              default_image_name="Default"
@@ -159,7 +163,7 @@
              left="10"
              name="texture control"
              tool_tip="Click to choose a picture"
-             top_pad="7"
+             top_pad="5"
              width="64" />
             <text
              type="string"
@@ -586,7 +590,7 @@
 			 label_width="205"
              left="10"
              max_val="100"
-             min_val="0.1"
+             min_val="-100"
              name="rptctrl"
              width="265" />
            <spinner
@@ -599,11 +603,10 @@
              layout="topleft"
 			 label_width="205"
              left="10"
-             max_val="9999"
-             min_val="-9999"
+             max_val="360"
+             min_val="-360"
              name="TexRot"
              width="265" />
-
             <spinner
              follows="left|top"
              height="19"
@@ -613,6 +616,7 @@
              layout="topleft"
              left="10"
              min_val="-1"
+             max_val="1"
              name="TexOffsetU"
              width="265" />
             <spinner
@@ -624,6 +628,7 @@
              layout="topleft"
              left="10"
              min_val="-1"
+             max_val="1"
              name="TexOffsetV"
              width="265" />
             <spinner
@@ -663,10 +668,9 @@
 			 label_width="205"
              left="10"
              max_val="360"
-             min_val="0"
+             min_val="-360"
              name="bumpyRot"
              width="265" />
-
             <spinner
              follows="left|top"
              height="19"
@@ -675,7 +679,8 @@
              label_width="205"
              layout="topleft"
              left="10"
-             min_val="0"
+             min_val="-1"
+             max_val="1"
              name="bumpyOffsetU"
              width="265" />
             <spinner
@@ -686,7 +691,8 @@
              label_width="205"
              layout="topleft"
              left="10"
-             min_val="0"
+             min_val="-1"
+             max_val="1"
              name="bumpyOffsetV"
              width="265" />
             <spinner
@@ -726,10 +732,9 @@
 			 label_width="205"
              left="10"
              max_val="360"
-             min_val="0"
+             min_val="-360"
              name="shinyRot"
              width="265" />
-
             <spinner
              follows="left|top"
              height="19"
@@ -738,7 +743,8 @@
              label_width="205"
              layout="topleft"
              left="10"
-             min_val="0"
+             min_val="-1"
+             max_val="1"
              name="shinyOffsetU"
              width="265" />
             <spinner
@@ -749,7 +755,8 @@
              label_width="205"
              layout="topleft"
              left="10"
-             min_val="0"
+             min_val="-1"
+             max_val="1"
              name="shinyOffsetV"
              width="265" />
             <check_box

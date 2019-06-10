@@ -12,6 +12,7 @@
 		<menu_item_call label="Controlli fotocamera..." name="Camera Controls"/>
 		<menu label="Spostamento" name="Movement">
 			<menu_item_call label="Siedi" name="Sit Down Here"/>
+			<menu_item_call label="Alzati" name="Stand up"/>
 			<menu_item_check label="Vola" name="Fly"/>
 			<menu_item_check label="Corri sempre" name="Always Run"/>
 			<menu_item_call label="Ferma animazione" name="Stop Animating My Avatar"/>
@@ -44,6 +45,7 @@
 			<menu_item_check label="Nessuna manipolazione voce" name="NoVoiceMorphing"/>
 			<menu_item_check label="Anteprima..." name="Preview"/>
 			<menu_item_call label="Abbonati..." name="Subscribe"/>
+			<menu_item_call label="Vantaggio Premium..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="Gesture..." name="Gestures"/>
 		<menu_item_check label="Amici" name="My Friends"/>
@@ -57,7 +59,8 @@
 		<menu_item_call label="Destinazioni..." name="Destinations"/>
 		<menu_item_check label="Mappamondo" name="World Map"/>
 		<menu_item_check label="Mini mappa" name="Mini-Map"/>
-		<menu_item_check label="Cerca" name="Search"/>
+		<menu_item_call label="Eventi" name="Events"/>
+		<menu_item_check label="Cerca..." name="Search"/>
 		<menu_item_call label="Teleport a Casa" name="Teleport Home"/>
 		<menu_item_call label="Imposta come Casa mia" name="Set Home to Here"/>
 		<menu_item_call label="Istantanea" name="Take Snapshot"/>
@@ -75,7 +78,7 @@
 			<menu_item_check label="Proprietà del lotto" name="Parcel Properties"/>
 			<menu_item_check label="Menu Avanzato" name="Show Advanced Menu"/>
 		</menu>
-		<menu label="Sole" name="Sun">
+		<menu label="Dom" name="Sun">
 			<menu_item_check label="Alba" name="Sunrise"/>
 			<menu_item_check label="Mezzogiorno" name="Noon"/>
 			<menu_item_check label="Tramonto" name="Sunset"/>
@@ -87,17 +90,17 @@
 			<menu label="Valori predefiniti acqua" name="Water Presets">
 				<menu_item_call label="Nuovo valore predefinito..." name="new_water_preset"/>
 				<menu_item_call label="Modifica valore predefinito..." name="edit_water_preset"/>
-				<menu_item_call label="Cancella valore predefinito..." name="delete_water_preset"/>
+				<menu_item_call label="Elimina valore predefinito..." name="delete_water_preset"/>
 			</menu>
 			<menu label="Valori predefiniti cielo" name="Sky Presets">
 				<menu_item_call label="Nuovo valore predefinito..." name="new_sky_preset"/>
 				<menu_item_call label="Modifica valore predefinito..." name="edit_sky_preset"/>
-				<menu_item_call label="Cancella valore predefinito..." name="delete_sky_preset"/>
+				<menu_item_call label="Elimina valore predefinito..." name="delete_sky_preset"/>
 			</menu>
 			<menu label="Valori predefiniti giorno" name="Day Presets">
 				<menu_item_call label="Nuovo valore predefinito..." name="new_day_preset"/>
 				<menu_item_call label="Modifica valore predefinito..." name="edit_day_preset"/>
-				<menu_item_call label="Cancella valore predefinito..." name="delete_day_preset"/>
+				<menu_item_call label="Elimina valore predefinito..." name="delete_day_preset"/>
 			</menu>
 		</menu>
 	</menu>
@@ -119,7 +122,7 @@
 			<menu_item_call label="Includi parte o faccia successiva" name="Include Next Part or Face"/>
 			<menu_item_call label="Includi parte o faccia precedente" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="Set collegati..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Oggetti regione" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="Ingrandisci selezione" name="Focus on Selection"/>
 		<menu_item_call label="Zoom sulla selezione" name="Zoom to Selection"/>
 		<menu label="Oggetto" name="Object">
@@ -128,8 +131,10 @@
 			<menu_item_call label="Prendi copia" name="Take Copy"/>
 			<menu_item_call label="Salva nei contenuti oggetto" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="Restituisci oggetto" name="Return Object back to Owner"/>
+			<menu_item_call label="Duplica" name="DuplicateObject"/>
 		</menu>
 		<menu label="Script" name="Scripts">
+			<menu_item_check label="Avvertenze/errori dello script..." name="Script debug"/>
 			<menu_item_call label="Ricompila script (Mono)" name="Mono"/>
 			<menu_item_call label="Ricompila gli script (LSL)" name="LSL"/>
 			<menu_item_call label="Reimposta script" name="Reset Scripts"/>
@@ -137,7 +142,7 @@
 			<menu_item_call label="Imposta script come non in esecuzione" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="Pathfinding" name="Pathfinding">
-			<menu_item_call label="Set collegati..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Oggetti regione" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="Personaggi..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="Visualizza / test..." name="pathfinding_console_menu_item"/>
 			<menu_item_call label="Rebake regione" name="pathfinding_rebake_navmesh_item"/>
@@ -169,6 +174,7 @@
 	</menu>
 	<menu label="Aiuto" name="Help">
 		<menu_item_call label="Istruzioni..." name="How To"/>
+		<menu_item_call label="Guida introduttiva" name="Quickstart"/>
 		<menu_item_call label="Base di conoscenza" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="Forum della comunità" name="Community Forums"/>
@@ -179,7 +185,6 @@
 		<menu_item_call label="Segnala bug" name="Report Bug"/>
 		<menu_item_call label="Urti, spinte e contatti" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="Informazioni su [APP_NAME]" name="About Second Life"/>
-		<menu_item_call label="Cerca aggiornamenti" name="Check for Updates"/>
 	</menu>
 	<menu label="Avanzate" name="Advanced">
 		<menu_item_call label="Ridisegna le texture" name="Rebake Texture"/>
@@ -269,7 +274,6 @@
 			<menu_item_check label="Mostra info sulla texture" name="Show Texture Info"/>
 			<menu_item_check label="Mostra colore sotto il cursore" name="Show Color Under Cursor"/>
 			<menu_item_check label="Mostra memoria" name="Show Memory"/>
-			<menu_item_check label="Mostra info mem privata" name="Show Private Mem Info"/>
 			<menu_item_check label="Mostra aggiornamenti agli oggetti" name="Show Updates"/>
 		</menu>
 		<menu label="Forza un errore" name="Force Errors">
@@ -294,6 +298,7 @@
 			<menu_item_check label="Forme fisica" name="Physics Shapes"/>
 			<menu_item_check label="Aggiorna tipo" name="Update Type"/>
 			<menu_item_check label="Info livello dettaglio" name="LOD Info"/>
+			<menu_item_check label="Conteggio triangolo" name="Triangle Count"/>
 			<menu_item_check label="Crea coda" name="Build Queue"/>
 			<menu_item_check label="Particelle" name="Particles"/>
 			<menu_item_check label="Giunti" name="Joints"/>
@@ -368,6 +373,7 @@
 			<menu_item_check label="Mostra schemi collisione" name="Show Collision Skeleton"/>
 			<menu_item_check label="Mostra ossa" name="Show Bones"/>
 			<menu_item_check label="Mostra bersaglio" name="Display Agent Target"/>
+			<menu_item_check label="Mostra Impostor Extents" name="Show Impostor Extents"/>
 			<menu_item_call label="Debug texture dell&apos;avatar" name="Debug Avatar Textures"/>
 		</menu>
 		<menu_item_check label="Texture HTTP" name="HTTP Textures"/>

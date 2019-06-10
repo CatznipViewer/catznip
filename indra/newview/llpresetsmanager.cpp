@@ -78,16 +78,10 @@ std::string LLPresetsManager::getPresetsDir(const std::string& subdirectory)
 	std::string presets_path = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, PRESETS_DIR);
 	std::string full_path;
 
-	if (!gDirUtilp->fileExists(presets_path))
-	{
-		LLFile::mkdir(presets_path);
-	}
+	LLFile::mkdir(presets_path);
 
 	full_path = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, PRESETS_DIR, subdirectory);
-	if (!gDirUtilp->fileExists(full_path))
-	{
-		LLFile::mkdir(full_path);
-	}
+	LLFile::mkdir(full_path);
 
 	return full_path;
 }
@@ -144,6 +138,11 @@ bool LLPresetsManager::savePreset(const std::string& subdirectory, std::string n
 	{
 		name = PRESETS_DEFAULT;
 	}
+	if (!createDefault && name == PRESETS_DEFAULT)
+	{
+		LL_WARNS() << "Should not overwrite default" << LL_ENDL;
+		return false;
+	}
 
 	bool saved = false;
 	std::vector<std::string> name_list;
@@ -165,8 +164,8 @@ bool LLPresetsManager::savePreset(const std::string& subdirectory, std::string n
 	}
     else if(PRESETS_CAMERA == subdirectory)
 	{
-		name_list = boost::assign::list_of
-			("Placeholder");
+		name_list.clear();
+		name_list.push_back("Placeholder");
 	}
     else
     {

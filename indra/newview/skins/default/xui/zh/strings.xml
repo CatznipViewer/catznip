@@ -38,7 +38,7 @@
 		顯像初始化失敗。 請更新你的顯像卡驅動程式！
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]位元)
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
@@ -71,7 +71,7 @@
 描繪距離：[DRAW_DISTANCE]公尺
 頻寬：[NET_BANDWITH]千位元/秒
 細節層次率：[LOD_FACTOR]
-呈像品質：[RENDER_QUALITY] / 7
+呈像品質：[RENDER_QUALITY]
 進階照明模型：[GPU_SHADERS]
 材質記憶體：[TEXTURE_MEMORY]MB
 VFS（快取）建立時間：[VFS_TIME]
@@ -79,7 +79,7 @@ VFS（快取）建立時間：[VFS_TIME]
 	<string name="AboutLibs">
 		J2C 解碼器版本： [J2C_VERSION]
 音效驅動程式版本： [AUDIO_DRIVER_VERSION]
-LLCEFLib/CEF版本：[LLCEFLIB_VERSION]
+[LIBCEF_VERSION]
 LibVLC版本：[LIBVLC_VERSION]N]
 語音伺服器版本： [VOICE_VERSION]
 	</string>
@@ -260,8 +260,7 @@ http://secondlife.com/viewer-access-faq
 	</string>
 	<string name="LoginFailedAccountDisabled">
 		此時無法完成你的請求。
-請到 http://secondlife.com/support 聯絡支援人員獲得幫助。
-如果你無法變更密碼，請致電 (866) 476-9763 （美國）。
+請到 http://support.secondlife.com 聯絡支援人員獲得幫助。
 	</string>
 	<string name="LoginFailedTransformError">
 		登入時的資料不一致。
@@ -277,7 +276,7 @@ http://secondlife.com/viewer-access-faq
 	</string>
 	<string name="LoginFailedPendingLogout">
 		系統正在處理你的登出。
-你的帳號要等到 [TIME] （太平洋時間）才可使用。
+請稍待一分鐘再試圖重新登入。
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		無法建立有效的時域。
@@ -695,6 +694,19 @@ http://secondlife.com/viewer-access-faq
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		未知狀態
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		服務無法取得。
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		伺服器發生意料外的困難。
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		無法提供服務，或者上傳逾時。
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		上傳要求發生錯誤。  請參見： 
+http://secondlife.com/support 求助解決問題。
 	</string>
 	<string name="texture">
 		材質
@@ -1426,6 +1438,9 @@ http://secondlife.com/viewer-access-faq
 	<string name="InventoryNoMatchingItems">
 		找不到你要找的嗎？ 請試試 [secondlife:///app/search/places/ 搜尋]。
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		找不到你要找的嗎？ 請試試[secondlife:///app/inventory/filters 顯示過濾器]。
+	</string>
 	<string name="PlacesNoMatchingItems">
 		找不到你要找的嗎？ 請試試 [secondlife:///app/search/places/[SEARCH_TERM] 搜尋]。
 	</string>
@@ -1483,13 +1498,17 @@ http://secondlife.com/viewer-access-faq
 		[[MARKETPLACE_CREATE_STORE_URL] 購物市集商店]正傳回錯誤。
 	</string>
 	<string name="InventoryMarketplaceError">
-		這功能尚在 Beta 測試階段。 如你想參與，請到這個[http://goo.gl/forms/FCQ7UXkakz Google 表單]填寫姓名。
+		開啟Marketplace刊登內容時發生錯誤。
+如果你繼續收到這個訊息，請到 http://support.secondlife.com 聯絡 Second Life 支援人員。
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">
 		你的 Marketplace 刊登資料夾是空的。
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		將資料夾拖曳到這個區域，即可在[[MARKETPLACE_DASHBOARD_URL] Marketplace]刊登出售。
+	</string>
+	<string name="InventoryItemsCount">
+		（[ITEMS_COUNT]個物項）
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		限量資料夾必須放在版本資料夾裡
@@ -2189,10 +2208,31 @@ http://secondlife.com/viewer-access-faq
 		你為 [OWNER] 管理的全部領地
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		允許居民：（[ALLOWEDAGENTS]，最多 [MAXACCESS]）
+		永遠允許：（[ALLOWEDAGENTS]，最多 [MAXACCESS]）
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		允許的群組：（[ALLOWEDGROUPS]，最多 [MAXACCESS]）
+		永遠允許的群組：（[ALLOWEDGROUPS]，最多 [MAXACCESS]）
+	</string>
+	<string name="RegionInfoBannedResidents">
+		永遠封鎖：（[BANNEDAGENTS]，最多可封鎖 [MAXBANNED] 名）
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		永遠允許
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		永遠封鎖
+	</string>
+	<string name="RegionInfoAllEstates">
+		全部領地
+	</string>
+	<string name="RegionInfoManagedEstates">
+		受管領地
+	</string>
+	<string name="RegionInfoThisEstate">
+		這個領地
+	</string>
+	<string name="AndNMore">
+		及其他[EXTRA_COUNT]個
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		地段腳本記憶體
@@ -4436,7 +4476,10 @@ http://secondlife.com/viewer-access-faq
 		和 [AGENT_NAME] 多方通話
 	</string>
 	<string name="inventory_item_offered-im">
-		收納區物品已發送
+		收納區物品&apos;[ITEM_NAME]&apos;已向人提供
+	</string>
+	<string name="inventory_folder_offered-im">
+		收納區資料夾&apos;[ITEM_NAME]&apos;已向人提供
 	</string>
 	<string name="share_alert">
 		將收納區物品拖曳到這裡
@@ -4523,7 +4566,10 @@ http://secondlife.com/viewer-access-faq
 		我的家位置已定。
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] 支付你 L$[AMOUNT]（[REASON]）。
@@ -4894,8 +4940,8 @@ http://secondlife.com/viewer-access-faq
 	<string name="server_is_down">
 		儘管我們努力避免，還是發生意料外的錯誤。
 
-	請察訪 status.secondlifegrid.net 看是否發生了已知狀況。
-        如果文體繼續發生，請檢查你的網路和防火牆設定。
+請察訪 http://status.secondlifegrid.net 看是否發生了已知狀況。
+        如果問題繼續發生，請檢查你的網路和防火牆設定。
 	</string>
 	<string name="dateTimeWeekdaysNames">
 		星期日:星期一:星期二:星期三:星期四:星期五:星期六
@@ -5367,6 +5413,9 @@ http://secondlife.com/viewer-access-faq
 	<string name="Command_Gestures_Label">
 		姿勢
 	</string>
+	<string name="Command_Grid_Status_Label">
+		網格狀態
+	</string>
 	<string name="Command_HowTo_Label">
 		簡易教學
 	</string>
@@ -5459,6 +5508,9 @@ http://secondlife.com/viewer-access-faq
 	</string>
 	<string name="Command_Gestures_Tooltip">
 		你化身可用的姿勢
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		顯示當前網格狀態
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		如何完成常用的動作
@@ -5681,6 +5733,9 @@ http://secondlife.com/viewer-access-faq
 	</string>
 	<string name="loading_chat_logs">
 		載入中…
+	</string>
+	<string name="na">
+		不適用
 	</string>
 	<string name="preset_combo_label">
 		-空白清單-

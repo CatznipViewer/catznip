@@ -265,9 +265,6 @@ public:
 	// Follow parent chain to the top.
 	bool getObjectTopmostAncestor(const LLUUID& object_id, LLUUID& result) const;
 
-private:
-	U32 getDescendentsCountRecursive(const LLUUID& id, U32 max_item_limit);
-	
 	//--------------------------------------------------------------------
 	// Find
 	//--------------------------------------------------------------------
@@ -411,6 +408,7 @@ public:
 	/// removeItem() or removeCategory(), whichever is appropriate
 	void removeObject(const LLUUID& object_id);
 
+	// "TrashIsFull" when trash exceeds maximum capacity
 	void checkTrashOverflow();
 
 protected:
@@ -615,6 +613,7 @@ protected:
 	static bool loadFromFile(const std::string& filename,
 							 cat_array_t& categories,
 							 item_array_t& items,
+							 changed_items_t& cats_to_update,
 							 bool& is_cache_obsolete); 
 	static bool saveToFile(const std::string& filename,
 						   const cat_array_t& categories,

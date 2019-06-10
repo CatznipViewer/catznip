@@ -281,7 +281,8 @@ const std::string LLEventPump::ANONYMOUS = std::string();
 
 LLEventPump::LLEventPump(const std::string& name, bool tweak):
     // Register every new instance with LLEventPumps
-    mName(LLEventPumps::instance().registerNew(*this, name, tweak)),
+    mRegistry(LLEventPumps::instance().getHandle()),
+    mName(mRegistry.get()->registerNew(*this, name, tweak)),
     mSignal(new LLStandardSignal()),
     mEnabled(true)
 {}
@@ -292,8 +293,13 @@ LLEventPump::LLEventPump(const std::string& name, bool tweak):
 
 LLEventPump::~LLEventPump()
 {
-    // Unregister this doomed instance from LLEventPumps
-    LLEventPumps::instance().unregister(*this);
+    // Unregister this doomed instance from LLEventPumps -- but only if
+    // LLEventPumps is still around!
+    LLEventPumps* registry = mRegistry.get();
+    if (registry)
+    {
+        registry->unregister(*this);
+    }
 }
 
 // static data member
@@ -316,6 +322,13 @@ LLBoundListener LLEventPump::listen_impl(const std::string& name, const LLEventL
                                          const NameList& after,
                                          const NameList& before)
 {
+    if (!mSignal)
+    {
+        LL_WARNS() << "Can't connect listener" << LL_ENDL;
+        // connect will fail, return dummy
+        return LLBoundListener();
+    }
+
     float nodePosition = 1.0;
 
     // if the supplied name is empty we are not interested in the ordering mechanism 
@@ -532,10 +545,8 @@ bool LLEventStream::post(const LLSD& event)
  *****************************************************************************/
 bool LLEventMailDrop::post(const LLSD& event)
 {
-    bool posted = false;
-    
-    if (!mSignal->empty())
-        posted = LLEventStream::post(event);
+    // forward the call to our base class
+    bool posted = LLEventStream::post(event);
     
     if (!posted)
     {   // if the event was not handled we will save it for later so that it can 
@@ -551,16 +562,25 @@ LLBoundListener LLEventMailDrop::listen_impl(const std::string& name,
                                     const NameList& after,
                                     const NameList& before)
 {
-    if (!mEventHistory.empty())
+    // Before actually connecting this listener for subsequent post() calls,
+    // first feed each of the saved events, in order, to the new listener.
+    // Remove any that this listener consumes -- Effective STL, Item 9.
+    for (auto hi(mEventHistory.begin()), hend(mEventHistory.end()); hi != hend; )
     {
-        if (listener(mEventHistory.front()))
+        if (listener(*hi))
         {
-            mEventHistory.pop_front();
+            // new listener consumed this event, erase it
+            hi = mEventHistory.erase(hi);
+        }
+        else
+        {
+            // listener did not consume this event, just move along
+            ++hi;
         }
     }
 
+    // let base class perform the actual connection
     return LLEventStream::listen_impl(name, listener, after, before);
-
 }
 
 

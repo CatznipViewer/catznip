@@ -46,6 +46,7 @@
 #include "llviewerobjectlist.h"
 #include "llexperiencecache.h"
 #include "lltrans.h"
+#include "llviewerregion.h"
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -327,9 +328,13 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
         LLTextBox* tb = getChild<LLTextBox>("LabelItemExperience");
         tb->setText(getString("loading_experience"));
         tb->setVisible(TRUE);
-
-        LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(), 
-            boost::bind(&LLSidepanelItemInfo::setAssociatedExperience, getDerivedHandle<LLSidepanelItemInfo>(), _1));
+        std::string url = std::string();
+        if(object && object->getRegion())
+        {
+            url = object->getRegion()->getCapability("GetMetadata");
+        }
+        LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(), url,
+                boost::bind(&LLSidepanelItemInfo::setAssociatedExperience, getDerivedHandle<LLSidepanelItemInfo>(), _1));
     }
     
 	//////////////////////
@@ -436,7 +441,6 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 	
 	const std::string perm_and_sale_items[]={
 		"perms_inv",
-		"OwnerLabel",
 		"perm_modify",
 		"CheckOwnerModify",
 		"CheckOwnerCopy",
@@ -450,10 +454,8 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		"CheckNextOwnerCopy",
 		"CheckNextOwnerTransfer",
 		"CheckPurchase",
-		"SaleLabel",
 		"ComboBoxSaleType",
-		"Edit Cost",
-		"TextPrice"
+		"Edit Cost"
 	};
 	
 	const std::string debug_items[]={
@@ -490,14 +492,6 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 	///////////////////////
 	// OWNER PERMISSIONS //
 	///////////////////////
-	if(can_agent_manipulate)
-	{
-		getChild<LLUICtrl>("OwnerLabel")->setValue(getString("you_can"));
-	}
-	else
-	{
-		getChild<LLUICtrl>("OwnerLabel")->setValue(getString("owner_can"));
-	}
 
 	U32 base_mask		= perm.getMaskBase();
 	U32 owner_mask		= perm.getMaskOwner();
@@ -505,7 +499,6 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 	U32 everyone_mask	= perm.getMaskEveryone();
 	U32 next_owner_mask	= perm.getMaskNextOwner();
 
-	getChildView("OwnerLabel")->setEnabled(TRUE);
 	getChildView("CheckOwnerModify")->setEnabled(FALSE);
 	getChild<LLUICtrl>("CheckOwnerModify")->setValue(LLSD((BOOL)(owner_mask & PERM_MODIFY)));
 	getChildView("CheckOwnerCopy")->setEnabled(FALSE);
@@ -620,7 +613,7 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		LLCheckBoxCtrl* ctl = getChild<LLCheckBoxCtrl>("CheckShareWithGroup");
 		if(ctl)
 		{
-			ctl->setTentative(TRUE);
+			ctl->setTentative(!ctl->getEnabled());
 			ctl->set(TRUE);
 		}
 	}
@@ -640,7 +633,6 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 	if (is_obj_modify && can_agent_sell 
 		&& gAgent.allowOperation(PERM_TRANSFER, perm, GP_OBJECT_MANIPULATE))
 	{
-		getChildView("SaleLabel")->setEnabled(is_complete);
 		getChildView("CheckPurchase")->setEnabled(is_complete);
 
 		getChildView("NextOwnerLabel")->setEnabled(TRUE);
@@ -648,13 +640,11 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled((base_mask & PERM_COPY) && !cannot_restrict_permissions);
 		getChildView("CheckNextOwnerTransfer")->setEnabled((next_owner_mask & PERM_COPY) && !cannot_restrict_permissions);
 
-		getChildView("TextPrice")->setEnabled(is_complete && is_for_sale);
 		combo_sale_type->setEnabled(is_complete && is_for_sale);
 		edit_cost->setEnabled(is_complete && is_for_sale);
 	}
 	else
 	{
-		getChildView("SaleLabel")->setEnabled(FALSE);
 		getChildView("CheckPurchase")->setEnabled(FALSE);
 
 		getChildView("NextOwnerLabel")->setEnabled(FALSE);
@@ -662,7 +652,6 @@ void LLSidepanelItemInfo::refreshFromItem(LLViewerInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled(FALSE);
 		getChildView("CheckNextOwnerTransfer")->setEnabled(FALSE);
 
-		getChildView("TextPrice")->setEnabled(FALSE);
 		combo_sale_type->setEnabled(FALSE);
 		edit_cost->setEnabled(FALSE);
 	}
@@ -810,40 +799,49 @@ void LLSidepanelItemInfo::onCommitPermissions()
 	//LL_INFOS() << "LLSidepanelItemInfo::onCommitPermissions()" << LL_ENDL;
 	LLViewerInventoryItem* item = findItem();
 	if(!item) return;
-	LLPermissions perm(item->getPermissions());
 
+	BOOL is_group_owned;
+	LLUUID owner_id;
+	LLUUID group_id;
+	LLPermissions perm(item->getPermissions());
+	perm.getOwnership(owner_id, is_group_owned);
+
+	if (is_group_owned && gAgent.hasPowerInGroup(owner_id, GP_OBJECT_MANIPULATE))
+	{
+		group_id = owner_id;
+	}
 
 	LLCheckBoxCtrl* CheckShareWithGroup = getChild<LLCheckBoxCtrl>("CheckShareWithGroup");
 
 	if(CheckShareWithGroup)
 	{
-		perm.setGroupBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setGroupBits(gAgent.getID(), group_id,
 						CheckShareWithGroup->get(),
 						PERM_MODIFY | PERM_MOVE | PERM_COPY);
 	}
 	LLCheckBoxCtrl* CheckEveryoneCopy = getChild<LLCheckBoxCtrl>("CheckEveryoneCopy");
 	if(CheckEveryoneCopy)
 	{
-		perm.setEveryoneBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setEveryoneBits(gAgent.getID(), group_id,
 						 CheckEveryoneCopy->get(), PERM_COPY);
 	}
 
 	LLCheckBoxCtrl* CheckNextOwnerModify = getChild<LLCheckBoxCtrl>("CheckNextOwnerModify");
 	if(CheckNextOwnerModify)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerModify->get(), PERM_MODIFY);
 	}
 	LLCheckBoxCtrl* CheckNextOwnerCopy = getChild<LLCheckBoxCtrl>("CheckNextOwnerCopy");
 	if(CheckNextOwnerCopy)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerCopy->get(), PERM_COPY);
 	}
 	LLCheckBoxCtrl* CheckNextOwnerTransfer = getChild<LLCheckBoxCtrl>("CheckNextOwnerTransfer");
 	if(CheckNextOwnerTransfer)
 	{
-		perm.setNextOwnerBits(gAgent.getID(), gAgent.getGroupID(),
+		perm.setNextOwnerBits(gAgent.getID(), group_id,
 							CheckNextOwnerTransfer->get(), PERM_TRANSFER);
 	}
 	if(perm != item->getPermissions()

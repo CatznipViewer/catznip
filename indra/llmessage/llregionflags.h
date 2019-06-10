@@ -42,6 +42,9 @@ const U64 REGION_FLAGS_RESET_HOME_ON_TELEPORT	= (1 << 3);
 // Does the sun move?
 const U64 REGION_FLAGS_SUN_FIXED				= (1 << 4);
 
+// Does the estate owner allow private parcels?
+const U64 REGION_FLAGS_ALLOW_ACCESS_OVERRIDE    = (1 << 5);
+
 // Can't change the terrain heightfield, even on owned parcels,
 // but can plant trees and grass.
 const U64 REGION_FLAGS_BLOCK_TERRAFORM			= (1 << 6);
@@ -163,7 +166,7 @@ const U32 ESTATE_ACCESS_MANAGER_REMOVE				= 1U << 9;
 const U32 ESTATE_ACCESS_NO_REPLY						= 1U << 10;
 const U32 ESTATE_ACCESS_FAILED_BAN_ESTATE_MANAGER	= 1U << 11;
 
-const S32 ESTATE_MAX_MANAGERS = 10;
+const S32 ESTATE_MAX_MANAGERS = 15;
 const S32 ESTATE_MAX_ACCESS_IDS = 500;	// max for access, banned
 const S32 ESTATE_MAX_GROUP_IDS = (S32) ESTATE_ACCESS_MAX_ENTRIES_PER_PACKET;
 
