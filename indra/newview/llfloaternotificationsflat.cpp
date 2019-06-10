@@ -41,6 +41,7 @@ LLFloaterNotificationsFlat::~LLFloaterNotificationsFlat()
 {
 }
 
+// virtual
 BOOL LLFloaterNotificationsFlat::postBuild()
 {
 	m_pMessageList = getChild<LLNotificationListView>("notification_list");
@@ -53,6 +54,17 @@ BOOL LLFloaterNotificationsFlat::postBuild()
 	m_pMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
 
 	return LLFloaterNotifications::postBuild();
+}
+
+// virtual
+void LLFloaterNotificationsFlat::onVisibilityChange(BOOL isVisible)
+{
+	LLFloaterNotifications::onVisibilityChange(isVisible);
+
+	if ( (isVisible) && (m_NeedsSort) )
+	{
+		refreshSort();
+	}
 }
 
 bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pItem) const
@@ -191,6 +203,19 @@ void LLFloaterNotificationsFlat::refreshFilter()
 	m_pMessageList->notify(LLSD().with("rearrange", LLSD()));
 }
 
+void LLFloaterNotificationsFlat::refreshSort()
+{
+	if (getVisible())
+	{
+		m_pMessageList->sort();
+		m_NeedsSort = false;
+	}
+	else
+	{
+		m_NeedsSort = true;
+	}
+}
+
 bool LLFloaterNotificationsFlat::isWindowEmpty() const
 {
 	// NOTE: consider all items, not just the visible ones
@@ -202,7 +227,7 @@ bool LLFloaterNotificationsFlat::addNotification(LLNotificationListItem* pItem)
 	if (m_pMessageList->addNotification(pItem, false))
 	{
 		pItem->setVisible(checkFilter(pItem));
-		m_pMessageList->sort();
+		refreshSort();
 		return true;
 	}
 	return false;

@@ -2021,6 +2021,12 @@ bool idle_startup()
 		LLLandmark::registerCallbacks(msg);
 		display_startup();
 
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-6.1
+		// Create the inventory views
+		LL_INFOS() << "Creating Inventory Views" << LL_ENDL;
+		LLFloaterReg::getInstance("inventory");
+		display_startup();
+// [/SL:KB]
 		// request mute list
 		LL_INFOS() << "Requesting Mute List" << LL_ENDL;
 		LLMuteList::getInstance()->requestFromServer(gAgent.getID());
@@ -2033,10 +2039,10 @@ bool idle_startup()
 		LL_INFOS() << "Requesting Agent Data" << LL_ENDL;
 		gAgent.sendAgentDataUpdateRequest();
 		display_startup();
-		// Create the inventory views
-		LL_INFOS() << "Creating Inventory Views" << LL_ENDL;
-		LLFloaterReg::getInstance("inventory");
-		display_startup();
+//		// Create the inventory views
+//		LL_INFOS() << "Creating Inventory Views" << LL_ENDL;
+//		LLFloaterReg::getInstance("inventory");
+//		display_startup();
 
 // [RLVa:KB] - Checked: RLVa-1.1.0
 		if (RlvHandler::isEnabled())
