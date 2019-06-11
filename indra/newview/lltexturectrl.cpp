@@ -379,12 +379,20 @@ BOOL LLFloaterTexturePicker::postBuild()
 	mModeSelector->setCommitCallback(onModeSelect, this);
 	mModeSelector->setSelectedIndex(0, 0);
 
-	childSetAction("l_add_btn", LLFloaterTexturePicker::onBtnAdd, this);
-	childSetAction("l_rem_btn", LLFloaterTexturePicker::onBtnRemove, this);
-	childSetAction("l_upl_btn", LLFloaterTexturePicker::onBtnUpload, this);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.1
+	childSetAction("l_add_btn", std::bind(&LLFloaterTexturePicker::onBtnAdd, this));
+	childSetAction("l_rem_btn", std::bind(&LLFloaterTexturePicker::onBtnRemove, this));
+	childSetAction("l_upl_btn", std::bind(&LLFloaterTexturePicker::onBtnUpload, this));
+// /[SL:KB]
+//	childSetAction("l_add_btn", LLFloaterTexturePicker::onBtnAdd, this);
+//	childSetAction("l_rem_btn", LLFloaterTexturePicker::onBtnRemove, this);
+//	childSetAction("l_upl_btn", LLFloaterTexturePicker::onBtnUpload, this);
 
 	mLocalScrollCtrl = getChild<LLScrollListCtrl>("l_name_list");
-	mLocalScrollCtrl->setCommitCallback(onLocalScrollCommit, this);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.1
+	mLocalScrollCtrl->setCommitCallback(boost::bind(&LLFloaterTexturePicker::onLocalScrollCommit, this, _1));
+// /[SL:KB]
+//	mLocalScrollCtrl->setCommitCallback(onLocalScrollCommit, this);
 	LLLocalBitmapMgr::feedScrollList(mLocalScrollCtrl);
 
 	mNoCopyTextureSelected = FALSE;
@@ -781,22 +789,23 @@ void LLFloaterTexturePicker::onModeSelect(LLUICtrl* ctrl, void *userdata)
 	self->getChild<LLScrollListCtrl>("l_name_list")->setVisible(!mode);
 }
 
-// static
-void LLFloaterTexturePicker::onBtnAdd(void* userdata)
-{
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, 
-		boost::bind(&LLFloaterTexturePicker::onFilePickerCallback, (LLFloaterTexturePicker*)userdata, _1));
-// [/SL:KB]
+//// static
+//void LLFloaterTexturePicker::onBtnAdd(void* userdata)
+//{
 //	if (LLLocalBitmapMgr::addUnit() == true)
 //	{
 //		LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
 //		LLLocalBitmapMgr::feedScrollList(self->mLocalScrollCtrl);
 //	}
-}
+//}
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLFloaterTexturePicker::onFilePickerCallback(const std::vector<std::string>& files)
+void LLFloaterTexturePicker::onBtnAdd()
+{
+	LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, boost::bind(&LLFloaterTexturePicker::onFilePickerCallback, getDerivedHandle<LLFloaterTexturePicker>(), _1));
+}
+
+void LLFloaterTexturePicker::onFilePickerCallback(LLHandle<LLFloaterTexturePicker> hSelf, const std::vector<std::string>& files)
 {
 	bool add_successful = false;
 	for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it)
@@ -806,15 +815,23 @@ void LLFloaterTexturePicker::onFilePickerCallback(const std::vector<std::string>
 
 	if (add_successful)
 	{
-		LLLocalBitmapMgr::feedScrollList(mLocalScrollCtrl);
+		if (!hSelf.isDead())
+		{
+			LLLocalBitmapMgr::feedScrollList(hSelf.get()->mLocalScrollCtrl);
+		}
 	}
 }
 // [/SL:KB]
 
-// static
-void LLFloaterTexturePicker::onBtnRemove(void* userdata)
+//// static
+//void LLFloaterTexturePicker::onBtnRemove(void* userdata)
+//{
+//	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.1
+void LLFloaterTexturePicker::onBtnRemove()
 {
-	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	LLFloaterTexturePicker* self = this;
+// [/SL:KB]
 	std::vector<LLScrollListItem*> selected_items = self->mLocalScrollCtrl->getAllSelected();
 
 	if (!selected_items.empty())
@@ -837,10 +854,15 @@ void LLFloaterTexturePicker::onBtnRemove(void* userdata)
 
 }
 
-// static
-void LLFloaterTexturePicker::onBtnUpload(void* userdata)
+//// static
+//void LLFloaterTexturePicker::onBtnUpload(void* userdata)
+//{
+//	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.1
+void LLFloaterTexturePicker::onBtnUpload()
 {
-	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	LLFloaterTexturePicker* self = this;
+// [/SL:KB]
 	std::vector<LLScrollListItem*> selected_items = self->mLocalScrollCtrl->getAllSelected();
 
 	if (selected_items.empty())
@@ -861,10 +883,15 @@ void LLFloaterTexturePicker::onBtnUpload(void* userdata)
 
 }
 
-//static
-void LLFloaterTexturePicker::onLocalScrollCommit(LLUICtrl* ctrl, void* userdata)
+////static
+//void LLFloaterTexturePicker::onLocalScrollCommit(LLUICtrl* ctrl, void* userdata)
+//{
+//	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.1
+void LLFloaterTexturePicker::onLocalScrollCommit(LLUICtrl* ctrl)
 {
-	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	LLFloaterTexturePicker* self = this;
+// [/SL:KB]
 	std::vector<LLScrollListItem*> selected_items = self->mLocalScrollCtrl->getAllSelected();
 	bool has_selection = !selected_items.empty();
 
