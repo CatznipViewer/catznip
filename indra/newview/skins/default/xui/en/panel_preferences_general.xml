@@ -252,6 +252,34 @@
          value="2"
          width="75" />
     </radio_group>
+    <slider
+     control_name="NameTagOffset"
+     decimal_digits="0"
+     follows="top|left"
+     height="16"
+     increment="0.05"
+     label="Position: Low"
+     label_width="80"
+     layout="topleft"
+     left="175"
+     min_val="0"
+     max_val="1"
+     name="name_tag_offset"
+     show_text="false"
+     top_pad="0"
+     width="200" />
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="15"
+     layout="topleft"
+     left_pad="3"
+     name="name_tags_textbox"
+     top_delta="0"
+     width="125">
+      High
+    </text>
     <check_box
 	 enabled_control="AvatarNameTagMode"
      control_name="RenderNameShowSelf"
@@ -260,7 +288,7 @@
      layout="topleft"
      left="155"
      name="show_my_name_checkbox1"
-	 top_pad="0"
+	 top_pad="6"
      width="100" />
     <check_box
      control_name="NameTagShowTyping"
