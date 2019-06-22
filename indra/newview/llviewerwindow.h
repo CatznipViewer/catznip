@@ -212,6 +212,7 @@ public:
 	/*virtual*/ BOOL handleTimerEvent(LLWindow *window);
 	/*virtual*/ BOOL handleDeviceChange(LLWindow *window);
 	/*virtual*/ BOOL handleDPIChanged(LLWindow *window, F32 ui_scale_factor, S32 window_width, S32 window_height);
+	/*virtual*/ BOOL handleWindowDidChangeScreen(LLWindow *window);
 
 	/*virtual*/ void handlePingWatchdog(LLWindow *window, const char * msg);
 	/*virtual*/ void handlePauseWatchdog(LLWindow *window);
@@ -430,8 +431,6 @@ public:
 	void			calcDisplayScale();
 	static LLRect 	calcScaledRect(const LLRect & rect, const LLVector2& display_scale);
 
-	bool getSystemUIScaleFactorChanged() { return mSystemUIScaleFactorChanged; }
-	static void showSystemUIScaleFactorChanged();
 //	static std::string getLastSnapshotDir();
 
 private:
@@ -452,7 +451,6 @@ private:
 	S32				getChatConsoleBottomPad(); // Vertical padding for child console rect, varied by bottom clutter
 	LLRect			getChatConsoleRect(); // Get optimal cosole rect.
 
-	static bool onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response);
 private:
 	LLWindow*		mWindow;						// graphical window object
 	bool			mActive;
@@ -526,7 +524,6 @@ private:
 	LLPointer<LLViewerObject>	mDragHoveredObject;
 
 	static LLTrace::SampleStatHandle<>	sMouseVelocityStat;
-	bool mSystemUIScaleFactorChanged; // system UI scale factor changed from last run
 };
 
 //

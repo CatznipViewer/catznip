@@ -54,6 +54,7 @@
 #include "llagentcamera.h"
 #include "llcallingcard.h"
 #include "llbuycurrencyhtml.h"
+#include "llcontrolavatar.h"
 #include "llfirstuse.h"
 #include "llfloaterbump.h"
 #include "llfloaterbuyland.h"
@@ -102,6 +103,7 @@
 #include "llviewerwindow.h"
 #include "llvlmanager.h"
 #include "llvoavatarself.h"
+#include "llvovolume.h"
 #include "llworld.h"
 #include "pipeline.h"
 #include "llfloaterworldmap.h"
@@ -169,7 +171,8 @@ void accept_friendship_coro(std::string url, LLSD notification)
     url += "?from=" + payload["from_id"].asString();
     url += "&agent_name=\"" + LLURI::escape(gAgentAvatarp->getFullname()) + "\"";
 
-    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
+    LLSD data;
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, data);
 
     LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
     LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
@@ -199,20 +202,20 @@ void accept_friendship_coro(std::string url, LLSD notification)
 
 void decline_friendship_coro(std::string url, LLSD notification, S32 option)
 {
-    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
-    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
-        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("friendshipResponceErrorProcessing", httpPolicy));
-    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
     if (url.empty())
     {
         LL_WARNS("Friendship") << "Empty capability!" << LL_ENDL;
         return;
     }
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("friendshipResponceErrorProcessing", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
 
     LLSD payload = notification["payload"];
     url += "?from=" + payload["from_id"].asString();
 
-    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
+    LLSD result = httpAdapter->deleteAndSuspend(httpRequest, url);
 
     LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
     LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
@@ -732,6 +735,122 @@ void send_sound_trigger(const LLUUID& sound_id, F32 gain)
 static LLSD sSavedGroupInvite;
 static LLSD sSavedResponse;
 
+void response_group_invitation_coro(std::string url, LLUUID group_id, bool notify_and_update)
+{
+    if (url.empty())
+    {
+        LL_WARNS("GroupInvite") << "Empty capability!" << LL_ENDL;
+        return;
+    }
+
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("responseGroupInvitation", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+
+    LLSD payload;
+    payload["group"] = group_id;
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, url, payload);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        LL_WARNS("GroupInvite") << "HTTP status, " << status.toTerseString() <<
+            ". Group " << group_id << " invitation response processing failed." << LL_ENDL;
+    }
+    else
+    {
+        if (!result.has("success") || result["success"].asBoolean() == false)
+        {
+            LL_WARNS("GroupInvite") << "Server failed to process group " << group_id << " invitation response. " << httpResults << LL_ENDL;
+        }
+        else
+        {
+            LL_DEBUGS("GroupInvite") << "Successfully sent response to group " << group_id << " invitation" << LL_ENDL;
+            if (notify_and_update)
+            {
+                LLNotificationsUtil::add("JoinGroupSuccess");
+                gAgent.sendAgentDataUpdateRequest();
+
+                LLGroupMgr::getInstance()->clearGroupData(group_id);
+                // refresh the floater for this group, if any.
+                LLGroupActions::refresh(group_id);
+            }
+        }
+    }
+}
+
+void send_join_group_response(LLUUID group_id, LLUUID transaction_id, bool accept_invite, S32 fee, bool use_offline_cap, LLSD &payload)
+{
+    if (accept_invite && fee > 0)
+    {
+        // If there is a fee to join this group, make
+        // sure the user is sure they want to join.
+            LLSD args;
+            args["COST"] = llformat("%d", fee);
+            // Set the fee for next time to 0, so that we don't keep
+            // asking about a fee.
+            LLSD next_payload = payload;
+            next_payload["fee"] = 0;
+            LLNotificationsUtil::add("JoinGroupCanAfford",
+                args,
+                next_payload);
+    }
+    else if (use_offline_cap)
+    {
+        std::string url;
+        if (accept_invite)
+        {
+            url = gAgent.getRegionCapability("AcceptGroupInvite");
+        }
+        else
+        {
+            url = gAgent.getRegionCapability("DeclineGroupInvite");
+        }
+
+        if (!url.empty())
+        {
+            LL_DEBUGS("GroupInvite") << "Capability url: " << url << LL_ENDL;
+            LLCoros::instance().launch("LLMessageSystem::acceptGroupInvitation",
+                boost::bind(response_group_invitation_coro, url, group_id, accept_invite));
+        }
+        else
+        {
+            // if sim has no this cap, we can do nothing - regular request will fail
+            LL_WARNS("GroupInvite") << "No capability, can't reply to offline invitation!" << LL_ENDL;
+        }
+    }
+    else
+    {
+        LL_DEBUGS("GroupInvite") << "Replying to group invite via IM message" << LL_ENDL;
+
+        EInstantMessage type = accept_invite ? IM_GROUP_INVITATION_ACCEPT : IM_GROUP_INVITATION_DECLINE;
+
+        send_improved_im(group_id,
+            std::string("name"),
+            std::string("message"),
+            IM_ONLINE,
+            type,
+            transaction_id);
+    }
+}
+
+void send_join_group_response(LLUUID group_id, LLUUID transaction_id, bool accept_invite, S32 fee, bool use_offline_cap)
+{
+    LLSD payload;
+    if (accept_invite)
+    {
+        payload["group_id"] = group_id;
+        payload["transaction_id"] =  transaction_id;
+        payload["fee"] =  fee;
+        payload["use_offline_cap"] = use_offline_cap;
+    }
+    send_join_group_response(group_id, transaction_id, accept_invite, fee, use_offline_cap, payload);
+}
+
 bool join_group_response(const LLSD& notification, const LLSD& response)
 {
 //	A bit of variable saving and restoring is used to deal with the case where your group list is full and you
@@ -770,6 +889,7 @@ bool join_group_response(const LLSD& notification, const LLSD& response)
 	std::string name = notification_adjusted["payload"]["name"].asString();
 	std::string message = notification_adjusted["payload"]["message"].asString();
 	S32 fee = notification_adjusted["payload"]["fee"].asInteger();
+	U8 use_offline_cap = notification_adjusted["payload"]["use_offline_cap"].asInteger();
 
 	if (option == 2 && !group_id.isNull())
 	{
@@ -798,42 +918,7 @@ bool join_group_response(const LLSD& notification, const LLSD& response)
 			return false;
 		}
 	}
-
-	if (accept_invite)
-	{
-		// If there is a fee to join this group, make
-		// sure the user is sure they want to join.
-		if (fee > 0)
-		{
-			LLSD args;
-			args["COST"] = llformat("%d", fee);
-			// Set the fee for next time to 0, so that we don't keep
-			// asking about a fee.
-			LLSD next_payload = notification_adjusted["payload"];
-			next_payload["fee"] = 0;
-			LLNotificationsUtil::add("JoinGroupCanAfford",
-									args,
-									next_payload);
-		}
-		else
-		{
-			send_improved_im(group_id,
-							 std::string("name"),
-							 std::string("message"),
-							IM_ONLINE,
-							IM_GROUP_INVITATION_ACCEPT,
-							transaction_id);
-		}
-	}
-	else
-	{
-		send_improved_im(group_id,
-						 std::string("name"),
-						 std::string("message"),
-						IM_ONLINE,
-						IM_GROUP_INVITATION_DECLINE,
-						transaction_id);
-	}
+	send_join_group_response(group_id, transaction_id, accept_invite, fee, use_offline_cap, notification_adjusted["payload"]);
 
 	sSavedGroupInvite[id] = LLSD::emptyMap();
 	sSavedResponse[id] = LLSD::emptyMap();
@@ -1740,7 +1825,7 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 		//don't spam them if they are getting flooded
 		if (check_offer_throttle(mFromName, true))
 		{
-			log_message = chatHistory_string + " " + LLTrans::getString("InvOfferGaveYou") + " " + mDesc + LLTrans::getString(".");
+			log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
 			LLSD args;
 			args["MESSAGE"] = log_message;
 			LLNotificationsUtil::add("SystemMessageTip", args);
@@ -1925,7 +2010,7 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			//don't spam them if they are getting flooded
 			if (check_offer_throttle(mFromName, true))
 			{
-				log_message = chatHistory_string + " " + LLTrans::getString("InvOfferGaveYou") + " " + mDesc + LLTrans::getString(".");
+				log_message = "<nolink>" + chatHistory_string + "</nolink> " + LLTrans::getString("InvOfferGaveYou") + " " + getSanitizedDescription() + LLTrans::getString(".");
 				LLSD args;
 				args["MESSAGE"] = log_message;
 				LLNotificationsUtil::add("SystemMessageTip", args);
@@ -1997,6 +2082,23 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 	}
 	return false;
 }
+
+std::string LLOfferInfo::getSanitizedDescription()
+{
+	// currently we get description from server as: 'Object' ( Location )
+	// object name shouldn't be shown as a hyperlink
+	std::string description = mDesc;
+
+	std::size_t start = mDesc.find_first_of("'");
+	std::size_t end = mDesc.find_last_of("'");
+	if ((start != std::string::npos) && (end != std::string::npos))
+	{
+		description.insert(start, "<nolink>");
+		description.insert(end + 8, "</nolink>");
+	}
+	return description;
+}
+
 
 void LLOfferInfo::initRespondFunctionMap()
 {
@@ -2617,6 +2719,12 @@ void process_teleport_start(LLMessageSystem *msg, void**)
 	U32 teleport_flags = 0x0;
 	msg->getU32("Info", "TeleportFlags", teleport_flags);
 
+	if (gAgent.getTeleportState() == LLAgent::TELEPORT_MOVING)
+	{
+		// Race condition?
+		LL_WARNS("Messaging") << "Got TeleportStart, but teleport already in progress. TeleportFlags=" << teleport_flags << LL_ENDL;
+	}
+
 	LL_DEBUGS("Messaging") << "Got TeleportStart with TeleportFlags=" << teleport_flags << ". gTeleportDisplay: " << gTeleportDisplay << ", gAgent.mTeleportState: " << gAgent.getTeleportState() << LL_ENDL;
 
 	// *NOTE: The server sends two StartTeleport packets when you are teleporting to a LM
@@ -2674,7 +2782,7 @@ void process_teleport_progress(LLMessageSystem* msg, void**)
 	}
 	std::string buffer;
 	msg->getString("Info", "Message", buffer);
-	LL_DEBUGS("Messaging") << "teleport progress: " << buffer << LL_ENDL;
+	LL_DEBUGS("Messaging") << "teleport progress: " << buffer << " flags: " << teleport_flags << LL_ENDL;
 
 	//Sorta hacky...default to using simulator raw messages
 	//if we don't find the coresponding mapping in our progress mappings
@@ -2797,9 +2905,25 @@ void process_teleport_finish(LLMessageSystem* msg, void**)
 
     if (gAgent.getTeleportState() == LLAgent::TELEPORT_NONE)
     {
-        // Server either ignored teleport cancel message or did not receive it in time.
-        // This message can't be ignored since teleport is complete at server side
-        gAgent.restoreCanceledTeleportRequest();
+        if (gAgent.canRestoreCanceledTeleport())
+        {
+            // Server either ignored teleport cancel message or did not receive it in time.
+            // This message can't be ignored since teleport is complete at server side
+            gAgent.restoreCanceledTeleportRequest();
+        }
+        else
+        {
+            // Race condition? Make sure all variables are set correctly for teleport to work
+            LL_WARNS("Messaging") << "Teleport 'finish' message without 'start'" << LL_ENDL;
+            gTeleportDisplay = TRUE;
+            LLViewerMessage::getInstance()->mTeleportStartedSignal();
+            gAgent.setTeleportState(LLAgent::TELEPORT_REQUESTED);
+            make_ui_sound("UISndTeleportOut");
+        }
+    }
+    else if (gAgent.getTeleportState() == LLAgent::TELEPORT_MOVING)
+    {
+        LL_WARNS("Messaging") << "Teleport message in the middle of other teleport" << LL_ENDL;
     }
 	
 	// Teleport is finished; it can't be cancelled now.
@@ -3663,7 +3787,7 @@ void process_time_synch(LLMessageSystem *mesgsys, void **user_data)
 
 	LLWorld::getInstance()->setSpaceTimeUSec(space_time_usec);
 
-	LL_DEBUGS("Windlight Sync") << "Sun phase: " << phase << " rad = " << fmodf(phase / F_TWO_PI + 0.25, 1.f) * 24.f << " h" << LL_ENDL;
+	LL_DEBUGS("WindlightSync") << "Sun phase: " << phase << " rad = " << fmodf(phase / F_TWO_PI + 0.25, 1.f) * 24.f << " h" << LL_ENDL;
 
 	gSky.setSunPhase(phase);
 	gSky.setSunTargetDirection(sun_direction, sun_ang_velocity);
@@ -3918,23 +4042,27 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 	LLUUID	animation_id;
 	LLUUID	uuid;
 	S32		anim_sequence_id;
-	LLVOAvatar *avatarp;
+	LLVOAvatar *avatarp = NULL;
 	
 	mesgsys->getUUIDFast(_PREHASH_Sender, _PREHASH_ID, uuid);
 
-	//clear animation flags
-	avatarp = (LLVOAvatar *)gObjectList.findObject(uuid);
+	LLViewerObject *objp = gObjectList.findObject(uuid);
+    if (objp)
+    {
+        avatarp =  objp->asAvatar();
+    }
 
 	if (!avatarp)
 	{
 		// no agent by this ID...error?
-		LL_WARNS("Messaging") << "Received animation state for unknown avatar" << uuid << LL_ENDL;
+		LL_WARNS("Messaging") << "Received animation state for unknown avatar " << uuid << LL_ENDL;
 		return;
 	}
 
 	S32 num_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationList);
 	S32 num_source_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationSourceList);
 
+	//clear animation flags
 	avatarp->mSignaledAnimations.clear();
 	
 	if (avatarp->isSelf())
@@ -4014,6 +4142,72 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 		avatarp->processAnimationStateChanges();
 	}
 }
+
+
+void process_object_animation(LLMessageSystem *mesgsys, void **user_data)
+{
+	LLUUID	animation_id;
+	LLUUID	uuid;
+	S32		anim_sequence_id;
+	
+	mesgsys->getUUIDFast(_PREHASH_Sender, _PREHASH_ID, uuid);
+
+    LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for object " << uuid << LL_ENDL;
+
+    signaled_animation_map_t signaled_anims;
+	S32 num_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationList);
+	LL_DEBUGS("AnimatedObjectsNotify") << "processing object animation requests, num_blocks " << num_blocks << " uuid " << uuid << LL_ENDL;
+    for( S32 i = 0; i < num_blocks; i++ )
+    {
+        mesgsys->getUUIDFast(_PREHASH_AnimationList, _PREHASH_AnimID, animation_id, i);
+        mesgsys->getS32Fast(_PREHASH_AnimationList, _PREHASH_AnimSequenceID, anim_sequence_id, i);
+        signaled_anims[animation_id] = anim_sequence_id;
+        LL_DEBUGS("AnimatedObjectsNotify") << "added signaled_anims animation request for object " 
+                                    << uuid << " animation id " << animation_id << LL_ENDL;
+    }
+    LLObjectSignaledAnimationMap::instance().getMap()[uuid] = signaled_anims;
+    
+    LLViewerObject *objp = gObjectList.findObject(uuid);
+    if (!objp)
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for unknown object " << uuid << LL_ENDL;
+        return;
+    }
+    
+	LLVOVolume *volp = dynamic_cast<LLVOVolume*>(objp);
+    if (!volp)
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for non-volume object " << uuid << LL_ENDL;
+        return;
+    }
+
+    if (!volp->isAnimatedObject())
+    {
+		LL_DEBUGS("AnimatedObjectsNotify") << "Received animation state for non-animated object " << uuid << LL_ENDL;
+        return;
+    }
+
+    volp->updateControlAvatar();
+    LLControlAvatar *avatarp = volp->getControlAvatar();
+    if (!avatarp)
+    {
+        LL_DEBUGS("AnimatedObjectsNotify") << "Received animation request for object with no control avatar, ignoring " << uuid << LL_ENDL;
+        return;
+    }
+    
+    if (!avatarp->mPlaying)
+    {
+        avatarp->mPlaying = true;
+        //if (!avatarp->mRootVolp->isAnySelected())
+        {
+            avatarp->updateVolumeGeom();
+            avatarp->mRootVolp->recursiveMarkForUpdate(TRUE);
+        }
+    }
+        
+    avatarp->updateAnimations();
+}
+
 
 void process_avatar_appearance(LLMessageSystem *mesgsys, void **user_data)
 {

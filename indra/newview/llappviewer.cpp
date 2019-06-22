@@ -276,6 +276,10 @@ extern BOOL gRandomizeFramerate;
 extern BOOL gPeriodicSlowFrame;
 extern BOOL gDebugGL;
 
+#if LL_DARWIN
+extern BOOL gHiDPISupport;
+#endif
+
 ////////////////////////////////////////////////////////////
 // All from the last globals push...
 
@@ -592,6 +596,10 @@ static void settings_to_globals()
 	gDebugWindowProc = gSavedSettings.getBOOL("DebugWindowProc");
 	gShowObjectUpdates = gSavedSettings.getBOOL("ShowObjectUpdates");
 	LLWorldMapView::sMapScale = gSavedSettings.getF32("MapScale");
+	
+#if LL_DARWIN
+	gHiDPISupport = gSavedSettings.getBOOL("RenderHiDPI");
+#endif
 
 // [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
 	audio_update_settings();
@@ -714,6 +722,22 @@ LLAppViewer::LLAppViewer()
 	//
 
 	LLLoginInstance::instance().setPlatformInfo(gPlatform, LLOSInfo::instance().getOSVersionString(), LLOSInfo::instance().getOSStringSimple());
+
+	// Under some circumstances we want to read the static_debug_info.log file
+	// from the previous viewer run between this constructor call and the
+	// init() call, which will overwrite the static_debug_info.log file for
+	// THIS run. So setDebugFileNames() early.
+#if LL_BUGSPLAT
+	// MAINT-8917: don't create a dump directory just for the
+	// static_debug_info.log file
+	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+#else // ! LL_BUGSPLAT
+	// write Google Breakpad minidump files to a per-run dump directory to avoid multiple viewer issues.
+	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_DUMP, "");
+#endif // ! LL_BUGSPLAT
+	mDumpPath = logdir;
+	setMiniDumpDir(logdir);
+	setDebugFileNames(logdir);
 }
 
 LLAppViewer::~LLAppViewer()
@@ -796,13 +820,6 @@ bool LLAppViewer::init()
 	//set the max heap size.
 	initMaxHeapSize() ;
 	LLCoros::instance().setStackSize(gSavedSettings.getS32("CoroutineStackSize"));
-
-	// write Google Breakpad minidump files to a per-run dump directory to avoid multiple viewer issues.
-	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_DUMP, "");
-	mDumpPath = logdir;
-	setMiniDumpDir(logdir);
-	logdir += gDirUtilp->getDirDelimiter();
-    setDebugFileNames(logdir);
 
 
 	// Although initLoggingAndGetLastDuration() is the right place to mess with
@@ -891,11 +908,6 @@ bool LLAppViewer::init()
 	mNumSessions = gSavedSettings.getS32("NumSessions");
 	mNumSessions++;
 	gSavedSettings.setS32("NumSessions", mNumSessions);
-
-	if (gSavedSettings.getBOOL("VerboseLogs"))
-	{
-		LLError::setPrintLocation(true);
-	}
 
 	// LLKeyboard relies on LLUI to know what some accelerator keys are called.
 	LLKeyboard::setStringTranslatorFunc( LLTrans::getKeyboardString );
@@ -1099,26 +1111,6 @@ bool LLAppViewer::init()
 		}
 	}
 
-// don't nag developers who need to run the executable directly
-#if LL_RELEASE_FOR_DOWNLOAD
-	// MAINT-8305: If we're processing a SLURL, skip the launcher check.
-	if (gSavedSettings.getString("CmdLineLoginLocation").empty())
-	{
-		const char* PARENT = getenv("PARENT");
-		if (! (PARENT && std::string(PARENT) == "SL_Launcher"))
-		{
-			// Don't directly run this executable. Please run the launcher, which
-			// will run the viewer itself.
-			// Naturally we do not consider this bulletproof. The point is to
-			// gently remind a user who *inadvertently* finds him/herself in this
-			// situation to do things the Right Way. Anyone who intentionally
-			// bypasses this mechanism needs no reminder that s/he's shooting
-			// him/herself in the foot.
-			LLNotificationsUtil::add("RunLauncher");
-		}
-	}
-#endif
-
 #if LL_WINDOWS
 	if (gGLManager.mGLVersion < LLFeatureManager::getInstance()->getExpectedGLVersion())
 	{
@@ -1166,6 +1158,40 @@ bool LLAppViewer::init()
 
 	gGLActive = FALSE;
 
+// [SL:KB] - Patch: Viewer-Build | Checked: Catznip-6.0
+#ifdef LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
+	LLProcess::Params updater;
+	updater.desc = "updater process";
+	// Because it's the updater, it MUST persist beyond the lifespan of the
+	// viewer itself.
+	updater.autokill = false;
+#if LL_WINDOWS
+	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker.exe");
+#elif LL_DARWIN
+	// explicitly run the system Python interpreter on SLVersionChecker.py
+	updater.executable = "python";
+	updater.args.add(gDirUtilp->add(gDirUtilp->getAppRODataDir(), "updater", "SLVersionChecker.py"));
+#else
+	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker");
+#endif
+	// add LEAP mode command-line argument to whichever of these we selected
+	updater.args.add("leap");
+	// UpdaterServiceSettings
+	updater.args.add(stringize(gSavedSettings.getU32("UpdaterServiceSetting")));
+	// channel
+	updater.args.add(LLVersionInfo::getChannel());
+	// testok
+	updater.args.add(stringize(gSavedSettings.getBOOL("UpdaterWillingToTest")));
+	// ForceAddressSize
+	updater.args.add(stringize(gSavedSettings.getU32("ForceAddressSize")));
+
+	// Run the updater. An exception from launching the updater should bother us.
+	LLLeap::create(updater, true);
+// [SL:KB] - Patch: Viewer-Build | Checked: Catznip-6.0
+#endif // LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
+ 
 	// Iterate over --leap command-line options. But this is a bit tricky: if
 	// there's only one, it won't be an array at all.
 	LLSD LeapCommand(gSavedSettings.getLLSD("LeapCommand"));
@@ -1709,7 +1735,7 @@ bool LLAppViewer::cleanup()
 
 	release_start_screen(); // just in case
 
-	LLError::logToFixedBuffer(NULL);
+	LLError::logToFixedBuffer(NULL); // stop the fixed buffer recorder
 
 	LL_INFOS() << "Cleaning Up" << LL_ENDL;
 
@@ -2188,7 +2214,12 @@ void errorCallback(const std::string &error_string)
 	//Set the ErrorActivated global so we know to create a marker file
 	gLLErrorActivated = true;
 
-//	LLError::crashAndLoop(error_string);
+	gDebugInfo["FatalMessage"] = error_string;
+	// We're not already crashing -- we simply *intend* to crash. Since we
+	// haven't actually trashed anything yet, we can afford to write the whole
+	// static info file.
+	LLAppViewer::instance()->writeDebugInfo();
+
 // [SL:KB] - Patch: Viewer-Build | Checked: Catznip-2.4
 #if !LL_RELEASE_FOR_DOWNLOAD && LL_WINDOWS
 	DebugBreak();
@@ -2196,6 +2227,7 @@ void errorCallback(const std::string &error_string)
 	LLError::crashAndLoop(error_string);
 #endif // LL_RELEASE_WITH_DEBUG_INFO && LL_WINDOWS
 // [/SL:KB]
+//	LLError::crashAndLoop(error_string);
 }
 
 void LLAppViewer::initLoggingAndGetLastDuration()
@@ -3075,14 +3107,11 @@ void LLAppViewer::writeDebugInfo(bool isStatic)
         ? getStaticDebugFile()
         : getDynamicDebugFile() );
 
-	LL_INFOS() << "Opening debug file " << *debug_filename << LL_ENDL;
-	llofstream out_file(debug_filename->c_str());
+    LL_INFOS() << "Writing debug file " << *debug_filename << LL_ENDL;
+    llofstream out_file(debug_filename->c_str());
 
     isStatic ?  LLSDSerialize::toPrettyXML(gDebugInfo, out_file)
              :  LLSDSerialize::toPrettyXML(gDebugInfo["Dynamic"], out_file);
-
-
-	out_file.close();
 }
 
 LLSD LLAppViewer::getViewerInfo() const
@@ -3154,7 +3183,7 @@ LLSD LLAppViewer::getViewerInfo() const
 	}
 	else
 	{
-		LL_WARNS("Driver version")<< "Cannot get driver version from getDriverVersionWMI" << LL_ENDL;
+		LL_WARNS("DriverVersion")<< "Cannot get driver version from getDriverVersionWMI" << LL_ENDL;
 		LLSD driver_info = gDXHardware.getDisplayInfo();
 		if (driver_info.has("DriverVersion"))
 		{
@@ -3950,12 +3979,6 @@ void LLAppViewer::requestQuit()
 
 	// Try to send metrics back to the grid
 	metricsSend(!gDisconnected);
-
-	// Try to send last batch of avatar rez metrics.
-	if (!gDisconnected && isAgentAvatarValid())
-	{
-		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
-	}
 
 	// Try to send last batch of avatar rez metrics.
 	if (!gDisconnected && isAgentAvatarValid())

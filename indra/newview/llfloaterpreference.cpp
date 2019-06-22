@@ -539,13 +539,6 @@ void LLFloaterPreference::onDoNotDisturbResponseChanged()
 
 LLFloaterPreference::~LLFloaterPreference()
 {
-	// clean up user data
-	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
-	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
-	{
-		ctrl_window_size->setCurrentByIndex(i);
-	}
-
 	LLConversationLog::instance().removeObserver(this);
 }
 
@@ -2373,11 +2366,20 @@ BOOL LLPanelPreference::postBuild()
 	{
 		getChild<LLCheckBoxCtrl>("voice_call_friends_only_check")->setCommitCallback(boost::bind(&showFriendsOnlyWarning, _1, _2));
 	}
+	if (hasChild("allow_multiple_viewer_check", TRUE))
+	{
+		getChild<LLCheckBoxCtrl>("allow_multiple_viewer_check")->setCommitCallback(boost::bind(&showMultipleViewersWarning, _1, _2));
+	}
 	if (hasChild("favorites_on_login_check", TRUE))
 	{
 		getChild<LLCheckBoxCtrl>("favorites_on_login_check")->setCommitCallback(boost::bind(&handleFavoritesOnLoginChanged, _1, _2));
 		bool show_favorites_at_login = LLPanelLogin::getShowFavorites();
 		getChild<LLCheckBoxCtrl>("favorites_on_login_check")->setValue(show_favorites_at_login);
+	}
+	if (hasChild("mute_chb_label", TRUE))
+	{
+		getChild<LLTextBox>("mute_chb_label")->setShowCursorHand(false);
+		getChild<LLTextBox>("mute_chb_label")->setClickedCallback(boost::bind(&toggleMuteWhenMinimized));
 	}
 
 	//////////////////////PanelAdvanced ///////////////////
@@ -2468,6 +2470,14 @@ void LLPanelPreference::saveSettings()
 	}	
 }
 
+void LLPanelPreference::showMultipleViewersWarning(LLUICtrl* checkbox, const LLSD& value)
+{
+    if (checkbox && checkbox->getValue())
+    {
+        LLNotificationsUtil::add("AllowMultipleViewers");
+    }
+}
+
 void LLPanelPreference::showFriendsOnlyWarning(LLUICtrl* checkbox, const LLSD& value)
 {
 	if (checkbox && checkbox->getValue())
@@ -2486,6 +2496,12 @@ void LLPanelPreference::handleFavoritesOnLoginChanged(LLUICtrl* checkbox, const 
 			LLNotificationsUtil::add("FavoritesOnLogin");
 		}
 	}
+}
+
+void LLPanelPreference::toggleMuteWhenMinimized()
+{
+	std::string mute("MuteWhenMinimized");
+	gSavedSettings.setBOOL(mute, !gSavedSettings.getBOOL(mute));
 }
 
 void LLPanelPreference::cancel()
@@ -2754,6 +2770,16 @@ void LLPanelPreferenceGraphics::cancel()
 void LLPanelPreferenceGraphics::saveSettings()
 {
 	resetDirtyChilds();
+	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
+	if (preset_graphic_active.empty())
+	{
+		LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
+		if (instance)
+		{
+			//don't restore previous preset after closing Preferences
+			instance->saveGraphicsPreset(preset_graphic_active);
+		}
+	}
 	LLPanelPreference::saveSettings();
 }
 void LLPanelPreferenceGraphics::setHardwareDefaults()
@@ -2794,6 +2820,9 @@ BOOL LLFloaterPreferenceGraphicsAdvanced::postBuild()
         combo->remove("8x");
         combo->remove("16x");
     }
+	
+	LLCheckBoxCtrl *use_HiDPI = getChild<LLCheckBoxCtrl>("use HiDPI");
+	use_HiDPI->setVisible(FALSE);
 #endif
 
     return TRUE;

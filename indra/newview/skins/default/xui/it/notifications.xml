@@ -1569,6 +1569,30 @@ Eccede il [MAX_AGENTS] [LIST_TYPE] limite di [NUM_EXCESS].
 	<notification name="ProblemAddingEstateManagerBanned">
 		Impossibile aggiungere il residente espulso alla lista dei gestori delle proprietà.
 	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Impossibile aggiunere il gestore della proprietà immobiliare [AGENT] all’elenco degli espulsi.
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;[GROUP]&lt;/nolink&gt; si trova già nell’elenco dei Gruppi ammessi.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] è gia nel tuo elenco [LIST_TYPE].
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] è gia nel tuo elenco [LIST_TYPE].
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] è stato aggiunto all’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] è stato aggiunto all’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] è stato rimosso dall’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] è stato rimosso dall’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Impossibile cambiare l&apos;aspetto fisico finchè gli abiti e i vestiti non sono caricati.
 	</notification>
@@ -1600,10 +1624,6 @@ Imposta l&apos;oggetto per la vendita e riprova.
 	<notification name="WebLaunchExternalTarget">
 		Vuoi aprire il browser per vedere questi contenuti?
 		<usetemplate ignoretext="Lancia il browser per consultare una pagina web" name="okcancelignore" notext="Annulla" yestext="OK"/>
-	</notification>
-	<notification name="SystemUIScaleFactorChanged">
-		Il fattore dimensioni UI del sistema è cambiato rispetto all&apos;ultima sessione. Vuoi aprire la pagina delle impostazioni di regolazione delle dimensioni UI?
-		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchJoinNow">
 		Vuoi andare su [http://secondlife.com/account/ Dashboard] per gestire il tuo account?
@@ -1876,7 +1896,7 @@ Cambierà migliaia di regioni e produrrà seri problemi ai vari server.
 		<usetemplate canceltext="Annulla" name="yesnocancelbuttons" notext="Tutte le proprietà" yestext="Questa proprietà"/>
 	</notification>
 	<notification label="Seleziona la proprietà" name="EstateBannedAgentRemove">
-		Rimuovi questo residente dalla lista dei residenti bloccati nell&apos;accesso solo a questa proprietà oppure per [ALL_ESTATES]?
+		Rimuovi questo Residente dall’elenco degli espulsi solo per questa proprietà immobiliare oppure per [ALL_ESTATES]?
 		<usetemplate canceltext="Annulla" name="yesnocancelbuttons" notext="Tutte le proprietà" yestext="Questa proprietà"/>
 	</notification>
 	<notification label="Seleziona la proprietà" name="EstateManagerAdd">
@@ -3168,16 +3188,22 @@ Clicca su Accetta per unirti alla chat oppure su Declina per declinare l&apos;in
 		Collegamento a [VOICE_CHANNEL_NAME] non riuscito, riprova più tardi.  Verrai ora ricollegato alla chat vocale nei dintorni.
 	</notification>
 	<notification name="VoiceEffectsExpired">
-		Almeno una delle manipolazioni vocali alle quali sei iscritto è scaduta.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Almeno una delle manipolazioni vocali alle quali sei iscritto è scaduta. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
-		Poiché la manipolazione vocale attiva è scaduta, sono state applicate le tue impostazioni normali.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Poiché la manipolazione vocale attiva è scaduta, sono state applicate le tue impostazioni normali. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Almeno una delle tue manipolazioni vocali scadrà tra meno di [INTERVAL] giorni.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Almeno una delle tue manipolazioni vocali scadrà tra meno di [INTERVAL] giorni. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		Sono disponibili nuove manipolazioni vocali.
@@ -3229,8 +3255,14 @@ Per sicurezza, verranno bloccati per alcuni secondi.
 	<notification name="SnapshotToComputerFailed">
 		Salvataggio istantanea in [PATH] non riuscito: Il disco è pieno. Sono necessari [NEED_MEMORY] KB ma sono disponibili solo [FREE_MEMORY] KB .
 	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Salvataggio istantanea in [PATH] non riuscito: La cartella non esiste.
+	</notification>
 	<notification name="PresetNotSaved">
 		Errore durante il salvataggio del valore predefinito [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Impossibile sovrascrivere l’impostazione predefinita.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Errore durante l&apos;eliminazione del valore predefinito [NAME].
@@ -3992,6 +4024,9 @@ Riprova tra un minuto.
 	<notification name="CantCreateObjectRegionFull">
 		Impossibile creare l&apos;oggetto richiesto. La regione è piena.
 	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
+	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Non puoi collegare più oggetti a un singolo luogo.
 	</notification>
@@ -4039,6 +4074,21 @@ Riprova tra un minuto.
 	</notification>
 	<notification name="CantChangeShape">
 		Non ti è consentito modificare questa forma.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		L’operazione farebbe superare il limite consentito al numero di oggetti animati allegati.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Impossibile cambiare lo stato dell’oggetto animato poichè andrebbe oltre il limite del lotto.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Errore del server: impossibile completare l’operazione poichè i dati mesh non sono stati caricati.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Le tue autorizzazioni di accesso non ti permettono di richiedere oggetti in questa posizione.
