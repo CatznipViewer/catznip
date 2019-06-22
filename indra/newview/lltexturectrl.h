@@ -384,12 +384,16 @@ public:
 	void			onTextureSelect(const LLTextureEntry& te);
 
 	static void		onModeSelect(LLUICtrl* ctrl, void *userdata);
-	static void		onBtnAdd(void* userdata);
-	static void		onBtnRemove(void* userdata);
-	static void		onBtnUpload(void* userdata);
-	static void		onLocalScrollCommit(LLUICtrl* ctrl, void* userdata);
+//	static void		onBtnAdd(void* userdata);
+//	static void		onBtnRemove(void* userdata);
+//	static void		onBtnUpload(void* userdata);
+//	static void		onLocalScrollCommit(LLUICtrl* ctrl, void* userdata);
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-	       void		onFilePickerCallback(const std::vector<std::string>& files);
+	       void     onBtnAdd();
+	       void		onBtnRemove();
+	       void		onBtnUpload();
+	       void		onLocalScrollCommit(LLUICtrl* ctrl);
+	static void		onFilePickerCallback(LLHandle<LLFloaterTexturePicker> hSelf, const std::vector<std::string>& files);
 // [/SL:KB]
 
 	void 			setLocalTextureEnabled(BOOL enabled);
