@@ -3415,9 +3415,19 @@ void LLVOAvatar::idleUpdateNameTagPosition(const LLVector3& root_pos_last)
 	
 	mCurRootToHeadOffset = lerp(mCurRootToHeadOffset, mTargetRootToHeadOffset, LLSmoothInterpolation::getInterpolant(0.2f));
 
+// [SL:KB] - Patch: Settings-NameTagOffset
+	//static LLCachedControl<F32> name_tag_offset_proj(gSavedSettings, "NameTagOffset", 25.f);
+	static LLCachedControl<F32> name_tag_offset_fixed(gSavedSettings, "NameTagOffset", 0.f);
+// [/SL:KB]
+
 	LLVector3 name_position = mRoot->getLastWorldPosition() + (mCurRootToHeadOffset * root_rot);
 	name_position += (local_camera_up * root_rot) - (projected_vec(local_camera_at * root_rot, camera_to_av));	
 	name_position += pixel_up_vec * NAMETAG_VERTICAL_SCREEN_OFFSET;
+// [SL:KB] - Patch: Settings-NameTagOffset
+	// NOTE: name_tag_offset_proj gives us an offset that's camera-dependent whereas name_tag_offset_fixed is a static screen-space offset
+	//name_position += pixel_up_vec * name_tag_offset_proj;
+	name_position[VZ] += name_tag_offset_fixed;
+// [/SL:KB]
 
 	mNameText->setPositionAgent(name_position);				
 }
