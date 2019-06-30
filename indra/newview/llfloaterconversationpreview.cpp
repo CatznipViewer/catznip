@@ -238,7 +238,8 @@ void LLFloaterConversationPreview::onSearch(ESearchDirection eDirection)
 
 void LLFloaterConversationPreview::refreshMonthFilter()
 {
-	// Timestamps, if present, will conform to TIMESTAMP_AND_STUFF so we can sa saextract by character index (see lllogchat.cpp)
+	// Timestamps, if present, will conform to TIMESTAMP_AND_STUFF so we can extract by character index (see lllogchat.cpp)
+	// (although as it turns out we can't trust any log that was imported from a different viewer)
 	int idxMessage = 0; month_lookup_type_t::iterator monthLookup = mMonthLookup.end(), yearLookup = mMonthLookup.end();
 	for (std::list<LLSD>::const_iterator itMessage = mMessages->cbegin(), endMessage = mMessages->cend(); itMessage != endMessage; ++itMessage, ++idxMessage)
 	{
@@ -247,26 +248,36 @@ void LLFloaterConversationPreview::refreshMonthFilter()
 			continue;
 
 		std::string strTime = sdMessage[LL_IM_TIME].asString();
-		int nYear = boost::lexical_cast<int>(strTime.data(), 4);
-		int nMonth = boost::lexical_cast<int>(strTime.data() + 5, 2);
+		if (strTime.length() < 9)
+			continue;
 
-		if ( (monthLookup != mMonthLookup.end()) || (monthLookup->second.first != nYear) || (monthLookup->second.second != nMonth) )
+		try
 		{
-			yearLookup = mMonthLookup.find(std::make_pair(nYear, 0));
-			monthLookup = mMonthLookup.find(std::make_pair(nYear, nMonth));
-		}
+			int nYear = boost::lexical_cast<int>(strTime.data(), 4);
+			int nMonth = boost::lexical_cast<int>(strTime.data() + 5, 2);
 
-		if (mMonthLookup.end() != monthLookup)
-		{
-			monthLookup->second.second = idxMessage;
+			if ( (monthLookup != mMonthLookup.end()) || (monthLookup->second.first != nYear) || (monthLookup->second.second != nMonth) )
+			{
+				yearLookup = mMonthLookup.find(std::make_pair(nYear, 0));
+				monthLookup = mMonthLookup.find(std::make_pair(nYear, nMonth));
+			}
+
+			if (mMonthLookup.end() != monthLookup)
+			{
+				monthLookup->second.second = idxMessage;
+			}
+			else
+			{
+				if ( (yearLookup != mMonthLookup.end()) || (yearLookup->second.first != nYear) )
+					yearLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, 0), std::make_pair(idxMessage, idxMessage))).first;
+				monthLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, nMonth), std::make_pair(idxMessage, idxMessage))).first;
+			}
+			yearLookup->second.second = idxMessage;
 		}
-		else
+		catch (const boost::bad_lexical_cast&)
 		{
-			if ( (yearLookup != mMonthLookup.end()) || (yearLookup->second.first != nYear) )
-				yearLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, 0), std::make_pair(idxMessage, idxMessage))).first;
-			monthLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, nMonth), std::make_pair(idxMessage, idxMessage))).first;
+			continue;
 		}
-		yearLookup->second.second = idxMessage;
 	}
 
 	if (LLStringOps::sMonthList.empty())
@@ -274,15 +285,18 @@ void LLFloaterConversationPreview::refreshMonthFilter()
 
 	mFilterCombo->clear();
 	mFilterCombo->add(getString("DefaultFilter"));
-	mFilterCombo->addSeparator();
-	for (const auto& kvYearMonth : mMonthLookup)
+	if (!mMonthLookup.empty())
 	{
-		std::string strItem;
-		if (kvYearMonth.first.second > 0)
-			strItem = llformat("%s %d", LLStringOps::sMonthList[kvYearMonth.first.second - 1].c_str(), kvYearMonth.first.first);
-		else
-			strItem = llformat("-- %d --", kvYearMonth.first.first);
-		mFilterCombo->add(strItem, LLSD().with("year", kvYearMonth.first.first).with("month", kvYearMonth.first.second));
+		mFilterCombo->addSeparator();
+		for (const auto& kvYearMonth : mMonthLookup)
+		{
+			std::string strItem;
+			if (kvYearMonth.first.second > 0)
+				strItem = llformat("%s %d", LLStringOps::sMonthList[kvYearMonth.first.second - 1].c_str(), kvYearMonth.first.first);
+			else
+				strItem = llformat("-- %d --", kvYearMonth.first.first);
+			mFilterCombo->add(strItem, LLSD().with("year", kvYearMonth.first.first).with("month", kvYearMonth.first.second));
+		}
 	}
 	mFilterCombo->selectFirstItem();
 
