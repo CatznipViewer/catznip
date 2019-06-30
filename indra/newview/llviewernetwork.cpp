@@ -66,7 +66,7 @@ const std::string GRID_SLURL_BASE = "slurl_base";
 const std::string GRID_APP_SLURL_BASE = "app_slurl_base";
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.8
-const std::string DEFAULT_LOGIN_PAGE = "http://viewer.catznip.com/login/";
+const std::string DEFAULT_LOGIN_PAGE = "https://www-staging.catznip.com/login/?channel=";
 // [/SL:KB]
 //const std::string DEFAULT_LOGIN_PAGE = "https://viewer-splash.secondlife.com/";
 
