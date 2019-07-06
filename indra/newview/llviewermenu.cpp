@@ -7918,7 +7918,7 @@ void handle_attachment_find_original()
 	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
 	if ( (SELECT_TYPE_ATTACHMENT == hSelection->getSelectType()) || (SELECT_TYPE_HUD == hSelection->getSelectType()) )
 	{
-		const LLViewerObject* pAttachObj = hSelection->getPrimaryObject();
+		const LLViewerObject* pAttachObj = hSelection->getFirstRootObject();
 		if ( (pAttachObj) && (!pAttachObj->isTempAttachment()) )
 		{
 			const LLUUID& idAttachItem = pAttachObj->getAttachmentItemID();
@@ -7933,7 +7933,7 @@ bool enable_attachment_find_original()
 	if ( (SELECT_TYPE_ATTACHMENT != hSelection->getSelectType()) && (SELECT_TYPE_HUD != hSelection->getSelectType()) )
 		return false;
 
-	const LLViewerObject* pAttachObj = hSelection->getPrimaryObject();
+	const LLViewerObject* pAttachObj = hSelection->getFirstRootObject();
 	return (pAttachObj) && (!pAttachObj->isTempAttachment());
 }
 // [/SL:KB]
