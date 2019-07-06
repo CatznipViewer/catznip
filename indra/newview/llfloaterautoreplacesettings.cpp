@@ -454,15 +454,21 @@ void LLPanelPreferenceAutoReplaceSettings::onDeleteEntry()
 }
 
 // called when the Import List button is pressed
-//void LLFloaterAutoReplaceSettings::onImportList()
 // [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
 void LLPanelPreferenceAutoReplaceSettings::onImportList()
-// [/SL:KB]
 {
-	(new LLFilePickerReplyThread(boost::bind(&LLFloaterAutoReplaceSettings::loadListFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
+	(new LLFilePickerReplyThread(boost::bind(&LLPanelPreferenceAutoReplaceSettings::loadListFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
 }
+// [/SL:KB]
+//void LLFloaterAutoReplaceSettings::onImportList()
+//{
+//	(new LLFilePickerReplyThread(boost::bind(&LLFloaterAutoReplaceSettings::loadListFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
+//}
 
-void LLFloaterAutoReplaceSettings::loadListFromFile(const std::vector<std::string>& filenames)
+//void LLFloaterAutoReplaceSettings::loadListFromFile(const std::vector<std::string>& filenames)
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::loadListFromFile(const std::vector<std::string>& filenames)
+// [/SL:KB]
 {
 	llifstream file;
 	file.open(filenames[0].c_str());
@@ -666,17 +672,25 @@ void LLPanelPreferenceAutoReplaceSettings::onDeleteList()
 	}
 }
 
-//void LLFloaterAutoReplaceSettings::onExportList()
 // [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
 void LLPanelPreferenceAutoReplaceSettings::onExportList()
-// [/SL:KB]
 {
 	std::string listName=mListNames->getFirstSelected()->getColumn(0)->getValue().asString();
 	std::string listFileName = listName + ".xml";
-	(new LLFilePickerReplyThread(boost::bind(&LLFloaterAutoReplaceSettings::saveListToFile, this, _1, listName), LLFilePicker::FFSAVE_XML, listFileName))->getFile();
+	(new LLFilePickerReplyThread(boost::bind(&LLPanelPreferenceAutoReplaceSettings::saveListToFile, this, _1, listName), LLFilePicker::FFSAVE_XML, listFileName))->getFile();
 }
+// [/SL:KB]
+//void LLFloaterAutoReplaceSettings::onExportList()
+//{
+//	std::string listName=mListNames->getFirstSelected()->getColumn(0)->getValue().asString();
+//	std::string listFileName = listName + ".xml";
+//	(new LLFilePickerReplyThread(boost::bind(&LLFloaterAutoReplaceSettings::saveListToFile, this, _1, listName), LLFilePicker::FFSAVE_XML, listFileName))->getFile();
+//}
 
-void LLFloaterAutoReplaceSettings::saveListToFile(const std::vector<std::string>& filenames, std::string listName)
+//void LLFloaterAutoReplaceSettings::saveListToFile(const std::vector<std::string>& filenames, std::string listName)
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::saveListToFile(const std::vector<std::string>& filenames, std::string listName)
+// [/SL:KB]
 {
 	llofstream file;
 	const LLSD* list = mSettings.exportList(listName);
