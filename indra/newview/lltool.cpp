@@ -191,11 +191,9 @@ LLTool* LLTool::getOverrideTool(MASK mask)
 	{
 		return NULL;
 	}
-//	if (gSavedSettings.getBOOL("EnableAltZoom"))
-// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
-	static LLCachedControl<bool> s_fEnableAltZoom(gSavedSettings, "EnableAltZoom", true);
-	if (s_fEnableAltZoom)
-// [/SL:KB]
+
+	static LLCachedControl<bool> alt_zoom(gSavedSettings, "EnableAltZoom", true);
+	if (alt_zoom)
 	{
 		if (mask & MASK_ALT)
 		{
