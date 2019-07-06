@@ -344,6 +344,9 @@ public:
 // [/SL:KB]
 // 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true);
 	void	resetToDefaults();
+	void	incrCount(const std::string& name);
+
+	bool	mSettingsProfile;
 };
 
 
