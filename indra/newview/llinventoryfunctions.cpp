@@ -2307,12 +2307,16 @@ void LLCollapseToFolders::doItem(LLFolderViewItem* pItem)
 		LLFolderViewFolder* pParentFolder = pItem->getParentFolder();
 		if (pParentFolder->isOpen())
 		{
-			// NOTE: we don't want one or two items under the Clothing folder causing it to collapse so we make a special
-			//       (convenience) exception for user or system protected folders that have at least 2 folders in them
+			// NOTE: we don't want one item collapsing an entire hierarchy so make a special (convenience) exception
+			int cntPassedFolders = 0;
+			for (auto& itFolder = pParentFolder->getFoldersBegin(), endFolder = pParentFolder->getFoldersEnd(); itFolder != endFolder; ++itFolder)
+			{
+				if ((*itFolder)->descendantsPassedFilter())
+					cntPassedFolders++;
+			}
+
 			LLInvFVBridge* pItemBridge = pParentFolder->getViewModelItem<LLInvFVBridge>();
-			if ( (!pItemBridge) ||
-				 (!LLFolderType::lookupIsProtectedType(pItemBridge->getPreferredType(), pItemBridge->getUUID())) ||
-				 (pParentFolder->getFoldersCount() < 2) )
+			if ( (!pItemBridge) || (0 == cntPassedFolders) )
 			{
 				pItem->getParentFolder()->setOpenArrangeRecursively(false, LLFolderViewFolder::RECURSE_NO);
 			}
