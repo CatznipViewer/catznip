@@ -131,7 +131,7 @@ LLFloaterTexturePicker::~LLFloaterTexturePicker()
 
 void LLFloaterTexturePicker::setImageID(const LLUUID& image_id, bool set_selection /*=true*/)
 {
-	if( mImageAssetID != image_id && mActive)
+	if( ((mImageAssetID != image_id) || mTentative) && mActive)
 	{
 		mNoCopyTextureSelected = FALSE;
 		mViewModel->setDirty(); // *TODO: shouldn't we be using setValue() here?
@@ -999,6 +999,7 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	mShowLoadingPlaceholder( TRUE ),
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	mShowLabel(p.show_label),
+	mAspectRatio(p.aspect_ratio),
 // [/SL:KB]
 	mImageAssetID(p.image_id),
 	mDefaultImageAssetID(p.default_image_id),
@@ -1108,6 +1109,10 @@ void LLTextureCtrl::setVisible( BOOL visible )
 void LLTextureCtrl::setEnabled( BOOL enabled )
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
+	if( floaterp )
+	{
+		floaterp->setActive(enabled);
+	}
 	if( enabled )
 	{
 		std::string tooltip;
@@ -1120,11 +1125,6 @@ void LLTextureCtrl::setEnabled( BOOL enabled )
 		// *TODO: would be better to keep floater open and show
 		// disabled state.
 		closeDependentFloater();
-	}
-
-	if( floaterp )
-	{
-		floaterp->setActive(enabled);
 	}
 
 	mCaption->setEnabled( enabled );
@@ -1227,9 +1227,10 @@ void LLTextureCtrl::showPicker(BOOL take_focus)
 void LLTextureCtrl::closeDependentFloater()
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
-	if( floaterp )
+	if( floaterp && floaterp->isInVisibleChain())
 	{
 		floaterp->setOwner(NULL);
+		floaterp->setVisible(FALSE);
 		floaterp->closeFloater();
 	}
 }
@@ -1447,7 +1448,8 @@ void LLTextureCtrl::draw()
 	// Border
 //	LLRect border( 0, getRect().getHeight(), getRect().getWidth(), BTN_HEIGHT_SMALL );
 // [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
-	LLRect border(0, getRect().getHeight(), getRect().getWidth(), (mShowLabel) ? BTN_HEIGHT_SMALL : 0);
+//	LLRect border(0, getRect().getHeight(), getRect().getWidth(), (mShowLabel) ? BTN_HEIGHT_SMALL : 0);
+	LLRect border(mBorder->getRect());
 // [/SL:KB]
 	gl_rect_2d( border, mBorderColor.get(), FALSE );
 
@@ -1589,6 +1591,43 @@ BOOL LLTextureCtrl::handleUnicodeCharHere(llwchar uni_char)
 	}
 	return LLUICtrl::handleUnicodeCharHere(uni_char);
 }
+
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: Catznip-5.4
+void LLTextureCtrl::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLUICtrl::reshape(width, height, called_from_parent);
+
+	if (mAspectRatio > 0.f)
+	{
+		LLRect clientRect = getLocalRect();
+		clientRect.mBottom += (mShowLabel) ? BTN_HEIGHT_SMALL : 0;
+
+		S32 nClientWidth = clientRect.getWidth();
+		S32 nClientHeight = clientRect.getHeight();
+		if (mAspectRatio > 1.f)
+		{
+			nClientHeight = llceil((F32)nClientWidth / mAspectRatio);
+			if (nClientHeight > clientRect.getHeight())
+			{
+				nClientHeight = clientRect.getHeight();
+				nClientWidth = llceil((F32)nClientHeight * mAspectRatio);
+			}
+		}
+		else
+		{
+			nClientWidth = llceil((F32)nClientHeight * mAspectRatio);
+			if (nClientWidth > clientRect.getWidth())
+			{
+				nClientWidth = clientRect.getWidth();
+				nClientHeight = llceil((F32)nClientWidth / mAspectRatio);
+			}
+		}
+
+		clientRect.setCenterAndSize(clientRect.getWidth() / 2, clientRect.mBottom + clientRect.getHeight() / 2, nClientWidth, nClientHeight);
+		mBorder->setRect(clientRect);
+	}
+}
+// [/SL:KB]
 
 void LLTextureCtrl::setValue( const LLSD& value )
 {
