@@ -158,6 +158,9 @@ public:
 	 */
 //	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
+	void updateAvatarsArrivalTime(uuid_vec_t& uuids);
+	F32 getArrivalTimeByID(const LLUUID& id);
+
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 public:
 	void purgeItems();
@@ -166,9 +169,6 @@ public:
 protected:
 	void load();
 // [/SL:KB]
-
-	void updateAvatarsArrivalTime(uuid_vec_t& uuids);
-	F32 getArrivalTimeByID(const LLUUID& id);
 
 private:
 

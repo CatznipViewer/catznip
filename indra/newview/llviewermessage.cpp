@@ -192,7 +192,10 @@ void accept_friendship_coro(std::string url, LLSD notification)
         {
             LL_DEBUGS("Friendship") << "Adding friend to list" << httpResults << LL_ENDL;
             // add friend to recent people list
-            LLRecentPeople::instance().add(payload["from_id"]);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//		    LLRecentPeople::instance().add(payload["from_id"]);
 
             LLNotificationsUtil::add("FriendshipAcceptedByMe",
                 notification["substitutions"], payload);
@@ -290,7 +293,10 @@ bool friendship_offer_callback(const LLSD& notification, const LLSD& response)
                 msg->sendReliable(LLHost(payload["sender"].asString()));
 
                 // add friend to recent people list
-                LLRecentPeople::instance().add(payload["from_id"]);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			    LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//			    LLRecentPeople::instance().add(payload["from_id"]);
                 LLNotificationsUtil::add("FriendshipAcceptedByMe",
                     notification["substitutions"], payload);
             }
