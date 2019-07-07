@@ -131,7 +131,7 @@ LLFloaterTexturePicker::~LLFloaterTexturePicker()
 
 void LLFloaterTexturePicker::setImageID(const LLUUID& image_id, bool set_selection /*=true*/)
 {
-	if( mImageAssetID != image_id && mActive)
+	if( ((mImageAssetID != image_id) || mTentative) && mActive)
 	{
 		mNoCopyTextureSelected = FALSE;
 		mViewModel->setDirty(); // *TODO: shouldn't we be using setValue() here?
@@ -1110,6 +1110,10 @@ void LLTextureCtrl::setVisible( BOOL visible )
 void LLTextureCtrl::setEnabled( BOOL enabled )
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
+	if( floaterp )
+	{
+		floaterp->setActive(enabled);
+	}
 //	if( enabled )
 // [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
 	if  ( (enabled) && (mControlMode == EControlMode::EDIT) )
@@ -1125,11 +1129,6 @@ void LLTextureCtrl::setEnabled( BOOL enabled )
 		// *TODO: would be better to keep floater open and show
 		// disabled state.
 		closeDependentFloater();
-	}
-
-	if( floaterp )
-	{
-		floaterp->setActive(enabled);
 	}
 
 // [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
@@ -1236,9 +1235,10 @@ void LLTextureCtrl::showPicker(BOOL take_focus)
 void LLTextureCtrl::closeDependentFloater()
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
-	if( floaterp )
+	if( floaterp && floaterp->isInVisibleChain())
 	{
 		floaterp->setOwner(NULL);
+		floaterp->setVisible(FALSE);
 		floaterp->closeFloater();
 	}
 }
