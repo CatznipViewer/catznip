@@ -62,6 +62,7 @@ class LLUICtrlFactory;
 
 class LLButton
 : public LLUICtrl, public LLBadgeOwner
+, public ll::ui::SearchableControl
 {
 public:
 	struct Params 
@@ -386,6 +387,12 @@ protected:
 	LLFlashTimer *				mFlashingTimer;
 	bool                        mForceFlashing; // Stick flashing color even if button is pressed
 	bool						mHandleRightMouse;
+
+protected:
+	virtual std::string _getSearchText() const
+	{
+		return getLabelUnselected() + getToolTip();
+	}
 };
 
 // Build time optimization, generate once in .cpp file

@@ -1,4 +1,4 @@
 # -*- cmake -*-
 include(Prebuilt)
 
-use_prebuilt_binary(llbase)
+use_prebuilt_binary(llca)

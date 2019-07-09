@@ -276,6 +276,7 @@ void LLModel::normalizeVolumeFaces()
 			// We shrink the extents so
 			// that they fall within
 			// the unit cube.
+			// VFExtents change
 			face.mExtents[0].add(trans);
 			face.mExtents[0].mul(scale);
 
@@ -398,40 +399,6 @@ void LLModel::setVolumeFaceData(
 
 	U32 size = (num_indices*2+0xF)&~0xF;
 	LLVector4a::memcpyNonAliased16((F32*) face.mIndices, (F32*) ind.get(), size);
-}
-
-void LLModel::appendFaces(LLModel *model, LLMatrix4 &transform, LLMatrix4& norm_mat)
-{
-	if (mVolumeFaces.empty())
-	{
-		setNumVolumeFaces(1);
-	}
-
-	LLVolumeFace& face = mVolumeFaces[mVolumeFaces.size()-1];
-
-
-	for (S32 i = 0; i < model->getNumFaces(); ++i)
-	{
-		face.appendFace(model->getVolumeFace(i), transform, norm_mat);
-	}
-
-}
-
-void LLModel::appendFace(const LLVolumeFace& src_face, std::string src_material, LLMatrix4& mat, LLMatrix4& norm_mat)
-{
-	S32 rindex = getNumVolumeFaces()-1; 
-	if (rindex == -1 || 
-		mVolumeFaces[rindex].mNumVertices + src_face.mNumVertices >= 65536)
-	{ //empty or overflow will occur, append new face
-		LLVolumeFace cur_face;
-		cur_face.appendFace(src_face, mat, norm_mat);
-		addFace(cur_face);
-		mMaterialList.push_back(src_material);
-	}
-	else
-	{ //append to existing end face
-		mVolumeFaces.rbegin()->appendFace(src_face, mat, norm_mat);
-	}
 }
 
 void LLModel::addFace(const LLVolumeFace& face)
@@ -1034,8 +1001,11 @@ LLModel::weight_list& LLModel::getJointInfluences(const LLVector3& pos)
 	{  //no exact match found, get closest point
 		const F32 epsilon = 1e-5f;
 		weight_map::iterator iter_up = mSkinWeights.lower_bound(pos);
-		weight_map::iterator iter_down = ++iter_up;
-
+		weight_map::iterator iter_down = iter_up;
+		if (iter_up != mSkinWeights.end())
+		{
+			iter_down = ++iter_up;
+		}
 		weight_map::iterator best = iter_up;
 
 		F32 min_dist = (iter->first - pos).magVec();
@@ -1354,7 +1324,7 @@ bool LLModel::loadSkinInfo(LLSD& header, std::istream &is)
 
 		LLSD skin_data;
 
-		if (unzip_llsd(skin_data, is, size))
+		if (LLUZipHelper::unzip_llsd(skin_data, is, size) == LLUZipHelper::ZR_OK)
 		{
 			mSkinInfo.fromLLSD(skin_data);
 			return true;
@@ -1375,7 +1345,7 @@ bool LLModel::loadDecomposition(LLSD& header, std::istream& is)
 
 		LLSD data;
 
-		if (unzip_llsd(data, is, size))
+		if (LLUZipHelper::unzip_llsd(data, is, size) == LLUZipHelper::ZR_OK)
 		{
 			mPhysics.fromLLSD(data);
 			updateHullCenters();
@@ -1388,14 +1358,16 @@ bool LLModel::loadDecomposition(LLSD& header, std::istream& is)
 LLMeshSkinInfo::LLMeshSkinInfo():
     mPelvisOffset(0.0),
     mLockScaleIfJointPosition(false),
-    mInvalidJointsScrubbed(false)
+    mInvalidJointsScrubbed(false),
+    mJointNumsInitialized(false)
 {
 }
 
 LLMeshSkinInfo::LLMeshSkinInfo(LLSD& skin):
     mPelvisOffset(0.0),
     mLockScaleIfJointPosition(false),
-    mInvalidJointsScrubbed(false)
+    mInvalidJointsScrubbed(false),
+    mJointNumsInitialized(false)
 {
 	fromLLSD(skin);
 }

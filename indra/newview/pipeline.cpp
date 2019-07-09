@@ -2525,7 +2525,7 @@ void LLPipeline::updateCull(LLCamera& camera, LLCullResult& result, S32 water_cl
 		LLVOCachePartition* vo_part = region->getVOCachePartition();
 		if(vo_part)
 		{
-			bool do_occlusion_cull = can_use_occlusion && use_occlusion && !gUseWireframe/* && !gViewerWindow->getProgressView()->getVisible()*/;
+			bool do_occlusion_cull = can_use_occlusion && use_occlusion && !gUseWireframe && 0 > water_clip /* && !gViewerWindow->getProgressView()->getVisible()*/;
 			vo_part->cull(camera, do_occlusion_cull);
 		}
 	}
@@ -2654,9 +2654,12 @@ void LLPipeline::downsampleDepthBuffer(LLRenderTarget& source, LLRenderTarget& d
 
 	if (scratch_space)
 	{
+        GLint bits = 0;
+        bits |= (source.hasStencil() && dest.hasStencil()) ? GL_STENCIL_BUFFER_BIT : 0;
+        bits |= GL_DEPTH_BUFFER_BIT;
 		scratch_space->copyContents(source, 
 									0, 0, source.getWidth(), source.getHeight(), 
-									0, 0, scratch_space->getWidth(), scratch_space->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+									0, 0, scratch_space->getWidth(), scratch_space->getHeight(), bits, GL_NEAREST);
 	}
 
 	dest.bindTarget();
@@ -3031,6 +3034,12 @@ void LLPipeline::updateGeom(F32 max_dtime)
 				}
 			}
 
+			if (drawablep->isUnload())
+			{
+				drawablep->unload();
+				drawablep->clearState(LLDrawable::FOR_UNLOAD);
+			}
+
 			if (updateDrawableGeom(drawablep, TRUE))
 			{
 				drawablep->clearState(LLDrawable::IN_REBUILD_Q1);
@@ -3350,6 +3359,18 @@ void LLPipeline::markRebuild(LLDrawable *drawablep, LLDrawable::EDrawableFlags f
 {
 	if (drawablep && !drawablep->isDead() && assertInitialized())
 	{
+        if (debugLoggingEnabled("AnimatedObjectsLinkset"))
+        {
+            LLVOVolume *vol_obj = drawablep->getVOVolume();
+            if (vol_obj && vol_obj->isAnimatedObject() && vol_obj->isRiggedMesh())
+            {
+                std::string vobj_name = llformat("Vol%p", vol_obj);
+                F32 est_tris = vol_obj->getEstTrianglesMax();
+                LL_DEBUGS("AnimatedObjectsLinkset") << vobj_name << " markRebuild, tris " << est_tris 
+                                                    << " priority " << (S32) priority << " flag " << std::hex << flag << LL_ENDL; 
+            }
+        }
+    
 		if (!drawablep->isState(LLDrawable::BUILT))
 		{
 			priority = true;
@@ -3424,6 +3445,7 @@ void LLPipeline::stateSort(LLCamera& camera, LLCullResult &result)
 	if (LLViewerCamera::sCurCameraID == LLViewerCamera::CAMERA_WORLD)
 	{
 		LLSpatialGroup* last_group = NULL;
+		BOOL fov_changed = LLViewerCamera::getInstance()->isDefaultFOVChanged();
 		for (LLCullResult::bridge_iterator i = sCull->beginVisibleBridge(); i != sCull->endVisibleBridge(); ++i)
 		{
 			LLCullResult::bridge_iterator cur_iter = i;
@@ -3437,7 +3459,7 @@ void LLPipeline::stateSort(LLCamera& camera, LLCullResult &result)
 
 			if (!bridge->isDead() && group && !group->isOcclusionState(LLSpatialGroup::OCCLUDED))
 			{
-				stateSort(bridge, camera);
+				stateSort(bridge, camera, fov_changed);
 			}
 
 			if (LLViewerCamera::sCurCameraID == LLViewerCamera::CAMERA_WORLD &&
@@ -3509,9 +3531,9 @@ void LLPipeline::stateSort(LLSpatialGroup* group, LLCamera& camera)
 
 }
 
-void LLPipeline::stateSort(LLSpatialBridge* bridge, LLCamera& camera)
+void LLPipeline::stateSort(LLSpatialBridge* bridge, LLCamera& camera, BOOL fov_changed)
 {
-	if (bridge->getSpatialGroup()->changeLOD())
+	if (bridge->getSpatialGroup()->changeLOD() || fov_changed)
 	{
 		bool force_update = false;
 		bridge->updateDistance(camera, force_update);
@@ -4117,7 +4139,12 @@ void LLPipeline::renderHighlights()
 
 		glStencilFunc(GL_ALWAYS, 0, 0xFFFFFFFF);
 		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-				
+
+        if (canUseVertexShaders())
+        {
+            gHighlightProgram.bind();
+        }
+
 		gGL.setColorMask(false, false);
 		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(); iter != mHighlightSet.end(); ++iter)
 		{
@@ -4576,12 +4603,6 @@ void LLPipeline::renderGeomDeferred(LLCamera& camera)
 	LL_RECORD_BLOCK_TIME(FTM_DEFERRED_POOLS);
 
 	LLGLEnable cull(GL_CULL_FACE);
-
-	LLGLEnable stencil(GL_STENCIL_TEST);
-	glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF);
-	stop_glerror();
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	stop_glerror();
 
 	for (pool_set_t::iterator iter = mPools.begin(); iter != mPools.end(); ++iter)
 	{
@@ -6843,7 +6864,7 @@ bool LLPipeline::toggleRenderTypeControlNegated(S32 type)
 }
 
 //static
-void LLPipeline::toggleRenderDebug(U32 bit)
+void LLPipeline::toggleRenderDebug(U64 bit)
 {
 	if (gPipeline.hasRenderDebugMask(bit))
 	{
@@ -6858,7 +6879,7 @@ void LLPipeline::toggleRenderDebug(U32 bit)
 
 
 //static
-bool LLPipeline::toggleRenderDebugControl(U32 bit)
+bool LLPipeline::toggleRenderDebugControl(U64 bit)
 {
 	return gPipeline.hasRenderDebugMask(bit);
 }
@@ -8138,7 +8159,7 @@ void LLPipeline::renderBloom(bool for_snapshot, F32 zoom_factor, int subfield)
 	if (LLRenderTarget::sUseFBO)
 	{ //copy depth buffer from mScreen to framebuffer
 		LLRenderTarget::copyContentsToFramebuffer(mScreen, 0, 0, mScreen.getWidth(), mScreen.getHeight(), 
-			0, 0, mScreen.getWidth(), mScreen.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			0, 0, mScreen.getWidth(), mScreen.getHeight(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 	}
 	
 
@@ -8665,7 +8686,8 @@ void LLPipeline::renderDeferredLighting()
 					}
 
 					const LLViewerObject *vobj = drawablep->getVObj();
-					if(vobj && vobj->getAvatar() && vobj->getAvatar()->isInMuteList())
+					if(vobj && vobj->getAvatar()
+						&& (vobj->getAvatar()->isTooComplex() || vobj->getAvatar()->isInMuteList()))
 					{
 						continue;
 					}
@@ -9019,7 +9041,7 @@ void LLPipeline::renderDeferredLightingToRT(LLRenderTarget* target)
 		{
 			LLGLDepthTest depth(GL_TRUE);
 			mDeferredDepth.copyContents(mDeferredScreen, 0, 0, mDeferredScreen.getWidth(), mDeferredScreen.getHeight(),
-							0, 0, mDeferredDepth.getWidth(), mDeferredDepth.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);	
+							0, 0, mDeferredDepth.getWidth(), mDeferredDepth.getHeight(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);	
 		}
 
 		LLGLEnable multisample(RenderFSAASamples > 0 ? GL_MULTISAMPLE_ARB : 0);
@@ -9852,16 +9874,16 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 
 						gPipeline.grabReferences(result);
 						gPipeline.mDeferredScreen.bindTarget();
-						gGL.setColorMask(true, true);						
+						gGL.setColorMask(true, true);
 						glClearColor(0,0,0,0);
 						gPipeline.mDeferredScreen.clear();
 
-						renderGeomDeferred(camera);						
+						renderGeomDeferred(camera);
 					}
 					else
 					{
-					renderGeom(camera, TRUE);
-					}					
+						renderGeom(camera, TRUE);
+					}
 
 					gPipeline.popRenderTypeMask();
 				}
@@ -9879,6 +9901,7 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 				S32 detail = RenderReflectionDetail;
 				if (detail > 0)
 				{ //mask out selected geometry based on reflection detail
+
 					if (detail < 4)
 					{
 						clearRenderTypeMask(LLPipeline::RENDER_TYPE_PARTICLES, END_RENDER_TYPES);
@@ -9891,6 +9914,7 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 							}
 						}
 					}
+
 
 					LLGLUserClipPlane clip_plane(plane, mat, projection);
 					LLGLDisable cull(GL_CULL_FACE);
@@ -9906,15 +9930,15 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 						LLGLUserClipPlane clip_plane(plane, mat, projection);
 
 						if (LLPipeline::sRenderDeferred && materials_in_water)
-						{							
+						{
 							renderGeomDeferred(camera);
 						}
 						else
 						{
-						renderGeom(camera);
+							renderGeom(camera);
+						}
 					}
-				}	
-				}	
+				}
 
 				if (LLPipeline::sRenderDeferred && materials_in_water)
 				{
@@ -9983,18 +10007,30 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 
 				
 				if (LLPipeline::sRenderDeferred && materials_in_water)
-				{										
+				{
 					mWaterDis.flush();
 					gPipeline.mDeferredScreen.bindTarget();
 					gGL.setColorMask(true, true);
 					glClearColor(0,0,0,0);
 					gPipeline.mDeferredScreen.clear();
 					gPipeline.grabReferences(result);
-					renderGeomDeferred(camera);					
+					renderGeomDeferred(camera);
 				}
 				else
 				{
-				renderGeom(camera);
+					renderGeom(camera);
+
+					if (LLGLSLShader::sNoFixedFunction)
+					{
+						gUIProgram.bind();
+					}
+					
+					LLWorld::getInstance()->renderPropertyLines();
+					
+					if (LLGLSLShader::sNoFixedFunction)
+					{
+						gUIProgram.unbind();
+					}
 				}
 
 				if (LLPipeline::sRenderDeferred && materials_in_water)
@@ -10117,7 +10153,7 @@ void LLPipeline::renderShadow(glh::matrix4f& view, glh::matrix4f& proj, LLCamera
 	}
 	LLPipeline::sShadowRender = true;
 	
-	U32 types[] = { 
+	static const U32 types[] = { 
 		LLRenderPass::PASS_SIMPLE, 
 		LLRenderPass::PASS_FULLBRIGHT, 
 		LLRenderPass::PASS_SHINY, 
@@ -10475,6 +10511,11 @@ void LLPipeline::generateHighlight(LLCamera& camera)
 		disableLights();
 		gGL.setColorMask(true, true);
 		mHighlight.clear();
+
+        if (canUseVertexShaders())
+        {
+            gHighlightProgram.bind();
+        }
 
 		gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sWhiteImagep);
 		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(); iter != mHighlightSet.end(); )
@@ -11622,7 +11663,7 @@ void LLPipeline::generateImpostor(LLVOAvatar* avatar)
 
 	avatar->setImpostorDim(tdim);
 
-	LLVOAvatar::sUseImpostors = true; // @TODO ???
+	LLVOAvatar::sUseImpostors = (0 != LLVOAvatar::sMaxNonImpostors);
 	sUseOcclusion = occlusion;
 	sReflectionRender = false;
 	sImpostorRender = false;
@@ -11636,6 +11677,7 @@ void LLPipeline::generateImpostor(LLVOAvatar* avatar)
 
 	avatar->mNeedsImpostorUpdate = FALSE;
 	avatar->cacheImpostorValues();
+	avatar->mLastImpostorUpdateFrameTime = gFrameTimeSeconds;
 
 	LLVertexBuffer::unbind();
 	LLGLState::checkStates();

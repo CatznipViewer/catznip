@@ -73,6 +73,8 @@ public:
 
 	// Returns true if vivox has successfully logged in and is not in error state	
 	virtual bool isVoiceWorking() const;
+	
+	virtual bool singletoneInstanceExists();
 
 	/////////////////////
 	/// @name Tuning
@@ -351,7 +353,7 @@ protected:
 		bool		mIsSpatial;	// True for spatial channels
 		bool		mIsP2P;
 		bool		mIncoming;
-		bool		mVoiceEnabled;
+		bool		mVoiceActive;
 		bool		mReconnect;	// Whether we should try to reconnect to this session if it's dropped
 
 		// Set to true when the volume/mute state of someone in the participant list changes.
@@ -432,10 +434,10 @@ protected:
 	//----------------------------------
 	// devices
 	void clearCaptureDevices();
-	void addCaptureDevice(const std::string& name);
+	void addCaptureDevice(const LLVoiceDevice& device);
 	void clearRenderDevices();
 	void setDevicesListUpdated(bool state);
-	void addRenderDevice(const std::string& name);	
+	void addRenderDevice(const LLVoiceDevice& device);	
 	void buildSetAudioDevices(std::ostringstream &stream);
 	
 	void getCaptureDevicesSendMessage();
@@ -953,7 +955,6 @@ protected:
 	int				ignoreDepth;
 	
 	// Members for processing responses. The values are transient and only valid within a call to processResponse().
-	bool			squelchDebugOutput;
 	int				returnCode;
 	int				statusCode;
 	std::string		statusString;
@@ -1037,6 +1038,38 @@ class LLVivoxSecurity :	public LLSingleton<LLVivoxSecurity>
   private:
     std::string     mConnectorHandle;
     std::string     mAccountHandle;
+};
+
+class LLVoiceVivoxStats : public LLSingleton<LLVoiceVivoxStats>
+{
+    LLSINGLETON(LLVoiceVivoxStats);
+    LOG_CLASS(LLVoiceVivoxStats);
+    virtual ~LLVoiceVivoxStats();
+    
+  private:
+    F64SecondsImplicit mStartTime;
+
+    U32 mConnectCycles;
+
+    F64 mConnectTime;
+    U32 mConnectAttempts;
+    
+    F64 mProvisionTime;
+    U32 mProvisionAttempts;
+
+    F64 mEstablishTime;
+    U32 mEstablishAttempts;
+
+  public:
+
+    void reset();
+    void connectionAttemptStart();
+    void connectionAttemptEnd(bool success);
+    void provisionAttemptStart();
+    void provisionAttemptEnd(bool success);
+    void establishAttemptStart();
+    void establishAttemptEnd(bool success);
+    LLSD read();
 };
 
 #endif //LL_VIVOX_VOICE_CLIENT_H
