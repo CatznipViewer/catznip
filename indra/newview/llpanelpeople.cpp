@@ -73,6 +73,7 @@
 #include "llrecentpeople.h"
 #include "llviewercontrol.h"		// for gSavedSettings
 #include "llviewermenu.h"			// for gMenuHolder
+#include "llviewerregion.h"
 #include "llvoiceclient.h"
 #include "llworld.h"
 #include "llspeakers.h"
@@ -370,10 +371,39 @@ protected:
 	}
 };
 
+class LLAvatarItemRecentArrivalComparator : public  LLAvatarItemNameComparator
+{
+public:
+	LLAvatarItemRecentArrivalComparator() {};
+	virtual ~LLAvatarItemRecentArrivalComparator() {};
+
+protected:
+	virtual bool doCompare(const LLAvatarListItem* item1, const LLAvatarListItem* item2) const
+	{
+
+		F32 arr_time1 = LLRecentPeople::instance().getArrivalTimeByID(item1->getAvatarId());
+		F32 arr_time2 = LLRecentPeople::instance().getArrivalTimeByID(item2->getAvatarId());
+
+		if (arr_time1 == arr_time2)
+		{
+			std::string name1 = item1->getAvatarName();
+			std::string name2 = item2->getAvatarName();
+
+			LLStringUtil::toUpper(name1);
+			LLStringUtil::toUpper(name2);
+
+			return name1 < name2;
+		}
+
+		return arr_time1 > arr_time2;
+	}
+};
+
 static const LLAvatarItemRecentComparator RECENT_COMPARATOR;
 static const LLAvatarItemStatusComparator STATUS_COMPARATOR;
 static LLAvatarItemDistanceComparator DISTANCE_COMPARATOR;
 static const LLAvatarItemRecentSpeakerComparator RECENT_SPEAKER_COMPARATOR;
+static LLAvatarItemRecentArrivalComparator RECENT_ARRIVAL_COMPARATOR;
 
 static LLPanelInjector<LLPanelPeople> t_people("panel_people");
 
@@ -743,6 +773,8 @@ LLPanelPeople::LLPanelPeople()
 	mEnableCallbackRegistrar.add("People.Nearby.ViewSort.CheckItem",	boost::bind(&LLPanelPeople::onNearbyViewSortMenuItemCheck,	this, _2));
 
 	mEnableCallbackRegistrar.add("People.Group.Plus.Validate",	boost::bind(&LLPanelPeople::onGroupPlusButtonValidate,	this));
+
+	doPeriodically(boost::bind(&LLPanelPeople::updateNearbyArrivalTime, this), 2.0);
 }
 
 LLPanelPeople::~LLPanelPeople()
@@ -786,6 +818,17 @@ void LLPanelPeople::removePicker()
 
 BOOL LLPanelPeople::postBuild()
 {
+	S32 max_premium = PREMIUM_MAX_AGENT_GROUPS; 
+	if (gAgent.getRegion())
+	{
+		LLSD features;
+		gAgent.getRegion()->getSimulatorFeatures(features);
+		if (features.has("MaxAgentGroupsPremium"))
+		{
+			max_premium = features["MaxAgentGroupsPremium"].asInteger();
+		}
+	}
+
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 	mFilterEditor = getChild<LLFilterEditor>("filter_input");
 	mFilterEditor->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
@@ -794,9 +837,9 @@ BOOL LLPanelPeople::postBuild()
 //	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 //	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 //	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-//	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 
-	if(gMaxAgentGroups <= BASE_MAX_AGENT_GROUPS)
+
+	if(gMaxAgentGroups < max_premium)
 	{
 	    getChild<LLTextBox>("groupcount")->setText(getString("GroupCountWithInfo"));
 	    getChild<LLTextBox>("groupcount")->setURLClickedCallback(boost::bind(&LLPanelPeople::onGroupLimitInfo, this));
@@ -1372,6 +1415,10 @@ void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save
 		list->setComparator(&DISTANCE_COMPARATOR);
 		list->sort();
 		break;
+	case E_SORT_BY_RECENT_ARRIVAL:
+		list->setComparator(&RECENT_ARRIVAL_COMPARATOR);
+		list->sort();
+		break;
 	default:
 		LL_WARNS() << "Unrecognized people sort order for " << list->getName() << LL_ENDL;
 		return;
@@ -1453,8 +1500,25 @@ void LLPanelPeople::onFilterEdit(const std::string& search_string)
 void LLPanelPeople::onGroupLimitInfo()
 {
 	LLSD args;
-	args["MAX_BASIC"] = BASE_MAX_AGENT_GROUPS;
-	args["MAX_PREMIUM"] = PREMIUM_MAX_AGENT_GROUPS;
+
+	S32 max_basic = BASE_MAX_AGENT_GROUPS;
+	S32 max_premium = PREMIUM_MAX_AGENT_GROUPS;
+	if (gAgent.getRegion())
+	{
+		LLSD features;
+		gAgent.getRegion()->getSimulatorFeatures(features);
+		if (features.has("MaxAgentGroupsBasic"))
+		{
+			max_basic = features["MaxAgentGroupsBasic"].asInteger();
+		}
+		if (features.has("MaxAgentGroupsPremium"))
+		{
+			max_premium = features["MaxAgentGroupsPremium"].asInteger();
+		}
+	}
+	args["MAX_BASIC"] = max_basic; 
+	args["MAX_PREMIUM"] = max_premium; 
+
 	LLNotificationsUtil::add("GroupLimitInfo", args);
 }
 
@@ -1787,6 +1851,10 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
+	else if (chosen_item == "sort_arrival")
+	{
+		setSortOrder(mNearbyList, E_SORT_BY_RECENT_ARRIVAL);
+	}
 //	else if (chosen_item == "view_usernames")
 //	{
 //	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
@@ -1831,6 +1899,8 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_NAME;
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
+	if (item == "sort_arrival")
+		return sort_order == E_SORT_BY_RECENT_ARRIVAL;
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	U32 name_format = gSavedSettings.getU32("NearbyPeopleNameFormat");
@@ -2080,6 +2150,16 @@ bool LLPanelPeople::isAccordionCollapsedByUser(LLUICtrl* acc_tab)
 bool LLPanelPeople::isAccordionCollapsedByUser(const std::string& name)
 {
 	return isAccordionCollapsedByUser(getChild<LLUICtrl>(name));
+}
+
+bool LLPanelPeople::updateNearbyArrivalTime()
+{
+	std::vector<LLVector3d> positions;
+	std::vector<LLUUID> uuids;
+	static LLCachedControl<F32> range(gSavedSettings, "NearMeRange");
+	LLWorld::getInstance()->getAvatars(&uuids, &positions, gAgent.getPositionGlobal(), range);
+	LLRecentPeople::instance().updateAvatarsArrivalTime(uuids);
+	return LLApp::isExiting();
 }
 
 
