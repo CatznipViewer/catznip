@@ -131,7 +131,7 @@ LLFloaterTexturePicker::~LLFloaterTexturePicker()
 
 void LLFloaterTexturePicker::setImageID(const LLUUID& image_id, bool set_selection /*=true*/)
 {
-	if( mImageAssetID != image_id && mActive)
+	if( ((mImageAssetID != image_id) || mTentative) && mActive)
 	{
 		mNoCopyTextureSelected = FALSE;
 		mViewModel->setDirty(); // *TODO: shouldn't we be using setValue() here?
@@ -990,6 +990,7 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	mOnSelectCallback(NULL),
 	mBorderColor( p.border_color() ),
 	mAllowNoTexture( FALSE ),
+	mAllowLocalTexture( TRUE ),
 	mImmediateFilterPermMask( PERM_NONE ),
 	mNonImmediateFilterPermMask( PERM_NONE ),
 	mCanApplyImmediately( FALSE ),
@@ -1095,6 +1096,10 @@ void LLTextureCtrl::setVisible( BOOL visible )
 void LLTextureCtrl::setEnabled( BOOL enabled )
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
+	if( floaterp )
+	{
+		floaterp->setActive(enabled);
+	}
 	if( enabled )
 	{
 		std::string tooltip;
@@ -1107,11 +1112,6 @@ void LLTextureCtrl::setEnabled( BOOL enabled )
 		// *TODO: would be better to keep floater open and show
 		// disabled state.
 		closeDependentFloater();
-	}
-
-	if( floaterp )
-	{
-		floaterp->setActive(enabled);
 	}
 
 	mCaption->setEnabled( enabled );
@@ -1198,6 +1198,12 @@ void LLTextureCtrl::showPicker(BOOL take_focus)
 		floaterp->openFloater();
 	}
 
+	LLFloaterTexturePicker* picker_floater = dynamic_cast<LLFloaterTexturePicker*>(floaterp);
+	if (picker_floater)
+	{
+		picker_floater->setLocalTextureEnabled(mAllowLocalTexture);
+	}
+
 	if (take_focus)
 	{
 		floaterp->setFocus(TRUE);
@@ -1208,9 +1214,10 @@ void LLTextureCtrl::showPicker(BOOL take_focus)
 void LLTextureCtrl::closeDependentFloater()
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
-	if( floaterp )
+	if( floaterp && floaterp->isInVisibleChain())
 	{
 		floaterp->setOwner(NULL);
+		floaterp->setVisible(FALSE);
 		floaterp->closeFloater();
 	}
 }
