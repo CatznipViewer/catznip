@@ -155,7 +155,7 @@ void LLWatchdogTimeout::ping(const std::string& state)
 
 // LLWatchdog
 LLWatchdog::LLWatchdog() :
-	mSuspectsAccessMutex(NULL),
+	mSuspectsAccessMutex(),
 	mTimer(NULL),
 	mLastClockCount(0),
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
@@ -197,7 +197,7 @@ void LLWatchdog::init(killer_event_callback killer_func, freeze_event_callback f
 // [/SL:KB]
 	if(!mSuspectsAccessMutex && !mTimer)
 	{
-		mSuspectsAccessMutex = new LLMutex(NULL);
+		mSuspectsAccessMutex = new LLMutex();
 		mTimer = new LLWatchdogTimerThread();
 		mTimer->setSleepTime(WATCHDOG_SLEEP_TIME_USEC / 1000);
 		mLastClockCount = LLTimer::getTotalTime();
