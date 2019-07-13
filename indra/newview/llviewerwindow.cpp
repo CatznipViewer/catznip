@@ -196,6 +196,7 @@
 #include "llviewerdisplay.h"
 #include "llspatialpartition.h"
 #include "llviewerjoystick.h"
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 #include "llviewernetwork.h"
 #include "llpostprocess.h"
 #include "llfloaterimnearbychat.h"
@@ -308,6 +309,9 @@ private:
 RecordToChatConsole::RecordToChatConsole():
 	mRecorder(new RecordToChatConsoleRecorder())
 {
+    mRecorder->showTags(false);
+    mRecorder->showLocation(false);
+    mRecorder->showMultiline(true);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -545,7 +549,14 @@ public:
 								object_count++;
 								S32 bytes = 0;	
 								S32 visible = 0;
-								cost += object->getStreamingCost(&bytes, &visible);
+								cost += object->getStreamingCost();
+                                LLMeshCostData costs;
+                                if (object->getCostData(costs))
+                                {
+                                    bytes = costs.getSizeTotal();
+                                    visible = costs.getSizeByLOD(object->getLOD());
+                                }
+
 								S32 vt = 0;
 								count += object->getTriangleCount(&vt);
 								vcount += vt;
@@ -1148,7 +1159,9 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 
 				if (prim_media_dnd_enabled)
 				{
-					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/, FALSE );
+					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,
+                                                          TRUE /* pick_transparent */, 
+                                                          FALSE /* pick_rigged */);
 
 					LLUUID object_id = pick_info.getObjectID();
 					S32 object_face = pick_info.mObjectFace;
@@ -1596,8 +1609,6 @@ BOOL LLViewerWindow::handleDPIChanged(LLWindow *window, F32 ui_scale_factor, S32
 {
     if (ui_scale_factor >= MIN_UI_SCALE && ui_scale_factor <= MAX_UI_SCALE)
     {
-        gSavedSettings.setF32("LastSystemUIScaleFactor", ui_scale_factor);
-        gSavedSettings.setF32("UIScaleFactor", ui_scale_factor);
         LLViewerWindow::reshape(window_width, window_height);
         mResDirty = true;
         return TRUE;
@@ -1607,6 +1618,14 @@ BOOL LLViewerWindow::handleDPIChanged(LLWindow *window, F32 ui_scale_factor, S32
         LL_WARNS() << "DPI change caused UI scale to go out of bounds: " << ui_scale_factor << LL_ENDL;
         return FALSE;
     }
+}
+
+BOOL LLViewerWindow::handleWindowDidChangeScreen(LLWindow *window)
+{
+	LLCoordScreen window_rect;
+	mWindow->getSize(&window_rect);
+	reshape(window_rect.mX, window_rect.mY);
+	return TRUE;
 }
 
 void LLViewerWindow::handlePingWatchdog(LLWindow *window, const char * msg)
@@ -1671,8 +1690,7 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	mResDirty(false),
 	mStatesDirty(false),
 	mCurrResolutionIndex(0),
-	mProgressView(NULL),
-	mSystemUIScaleFactorChanged(false)
+	mProgressView(NULL)
 {
 	// gKeyboard is still NULL, so it doesn't do LLWindowListener any good to
 	// pass its value right now. Instead, pass it a nullary function that
@@ -1748,31 +1766,19 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	LLCoordScreen scr;
     mWindow->getSize(&scr);
 
-    if(p.fullscreen && ( scr.mX!=p.width || scr.mY!=p.height))
+    // Reset UI scale factor on first run if OS's display scaling is not 100%
+    if (gSavedSettings.getBOOL("ResetUIScaleOnFirstRun"))
     {
-		LL_WARNS() << "Fullscreen has forced us in to a different resolution now using "<<scr.mX<<" x "<<scr.mY<<LL_ENDL;
-		gSavedSettings.setS32("FullScreenWidth",scr.mX);
-		gSavedSettings.setS32("FullScreenHeight",scr.mY);
+        if (mWindow->getSystemUISize() != 1.f)
+        {
+            gSavedSettings.setF32("UIScaleFactor", 1.f);
+        }
+        gSavedSettings.setBOOL("ResetUIScaleOnFirstRun", FALSE);
     }
-
-
-	F32 system_scale_factor = mWindow->getSystemUISize();
-	if (system_scale_factor < MIN_UI_SCALE || system_scale_factor > MAX_UI_SCALE)
-	{
-		// reset to default;
-		system_scale_factor = 1.f;
-	}
-	if (p.first_run || gSavedSettings.getF32("LastSystemUIScaleFactor") != system_scale_factor)
-	{
-		mSystemUIScaleFactorChanged = !p.first_run;
-		gSavedSettings.setF32("LastSystemUIScaleFactor", system_scale_factor);
-		gSavedSettings.setF32("UIScaleFactor", system_scale_factor);
-	}
-
 
 	// Get the real window rect the window was created with (since there are various OS-dependent reasons why
 	// the size of a window or fullscreen context may have been adjusted slightly...)
-	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE);
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE) * mWindow->getSystemUISize();
 	
 	mDisplayScale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	mDisplayScale *= ui_scale_factor;
@@ -1865,32 +1871,10 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	mWorldViewRectScaled = calcScaledRect(mWorldViewRectRaw, mDisplayScale);
 }
 
-//static
-void LLViewerWindow::showSystemUIScaleFactorChanged()
-{
-	LLNotificationsUtil::add("SystemUIScaleFactorChanged", LLSD(), LLSD(), onSystemUIScaleFactorChanged);
-}
-
 std::string LLViewerWindow::getLastSnapshotDir()
 {
     return sSnapshotDir;
 }
-
-//static
-bool LLViewerWindow::onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response)
-{
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	if(option == 0)
-	{
-		LLFloaterReg::toggleInstanceOrBringToFront("preferences");
-		LLFloater* pref_floater = LLFloaterReg::getInstance("preferences");
-		LLTabContainer* tab_container = pref_floater->getChild<LLTabContainer>("pref core");
-		tab_container->selectTabByName("advanced1");
-
-	}
-	return false; 
-}
-
 
 void LLViewerWindow::initGLDefaults()
 {
@@ -3039,12 +3023,12 @@ void LLViewerWindow::moveCursorToCenter()
 		S32 x = getWorldViewWidthScaled() / 2;
 		S32 y = getWorldViewHeightScaled() / 2;
 	
+		LLUI::setMousePositionScreen(x, y);
+		
 		//on a forced move, all deltas get zeroed out to prevent jumping
 		mCurrentMousePoint.set(x,y);
 		mLastMousePoint.set(x,y);
 		mCurrentMouseDelta.set(0,0);	
-
-		LLUI::setMousePositionScreen(x, y);	
 	}
 }
 
@@ -3849,37 +3833,22 @@ void LLViewerWindow::renderSelections( BOOL for_gl_pick, BOOL pick_parcel_walls,
 			{
 				if( !LLSelectMgr::getInstance()->getSelection()->isEmpty() )
 				{
-					BOOL moveable_object_selected = FALSE;
-					BOOL all_selected_objects_move = TRUE;
-					BOOL all_selected_objects_modify = TRUE;
-					BOOL selecting_linked_set = !gSavedSettings.getBOOL("EditLinkedParts");
-
-					for (LLObjectSelection::iterator iter = LLSelectMgr::getInstance()->getSelection()->begin();
-						 iter != LLSelectMgr::getInstance()->getSelection()->end(); iter++)
-					{
-						LLSelectNode* nodep = *iter;
-						LLViewerObject* object = nodep->getObject();
-						LLViewerObject *root_object = (object == NULL) ? NULL : object->getRootEdit();
-						BOOL this_object_movable = FALSE;
-						if (object->permMove() && !object->isPermanentEnforced() &&
-							((root_object == NULL) || !root_object->isPermanentEnforced()) &&
-							(object->permModify() || selecting_linked_set))
-						{
-							moveable_object_selected = TRUE;
-							this_object_movable = TRUE;
-						}
-						all_selected_objects_move = all_selected_objects_move && this_object_movable;
-						all_selected_objects_modify = all_selected_objects_modify && object->permModify();
-					}
+					bool all_selected_objects_move;
+					bool all_selected_objects_modify;
+					// Note: This might be costly to do on each frame and when a lot of objects are selected
+					// we might be better off with some kind of memory for selection and/or states, consider
+					// optimizing, perhaps even some kind of selection generation at level of LLSelectMgr to
+					// make whole viewer benefit.
+					LLSelectMgr::getInstance()->selectGetEditMoveLinksetPermissions(all_selected_objects_move, all_selected_objects_modify);
 
 					BOOL draw_handles = TRUE;
 
-					if (tool == LLToolCompTranslate::getInstance() && (!moveable_object_selected || !all_selected_objects_move))
+					if (tool == LLToolCompTranslate::getInstance() && !all_selected_objects_move)
 					{
 						draw_handles = FALSE;
 					}
 
-					if (tool == LLToolCompRotate::getInstance() && (!moveable_object_selected || !all_selected_objects_move))
+					if (tool == LLToolCompRotate::getInstance() && !all_selected_objects_move)
 					{
 						draw_handles = FALSE;
 					}
@@ -4389,77 +4358,110 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 }
 
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
-BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory)
+void LLViewerWindow::saveImageNumbered(LLImageFormatted *image, BOOL force_picker, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
 {
-	insufficient_memory = FALSE;
-
 	if (!image)
 	{
 		LL_WARNS() << "No image to save" << LL_ENDL;
-		return FALSE;
+		return;
 	}
-
-	LLFilePicker::ESaveFilter pick_type;
 	std::string extension("." + image->getExtension());
-	if (extension == ".j2c")
-		pick_type = LLFilePicker::FFSAVE_J2C;
-	else if (extension == ".bmp")
-		pick_type = LLFilePicker::FFSAVE_BMP;
-	else if (extension == ".jpg")
-		pick_type = LLFilePicker::FFSAVE_JPEG;
-	else if (extension == ".png")
-		pick_type = LLFilePicker::FFSAVE_PNG;
-	else if (extension == ".tga")
-		pick_type = LLFilePicker::FFSAVE_TGA;
-	else
-		pick_type = LLFilePicker::FFSAVE_ALL; // ???
-	
-	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
-
+	LLImageFormatted* formatted_image = image;
 	// Get a base file location if needed.
 	if (force_picker || !isSnapshotLocSet())
 	{
-		std::string proposed_name( sSnapshotBaseName );
+		std::string proposed_name(sSnapshotBaseName);
 
 		// getSaveFile will append an appropriate extension to the proposed name, based on the ESaveFilter constant passed in.
+		LLFilePicker::ESaveFilter pick_type;
 
-		// pick a directory in which to save
-		LLFilePicker& picker = LLFilePicker::instance();
-		if (!picker.getSaveFile(pick_type, proposed_name))
-		{
-			// Clicked cancel
-			return FALSE;
-		}
+		if (extension == ".j2c")
+			pick_type = LLFilePicker::FFSAVE_J2C;
+		else if (extension == ".bmp")
+			pick_type = LLFilePicker::FFSAVE_BMP;
+		else if (extension == ".jpg")
+			pick_type = LLFilePicker::FFSAVE_JPEG;
+		else if (extension == ".png")
+			pick_type = LLFilePicker::FFSAVE_PNG;
+		else if (extension == ".tga")
+			pick_type = LLFilePicker::FFSAVE_TGA;
+		else
+			pick_type = LLFilePicker::FFSAVE_ALL;
 
-		// Copy the directory + file name
-		std::string filepath = picker.getFirstFile();
-
-		gSavedPerAccountSettings.setString("SnapshotBaseName", gDirUtilp->getBaseFileName(filepath, true));
-		gSavedPerAccountSettings.setString("SnapshotBaseDir", gDirUtilp->getDirName(filepath));
+		(new LLFilePickerReplyThread(boost::bind(&LLViewerWindow::onDirectorySelected, this, _1, formatted_image, success_cb, failure_cb), pick_type, proposed_name,
+										boost::bind(&LLViewerWindow::onSelectionFailure, this, failure_cb)))->getFile();
 	}
-
-	std::string snapshot_dir = sSnapshotDir;
-	if(snapshot_dir.empty())
+	else
 	{
-		return FALSE;
+		saveImageLocal(formatted_image, success_cb, failure_cb);
+	}	
+}
+
+void LLViewerWindow::onDirectorySelected(const std::vector<std::string>& filenames, LLImageFormatted *image, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
+{
+	// Copy the directory + file name
+	std::string filepath = filenames[0];
+
+	gSavedPerAccountSettings.setString("SnapshotBaseName", gDirUtilp->getBaseFileName(filepath, true));
+	gSavedPerAccountSettings.setString("SnapshotBaseDir", gDirUtilp->getDirName(filepath));
+	saveImageLocal(image, success_cb, failure_cb);
+}
+
+void LLViewerWindow::onSelectionFailure(const snapshot_saved_signal_t::slot_type& failure_cb)
+{
+	failure_cb();
+}
+
+
+void LLViewerWindow::saveImageLocal(LLImageFormatted *image, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
+{
+	std::string lastSnapshotDir = LLViewerWindow::getLastSnapshotDir();
+	if (lastSnapshotDir.empty())
+	{
+		failure_cb();
+		return;
 	}
 
 // Check if there is enough free space to save snapshot
 #ifdef LL_WINDOWS
-	boost::filesystem::space_info b_space = boost::filesystem::space(utf8str_to_utf16str(snapshot_dir));
+	boost::filesystem::path b_path(utf8str_to_utf16str(lastSnapshotDir));
 #else
-	boost::filesystem::space_info b_space = boost::filesystem::space(snapshot_dir);
+	boost::filesystem::path b_path(lastSnapshotDir);
 #endif
+	if (!boost::filesystem::is_directory(b_path))
+	{
+		LLSD args;
+		args["PATH"] = lastSnapshotDir;
+		LLNotificationsUtil::add("SnapshotToLocalDirNotExist", args);
+		resetSnapshotLoc();
+		failure_cb();
+		return;
+	}
+	boost::filesystem::space_info b_space = boost::filesystem::space(b_path);
 	if (b_space.free < image->getDataSize())
 	{
-		insufficient_memory = TRUE;
-		return FALSE;
+		LLSD args;
+		args["PATH"] = lastSnapshotDir;
+
+		std::string needM_bytes_string;
+		LLResMgr::getInstance()->getIntegerString(needM_bytes_string, (image->getDataSize()) >> 10);
+		args["NEED_MEMORY"] = needM_bytes_string;
+
+		std::string freeM_bytes_string;
+		LLResMgr::getInstance()->getIntegerString(freeM_bytes_string, (b_space.free) >> 10);
+		args["FREE_MEMORY"] = freeM_bytes_string;
+
+		LLNotificationsUtil::add("SnapshotToComputerFailed", args);
+
+		failure_cb();
 	}
+	
 	// Look for an unused file name
+	BOOL is_snapshot_name_loc_set = isSnapshotLocSet();
 	std::string filepath;
 	S32 i = 1;
 	S32 err = 0;
-
+	std::string extension("." + image->getExtension());
 	do
 	{
 		filepath = sSnapshotDir;
@@ -4481,7 +4483,15 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, BOOL force_picke
 			&& is_snapshot_name_loc_set); // Or stop if we are rewriting.
 
 	LL_INFOS() << "Saving snapshot to " << filepath << LL_ENDL;
-	return image->save(filepath);
+	if (image->save(filepath))
+	{
+		playSnapshotAnimAndSound();
+		success_cb();
+	}
+	else
+	{
+		failure_cb();
+	}
 }
 
 void LLViewerWindow::resetSnapshotLoc()
@@ -5362,7 +5372,7 @@ F32	LLViewerWindow::getWorldViewAspectRatio() const
 
 void LLViewerWindow::calcDisplayScale()
 {
-	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE);
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE) * mWindow->getSystemUISize();
 	LLVector2 display_scale;
 	display_scale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	display_scale *= ui_scale_factor;
