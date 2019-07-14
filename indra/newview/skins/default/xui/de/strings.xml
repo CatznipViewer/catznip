@@ -65,12 +65,12 @@ Grafikkarte: [GRAPHICS_CARD]
 	</string>
 	<string name="AboutSettings">
 		Fenstergröße: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
-Schriftgrößenanpassung [FONT_SIZE_ADJUSTMENT] Pt
+Schriftgrößenanpassung: [FONT_SIZE_ADJUSTMENT] pt
 UI-Skalierung: [UI_SCALE]
 Sichtweite: [DRAW_DISTANCE] m
 Bandbreite: [NET_BANDWITH] kbit/s
 LOD-Faktor: [LOD_FACTOR]
-Darstellungsqualität: [RENDER_QUALITY] / 7
+Darstellungsqualität: [RENDER_QUALITY]
 Erweitertes Beleuchtungsmodell: [GPU_SHADERS]
 Texturspeicher: [TEXTURE_MEMORY] MB
 Erstellungszeit VFS (Cache): [VFS_TIME]
@@ -2231,6 +2231,18 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 	<string name="RegionInfoListTypeBannedAgents">
 		Immer verbannt
 	</string>
+	<string name="RegionInfoAllEstates">
+		alle Grundbesitze
+	</string>
+	<string name="RegionInfoManagedEstates">
+		verwaltete Grundbesitze
+	</string>
+	<string name="RegionInfoThisEstate">
+		dieser Grundbesitz
+	</string>
+	<string name="AndNMore">
+		und [EXTRA_COUNT] weitere
+	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Parzellenskript-Speicher
 	</string>
@@ -2274,7 +2286,7 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 		Brust
 	</string>
 	<string name="ATTACH_HEAD">
-		Kopf
+		Schädel
 	</string>
 	<string name="ATTACH_LSHOULDER">
 		Linke Schulter
@@ -2295,7 +2307,7 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 		Rechter Fuß
 	</string>
 	<string name="ATTACH_BACK">
-		Hinten
+		Wirbelsäule
 	</string>
 	<string name="ATTACH_PELVIS">
 		Becken
@@ -5742,5 +5754,26 @@ Setzen Sie den Editorpfad in Anführungszeichen
 	</string>
 	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
 		Die Physikform hat keine korrekte Version. Legen Sie die korrekte Version für das Physikmodell fest.
+	</string>
+	<string name="couldnt_resolve_host">
+		Der DNS konnte den Hostnamen ([HOSTNAME]) nicht auflösen Prüfen 
+Sie bitte, ob Sie die Website www.secondlife.com aufrufen können. Wenn Sie die 
+Website aufrufen können, jedoch weiterhin diese Fehlermeldung erhalten, 
+besuchen Sie bitte den Support-Bereich und melden Sie das Problem.
+	</string>
+	<string name="ssl_peer_certificate">
+		Der Anmeldeserver konnte sich nicht per SSL verifizieren. 
+Wenn Sie diese Fehlermeldung weiterhin erhalten, besuchen 
+Sie bitte den Support-Bereich der Website Secondlife.com 
+und melden Sie das Problem.
+	</string>
+	<string name="ssl_connect_error">
+		Die Ursache hierfür ist häufig eine falsch eingestellte Uhrzeit auf Ihrem Computer. 
+Bitte vergewissern Sie sich, dass Datum und Uhrzeit in der Systemsteuerung korrekt 
+eingestellt sind. Überprüfen Sie außerdem, ob Ihre Netzwerk- und Firewall-Einstellungen 
+korrekt sind. Wenn Sie diese Fehlermeldung weiterhin erhalten, besuchen Sie bitte den 
+Support-Bereich der Website Secondlife.com und melden Sie das Problem. 
+
+[https://community.secondlife.com/knowledgebase/english/error-messages-r520/#Section__3 Knowledge-Base]
 	</string>
 </strings>
