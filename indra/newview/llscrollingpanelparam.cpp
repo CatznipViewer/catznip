@@ -37,6 +37,9 @@
 #include "llsliderctrl.h"
 #include "llagent.h"
 #include "llviewborder.h"
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+#include "llviewerwearable.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 
 // Constants for LLPanelVisualParam
@@ -49,8 +52,12 @@ const S32 LLScrollingPanelParam::PARAM_HINT_HEIGHT = 128;
 //static
 S32 LLScrollingPanelParam::sUpdateDelayFrames = 0;
 
+//LLScrollingPanelParam::LLScrollingPanelParam( const LLPanel::Params& panel_params,
+//					      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints )
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
 LLScrollingPanelParam::LLScrollingPanelParam( const LLPanel::Params& panel_params,
-					      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLWearable* wearable, LLJoint* jointp, BOOL use_hints )
+					      LLViewerJointMesh* mesh, LLViewerVisualParam* param, BOOL allow_modify, LLViewerWearable* wearable, LLJoint* jointp, BOOL use_hints )
+// [/SL:KB]
     : LLScrollingPanelParamBase( panel_params, mesh, param, allow_modify, wearable, jointp, use_hints)
 {
 	// *HACK To avoid hard coding texture position, lets use border's position for texture. 

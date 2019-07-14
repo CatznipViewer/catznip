@@ -71,6 +71,11 @@ public:
 	void				updatePanels(BOOL allow_modify);
 	const panel_list_t&	getPanelList() { return mPanelList; }
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	const std::string&  getListLabel() const { return mListLabel; }
+	void                setListLabel(const std::string& label) { mListLabel = label; }
+// [/SL:KB]
+
 private:
 	void				updatePanelVisiblilty();
 
@@ -80,6 +85,9 @@ private:
 	void				notifySizeChanged(S32 height);
 
 	panel_list_t		mPanelList;
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	std::string         mListLabel;
+// [/SL:KB]
 };
 
 #endif //LL_LLSCROLLINGPANELLIST_H

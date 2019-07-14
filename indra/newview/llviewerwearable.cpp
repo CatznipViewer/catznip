@@ -198,6 +198,13 @@ BOOL LLViewerWearable::isOldVersion() const
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+F32 LLViewerWearable::getSavedVisualParamWeight(const LLViewerVisualParam* param) const
+{
+	return get_if_there(mSavedVisualParamMap, param->getID(), param->getDefaultWeight());
+}
+// [/SL:KB]
+
 // Avatar parameter and texture definitions can change over time.
 // * If parameters or textures have been REMOVED since the wearable was created,
 // they're just ignored, so we consider the wearable clean even though isOldVersion()

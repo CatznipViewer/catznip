@@ -31,6 +31,9 @@
 #include "llavatarappearancedefines.h"
 #include "llextendedstatus.h"
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+class LLViewerVisualParam;
+// [/SL:KB]
 class LLVOAvatar;
 
 class LLViewerWearable : public LLWearable
@@ -58,6 +61,9 @@ public:
 
 public:
 
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	F32                 getSavedVisualParamWeight(const LLViewerVisualParam* param) const;
+// [/SL:KB]
 	BOOL				isDirty() const;
 	BOOL				isOldVersion() const;
 

@@ -54,6 +54,9 @@ public:
 	/*virtual*/ BOOL 		postBuild();
 	/*virtual*/ BOOL		isDirty() const;	// LLUICtrl
 	/*virtual*/ void		draw();	
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+				S32			notifyParent(const LLSD& info) override;
+// [/SL:KB]
 				void		onClose();
 
 	// changes camera angle to default for selected subpart
@@ -66,6 +69,9 @@ public:
 	void				revertChanges();
 
 	void				showDefaultSubpart();
+// [SL:KB] - Patch: Appearance-WearableChanges | Checked: Catznip-6.0
+	void				updateDirty();
+// [/SL:KB]
 	void				onTabExpandedCollapsed(const LLSD& param, U8 index);
 
 	void 				updateScrollingPanelList();
