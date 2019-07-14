@@ -84,7 +84,8 @@ public:
 		mButton(b),
 		mOldState(FALSE),
 		mPlaceholderText(placeholder),
-		mPadding(0)
+		mPadding(0),
+		mVisible(true)
 	{}
 
 	LLTabContainer*  mTabContainer;
@@ -97,6 +98,8 @@ public:
 	BOOL			 mOldState;
 	LLTextBox*		 mPlaceholderText;
 	S32				 mPadding;
+
+	mutable bool mVisible;
 };
 
 //----------------------------------------------------------------------------
@@ -494,7 +497,10 @@ void LLTabContainer::draw()
 				{
 					break;
 				}
-				target_pixel_scroll += (*iter)->mButton->getRect().getWidth();
+
+				if( (*iter)->mVisible )
+					target_pixel_scroll += (*iter)->mButton->getRect().getWidth();
+
 				cur_scroll_pos--;
 			}
 
@@ -571,6 +577,12 @@ void LLTabContainer::draw()
 		for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 		{
 			LLTabTuple* tuple = *iter;
+
+			if( !tuple->mVisible )
+			{
+				tuple->mButton->setVisible( false );
+				continue;
+			}
 
 			tuple->mButton->translate( left ? left - tuple->mButton->getRect().mLeft : 0,
 									   top ? top - tuple->mButton->getRect().mTop : 0 );
@@ -892,15 +904,11 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 		{
 			for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 			{
-				LLTabTuple* tuple = *iter;
-// [SL:KB]
-				if (!tuple->mButton->getVisible())
-					continue;
-// [/SL/KB]
-//				tuple->mButton->setVisible( TRUE );
-				S32 local_x = x - tuple->mButton->getRect().mLeft;
-				S32 local_y = y - tuple->mButton->getRect().mBottom;
-				handled = tuple->mButton->handleToolTip( local_x, local_y, mask);
+				LLButton* tab_button = (*iter)->mButton;
+				if (!tab_button->getVisible()) continue;
+				S32 local_x = x - tab_button->getRect().mLeft;
+				S32 local_y = y - tab_button->getRect().mBottom;
+				handled = tab_button->handleToolTip(local_x, local_y, mask);
 				if( handled )
 				{
 					break;
@@ -1799,7 +1807,7 @@ BOOL LLTabContainer::setTab(S32 which)
 	}
 
 	BOOL is_visible = FALSE;
-	if (selected_tuple->mButton->getEnabled())
+	if( selected_tuple->mButton->getEnabled() && selected_tuple->mVisible )
 	{
 		setCurrentPanelIndex(which);
 
@@ -2608,6 +2616,38 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y, bool drag_commit)
 S32 LLTabContainer::getTotalTabWidth() const
 {
     return mTotalTabWidth;
+}
+
+void LLTabContainer::setTabVisibility( LLPanel const *aPanel, bool aVisible )
+{
+	for( tuple_list_t::const_iterator itr = mTabList.begin(); itr != mTabList.end(); ++itr )
+	{
+		LLTabTuple const *pTT = *itr;
+		if( pTT->mTabPanel == aPanel )
+		{
+			pTT->mVisible = aVisible;
+			break;
+		}
+	}
+
+	bool foundTab( false );
+	for( tuple_list_t::const_iterator itr = mTabList.begin(); itr != mTabList.end(); ++itr )
+	{
+		LLTabTuple const *pTT = *itr;
+		if( pTT->mVisible )
+		{
+			this->selectTab( itr - mTabList.begin() );
+			foundTab = true;
+			break;
+		}
+	}
+
+	if( foundTab )
+		this->setVisible( TRUE );
+	else
+		this->setVisible( FALSE );
+
+	updateMaxScrollPos();
 }
 
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)

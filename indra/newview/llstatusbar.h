@@ -45,10 +45,18 @@ class LLPanelPresetsPulldown;
 class LLPanelVolumePulldown;
 class LLPanelNearByMedia;
 class LLIconCtrl;
+class LLSearchEditor;
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-2.6
 class LLPanelTopInfoBar;
 // [/SL:KB]
 
+namespace ll
+{
+	namespace statusbar
+	{
+		struct SearchData;
+	}
+}
 class LLStatusBar
 :	public LLPanel
 {
@@ -113,6 +121,15 @@ private:
 
 	static void onClickMediaToggle(void* data);
 	static void onClickBalance(void* data);
+
+	LLSearchEditor *mFilterEdit;
+	LLPanel *mSearchPanel;
+	void onUpdateFilterTerm();
+
+	std::unique_ptr< ll::statusbar::SearchData > mSearchData;
+	void collectSearchableItems();
+	void updateMenuSearchVisibility( const LLSD& data );
+	void updateMenuSearchPosition();
 
 private:
 // [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2

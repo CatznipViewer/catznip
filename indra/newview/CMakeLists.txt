@@ -288,6 +288,7 @@ set(viewer_SOURCE_FILES
     llfloatermemleak.cpp
     llfloatermodelpreview.cpp
     llfloatermodeluploadbase.cpp
+    llfloatermyscripts.cpp
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
     llfloaternotificationsflat.cpp
@@ -578,6 +579,7 @@ set(viewer_SOURCE_FILES
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
     llsculptidsize.cpp
+    llsearchableui.cpp
     llsearchcombobox.cpp
     llsearchdirectory.cpp
     llsearchhistory.cpp
@@ -964,6 +966,7 @@ set(viewer_HEADER_FILES
     llfloatermemleak.h
     llfloatermodelpreview.h
     llfloatermodeluploadbase.h
+    llfloatermyscripts.h
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
     llfloaternotificationsflat.h
@@ -1243,6 +1246,7 @@ set(viewer_HEADER_FILES
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
     llsculptidsize.h
+    llsearchableui.h
     llsearchcombobox.h
     llsearchdirectory.h
     llsearchhistory.h
@@ -1727,6 +1731,7 @@ endif (WINDOWS)
 # from within the IDE.
 set(viewer_XUI_FILES
     skins/default/colors.xml
+    skins/default/default_languages.xml
     skins/default/textures/textures.xml
     )
 file(GLOB DEFAULT_XUI_FILE_GLOB_LIST
@@ -1996,6 +2001,15 @@ if (WINDOWS)
             COMMENT "Setting the ${VIEWER_BINARY_NAME} working directory for debugging."
             )
     endif (NOT UNATTENDED)
+
+    # sets the 'working directory' for debugging from visual studio.
+    # Condition for version can be moved to requirements once build agents will be updated (see TOOL-3865)
+    if ((NOT UNATTENDED) AND (${CMAKE_VERSION} VERSION_GREATER "3.7.2"))
+        set_property(
+          TARGET ${VIEWER_BINARY_NAME}
+          PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+          )
+    endif ((NOT UNATTENDED) AND (${CMAKE_VERSION} VERSION_GREATER "3.7.2"))
 
     if (PACKAGE)
       add_custom_command(

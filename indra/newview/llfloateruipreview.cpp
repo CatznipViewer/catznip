@@ -60,6 +60,7 @@
 #include "llfloaterreg.h"
 #include "llscrollcontainer.h"	// scroll container for overlapping elements
 #include "lllivefile.h"					// live file poll/stat/reload
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 
 // Boost (for linux/unix command-line execv)
 #include <boost/tokenizer.hpp>
@@ -206,7 +207,9 @@ private:
 	void onClickSaveAll(S32 id);
 	void onClickEditFloater();
 	void onClickBrowseForEditor();
+	void getExecutablePath(const std::vector<std::string>& filenames);
 	void onClickBrowseForDiffs();
+	void getDiffsFilePath(const std::vector<std::string>& filenames);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	void onFilePickerEditorCallback(const std::string& filename);
 	void onFilePickerDiffsCallback(const std::string& filename);
@@ -1027,19 +1030,23 @@ void LLFloaterUIPreview::onClickEditFloater()
 }
 
 // Respond to button click to browse for an executable with which to edit XML files
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterUIPreview::onClickBrowseForEditor()
 {
-//	// Let the user choose an executable through the file picker dialog box
-//	LLFilePicker& picker = LLFilePicker::instance();
-//    if (!picker.getOpenFile(LLFilePicker::FFLOAD_EXE))
-//	{
-//		return; // user cancelled -- do nothing
-//	}
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_EXE, 
-		boost::bind(&LLFloaterUIPreview::onFilePickerEditorCallback, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_EXE, boost::bind(&LLFloaterUIPreview::onFilePickerEditorCallback, this, _1));
 }
+// [/SL:KB]
+//void LLFloaterUIPreview::onClickBrowseForEditor()
+//{
+//    // Let the user choose an executable through the file picker dialog box
+//    (new LLFilePickerReplyThread(boost::bind(&LLFloaterUIPreview::getExecutablePath, this, _1), LLFilePicker::FFLOAD_EXE, false))->getFile();
+//}
 
+//void LLFloaterUIPreview::getExecutablePath(const std::vector<std::string>& filenames)
+//{
+//	// put the selected path into text field
+//	const std::string chosen_path = filenames[0];
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterUIPreview::onFilePickerEditorCallback(const std::string& chosen_path)
 {
 	if (chosen_path.empty())	// User cancelled -- do nothing
@@ -1047,8 +1054,6 @@ void LLFloaterUIPreview::onFilePickerEditorCallback(const std::string& chosen_pa
 		return;
 	}
 // [/SL:KB]
-//	// put the selected path into text field
-//	const std::string chosen_path = picker.getFirstFile();
 	std::string executable_path = chosen_path;
 #if LL_DARWIN
 	// on Mac, if it's an application bundle, figure out the actual path from the Info.plist file
@@ -1093,20 +1098,23 @@ void LLFloaterUIPreview::onFilePickerEditorCallback(const std::string& chosen_pa
 }
 
 // Respond to button click to browse for a VLT-generated diffs file
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterUIPreview::onClickBrowseForDiffs()
 {
-//	// create load dialog box
-//	LLFilePicker::ELoadFilter type = (LLFilePicker::ELoadFilter)((intptr_t)((void*)LLFilePicker::FFLOAD_XML));	// nothing for *.exe so just use all
-//	LLFilePicker& picker = LLFilePicker::instance();
-//	if (!picker.getOpenFile(type))	// user cancelled -- do nothing
-//	{
-//		return;
-//	}
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
-		boost::bind(&LLFloaterUIPreview::onFilePickerDiffsCallback, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterUIPreview::onFilePickerDiffsCallback, this, _1));
 }
+// [/SL:KB]
+//void LLFloaterUIPreview::onClickBrowseForDiffs()
+//{
+//	// create load dialog box
+//    (new LLFilePickerReplyThread(boost::bind(&LLFloaterUIPreview::getDiffsFilePath, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
+//}
 
+//void LLFloaterUIPreview::getDiffsFilePath(const std::vector<std::string>& filenames)
+//{
+//	// put the selected path into text field
+//	const std::string chosen_path = filenames[0];
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterUIPreview::onFilePickerDiffsCallback(const std::string& chosen_path)
 {
 	if (chosen_path.empty())	// User cancelled -- do nothing
@@ -1114,8 +1122,6 @@ void LLFloaterUIPreview::onFilePickerDiffsCallback(const std::string& chosen_pat
 		return;
 	}
 // [/SL:KB]
-//	// put the selected path into text field
-//	const std::string chosen_path = picker.getFirstFile();
 	mDiffPathTextBox->setText(std::string(chosen_path));	// copy the path to the executable to the textfield for display and later fetching
 	if(LLView::sHighlightingDiffs)								// if we're already highlighting, toggle off and then on so we get the data from the new file
 	{
