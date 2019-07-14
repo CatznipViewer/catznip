@@ -1159,43 +1159,43 @@ bool LLAppViewer::init()
 
 	gGLActive = FALSE;
 
-	LLProcess::Params updater;
-	updater.desc = "updater process";
-	// Because it's the updater, it MUST persist beyond the lifespan of the
-	// viewer itself.
-	updater.autokill = false;
-#if LL_WINDOWS
-	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker.exe");
-#elif LL_DARWIN
-	// explicitly run the system Python interpreter on SLVersionChecker.py
-	updater.executable = "python";
-	updater.args.add(gDirUtilp->add(gDirUtilp->getAppRODataDir(), "updater", "SLVersionChecker.py"));
-#else
-	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker");
-#endif
-	// add LEAP mode command-line argument to whichever of these we selected
-	updater.args.add("leap");
-	// UpdaterServiceSettings
-	updater.args.add(stringize(gSavedSettings.getU32("UpdaterServiceSetting")));
-	// channel
-	updater.args.add(LLVersionInfo::getChannel());
-	// testok
-	updater.args.add(stringize(gSavedSettings.getBOOL("UpdaterWillingToTest")));
-	// ForceAddressSize
-	updater.args.add(stringize(gSavedSettings.getU32("ForceAddressSize")));
-
-#if LL_WINDOWS && !LL_RELEASE_FOR_DOWNLOAD && !LL_SEND_CRASH_REPORTS
-	// This is neither a release package, nor crash-reporting enabled test build
-	// try to run version updater, but don't bother if it fails (file might be missing)
-	LLLeap *leap_p = LLLeap::create(updater, false);
-	if (!leap_p)
-	{
-		LL_WARNS("LLLeap") << "Failed to run LLLeap" << LL_ENDL;
-	}
-#else
- 	// Run the updater. An exception from launching the updater should bother us.
-	LLLeap::create(updater, true);
-#endif
+//	LLProcess::Params updater;
+//	updater.desc = "updater process";
+//	// Because it's the updater, it MUST persist beyond the lifespan of the
+//	// viewer itself.
+//	updater.autokill = false;
+//#if LL_WINDOWS
+//	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker.exe");
+//#elif LL_DARWIN
+//	// explicitly run the system Python interpreter on SLVersionChecker.py
+//	updater.executable = "python";
+//	updater.args.add(gDirUtilp->add(gDirUtilp->getAppRODataDir(), "updater", "SLVersionChecker.py"));
+//#else
+//	updater.executable = gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE, "SLVersionChecker");
+//#endif
+//	// add LEAP mode command-line argument to whichever of these we selected
+//	updater.args.add("leap");
+//	// UpdaterServiceSettings
+//	updater.args.add(stringize(gSavedSettings.getU32("UpdaterServiceSetting")));
+//	// channel
+//	updater.args.add(LLVersionInfo::getChannel());
+//	// testok
+//	updater.args.add(stringize(gSavedSettings.getBOOL("UpdaterWillingToTest")));
+//	// ForceAddressSize
+//	updater.args.add(stringize(gSavedSettings.getU32("ForceAddressSize")));
+//
+//#if LL_WINDOWS && !LL_RELEASE_FOR_DOWNLOAD && !LL_SEND_CRASH_REPORTS
+//	// This is neither a release package, nor crash-reporting enabled test build
+//	// try to run version updater, but don't bother if it fails (file might be missing)
+//	LLLeap *leap_p = LLLeap::create(updater, false);
+//	if (!leap_p)
+//	{
+//		LL_WARNS("LLLeap") << "Failed to run LLLeap" << LL_ENDL;
+//	}
+//#else
+// 	// Run the updater. An exception from launching the updater should bother us.
+//	LLLeap::create(updater, true);
+//#endif
 
 	// Iterate over --leap command-line options. But this is a bit tricky: if
 	// there's only one, it won't be an array at all.
