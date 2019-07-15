@@ -832,11 +832,9 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 //{
 //	if (mAttached) return;
 //
-//	S32 y_pos = 0;
 //	S32 bottom_tb_center = 0;
 //	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_BOTTOM))
 //	{
-//		y_pos = toolbar_bottom->getRect().getHeight();
 //		bottom_tb_center = toolbar_bottom->getRect().getCenterX();
 //	}
 //
@@ -844,20 +842,6 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 //	if (LLToolBar* toolbar_left = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT))
 //	{
 //		left_tb_width = toolbar_left->getRect().getWidth();
-//	}
-//
-//	if (!mStateManagementButtons.get()) // Obsolete?!!
-//	{
-//		LLPanel* panel_ssf_container = gToolBarView->getChild<LLPanel>("state_management_buttons_container");
-//		if (panel_ssf_container)
-//		{
-//			mStateManagementButtons = panel_ssf_container->getHandle();
-//		}
-//	}
-//
-//	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
-//	{
-//		panel_ssf_container->setOrigin(0, y_pos);
 //	}
 //
 //	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())

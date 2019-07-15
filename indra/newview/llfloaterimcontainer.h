@@ -213,6 +213,8 @@ private:
 	void openNearbyChat();
 	bool isParticipantListExpanded();
 
+	void idleUpdate(); // for convenience (self) from static idle
+
 	LLButton* mExpandCollapseBtn;
 	LLButton* mStubCollapseBtn;
     LLButton* mSpeakBtn;
@@ -262,6 +264,8 @@ private:
 	LLConversationViewModel mConversationViewModel;
 	LLFolderView* mConversationsRoot;
 	LLEventStream mConversationsEventStream; 
+
+	LLTimer mParticipantRefreshTimer;
 };
 
 #endif // LL_LLFLOATERIMCONTAINER_H

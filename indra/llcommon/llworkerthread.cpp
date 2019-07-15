@@ -40,7 +40,7 @@ LLWorkerThread::LLWorkerThread(const std::string& name, bool threaded, bool shou
 	mDeleteCount(0)
 // [/SL:KB]
 {
-	mDeleteMutex = new LLMutex(NULL);
+	mDeleteMutex = new LLMutex();
 
 	if(!mLocalAPRFilePoolp)
 	{
@@ -223,7 +223,7 @@ LLWorkerClass::LLWorkerClass(LLWorkerThread* workerthread, const std::string& na
 	  mWorkerClassName(name),
 	  mRequestHandle(LLWorkerThread::nullHandle()),
 	  mRequestPriority(LLWorkerThread::PRIORITY_NORMAL),
-	  mMutex(NULL),
+	  mMutex(),
 	  mWorkFlags(0)
 {
 	if (!mWorkerThread)
