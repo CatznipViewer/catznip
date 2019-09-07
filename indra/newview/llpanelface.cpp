@@ -94,6 +94,8 @@ const S32 ALPHAMODE_MASK = 2;		// Alpha masking mode
 const S32 BUMPY_TEXTURE = 18;		// use supplied normal map
 const S32 SHINY_TEXTURE = 4;		// use supplied specular map
 
+BOOST_STATIC_ASSERT(MATTYPE_DIFFUSE == LLRender::DIFFUSE_MAP && MATTYPE_NORMAL == LLRender::NORMAL_MAP && MATTYPE_SPECULAR == LLRender::SPECULAR_MAP);
+
 //
 // "Use texture" label for normal/specular type comboboxes
 // Filled in at initialization from translated strings
@@ -205,6 +207,7 @@ BOOL	LLPanelFace::postBuild()
 	childSetCommitCallback("maskcutoff",&LLPanelFace::onCommitMaterialMaskCutoff, this);
 
 	childSetAction("button align",&LLPanelFace::onClickAutoFix,this);
+	childSetAction("button align textures", &LLPanelFace::onAlignTexture, this);
 
 	LLTextureCtrl*	mTextureCtrl;
 	LLTextureCtrl*	mShinyTextureCtrl;
@@ -544,11 +547,28 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 	{
 		BOOL valid;
 		F32 value;
-		LLSpinCtrl*	ctrlTexScaleS = mPanel->getChild<LLSpinCtrl>("TexScaleU");
-		LLSpinCtrl*	ctrlTexScaleT = mPanel->getChild<LLSpinCtrl>("TexScaleV");
-		LLSpinCtrl*	ctrlTexOffsetS = mPanel->getChild<LLSpinCtrl>("TexOffsetU");
-		LLSpinCtrl*	ctrlTexOffsetT = mPanel->getChild<LLSpinCtrl>("TexOffsetV");
-		LLSpinCtrl*	ctrlTexRotation = mPanel->getChild<LLSpinCtrl>("TexRot");
+
+        LLRadioGroup * radio_mat_type = mPanel->getChild<LLRadioGroup>("radio_material_type");
+        std::string prefix;
+        switch (radio_mat_type->getSelectedIndex())
+        {
+        case MATTYPE_DIFFUSE:
+            prefix = "Tex";
+            break;
+        case MATTYPE_NORMAL:
+            prefix = "bumpy";
+            break;
+        case MATTYPE_SPECULAR:
+            prefix = "shiny";
+            break;
+        }
+        
+        LLSpinCtrl * ctrlTexScaleS = mPanel->getChild<LLSpinCtrl>(prefix + "ScaleU");
+        LLSpinCtrl * ctrlTexScaleT = mPanel->getChild<LLSpinCtrl>(prefix + "ScaleV");
+        LLSpinCtrl * ctrlTexOffsetS = mPanel->getChild<LLSpinCtrl>(prefix + "OffsetU");
+        LLSpinCtrl * ctrlTexOffsetT = mPanel->getChild<LLSpinCtrl>(prefix + "OffsetV");
+        LLSpinCtrl * ctrlTexRotation = mPanel->getChild<LLSpinCtrl>(prefix + "Rot");
+
 		LLComboBox*	comboTexGen = mPanel->getChild<LLComboBox>("combobox texgen");
 		LLCheckBoxCtrl*	cb_planar_align = mPanel->getChild<LLCheckBoxCtrl>("checkbox planar align");
 		bool align_planar = (cb_planar_align && cb_planar_align->get());
@@ -571,8 +591,8 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 
 				if (align_planar) 
 				{
-					LLPanelFace::LLSelectedTEMaterial::setNormalRepeatX(mPanel, value, te);
-					LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatX(mPanel, value, te);
+					LLPanelFace::LLSelectedTEMaterial::setNormalRepeatX(mPanel, value, te, object->getID());
+					LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatX(mPanel, value, te, object->getID());
 				}
 			}
 		}
@@ -596,8 +616,8 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 
 				if (align_planar) 
 				{
-					LLPanelFace::LLSelectedTEMaterial::setNormalRepeatY(mPanel, value, te);
-					LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatY(mPanel, value, te);
+					LLPanelFace::LLSelectedTEMaterial::setNormalRepeatY(mPanel, value, te, object->getID());
+					LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatY(mPanel, value, te, object->getID());
 				}
 			}
 		}
@@ -612,8 +632,8 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 
 				if (align_planar) 
 				{
-					LLPanelFace::LLSelectedTEMaterial::setNormalOffsetX(mPanel, value, te);
-					LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetX(mPanel, value, te);
+					LLPanelFace::LLSelectedTEMaterial::setNormalOffsetX(mPanel, value, te, object->getID());
+					LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetX(mPanel, value, te, object->getID());
 				}
 			}
 		}
@@ -628,8 +648,8 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 
 				if (align_planar) 
 				{
-					LLPanelFace::LLSelectedTEMaterial::setNormalOffsetY(mPanel, value, te);
-					LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetY(mPanel, value, te);
+					LLPanelFace::LLSelectedTEMaterial::setNormalOffsetY(mPanel, value, te, object->getID());
+					LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetY(mPanel, value, te, object->getID());
 				}
 			}
 		}
@@ -644,8 +664,8 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 
 				if (align_planar) 
 				{
-					LLPanelFace::LLSelectedTEMaterial::setNormalRotation(mPanel, value, te);
-					LLPanelFace::LLSelectedTEMaterial::setSpecularRotation(mPanel, value, te);
+					LLPanelFace::LLSelectedTEMaterial::setNormalRotation(mPanel, value, te, object->getID());
+					LLPanelFace::LLSelectedTEMaterial::setSpecularRotation(mPanel, value, te, object->getID());
 				}
 			}
 		}
@@ -715,6 +735,68 @@ struct LLPanelFaceSetAlignedTEFunctor : public LLSelectedTEFunctor
 private:
 	LLPanelFace* mPanel;
 	LLFace* mCenterFace;
+};
+
+struct LLPanelFaceSetAlignedConcreteTEFunctor : public LLSelectedTEFunctor
+{
+    LLPanelFaceSetAlignedConcreteTEFunctor(LLPanelFace* panel, LLFace* center_face, LLRender::eTexIndex map) :
+        mPanel(panel),
+        mChefFace(center_face),
+        mMap(map)
+    {}
+
+    virtual bool apply(LLViewerObject* object, S32 te)
+    {
+        LLFace* facep = object->mDrawable->getFace(te);
+        if (!facep)
+        {
+            return true;
+        }
+
+        if (facep->getViewerObject()->getVolume()->getNumVolumeFaces() <= te)
+        {
+            return true;
+        }
+
+        if (mChefFace != facep)
+        {
+            LLVector2 uv_offset, uv_scale;
+            F32 uv_rot;
+            if (facep->calcAlignedPlanarTE(mChefFace, &uv_offset, &uv_scale, &uv_rot, mMap))
+            {
+                switch (mMap)
+                {
+                case LLRender::DIFFUSE_MAP:
+                        object->setTEOffset(te, uv_offset.mV[VX], uv_offset.mV[VY]);
+                        object->setTEScale(te, uv_scale.mV[VX], uv_scale.mV[VY]);
+                        object->setTERotation(te, uv_rot);
+                    break;
+                case LLRender::NORMAL_MAP:
+                        LLPanelFace::LLSelectedTEMaterial::setNormalRotation(mPanel, uv_rot, te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setNormalOffsetX(mPanel, uv_offset.mV[VX], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setNormalOffsetY(mPanel, uv_offset.mV[VY], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setNormalRepeatX(mPanel, uv_scale.mV[VX], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setNormalRepeatY(mPanel, uv_scale.mV[VY], te, object->getID());
+                    break;
+                case LLRender::SPECULAR_MAP:
+                        LLPanelFace::LLSelectedTEMaterial::setSpecularRotation(mPanel, uv_rot, te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetX(mPanel, uv_offset.mV[VX], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setSpecularOffsetY(mPanel, uv_offset.mV[VY], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatX(mPanel, uv_scale.mV[VX], te, object->getID());
+                        LLPanelFace::LLSelectedTEMaterial::setSpecularRepeatY(mPanel, uv_scale.mV[VY], te, object->getID());
+                    break;
+                default: /*make compiler happy*/
+                    break;
+                }
+            }
+        }
+        
+        return true;
+    }
+private:
+    LLPanelFace* mPanel;
+    LLFace* mChefFace;
+    LLRender::eTexIndex mMap;
 };
 
 // Functor that tests if a face is aligned to mCenterFace
@@ -800,6 +882,17 @@ void LLPanelFace::sendTextureInfo()
 
 	LLPanelFaceSendFunctor sendfunc;
 	LLSelectMgr::getInstance()->getSelection()->applyToObjects(&sendfunc);
+}
+
+void LLPanelFace::alignTestureLayer()
+{
+    LLFace* last_face = NULL;
+    bool identical_face = false;
+    LLSelectedTE::getFace(last_face, identical_face);
+
+    LLRadioGroup * radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+    LLPanelFaceSetAlignedConcreteTEFunctor setfunc(this, last_face, static_cast<LLRender::eTexIndex>(radio_mat_type->getSelectedIndex()));
+    LLSelectMgr::getInstance()->getSelection()->applyToTEs(&setfunc);
 }
 
 void LLPanelFace::getState()
@@ -1051,45 +1144,79 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			}
 
 			updateAlphaControls();
-			
-				if(texture_ctrl)
+
+			if (texture_ctrl)
 				{
 				if (identical_diffuse)
 				{
-					texture_ctrl->setTentative( FALSE );
-					texture_ctrl->setEnabled( editable );
-					texture_ctrl->setImageAssetID( id );
+					texture_ctrl->setTentative(FALSE);
+					texture_ctrl->setEnabled(editable);
+					texture_ctrl->setImageAssetID(id);
 					getChildView("combobox alphamode")->setEnabled(editable && mIsAlpha && transparency <= 0.f);
 					getChildView("label alphamode")->setEnabled(editable && mIsAlpha);
 					getChildView("maskcutoff")->setEnabled(editable && mIsAlpha);
 					getChildView("label maskcutoff")->setEnabled(editable && mIsAlpha);
+
+					bool allAttachments = true;
+					for (LLObjectSelection::iterator iter = LLSelectMgr::getInstance()->getSelection()->begin();
+						iter != LLSelectMgr::getInstance()->getSelection()->end();iter++)
+					{
+						LLSelectNode* node = *iter;
+						LLViewerObject* object = node->getObject();
+						if (!object->isAttachment())
+						{
+							allAttachments = false;
+							break;
+						}
+					}
+
+					texture_ctrl->setBakeTextureEnabled(allAttachments);
+					
 				}
 				else if (id.isNull())
 					{
 						// None selected
-						texture_ctrl->setTentative( FALSE );
-						texture_ctrl->setEnabled( FALSE );
-						texture_ctrl->setImageAssetID( LLUUID::null );
-					getChildView("combobox alphamode")->setEnabled( FALSE );
-					getChildView("label alphamode")->setEnabled( FALSE );
-					getChildView("maskcutoff")->setEnabled( FALSE);
-					getChildView("label maskcutoff")->setEnabled( FALSE );
+					texture_ctrl->setTentative(FALSE);
+					texture_ctrl->setEnabled(FALSE);
+					texture_ctrl->setImageAssetID(LLUUID::null);
+					getChildView("combobox alphamode")->setEnabled(FALSE);
+					getChildView("label alphamode")->setEnabled(FALSE);
+					getChildView("maskcutoff")->setEnabled(FALSE);
+					getChildView("label maskcutoff")->setEnabled(FALSE);
+
+					texture_ctrl->setBakeTextureEnabled(false);
 					}
 					else
 					{
 						// Tentative: multiple selected with different textures
-						texture_ctrl->setTentative( TRUE );
-						texture_ctrl->setEnabled( editable );
-						texture_ctrl->setImageAssetID( id );
+					texture_ctrl->setTentative(TRUE);
+					texture_ctrl->setEnabled(editable);
+					texture_ctrl->setImageAssetID(id);
 					getChildView("combobox alphamode")->setEnabled(editable && mIsAlpha && transparency <= 0.f);
 					getChildView("label alphamode")->setEnabled(editable && mIsAlpha);
 					getChildView("maskcutoff")->setEnabled(editable && mIsAlpha);
 					getChildView("label maskcutoff")->setEnabled(editable && mIsAlpha);
+
+					bool allAttachments = true;
+					for (LLObjectSelection::iterator iter = LLSelectMgr::getInstance()->getSelection()->begin();
+						iter != LLSelectMgr::getInstance()->getSelection()->end();iter++)
+					{
+						LLSelectNode* node = *iter;
+						LLViewerObject* object = node->getObject();
+						if (!object->isAttachment())
+						{
+							allAttachments = false;
+							break;
 				}
 			}
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 		mBtnTexturePipette->setEnabled(editable);
 // [/SL:KB]
+
+					texture_ctrl->setBakeTextureEnabled(allAttachments);
+				}
+				
+			}
 
 			if (shinytexture_ctrl)
 			{
@@ -1116,6 +1243,7 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			bool enabled = (editable && isIdenticalPlanarTexgen());
 			childSetValue("checkbox planar align", align_planar && enabled);
 			childSetEnabled("checkbox planar align", enabled);
+			childSetEnabled("button align textures", enabled && LLSelectMgr::getInstance()->getSelection()->getObjectCount() > 1);
 
 			if (align_planar && enabled)
 			{
@@ -2727,7 +2855,18 @@ void LLPanelFace::onCommitMaterialBumpyRot(LLUICtrl* ctrl, void* userdata)
 	}
 	else
 	{
-		LLSelectedTEMaterial::setNormalRotation(self,self->getCurrentBumpyRot() * DEG_TO_RAD);
+        if ((bool)self->childGetValue("checkbox planar align").asBoolean())
+        {
+            LLFace* last_face = NULL;
+            bool identical_face = false;
+            LLSelectedTE::getFace(last_face, identical_face);
+            LLPanelFaceSetAlignedTEFunctor setfunc(self, last_face);
+            LLSelectMgr::getInstance()->getSelection()->applyToTEs(&setfunc);
+        }
+        else
+        {
+            LLSelectedTEMaterial::setNormalRotation(self, self->getCurrentBumpyRot() * DEG_TO_RAD);
+        }
 	}
 }
 
@@ -2744,7 +2883,18 @@ void LLPanelFace::onCommitMaterialShinyRot(LLUICtrl* ctrl, void* userdata)
 	}
 	else
 	{
-		LLSelectedTEMaterial::setSpecularRotation(self,self->getCurrentShinyRot() * DEG_TO_RAD);
+        if ((bool)self->childGetValue("checkbox planar align").asBoolean())
+        {
+            LLFace* last_face = NULL;
+            bool identical_face = false;
+            LLSelectedTE::getFace(last_face, identical_face);
+            LLPanelFaceSetAlignedTEFunctor setfunc(self, last_face);
+            LLSelectMgr::getInstance()->getSelection()->applyToTEs(&setfunc);
+        }
+        else
+        {
+            LLSelectedTEMaterial::setSpecularRotation(self, self->getCurrentShinyRot() * DEG_TO_RAD);
+        }
 	}
 }
 
@@ -3007,6 +3157,11 @@ void LLPanelFace::onClickAutoFix(void* userdata)
 	LLSelectMgr::getInstance()->getSelection()->applyToObjects(&sendfunc);
 }
 
+void LLPanelFace::onAlignTexture(void* userdata)
+{
+    LLPanelFace* self = (LLPanelFace*)userdata;
+    self->alignTestureLayer();
+}
 
 
 // TODO: I don't know who put these in or what these are for???
@@ -3126,6 +3281,16 @@ void LLPanelFace::LLSelectedTE::getTexId(LLUUID& id, bool& identical)
 	{
 		LLUUID get(LLViewerObject* object, S32 te_index)
 		{
+			LLTextureEntry *te = object->getTE(te_index);
+			if (te)
+			{
+				if ((te->getID() == IMG_USE_BAKED_EYES) || (te->getID() == IMG_USE_BAKED_HAIR) || (te->getID() == IMG_USE_BAKED_HEAD) || (te->getID() == IMG_USE_BAKED_LOWER) || (te->getID() == IMG_USE_BAKED_SKIRT) || (te->getID() == IMG_USE_BAKED_UPPER)
+					|| (te->getID() == IMG_USE_BAKED_LEFTARM) || (te->getID() == IMG_USE_BAKED_LEFTLEG) || (te->getID() == IMG_USE_BAKED_AUX1) || (te->getID() == IMG_USE_BAKED_AUX2) || (te->getID() == IMG_USE_BAKED_AUX3))
+				{
+					return te->getID();
+				}
+			}
+
 			LLUUID id;
 			LLViewerTexture* image = object->getTEImage(te_index);
 			if (image)
@@ -3135,7 +3300,6 @@ void LLPanelFace::LLSelectedTE::getTexId(LLUUID& id, bool& identical)
 
 			if (!id.isNull() && LLViewerMedia::textureHasMedia(id))
 			{
-				LLTextureEntry *te = object->getTE(te_index);
 				if (te)
 				{
 					LLViewerTexture* tex = te->getID().notNull() ? gTextureList.findImage(te->getID(), TEX_LIST_STANDARD) : NULL;
