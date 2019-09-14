@@ -548,9 +548,14 @@ struct LLPanelFaceSetTEFunctor : public LLSelectedTEFunctor
 		BOOL valid;
 		F32 value;
 
-        LLRadioGroup * radio_mat_type = mPanel->getChild<LLRadioGroup>("radio_material_type");
+//        LLRadioGroup * radio_mat_type = mPanel->getChild<LLRadioGroup>("radio_material_type");
+//        std::string prefix;
+//        switch (radio_mat_type->getSelectedIndex())
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-5.3
+		const LLComboBox* combobox_mattype = mPanel->getChild<LLComboBox>("combobox mattype");
         std::string prefix;
-        switch (radio_mat_type->getSelectedIndex())
+        switch (combobox_mattype->getCurrentIndex())
+// [/SL:KB]
         {
         case MATTYPE_DIFFUSE:
             prefix = "Tex";
@@ -890,8 +895,12 @@ void LLPanelFace::alignTestureLayer()
     bool identical_face = false;
     LLSelectedTE::getFace(last_face, identical_face);
 
-    LLRadioGroup * radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-    LLPanelFaceSetAlignedConcreteTEFunctor setfunc(this, last_face, static_cast<LLRender::eTexIndex>(radio_mat_type->getSelectedIndex()));
+//    LLRadioGroup * radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//    LLPanelFaceSetAlignedConcreteTEFunctor setfunc(this, last_face, static_cast<LLRender::eTexIndex>(radio_mat_type->getSelectedIndex()));
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-5.3
+	const LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+    LLPanelFaceSetAlignedConcreteTEFunctor setfunc(this, last_face, static_cast<LLRender::eTexIndex>(combobox_mattype->getCurrentIndex()));
+// [/SL:KB]
     LLSelectMgr::getInstance()->getSelection()->applyToTEs(&setfunc);
 }
 
@@ -1711,11 +1720,18 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			mColorSwatch->setFallbackImage(LLUI::getUIImage("locked_image.j2c") );
 			mColorSwatch->setValid(FALSE);
 		}
-		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-		if (radio_mat_type)
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-5.3
+		LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+		if (combobox_mattype)
 		{
-			radio_mat_type->setSelectedIndex(0);
+			combobox_mattype->setCurrentByIndex(0);
 		}
+// [/SL:KB]
+//		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//		if (radio_mat_type)
+//		{
+//			radio_mat_type->setSelectedIndex(0);
+//		}
 		getChildView("color trans")->setEnabled(FALSE);
 		getChildView("rptctrl")->setEnabled(FALSE);
 		getChildView("tex gen")->setEnabled(FALSE);
