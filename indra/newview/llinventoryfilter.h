@@ -141,6 +141,7 @@ public:
 			Optional<PermissionMask>	permissions_deny;
 // [/SL:KB]
 //			Optional<PermissionMask>	permissions;
+//			Optional<EFilterCreatorType> creator_type;
 
 			Params()
 //			:	types("filter_types", FILTERTYPE_OBJECT),
@@ -161,6 +162,7 @@ public:
 				permissions_allow("permissions", PERM_NONE),
 				permissions_deny("permissions_deny", PERM_NONE)
 // [/SL:KB]
+//				creator_type("creator_type", FILTERCREATOR_ALL),
 //				permissions("permissions", PERM_NONE)
 			{}
 		};
@@ -185,12 +187,13 @@ public:
 		U32				mHoursAgo;
 		U32				mDateSearchDirection;
 
-		EFolderShow		mShowFolderState;
+		EFolderShow			mShowFolderState;
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 		PermissionMask	mPermissionsAllow;
 		PermissionMask	mPermissionsDeny;
 // [/SL:KB]
-//		PermissionMask	mPermissions;
+//		PermissionMask		mPermissions;
+//		EFilterCreatorType	mFilterCreatorType;
 	};
 							
 	struct Params : public LLInitParam::Block<Params>
@@ -244,7 +247,6 @@ public:
 //	void 				setSearchType(ESearchType type);
 //	ESearchType			getSearchType() { return mSearchType; }
 //	void 				setFilterCreator(EFilterCreatorType type);
-//	EFilterCreatorType		getFilterCreator() { return mFilterCreatorType; }
 
 	void 				setFilterSubString(const std::string& string);
 //	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
@@ -319,8 +321,9 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Presentation
 	// +-------------------------------------------------------------------+
-	void 				setShowFolderState( EFolderShow state);
-	EFolderShow 		getShowFolderState() const;
+	void 					setShowFolderState( EFolderShow state);
+	EFolderShow 			getShowFolderState() const;
+//	EFilterCreatorType		getFilterCreatorType() const;
 
 	void 				setEmptyLookupMessage(const std::string& message);
 	std::string			getEmptyLookupMessage() const;
@@ -415,7 +418,6 @@ private:
 	std::string 			mEmptyLookupMessage;
 
 //	ESearchType 			mSearchType;
-//	EFilterCreatorType		mFilterCreatorType;
 };
 
 #endif
