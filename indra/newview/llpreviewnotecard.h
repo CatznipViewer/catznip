@@ -29,6 +29,7 @@
 
 #include "llpreview.h"
 #include "llassetstorage.h"
+#include "llpreviewscript.h"
 #include "lliconctrl.h"
 // [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
 #include "llvoinventorylistener.h"
@@ -56,21 +57,21 @@ public:
 	virtual ~LLPreviewNotecard();
 	
 	bool saveItem();
-	void setObjectID(const LLUUID& object_id);
+	void setObjectID(const LLUUID& object_id) override;
 
 	// llview
-	virtual void draw();
+	void draw() override;
+	BOOL handleKeyHere(KEY key, MASK mask) override;
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	virtual bool hasAccelerators() const { return true; }
 // [/SL:KB]
-	virtual BOOL handleKeyHere(KEY key, MASK mask);
-	virtual void setEnabled( BOOL enabled );
+	void setEnabled( BOOL enabled ) override;
 
 	// llfloater
-	virtual BOOL canClose();
+	BOOL canClose() override;
 
 	// llpanel
-	virtual BOOL postBuild();
+	BOOL postBuild() override;
 
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
@@ -87,15 +88,17 @@ public:
 	// asset system. :(
 	void refreshFromInventory(const LLUUID& item_id = LLUUID::null);
 
+	void syncExternal();
+
 // [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
 	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
 // [/SL:KB]
 
 protected:
 
-	void updateTitleButtons();
-	virtual void loadAsset();
-	bool saveIfNeeded(LLInventoryItem* copyitem = NULL);
+	void updateTitleButtons() override;
+	void loadAsset() override;
+	bool saveIfNeeded(LLInventoryItem* copyitem = NULL, bool sync = true);
 
 	void deleteNotecard();
 
@@ -108,6 +111,8 @@ protected:
 
 	static void onClickDelete(void* data);
 
+	static void onClickEdit(void* data);
+
 	static void onSaveComplete(const LLUUID& asset_uuid,
 							   void* user_data,
 							   S32 status, LLExtStat ext_status);
@@ -118,13 +123,21 @@ protected:
     static void finishInventoryUpload(LLUUID itemId, LLUUID newAssetId, LLUUID newItemId);
     static void finishTaskUpload(LLUUID itemId, LLUUID newAssetId, LLUUID taskId);
 
+    void openInExternalEditor();
+    bool onExternalChange(const std::string& filename);
+    bool loadNotecardText(const std::string& filename);
+    bool writeToFile(const std::string& filename);
+    std::string getTmpFileName();
+
 protected:
-//	LLViewerTextEditor* mEditor;
+	LLViewerTextEditor* mEditor;
 	LLButton* mSaveBtn;
 
 	LLUUID mAssetID;
 
 	LLUUID mObjectID;
+
+	LLLiveLSLFile* mLiveFile;
 };
 
 
