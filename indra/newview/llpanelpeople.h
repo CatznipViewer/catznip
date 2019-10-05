@@ -60,8 +60,6 @@ public:
 	// when voice is available
 	/*virtual*/ void onChange(EStatusType status, const std::string &channelURI, bool proximal);
 
-    bool mTryToConnectToFacebook;
-
 // [RLVa:KB] - Checked: RLVa-1.2.0
 	LLAvatarList* getNearbyList() { return mNearbyList; }
 	void          updateNearbyList();
@@ -88,14 +86,12 @@ private:
 	// methods indirectly called by the updaters
 	void					updateFriendListHelpText();
 	void					updateFriendList();
-	bool					updateSuggestedFriendList();
 //	void					updateNearbyList();
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	void					refreshRecentList();
 	void					updateRecentList(bool fForceUpdate);
 // [/SL:KB]
 //	void					updateRecentList();
-	void					updateFacebookList(bool visible);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
 	void					updateDistances();
 	void					updateLastInteractionTimes();
@@ -161,8 +157,6 @@ private:
 
 	void					onFriendListRefreshComplete(LLUICtrl*ctrl, const LLSD& param);
 
-	bool					onConnectedToFacebook(const LLSD& data);
-
 	void					setAccordionCollapsedByUser(LLUICtrl* acc_tab, bool collapsed);
 	void					setAccordionCollapsedByUser(const std::string& name, bool collapsed);
 	bool					isAccordionCollapsedByUser(LLUICtrl* acc_tab);
@@ -174,7 +168,6 @@ private:
 	LLTabContainer*			mTabContainer;
 	LLAvatarList*			mOnlineFriendList;
 	LLAvatarList*			mAllFriendList;
-	LLAvatarList*			mSuggestedFriends;
 	LLAvatarList*			mNearbyList;
 	LLAvatarList*			mRecentList;
 	LLGroupList*			mGroupList;
