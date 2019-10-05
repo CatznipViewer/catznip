@@ -118,7 +118,7 @@ protected:
     std::string getTmpFileName();
 
 protected:
-//	LLViewerTextEditor* mEditor;
+	LLViewerTextEditor* mEditor;
 	LLButton* mSaveBtn;
 
 	LLUUID mAssetID;

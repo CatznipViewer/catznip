@@ -624,8 +624,7 @@ void LLPreviewNotecard::deleteNotecard()
 // [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
 void LLPreviewNotecard::onBackupTimer()
 {
-	LLViewerTextEditor* pEditor = findChild<LLViewerTextEditor>("Notecard Editor");
-	if ( (pEditor) && (!pEditor->isPristine()) )
+	if ( (mEditor) && (!mEditor->isPristine()) )
 	{
 		if (mBackupFilename.empty())
 			mBackupFilename = getBackupFileName();
@@ -633,7 +632,7 @@ void LLPreviewNotecard::onBackupTimer()
 		if (!mBackupFilename.empty())
 		{
 			LLNotecard notecard(LLNotecard::MAX_SIZE);
-			notecard.setText(pEditor->getText());
+			notecard.setText(mEditor->getText());
 
 			std::stringstream strmNotecard;
 			notecard.exportStream(strmNotecard);
@@ -651,8 +650,7 @@ void LLPreviewNotecard::onBackupTimer()
 void LLPreviewNotecard::callbackSaveComplete()
 {
 	// Notecard was successfully saved so delete our backup copy if we have one and the editor is still pristine
-	LLViewerTextEditor* pEditor = findChild<LLViewerTextEditor>("Notecard Editor");
-	if ( (pEditor) && (pEditor->isPristine()) && (hasBackupFile()) )
+	if ( (mEditor) && (mEditor->isPristine()) && (hasBackupFile()) )
 	{
 		removeBackupFile();
 	}
