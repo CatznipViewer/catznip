@@ -7238,13 +7238,6 @@ Please select at least one type of content to search (General, Moderate, or Adul
 [MESSAGE]
   </notification>
 
- <notification
-  icon="notify.tga"
-  name="FacebookConnect"
-  type="notifytip">
-[MESSAGE]
- </notification>
-
   <notification
    icon="notify.tga"
    name="FlickrConnect"
@@ -9249,6 +9242,7 @@ Please check your network and firewall setup.
    icon="alertmodal.tga"
    name="NoVoiceConnect"
    type="alertmodal">
+    <unique/>
 We are unable to connect to the voice server:
 
 [HOSTID]

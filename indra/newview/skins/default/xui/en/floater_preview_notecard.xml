@@ -6,7 +6,7 @@
  height="355"
  layout="topleft"
  min_height="200"
- min_width="230"
+ min_width="280"
  name="preview notecard"
  help_topic="preview_notecard"
  save_rect="true"
@@ -90,9 +90,35 @@
          follows="bottom|left|right"
          height="25"
          image_name="Toolbar_Left_Off"
-         right="-200"
+         right="-270"
          layout="topleft"
          left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Edit..."
+         layout="topleft"
+         left_pad="1"
+         name="Edit"
+         top="0"
+         width="80" />
+
+        <icon  
+         follows="bottom|right"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="8"
+         layout="topleft"
+         left_pad="1"
          name="spacer_icon_1"
          top="0" />
 
@@ -117,7 +143,7 @@
          follows="bottom|right"
          height="25"
          image_name="Toolbar_Middle_Off"
-         width="18"
+         width="8"
          layout="topleft"
          left_pad="1"
          name="spacer_icon_2"
@@ -147,7 +173,7 @@
          right="-1"
          layout="topleft"
          left_pad="1"
-         left="-18"
+         left="-8"
          name="spacer_icon_3"
          top="0" />
     </panel>

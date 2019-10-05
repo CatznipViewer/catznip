@@ -741,6 +741,18 @@ void LLWindowWin32::restore()
 	SetFocus(mWindowHandle);
 }
 
+bool destroy_window_handler(HWND &hWnd)
+{
+    __try
+    {
+        return DestroyWindow(hWnd);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
+
 // [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0)
 BOOL LLWindowWin32::getFullscreenWindow()
 {
@@ -848,7 +860,7 @@ void LLWindowWin32::close()
 	ShowWindow(mWindowHandle, SW_HIDE);
 
 	// This causes WM_DESTROY to be sent *immediately*
-	if (!DestroyWindow(mWindowHandle))
+	if (!destroy_window_handler(mWindowHandle))
 	{
 		OSMessageBox(mCallbacks->translateString("MBDestroyWinFailed"),
 			mCallbacks->translateString("MBShutdownErr"),

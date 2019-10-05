@@ -82,17 +82,6 @@ protected:
 	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
 };
 
-/**
- * Menu used in the suggested friends list.
- */
-class SuggestedFriendsContextMenu : public PeopleContextMenu
-{
-public:
-	/*virtual*/ LLContextMenu * createMenu();
-
-protected:
-	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
-};
 
 // [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
 /**
@@ -134,10 +123,8 @@ protected:
 	LLSpeakerMgr* m_pSpeakerMgr = nullptr;
 };
 // [/SL:KB]
-
 extern PeopleContextMenu gPeopleContextMenu;
 extern NearbyPeopleContextMenu gNearbyPeopleContextMenu;
-extern SuggestedFriendsContextMenu gSuggestedFriendsContextMenu;
 
 } // namespace LLPanelPeopleMenus
 

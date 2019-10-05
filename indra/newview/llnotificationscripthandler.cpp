@@ -36,7 +36,6 @@
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
 #include "llscriptfloater.h"
-#include "llfacebookconnect.h"
 #include "llavatarname.h"
 #include "llavatarnamecache.h"
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
