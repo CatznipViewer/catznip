@@ -99,7 +99,7 @@ SetOverwrite on							# Overwrite files by default
 AutoCloseWindow true					# After all files install, close window
 
 # Registry key paths, ours and Microsoft's
-!define CATZNIP_KEY      "SOFTWARE\${PRODUCT_SHORT}"
+!define CATZNIP_KEY     "SOFTWARE\${PRODUCT_SHORT}"
 !define INSTNAME_KEY    "${CATZNIP_KEY}\${INSTNAME}"
 !define MSCURRVER_KEY   "SOFTWARE\Microsoft\Windows\CurrentVersion"
 !define MSNTCURRVER_KEY "SOFTWARE\Microsoft\Windows NT\CurrentVersion"
@@ -389,10 +389,10 @@ CreateShortCut "$INSTDIR\Uninstall $INSTSHORTCUT.lnk" \
 				'"$INSTDIR\uninst.exe"' ''
 
 # Write registry
-WriteRegStr SHELL_CONTEXT "${INSTNAME}" "" "$INSTDIR"
-WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Version" "${VERSION_LONG}"
-WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Shortcut" "$INSTSHORTCUT"
-WriteRegStr SHELL_CONTEXT "${INSTNAME}" "Exe" "$INSTEXE"
+WriteRegStr SHELL_CONTEXT "${INSTNAME_KEY}" "" "$INSTDIR"
+WriteRegStr SHELL_CONTEXT "${INSTNAME_KEY}" "Version" "${VERSION_LONG}"
+WriteRegStr SHELL_CONTEXT "${INSTNAME_KEY}" "Shortcut" "$INSTSHORTCUT"
+WriteRegStr SHELL_CONTEXT "${INSTNAME_KEY}" "Exe" "$INSTEXE"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "URLInfoAbout" "${URL_ABOUT}"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "URLUpdateInfo" "${URL_DOWNLOAD}"
@@ -400,7 +400,7 @@ WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "HelpLink" "${URL_ABOUT}"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayName" "$INSTNAME"
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "UninstallString" '"$INSTDIR\uninst.exe"'
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayVersion" "${VERSION_LONG}"
-WriteRegDWORD SHELL_CONTEXT "${MSUNINSTALL_KEY}" "EstimatedSize" "0x0001D500"		# ~117 MB
+WriteRegDWORD SHELL_CONTEXT "${MSUNINSTALL_KEY}" "EstimatedSize" "0x00064000"		# ~400 MB
 
 # from FS:Ansariel
 WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayIcon" '"$INSTDIR\$VIEWER_EXE"'
@@ -466,11 +466,11 @@ ${EndIf}
 Call un.CloseSecondLife
 
 # Clean up registry keys and subkeys (these should all be !defines somewhere)
-DeleteRegKey SHELL_CONTEXT "${INSTNAME}"
+DeleteRegKey SHELL_CONTEXT "${INSTNAME_KEY}"
 DeleteRegKey SHELL_CONTEXT "${MSCURRVER_KEY}\Uninstall\$INSTNAME"
 # BUG-2707 Remove entry that disabled SEHOP
 DeleteRegKey SHELL_CONTEXT "${MSNTCURRVER_KEY}\Image File Execution Options\$VIEWER_EXE"
-;DeleteRegKey HKEY_CLASSES_ROOT "Applications\$INSTEXE"
+DeleteRegKey HKEY_CLASSES_ROOT "Applications\$INSTEXE"
 ;DeleteRegKey HKEY_CLASSES_ROOT "Applications\${VIEWER_EXE}"
 
 # Clean up shortcuts
@@ -653,7 +653,7 @@ Push $2
 
 # Delete files in \Users\<User>\AppData\Roaming\${PRODUCT_SHORT}
 # Remove all settings files but leave any other .txt files to preserve the chat logs
-;    RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\logs"
+    RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\logs"
     RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\browser_profile"
     RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\user_settings"
     Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\*.xml"
@@ -663,6 +663,7 @@ Push $2
     Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\typed_locations.txt"
 # Delete files in \Users\<User>\AppData\Local\${PRODUCT_SHORT}
     RmDir /r  "$2\AppData\Local\${PRODUCT_SHORT}"							#Delete the cache folder
+    RmDir /r  "$2\AppData\Local\${PRODUCT_SHORT}64"							#Delete the cache folder
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -730,7 +731,7 @@ FOLDERFOUND:
 
 NOFOLDER:
 
-MessageBox MB_YESNO $(DeleteRegistryKeysMB) IDYES DeleteKeys IDNO NoDelete
+MessageBox MB_YESNO|MB_DEFBUTTON2 $(DeleteRegistryKeysMB) IDYES DeleteKeys IDNO NoDelete
 
 DeleteKeys:
   DeleteRegKey SHELL_CONTEXT "SOFTWARE\Classes\x-grid-location-info"
