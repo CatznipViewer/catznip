@@ -454,7 +454,7 @@ public:
 		ONLY_EXCEPTIONS,
 		INVISIBLE
 	};
-	ERenderAvatarAs getRenderAvatarAs() const;
+	virtual ERenderAvatarAs getRenderAvatarAs() const;
 // [/SL:KB]
 
 	void		forceUpdateVisualMuteSettings();
