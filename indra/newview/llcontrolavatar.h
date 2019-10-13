@@ -79,7 +79,10 @@ public:
     virtual bool shouldRenderRigged() const;
 
 	virtual BOOL isImpostor(); 
-    
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-6.2
+	ERenderAvatarAs getRenderAvatarAs() const override;
+// [/SL:KB]
+   
     bool mPlaying;
 
     F32 mGlobalScale;
