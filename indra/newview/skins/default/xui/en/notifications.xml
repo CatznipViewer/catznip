@@ -4208,19 +4208,6 @@ Open [APP_NAME]'s Facebook page in your browser.
      yestext="OK"/>
   </notification> 
 
-   <notification
-   icon="alertmodal.tga"
-   name="WebLaunchAGoogleplus"
-   type="alertmodal">
-Open [APP_NAME]'s Google+ page in your browser.
-    <tag>confirm</tag>
-    <usetemplate
-     ignoretext="Launch my browser to view google+"
-     name="okcancelignore"
-     notext="Cancel"
-     yestext="OK"/>
-  </notification>
-  
   <notification
    icon="alertmodal.tga"
    name="WebLaunchExternalTarget"
