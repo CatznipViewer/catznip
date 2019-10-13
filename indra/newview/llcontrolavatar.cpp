@@ -672,6 +672,22 @@ BOOL LLControlAvatar::isImpostor()
 	return LLVOAvatar::isImpostor();
 }
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-6.2
+// virtual
+LLVOAvatar::ERenderAvatarAs LLControlAvatar::getRenderAvatarAs() const
+{
+    if (mRootVolp && mRootVolp->isAttachment())
+    {
+		// Attached animated objects should match state of their attached av.
+		if (LLVOAvatar* attached_av = mRootVolp->getAvatarAncestor())
+		{
+			return attached_av->getRenderAvatarAs();
+		}
+    }
+	return LLVOAvatar::getRenderAvatarAs();
+}
+// [/SL:KB]
+   
 //static
 void LLControlAvatar::onRegionChanged()
 {

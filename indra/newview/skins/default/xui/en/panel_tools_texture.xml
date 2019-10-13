@@ -108,7 +108,7 @@
              layout="topleft"
              left="10"
              name="combobox matmedia"
-             top_pad="5"
+             top_pad="0"
              width="80">
                 <combo_box.item
                  label="Materials"
@@ -875,18 +875,18 @@
              left="7"
              name="checkbox planar align"
              tool_tip="Align textures on all selected faces with the last selected face. Requires Planar texture mapping."
-             top_delta="18"
+             top_delta="25"
              width="260" />
 			<button
-			 left="10"
-			 top="222"
+			 follows="top|left"
+			 left="208"
+			 top_delta="-2"
 			 height="20"
 			 label="Align"
 			 label_selected="Align current texture layers"
 			 layout="topleft"
 			 name="button align textures"
-			 top_delta="0"
-			 tool_tip="Align current texture layers"
+			 tool_tip="Align current texture layers (Requires planar texture mapping)"
 			 width="66" />
             <web_browser
              visible="false"
