@@ -60,23 +60,53 @@
 #include <dinput.h>
 #include <Dbt.h.>
 
-// culled from winuser.h
-#ifndef WM_MOUSEWHEEL /* Added to be compatible with later SDK's */
-const S32	WM_MOUSEWHEEL = 0x020A;
-#endif
-#ifndef WHEEL_DELTA /* Added to be compatible with later SDK's */
-const S32	WHEEL_DELTA = 120;     /* Value for rolling one detent */
-#endif
 const S32	MAX_MESSAGE_PER_UPDATE = 20;
 const S32	BITS_PER_PIXEL = 32;
 const S32	MAX_NUM_RESOLUTIONS = 32;
 const F32	ICON_FLASH_TIME = 0.5f;
+
+#ifndef WM_DPICHANGED
+#define WM_DPICHANGED 0x02E0
+#endif
+
+#ifndef USER_DEFAULT_SCREEN_DPI
+#define USER_DEFAULT_SCREEN_DPI 96 // Win7
+#endif
 
 extern BOOL gDebugWindowProc;
 
 LPWSTR gIconResource = IDI_APPLICATION;
 
 LLW32MsgCallback gAsyncMsgCallback = NULL;
+
+#ifndef DPI_ENUMS_DECLARED
+
+typedef enum PROCESS_DPI_AWARENESS {
+	PROCESS_DPI_UNAWARE = 0,
+	PROCESS_SYSTEM_DPI_AWARE = 1,
+	PROCESS_PER_MONITOR_DPI_AWARE = 2
+} PROCESS_DPI_AWARENESS;
+
+typedef enum MONITOR_DPI_TYPE {
+	MDT_EFFECTIVE_DPI = 0,
+	MDT_ANGULAR_DPI = 1,
+	MDT_RAW_DPI = 2,
+	MDT_DEFAULT = MDT_EFFECTIVE_DPI
+} MONITOR_DPI_TYPE;
+
+#endif
+
+typedef HRESULT(STDAPICALLTYPE *SetProcessDpiAwarenessType)(_In_ PROCESS_DPI_AWARENESS value);
+
+typedef HRESULT(STDAPICALLTYPE *GetProcessDpiAwarenessType)(
+	_In_ HANDLE hprocess,
+	_Out_ PROCESS_DPI_AWARENESS *value);
+
+typedef HRESULT(STDAPICALLTYPE *GetDpiForMonitorType)(
+	_In_ HMONITOR hmonitor,
+	_In_ MONITOR_DPI_TYPE dpiType,
+	_Out_ UINT *dpiX,
+	_Out_ UINT *dpiY);
 
 //
 // LLWindowWin32
@@ -395,6 +425,14 @@ LLWindowWin32::LLWindowWin32(LLWindowCallbacks* callbacks,
 	mKeyVirtualKey = 0;
 	mhDC = NULL;
 	mhRC = NULL;
+	memset(mCurrentGammaRamp, 0, sizeof(mCurrentGammaRamp));
+	memset(mPrevGammaRamp, 0, sizeof(mPrevGammaRamp));
+	mCustomGammaSet = FALSE;
+	
+	if (!SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &mMouseVanish, 0))
+	{
+		mMouseVanish = TRUE;
+	}
 
 	// Initialize the keyboard
 	gKeyboard = new LLKeyboardWin32();
@@ -703,6 +741,17 @@ void LLWindowWin32::restore()
 	SetFocus(mWindowHandle);
 }
 
+bool destroy_window_handler(HWND &hWnd)
+{
+    __try
+    {
+        return DestroyWindow(hWnd);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
 
 // close() destroys all OS-specific code associated with a window.
 // Usually called from LLWindowManager::destroyWindow()
@@ -717,9 +766,6 @@ void LLWindowWin32::close()
 
 	mDragDrop->reset();
 
-	// Make sure cursor is visible and we haven't mangled the clipping state.
-	setMouseClipping(FALSE);
-	showCursor();
 
 	// Go back to screen mode written in the registry.
 	if (mFullscreen)
@@ -727,9 +773,23 @@ void LLWindowWin32::close()
 		resetDisplayResolution();
 	}
 
+	// Don't process events in our mainWindowProc any longer.
+	SetWindowLongPtr(mWindowHandle, GWLP_USERDATA, NULL);
+
+	// Make sure cursor is visible and we haven't mangled the clipping state.
+	showCursor();
+	setMouseClipping(FALSE);
+	if (gKeyboard)
+	{
+		gKeyboard->resetKeys();
+	}
+
 	// Clean up remaining GL state
-	LL_DEBUGS("Window") << "Shutting down GL" << LL_ENDL;
-	gGLManager.shutdownGL();
+	if (gGLManager.mInited)
+	{
+		LL_INFOS("Window") << "Cleaning up GL" << LL_ENDL;
+		gGLManager.shutdownGL();
+	}
 
 	LL_DEBUGS("Window") << "Releasing Context" << LL_ENDL;
 	if (mhRC)
@@ -750,22 +810,22 @@ void LLWindowWin32::close()
 	// Restore gamma to the system values.
 	restoreGamma();
 
-	if (mhDC && !ReleaseDC(mWindowHandle, mhDC))
+	if (mhDC)
 	{
-		LL_WARNS("Window") << "Release of ghDC failed" << LL_ENDL;
+		if (!ReleaseDC(mWindowHandle, mhDC))
+		{
+			LL_WARNS("Window") << "Release of ghDC failed" << LL_ENDL;
+		}
 		mhDC = NULL;
 	}
 
 	LL_DEBUGS("Window") << "Destroying Window" << LL_ENDL;
-	
-	// Don't process events in our mainWindowProc any longer.
-	SetWindowLong(mWindowHandle, GWL_USERDATA, NULL);
 
 	// Make sure we don't leave a blank toolbar button.
 	ShowWindow(mWindowHandle, SW_HIDE);
 
 	// This causes WM_DESTROY to be sent *immediately*
-	if (!DestroyWindow(mWindowHandle))
+	if (!destroy_window_handler(mWindowHandle))
 	{
 		OSMessageBox(mCallbacks->translateString("MBDestroyWinFailed"),
 			mCallbacks->translateString("MBShutdownErr"),
@@ -1070,7 +1130,14 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 		mhInstance,
 		NULL);
 
-	LL_INFOS("Window") << "window is created." << LL_ENDL ;
+	if (mWindowHandle)
+	{
+		LL_INFOS("Window") << "window is created." << LL_ENDL ;
+	}
+	else
+	{
+		LL_WARNS("Window") << "Window creation failed, code: " << GetLastError() << LL_ENDL;
+	}
 
 	//-----------------------------------------------------------------------
 	// Create GL drawing context
@@ -1385,7 +1452,16 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 			mhInstance,
 			NULL);
 
-		LL_INFOS("Window") << "recreate window done." << LL_ENDL ;
+
+		if (mWindowHandle)
+		{
+			LL_INFOS("Window") << "recreate window done." << LL_ENDL ;
+		}
+		else
+		{
+			// Note: if value is NULL GetDC retrieves the DC for the entire screen.
+			LL_WARNS("Window") << "Window recreation failed, code: " << GetLastError() << LL_ENDL;
+		}
 
 		if (!(mhDC = GetDC(mWindowHandle)))
 		{
@@ -1498,7 +1574,10 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 					(LLRender::sGLCoreProfile ? " core" : " compatibility") << " context." << LL_ENDL;
 				done = true;
 
-				if (LLRender::sGLCoreProfile)
+			// force sNoFixedFunction iff we're trying to use nsight debugging which does not support many legacy API uses
+
+				// nSight doesn't support use of legacy API funcs in the fixed function pipe
+				if (LLRender::sGLCoreProfile || LLRender::sNsightDebugSupport)
 				{
 					LLGLSLShader::sNoFixedFunction = true;
 				}
@@ -1538,7 +1617,7 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 		LL_DEBUGS("Window") << "Keeping vertical sync" << LL_ENDL;
 	}
 
-	SetWindowLong(mWindowHandle, GWL_USERDATA, (U32)this);
+	SetWindowLongPtr(mWindowHandle, GWLP_USERDATA, (LONG_PTR)this);
 
 	// register this window as handling drag/drop events from the OS
 	DragAcceptFiles( mWindowHandle, TRUE );
@@ -1654,7 +1733,7 @@ void LLWindowWin32::showCursorFromMouseMove()
 
 void LLWindowWin32::hideCursorUntilMouseMove()
 {
-	if (!mHideCursorPermanent)
+	if (!mHideCursorPermanent && mMouseVanish)
 	{
 		hideCursor();
 		mHideCursorPermanent = FALSE;
@@ -1850,7 +1929,7 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 	// This is to avoid triggering double click teleport after returning focus (see MAINT-3786).
 	static bool sHandleDoubleClick = true;
 
-	LLWindowWin32 *window_imp = (LLWindowWin32 *)GetWindowLong(h_wnd, GWL_USERDATA);
+	LLWindowWin32 *window_imp = (LLWindowWin32 *)GetWindowLongPtr( h_wnd, GWLP_USERDATA );
 
 
 	if (NULL != window_imp)
@@ -2460,6 +2539,72 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 				}
 			}
 			break;
+		case WM_XBUTTONDOWN:
+			{
+				window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_MBUTTONDOWN");
+				LL_RECORD_BLOCK_TIME(FTM_MOUSEHANDLER);
+				S32 button = GET_XBUTTON_WPARAM(w_param);
+				if (LLWinImm::isAvailable() && window_imp->mPreeditor)
+				{
+					window_imp->interruptLanguageTextInput();
+				}
+
+				// Because we move the cursor position in tllviewerhe app, we need to query
+				// to find out where the cursor at the time the event is handled.
+				// If we don't do this, many clicks could get buffered up, and if the
+				// first click changes the cursor position, all subsequent clicks
+				// will occur at the wrong location.  JC
+				if (window_imp->mMousePositionModified)
+				{
+					LLCoordWindow cursor_coord_window;
+					window_imp->getCursorPosition(&cursor_coord_window);
+					gl_coord = cursor_coord_window.convert();
+				}
+				else
+				{
+					gl_coord = window_coord.convert();
+				}
+				MASK mask = gKeyboard->currentMask(TRUE);
+				// generate move event to update mouse coordinates
+				window_imp->mCallbacks->handleMouseMove(window_imp, gl_coord, mask);
+				// Windows uses numbers 1 and 2 for buttons, remap to 4, 5
+				if (window_imp->mCallbacks->handleOtherMouseDown(window_imp, gl_coord, mask, button + 3))
+				{
+					return 0;
+				}
+			}
+			break;
+
+		case WM_XBUTTONUP:
+			{
+				window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_MBUTTONUP");
+				LL_RECORD_BLOCK_TIME(FTM_MOUSEHANDLER);
+				S32 button = GET_XBUTTON_WPARAM(w_param);
+				// Because we move the cursor position in the llviewer app, we need to query
+				// to find out where the cursor at the time the event is handled.
+				// If we don't do this, many clicks could get buffered up, and if the
+				// first click changes the cursor position, all subsequent clicks
+				// will occur at the wrong location.  JC
+				if (window_imp->mMousePositionModified)
+				{
+					LLCoordWindow cursor_coord_window;
+					window_imp->getCursorPosition(&cursor_coord_window);
+					gl_coord = cursor_coord_window.convert();
+				}
+				else
+				{
+					gl_coord = window_coord.convert();
+				}
+				MASK mask = gKeyboard->currentMask(TRUE);
+				// generate move event to update mouse coordinates
+				window_imp->mCallbacks->handleMouseMove(window_imp, gl_coord, mask);
+				// Windows uses numbers 1 and 2 for buttons, remap to 4, 5
+				if (window_imp->mCallbacks->handleOtherMouseUp(window_imp, gl_coord, mask, button + 3))
+				{
+					return 0;
+				}
+			}
+			break;
 
 		case WM_MOUSEWHEEL:
 			{
@@ -2593,22 +2738,42 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 
 				return 0;
 			}
+        
+		case WM_DPICHANGED:
+			{
+				LPRECT lprc_new_scale;
+				F32 new_scale = F32(LOWORD(w_param)) / F32(USER_DEFAULT_SCREEN_DPI);
+				lprc_new_scale = (LPRECT)l_param;
+				S32 new_width = lprc_new_scale->right - lprc_new_scale->left;
+				S32 new_height = lprc_new_scale->bottom - lprc_new_scale->top;
+				if (window_imp->mCallbacks->handleDPIChanged(window_imp, new_scale, new_width, new_height))
+				{
+					SetWindowPos(h_wnd,
+						HWND_TOP,
+						lprc_new_scale->left,
+						lprc_new_scale->top,
+						new_width,
+						new_height,
+						SWP_NOZORDER | SWP_NOACTIVATE);
+				}
+				return 0;
+			}
 
 		case WM_SETFOCUS:
-			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_SETFOCUS");
 			if (gDebugWindowProc)
 			{
 				LL_INFOS("Window") << "WINDOWPROC SetFocus" << LL_ENDL;
 			}
+			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_SETFOCUS");
 			window_imp->mCallbacks->handleFocus(window_imp);
 			return 0;
 
 		case WM_KILLFOCUS:
-			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_KILLFOCUS");
 			if (gDebugWindowProc)
 			{
 				LL_INFOS("Window") << "WINDOWPROC KillFocus" << LL_ENDL;
 			}
+			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_KILLFOCUS");
 			window_imp->mCallbacks->handleFocusLost(window_imp);
 			return 0;
 
@@ -2621,6 +2786,26 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			};
 			return 0;			
 
+			break;
+
+		case WM_SETTINGCHANGE:
+			{
+				if (w_param == SPI_SETMOUSEVANISH)
+				{
+					if (!SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &window_imp->mMouseVanish, 0))
+					{
+						window_imp->mMouseVanish = TRUE;
+					}
+				}
+			}
+			break;
+		default:
+			{
+				if (gDebugWindowProc)
+				{
+					LL_INFOS("Window") << "Unhandled windows message code: " << U32(u_msg) << LL_ENDL;
+				}
+			}
 			break;
 		}
 
@@ -2755,7 +2940,7 @@ BOOL LLWindowWin32::pasteTextFromClipboard(LLWString &dst)
 				if (utf16str)
 				{
 					dst = utf16str_to_wstring(utf16str);
-					LLWStringUtil::removeCRLF(dst);
+					LLWStringUtil::removeWindowsCR(dst);
 					GlobalUnlock(h_data);
 					success = TRUE;
 				}
@@ -2884,12 +3069,33 @@ F32 LLWindowWin32::getGamma()
 
 BOOL LLWindowWin32::restoreGamma()
 {
-	return SetDeviceGammaRamp(mhDC, mPrevGammaRamp);
+	if (mCustomGammaSet != FALSE)
+	{
+        LL_DEBUGS("Window") << "Restoring gamma" << LL_ENDL;
+		mCustomGammaSet = FALSE;
+		return SetDeviceGammaRamp(mhDC, mPrevGammaRamp);
+	}
+	return TRUE;
 }
 
 BOOL LLWindowWin32::setGamma(const F32 gamma)
 {
 	mCurrentGamma = gamma;
+
+	//Get the previous gamma ramp to restore later.
+	if (mCustomGammaSet == FALSE)
+	{
+        if (!gGLManager.mIsIntel) // skip for Intel GPUs (see SL-11341)
+        {
+            LL_DEBUGS("Window") << "Getting the previous gamma ramp to restore later" << LL_ENDL;
+            if(GetDeviceGammaRamp(mhDC, mPrevGammaRamp) == FALSE)
+            {
+                LL_WARNS("Window") << "Failed to get the previous gamma ramp" << LL_ENDL;
+                return FALSE;
+            }
+        }
+		mCustomGammaSet = TRUE;
+	}
 
 	LL_DEBUGS("Window") << "Setting gamma to " << gamma << LL_ENDL;
 
@@ -2902,9 +3108,9 @@ BOOL LLWindowWin32::setGamma(const F32 gamma)
 		if ( value > 0xffff )
 			value = 0xffff;
 
-		mCurrentGammaRamp [ 0 * 256 + i ] = 
-			mCurrentGammaRamp [ 1 * 256 + i ] = 
-				mCurrentGammaRamp [ 2 * 256 + i ] = ( WORD )value;
+		mCurrentGammaRamp[0][i] =
+			mCurrentGammaRamp[1][i] =
+			mCurrentGammaRamp[2][i] = (WORD) value;
 	};
 
 	return SetDeviceGammaRamp ( mhDC, mCurrentGammaRamp );
@@ -3170,8 +3376,10 @@ S32 OSMessageBoxWin32(const std::string& text, const std::string& caption, U32 t
 		break;
 	}
 
-	// HACK! Doesn't properly handle wide strings!
-	int retval_win = MessageBoxA(NULL, text.c_str(), caption.c_str(), uType);
+	int retval_win = MessageBoxW(NULL, // HWND
+								 ll_convert_string_to_wide(text).c_str(),
+								 ll_convert_string_to_wide(caption).c_str(),
+								 uType);
 	S32 retval;
 
 	switch(retval_win)
@@ -3754,7 +3962,7 @@ LLWindowCallbacks::DragNDropResult LLWindowWin32::completeDragNDropRequest( cons
 // When it handled the message, the value to be returned from
 // the Window Procedure is set to *result.
 
-BOOL LLWindowWin32::handleImeRequests(U32 request, U32 param, LRESULT *result)
+BOOL LLWindowWin32::handleImeRequests(WPARAM request, LPARAM param, LRESULT *result)
 {
 	if ( mPreeditor )
 	{
@@ -3876,6 +4084,92 @@ BOOL LLWindowWin32::handleImeRequests(U32 request, U32 param, LRESULT *result)
 	}
 
 	return FALSE;
+}
+
+//static
+void LLWindowWin32::setDPIAwareness()
+{
+	HMODULE hShcore = LoadLibrary(L"shcore.dll");
+	if (hShcore != NULL)
+	{
+		SetProcessDpiAwarenessType pSPDA;
+		pSPDA = (SetProcessDpiAwarenessType)GetProcAddress(hShcore, "SetProcessDpiAwareness");
+		if (pSPDA)
+		{
+			
+			HRESULT hr = pSPDA(PROCESS_PER_MONITOR_DPI_AWARE);
+			if (hr != S_OK)
+			{
+				LL_WARNS() << "SetProcessDpiAwareness() function returned an error. Will use legacy DPI awareness API of Win XP/7" << LL_ENDL;
+			}
+		}
+		FreeLibrary(hShcore);	
+	}
+	else
+	{
+		LL_WARNS() << "Could not load shcore.dll library (included by <ShellScalingAPI.h> from Win 8.1 SDK. Will use legacy DPI awareness API of Win XP/7" << LL_ENDL;
+	}
+}
+
+F32 LLWindowWin32::getSystemUISize()
+{
+	F32 scale_value = 1.f;
+	HWND hWnd = (HWND)getPlatformWindow();
+	HDC hdc = GetDC(hWnd);
+	HMONITOR hMonitor;
+	HANDLE hProcess = GetCurrentProcess();
+	PROCESS_DPI_AWARENESS dpi_awareness;
+
+	HMODULE hShcore = LoadLibrary(L"shcore.dll");
+
+	if (hShcore != NULL)
+	{
+		GetProcessDpiAwarenessType pGPDA;
+		pGPDA = (GetProcessDpiAwarenessType)GetProcAddress(hShcore, "GetProcessDpiAwareness");
+		GetDpiForMonitorType pGDFM;
+		pGDFM = (GetDpiForMonitorType)GetProcAddress(hShcore, "GetDpiForMonitor");
+		if (pGPDA != NULL && pGDFM != NULL)
+		{
+			pGPDA(hProcess, &dpi_awareness);
+			if (dpi_awareness == PROCESS_PER_MONITOR_DPI_AWARE)
+			{
+				POINT    pt;
+				UINT     dpix = 0, dpiy = 0;
+				HRESULT  hr = E_FAIL;
+				RECT     rect;
+
+				GetWindowRect(hWnd, &rect);
+				// Get the DPI for the monitor, on which the center of window is displayed and set the scaling factor
+				pt.x = (rect.left + rect.right) / 2;
+				pt.y = (rect.top + rect.bottom) / 2;
+				hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+				hr = pGDFM(hMonitor, MDT_EFFECTIVE_DPI, &dpix, &dpiy);
+				if (hr == S_OK)
+				{
+					scale_value = F32(dpix) / F32(USER_DEFAULT_SCREEN_DPI);
+				}
+				else
+				{
+					LL_WARNS() << "Could not determine DPI for monitor. Setting scale to default 100 %" << LL_ENDL;
+					scale_value = 1.0f;
+				}
+			}
+			else
+			{
+				LL_WARNS() << "Process is not per-monitor DPI-aware. Setting scale to default 100 %" << LL_ENDL;
+				scale_value = 1.0f;
+			}
+		}
+		FreeLibrary(hShcore);
+	}
+	else
+	{
+		LL_WARNS() << "Could not load shcore.dll library (included by <ShellScalingAPI.h> from Win 8.1 SDK). Using legacy DPI awareness API of Win XP/7" << LL_ENDL;
+		scale_value = F32(GetDeviceCaps(hdc, LOGPIXELSX)) / F32(USER_DEFAULT_SCREEN_DPI);
+	}
+
+	ReleaseDC(hWnd, hdc);
+	return scale_value;
 }
 
 //static

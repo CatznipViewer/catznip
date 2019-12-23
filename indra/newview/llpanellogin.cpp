@@ -75,6 +75,7 @@
 
 LLPanelLogin *LLPanelLogin::sInstance = NULL;
 BOOL LLPanelLogin::sCapslockDidNotification = FALSE;
+BOOL LLPanelLogin::sCredentialSet = FALSE;
 
 class LLLoginLocationAutoHandler : public LLCommandHandler
 {
@@ -176,7 +177,8 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	setBackgroundOpaque(TRUE);
 
 	mPasswordModified = FALSE;
-	LLPanelLogin::sInstance = this;
+
+	sInstance = this;
 
 	LLView* login_holder = gViewerWindow->getLoginPanelHolder();
 	if (login_holder)
@@ -202,6 +204,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 
 	// change z sort of clickable text to be behind buttons
 	sendChildToBack(getChildView("forgot_password_text"));
+	sendChildToBack(getChildView("sign_up_text"));
 
 	LLComboBox* favorites_combo = getChild<LLComboBox>("start_location_combo");
 	updateLocationSelectorsVisibility(); // separate so that it can be called from preferences
@@ -231,29 +234,44 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	server_choice_combo->add(LLGridManager::getInstance()->getGridLabel(), 
 							 current_grid,
 							 ADD_TOP);	
-	server_choice_combo->selectFirstItem();		
+	server_choice_combo->selectFirstItem();
 
 	LLSLURL start_slurl(LLStartUp::getStartSLURL());
+	// The StartSLURL might have been set either by an explicit command-line
+	// argument (CmdLineLoginLocation) or by default.
+	// current_grid might have been set either by an explicit command-line
+	// argument (CmdLineGridChoice) or by default.
+	// If the grid specified by StartSLURL is the same as current_grid, the
+	// distinction is moot.
+	// If we have an explicit command-line SLURL, use that.
+	// If we DON'T have an explicit command-line SLURL but we DO have an
+	// explicit command-line grid, which is different from the default SLURL's
+	// -- do NOT override the explicit command-line grid with the grid from
+	// the default SLURL!
+	bool force_grid{ start_slurl.getGrid() != current_grid &&
+					 gSavedSettings.getString("CmdLineLoginLocation").empty() &&
+				   ! gSavedSettings.getString("CmdLineGridChoice").empty() };
 	if ( !start_slurl.isSpatial() ) // has a start been established by the command line or NextLoginLocation ? 
 	{
 		// no, so get the preference setting
 		std::string defaultStartLocation = gSavedSettings.getString("LoginLocation");
 		LL_INFOS("AppInit")<<"default LoginLocation '"<<defaultStartLocation<<"'"<<LL_ENDL;
 		LLSLURL defaultStart(defaultStartLocation);
-		if ( defaultStart.isSpatial() )
+		if ( defaultStart.isSpatial() && ! force_grid )
 		{
 			LLStartUp::setStartSLURL(defaultStart);
 		}
 		else
 		{
-			LL_INFOS("AppInit")<<"no valid LoginLocation, using home"<<LL_ENDL;
+			LL_INFOS("AppInit") << (force_grid? "--grid specified" : "no valid LoginLocation")
+								<< ", using home" << LL_ENDL;
 			LLSLURL homeStart(LLSLURL::SIM_LOCATION_HOME);
 			LLStartUp::setStartSLURL(homeStart);
 		}
 	}
-	else
+	else if (! force_grid)
 	{
-		LLPanelLogin::onUpdateStartSLURL(start_slurl); // updates grid if needed
+		onUpdateStartSLURL(start_slurl); // updates grid if needed
 	}
 	
 	childSetAction("connect_btn", onClickConnect, this);
@@ -269,9 +287,9 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	LLTextBox* forgot_password_text = getChild<LLTextBox>("forgot_password_text");
 	forgot_password_text->setClickedCallback(onClickForgotPassword, NULL);
 
-	LLTextBox* need_help_text = getChild<LLTextBox>("login_help");
-	need_help_text->setClickedCallback(onClickHelp, NULL);
-	
+	LLTextBox* sign_up_text = getChild<LLTextBox>("sign_up_text");
+	sign_up_text->setClickedCallback(onClickSignUp, NULL);
+
 	// get the web browser control
 	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("login_html");
 	web_browser->addObserver(this);
@@ -282,6 +300,7 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::addFavoritesToStartLocation, this));
 	// STEAM-14: When user presses Enter with this field in focus, initiate login
 	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onClickConnect, this));
+	username_combo->setKeystrokeOnEsc(TRUE);
 }
 
 void LLPanelLogin::addFavoritesToStartLocation()
@@ -297,11 +316,23 @@ void LLPanelLogin::addFavoritesToStartLocation()
 
 	// Load favorites into the combo.
 	std::string user_defined_name = getChild<LLComboBox>("username_combo")->getSimple();
+	LLStringUtil::toLower(user_defined_name);
 	std::replace(user_defined_name.begin(), user_defined_name.end(), '.', ' ');
 	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites_" + LLGridManager::getInstance()->getGrid() + ".xml");
 	std::string old_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "stored_favorites.xml");
 	mUsernameLength = user_defined_name.length();
 	updateLoginButtons();
+
+	std::string::size_type index = user_defined_name.find(' ');
+	if (index != std::string::npos)
+	{
+		std::string username = user_defined_name.substr(0, index);
+		std::string lastname = user_defined_name.substr(index+1);
+		if (lastname == "resident")
+		{
+			user_defined_name = username;
+		}
+	}
 
 	LLSD fav_llsd;
 	llifstream file;
@@ -364,7 +395,7 @@ void LLPanelLogin::setFocus(BOOL b)
 	{
 		if(b)
 		{
-			LLPanelLogin::giveFocus();
+			giveFocus();
 		}
 		else
 		{
@@ -458,6 +489,7 @@ void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
 		LL_WARNS() << "Attempted fillFields with no login view shown" << LL_ENDL;
 		return;
 	}
+	sCredentialSet = TRUE;
 	LL_INFOS("Credentials") << "Setting login fields to " << *credential << LL_ENDL;
 
 	LLSD identifier = credential->getIdentifier();
@@ -489,7 +521,7 @@ void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
 	LL_INFOS("Credentials") << "Setting authenticator field " << authenticator["type"].asString() << LL_ENDL;
 	if(authenticator.isMap() && 
 	   authenticator.has("secret") && 
-	   (authenticator["secret"].asString().size() > 0))
+	   (authenticator["secret"].asString().size() > 0) && remember)
 	{
 		
 		// This is a MD5 hex digest of a password.
@@ -680,10 +712,8 @@ void LLPanelLogin::onUpdateStartSLURL(const LLSLURL& new_start_slurl)
 			}
 			if ( new_start_slurl.getLocationString().length() )
 			{
-				if (location_combo->getCurrentIndex() == -1)
-				{
-					location_combo->setLabel(new_start_slurl.getLocationString());
-				}
+					
+				location_combo->setLabel(new_start_slurl.getLocationString());
 				sInstance->mLocationLength = new_start_slurl.getLocationString().length();
 				sInstance->updateLoginButtons();
 			}
@@ -733,7 +763,10 @@ void LLPanelLogin::closePanel()
 {
 	if (sInstance)
 	{
-		LLPanelLogin::sInstance->getParent()->removeChild( LLPanelLogin::sInstance );
+		if (LLPanelLogin::sInstance->getParent())
+		{
+			LLPanelLogin::sInstance->getParent()->removeChild(LLPanelLogin::sInstance);
+		}
 
 		delete sInstance;
 		sInstance = NULL;
@@ -791,7 +824,7 @@ void LLPanelLogin::loadLoginPage()
 	params["grid"] = LLGridManager::getInstance()->getGridId();
 
 	// add OS info
-	params["os"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	params["os"] = LLOSInfo::instance().getOSStringSimple();
 
 	// sourceid
 	params["sourceid"] = gSavedSettings.getString("sourceid");
@@ -800,7 +833,8 @@ void LLPanelLogin::loadLoginPage()
 	params["login_content_version"] = gSavedSettings.getString("LoginContentVersion");
 
 	// Make an LLURI with this augmented info
-	LLURI login_uri(LLURI::buildHTTP(login_page.authority(),
+	std::string url = login_page.scheme().empty()? login_page.authority() : login_page.scheme() + "://" + login_page.authority();
+	LLURI login_uri(LLURI::buildHTTP(url,
 									 login_page.path(),
 									 params));
 
@@ -862,6 +896,7 @@ void LLPanelLogin::onClickConnect(void *)
 		}
 		else
 		{
+			sCredentialSet = FALSE;
 			LLPointer<LLCredential> cred;
 			BOOL remember;
 			getFields(cred, remember);
@@ -909,12 +944,11 @@ void LLPanelLogin::onClickForgotPassword(void*)
 }
 
 //static
-void LLPanelLogin::onClickHelp(void*)
+void LLPanelLogin::onClickSignUp(void*)
 {
 	if (sInstance)
 	{
-		LLViewerHelp* vhelp = LLViewerHelp::getInstance();
-		vhelp->showTopic(vhelp->preLoginTopic());
+		LLWeb::loadURLExternal(sInstance->getString("sign_up_url"));
 	}
 }
 

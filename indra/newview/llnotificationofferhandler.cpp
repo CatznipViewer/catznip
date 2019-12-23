@@ -96,17 +96,21 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 
 			LLUUID from_id = notification->getPayload()["from_id"];
 
-			//Will not play a notification sound for inventory and teleport offer based upon chat preference
-			bool playSound = (!notification->isDND()
-							  && ((notification->getName() == "UserGiveItem"
-			                  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
-			                  || (notification->getName() == "TeleportOffered"
-			                  && gSavedSettings.getBOOL("PlaySoundTeleportOffer"))));
+			if (!notification->isDND())
+			{
+				//Will not play a notification sound for inventory and teleport offer based upon chat preference
+				bool playSound = (notification->getName() == "UserGiveItem"
+								  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
+								 || ((notification->getName() == "TeleportOffered"
+								     || notification->getName() == "TeleportOffered_MaturityExceeded"
+								     || notification->getName() == "TeleportOffered_MaturityBlocked")
+								    && gSavedSettings.getBOOL("PlaySoundTeleportOffer"));
 
-			            if(playSound)
-			            {
-			                notification->playSound();
-			            }
+				if (playSound)
+				{
+					notification->playSound();
+				}
+			}
 
 			LLHandlerUtil::spawnIMSession(name, from_id);
 			LLHandlerUtil::addNotifPanelToIM(notification);
@@ -127,6 +131,7 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 			// we not save offer notifications to the syswell floater that should be added to the IM floater
 			p.can_be_stored = !add_notif_to_im;
 			p.force_show = notification->getOfferFromAgent();
+			p.can_fade = notification->canFadeToast();
 
 			LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel.get());
 			if(channel)

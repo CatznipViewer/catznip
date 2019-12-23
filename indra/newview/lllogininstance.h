@@ -28,23 +28,24 @@
 #define LL_LLLOGININSTANCE_H
 
 #include "lleventdispatcher.h"
+#include "lleventapi.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
+#include <memory>                   // std::shared_ptr
 #include "llsecapi.h"
 class LLLogin;
 class LLEventStream;
 class LLNotificationsInterface;
-class LLUpdaterService;
 
 // This class hosts the login module and is used to 
 // negotiate user authentication attempts.
 class LLLoginInstance : public LLSingleton<LLLoginInstance>
 {
+	LLSINGLETON(LLLoginInstance);
+	~LLLoginInstance();
+
 public:
 	class Disposable;
-
-	LLLoginInstance();
-	~LLLoginInstance();
 
 	void connect(LLPointer<LLCredential> credentials); // Connect to the current grid choice.
 	void connect(const std::string& uri, LLPointer<LLCredential> credentials);	// Connect to the given uri.
@@ -60,23 +61,16 @@ public:
 
 	// Only valid when authSuccess == true.
 	const F64 getLastTransferRateBPS() { return mTransferRate; }
-
-	// Whether to tell login to skip optional update request.
-	// False by default.
-	void setSkipOptionalUpdate(bool state) { mSkipOptionalUpdate = state; }
 	void setSerialNumber(const std::string& sn) { mSerialNumber = sn; }
 	void setLastExecEvent(int lee) { mLastExecEvent = lee; }
 	void setLastExecDuration(S32 duration) { mLastExecDuration = duration; }
-	void setPlatformInfo(const std::string platform, const std::string platform_version);
+	void setPlatformInfo(const std::string platform, const std::string platform_version, const std::string platform_name);
 
 	void setNotificationsInterface(LLNotificationsInterface* ni) { mNotifications = ni; }
 	LLNotificationsInterface& getNotificationsInterface() const { return *mNotifications; }
 
-	typedef boost::function<void()> UpdaterLauncherCallback;
-	void setUpdaterLauncher(const UpdaterLauncherCallback& ulc) { mUpdaterLauncher = ulc; }
-
-	void setUpdaterService(LLUpdaterService * updaterService) { mUpdaterService = updaterService; }
 private:
+	typedef std::shared_ptr<LLEventAPI::Response> ResponsePtr;
 	void constructAuthParams(LLPointer<LLCredential> user_credentials);
 	void updateApp(bool mandatory, const std::string& message);
 	bool updateDialogCallback(const LLSD& notification, const LLSD& response);
@@ -86,6 +80,8 @@ private:
 	void handleLoginSuccess(const LLSD& event);
 	void handleDisconnect(const LLSD& event);
 	void handleIndeterminate(const LLSD& event);
+	void handleLoginDisallowed(const LLSD& notification, const LLSD& response);
+	void syncWithUpdater(ResponsePtr resp, const LLSD& notification, const LLSD& response);
 
 	bool handleTOSResponse(bool v, const std::string& key);
 
@@ -97,7 +93,6 @@ private:
 	std::string mLoginState;
 	LLSD mRequestData;
 	LLSD mResponseData;
-	bool mSkipOptionalUpdate;
 	bool mAttemptComplete;
 	F64 mTransferRate;
 	std::string mSerialNumber;
@@ -105,10 +100,8 @@ private:
 	S32 mLastExecDuration;
 	std::string mPlatform;
 	std::string mPlatformVersion;
-	UpdaterLauncherCallback mUpdaterLauncher;
+	std::string mPlatformVersionName;
 	LLEventDispatcher mDispatcher;
-	LLUpdaterService * mUpdaterService;	
-	boost::scoped_ptr<Disposable> mUpdateStateMachine;
 };
 
 #endif

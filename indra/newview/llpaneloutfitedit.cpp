@@ -51,7 +51,6 @@
 #include "llbutton.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
-#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -468,6 +467,7 @@ BOOL LLPanelOutfitEdit::postBuild()
 	mListViewItemTypes.push_back(new LLFilterItem(LLTrans::getString("alpha"), new LLFindActualWearablesOfType(LLWearableType::WT_ALPHA)));
 	mListViewItemTypes.push_back(new LLFilterItem(LLTrans::getString("tattoo"), new LLFindActualWearablesOfType(LLWearableType::WT_TATTOO)));
 	mListViewItemTypes.push_back(new LLFilterItem(LLTrans::getString("physics"), new LLFindActualWearablesOfType(LLWearableType::WT_PHYSICS)));
+	mListViewItemTypes.push_back(new LLFilterItem(LLTrans::getString("universal"), new LLFindActualWearablesOfType(LLWearableType::WT_UNIVERSAL)));
 
 	mCurrentOutfitName = getChild<LLTextBox>("curr_outfit_name"); 
 	mStatus = getChild<LLTextBox>("status");
@@ -532,11 +532,6 @@ BOOL LLPanelOutfitEdit::postBuild()
 
 	mPlusBtn = getChild<LLButton>("plus_btn");
 	mPlusBtn->setClickedCallback(boost::bind(&LLPanelOutfitEdit::onPlusBtnClicked, this));
-	
-	mEditWearableBtn = getChild<LLButton>("edit_wearable_btn");
-	mEditWearableBtn->setEnabled(FALSE);
-	mEditWearableBtn->setVisible(FALSE);
-	mEditWearableBtn->setCommitCallback(boost::bind(&LLPanelOutfitEdit::onEditWearableClicked, this));
 
 	childSetAction(REVERT_BTN, boost::bind(&LLAppearanceMgr::wearBaseOutfit, LLAppearanceMgr::getInstance()));
 
@@ -579,7 +574,6 @@ void LLPanelOutfitEdit::onOpen(const LLSD& key)
 		// *TODO: this method is called even panel is not visible to user because its parent layout panel is hidden.
 		// So, we can defer initializing a bit.
 		mWearableListManager = new LLFilteredWearableListManager(mWearableItemsList, mListViewItemTypes[LVIT_ALL]->collector);
-		mWearableListManager->populateList();
 		displayCurrentOutfit();
 		mInitialized = true;
 	}
@@ -633,6 +627,10 @@ void LLPanelOutfitEdit::showAddWearablesPanel(bool show_add_wearables)
 		// Reset mWearableItemsList position to top. See EXT-8180.
 		mWearableItemsList->goToTop();
 	}
+	else
+	{
+		mWearableListManager->populateIfNeeded();
+	}
 
 	//switching button bars
 	getChildView("no_add_wearables_button_bar")->setVisible( !show_add_wearables);
@@ -662,6 +660,7 @@ void LLPanelOutfitEdit::showWearablesListView()
 	{
 		updateWearablesPanelVerbButtons();
 		updateFiltersVisibility();
+		mWearableListManager->populateIfNeeded();
 	}
 	mListViewBtn->setToggleState(TRUE);
 }
@@ -778,6 +777,10 @@ void LLPanelOutfitEdit::onVisibilityChanged(const LLSD &in_visible_chain)
 	if (in_visible_chain.asBoolean())
 	{
 		update();
+	}
+	else
+	{
+		mWearableListManager->holdProgress(); //list population restarts with visibility
 	}
 }
 
@@ -1059,9 +1062,6 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 		case LLAssetType::AT_BODYPART:
 			applyListViewFilter(LVIT_BODYPART);
 			break;
-		case LLAssetType::AT_GESTURE:
-			applyListViewFilter(LVIT_GESTURES);
-			break;
 		case LLAssetType::AT_CLOTHING:
 		default:
 			applyListViewFilter(LVIT_CLOTHING);
@@ -1281,7 +1281,7 @@ void LLPanelOutfitEdit::showFilteredWearablesListView(LLWearableType::EType type
 	showWearablesListView();
 
 	//e_list_view_item_type implicitly contains LLWearableType::EType starting from LVIT_SHAPE
-	applyListViewFilter((EListViewItemType) (LVIT_SHAPE + type));
+	applyListViewFilter(static_cast<EListViewItemType>(LVIT_SHAPE + type));
 }
 
 static void update_status_widget_rect(LLView * widget, S32 right_border)
@@ -1301,8 +1301,10 @@ void LLPanelOutfitEdit::onOutfitChanging(bool started)
 	S32 delta = started ? indicator_delta : 0;
 	S32 right_border = status_panel->getRect().getWidth() - delta;
 
-	update_status_widget_rect(mCurrentOutfitName, right_border);
-	update_status_widget_rect(mStatus, right_border);
+	if (mCurrentOutfitName)
+		update_status_widget_rect(mCurrentOutfitName, right_border);
+	if (mStatus)
+		update_status_widget_rect(mStatus, right_border);
 
 	indicator->setVisible(started);
 }

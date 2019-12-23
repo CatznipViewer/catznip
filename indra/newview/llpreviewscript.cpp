@@ -41,7 +41,6 @@
 #include "llinventorymodel.h"
 #include "llkeyboard.h"
 #include "lllineeditor.h"
-#include "lllivefile.h"
 #include "llhelp.h"
 #include "llnotificationsutil.h"
 #include "llresmgr.h"
@@ -61,6 +60,7 @@
 #include "llselectmgr.h"
 #include "llviewerinventory.h"
 #include "llviewermenu.h"
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 #include "llviewerobject.h"
 #include "llviewerobjectlist.h"
 #include "llviewerregion.h"
@@ -119,22 +119,6 @@ static bool have_script_upload_cap(LLUUID& object_id)
 /// ---------------------------------------------------------------------------
 /// LLLiveLSLFile
 /// ---------------------------------------------------------------------------
-class LLLiveLSLFile : public LLLiveFile
-{
-public:
-	typedef boost::function<bool (const std::string& filename)> change_callback_t;
-
-	LLLiveLSLFile(std::string file_path, change_callback_t change_cb);
-	~LLLiveLSLFile();
-
-	void ignoreNextUpdate() { mIgnoreNextUpdate = true; }
-
-protected:
-	/*virtual*/ bool loadFile();
-
-	change_callback_t	mOnChangeCallback;
-	bool				mIgnoreNextUpdate;
-};
 
 LLLiveLSLFile::LLLiveLSLFile(std::string file_path, change_callback_t change_cb)
 :	mOnChangeCallback(change_cb)
@@ -375,7 +359,9 @@ LLScriptEdCore::LLScriptEdCore(
 	mLiveFile(NULL),
 	mLive(live),
 	mContainer(container),
-	mHasScriptData(FALSE)
+	mHasScriptData(FALSE),
+	mScriptRemoved(FALSE),
+	mSaveDialogShown(FALSE)
 {
 	setFollowsAll();
 	setBorderVisible(FALSE);
@@ -583,6 +569,14 @@ void LLScriptEdCore::setScriptText(const std::string& text, BOOL is_valid)
 	}
 }
 
+void LLScriptEdCore::makeEditorPristine()
+{
+	if (mEditor)
+	{
+		mEditor->makePristine();
+	}
+}
+
 bool LLScriptEdCore::loadScriptText(const std::string& filename)
 {
 	if (filename.empty())
@@ -666,7 +660,7 @@ bool LLScriptEdCore::hasChanged()
 void LLScriptEdCore::draw()
 {
 	BOOL script_changed	= hasChanged();
-	getChildView("Save_btn")->setEnabled(script_changed);
+	getChildView("Save_btn")->setEnabled(script_changed && !mScriptRemoved);
 
 	if( mEditor->hasFocus() )
 	{
@@ -840,14 +834,18 @@ void LLScriptEdCore::addHelpItemToHistory(const std::string& help_string)
 
 BOOL LLScriptEdCore::canClose()
 {
-	if(mForceClose || !hasChanged())
+	if(mForceClose || !hasChanged() || mScriptRemoved)
 	{
 		return TRUE;
 	}
 	else
 	{
-		// Bring up view-modal dialog: Save changes? Yes, No, Cancel
-		LLNotificationsUtil::add("SaveChanges", LLSD(), LLSD(), boost::bind(&LLScriptEdCore::handleSaveChangesDialog, this, _1, _2));
+		if(!mSaveDialogShown)
+		{
+			mSaveDialogShown = TRUE;
+			// Bring up view-modal dialog: Save changes? Yes, No, Cancel
+			LLNotificationsUtil::add("SaveChanges", LLSD(), LLSD(), boost::bind(&LLScriptEdCore::handleSaveChangesDialog, this, _1, _2));
+		}
 		return FALSE;
 	}
 }
@@ -860,6 +858,7 @@ void LLScriptEdCore::setEnableEditing(bool enable)
 
 bool LLScriptEdCore::handleSaveChangesDialog(const LLSD& notification, const LLSD& response )
 {
+	mSaveDialogShown = FALSE;
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	switch( option )
 	{
@@ -886,7 +885,7 @@ bool LLScriptEdCore::handleSaveChangesDialog(const LLSD& notification, const LLS
 
 void LLScriptEdCore::onBtnHelp()
 {
-	LLUI::sHelpImpl->showTopic(HELP_LSL_PORTAL_TOPIC);
+	LLUI::getInstance()->mHelpImpl->showTopic(HELP_LSL_PORTAL_TOPIC);
 }
 
 void LLScriptEdCore::onBtnDynamicHelp()
@@ -1053,7 +1052,7 @@ void LLScriptEdCore::openInExternalEditor()
 		{
 			if (status == LLExternalEditor::EC_NOT_SPECIFIED) // Use custom message for this error.
 			{
-				msg = getString("external_editor_not_set");
+				msg = LLTrans::getString("ExternalEditorNotSet");
 			}
 			else
 			{
@@ -1187,26 +1186,21 @@ BOOL LLScriptEdCore::handleKeyHere(KEY key, MASK mask)
 
 void LLScriptEdCore::onBtnLoadFromFile( void* data )
 {
-	LLScriptEdCore* self = (LLScriptEdCore*) data;
+	(new LLFilePickerReplyThread(boost::bind(&LLScriptEdCore::loadScriptFromFile, _1, data), LLFilePicker::FFLOAD_SCRIPT, false))->getFile();
+}
 
-	// TODO Maybe add a dialogue warning here if the current file has unsaved changes.
-	LLFilePicker& file_picker = LLFilePicker::instance();
-	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_SCRIPT ) )
-	{
-		//File picking cancelled by user, so nothing to do.
-		return;
-	}
+void LLScriptEdCore::loadScriptFromFile(const std::vector<std::string>& filenames, void* data)
+{
+	std::string filename = filenames[0];
 
-	std::string filename = file_picker.getFirstFile();
-
-	std::ifstream fin(filename.c_str());
+	llifstream fin(filename.c_str());
 
 	std::string line;
 	std::string text;
 	std::string linetotal;
 	while (!fin.eof())
-	{ 
-		getline(fin,line);
+	{
+		getline(fin, line);
 		text += line;
 		if (!fin.eof())
 		{
@@ -1216,7 +1210,8 @@ void LLScriptEdCore::onBtnLoadFromFile( void* data )
 	fin.close();
 
 	// Only replace the script if there is something to replace with.
-	if (text.length() > 0)
+	LLScriptEdCore* self = (LLScriptEdCore*)data;
+	if (self && (text.length() > 0))
 	{
 		self->mEditor->selectAll();
 		LLWString script(utf8str_to_wstring(text));
@@ -1232,16 +1227,21 @@ void LLScriptEdCore::onBtnSaveToFile( void* userdata )
 
 	if( self->mSaveCallback )
 	{
-		LLFilePicker& file_picker = LLFilePicker::instance();
-		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT, self->mScriptName ) )
-		{
-			std::string filename = file_picker.getFirstFile();
-			std::string scriptText=self->mEditor->getText();
-			std::ofstream fout(filename.c_str());
-			fout<<(scriptText);
-			fout.close();
-			self->mSaveCallback( self->mUserdata, FALSE );
-		}
+		(new LLFilePickerReplyThread(boost::bind(&LLScriptEdCore::saveScriptToFile, _1, userdata), LLFilePicker::FFSAVE_SCRIPT, self->mScriptName))->getFile();
+	}
+}
+
+void LLScriptEdCore::saveScriptToFile(const std::vector<std::string>& filenames, void* data)
+{
+	LLScriptEdCore* self = (LLScriptEdCore*)data;
+	if (self)
+	{
+		std::string filename = filenames[0];
+		std::string scriptText = self->mEditor->getText();
+		llofstream fout(filename.c_str());
+		fout << (scriptText);
+		fout.close();
+		self->mSaveCallback(self->mUserdata, FALSE);
 	}
 }
 
@@ -1511,6 +1511,17 @@ BOOL LLPreviewLSL::postBuild()
 	return LLPreview::postBuild();
 }
 
+void LLPreviewLSL::draw()
+{
+	const LLInventoryItem* item = getItem();
+	if(!item)
+	{
+		setTitle(LLTrans::getString("ScriptWasDeleted"));
+		mScriptEd->setItemRemoved(TRUE);
+	}
+
+	LLPreview::draw();
+}
 // virtual
 void LLPreviewLSL::callbackLSLCompileSucceeded()
 {
@@ -1671,6 +1682,7 @@ void LLPreviewLSL::saveIfNeeded(bool sync /*= true*/)
         mScriptEd->sync();
     }
 
+    if (!gAgent.getRegion()) return;
     const LLInventoryItem *inv_item = getItem();
     // save it out to asset server
     std::string url = gAgent.getRegion()->getCapability("UpdateScriptAgent");
@@ -1715,14 +1727,22 @@ void LLPreviewLSL::onLoadComplete( LLVFS *vfs, const LLUUID& asset_uuid, LLAsset
 			buffer[file_length] = 0;
 			preview->mScriptEd->setScriptText(LLStringExplicit(&buffer[0]), TRUE);
 			preview->mScriptEd->mEditor->makePristine();
+
+			std::string script_name = DEFAULT_SCRIPT_NAME;
 			LLInventoryItem* item = gInventory.getItem(*item_uuid);
 			BOOL is_modifiable = FALSE;
-			if(item
-			   && gAgent.allowOperation(PERM_MODIFY, item->getPermissions(),
-				   					GP_OBJECT_MANIPULATE))
+			if (item)
 			{
-				is_modifiable = TRUE;		
+				if (!item->getName().empty())
+				{
+					script_name = item->getName();
+				}
+				if (gAgent.allowOperation(PERM_MODIFY, item->getPermissions(), GP_OBJECT_MANIPULATE))
+				{
+					is_modifiable = TRUE;
+				}
 			}
+			preview->mScriptEd->setScriptName(script_name);
 			preview->mScriptEd->setEnableEditing(is_modifiable);
 			preview->mAssetStatus = PREVIEW_ASSET_LOADED;
 		}
@@ -1861,8 +1881,14 @@ void LLLiveLSLEditor::loadAsset()
 
 			if(item)
 			{
-                LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(),
-                        boost::bind(&LLLiveLSLEditor::setAssociatedExperience, getDerivedHandle<LLLiveLSLEditor>(), _1));
+				LLViewerRegion* region = object->getRegion();
+				std::string url = std::string();
+				if(region)
+				{
+					url = region->getCapability("GetMetadata");
+				}
+				LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(), url,
+					boost::bind(&LLLiveLSLEditor::setAssociatedExperience, getDerivedHandle<LLLiveLSLEditor>(), _1));
 
 				bool isGodlike = gAgent.isGodlike();
 				bool copyManipulate = gAgent.allowOperation(PERM_COPY, item->getPermissions(), GP_OBJECT_MANIPULATE);
@@ -2010,8 +2036,16 @@ void LLLiveLSLEditor::loadScriptText(LLVFS *vfs, const LLUUID &uuid, LLAssetType
 	buffer[file_length] = '\0';
 
 	mScriptEd->setScriptText(LLStringExplicit(&buffer[0]), TRUE);
-	mScriptEd->mEditor->makePristine();
-	mScriptEd->setScriptName(getItem()->getName());
+	mScriptEd->makeEditorPristine();
+
+	std::string script_name = DEFAULT_SCRIPT_NAME;
+	const LLInventoryItem* inv_item = getItem();
+
+	if(inv_item)
+	{
+		script_name = inv_item->getName();
+	}
+	mScriptEd->setScriptName(script_name);
 }
 
 

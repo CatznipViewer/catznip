@@ -130,7 +130,7 @@ public:
 			// | 4. ADD TO LLViewerAssetType.cpp                         |
 			// | 5. ADD TO DEFAULT_ASSET_FOR_INV in LLInventoryType.cpp  |
 			// +*********************************************************+
-
+		AT_UNKNOWN = 255,
 		AT_NONE = -1
 	};
 
@@ -152,7 +152,7 @@ public:
 
 	static bool 				lookupIsAssetFetchByIDAllowed(EType asset_type); // the asset allows direct download
 	static bool 				lookupIsAssetIDKnowable(EType asset_type); // asset data can be known by the viewer
-	
+
 	static const std::string&	badLookup(); // error string when a lookup fails
 
 protected:

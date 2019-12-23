@@ -4,6 +4,7 @@ project(llmath)
 
 include(00-Common)
 include(LLCommon)
+include(Boost)
 
 include_directories(
     ${LLCOMMON_INCLUDE_DIRS}
@@ -19,9 +20,12 @@ set(llmath_SOURCE_FILES
     llcoordframe.cpp
     llline.cpp
     llmatrix3a.cpp
+    llmatrix4a.cpp
     llmodularmath.cpp
+    lloctree.cpp
     llperlin.cpp
     llquaternion.cpp
+    llrigginginfo.cpp
     llrect.cpp
     llsphere.cpp
     llvector4a.cpp
@@ -68,6 +72,7 @@ set(llmath_HEADER_FILES
     llquaternion2.h
     llquaternion2.inl
     llrect.h
+    llrigginginfo.h
     llsimdmath.h
     llsimdtypes.h
     llsimdtypes.inl
@@ -117,6 +122,11 @@ if (LL_TESTS)
     v4color.cpp
     v4coloru.cpp
     )
+  set_source_files_properties(
+    ${llmath_TEST_SOURCE_FILES}
+    PROPERTIES
+    LL_TEST_ADDITIONAL_LIBRARIES "${BOOST_THREAD_LIBRARY}"
+  )
   LL_ADD_PROJECT_UNIT_TESTS(llmath "${llmath_TEST_SOURCE_FILES}")
 
   # INTEGRATION TESTS

@@ -60,12 +60,7 @@ public:
 
 namespace LLError
 {
-	LL_COMMON_API void initForServer(const std::string& identity);
-		// resets all logging settings to defaults needed by server processes
-		// logs to stderr, syslog, and windows debug log
-		// the identity string is used for in the syslog
-
-	LL_COMMON_API void initForApplication(const std::string& dir, bool log_to_stderr = true);
+	LL_COMMON_API void initForApplication(const std::string& user_dir, const std::string& app_dir, bool log_to_stderr = true);
 		// resets all logging settings to defaults needed by applicaitons
 		// logs to stderr and windows debug log
 		// sets up log configuration from the file logcontrol.xml in dir
@@ -79,6 +74,10 @@ namespace LLError
 	LL_COMMON_API void setPrintLocation(bool);
 	LL_COMMON_API void setDefaultLevel(LLError::ELevel);
 	LL_COMMON_API ELevel getDefaultLevel();
+	LL_COMMON_API void setAlwaysFlush(bool flush);
+    LL_COMMON_API bool getAlwaysFlush();
+	LL_COMMON_API void setEnabledLogTypesMask(U32 mask);
+	LL_COMMON_API U32 getEnabledLogTypesMask();
 	LL_COMMON_API void setFunctionLevel(const std::string& function_name, LLError::ELevel);
 	LL_COMMON_API void setClassLevel(const std::string& class_name, LLError::ELevel);
 	LL_COMMON_API void setFileLevel(const std::string& file_name, LLError::ELevel);
@@ -106,6 +105,9 @@ namespace LLError
 
 	LL_COMMON_API FatalFunction getFatalFunction();
 		// Retrieve the previously-set FatalFunction
+
+	LL_COMMON_API std::string getFatalMessage();
+		// Retrieve the message last passed to FatalFunction, if any
 
 	/// temporarily override the FatalFunction for the duration of a
 	/// particular scope, e.g. for unit tests
@@ -145,18 +147,29 @@ namespace LLError
 		virtual void recordMessage(LLError::ELevel, const std::string& message) = 0;
 			// use the level for better display, not for filtering
 
+        virtual bool enabled() { return true; }
+
 		bool wantsTime();
 		bool wantsTags();
 		bool wantsLevel();
 		bool wantsLocation(); 
 		bool wantsFunctionName();
+        bool wantsMultiline();
+
+		void showTime(bool show);
+		void showTags(bool show);
+		void showLevel(bool show);
+		void showLocation(bool show); 
+		void showFunctionName(bool show);
+		void showMultiline(bool show);
 
 	protected:
-		bool	mWantsTime,
-				mWantsTags,
-				mWantsLevel,
-				mWantsLocation,
-				mWantsFunctionName;
+		bool mWantsTime;
+        bool mWantsTags;
+        bool mWantsLevel;
+        bool mWantsLocation;
+        bool mWantsFunctionName;
+        bool mWantsMultiline;
 	};
 
 	typedef boost::shared_ptr<Recorder> RecorderPtr;
@@ -189,6 +202,11 @@ namespace LLError
 
 	LL_COMMON_API std::string abbreviateFile(const std::string& filePath);
 	LL_COMMON_API int shouldLogCallCount();
+
+	// Check whether Globals exists. This should only be used by LLSingleton
+	// infrastructure to avoid trying to log when our internal LLSingleton is
+	// unavailable -- circularity ensues.
+	LL_COMMON_API bool is_available();
 };
 
 #endif // LL_LLERRORCONTROL_H

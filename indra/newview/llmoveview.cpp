@@ -252,7 +252,7 @@ void LLFloaterMove::setSittingMode(BOOL bSitting)
 			LLPanelStandStopFlying::setStandStopFlyingMode(LLPanelStandStopFlying::SSFM_STOP_FLYING);
 		}
 	}
-	enableInstance(!bSitting);
+	enableInstance();
 }
 
 // protected 
@@ -400,12 +400,12 @@ void LLFloaterMove::initMovementMode()
 	{
 		initMovementMode = MM_FLY;
 	}
-	setMovementMode(initMovementMode);
+	
+	mCurrentMode = initMovementMode;
+	bool hide_mode_buttons = (MM_FLY == mCurrentMode) || (isAgentAvatarValid() && gAgentAvatarp->isSitting());
 
-	if (isAgentAvatarValid())
-	{
-		showModeButtons(!gAgentAvatarp->isSitting());
-	}
+	updateButtonsWithMovementMode(mCurrentMode);
+	showModeButtons(!hide_mode_buttons);
 }
 
 void LLFloaterMove::setModeTooltip(const EMovementMode mode)
@@ -459,7 +459,7 @@ void LLFloaterMove::showModeButtons(BOOL bShow)
 }
 
 //static
-void LLFloaterMove::enableInstance(BOOL bEnable)
+void LLFloaterMove::enableInstance()
 {
 	LLFloaterMove* instance = LLFloaterReg::findTypedInstance<LLFloaterMove>("moveview");
 	if (instance)
@@ -470,7 +470,7 @@ void LLFloaterMove::enableInstance(BOOL bEnable)
 		}
 		else
 		{
-			instance->showModeButtons(bEnable);
+            instance->showModeButtons(isAgentAvatarValid() && !gAgentAvatarp->isSitting());
 		}
 	}
 }
@@ -566,9 +566,9 @@ BOOL LLPanelStandStopFlying::postBuild()
 {
 	mStandButton = getChild<LLButton>("stand_btn");
 	mStandButton->setCommitCallback(boost::bind(&LLPanelStandStopFlying::onStandButtonClick, this));
-	mStandButton->setCommitCallback(boost::bind(&LLFloaterMove::enableInstance, TRUE));
+	mStandButton->setCommitCallback(boost::bind(&LLFloaterMove::enableInstance));
 	mStandButton->setVisible(FALSE);
-	LLHints::registerHintTarget("stand_btn", mStandButton->getHandle());
+	LLHints::getInstance()->registerHintTarget("stand_btn", mStandButton->getHandle());
 	
 	mStopFlyingButton = getChild<LLButton>("stop_fly_btn");
 	//mStopFlyingButton->setCommitCallback(boost::bind(&LLFloaterMove::setFlyingMode, FALSE));
@@ -670,7 +670,7 @@ LLPanelStandStopFlying* LLPanelStandStopFlying::getStandStopFlyingPanel()
 	panel->buildFromFile("panel_stand_stop_flying.xml");
 
 	panel->setVisible(FALSE);
-	//LLUI::getRootView()->addChild(panel);
+	//LLUI::getInstance()->getRootView()->addChild(panel);
 
 	LL_INFOS() << "Build LLPanelStandStopFlying panel" << LL_ENDL;
 
@@ -685,8 +685,7 @@ void LLPanelStandStopFlying::onStandButtonClick()
 	LLSelectMgr::getInstance()->deselectAllForStandingUp();
 	gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
 
-	setFocus(FALSE); // EXT-482
-	mStandButton->setVisible(FALSE); // force visibility changing to avoid seeing Stand & Move buttons at once.
+	setFocus(FALSE); 
 }
 
 void LLPanelStandStopFlying::onStopFlyingButtonClick()
@@ -694,7 +693,6 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 	gAgent.setFlying(FALSE);
 
 	setFocus(FALSE); // EXT-482
-	mStopFlyingButton->setVisible(FALSE);
 }
 
 /**
@@ -704,11 +702,9 @@ void LLPanelStandStopFlying::updatePosition()
 {
 	if (mAttached) return;
 
-	S32 y_pos = 0;
 	S32 bottom_tb_center = 0;
 	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_BOTTOM))
 	{
-		y_pos = toolbar_bottom->getRect().getHeight();
 		bottom_tb_center = toolbar_bottom->getRect().getCenterX();
 	}
 
@@ -718,23 +714,16 @@ void LLPanelStandStopFlying::updatePosition()
 		left_tb_width = toolbar_left->getRect().getWidth();
 	}
 
-	if (!mStateManagementButtons.get())
+	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())
 	{
-		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
-		if (panel_ssf_container)
-		{
-			mStateManagementButtons = panel_ssf_container->getHandle();
-		}
+		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2 - left_tb_width;
+		setOrigin( x_pos, 0);
 	}
-
-	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
+	else 
 	{
-		panel_ssf_container->setOrigin(0, y_pos);
+		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2;
+		setOrigin( x_pos, 0);
 	}
-
-	S32 x_pos = bottom_tb_center-getRect().getWidth()/2 - left_tb_width;
-
-	setOrigin( x_pos, 0);
 }
 
 // EOF

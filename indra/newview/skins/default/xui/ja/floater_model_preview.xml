@@ -4,6 +4,9 @@
 	<string name="status_parse_error">
 		エラー：Dae に問題が見つかりました - 詳細についてはログをご参照ください。
 	</string>
+	<string name="status_bind_shape_orientation">
+		警告： バインドシェイプマトリックスは、標準の X 軸正方向にはありません。
+	</string>
 	<string name="status_material_mismatch">
 		エラー：モデルの材料は参考モデルのサブセットではありません。
 	</string>
@@ -245,6 +248,7 @@
 				</text>
 				<check_box label="スキンの重さを含む" name="upload_skin"/>
 				<check_box label="ジョイントポジションを含む" name="upload_joints"/>
+				<check_box label="ジョイント位置が定義されている場合、スケールをロック" name="lock_scale_if_joint_position"/>
 				<text name="pelvis_offset_label">
 					Z オフセット（アバターを上下調整）：
 				</text>

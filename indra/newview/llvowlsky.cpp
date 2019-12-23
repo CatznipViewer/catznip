@@ -313,7 +313,12 @@ BOOL LLVOWLSky::updateGeometry(LLDrawable * drawable)
 #if DOME_SLICES
 	{
 		mFanVerts = new LLVertexBuffer(LLDrawPoolWLSky::SKY_VERTEX_DATA_MASK, GL_STATIC_DRAW_ARB);
-		mFanVerts->allocateBuffer(getFanNumVerts(), getFanNumIndices(), TRUE);
+		if (!mFanVerts->allocateBuffer(getFanNumVerts(), getFanNumIndices(), TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer on sky update to "
+				<< getFanNumVerts() << " vertices and "
+				<< getFanNumIndices() << " indices" << LL_ENDL;
+		}
 
 		BOOL success = mFanVerts->getVertexStrider(vertices)
 			&& mFanVerts->getTexCoord0Strider(texCoords)
@@ -330,7 +335,8 @@ BOOL LLVOWLSky::updateGeometry(LLDrawable * drawable)
 	}
 
 	{
-		const U32 max_buffer_bytes = gSavedSettings.getS32("RenderMaxVBOSize")*1024;
+		LLCachedControl<S32> max_vbo_size(gSavedSettings, "RenderMaxVBOSize", 512);
+		const U32 max_buffer_bytes = max_vbo_size * 1024;
 		const U32 data_mask = LLDrawPoolWLSky::SKY_VERTEX_DATA_MASK;
 		const U32 max_verts = max_buffer_bytes / LLVertexBuffer::calcVertexSize(data_mask);
 
@@ -375,7 +381,12 @@ BOOL LLVOWLSky::updateGeometry(LLDrawable * drawable)
 			const U32 num_indices_this_seg = 1+num_stacks_this_seg*(2+2*verts_per_stack);
 			llassert(num_indices_this_seg * sizeof(U16) <= max_buffer_bytes);
 
-			segment->allocateBuffer(num_verts_this_seg, num_indices_this_seg, TRUE);
+			if (!segment->allocateBuffer(num_verts_this_seg, num_indices_this_seg, TRUE))
+			{
+				LL_WARNS() << "Failed to allocate Vertex Buffer on update to "
+					<< num_verts_this_seg << " vertices and "
+					<< num_indices_this_seg << " indices" << LL_ENDL;
+			}
 
 			// lock the buffer
 			BOOL success = segment->getVertexStrider(vertices)
@@ -777,7 +788,10 @@ BOOL LLVOWLSky::updateStarGeometry(LLDrawable *drawable)
 	if (mStarsVerts.isNull() || !mStarsVerts->isWriteable())
 	{
 		mStarsVerts = new LLVertexBuffer(LLDrawPoolWLSky::STAR_VERTEX_DATA_MASK, GL_DYNAMIC_DRAW);
-		mStarsVerts->allocateBuffer(getStarsNumVerts()*6, 0, TRUE);
+		if (!mStarsVerts->allocateBuffer(getStarsNumVerts()*6, 0, TRUE))
+		{
+			LL_WARNS() << "Failed to allocate Vertex Buffer for Sky to " << getStarsNumVerts() * 6 << " vertices" << LL_ENDL;
+		}
 	}
  
 	BOOL success = mStarsVerts->getVertexStrider(verticesp)
@@ -810,18 +824,18 @@ BOOL LLVOWLSky::updateStarGeometry(LLDrawable *drawable)
 		up *= sc;
 
 		*(verticesp++)  = mStarVertices[vtx];
-		*(verticesp++) = mStarVertices[vtx]+left;
-		*(verticesp++) = mStarVertices[vtx]+left+up;
-		*(verticesp++) = mStarVertices[vtx]+left;
-		*(verticesp++) = mStarVertices[vtx]+left+up;
 		*(verticesp++) = mStarVertices[vtx]+up;
+		*(verticesp++) = mStarVertices[vtx]+left+up;
+		*(verticesp++)  = mStarVertices[vtx];
+		*(verticesp++) = mStarVertices[vtx]+left+up;
+		*(verticesp++) = mStarVertices[vtx]+left;
 
-		*(texcoordsp++) = LLVector2(0,0);
-		*(texcoordsp++) = LLVector2(0,1);
-		*(texcoordsp++) = LLVector2(1,1);
-		*(texcoordsp++) = LLVector2(0,1);
-		*(texcoordsp++) = LLVector2(1,1);
 		*(texcoordsp++) = LLVector2(1,0);
+		*(texcoordsp++) = LLVector2(1,1);
+		*(texcoordsp++) = LLVector2(0,1);
+		*(texcoordsp++) = LLVector2(1,0);
+		*(texcoordsp++) = LLVector2(0,1);
+		*(texcoordsp++) = LLVector2(0,0);
 
 		*(colorsp++)    = LLColor4U(mStarColors[vtx]);
 		*(colorsp++)    = LLColor4U(mStarColors[vtx]);

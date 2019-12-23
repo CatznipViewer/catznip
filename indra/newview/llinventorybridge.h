@@ -94,6 +94,10 @@ public:
 	virtual const std::string& getDisplayName() const;
 	const std::string& getSearchableName() const { return mSearchableName; }
 
+	std::string getSearchableDescription() const;
+	std::string getSearchableCreatorName() const;
+	std::string getSearchableUUIDString() const;
+
 	virtual PermissionMask getPermissionMask() const;
 	virtual LLFolderType::EType getPreferredType() const;
 	virtual time_t getCreationDate() const;
@@ -116,6 +120,7 @@ public:
 	virtual BOOL isItemCopyable() const { return FALSE; }
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
+	virtual bool isCutToClipboard();
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	virtual void pasteFromClipboard() {}
@@ -147,6 +152,9 @@ protected:
 	virtual void addMarketplaceContextMenuOptions(U32 flags,
 											 menuentry_vec_t &items,
 											 menuentry_vec_t &disabled_items);
+	virtual void addLinkReplaceMenuOption(menuentry_vec_t& items,
+										  menuentry_vec_t& disabled_items);
+
 protected:
 	LLInvFVBridge(LLInventoryPanel* inventory, LLFolderView* root, const LLUUID& uuid);
 
@@ -260,7 +268,8 @@ public:
 	:	LLInvFVBridge(inventory, root, uuid),
 		mCallingCards(FALSE),
 		mWearables(FALSE),
-		mIsLoading(false)
+		mIsLoading(false),
+		mShowDescendantsCount(false)
 	{}
 		
 	BOOL dragItemIntoFolder(LLInventoryItem* inv_item, BOOL drop, std::string& tooltip_msg, BOOL user_confirm = TRUE);
@@ -284,6 +293,8 @@ public:
 	static LLUIImagePtr getIcon(LLFolderType::EType preferred_type);
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
+
+	void setShowDescendantsCount(bool show_count) {mShowDescendantsCount = show_count;}
 
 	virtual BOOL renameItem(const std::string& new_name);
 
@@ -343,10 +354,12 @@ protected:
 	BOOL checkFolderForContentsOfType(LLInventoryModel* model, LLInventoryCollectFunctor& typeToCheck);
 
 	void modifyOutfit(BOOL append);
+	void copyOutfitToClipboard();
 	void determineFolderType();
 
 	void dropToFavorites(LLInventoryItem* inv_item);
 	void dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_current_outfit);
+	void dropToMyOutfits(LLInventoryCategory* inv_cat);
 
 	//--------------------------------------------------------------------
 	// Messy hacks for handling folder options
@@ -356,6 +369,7 @@ public:
 	static void staticFolderOptionsMenu();
 
 protected:
+    void outfitFolderCreatedCallback(LLUUID cat_source_id, LLUUID cat_dest_id);
     void callback_pasteFromClipboard(const LLSD& notification, const LLSD& response);
     void perform_pasteFromClipboard();
     void gatherMessage(std::string& message, S32 depth, LLError::ELevel log_level);
@@ -364,6 +378,7 @@ protected:
 	bool							mCallingCards;
 	bool							mWearables;
 	bool							mIsLoading;
+	bool							mShowDescendantsCount;
 	LLTimer							mTimeSinceRequestStart;
     std::string                     mMessage;
 	LLRootHandle<LLFolderBridge> mHandle;
@@ -562,6 +577,17 @@ protected:
 	static std::string sPrefix;
 };
 
+class LLUnknownItemBridge : public LLItemBridge
+{
+public:
+	LLUnknownItemBridge(LLInventoryPanel* inventory,
+		LLFolderView* root,
+		const LLUUID& uuid) :
+		LLItemBridge(inventory, root, uuid) {}
+	virtual LLUIImagePtr getIcon() const;
+	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
+};
+
 class LLLinkFolderBridge : public LLItemBridge
 {
 public:
@@ -578,23 +604,6 @@ protected:
 	const LLUUID &getFolderID() const;
 	static std::string sPrefix;
 };
-
-
-class LLMeshBridge : public LLItemBridge
-{
-	friend class LLInvFVBridge;
-public:
-	virtual LLUIImagePtr getIcon() const;
-	virtual void openItem();
-	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
-
-protected:
-	LLMeshBridge(LLInventoryPanel* inventory, 
-		     LLFolderView* root,
-		     const LLUUID& uuid) :
-                       LLItemBridge(inventory, root, uuid) {}
-};
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLInvFVBridgeAction
@@ -624,17 +633,6 @@ protected:
 protected:
 	const LLUUID& mUUID; // item id
 	LLInventoryModel* mModel;
-};
-
-class LLMeshBridgeAction: public LLInvFVBridgeAction
-{
-	friend class LLInvFVBridgeAction;
-public:
-	virtual void	doIt() ;
-	virtual ~LLMeshBridgeAction(){}
-protected:
-	LLMeshBridgeAction(const LLUUID& id,LLInventoryModel* model):LLInvFVBridgeAction(id,model){}
-
 };
 
 
@@ -734,6 +732,7 @@ class LLFolderViewGroupedItemBridge: public LLFolderViewGroupedItemModel
 public:
     LLFolderViewGroupedItemBridge();
     virtual void groupFilterContextMenu(folder_view_item_deque& selected_items, LLMenuGL& menu);
+    bool canWearSelected(uuid_vec_t item_ids);
 };
 
 #endif // LL_LLINVENTORYBRIDGE_H

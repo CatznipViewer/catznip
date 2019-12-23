@@ -101,7 +101,7 @@ LLFloaterIMContainer::~LLFloaterIMContainer()
 	gSavedPerAccountSettings.setBOOL("ConversationsMessagePaneCollapsed", mMessagesPane->isCollapsed());
 	gSavedPerAccountSettings.setBOOL("ConversationsParticipantListCollapsed", !isParticipantListExpanded());
 
-	if (!LLSingleton<LLIMMgr>::destroyed())
+	if (LLIMMgr::instanceExists())
 	{
 		LLIMMgr::getInstance()->removeSessionObserver(this);
 	}
@@ -237,7 +237,7 @@ BOOL LLFloaterIMContainer::postBuild()
 
 	collapseMessagesPane(gSavedPerAccountSettings.getBOOL("ConversationsMessagePaneCollapsed"));
 	collapseConversationsPane(gSavedPerAccountSettings.getBOOL("ConversationsListPaneCollapsed"), false);
-	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
+	LLAvatarNameCache::getInstance()->addUseDisplayNamesCallback(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
 	mMicroChangedSignal = LLVoiceClient::getInstance()->MicroChangedCallback(boost::bind(&LLFloaterIMContainer::updateSpeakBtnState, this));
 
 	if (! mMessagesPane->isCollapsed() && ! mConversationsPane->isCollapsed())
@@ -267,7 +267,10 @@ BOOL LLFloaterIMContainer::postBuild()
 	// We'll take care of view updates on idle
 	gIdleCallbacks.addFunction(idle, this);
 	// When display name option change, we need to reload all participant names
-	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLFloaterIMContainer::processParticipantsStyleUpdate, this));
+	LLAvatarNameCache::getInstance()->addUseDisplayNamesCallback(boost::bind(&LLFloaterIMContainer::processParticipantsStyleUpdate, this));
+
+    mParticipantRefreshTimer.setTimerExpirySec(0);
+    mParticipantRefreshTimer.start();
 
 	return TRUE;
 }
@@ -420,14 +423,66 @@ void LLFloaterIMContainer::processParticipantsStyleUpdate()
 void LLFloaterIMContainer::idle(void* user_data)
 {
 	LLFloaterIMContainer* self = static_cast<LLFloaterIMContainer*>(user_data);
-	
-	// Update the distance to agent in the nearby chat session if required
-	// Note: it makes no sense of course to update the distance in other session
-	if (self->mConversationViewModel.getSorter().getSortOrderParticipants() == LLConversationFilter::SO_DISTANCE)
-	{
-		self->setNearbyDistances();
-	}
-	self->mConversationsRoot->update();
+
+    if (!self->getVisible() || self->isMinimized())
+    {
+        return;
+    }
+    self->idleUpdate();
+}
+
+void LLFloaterIMContainer::idleUpdate()
+{
+    if (mTabContainer->getTabCount() == 0)
+    {
+        // Do not close the container when every conversation is torn off because the user
+        // still needs the conversation list. Simply collapse the message pane in that case.
+        collapseMessagesPane(true);
+    }
+
+    U32 sort_order = mConversationViewModel.getSorter().getSortOrderParticipants();
+
+    if (mParticipantRefreshTimer.hasExpired())
+    {
+        const LLConversationItem *current_session = getCurSelectedViewModelItem();
+        if (current_session)
+        {
+            // Update moderator options visibility
+            LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = current_session->getChildrenBegin();
+            LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = current_session->getChildrenEnd();
+            bool is_moderator = isGroupModerator();
+            bool can_ban = haveAbilityToBan();
+            while (current_participant_model != end_participant_model)
+            {
+                LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
+                participant_model->setModeratorOptionsVisible(is_moderator && participant_model->getUUID() != gAgentID);
+                participant_model->setGroupBanVisible(can_ban && participant_model->getUUID() != gAgentID);
+
+                current_participant_model++;
+            }
+            // Update floater's title as required by the currently selected session or use the default title
+            LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
+            setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
+        }
+
+        mParticipantRefreshTimer.setTimerExpirySec(1.0f);
+    }
+
+    // Update the distance to agent in the nearby chat session if required
+    // Note: it makes no sense of course to update the distance in other session
+    if (sort_order == LLConversationFilter::SO_DISTANCE)
+    {
+        // almost real-time updates
+        setNearbyDistances(); //calls arrange all
+    }
+    mConversationsRoot->update(); //arranges, resizes, heavy
+
+    // "Manually" resize of mConversationsPane: same as temporarity cancellation of the flag "auto_resize=false" for it
+    if (!mConversationsPane->isCollapsed() && mMessagesPane->isCollapsed())
+    {
+        LLRect stack_rect = mConversationsStack->getRect();
+        mConversationsPane->reshape(stack_rect.getWidth(), stack_rect.getHeight(), true);
+    }
 }
 
 bool LLFloaterIMContainer::onConversationModelEvent(const LLSD& event)
@@ -526,39 +581,6 @@ bool LLFloaterIMContainer::onConversationModelEvent(const LLSD& event)
 
 void LLFloaterIMContainer::draw()
 {
-	if (mTabContainer->getTabCount() == 0)
-	{
-		// Do not close the container when every conversation is torn off because the user
-		// still needs the conversation list. Simply collapse the message pane in that case.
-		collapseMessagesPane(true);
-	}
-	
-	const LLConversationItem *current_session = getCurSelectedViewModelItem();
-	if (current_session)
-	{
-		// Update moderator options visibility
-		LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = current_session->getChildrenBegin();
-		LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = current_session->getChildrenEnd();
-		while (current_participant_model != end_participant_model)
-		{
-			LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
-			participant_model->setModeratorOptionsVisible(isGroupModerator() && participant_model->getUUID() != gAgentID);
-			participant_model->setGroupBanVisible(haveAbilityToBan() && participant_model->getUUID() != gAgentID);
-
-			current_participant_model++;
-		}
-		// Update floater's title as required by the currently selected session or use the default title
-		LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
-		setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
-	}
-
-    // "Manually" resize of mConversationsPane: same as temporarity cancellation of the flag "auto_resize=false" for it
-	if (!mConversationsPane->isCollapsed() && mMessagesPane->isCollapsed())
-	{
-		LLRect stack_rect = mConversationsStack->getRect();
-		mConversationsPane->reshape(stack_rect.getWidth(), stack_rect.getHeight(), true);
-	}
-
 	LLFloater::draw();
 }
 
@@ -1150,11 +1172,11 @@ void LLFloaterIMContainer::doToParticipants(const std::string& command, uuid_vec
 		}
 		else if ("block_unblock" == command)
 		{
-			toggleMute(userID, LLMute::flagVoiceChat);
+			LLAvatarActions::toggleMute(userID, LLMute::flagVoiceChat);
 		}
 		else if ("mute_unmute" == command)
 		{
-			toggleMute(userID, LLMute::flagTextChat);
+			LLAvatarActions::toggleMute(userID, LLMute::flagTextChat);
 		}
 		else if ("selected" == command || "mute_all" == command || "unmute_all" == command)
 		{
@@ -1505,15 +1527,21 @@ bool LLFloaterIMContainer::checkContextMenuItem(const std::string& item, uuid_ve
 
 bool LLFloaterIMContainer::visibleContextMenuItem(const LLSD& userdata)
 {
+	const LLConversationItem *conversation_item = getCurSelectedViewModelItem();
+	if(!conversation_item)
+	{
+		return false;
+	}
+
 	const std::string& item = userdata.asString();
 
 	if ("show_mute" == item)
 	{
-		return !isMuted(getCurSelectedViewModelItem()->getUUID());
+		return !isMuted(conversation_item->getUUID());
 	}
 	else if ("show_unmute" == item)
 	{
-		return isMuted(getCurSelectedViewModelItem()->getUUID());
+		return isMuted(conversation_item->getUUID());
 	}
 
 	return true;
@@ -2090,23 +2118,6 @@ void LLFloaterIMContainer::toggleAllowTextChat(const LLUUID& participant_uuid)
 	}
 }
 
-void LLFloaterIMContainer::toggleMute(const LLUUID& participant_id, U32 flags)
-{
-        BOOL is_muted = LLMuteList::getInstance()->isMuted(participant_id, flags);
-        std::string name;
-        gCacheName->getFullName(participant_id, name);
-        LLMute mute(participant_id, name, LLMute::AGENT);
-
-        if (!is_muted)
-        {
-                LLMuteList::getInstance()->add(mute, flags);
-        }
-        else
-        {
-                LLMuteList::getInstance()->remove(mute, flags);
-        }
-}
-
 void LLFloaterIMContainer::openNearbyChat()
 {
 	// If there's only one conversation in the container and that conversation is the nearby chat
@@ -2287,6 +2298,7 @@ BOOL LLFloaterIMContainer::isFrontmost()
 // This is intentional so it doesn't confuse the user. onClickCloseBtn() closes the whole floater.
 void LLFloaterIMContainer::onClickCloseBtn(bool app_quitting/* = false*/)
 {
+	gSavedPerAccountSettings.setS32("ConversationsListPaneWidth", mConversationsPane->getRect().getWidth());
 	LLMultiFloater::closeFloater(app_quitting);
 }
 

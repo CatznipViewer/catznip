@@ -40,8 +40,19 @@ class LLVOAvatar;
 
 // devices
 
-typedef std::vector<std::string> LLVoiceDeviceList;	
+class LLVoiceDevice
+{
+  public:
+    std::string display_name; // friendly value for the user
+    std::string full_name;  // internal value for selection
 
+    LLVoiceDevice(const std::string& display_name, const std::string& full_name)
+        :display_name(display_name)
+        ,full_name(full_name)
+    {
+    };
+};
+typedef std::vector<LLVoiceDevice> LLVoiceDeviceList;
 
 class LLVoiceClientParticipantObserver
 {
@@ -109,6 +120,8 @@ public:
     virtual void setHidden(bool hidden)=0;  //  Hides the user from voice.
 
 	virtual const LLVoiceVersionInfo& getVersion()=0;
+	
+	virtual bool singletoneInstanceExists()=0;
 	
 	/////////////////////
 	/// @name Tuning
@@ -297,17 +310,16 @@ public:
 };
 
 
-class LLVoiceClient: public LLSingleton<LLVoiceClient>
+class LLVoiceClient: public LLParamSingleton<LLVoiceClient>
 {
+	LLSINGLETON(LLVoiceClient, LLPumpIO *pump);
 	LOG_CLASS(LLVoiceClient);
-public:
-	LLVoiceClient();	
 	~LLVoiceClient();
 
+public:
 	typedef boost::signals2::signal<void(void)> micro_changed_signal_t;
 	micro_changed_signal_t mMicroChangedSignal;
 
-	void init(LLPumpIO *pump);	// Call this once at application startup (creates connector)
 	void terminate();	// Call this to clean up during shutdown
 	
 	const LLVoiceVersionInfo getVersion();
@@ -405,8 +417,8 @@ public:
 	// PTT key triggering
 	void keyDown(KEY key, MASK mask);
 	void keyUp(KEY key, MASK mask);
-	void middleMouseState(bool down);
-	
+	void updateMouseState(S32 click, bool down);
+
 	boost::signals2::connection MicroChangedCallback(const micro_changed_signal_t::slot_type& cb ) { return mMicroChangedSignal.connect(cb); }
 
 	
@@ -459,6 +471,8 @@ public:
 	// Returns NULL if voice effects are not supported, or not enabled.
 	LLVoiceEffectInterface* getVoiceEffectInterface() const;
 	//@}
+private:
+	void init(LLPumpIO *pump);
 
 protected:
 	LLVoiceModuleInterface* mVoiceModule;
@@ -472,7 +486,7 @@ protected:
 	bool		mPTT;
 	
 	bool		mUsePTT;
-	bool		mPTTIsMiddleMouse;
+	S32			mPTTMouseButton;
 	KEY			mPTTKey;
 	bool		mPTTIsToggle;
 	bool		mUserPTTState;
@@ -485,6 +499,8 @@ protected:
  **/
 class LLSpeakerVolumeStorage : public LLSingleton<LLSpeakerVolumeStorage>
 {
+	LLSINGLETON(LLSpeakerVolumeStorage);
+	~LLSpeakerVolumeStorage();
 	LOG_CLASS(LLSpeakerVolumeStorage);
 public:
 
@@ -513,10 +529,6 @@ public:
 	void removeSpeakerVolume(const LLUUID& speaker_id);
 
 private:
-	friend class LLSingleton<LLSpeakerVolumeStorage>;
-	LLSpeakerVolumeStorage();
-	~LLSpeakerVolumeStorage();
-
 	const static std::string SETTINGS_FILE_NAME;
 
 	void load();

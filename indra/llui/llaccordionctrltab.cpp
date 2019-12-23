@@ -361,6 +361,7 @@ LLAccordionCtrlTab::LLAccordionCtrlTab(const LLAccordionCtrlTab::Params&p)
 {
 	mStoredOpenCloseState = false;
 	mWasStateStored = false;
+	mSkipChangesOnNotifyParent = false;
 	
 	mDropdownBGColor = LLColor4::white;
 	LLAccordionCtrlTabHeader::Params headerParams;
@@ -691,7 +692,7 @@ S32	LLAccordionCtrlTab::notifyParent(const LLSD& info)
 			
 			mExpandedHeight = height;
 			
-			if(isExpanded())
+			if(isExpanded() && !mSkipChangesOnNotifyParent)
 			{
 				LLRect panel_rect = getRect();
 				panel_rect.setLeftTopAndSize( panel_rect.mLeft, panel_rect.mTop, panel_rect.getWidth(), height);
@@ -822,6 +823,11 @@ BOOL LLAccordionCtrlTab::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 
 void LLAccordionCtrlTab::showAndFocusHeader()
 {
+	if (!mHeader)
+	{
+		return;
+	}
+
 	mHeader->setFocus(true);
 	mHeader->setSelected(mSelectionEnabled);
 
@@ -971,7 +977,7 @@ void LLAccordionCtrlTab::drawChild(const LLRect& root_rect,LLView* child)
 		LLRect screen_rect;
 		localRectToScreen(child->getRect(),&screen_rect);
 		
-		if ( root_rect.overlaps(screen_rect)  && LLUI::sDirtyRect.overlaps(screen_rect))
+		if ( root_rect.overlaps(screen_rect)  && LLUI::getInstance()->mDirtyRect.overlaps(screen_rect))
 		{
 			gGL.matrixMode(LLRender::MM_MODELVIEW);
 			LLUI::pushMatrix();

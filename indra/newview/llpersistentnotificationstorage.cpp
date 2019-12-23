@@ -36,11 +36,11 @@
 #include "llscriptfloater.h"
 #include "llviewermessage.h"
 #include "llviewernetwork.h"
-LLPersistentNotificationStorage::LLPersistentNotificationStorage()
-	: LLSingleton<LLPersistentNotificationStorage>()
-	, LLNotificationStorage("")
+LLPersistentNotificationStorage::LLPersistentNotificationStorage():
+	  LLNotificationStorage("")
 	, mLoaded(false)
 {
+    initialize();
 }
 
 LLPersistentNotificationStorage::~LLPersistentNotificationStorage()

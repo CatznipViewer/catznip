@@ -121,7 +121,6 @@ namespace {
         {
             // Prompt the user with the warning (so they know why things are failing)
             LLSD subs;
-            subs["[ERROR_REASON]"] = reason;
             // We do show long descriptions in the alert (unlikely to be readable). The description string will be in the log though.
             std::string description;
             if (result.has(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_CONTENT))
@@ -144,6 +143,16 @@ namespace {
             else
             {
                 description = result.asString();
+            }
+            std::string reason_lc = reason;
+            LLStringUtil::toLower(reason_lc);
+            if (!description.empty() && reason_lc.find("unknown") != std::string::npos)
+            {
+                subs["[ERROR_REASON]"] = "";
+            }
+            else
+            {
+                subs["[ERROR_REASON]"] = "'" + reason +"'\n";
             }
             subs["[ERROR_DESCRIPTION]"] = description;
             LLNotificationsUtil::add("MerchantTransactionFailed", subs);
@@ -210,7 +219,7 @@ namespace LLMarketplaceImport
         httpHeaders->append(HTTP_OUT_HEADER_CONNECTION, "Keep-Alive");
         httpHeaders->append(HTTP_OUT_HEADER_COOKIE, sMarketplaceCookie);
         httpHeaders->append(HTTP_OUT_HEADER_CONTENT_TYPE, HTTP_CONTENT_XML);
-        httpHeaders->append(HTTP_OUT_HEADER_USER_AGENT, LLViewerMedia::getCurrentUserAgent());
+        httpHeaders->append(HTTP_OUT_HEADER_USER_AGENT, LLViewerMedia::getInstance()->getCurrentUserAgent());
 
         LLSD result = httpAdapter->postAndSuspend(httpRequest, url, LLSD(), httpOpts, httpHeaders);
 
@@ -274,11 +283,11 @@ namespace LLMarketplaceImport
             httpHeaders->append(HTTP_OUT_HEADER_ACCEPT, "*/*");
             httpHeaders->append(HTTP_OUT_HEADER_COOKIE, sMarketplaceCookie);
             httpHeaders->append(HTTP_OUT_HEADER_CONTENT_TYPE, HTTP_CONTENT_LLSD_XML);
-            httpHeaders->append(HTTP_OUT_HEADER_USER_AGENT, LLViewerMedia::getCurrentUserAgent());
+            httpHeaders->append(HTTP_OUT_HEADER_USER_AGENT, LLViewerMedia::getInstance()->getCurrentUserAgent());
         }
         else
         {
-            httpHeaders = LLViewerMedia::getHttpHeaders();
+            httpHeaders = LLViewerMedia::getInstance()->getHttpHeaders();
         }
 
         LLSD result = httpAdapter->getAndSuspend(httpRequest, url, httpOpts, httpHeaders);
@@ -773,7 +782,9 @@ void LLMarketplaceData::getMerchantStatusCoro()
     std::string url = getSLMConnectURL("/merchant");
     if (url.empty())
     {
-        LL_INFOS("Marketplace") << "No marketplace capability on Sim" << LL_ENDL;
+        LL_WARNS("Marketplace") << "No marketplace capability on Sim" << LL_ENDL;
+        setSLMStatus(MarketplaceStatusCodes::MARKET_PLACE_CONNECTION_FAILURE);
+        return;
     }
 
     LLSD result = httpAdapter->getAndSuspend(httpRequest, url, httpOpts);

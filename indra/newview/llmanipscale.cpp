@@ -228,12 +228,16 @@ void LLManipScale::render()
 		const F32 BOX_HANDLE_BASE_SIZE		= 50.0f;   // box size in pixels = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR
 		const F32 BOX_HANDLE_BASE_FACTOR	= 0.2f;
 
+		//Assume that UI scale factor is equivalent for X and Y axis
+		F32 ui_scale_factor = LLUI::getScaleFactor().mV[VX];
+
 		if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 		{
 			for (S32 i = 0; i < NUM_MANIPULATORS; i++)
 			{
 				mBoxHandleSize[i] = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
 				mBoxHandleSize[i] /= gAgentCamera.mHUDCurZoom;
+				mBoxHandleSize[i] *= ui_scale_factor;
 			}
 		}
 		else
@@ -266,6 +270,7 @@ void LLManipScale::render()
 					// range == zero
 					mBoxHandleSize[i] = BOX_HANDLE_BASE_FACTOR;
 				}
+				mBoxHandleSize[i] *= ui_scale_factor;
 			}
 		}
 
@@ -749,6 +754,7 @@ void LLManipScale::renderBoxHandle( F32 x, F32 y, F32 z )
 {
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	LLGLDepthTest gls_depth(GL_FALSE);
+	LLGLDisable gls_stencil(GL_STENCIL_TEST);
 
 	gGL.pushMatrix();
 	{

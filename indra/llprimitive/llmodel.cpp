@@ -50,8 +50,12 @@ std::string model_names[] =
 const int MODEL_NAMES_LENGTH = sizeof(model_names) / sizeof(std::string);
 
 LLModel::LLModel(LLVolumeParams& params, F32 detail)
-	: LLVolume(params, detail), mNormalizedScale(1,1,1), mNormalizedTranslation(0,0,0)
-	, mPelvisOffset( 0.0f ), mStatus(NO_ERRORS), mSubmodelID(0)
+	: LLVolume(params, detail), 
+      mNormalizedScale(1,1,1), 
+      mNormalizedTranslation(0,0,0), 
+      mPelvisOffset( 0.0f ), 
+      mStatus(NO_ERRORS), 
+      mSubmodelID(0)
 {
 	mDecompID = -1;
 	mLocalID = -1;
@@ -272,6 +276,7 @@ void LLModel::normalizeVolumeFaces()
 			// We shrink the extents so
 			// that they fall within
 			// the unit cube.
+			// VFExtents change
 			face.mExtents[0].add(trans);
 			face.mExtents[0].mul(scale);
 
@@ -394,40 +399,6 @@ void LLModel::setVolumeFaceData(
 
 	U32 size = (num_indices*2+0xF)&~0xF;
 	LLVector4a::memcpyNonAliased16((F32*) face.mIndices, (F32*) ind.get(), size);
-}
-
-void LLModel::appendFaces(LLModel *model, LLMatrix4 &transform, LLMatrix4& norm_mat)
-{
-	if (mVolumeFaces.empty())
-	{
-		setNumVolumeFaces(1);
-	}
-
-	LLVolumeFace& face = mVolumeFaces[mVolumeFaces.size()-1];
-
-
-	for (S32 i = 0; i < model->getNumFaces(); ++i)
-	{
-		face.appendFace(model->getVolumeFace(i), transform, norm_mat);
-	}
-
-}
-
-void LLModel::appendFace(const LLVolumeFace& src_face, std::string src_material, LLMatrix4& mat, LLMatrix4& norm_mat)
-{
-	S32 rindex = getNumVolumeFaces()-1; 
-	if (rindex == -1 || 
-		mVolumeFaces[rindex].mNumVertices + src_face.mNumVertices >= 65536)
-	{ //empty or overflow will occur, append new face
-		LLVolumeFace cur_face;
-		cur_face.appendFace(src_face, mat, norm_mat);
-		addFace(cur_face);
-		mMaterialList.push_back(src_material);
-	}
-	else
-	{ //append to existing end face
-		mVolumeFaces.rbegin()->appendFace(src_face, mat, norm_mat);
-	}
 }
 
 void LLModel::addFace(const LLVolumeFace& face)
@@ -667,6 +638,7 @@ LLSD LLModel::writeModel(
 	const LLModel::Decomposition& decomp,
 	BOOL upload_skin,
 	BOOL upload_joints,
+    BOOL lock_scale_if_joint_position,
 	BOOL nowrite,
 	BOOL as_slm,
 	int submodel_id)
@@ -686,7 +658,7 @@ LLSD LLModel::writeModel(
 
 	if (skinning)
 	{ //write skinning block
-		mdl["skin"] = high->mSkinInfo.asLLSD(upload_joints);
+		mdl["skin"] = high->mSkinInfo.asLLSD(upload_joints, lock_scale_if_joint_position);
 	}
 
 	if (!decomp.mBaseHull.empty() ||
@@ -867,6 +839,7 @@ LLSD LLModel::writeModel(
 						S32 count = 0;
 						for (weight_list::iterator iter = weights.begin(); iter != weights.end(); ++iter)
 						{
+							// Note joint index cannot exceed 255.
 							if (iter->mJointIdx < 255 && iter->mJointIdx >= 0)
 							{
 								U8 idx = (U8) iter->mJointIdx;
@@ -1000,7 +973,7 @@ LLSD LLModel::writeModelToStream(std::ostream& ostr, LLSD& mdl, BOOL nowrite, BO
 
 LLModel::weight_list& LLModel::getJointInfluences(const LLVector3& pos)
 {
-	//1. If a vertex has been weighted then we'll find it via pos and return it's weight list
+	//1. If a vertex has been weighted then we'll find it via pos and return its weight list
 	weight_map::iterator iterPos = mSkinWeights.begin();
 	weight_map::iterator iterEnd = mSkinWeights.end();
 	
@@ -1028,8 +1001,11 @@ LLModel::weight_list& LLModel::getJointInfluences(const LLVector3& pos)
 	{  //no exact match found, get closest point
 		const F32 epsilon = 1e-5f;
 		weight_map::iterator iter_up = mSkinWeights.lower_bound(pos);
-		weight_map::iterator iter_down = ++iter_up;
-
+		weight_map::iterator iter_down = iter_up;
+		if (iter_up != mSkinWeights.end())
+		{
+			iter_down = ++iter_up;
+		}
 		weight_map::iterator best = iter_up;
 
 		F32 min_dist = (iter->first - pos).magVec();
@@ -1223,7 +1199,6 @@ bool LLModel::loadModel(std::istream& is)
 	}
 
 	return false;
-
 }
 
 bool LLModel::isMaterialListSubset( LLModel* ref )
@@ -1338,7 +1313,6 @@ bool LLModel::matchMaterialOrder(LLModel* ref, int& refFaceCnt, int& modelFaceCn
 	return true;
 }
 
-
 bool LLModel::loadSkinInfo(LLSD& header, std::istream &is)
 {
 	S32 offset = header["skin"]["offset"].asInteger();
@@ -1350,7 +1324,7 @@ bool LLModel::loadSkinInfo(LLSD& header, std::istream &is)
 
 		LLSD skin_data;
 
-		if (unzip_llsd(skin_data, is, size))
+		if (LLUZipHelper::unzip_llsd(skin_data, is, size) == LLUZipHelper::ZR_OK)
 		{
 			mSkinInfo.fromLLSD(skin_data);
 			return true;
@@ -1371,7 +1345,7 @@ bool LLModel::loadDecomposition(LLSD& header, std::istream& is)
 
 		LLSD data;
 
-		if (unzip_llsd(data, is, size))
+		if (LLUZipHelper::unzip_llsd(data, is, size) == LLUZipHelper::ZR_OK)
 		{
 			mPhysics.fromLLSD(data);
 			updateHullCenters();
@@ -1381,8 +1355,19 @@ bool LLModel::loadDecomposition(LLSD& header, std::istream& is)
 	return true;
 }
 
+LLMeshSkinInfo::LLMeshSkinInfo():
+    mPelvisOffset(0.0),
+    mLockScaleIfJointPosition(false),
+    mInvalidJointsScrubbed(false),
+    mJointNumsInitialized(false)
+{
+}
 
-LLMeshSkinInfo::LLMeshSkinInfo(LLSD& skin)
+LLMeshSkinInfo::LLMeshSkinInfo(LLSD& skin):
+    mPelvisOffset(0.0),
+    mLockScaleIfJointPosition(false),
+    mInvalidJointsScrubbed(false),
+    mJointNumsInitialized(false)
 {
 	fromLLSD(skin);
 }
@@ -1394,6 +1379,7 @@ void LLMeshSkinInfo::fromLLSD(LLSD& skin)
 		for (U32 i = 0; i < skin["joint_names"].size(); ++i)
 		{
 			mJointNames.push_back(skin["joint_names"][i]);
+            mJointNums.push_back(-1);
 		}
 	}
 
@@ -1446,9 +1432,18 @@ void LLMeshSkinInfo::fromLLSD(LLSD& skin)
 	{
 		mPelvisOffset = skin["pelvis_offset"].asReal();
 	}
+
+    if (skin.has("lock_scale_if_joint_position"))
+    {
+        mLockScaleIfJointPosition = skin["lock_scale_if_joint_position"].asBoolean();
+    }
+	else
+	{
+		mLockScaleIfJointPosition = false;
+	}
 }
 
-LLSD LLMeshSkinInfo::asLLSD(bool include_joints) const
+LLSD LLMeshSkinInfo::asLLSD(bool include_joints, bool lock_scale_if_joint_position) const
 {
 	LLSD ret;
 
@@ -1485,6 +1480,11 @@ LLSD LLMeshSkinInfo::asLLSD(bool include_joints) const
 				}
 			}
 		}
+
+        if (lock_scale_if_joint_position)
+        {
+            ret["lock_scale_if_joint_position"] = lock_scale_if_joint_position;
+        }
 
 		ret["pelvis_offset"] = mPelvisOffset;
 	}

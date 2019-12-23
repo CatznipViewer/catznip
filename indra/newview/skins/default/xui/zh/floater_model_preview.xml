@@ -4,6 +4,9 @@
 	<string name="status_parse_error">
 		錯誤：剖析 dae 時出錯，詳見記錄檔。
 	</string>
+	<string name="status_bind_shape_orientation">
+		警告：綁定形狀矩陣並未處於標準的「X-向前」方位。
+	</string>
 	<string name="status_material_mismatch">
 		錯誤：模型材料並非參考模型的子集合。
 	</string>
@@ -245,6 +248,7 @@
 				</text>
 				<check_box label="包含表皮重量" name="upload_skin"/>
 				<check_box label="包含接點位置" name="upload_joints"/>
+				<check_box label="若接點位置已定義，就鎖住比例" name="lock_scale_if_joint_position"/>
 				<text name="pelvis_offset_label">
 					Z 偏距（升高或降低化身）：
 				</text>

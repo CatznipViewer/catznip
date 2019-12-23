@@ -43,10 +43,9 @@ class LLPickInfo;
 
 class LLToolDragAndDrop : public LLTool, public LLSingleton<LLToolDragAndDrop>
 {
+	LLSINGLETON(LLToolDragAndDrop);
 public:
 	typedef boost::signals2::signal<void ()> enddrag_signal_t;
-
-	LLToolDragAndDrop();
 
 	// overridden from LLTool
 	virtual BOOL	handleMouseUp(S32 x, S32 y, MASK mask);
@@ -163,6 +162,8 @@ protected:
 									 MASK mask, BOOL drop);
 	EAcceptance dad3dRezObjectOnObject(LLViewerObject* obj, S32 face,
 									   MASK mask, BOOL drop);
+	EAcceptance dad3dRezCategoryOnObject(LLViewerObject* obj, S32 face,
+										 MASK mask, BOOL drop);
 	EAcceptance dad3dRezScript(LLViewerObject* obj, S32 face,
 							   MASK mask, BOOL drop);
 	EAcceptance dad3dTextureObject(LLViewerObject* obj, S32 face,
@@ -225,7 +226,7 @@ protected:
 	
 	// accessor that looks at permissions, copyability, and names of
 	// inventory items to determine if a drop would be ok.
-	static EAcceptance willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item);
+	static EAcceptance willObjectAcceptInventory(LLViewerObject* obj, LLInventoryItem* item, EDragAndDropType type = DAD_NONE);
 
 public:
 	// helper functions
@@ -281,8 +282,8 @@ private:
 	class LLDragAndDropDictionary : public LLSingleton<LLDragAndDropDictionary>,
 									public LLDictionary<EDragAndDropType, DragAndDropEntry>
 	{
+		LLSINGLETON(LLDragAndDropDictionary);
 	public:
-		LLDragAndDropDictionary();
 		dragOrDrop3dImpl get(EDragAndDropType dad_type, EDropTarget drop_target);
 	};
 };

@@ -320,7 +320,7 @@ BOOL LLNavigationBar::postBuild()
 	LLTeleportHistory::getInstance()->setHistoryChangedCallback(
 			boost::bind(&LLNavigationBar::onTeleportHistoryChanged, this));
 
-	LLHints::registerHintTarget("nav_bar", getHandle());
+	LLHints::getInstance()->registerHintTarget("nav_bar", getHandle());
 
 	mNavigationPanel = getChild<LLLayoutPanel>("navigation_layout_panel");
 	mFavoritePanel = getChild<LLLayoutPanel>("favorites_layout_panel");
@@ -443,6 +443,7 @@ void LLNavigationBar::onLocationSelection()
 			{
 				
 				gAgent.teleportViaLandmark( LLUUID(value["AssetUUID"].asString()));
+				mSaveToLocationHistory = true;
 				return;
 			}
 			else
@@ -453,6 +454,7 @@ void LLNavigationBar::onLocationSelection()
 				if (!landmark_items.empty())
 				{
 					gAgent.teleportViaLandmark( landmark_items[0]->getAssetUUID());
+					mSaveToLocationHistory = true;
 					return; 
 				}
 			}

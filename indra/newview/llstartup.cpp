@@ -28,6 +28,7 @@
 
 #include "llappviewer.h"
 #include "llstartup.h"
+#include "llcallstack.h"
 
 #if LL_WINDOWS
 #	include <process.h>		// _spawnl()
@@ -55,6 +56,7 @@
 #include "llerrorcontrol.h"
 #include "llfloaterreg.h"
 #include "llfocusmgr.h"
+#include "llfloatergridstatus.h"
 #include "llfloaterimsession.h"
 #include "lllocationhistory.h"
 #include "llimageworker.h"
@@ -111,7 +113,7 @@
 #include "llgroupmgr.h"
 #include "llhudeffecttrail.h"
 #include "llhudmanager.h"
-#include "llimagebmp.h"
+#include "llimage.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -160,6 +162,7 @@
 #include "llviewerparcelmgr.h"
 #include "llviewerregion.h"
 #include "llviewerstats.h"
+#include "llviewerstatsrecorder.h"
 #include "llviewerthrottle.h"
 #include "llviewerwindow.h"
 #include "llvoavatar.h"
@@ -193,6 +196,9 @@
 #include "llstartuplistener.h"
 #include "lltoolbarview.h"
 #include "llexperiencelog.h"
+#include "llcleanup.h"
+
+#include "llstacktrace.h"
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -204,8 +210,8 @@
 bool gAgentMovementCompleted = false;
 S32  gMaxAgentGroups;
 
-std::string SCREEN_HOME_FILENAME = "screen_home.bmp";
-std::string SCREEN_LAST_FILENAME = "screen_last.bmp";
+const std::string SCREEN_HOME_FILENAME = "screen_home%s.png";
+const std::string SCREEN_LAST_FILENAME = "screen_last%s.png";
 
 LLPointer<LLViewerTexture> gStartTexture;
 
@@ -241,6 +247,7 @@ static bool mLoginStatePastUI = false;
 
 const S32 DEFAULT_MAX_AGENT_GROUPS = 42;
 const S32 ALLOWED_MAX_AGENT_GROUPS = 500;
+const F32 STATE_AGENT_WAIT_TIMEOUT = 240; //seconds
 
 boost::scoped_ptr<LLEventPump> LLStartUp::sStateWatcher(new LLEventStream("StartupState"));
 boost::scoped_ptr<LLStartupListener> LLStartUp::sListener(new LLStartupListener());
@@ -252,6 +259,7 @@ boost::scoped_ptr<LLViewerStats::PhaseMap> LLStartUp::sPhases(new LLViewerStats:
 
 void login_show();
 void login_callback(S32 option, void* userdata);
+void show_release_notes_if_required();
 void show_first_run_dialog();
 bool first_run_dialog_callback(const LLSD& notification, const LLSD& response);
 void set_startup_status(const F32 frac, const std::string& string, const std::string& msg);
@@ -307,6 +315,13 @@ void set_flags_and_update_appearance()
 // true when all initialization done.
 bool idle_startup()
 {
+	if (gViewerWindow == NULL)
+	{
+		// We expect window to be initialized
+		LL_WARNS_ONCE() << "gViewerWindow is not initialized" << LL_ENDL;
+		return false; // No world yet
+	}
+
 	const F32 PRECACHING_DELAY = gSavedSettings.getF32("PrecachingDelay");
 	static LLTimer timeout;
 
@@ -334,12 +349,20 @@ bool idle_startup()
 	// to work.
 	gIdleCallbacks.callFunctions();
 	gViewerWindow->updateUI();
+
+	// There is a crash on updateClass, this is an attempt to get more information
+	if (LLMortician::graveyardCount())
+	{
+		std::stringstream log_stream;
+		LLMortician::logClass(log_stream);
+		LL_INFOS() << log_stream.str() << LL_ENDL;
+	}
 	LLMortician::updateClass();
 
 	const std::string delims (" ");
 	std::string system;
 	int begIdx, endIdx;
-	std::string osString = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	std::string osString = LLOSInfo::instance().getOSStringSimple();
 
 	begIdx = osString.find_first_not_of (delims);
 	endIdx = osString.find_first_of (delims, begIdx);
@@ -466,8 +489,7 @@ bool idle_startup()
 			if (!found_template)
 			{
 				message_template_path =
-					gDirUtilp->getExpandedFilename(LL_PATH_EXECUTABLE,
-												   "../Resources/app_settings",
+					gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,
 												   "message_template.msg");
 				found_template = LLFile::fopen(message_template_path.c_str(), "r");		/* Flawfinder: ignore */
 			}		
@@ -678,9 +700,16 @@ bool idle_startup()
 		}
 		else if (gSavedSettings.getBOOL("AutoLogin"))  
 		{
+			// Log into last account
 			gRememberPassword = TRUE;
 			gSavedSettings.setBOOL("RememberPassword", TRUE);                                                      
 			show_connect_box = false;    			
+		}
+		else if (gSavedSettings.getLLSD("UserLoginInfo").size() == 3)
+		{
+			// Console provided login&password
+			gRememberPassword = gSavedSettings.getBOOL("RememberPassword");
+			show_connect_box = false;
 		}
 		else 
 		{
@@ -731,10 +760,10 @@ bool idle_startup()
 		if (gLoginMenuBarView == NULL)
 		{
 			LL_DEBUGS("AppInit") << "initializing menu bar" << LL_ENDL;
-			initialize_edit_menu();
 			initialize_spellcheck_menu();
 			init_menus();
 		}
+		show_release_notes_if_required();
 
 		if (show_connect_box)
 		{
@@ -752,7 +781,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull())
+			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
 			{
 				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
@@ -771,7 +800,7 @@ bool idle_startup()
 					LL_DEBUGS("AppInit") << "FirstLoginThisInstall off" << LL_ENDL;
 				}
 			}
-
+			display_startup();
 			LLStartUp::setStartupState( STATE_LOGIN_WAIT );		// Wait for user input
 		}
 		else
@@ -812,7 +841,8 @@ bool idle_startup()
 
 		// Don't do anything.  Wait for the login view to call the login_callback,
 		// which will push us to the next state.
-		display_startup();
+
+		// display() function will be the one to run display_startup()
 		// Sleep so we don't spin the CPU
 		ms_sleep(1);
 		return FALSE;
@@ -872,8 +902,13 @@ bool idle_startup()
 		LLFile::mkdir(gDirUtilp->getLindenUserDir());
 
 		// As soon as directories are ready initialize notification storages
-		LLPersistentNotificationStorage::getInstance()->initialize();
-		LLDoNotDisturbNotificationStorage::getInstance()->initialize();
+		if (!LLPersistentNotificationStorage::instanceExists())
+		{
+			// check existance since this part of code can be reached
+			// twice due to login failures
+			LLPersistentNotificationStorage::initParamSingleton();
+			LLDoNotDisturbNotificationStorage::initParamSingleton();
+		}
 
 		// Set PerAccountSettingsFile to the default value.
 		gSavedSettings.setString("PerAccountSettingsFile",
@@ -946,8 +981,7 @@ bool idle_startup()
 		// Load Avatars icons cache
 		LLAvatarIconIDCache::getInstance()->load();
 		
-		// Load media plugin cookies
-		LLViewerMedia::loadCookieFile();
+		LLRenderMuteList::getInstance()->loadFromFile();
 
 		//-------------------------------------------------
 		// Handle startup progress screen
@@ -1009,7 +1043,6 @@ bool idle_startup()
 		login->setSerialNumber(LLAppViewer::instance()->getSerialNumber());
 		login->setLastExecEvent(gLastExecEvent);
 		login->setLastExecDuration(gLastExecDuration);
-		login->setUpdaterLauncher(boost::bind(&LLAppViewer::launchUpdater, LLAppViewer::instance()));
 
 		// This call to LLLoginInstance::connect() starts the 
 		// authentication process.
@@ -1134,7 +1167,7 @@ bool idle_startup()
 
 						}
 					}
-					else 
+					else if (!message.empty())
 					{
 						// This wasn't a certificate error, so throw up the normal
 						// notificatioin message.
@@ -1201,14 +1234,13 @@ bool idle_startup()
 		//
 		// Initialize classes w/graphics stuff.
 		//
+		LLViewerStatsRecorder::instance(); // Since textures work in threads
 		gTextureList.doPrefetchImages();		
 		display_startup();
 
 		LLSurface::initClasses();
 		display_startup();
 
-
-		LLFace::initClass();
 		display_startup();
 
 		LLDrawable::initClass();
@@ -1218,7 +1250,7 @@ bool idle_startup()
 		LLPostProcess::initClass();
 		display_startup();
 
-		LLAvatarAppearance::initClass();
+        LLAvatarAppearance::initClass("avatar_lad.xml","avatar_skeleton.xml");
 		display_startup();
 
 		LLViewerObject::initVOClasses();
@@ -1270,9 +1302,13 @@ bool idle_startup()
 		LLStartUp::initExperiences();
 
 		display_startup();
+
+		// If logging should be enebled, turns it on and loads history from disk
+		// Note: does not happen on init of singleton because preferences can use
+		// this instance without logging in
+		LLConversationLog::getInstance()->initLoggingState();
+
 		LLStartUp::setStartupState( STATE_MULTIMEDIA_INIT );
-		
-		LLConversationLog::getInstance();
 
 		return FALSE;
 	}
@@ -1442,6 +1478,7 @@ bool idle_startup()
 		LLGLState::checkStates();
 		LLGLState::checkTextureChannels();
 
+		LLEnvManagerNew::getInstance()->usePrefs(); // Load all presets and settings
 		gSky.init(initial_sun_direction);
 
 		LLGLState::checkStates();
@@ -1591,6 +1628,20 @@ bool idle_startup()
 			LLStartUp::setStartupState( STATE_INVENTORY_SEND );
 		}
 		display_startup();
+
+		if (!gAgentMovementCompleted && timeout.getElapsedTimeF32() > STATE_AGENT_WAIT_TIMEOUT)
+		{
+			LL_WARNS("AppInit") << "Backing up to login screen!" << LL_ENDL;
+			if (gRememberPassword)
+			{
+				LLNotificationsUtil::add("LoginPacketNeverReceived", LLSD(), LLSD(), login_alert_status);
+			}
+			else
+			{
+				LLNotificationsUtil::add("LoginPacketNeverReceivedNoTP", LLSD(), LLSD(), login_alert_status);
+			}
+			reset_login();
+		}
 		return FALSE;
 	}
 
@@ -1857,6 +1908,8 @@ bool idle_startup()
 		gSavedSettings.setBOOL("FirstLoginThisInstall", FALSE);
 
 		LLFloaterReg::showInitialVisibleInstances();
+
+		LLFloaterGridStatus::getInstance()->startGridStatusTimer();
 
 		display_startup();
 
@@ -2239,6 +2292,24 @@ void login_callback(S32 option, void *userdata)
 	}
 }
 
+/**
+* Check if user is running a new version of the viewer.
+* Display the Release Notes if it's not overriden by the "UpdaterShowReleaseNotes" setting.
+*/
+void show_release_notes_if_required()
+{
+    static bool release_notes_shown = false;
+    if (!release_notes_shown && (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
+        && LLVersionInfo::getViewerMaturity() != LLVersionInfo::TEST_VIEWER // don't show Release Notes for the test builds
+        && gSavedSettings.getBOOL("UpdaterShowReleaseNotes")
+        && !gSavedSettings.getBOOL("FirstLoginThisInstall"))
+    {
+        LLSD info(LLAppViewer::instance()->getViewerInfo());
+        LLWeb::loadURLInternal(info["VIEWER_RELEASE_NOTES_URL"]);
+        release_notes_shown = true;
+    }
+}
+
 void show_first_run_dialog()
 {
 	LLNotificationsUtil::add("FirstRun", LLSD(), LLSD(), first_run_dialog_callback);
@@ -2303,7 +2374,14 @@ void use_circuit_callback(void**, S32 result)
 		{
 			// Make sure user knows something bad happened. JC
 			LL_WARNS("AppInit") << "Backing up to login screen!" << LL_ENDL;
-			LLNotificationsUtil::add("LoginPacketNeverReceived", LLSD(), LLSD(), login_alert_status);
+			if (gRememberPassword)
+			{
+				LLNotificationsUtil::add("LoginPacketNeverReceived", LLSD(), LLSD(), login_alert_status);
+			}
+			else
+			{
+				LLNotificationsUtil::add("LoginPacketNeverReceivedNoTP", LLSD(), LLSD(), login_alert_status);
+			}
 			reset_login();
 		}
 		else
@@ -2345,6 +2423,7 @@ void register_viewer_callbacks(LLMessageSystem* msg)
 	msg->setHandlerFuncFast(_PREHASH_NameValuePair,			process_name_value);
 	msg->setHandlerFuncFast(_PREHASH_RemoveNameValuePair,	process_remove_name_value);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAnimation,		process_avatar_animation);
+	msg->setHandlerFuncFast(_PREHASH_ObjectAnimation,		process_object_animation);
 	msg->setHandlerFuncFast(_PREHASH_AvatarAppearance,		process_avatar_appearance);
 	msg->setHandlerFuncFast(_PREHASH_CameraConstraint,		process_camera_constraint);
 	msg->setHandlerFuncFast(_PREHASH_AvatarSitResponse,		process_avatar_sit_response);
@@ -2519,6 +2598,34 @@ bool callback_choose_gender(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+std::string get_screen_filename(const std::string& pattern)
+{
+    if (LLGridManager::getInstance()->isInProductionGrid())
+    {
+        return llformat(pattern.c_str(), "");
+    }
+    else
+    {
+        const std::string& grid_id_str = LLGridManager::getInstance()->getGridId();
+        const std::string& grid_id_lower = utf8str_tolower(grid_id_str);
+        std::string grid = "." + grid_id_lower;
+        return llformat(pattern.c_str(), grid.c_str());
+    }
+}
+
+//static
+std::string LLStartUp::getScreenLastFilename()
+{
+    return get_screen_filename(SCREEN_LAST_FILENAME);
+}
+
+//static
+std::string LLStartUp::getScreenHomeFilename()
+{
+    return get_screen_filename(SCREEN_HOME_FILENAME);
+}
+
+//static
 void LLStartUp::loadInitialOutfit( const std::string& outfit_folder_name,
 								   const std::string& gender_name )
 {
@@ -2612,19 +2719,32 @@ void init_start_screen(S32 location_id)
 
 	LL_DEBUGS("AppInit") << "Loading startup bitmap..." << LL_ENDL;
 
+	U8 image_codec = IMG_CODEC_PNG;
 	std::string temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter();
 
 	if ((S32)START_LOCATION_ID_LAST == location_id)
 	{
-		temp_str += SCREEN_LAST_FILENAME;
+		temp_str += LLStartUp::getScreenLastFilename();
 	}
 	else
 	{
-		temp_str += SCREEN_HOME_FILENAME;
+		std::string path = temp_str + LLStartUp::getScreenHomeFilename();
+		
+		if (!gDirUtilp->fileExists(path) && LLGridManager::getInstance()->isInProductionGrid())
+		{
+			// Fallback to old file, can be removed later
+			// Home image only sets when user changes home, so it will take time for users to switch to pngs
+			temp_str += "screen_home.bmp";
+			image_codec = IMG_CODEC_BMP;
+		}
+		else
+		{
+			temp_str = path;
+		}
 	}
 
-	LLPointer<LLImageBMP> start_image_bmp = new LLImageBMP;
-	
+	LLPointer<LLImageFormatted> start_image_frmted = LLImageFormatted::createFromType(image_codec);
+
 	// Turn off start screen to get around the occasional readback 
 	// driver bug
 	if(!gSavedSettings.getBOOL("UseStartScreen"))
@@ -2632,18 +2752,18 @@ void init_start_screen(S32 location_id)
 		LL_INFOS("AppInit")  << "Bitmap load disabled" << LL_ENDL;
 		return;
 	}
-	else if(!start_image_bmp->load(temp_str) )
+	else if(!start_image_frmted->load(temp_str) )
 	{
 		LL_WARNS("AppInit") << "Bitmap load failed" << LL_ENDL;
 		gStartTexture = NULL;
 	}
 	else
 	{
-		gStartImageWidth = start_image_bmp->getWidth();
-		gStartImageHeight = start_image_bmp->getHeight();
+		gStartImageWidth = start_image_frmted->getWidth();
+		gStartImageHeight = start_image_frmted->getHeight();
 
 		LLPointer<LLImageRaw> raw = new LLImageRaw;
-		if (!start_image_bmp->decode(raw, 0.0f))
+		if (!start_image_frmted->decode(raw, 0.0f))
 		{
 			LL_WARNS("AppInit") << "Bitmap decode failed" << LL_ENDL;
 			gStartTexture = NULL;
@@ -2725,6 +2845,7 @@ void LLStartUp::postStartupState()
 	stateInfo["str"] = getStartupStateString();
 	stateInfo["enum"] = gStartupState;
 	sStateWatcher->post(stateInfo);
+	gDebugInfo["StartupState"] = getStartupStateString();
 }
 
 
@@ -2757,9 +2878,6 @@ void LLStartUp::multimediaInit()
 	std::string msg = LLTrans::getString("LoginInitializingMultimedia");
 	set_startup_status(0.42f, msg.c_str(), gAgent.mMOTD.c_str());
 	display_startup();
-
-	// LLViewerMedia::initClass();
-	LLViewerParcelMedia::initClass();
 }
 
 void LLStartUp::fontInit()
@@ -2787,9 +2905,10 @@ void LLStartUp::initNameCache()
 
 	// Start cache in not-running state until we figure out if we have
 	// capabilities for display name lookup
-	LLAvatarNameCache::initClass(false,gSavedSettings.getBOOL("UsePeopleAPI"));
-	LLAvatarNameCache::setUseDisplayNames(gSavedSettings.getBOOL("UseDisplayNames"));
-	LLAvatarNameCache::setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
+	LLAvatarNameCache* cache_inst = LLAvatarNameCache::getInstance();
+	cache_inst->setUsePeopleAPI(gSavedSettings.getBOOL("UsePeopleAPI"));
+	cache_inst->setUseDisplayNames(gSavedSettings.getBOOL("UseDisplayNames"));
+	cache_inst->setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
 }
 
 
@@ -2804,8 +2923,6 @@ void LLStartUp::initExperiences()
 
 void LLStartUp::cleanupNameCache()
 {
-	LLAvatarNameCache::cleanupClass();
-
 	delete gCacheName;
 	gCacheName = NULL;
 }
@@ -3021,7 +3138,7 @@ bool LLStartUp::startLLProxy()
 		}
 		else
 		{
-			LL_WARNS("Proxy") << "Invalid other HTTP proxy configuration."<< LL_ENDL;
+			LL_WARNS("Proxy") << "Invalid other HTTP proxy configuration: " << httpProxyType << LL_ENDL;
 
 			// Set the missing or wrong configuration back to something valid.
 			gSavedSettings.setString("HttpProxyType", "None");
@@ -3494,7 +3611,7 @@ bool process_login_success_response()
 	if(!openid_url.empty())
 	{
 		std::string openid_token = response["openid_token"];
-		LLViewerMedia::openIDSetup(openid_url, openid_token);
+		LLViewerMedia::getInstance()->openIDSetup(openid_url, openid_token);
 	}
 
 	gMaxAgentGroups = DEFAULT_MAX_AGENT_GROUPS;

@@ -502,10 +502,6 @@ void LLPanelPlaceProfile::displaySelectedParcelInfo(LLParcel* parcel,
 
 			if(!parcel->getGroupID().isNull())
 			{
-				// FIXME: Using parcel group as region group.
-				gCacheName->getGroup(parcel->getGroupID(),
-								boost::bind(&LLPanelPlaceInfo::onNameCache, mRegionGroupText, _2));
-
 				std::string owner =
 					LLSLURL("group", parcel->getGroupID(), "inspect").getSLURLString();
 				mParcelOwner->setText(owner);
@@ -524,11 +520,19 @@ void LLPanelPlaceProfile::displaySelectedParcelInfo(LLParcel* parcel,
 				LLSLURL("agent", parcel->getOwnerID(), "inspect").getSLURLString();
 			mParcelOwner->setText(parcel_owner);
 			LLAvatarNameCache::get(region->getOwner(), boost::bind(&LLPanelPlaceInfo::onAvatarNameCache, _1, _2, mRegionOwnerText));
+			mRegionGroupText->setText( getString("none_text"));
 		}
 
 		if(LLParcel::OS_LEASE_PENDING == parcel->getOwnershipStatus())
 		{
 			mRegionOwnerText->setText(mRegionOwnerText->getText() + getString("sale_pending_text"));
+		}
+
+		if(!parcel->getGroupID().isNull())
+		{
+			// FIXME: Using parcel group as region group.
+			gCacheName->getGroup(parcel->getGroupID(),
+							boost::bind(&LLPanelPlaceInfo::onNameCache, mRegionGroupText, _2));
 		}
 	}
 
@@ -559,11 +563,8 @@ void LLPanelPlaceProfile::displaySelectedParcelInfo(LLParcel* parcel,
 			mSaleToText->setText(getString("anyone"));
 		}
 
-		const U8* sign = (U8*)getString("price_text").c_str();
-		const U8* sqm = (U8*)getString("area_text").c_str();
-
-		mSalesPriceText->setText(llformat("%s%d ", sign, parcel->getSalePrice()));
-		mAreaText->setText(llformat("%d %s", area, sqm));
+		mSalesPriceText->setText(llformat("%s%d ", getString("price_text").c_str(), parcel->getSalePrice()));
+		mAreaText->setText(llformat("%d %s", area, getString("area_text").c_str()));
 		mTrafficText->setText(llformat("%.0f", dwell));
 
 		// Can't have more than region max tasks, regardless of parcel
@@ -571,10 +572,7 @@ void LLPanelPlaceProfile::displaySelectedParcelInfo(LLParcel* parcel,
 		S32 primitives = llmin(ll_round(parcel->getMaxPrimCapacity() * parcel->getParcelPrimBonus()),
 							   (S32)region->getMaxTasks());
 
-		const U8* available = (U8*)getString("available").c_str();
-		const U8* allocated = (U8*)getString("allocated").c_str();
-
-		mPrimitivesText->setText(llformat("%d %s, %d %s", primitives, available, parcel->getPrimCount(), allocated));
+		mPrimitivesText->setText(llformat("%d %s, %d %s", primitives, getString("available").c_str(), parcel->getPrimCount(), getString("allocated").c_str()));
 
 		if (parcel->getAllowOtherScripts())
 		{

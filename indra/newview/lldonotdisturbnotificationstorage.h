@@ -45,17 +45,16 @@ public:
     BOOL tick();
 };
 
-class LLDoNotDisturbNotificationStorage : public LLSingleton<LLDoNotDisturbNotificationStorage>, public LLNotificationStorage
+class LLDoNotDisturbNotificationStorage : public LLParamSingleton<LLDoNotDisturbNotificationStorage>, public LLNotificationStorage
 {
+	LLSINGLETON(LLDoNotDisturbNotificationStorage);
+	~LLDoNotDisturbNotificationStorage();
+
 	LOG_CLASS(LLDoNotDisturbNotificationStorage);
 public:
     static const char * toastName;
     static const char * offerName;
 
-	LLDoNotDisturbNotificationStorage();
-	~LLDoNotDisturbNotificationStorage();
-
-	void initialize();
     bool getDirty();
     void resetDirty();
 	void saveNotifications();
@@ -66,6 +65,8 @@ public:
 protected:
 
 private:
+    void initialize();
+
     bool mDirty;
     LLDoNotDisturbNotificationStorageTimer mTimer;
 

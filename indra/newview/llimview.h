@@ -33,6 +33,7 @@
 
 #include "lllogchat.h"
 #include "llvoicechannel.h"
+#include "llinitdestroyclass.h"
 
 #include "llcoros.h"
 #include "lleventcoro.h"
@@ -61,6 +62,7 @@ private:
  */
 class LLIMModel :  public LLSingleton<LLIMModel>
 {
+	LLSINGLETON(LLIMModel);
 public:
 
 	struct LLIMSession : public boost::signals2::trackable
@@ -151,7 +153,6 @@ public:
 	};
 	
 
-	LLIMModel();
 
 	/** Session id to session object */
 	std::map<LLUUID, LLIMSession*> mId2SessionMap;
@@ -312,6 +313,7 @@ public:
 
 class LLIMMgr : public LLSingleton<LLIMMgr>
 {
+	LLSINGLETON(LLIMMgr);
 	friend class LLIMModel;
 
 public:
@@ -322,8 +324,6 @@ public:
 		INVITATION_TYPE_IMMEDIATE = 2
 	};
 
-	LLIMMgr();
-	virtual ~LLIMMgr() {};
 
 	// Add a message to a session. The session can keyed to sesion id
 	// or agent id.
@@ -391,8 +391,8 @@ public:
 		const std::string& session_handle = LLStringUtil::null,
 		const std::string& session_uri = LLStringUtil::null);
 
-	void processIMTypingStart(const LLIMInfo* im_info);
-	void processIMTypingStop(const LLIMInfo* im_info);
+	void processIMTypingStart(const LLUUID& from_id, const EInstantMessage im_type);
+	void processIMTypingStop(const LLUUID& from_id, const EInstantMessage im_type);
 
 	// automatically start a call once the session has initialized
 	void autoStartCallOnStartup(const LLUUID& session_id);
@@ -471,9 +471,9 @@ private:
 	void noteOfflineUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
 	void noteMutedUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
 
-	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
+	void processIMTypingCore(const LLUUID& from_id, const EInstantMessage im_type, BOOL typing);
 
-	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const std::string& name, bool is_group);
+	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const LLAvatarName& name);
 
 	void notifyObserverSessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, bool has_offline_msg);
     //Triggers when a session has already been added
@@ -499,22 +499,26 @@ private:
 	LLSD mPendingAgentListUpdates;
 };
 
-class LLCallDialogManager : public LLInitClass<LLCallDialogManager>
+class LLCallDialogManager : public LLSingleton<LLCallDialogManager>
 {
-public:
-	LLCallDialogManager();
+	LLSINGLETON(LLCallDialogManager);
 	~LLCallDialogManager();
-
-	static void initClass();
+public:
+	// static for convinience
 	static void onVoiceChannelChanged(const LLUUID &session_id);
 	static void onVoiceChannelStateChanged(const LLVoiceChannel::EState& old_state, const LLVoiceChannel::EState& new_state, const LLVoiceChannel::EDirection& direction, bool ended_by_agent);
 
+private:
+	void initSingleton();
+	void onVoiceChannelChangedInt(const LLUUID &session_id);
+	void onVoiceChannelStateChangedInt(const LLVoiceChannel::EState& old_state, const LLVoiceChannel::EState& new_state, const LLVoiceChannel::EDirection& direction, bool ended_by_agent);
+
 protected:
-	static std::string sPreviousSessionlName;
-	static LLIMModel::LLIMSession::SType sPreviousSessionType;
-	static std::string sCurrentSessionlName;
-	static LLIMModel::LLIMSession* sSession;
-	static LLVoiceChannel::EState sOldState;
+	std::string mPreviousSessionlName;
+	LLIMModel::LLIMSession::SType mPreviousSessionType;
+	std::string mCurrentSessionlName;
+	LLIMModel::LLIMSession* mSession;
+	LLVoiceChannel::EState mOldState;
 };
 
 class LLCallDialog : public LLDockableFloater

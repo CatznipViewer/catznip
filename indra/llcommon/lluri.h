@@ -121,6 +121,14 @@ public:
 	/** @name Escaping Utilities */
 	//@{
 	/**
+	 * @brief 'Escape' symbol into stream
+	 *
+	 * @param ostr Output stream.
+	 * @param val Symbol to encode.
+	 */
+	static void encodeCharacter(std::ostream& ostr, std::string::value_type val);
+
+	/**
 	 * @brief Escape the string passed except for unreserved
 	 *
 	 *  ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
@@ -148,6 +156,14 @@ public:
 		const std::string& str,
 		const std::string& allowed,
 		bool is_allowed_sorted = false);
+
+	/**
+	 * @brief Break string into data part and path or sheme
+	 * and escape path (if present) and data.
+	 * Data part is not allowed to have path related symbols
+	 * @param str The raw URI to escape.
+	 */
+	static std::string escapePathAndData(const std::string &str);
 
 	/**
 	 * @brief unescape an escaped URI string.

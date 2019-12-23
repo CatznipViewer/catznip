@@ -311,7 +311,7 @@ void LLOutfitsList::onSetSelectedOutfitByUUID(const LLUUID& outfit_uuid)
 			tab->setFocus(TRUE);
 			ChangeOutfitSelection(list, outfit_uuid);
 
-			tab->setDisplayChildren(true);
+			tab->changeOpenClose(false);
 		}
 	}
 }
@@ -621,8 +621,14 @@ void LLOutfitsList::applyFilterToTab(
 
 bool LLOutfitsList::canWearSelected()
 {
+	if (!isAgentAvatarValid())
+	{
+		return false;
+	}
+
 	uuid_vec_t selected_items;
 	getSelectedItemsUUIDs(selected_items);
+	S32 nonreplacable_objects = 0;
 
 	for (uuid_vec_t::const_iterator it = selected_items.begin(); it != selected_items.end(); ++it)
 	{
@@ -633,10 +639,21 @@ bool LLOutfitsList::canWearSelected()
 		{
 			return false;
 		}
+
+		const LLViewerInventoryItem* item = gInventory.getItem(id);
+		if (!item)
+		{
+			return false;
+		}
+
+		if (item->getType() == LLAssetType::AT_OBJECT)
+		{
+			nonreplacable_objects++;
+		}
 	}
 
-	// All selected items can be worn.
-	return true;
+	// All selected items can be worn. But do we have enough space for them?
+	return nonreplacable_objects == 0 || gAgentAvatarp->canAttachMoreObjects(nonreplacable_objects);
 }
 
 void LLOutfitsList::wearSelectedItems()
@@ -872,8 +889,15 @@ void LLOutfitListBase::refreshList(const LLUUID& category_id)
         ++items_iter)
     {
         LLViewerInventoryCategory *cat = gInventory.getCategory(*items_iter);
-        if (!cat) return;
-
+        if (!cat)
+        {
+            LLInventoryObject* obj = gInventory.getObject(*items_iter);
+            if(!obj || (obj->getType() != LLAssetType::AT_CATEGORY))
+            {
+                return;
+            }
+            cat = (LLViewerInventoryCategory*)obj;
+        }
         std::string name = cat->getName();
 
         updateChangedCategoryName(cat, name);
@@ -988,7 +1012,8 @@ void LLOutfitListBase::deselectOutfit(const LLUUID& category_id)
     // Reset selection if the outfit is selected.
     if (category_id == mSelectedOutfitUUID)
     {
-        signalSelectionOutfitUUID(LLUUID::null);
+        mSelectedOutfitUUID = LLUUID::null;
+        signalSelectionOutfitUUID(mSelectedOutfitUUID);
     }
 }
 
@@ -1042,15 +1067,15 @@ bool LLOutfitContextMenu::onEnable(LLSD::String param)
 bool LLOutfitContextMenu::onVisible(LLSD::String param)
 {
     LLUUID outfit_cat_id = mUUIDs.back();
-    bool is_worn = LLAppearanceMgr::instance().getBaseOutfitUUID() == outfit_cat_id;
 
     if ("edit" == param)
     {
+        bool is_worn = LLAppearanceMgr::instance().getBaseOutfitUUID() == outfit_cat_id;
         return is_worn;
     }
     else if ("wear_replace" == param)
     {
-        return !is_worn;
+        return true;
     }
     else if ("delete" == param)
     {

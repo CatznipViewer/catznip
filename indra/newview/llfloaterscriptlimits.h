@@ -38,6 +38,7 @@
 
 class LLPanelScriptLimitsInfo;
 class LLTabContainer;
+class LLAvatarName;
 
 class LLPanelScriptLimitsRegionMemory;
 
@@ -113,8 +114,11 @@ public:
 	void showBeacon();
 	void returnObjectsFromParcel(S32 local_id);
 	void returnObjects();
+	void checkButtonsEnabled();
 
 private:
+	void onAvatarNameCache(const LLUUID& id,
+						 const LLAvatarName& av_name);
 	void onNameCache(const LLUUID& id,
 						 const std::string& name);
 
@@ -146,53 +150,6 @@ protected:
 	static void onClickRefresh(void* userdata);
 	static void onClickHighlight(void* userdata);
 	static void onClickReturn(void* userdata);
-};
-
-/////////////////////////////////////////////////////////////////////////////
-// Attachment panel
-/////////////////////////////////////////////////////////////////////////////
-
-class LLPanelScriptLimitsAttachment : public LLPanelScriptLimitsInfo
-{
-	
-public:
-	LLPanelScriptLimitsAttachment()
-		:	LLPanelScriptLimitsInfo(),
-		mGotAttachmentMemoryUsed(false),
-		mAttachmentMemoryMax(0),
-		mAttachmentMemoryUsed(0),
-		mGotAttachmentURLsUsed(false),
-		mAttachmentURLsMax(0),
-		mAttachmentURLsUsed(0)
-		{};
-
-	~LLPanelScriptLimitsAttachment()
-	{
-	};
-	
-	// LLPanel
-	virtual BOOL postBuild();
-
-	void setAttachmentDetails(LLSD content);
-
-	void setAttachmentSummary(LLSD content);
-	BOOL requestAttachmentDetails();
-	void clearList();
-
-private:
-    void getAttachmentLimitsCoro(std::string url);
-
-	bool mGotAttachmentMemoryUsed;
-	S32 mAttachmentMemoryMax;
-	S32 mAttachmentMemoryUsed;
-
-	bool mGotAttachmentURLsUsed;
-	S32 mAttachmentURLsMax;
-	S32 mAttachmentURLsUsed;
-
-protected:
-	
-	static void onClickRefresh(void* userdata);
 };
 
 #endif
