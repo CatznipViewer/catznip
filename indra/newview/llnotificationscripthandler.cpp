@@ -35,7 +35,6 @@
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
 #include "llscriptfloater.h"
-#include "llfacebookconnect.h"
 #include "llavatarname.h"
 #include "llavatarnamecache.h"
 
@@ -77,6 +76,7 @@ void LLScriptHandler::addToastWithNotification(const LLNotificationPtr& notifica
 	p.notification = notification;
 	p.panel = notify_box;
 	p.on_delete_toast = boost::bind(&LLScriptHandler::onDeleteToast, this, _1);
+	p.can_fade = notification->canFadeToast();
 	if(gAgent.isDoNotDisturb())
 	{ 
 		p.force_show = notification->getName() == "SystemMessage" 

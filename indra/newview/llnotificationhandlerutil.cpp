@@ -177,7 +177,7 @@ void LLHandlerUtil::logGroupNoticeToIMGroup(
 	{
 		// Legacy support and fallback method
 		// if we can't retrieve sender id from group notice system message, try to lookup it from cache
-		sender_id = LLAvatarNameCache::findIdByName(sender_name);
+		sender_id = LLAvatarNameCache::getInstance()->findIdByName(sender_name);
 	}
 
 	logToIM(IM_SESSION_GROUP_START, group_name, sender_name, payload["message"],
@@ -239,6 +239,20 @@ std::string LLHandlerUtil::getSubstitutionName(const LLNotificationPtr& notifica
 		}
 	}
 	return res;
+}
+
+// static
+std::string LLHandlerUtil::getSubstitutionOriginalName(const LLNotificationPtr& notification)
+{
+	if(notification->getSubstitutions().has("ORIGINAL_NAME"))
+	{
+		std::string name = notification->getSubstitutions()["ORIGINAL_NAME"];
+		if(!name.empty())
+		{
+			return name;
+		}
+	}
+	return LLHandlerUtil::getSubstitutionName(notification);
 }
 
 // static

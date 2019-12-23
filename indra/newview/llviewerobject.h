@@ -42,11 +42,13 @@
 #include "v3math.h"
 #include "llvertexbuffer.h"
 #include "llbbox.h"
+#include "llrigginginfo.h"
 
 class LLAgent;			// TODO: Get rid of this.
 class LLAudioSource;
 class LLAudioSourceVO;
 class LLColor4;
+class LLControlAvatar;
 class LLDataPacker;
 class LLDataPackerBinaryBuffer;
 class LLDrawable;
@@ -66,6 +68,8 @@ class LLViewerPartSourceScript;
 class LLViewerRegion;
 class LLViewerTexture;
 class LLWorld;
+
+class LLMeshCostData;
 
 typedef enum e_object_update_type
 {
@@ -220,6 +224,8 @@ public:
 	LLViewerRegion* getRegion() const				{ return mRegionp; }
 
 	BOOL isSelected() const							{ return mUserSelected; }
+    // Check whole linkset
+    BOOL isAnySelected() const;
 	virtual void setSelected(BOOL sel);
 
 	const LLUUID &getID() const						{ return mID; }
@@ -231,6 +237,7 @@ public:
 	virtual BOOL isFlexible() const					{ return FALSE; }
 	virtual BOOL isSculpted() const 				{ return FALSE; }
 	virtual BOOL isMesh() const						{ return FALSE; }
+	virtual BOOL isRiggedMesh() const				{ return FALSE; }
 	virtual BOOL hasLightTexture() const			{ return FALSE; }
 
 	// This method returns true if the object is over land owned by
@@ -255,6 +262,8 @@ public:
 	*/
 
 	virtual BOOL setParent(LLViewerObject* parent);
+    virtual void onReparent(LLViewerObject *old_parent, LLViewerObject *new_parent);
+    virtual void afterReparent();
 	virtual void addChild(LLViewerObject *childp);
 	virtual void removeChild(LLViewerObject *childp);
 	const_child_list_t& getChildren() const { 	return mChildList; }
@@ -356,9 +365,17 @@ public:
 	
 	virtual void setScale(const LLVector3 &scale, BOOL damped = FALSE);
 
-	virtual F32 getStreamingCost(S32* bytes = NULL, S32* visible_bytes = NULL, F32* unscaled_value = NULL) const;
+    S32 getAnimatedObjectMaxTris() const;
+    F32 recursiveGetEstTrianglesMax() const;
+    virtual F32 getEstTrianglesMax() const;
+    virtual F32 getEstTrianglesStreamingCost() const;
+	virtual F32 getStreamingCost() const;
+    virtual bool getCostData(LLMeshCostData& costs) const;
 	virtual U32 getTriangleCount(S32* vcount = NULL) const;
 	virtual U32 getHighLODTriangleCount();
+    F32 recursiveGetScaledSurfaceArea() const;
+
+    U32 recursiveGetTriangleCount(S32* vcount = NULL) const;
 
 	void setObjectCost(F32 cost);
 	F32 getObjectCost();
@@ -374,7 +391,7 @@ public:
 
 	void sendShapeUpdate();
 
-	U8 getState()							{ return mState; }
+	U8 getAttachmentState()							{ return mAttachmentState; }
 
 	F32 getAppAngle() const					{ return mAppAngle; }
 	F32 getPixelArea() const				{ return mPixelArea; }
@@ -411,7 +428,9 @@ public:
 	void setIcon(LLViewerTexture* icon_image);
 	void clearIcon();
 
-	void markForUpdate(BOOL priority);
+    void recursiveMarkForUpdate(BOOL priority);
+	virtual void markForUpdate(BOOL priority);
+	void markForUnload(BOOL priority);
 	void updateVolume(const LLVolumeParams& volume_params);
 	virtual	void updateSpatialExtents(LLVector4a& min, LLVector4a& max);
 	virtual F32 getBinRadius();
@@ -421,6 +440,8 @@ public:
 	void updatePositionCaches() const; // Update the global and region position caches from the object (and parent's) xform.
 	void updateText(); // update text label position
 	virtual void updateDrawable(BOOL force_damped); // force updates on static objects
+
+	bool isOwnerInMuteList(LLUUID item_id = LLUUID());
 
 	void setDrawableState(U32 state, BOOL recursive = TRUE);
 	void clearDrawableState(U32 state, BOOL recursive = TRUE);
@@ -453,6 +474,8 @@ public:
 	void updateInventoryLocal(LLInventoryItem* item, U8 key); // Update without messaging.
 	void updateTextureInventory(LLViewerInventoryItem* item, U8 key, bool is_new);
 	LLInventoryObject* getInventoryObject(const LLUUID& item_id);
+
+	// Get content except for root category
 	void getInventoryContents(LLInventoryObject::object_list_t& objects);
 	LLInventoryObject* getInventoryRoot();
 	LLViewerInventoryItem* getInventoryItemByAsset(const LLUUID& asset_id);
@@ -567,6 +590,10 @@ public:
 	friend class LLViewerMediaList;
 
 public:
+	LLViewerTexture* getBakedTextureForMagicId(const LLUUID& id);
+	void updateAvatarMeshVisibility(const LLUUID& id, const LLUUID& old_id);
+	void refreshBakeTexture();
+public:
 	static void unpackVector3(LLDataPackerBinaryBuffer* dp, LLVector3& value, std::string name);
 	static void unpackUUID(LLDataPackerBinaryBuffer* dp, LLUUID& value, std::string name);
 	static void unpackU32(LLDataPackerBinaryBuffer* dp, U32& value, std::string name);
@@ -575,7 +602,7 @@ public:
 
 public:
 	//counter-translation
-	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE) ;
+	void resetChildrenPosition(const LLVector3& offset, BOOL simplified = FALSE,  BOOL skip_avatar_child = FALSE) ;
 	//counter-rotation
 	void resetChildrenRotationAndPosition(const std::vector<LLQuaternion>& rotations, 
 											const std::vector<LLVector3>& positions) ;
@@ -594,12 +621,16 @@ private:
     U32 checkMediaURL(const std::string &media_url);
 	
 	// Motion prediction between updates
-	void interpolateLinearMotion(const F64SecondsImplicit & time, const F32SecondsImplicit & dt);
+	void interpolateLinearMotion(const F64SecondsImplicit & frame_time, const F32SecondsImplicit & dt);
 
 	static void initObjectDataMap();
 
-	// forms task inventory request if none are pending
+	// forms task inventory request if none are pending, marks request as pending
 	void fetchInventoryFromServer();
+
+	// forms task inventory request after some time passed, marks request as pending
+	void fetchInventoryDelayed(const F64 &time_seconds);
+	static void fetchInventoryDelayedCoro(const LLUUID task_inv, const F64 time_seconds);
 
 public:
 	//
@@ -683,6 +714,27 @@ public:
 
 	static			BOOL		sUseSharedDrawables;
 
+public:
+    // Returns mControlAvatar for the edit root prim of this linkset
+    LLControlAvatar *getControlAvatar();
+    LLControlAvatar *getControlAvatar() const;
+
+    // Create or connect to an existing control av as applicable
+    void linkControlAvatar();
+    // Remove any reference to control av for this prim
+    void unlinkControlAvatar();
+    // Link or unlink as needed
+    void updateControlAvatar();
+
+    virtual bool isAnimatedObject() const;
+
+    // Flags for createObject
+    static const S32 CO_FLAG_CONTROL_AVATAR = 1 << 0;
+    static const S32 CO_FLAG_UI_AVATAR = 1 << 1;
+
+protected:
+    LLPointer<LLControlAvatar> mControlAvatar;
+
 protected:
 	// delete an item in the inventory, but don't tell the
 	// server. This is used internally by remove, update, and
@@ -693,8 +745,7 @@ protected:
 	// updateInventory.
 	void doUpdateInventory(LLPointer<LLViewerInventoryItem>& item, U8 key, bool is_new);
 
-
-	static LLViewerObject *createObject(const LLUUID &id, LLPCode pcode, LLViewerRegion *regionp);
+	static LLViewerObject *createObject(const LLUUID &id, LLPCode pcode, LLViewerRegion *regionp, S32 flags = 0);
 
 	BOOL setData(const U8 *datap, const U32 data_size);
 
@@ -731,6 +782,7 @@ protected:
 	F64Seconds		mLastInterpUpdateSecs;			// Last update for purposes of interpolation
 	F64Seconds		mLastMessageUpdateSecs;			// Last update from a message from the simulator
 	TPACKETID		mLatestRecvPacketID;			// Latest time stamp on message from simulator
+	F64SecondsImplicit mRegionCrossExpire;		// frame time we detected region crossing in + wait time
 
 	// extra data sent from the sim...currently only used for tree species info
 	U8* mData;
@@ -758,12 +810,14 @@ protected:
 	typedef std::list<LLInventoryCallbackInfo*> callback_list_t;
 	callback_list_t mInventoryCallbacks;
 	S16 mInventorySerialNum;
+	S16 mExpectedInventorySerialNum;
 
 	enum EInventoryRequestState
 	{
 		INVENTORY_REQUEST_STOPPED,
-		INVENTORY_REQUEST_PENDING,
-		INVENTORY_XFER
+		INVENTORY_REQUEST_WAIT,    // delay before requesting
+		INVENTORY_REQUEST_PENDING, // just did fetchInventoryFromServer()
+		INVENTORY_XFER             // processed response from 'fetch', now doing an xfer
 	};
 	EInventoryRequestState	mInvRequestState;
 	U64						mInvRequestXFerId;
@@ -782,7 +836,7 @@ protected:
 	LLQuaternion	mAngularVelocityRot;		// accumulated rotation from the angular velocity computations
 	LLQuaternion	mPreviousRotation;
 
-	U8				mState;	// legacy
+	U8				mAttachmentState;	// this encodes the attachment id in a somewhat complex way. 0 if not an attachment.
 	LLViewerObjectMedia* mMedia;	// NULL if no media associated
 	U8 mClickAction;
 	F32 mObjectCost; //resource cost of this object or -1 if unknown
@@ -810,6 +864,7 @@ protected:
 
 	static void setPhaseOutUpdateInterpolationTime(F32 value)	{ sPhaseOutUpdateInterpolationTime = (F64Seconds) value;	}
 	static void setMaxUpdateInterpolationTime(F32 value)		{ sMaxUpdateInterpolationTime = (F64Seconds) value;	}
+	static void setMaxRegionCrossingInterpolationTime(F32 value)		{ sMaxRegionCrossingInterpolationTime = (F64Seconds) value; }
 
 	static void	setVelocityInterpolate(BOOL value)		{ sVelocityInterpolate = value;	}
 	static void	setPingInterpolate(BOOL value)			{ sPingInterpolate = value;	}
@@ -819,9 +874,13 @@ private:
 
 	static F64Seconds sPhaseOutUpdateInterpolationTime;	// For motion interpolation
 	static F64Seconds sMaxUpdateInterpolationTime;			// For motion interpolation
+	static F64Seconds sMaxRegionCrossingInterpolationTime;			// For motion interpolation
 
 	static BOOL sVelocityInterpolate;
 	static BOOL sPingInterpolate;
+
+	bool mCachedOwnerInMuteList;
+	F64 mCachedMuteListUpdateTime;
 
 	//--------------------------------------------------------------------
 	// For objects that are attachments
@@ -834,6 +893,10 @@ public:
 	void setLastUpdateType(EObjectUpdateType last_update_type);
 	BOOL getLastUpdateCached() const;
 	void setLastUpdateCached(BOOL last_update_cached);
+
+    virtual void updateRiggingInfo() {}
+
+    LLJointRiggingInfoTab mJointRiggingInfoTab;
 
 private:
 	LLUUID mAttachmentItemID; // ItemID of the associated object is in user inventory.

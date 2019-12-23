@@ -45,7 +45,7 @@ typedef FILE	LLFILE;
 typedef struct _stat	llstat;
 #else
 typedef struct stat		llstat;
-#include <bits/postypes.h>
+#include <sys/types.h>
 #endif
 
 #ifndef S_ISREG
@@ -69,11 +69,12 @@ public:
 
 	// perms is a permissions mask like 0777 or 0700.  In most cases it will
 	// be overridden by the user's umask.  It is ignored on Windows.
+	// mkdir() considers "directory already exists" to be SUCCESS.
 	static	int		mkdir(const std::string& filename, int perms = 0700);
 
 	static	int		rmdir(const std::string& filename);
 	static	int		remove(const std::string& filename, int supress_error = 0);
-	static	int		rename(const std::string& filename,const std::string&	newname);
+	static	int		rename(const std::string& filename,const std::string& newname, int supress_error = 0);
 	static  bool	copy(const std::string from, const std::string to);
 
 	static	int		stat(const std::string&	filename,llstat*	file_status);

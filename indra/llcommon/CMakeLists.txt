@@ -10,7 +10,6 @@ include(Boost)
 include(LLSharedLibs)
 include(JsonCpp)
 include(GoogleBreakpad)
-include(GooglePerfTools)
 include(Copy3rdPartyLibs)
 include(ZLIB)
 include(URIPARSER)
@@ -36,6 +35,7 @@ set(llcommon_SOURCE_FILES
     llapp.cpp
     llapr.cpp
     llassettype.cpp
+    llatomic.cpp
     llbase32.cpp
     llbase64.cpp
     llbitpack.cpp
@@ -136,6 +136,7 @@ set(llcommon_HEADER_FILES
     llapp.h
     llapr.h
     llassettype.h
+    llatomic.h
     llbase32.h
     llbase64.h
     llbitpack.h
@@ -227,6 +228,7 @@ set(llcommon_HEADER_FILES
     llstring.h
     llstringtable.h
     llstaticstringtable.h
+    llstatsaccumulator.h
     llsys.h
     llthread.h
     llthreadlocalstorage.h
@@ -255,17 +257,22 @@ set(llcommon_HEADER_FILES
 set_source_files_properties(${llcommon_HEADER_FILES}
                             PROPERTIES HEADER_FILE_ONLY TRUE)
 
+if (BUGSPLAT_DB)
+  set_source_files_properties(llapp.cpp
+    PROPERTIES COMPILE_DEFINITIONS "LL_BUGSPLAT")
+endif (BUGSPLAT_DB)
+
 list(APPEND llcommon_SOURCE_FILES ${llcommon_HEADER_FILES})
 
 if(LLCOMMON_LINK_SHARED)
   add_library (llcommon SHARED ${llcommon_SOURCE_FILES})
-  if(NOT WORD_SIZE EQUAL 32)
+  if(NOT ADDRESS_SIZE EQUAL 32)
     if(WINDOWS)
-      add_definitions(/FIXED:NO)
+      ##add_definitions(/FIXED:NO)
     else(WINDOWS) # not windows therefore gcc LINUX and DARWIN
       add_definitions(-fPIC)
     endif(WINDOWS)
-  endif(NOT WORD_SIZE EQUAL 32)
+  endif(NOT ADDRESS_SIZE EQUAL 32)
   if(WINDOWS)
     # always generate llcommon.pdb, even for "Release" builds
     set_target_properties(llcommon PROPERTIES LINK_FLAGS "/DEBUG")
@@ -351,8 +358,4 @@ if (LL_TESTS)
 ## throwing and catching exceptions.
 ##LL_ADD_INTEGRATION_TEST(llexception "" "${test_libs}")
 
-  # *TODO - reenable these once tcmalloc libs no longer break the build.
-  #ADD_BUILD_TEST(llallocator llcommon)
-  #ADD_BUILD_TEST(llallocator_heap_profile llcommon)
-  #ADD_BUILD_TEST(llmemtype llcommon)
 endif (LL_TESTS)

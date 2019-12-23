@@ -27,11 +27,13 @@
 
 #include "llfloateravatarrendersettings.h"
 
+#include "llagent.h"
 #include "llavatarnamecache.h"
 #include "llfloateravatarpicker.h"
 #include "llfiltereditor.h"
 #include "llfloaterreg.h"
 #include "llnamelistctrl.h"
+#include "llnotificationsutil.h"
 #include "llmenugl.h"
 #include "lltrans.h"
 #include "llviewerobjectlist.h"
@@ -87,18 +89,9 @@ BOOL LLFloaterAvatarRenderSettings::postBuild()
     LLFloater::postBuild();
     mAvatarSettingsList = getChild<LLNameListCtrl>("render_settings_list");
     mAvatarSettingsList->setRightMouseDownCallback(boost::bind(&LLFloaterAvatarRenderSettings::onAvatarListRightClick, this, _1, _2, _3));
-    this->setVisibleCallback(boost::bind(&LLFloaterAvatarRenderSettings::removePicker, this));
     getChild<LLFilterEditor>("people_filter_input")->setCommitCallback(boost::bind(&LLFloaterAvatarRenderSettings::onFilterEdit, this, _2));
 
 	return TRUE;
-}
-
-void LLFloaterAvatarRenderSettings::removePicker()
-{
-    if(mPicker.get())
-    {
-        mPicker.get()->closeFloater();
-    }
 }
 
 void LLFloaterAvatarRenderSettings::draw()
@@ -261,13 +254,16 @@ void LLFloaterAvatarRenderSettings::onClickAdd(const LLSD& userdata)
     {
         root_floater->addDependentFloater(picker);
     }
-
-    mPicker = picker->getHandle();
 }
 
 void LLFloaterAvatarRenderSettings::callbackAvatarPicked(const uuid_vec_t& ids, S32 visual_setting)
 {
     if (ids.empty()) return;
+    if(ids[0] == gAgentID)
+    {
+        LLNotificationsUtil::add("AddSelfRenderExceptions");
+        return;
+    }
     setAvatarRenderSetting(ids[0], visual_setting);
 }
 

@@ -4,6 +4,11 @@
 		Don&apos;t show me this again
   </global>
 
+  <global name="skipnexttimesessiononly">
+Don&apos;t show me this again
+(for current session)
+  </global>
+
   <global name="alwayschoose">
 
 		Always choose this option
@@ -321,6 +326,16 @@ Initialization with the Marketplace failed because of a system or network error.
         name="okbutton"
         yestext="OK"/>
     </notification>
+  
+    <notification
+        icon="OutboxStatus_Error"
+        name="MyOutfitsPasteFailed"
+        type="alertmodal">
+       One or more items can't be used inside "My outfits"
+      <usetemplate
+        name="okbutton"
+        yestext="OK"/>
+    </notification>
     
     <notification
         icon="OutboxStatus_Error"
@@ -611,6 +626,16 @@ Save all changes to clothing/body parts?
 
   <notification
    icon="alertmodal.tga"
+   name="AllowMultipleViewers"
+   type="alertmodal">
+    Running multiple Second Life viewers is not supported. It can lead to texture cache collisions, corruption and degraded visuals and performance.
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="GrantModifyRights"
    type="alertmodal">
 Granting modify rights to another Resident allows them to change, delete or take ANY objects you may have in-world. Be VERY careful when handing out this permission.
@@ -869,7 +894,7 @@ Do you wish to proceed?
    icon="alertmodal.tga"
    name="JoinGroupNoCost"
    type="alertmodal">
-You are joining group [NAME].
+You are joining group &lt;nolink&gt;[NAME]&lt;/nolink&gt;.
 Do you wish to proceed?
     <tag>group</tag>
     <tag>confirm</tag>
@@ -960,7 +985,7 @@ Sorry, trial users can't join groups.
    icon="alertmodal.tga"
    name="JoinGroupMaxGroups"
    type="alertmodal">
-You cannot join '[group_name]':
+You cannot join &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;:
 You are already a member of [group_count] groups, the maximum number allowed is [max_groups]
     <tag>success</tag>
     <tag>group_id</tag>
@@ -976,7 +1001,7 @@ You are already a member of [group_count] groups, the maximum number allowed is 
    icon="alertmodal.tga"
    name="JoinGroupClosedEnrollment"
    type="alertmodal">
-You cannot join '[group_name]':
+You cannot join &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;:
 The group no longer has open enrollment.
     <tag>group_id</tag>
     <tag>success</tag>
@@ -1065,7 +1090,7 @@ Your selling price will be L$[SALE_PRICE] and will be authorized for sale to [NA
    icon="alertmodal.tga"
    name="ReturnObjectsDeededToGroup"
    type="alertmodal">
-Are you sure you want to return all objects shared with the group &apos;[NAME]&apos; on this parcel of land back to their previous owner&apos;s inventory?
+Are you sure you want to return all objects shared with the group &apos;&lt;nolink&gt;[NAME]&lt;/nolink&gt;&apos; on this parcel of land back to their previous owner&apos;s inventory?
 
 *WARNING* This will delete the non-transferable objects deeded to the group!
 
@@ -1168,7 +1193,7 @@ Are you sure you want to disable all objects in this region?
    icon="alertmodal.tga"
    name="ReturnObjectsNotOwnedByGroup"
    type="alertmodal">
-Return the objects on this parcel of land that are NOT shared with the group [NAME] back to their owners?
+Return the objects on this parcel of land that are NOT shared with the group &lt;nolink&gt;[NAME]&lt;/nolink&gt; back to their owners?
 
 Objects: [N]
     <tag>confirm</tag>
@@ -1293,7 +1318,7 @@ There was a problem uploading a report screenshot due to the following reason: [
    name="MustAgreeToLogIn"
    type="alertmodal">
    <tag>fail</tag>
-You must agree to the Terms of Service to continue logging into [SECOND_LIFE].
+You must agree to the Second Life Terms and Conditions, Privacy Policy, and Terms of Service to continue logging into [SECOND_LIFE].
   </notification>
 
   <notification
@@ -1823,7 +1848,7 @@ You are not allowed to terraform parcel [PARCEL].
    name="CannotCopyWarning"
    type="alertmodal">
 You do not have permission to copy the following items:
-[ITEMS]
+&lt;nolink&gt;[ITEMS]&lt;/nolink&gt;
 and will lose it from your inventory if you give it away. Do you really want to offer these items?
     <tag>confirm</tag>
     <usetemplate
@@ -1956,7 +1981,7 @@ Eject [AVATAR_NAME] from your land?
    name="EjectAvatarFromGroup"
    persist="true"
    type="notify">
-You ejected [AVATAR_NAME] from group [GROUP_NAME]
+You ejected [AVATAR_NAME] from group &lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;
     <tag>group</tag>
   </notification>
 
@@ -2371,6 +2396,7 @@ Your search terms were too short so no search was performed.
    icon="alertmodal.tga"
    name="CouldNotTeleportReason"
    type="alertmodal">
+    <unique/>
 Teleport failed.
 [REASON]
   <tag>fail</tag>
@@ -2451,6 +2477,13 @@ Sorry, but the system was unable to complete your teleport request in a timely f
    type="alertmodal">
    <tag>fail</tag>
 Sorry, but the system was unable to complete your region crossing in a timely fashion. Please try again in a few minutes.
+  </notification>
+  <notification
+   icon="alertmodal.tga"
+   name="preexisting_tport"
+   type="alertmodal">
+   <tag>fail</tag>
+Sorry, but the system was unable to start your teleport. Please try again in a few minutes.
   </notification>
   <notification
    icon="alertmodal.tga"
@@ -3067,6 +3100,29 @@ See https://wiki.secondlife.com/wiki/Adding_Spelling_Dictionaries
 
   <notification
    icon="alertmodal.tga"
+   label="Rename Gesture"
+   name="RenameGesture"
+   type="alertmodal">
+    New gesture name:
+    <tag>confirm</tag>
+    <form name="form">
+      <input name="new_name" type="text" width="300">
+        [NAME]
+      </input>
+      <button
+       default="true"
+       index="0"
+       name="OK"
+       text="OK"/>
+      <button
+       index="1"
+       name="Cancel"
+       text="Cancel"/>
+    </form>
+  </notification>
+  
+  <notification
+   icon="alertmodal.tga"
    name="RemoveFromFriends"
    type="alertmodal">
     <tag>friendship</tag>
@@ -3331,7 +3387,7 @@ Please select a smaller area and try again.
 By deeding this parcel, the group will be required to have and maintain sufficient land use credits.
 The purchase price of the land is not refunded to the owner. If a deeded parcel is sold, the sale price will be divided evenly among group members.
 
-Deed this [AREA] m² of land to the group &apos;[GROUP_NAME]&apos;?
+Deed this [AREA] m² of land to the group &apos;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
     <tag>group</tag>
     <tag>confirm</tag>
     <usetemplate
@@ -3348,7 +3404,7 @@ By deeding this parcel, the group will be required to have and maintain sufficie
 The deed will include a simultaneous land contribution to the group from &apos;[NAME]&apos;.
 The purchase price of the land is not refunded to the owner. If a deeded parcel is sold, the sale price will be divided evenly among group members.
 
-Deed this [AREA] m² of land to the group &apos;[GROUP_NAME]&apos;?
+Deed this [AREA] m² of land to the group &apos;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
     <tag>group</tag>
     <tag>confirm</tag>
     <usetemplate
@@ -3516,6 +3572,30 @@ You can either check your Internet connection and try again in a few minutes, cl
        index="2"
        name="Teleport"
        text="Teleport"/>
+    </form>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="LoginPacketNeverReceivedNoTP"
+   type="alertmodal">
+    <tag>fail</tag>
+We&apos;re having trouble connecting. There may be a problem with your Internet connection or the [SECOND_LIFE_GRID].
+
+You can either check your Internet connection and try again in a few minutes or click Help to view the [SUPPORT_SITE].
+    <url option="1" name="url">
+			http://secondlife.com/support/
+    </url>
+    <form name="form">
+      <button
+       default="true"
+       index="0"
+       name="OK"
+       text="OK"/>
+      <button
+       index="1"
+       name="Help"
+       text="Help"/>
     </form>
   </notification>
 
@@ -3793,6 +3873,62 @@ Can&apos;t add estate owner to estate &apos;Banned Resident&apos; list.
    type="alertmodal">
 Unable to add banned resident to estate manager list.
   </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="ProblemBanningEstateManager"
+   type="alertmodal">
+Unable to add estate manager [AGENT] to banned list.
+  </notification>
+  
+  <notification
+   icon="alertmodal.tga"
+   name="GroupIsAlreadyInList"
+   type="alertmodal">
+&lt;nolink&gt;[GROUP]&lt;/nolink&gt; is already in the Allowed Groups list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentIsAlreadyInList"
+   type="alertmodal">
+[AGENT] is already in your [LIST_TYPE] list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsAreAlreadyInList"
+   type="alertmodal">
+[AGENT] are already in your [LIST_TYPE] list.
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentWasAddedToList"
+   type="alertmodal">
+[AGENT] was added to [LIST_TYPE] list of [ESTATE].
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsWereAddedToList"
+   type="alertmodal">
+[AGENT] were added to [LIST_TYPE] list of [ESTATE].
+
+  </notification>
+      <notification
+   icon="alertmodal.tga"
+   name="AgentWasRemovedFromList"
+   type="alertmodal">
+[AGENT] was removed from [LIST_TYPE] list of [ESTATE].
+  </notification>
+    
+  <notification
+   icon="alertmodal.tga"
+   name="AgentsWereRemovedFromList"
+   type="alertmodal">
+[AGENT] were removed from [LIST_TYPE] list of [ESTATE].
+  </notification>
 
   <notification
    icon="alertmodal.tga"
@@ -3826,143 +3962,11 @@ Finished download of raw terrain file to:
 
   <notification
    icon="alertmodal.tga"
-   name="DownloadWindowsMandatory"
+   name="RequiredUpdate"
    type="alertmodal">
-A new version of [APP_NAME] is available.
-[MESSAGE]
-You must download this update to use [APP_NAME].
+Version [VERSION] is required for login.
+Please download from https://secondlife.com/support/downloads/
     <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadWindows"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadWindowsReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinuxMandatory"
-   type="alertmodal">
-A new version of [APP_NAME] is available.
-[MESSAGE]
-You must download this update to use [APP_NAME].
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinux"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadLinuxReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMacMandatory"
-   type="alertmodal">
-A new version of [APP_NAME] is available.
-[MESSAGE]
-You must download this update to use [APP_NAME].
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMac"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="DownloadMacReleaseForDownload"
-   type="alertmodal">
-An updated version of [APP_NAME] is available.
-[MESSAGE]
-This update is not required, but we suggest you install it to improve performance and stability.
-
-Download to your Applications folder?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Continue"
-     yestext="Download"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="FailedUpdateInstall"
-   type="alertmodal">
-An error occurred installing the viewer update.
-Please download and install the latest viewer from
-http://secondlife.com/download.
     <usetemplate
      name="okbutton"
      yestext="OK"/>
@@ -3970,194 +3974,52 @@ http://secondlife.com/download.
 
   <notification
    icon="alertmodal.tga"
-   name="FailedRequiredUpdateInstall"
+   name="PauseForUpdate"
    type="alertmodal">
-We were unable to install a required update. 
-You will be unable to log in until [APP_NAME] has been updated.
+Version [VERSION] is required for login.
+Click OK to download and install.
+    <tag>confirm</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
 
-Please download and install the latest viewer from
-http://secondlife.com/download.
-  <tag>fail</tag>
+  <notification
+   icon="alertmodal.tga"
+   name="OptionalUpdateReady"
+   type="alertmodal">
+Version [VERSION] has been downloaded and is ready to install.
+Click OK to install.
+    <tag>confirm</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="PromptOptionalUpdate"
+   type="alertmodal">
+Version [VERSION] has been downloaded and is ready to install.
+Proceed?
+    <tag>confirm</tag>
+    <usetemplate
+     canceltext="Not Now"
+     name="yesnocancelbuttons"
+     notext="Skip"
+     yestext="Install"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="LoginFailedUnknown"
+   type="alertmodal">
+Sorry, login failed for an unrecognized reason.
+If you continue to get this message, please check the [SUPPORT_SITE].
+    <tag>confirm</tag>
     <usetemplate
      name="okbutton"
      yestext="Quit"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="UpdaterServiceNotRunning"
-   type="alertmodal">
-There is a required update for your Second Life Installation.
-
-You may download this update from http://www.secondlife.com/downloads
-or you can install it now.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Quit Second Life"
-     yestext="Download and install now"/>
-  </notification>
-
-  <notification
-   icon="notify.tga"
-   name="DownloadBackgroundTip"
-   type="notify">
-We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION] [[INFO_URL] Information about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
-  </notification>
-
-  <notification
- icon="alertmodal.tga"
- name="DownloadBackgroundDialog"
- type="alertmodal">
-We have downloaded an update to your [APP_NAME] installation.
-    Version [VERSION] [[INFO_URL] Information about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
-  </notification>
-  
-  <notification
-   icon="alertmodal.tga"
-   name="RequiredUpdateDownloadedVerboseDialog"
-   type="alertmodal"
-   force_urls_external="true">
-We have downloaded a required software update.
-Version [VERSION] [[INFO_URL] Information about this update]
-
-We must restart [APP_NAME] to install the update.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-  
-  <notification
-   icon="alertmodal.tga"
-   name="RequiredUpdateDownloadedDialog"
-   type="alertmodal"
-   force_urls_external="true">
-We must restart [APP_NAME] to install the update.
-[[INFO_URL] Information about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
-   icon="notify.tga"
-   name="OtherChannelDownloadBackgroundTip"
-   type="notify">
-We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION] 
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer;
-see [[INFO_URL] for details about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
-  </notification>
-
-  <notification
- icon="alertmodal.tga"
- name="OtherChannelDownloadBackgroundDialog"
- type="alertmodal">
-We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION]
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer;
-see [[INFO_URL] Information about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
-     notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
-  </notification>
-  
-  <notification
-   icon="alertmodal.tga"
-   name="OtherChannelRequiredUpdateDownloadedVerboseDialog"
-   type="alertmodal"
-   force_urls_external="true">
-We have downloaded a required software update.
-Version [VERSION]
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer;
-see [[INFO_URL] Information about this update]
-
-We must restart [APP_NAME] to install the update.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-  
-  <notification
-   icon="alertmodal.tga"
-   name="OtherChannelRequiredUpdateDownloadedDialog"
-   type="alertmodal"
-   force_urls_external="true">
-We must restart [APP_NAME] to install the update.
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer;
-see [[INFO_URL] Information about this update]
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-  
-  <notification
- icon="alertmodal.tga"
- name="UpdateDownloadInProgress"
- type="alertmodal">
-An update is available!
-It's downloading in the background and we will prompt you to restart your viewer to finish installing it as soon as it's ready.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-  
-  <notification
- icon="alertmodal.tga"
- name="UpdateDownloadComplete"
- type="alertmodal">
-An update was downloaded. It will be installed during restart.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
- icon="alertmodal.tga"
- name="UpdateCheckError"
- type="alertmodal">
-An error occurred while checking for update.
-Please try again later.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
- icon="alertmodal.tga"
- name="UpdateViewerUpToDate"
- type="alertmodal">
-Your viewer is up to date!
-If you can't wait to try out the latest features and fixes, check out the Alternate Viewers page. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
-    <tag>confirm</tag>
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
   </notification>
 
   <notification
@@ -4184,18 +4046,6 @@ Do you want to open your Web browser to view this content?
     <usetemplate
      ignoretext="Launch my browser to view a web page"
      name="okcancelignore"
-     notext="Cancel"
-     yestext="OK"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="SystemUIScaleFactorChanged"
-   type="alertmodal">
-System UI size factor has changed since last run. Do you want to open UI size adjustment settings page?
-    <tag>confirm</tag>
-    <usetemplate
-     name="okcancelbuttons"
      notext="Cancel"
      yestext="OK"/>
   </notification>
@@ -4324,7 +4174,7 @@ Leave Group?
    icon="notify.tga"
    name="GroupDepart"
    type="notify">
-You have left the group &apos;[group_name]&apos;.
+You have left the group &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;.
     <tag>group</tag>
   </notification>
 
@@ -4880,7 +4730,8 @@ Add to allowed list for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateAllowedAgentRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove from allowed list for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
@@ -4909,7 +4760,8 @@ Add to group allowed list for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateAllowedGroupRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove from group allowed list for this estate only or [ALL_ESTATES]?
     <tag>group</tag>
     <tag>confirm</tag>
@@ -4938,8 +4790,9 @@ Deny access for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateBannedAgentRemove"
-   type="alert">
-Remove this Resident from the ban list for  access for this estate only or for [ALL_ESTATES]?
+   type="alertmodal">
+    <unique/>
+Remove this Resident from the ban list for access for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
      canceltext="Cancel"
@@ -4966,7 +4819,8 @@ Add estate manager for this estate only or for [ALL_ESTATES]?
    icon="alert.tga"
    label="Select estate"
    name="EstateManagerRemove"
-   type="alert">
+   type="alertmodal">
+    <unique/>
 Remove estate manager for this estate only or for [ALL_ESTATES]?
     <tag>confirm</tag>
     <usetemplate
@@ -6004,8 +5858,33 @@ You cannot undo this action.
     <unique/>
     [QUESTION]
     <tag>confirm</tag>
+    <form name="form">
+     <ignore name="ignore"
+      session_only="true"
+      text="Confirm before deleting items"/>
+      <button
+       default="true"
+       index="0"
+       name="Yes"
+       text="OK"/>
+      <button
+       index="1"
+       name="No"
+       text="Cancel"/>
+    </form>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="DeleteFilteredItems"
+   type="alertmodal">
+    <unique/>
+    Your inventory is currently filtered and not all of the items you're about to delete are currently visible.
+
+Are you sure you want to delete them?
+    <tag>confirm</tag>
     <usetemplate
-     ignoretext="Confirm before deleting items"
+     ignoretext="Confirm before deleting filtered items"
      name="okcancelignore"
      notext="Cancel"
      yestext="OK"/>
@@ -6202,7 +6081,7 @@ The folder &apos;[FOLDERNAME]&apos; is a system folder. Deleting system folders 
    icon="alertmodal.tga"
    name="ConfirmEmptyTrash"
    type="alertmodal">
-[COUNT] items will be permanently deleted. Are you sure you want to permanently delete the contents of your Trash?
+[COUNT] items and folders will be permanently deleted. Are you sure you want to permanently delete the contents of your Trash?
     <tag>confirm</tag>
     <usetemplate
      name="okcancelbuttons"
@@ -6559,6 +6438,13 @@ Although you&apos;re very nice, you can&apos;t add yourself as a friend.
 
   <notification
    icon="notifytip.tga"
+   name="AddSelfRenderExceptions"
+   type="notifytip">
+You can&apos;t add yourself to the rendering exceptions list.
+  </notification>
+
+  <notification
+   icon="notifytip.tga"
    name="UploadingAuctionSnapshot"
    type="notifytip">
 Uploading in-world and web site snapshots...
@@ -6877,27 +6763,6 @@ Please select at least one type of content to search (General, Moderate, or Adul
 [MESSAGE]
   </notification>
 
- <notification
-  icon="notify.tga"
-  name="FacebookConnect"
-  type="notifytip">
-[MESSAGE]
- </notification>
-
-  <notification
-   icon="notify.tga"
-   name="FlickrConnect"
-   type="notifytip">
-    [MESSAGE]
-  </notification>
-
-  <notification
-   icon="notify.tga"
-   name="TwitterConnect"
-   type="notifytip">
-    [MESSAGE]
-  </notification>
-
   <notification
    icon="notify.tga"
    name="PaymentReceived"
@@ -7039,7 +6904,7 @@ The objects on the selected parcel of land owned by the Resident &apos;[NAME]&ap
    name="GroupObjectsReturned"
    persist="true"
    type="notify">
-The objects on the selected parcel of land shared with the group [GROUPNAME] have been returned back to their owner&apos;s inventory.
+The objects on the selected parcel of land shared with the group &lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt; have been returned back to their owner&apos;s inventory.
 Transferable deeded objects have been returned to their previous owners.
 Non-transferable objects that are deeded to the group have been deleted.
     <tag>group</tag>
@@ -7527,6 +7392,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
    name="TeleportOffered"
    log_to_im="true"
    log_to_chat="false"
+   fade_toast="false"
    type="offer"
    sound="UISndNewIncomingIMSession">
 [NAME_SLURL] has offered to teleport you to their location:
@@ -7602,6 +7468,7 @@ However, this region contains content accessible to adults only.
    icon="notify.tga"
    name="TeleportRequest"
    log_to_im="true"
+   fade_toast="false"
    type="offer">
 [NAME_SLURL] is requesting to be teleported to your location.
 [MESSAGE]
@@ -7958,6 +7825,7 @@ Other Key Experiences may be available.
    icon="notify.tga"
    name="ScriptQuestionExperience"
    persist="false"
+   fade_toast="false"
    type="notify">
 &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos;, an object owned by &apos;[NAME]&apos;, requests your participation in the [GRID_WIDE] experience:
 
@@ -8020,28 +7888,6 @@ Do not allow access if you do not fully understand why it wants access to your a
     </footer>
   </notification>
 
-  <notification
-   icon="notify.tga"
-	 name="UnknownScriptQuestion"
-	 persist="false"
-	 type="notify">
-The runtime script permission requested by &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos;, an object owned by &apos;[NAME]&apos;, isn&apos;t recognized by the viewer and can&apos;t be granted.
-
-To grant this permission please update your viewer to the latest version from [DOWNLOADURL].
-		<tag>confirm</tag>
-		<form name="form">
-			<button
-			 default="true"
-			 index="1"
-			 name="Deny"
-			 text="Ok"/>
-			<button
-			 index="2"
-			 name="Mute"
-			 text="Block"/>
-		</form>
-	</notification>
-
 	<notification
    icon="notify.tga"
    name="ScriptDialog"
@@ -8067,7 +7913,7 @@ To grant this permission please update your viewer to the latest version from [D
    show_toast="false"
    type="notify">
     <tag>group</tag>
-[GROUPNAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
+&lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt;&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
       <button
@@ -8198,7 +8044,7 @@ Click Accept to join the call or Decline to decline the invitation. Click Block 
    icon="notify.tga"
    name="VoiceInviteGroup"
    type="notify">
-[NAME] has joined a Voice Chat call with the group [GROUP].
+[NAME] has joined a Voice Chat call with the group &lt;nolink&gt;[GROUP]&lt;/nolink&gt;.
 Click Accept to join the call or Decline to decline the invitation. Click Block to block this caller.
     <tag>group</tag>
     <tag>confirm</tag>
@@ -8358,17 +8204,6 @@ Failed to connect to [VOICE_CHANNEL_NAME], please try again later.  You will now
   </notification>
 
   <notification
-   duration="10"
-   icon="notifytip.tga"
-   name="VoiceLoginRetry"
-   type="notifytip">
-    <unique/>    
-We are creating a voice channel for you. This may take up to one minute.
-  <tag>status</tag>
-  <tag>voice</tag>
-  </notification>
-
-  <notification
    icon="notify.tga"
    name="VoiceEffectsExpired"
    sound="UISndAlert"
@@ -8377,6 +8212,8 @@ We are creating a voice channel for you. This may take up to one minute.
     <unique/>    
 One or more of your subscribed Voice Morphs has expired.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
   <tag>voice</tag>
   </notification>
@@ -8390,6 +8227,8 @@ One or more of your subscribed Voice Morphs has expired.
     <unique/>
 The active Voice Morph has expired, your normal voice settings have been applied.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
     <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8403,6 +8242,8 @@ The active Voice Morph has expired, your normal voice settings have been applied
     <unique/>    
 One or more of your Voice Morphs will expire in less than [INTERVAL] days.
 [[URL] Click here] to renew your subscription.
+
+If you are a Premium Member, [[PREMIUM_URL] click here] to receive your voice morphing perk.
   <tag>fail</tag>
     <tag>voice</tag>
   </notification>
@@ -8530,11 +8371,28 @@ Appearance has been saved to XML to [PATH]
 Failed to save appearance to XML.
   </notification>
 
+  <notification icon="notifytip.tga"
+    name="SnapshotToComputerFailed" type="notifytip">
+Failed to save snapshot to [PATH]: Disk is full. [NEED_MEMORY]KB is required but only [FREE_MEMORY]KB is free.
+  </notification>
+
+  <notification icon="notifytip.tga"
+    name="SnapshotToLocalDirNotExist" type="notifytip">
+Failed to save snapshot to [PATH]: Directory does not exist.
+  </notification>
+
   <notification
     icon="notifytip.tga"
     name="PresetNotSaved"
     type="notifytip">
 Error saving preset [NAME].
+  </notification>
+    
+  <notification
+    icon="notifytip.tga"
+    name="DefaultPresetNotSaved"
+    type="notifytip">
+Can not overwrite default preset.
   </notification>
 
   <notification
@@ -8818,9 +8676,31 @@ Please check your network and firewall setup.
    icon="alertmodal.tga"
    name="NoVoiceConnect"
    type="alertmodal">
-We're having trouble connecting to your voice server:
+    <unique/>
+We are unable to connect to the voice server:
 
 [HOSTID]
+
+Ports that must be allowed for voice are:
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Please check your network and firewall setup.
+Disable any SIP ALG feature in your router.
+
+Voice communications will not be available.
+    <tag>voice</tag>
+  <tag>fail</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="NoVoiceConnect-GIAB"
+   type="alertmodal">
+We're having trouble connecting to your voice server.
 
 Voice communications will not be available.
 Please check your network and firewall setup.
@@ -9700,7 +9580,7 @@ You Can't create trees and grass on land you don't own.
    name="NoCopyPermsNoObject"
    type="notify">
    <tag>fail</tag>
-Copy failed because you lack permission to copy the object '[OBJ_NAME]'.
+Copy failed because you lack permission to copy the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt;.
   </notification>
 
   <notification
@@ -9708,7 +9588,7 @@ Copy failed because you lack permission to copy the object '[OBJ_NAME]'.
    name="NoTransPermsNoObject"
    type="notify">
    <tag>fail</tag>
-Copy failed because the object '[OBJ_NAME]' cannot be transferred to you.
+Copy failed because the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; cannot be transferred to you.
   </notification>
 
   <notification
@@ -9716,7 +9596,7 @@ Copy failed because the object '[OBJ_NAME]' cannot be transferred to you.
    name="AddToNavMeshNoCopy"
    type="notify">
    <tag>fail</tag>
-Copy failed because the object '[OBJ_NAME]' contributes to navmesh.
+Copy failed because the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; contributes to navmesh.
   </notification>
 
   <notification
@@ -9840,7 +9720,7 @@ Save Back To Inventory has been disabled.
    name="NoExistNoSaveToContents"
    type="notify">
    <tag>fail</tag>
-Cannot save '[OBJ_NAME]' to object contents because the object it was rezzed from no longer exists.
+Cannot save &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; to object contents because the object it was rezzed from no longer exists.
   </notification>
 
   <notification
@@ -9848,7 +9728,7 @@ Cannot save '[OBJ_NAME]' to object contents because the object it was rezzed fro
    name="NoModNoSaveToContents"
    type="notify">
    <tag>fail</tag>
-Cannot save '[OBJ_NAME]' to object contents because you do not have permission to modify the object '[DEST_NAME]'.
+Cannot save &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; to object contents because you do not have permission to modify the object &lt;nolink&gt;'[DEST_NAME]'&lt;/nolink&gt;.
   </notification>
 
   <notification
@@ -9856,7 +9736,7 @@ Cannot save '[OBJ_NAME]' to object contents because you do not have permission t
    name="NoSaveBackToInvDisabled"
    type="notify">
    <tag>fail</tag>
-Cannot save '[OBJ_NAME]' back to inventory -- this operation has been disabled.
+Cannot save &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; back to inventory -- this operation has been disabled.
   </notification>
 
   <notification
@@ -9864,7 +9744,7 @@ Cannot save '[OBJ_NAME]' back to inventory -- this operation has been disabled.
    name="NoCopyNoSelCopy"
    type="notify">
    <tag>fail</tag>
-You cannot copy your selection because you do not have permission to copy the object '[OBJ_NAME]'.
+You cannot copy your selection because you do not have permission to copy the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt;.
   </notification>
 
   <notification
@@ -9872,7 +9752,7 @@ You cannot copy your selection because you do not have permission to copy the ob
    name="NoTransNoSelCopy"
    type="notify">
    <tag>fail</tag>
-You cannot copy your selection because the object '[OBJ_NAME]' is not transferrable.
+You cannot copy your selection because the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; is not transferrable.
   </notification>
 
   <notification
@@ -9880,7 +9760,7 @@ You cannot copy your selection because the object '[OBJ_NAME]' is not transferra
    name="NoTransNoCopy"
    type="notify">
    <tag>fail</tag>
-You cannot copy your selection because the object '[OBJ_NAME]' is not transferrable.
+You cannot copy your selection because the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; is not transferrable.
   </notification>
 
   <notification
@@ -9888,7 +9768,7 @@ You cannot copy your selection because the object '[OBJ_NAME]' is not transferra
    name="NoPermsNoRemoval"
    type="notify">
    <tag>fail</tag>
-Removal of the object '[OBJ_NAME]' from the simulator is disallowed by the permissions system.
+Removal of the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; from the simulator is disallowed by the permissions system.
   </notification>
 
   <notification
@@ -9896,7 +9776,7 @@ Removal of the object '[OBJ_NAME]' from the simulator is disallowed by the permi
    name="NoModNoSaveSelection"
    type="notify">
    <tag>fail</tag>
-Cannot save your selection because you do not have permission to modify the object '[OBJ_NAME]'.
+Cannot save your selection because you do not have permission to modify the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt;.
   </notification>
 
   <notification
@@ -9904,7 +9784,7 @@ Cannot save your selection because you do not have permission to modify the obje
    name="NoCopyNoSaveSelection"
    type="notify">
    <tag>fail</tag>
-Cannot save your selection because the object '[OBJ_NAME]' is not copyable.
+Cannot save your selection because the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt; is not copyable.
   </notification>
 
   <notification
@@ -9912,7 +9792,7 @@ Cannot save your selection because the object '[OBJ_NAME]' is not copyable.
    name="NoModNoTaking"
    type="notify">
    <tag>fail</tag>
-You cannot take your selection because you do not have permission to modify the object '[OBJ_NAME]'.
+You cannot take your selection because you do not have permission to modify the object &lt;nolink&gt;'[OBJ_NAME]'&lt;/nolink&gt;.
   </notification>
 
   <notification
@@ -10446,6 +10326,14 @@ You have been teleported by the object '[OBJECT_NAME]' owned by an unknown user.
 Unable to create requested object. The region is full.
   </notification>
 
+   <notification
+    icon="alertmodal.tga"
+   name="CantCreateAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Unable to create requested animated object because it exceeds the rigged triangle limit.
+  </notification>
+
   <notification
    icon="alertmodal.tga"
    name="CantAttackMultipleObjOneSpot"
@@ -10576,6 +10464,46 @@ You are not allowed to change this shape.
 
   <notification
    icon="alertmodal.tga"
+   name="NoPermsTooManyAttachedAnimatedObjects"
+   type="notify">
+   <tag>fail</tag>
+Operation would cause the number of attached animated objects to exceed the limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="NoPermsLinkAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Can't link these objects because the resulting animated object would exceed the rigged triangle limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="NoPermsSetFlagAnimatedObjectTooLarge"
+   type="notify">
+   <tag>fail</tag>
+Can't make this object into an animated object because it would exceed the rigged triangle limit.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="CantChangeAnimatedObjectStateInsufficientLand"
+   type="notify">
+   <tag>fail</tag>
+Can't change animated object state for this object because it would cause parcel limit to be exceeded.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ErrorNoMeshData"
+   type="notify">
+   <tag>fail</tag>
+Server error: cannot complete this operation because mesh data is not loaded.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="NoAccessToClaimObjects"
    type="notify">
    <tag>fail</tag>
@@ -10660,14 +10588,6 @@ Not enough script resources available to attach object!
    type="notify">
     <tag>fail</tag>
     Cannot attach object because it is already being removed.
-  </notification>
-
-  <notification
-  icon="alertmodal.tga"
-  name="IllegalAttachment"
-  type="notify">
-   <tag>fail</tag>
-   The attachment has requested a nonexistent point on the avatar. It has been attached to the chest instead.
   </notification>
 
   <notification
@@ -11280,7 +11200,7 @@ An internal error prevented us from properly updating your viewer.  The L$ balan
    name="LargePrimAgentIntersect"
    type="notify">
    <tag>fail</tag>
-Cannot create large prims that intersect other players.  Please re-try when other players have moved.
+Cannot create large prims that intersect other residents.  Please re-try when other residents have moved.
   </notification>
   
   <notification

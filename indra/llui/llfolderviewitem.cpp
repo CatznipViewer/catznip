@@ -548,7 +548,7 @@ BOOL LLFolderViewItem::handleMouseDown( S32 x, S32 y, MASK mask )
 
 BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 {
-	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::getInstance()->mSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
 
 	mIsMouseOverTitle = (y > (getRect().getHeight() - mItemHeight));
 
@@ -1174,6 +1174,11 @@ S32 LLFolderViewFolder::arrange( S32* width, S32* height )
 BOOL LLFolderViewFolder::needsArrange()
 {
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
+}
+
+bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
+{
+	return getViewModelItem()->descendantsPassedFilter(filter_generation);
 }
 
 // Passes selection information on to children and record selection

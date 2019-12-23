@@ -62,6 +62,7 @@
 #include "lldependencies.h"
 #include "llstl.h"
 #include "llexception.h"
+#include "llhandle.h"
 
 /*==========================================================================*|
 // override this to allow binding free functions with more parameters
@@ -227,7 +228,15 @@ class LLEventPump;
  * LLEventPumps is a Singleton manager through which one typically accesses
  * this subsystem.
  */
-class LL_COMMON_API LLEventPumps: public LLSingleton<LLEventPumps>
+// LLEventPumps isa LLHandleProvider only for (hopefully rare) long-lived
+// class objects that must refer to this class late in their lifespan, say in
+// the destructor. Specifically, the case that matters is a possible reference
+// after LLEventPumps::deleteSingleton(). (Lingering LLEventPump instances are
+// capable of this.) In that case, instead of calling LLEventPumps::instance()
+// again -- resurrecting the deleted LLSingleton -- store an
+// LLHandle<LLEventPumps> and test it before use.
+class LL_COMMON_API LLEventPumps: public LLSingleton<LLEventPumps>,
+                                  public LLHandleProvider<LLEventPumps>
 {
     LLSINGLETON(LLEventPumps);
 public:
@@ -573,10 +582,11 @@ public:
     /// Generate a distinct name for a listener -- see listen()
     static std::string inventName(const std::string& pfx="listener");
 
-private:
-    friend class LLEventPumps;
     /// flush queued events
     virtual void flush() {}
+
+private:
+    friend class LLEventPumps;
 
     virtual void reset();
 
@@ -589,6 +599,9 @@ private:
     {
         return this->listen_impl(name, listener, after, before);
     }
+
+    // must precede mName; see LLEventPump::LLEventPump()
+    LLHandle<LLEventPumps> mRegistry;
 
     std::string mName;
 
@@ -638,15 +651,21 @@ public:
  *   LLEventMailDrop
  *****************************************************************************/
 /**
- * LLEventMailDrop is a specialization of LLEventStream. Events are posted normally, 
- * however if no listeners return that they have handled the event it is placed in 
- * a queue. Subsequent attaching listeners will receive stored events from the queue 
- * until a listener indicates that the event has been handled.  In order to receive 
- * multiple events from a mail drop the listener must disconnect and reconnect.
+ * LLEventMailDrop is a specialization of LLEventStream. Events are posted
+ * normally, however if no listener returns that it has handled the event
+ * (returns true), it is placed in a queue. Subsequent attaching listeners
+ * will receive stored events from the queue until some listener indicates
+ * that the event has been handled.
+ *
+ * LLEventMailDrop completely decouples the timing of post() calls from
+ * listen() calls: every event posted to an LLEventMailDrop is eventually seen
+ * by all listeners, until some listener consumes it. The caveat is that each
+ * event *must* eventually reach a listener that will consume it, else the
+ * queue will grow to arbitrary length.
  * 
  * @NOTE: When using an LLEventMailDrop (or LLEventQueue) with a LLEventTimeout or
- * LLEventFilter attaching the filter downstream using Timeout's constructor will
- * cause the MailDrop to discharge any of it's stored events. The timeout should 
+ * LLEventFilter attaching the filter downstream, using Timeout's constructor will
+ * cause the MailDrop to discharge any of its stored events. The timeout should 
  * instead be connected upstream using its listen() method.  
  * See llcoro::suspendUntilEventOnWithTimeout() for an example.
  */
@@ -657,12 +676,14 @@ public:
     virtual ~LLEventMailDrop() {}
     
     /// Post an event to all listeners
-    virtual bool post(const LLSD& event);
+    virtual bool post(const LLSD& event) override;
     
+    /// Remove any history stored in the mail drop.
+    virtual void flush() override { mEventHistory.clear(); LLEventStream::flush(); };
 protected:
     virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
                                         const NameList& after,
-                                        const NameList& before);
+                                        const NameList& before) override;
 
 private:
     typedef std::list<LLSD> EventList;
@@ -685,7 +706,6 @@ public:
     /// Post an event to all listeners
     virtual bool post(const LLSD& event);
 
-private:
     /// flush queued events
     virtual void flush();
 
@@ -817,14 +837,14 @@ public:
         mConnection(new LLBoundListener)
     {
     }
-	
+
     /// Copy constructor. Copy shared_ptrs to original instance data.
     LLListenerWrapperBase(const LLListenerWrapperBase& that):
         mName(that.mName),
         mConnection(that.mConnection)
     {
     }
-	virtual ~LLListenerWrapperBase() {}
+    virtual ~LLListenerWrapperBase() {}
 
     /// Ask LLEventPump::listen() for the listener name
     virtual void accept_name(const std::string& name) const

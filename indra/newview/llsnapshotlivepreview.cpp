@@ -34,9 +34,6 @@
 #include "lleconomy.h"
 #include "llfloaterperms.h"
 #include "llfloaterreg.h"
-#include "llfloaterfacebook.h"
-#include "llfloaterflickr.h"
-#include "llfloatertwitter.h"
 #include "llimagefilter.h"
 #include "llimagefiltersmanager.h"
 #include "llimagebmp.h"
@@ -45,6 +42,7 @@
 #include "llimagepng.h"
 #include "lllandmarkactions.h"
 #include "lllocalcliprect.h"
+#include "llresmgr.h"
 #include "llnotificationsutil.h"
 #include "llslurl.h"
 #include "llsnapshotlivepreview.h"
@@ -56,6 +54,7 @@
 #include "llvfs.h"
 #include "llwindow.h"
 #include "llworld.h"
+#include <boost/filesystem.hpp>
 
 const F32 AUTO_SNAPSHOT_TIME_DELAY = 1.f;
 
@@ -68,6 +67,7 @@ S32 BORDER_WIDTH = 6;
 const S32 MAX_TEXTURE_SIZE = 512 ; //max upload texture size 512 * 512
 
 std::set<LLSnapshotLivePreview*> LLSnapshotLivePreview::sList;
+LLPointer<LLImageFormatted> LLSnapshotLivePreview::sSaveLocalImage = NULL;
 
 LLSnapshotLivePreview::LLSnapshotLivePreview (const LLSnapshotLivePreview::Params& p) 
 	:	LLView(p),
@@ -129,6 +129,7 @@ LLSnapshotLivePreview::~LLSnapshotLivePreview()
 
 	// 	gIdleCallbacks.deleteFunction( &LLSnapshotLivePreview::onIdle, (void*)this );
 	sList.erase(this);
+	sSaveLocalImage = NULL;
 }
 
 void LLSnapshotLivePreview::setMaxImageSize(S32 size) 
@@ -568,7 +569,7 @@ void LLSnapshotLivePreview::generateThumbnailImage(BOOL force_update)
     
     if (mThumbnailSubsampled)
     {
-        // The thumbnail is be a subsampled version of the preview (used in SL Share previews, i.e. Flickr, Twitter, Facebook)
+        // The thumbnail is be a subsampled version of the preview (used in SL Share previews, i.e. Flickr, Twitter)
 		raw->resize( mPreviewImage->getWidth(),
                      mPreviewImage->getHeight(),
                      mPreviewImage->getComponents());
@@ -634,7 +635,7 @@ LLViewerTexture* LLSnapshotLivePreview::getBigThumbnailImage()
     
 	if (raw)
 	{
-        // The big thumbnail is a new filtered version of the preview (used in SL Share previews, i.e. Flickr, Twitter, Facebook)
+        // The big thumbnail is a new filtered version of the preview (used in SL Share previews, i.e. Flickr, Twitter)
         mBigThumbnailWidth = mPreviewImage->getWidth();
         mBigThumbnailHeight = mPreviewImage->getHeight();
         raw->resize( mBigThumbnailWidth,
@@ -1046,7 +1047,7 @@ void LLSnapshotLivePreview::saveTexture(BOOL outfit_snapshot, std::string name)
             tid, LLAssetType::AT_TEXTURE, res_name, res_desc, 0,
             folder_type, inv_type,
             PERM_ALL, LLFloaterPerms::getGroupPerms("Uploads"), LLFloaterPerms::getEveryonePerms("Uploads"),
-            expected_upload_cost));
+            expected_upload_cost, !outfit_snapshot));
 
         upload_new_resource(assetUploadInfo);
 
@@ -1063,18 +1064,19 @@ void LLSnapshotLivePreview::saveTexture(BOOL outfit_snapshot, std::string name)
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+void LLSnapshotLivePreview::saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
 {
     // Update mFormattedImage if necessary
     getFormattedImage();
     
     // Save the formatted image
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
-
-	if(success)
-	{
-		gViewerWindow->playSnapshotAnimAndSound();
-	}
-	return success;
+	saveLocal(mFormattedImage, success_cb, failure_cb);
 }
 
+//Check if failed due to insufficient memory
+void LLSnapshotLivePreview::saveLocal(LLPointer<LLImageFormatted> image, const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
+{
+	sSaveLocalImage = image;
+
+	gViewerWindow->saveImageNumbered(sSaveLocalImage, FALSE, success_cb, failure_cb);
+}

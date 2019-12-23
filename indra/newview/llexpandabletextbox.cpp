@@ -97,7 +97,7 @@ public:
 	/*virtual*/ BOOL	handleMouseUp(S32 x, S32 y, MASK mask) { mEditor.onCommit(); return TRUE; }
 	/*virtual*/ BOOL	handleHover(S32 x, S32 y, MASK mask) 
 	{
-		LLUI::getWindow()->setCursor(UI_CURSOR_HAND);
+		LLUI::getInstance()->getWindow()->setCursor(UI_CURSOR_HAND);
 		return TRUE; 
 	}
 private:
@@ -407,6 +407,7 @@ void LLExpandableTextBox::collapseTextBox()
 	setRect(mCollapsedRect);
 
 	updateTextBoxRect();
+	gViewerWindow->removePopup(this);
 }
 
 void LLExpandableTextBox::onFocusLost()
@@ -434,8 +435,6 @@ void LLExpandableTextBox::reshape(S32 width, S32 height, BOOL called_from_parent
     mExpanded = false;
     LLUICtrl::reshape(width, height, called_from_parent);
     updateTextBoxRect();
-
-    gViewerWindow->removePopup(this);
 }
 
 void LLExpandableTextBox::setValue(const LLSD& value)

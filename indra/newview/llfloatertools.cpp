@@ -253,7 +253,6 @@ BOOL	LLFloaterTools::postBuild()
 	mCheckStretchTexture	= getChild<LLCheckBoxCtrl>("checkbox stretch textures");
 	getChild<LLUICtrl>("checkbox stretch textures")->setValue((BOOL)gSavedSettings.getBOOL("ScaleStretchTextures"));
 	mComboGridMode			= getChild<LLComboBox>("combobox grid mode");
-	mCheckStretchUniformLabel = getChild<LLTextBox>("checkbox uniform label");
 
 	//
 	// Create Buttons
@@ -515,11 +514,6 @@ void LLFloaterTools::refresh()
 		selection_info << getString("status_selectcount", selection_args);
 
 		getChild<LLTextBox>("selection_count")->setText(selection_info.str());
-
-		bool have_selection = !LLSelectMgr::getInstance()->getSelection()->isEmpty();
-		childSetVisible("selection_count",  have_selection);
-		childSetVisible("remaining_capacity", have_selection);
-		childSetVisible("selection_empty", !have_selection);
 	}
 
 
@@ -638,20 +632,20 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	// HACK - highlight buttons for next click
 	mRadioGroupMove->setVisible(move_visible);
-	if (!gGrabBtnSpin && 
-		!gGrabBtnVertical &&
-		!(mask == MASK_VERTICAL) && 
-		!(mask == MASK_SPIN) )
+	if (!(gGrabBtnSpin || 
+		gGrabBtnVertical || 
+		(mask == MASK_VERTICAL) || 
+		(mask == MASK_SPIN)))
 	{
 		mRadioGroupMove->setValue("radio move");
 	}
-	else if (gGrabBtnVertical || 
-			 (mask == MASK_VERTICAL) )
+	else if ((mask == MASK_VERTICAL) ||
+			 (gGrabBtnVertical && (mask != MASK_SPIN)))
 	{
 		mRadioGroupMove->setValue("radio lift");
 	}
-	else if (gGrabBtnSpin || 
-			 (mask == MASK_SPIN) )
+	else if ((mask == MASK_SPIN) || 
+			 (gGrabBtnSpin && (mask != MASK_VERTICAL)))
 	{
 		mRadioGroupMove->setValue("radio spin");
 	}
@@ -855,6 +849,18 @@ void LLFloaterTools::onOpen(const LLSD& key)
 	if (!panel.empty())
 	{
 		mTab->selectTabByName(panel);
+	}
+
+	LLTool* tool = LLToolMgr::getInstance()->getCurrentTool();
+	if (tool == LLToolCompInspect::getInstance()
+		|| tool == LLToolDragAndDrop::getInstance())
+	{
+		// Something called floater up while it was supressed (during drag n drop, inspect),
+		// so it won't be getting any layout or visibility updates, update once
+		// further updates will come from updateLayout()
+		LLCoordGL select_center_screen;
+		MASK	mask = gKeyboard->currentMask(TRUE);
+		updatePopup(select_center_screen, mask);
 	}
 	
 	//gMenuBarView->setItemVisible("BuildTools", TRUE);
@@ -1214,7 +1220,7 @@ void LLFloaterTools::getMediaState()
 		  &&first_object->permModify() 
 	      ))
 	{
-		getChildView("Add_Media")->setEnabled(FALSE);
+		getChildView("add_media")->setEnabled(FALSE);
 		media_info->clear();
 		clearMediaSettings();
 		return;
@@ -1225,8 +1231,8 @@ void LLFloaterTools::getMediaState()
 	
 	if(!has_media_capability)
 	{
-		getChildView("Add_Media")->setEnabled(FALSE);
-		LL_WARNS("LLFloaterTools: media") << "Media not enabled (no capability) in this region!" << LL_ENDL;
+		getChildView("add_media")->setEnabled(FALSE);
+		LL_WARNS("LLFloaterToolsMedia") << "Media not enabled (no capability) in this region!" << LL_ENDL;
 		clearMediaSettings();
 		return;
 	}
@@ -1250,7 +1256,7 @@ void LLFloaterTools::getMediaState()
 			{
 				if (!object->permModify())
 				{
-					LL_INFOS("LLFloaterTools: media")
+					LL_INFOS("LLFloaterToolsMedia")
 						<< "Selection not editable due to lack of modify permissions on object id "
 						<< object->getID() << LL_ENDL;
 					
@@ -1263,7 +1269,7 @@ void LLFloaterTools::getMediaState()
 				// contention as to whether this is a sufficient solution.
 //				if (object->isMediaDataBeingFetched())
 //				{
-//					LL_INFOS("LLFloaterTools: media")
+//					LL_INFOS("LLFloaterToolsMedia")
 //						<< "Selection not editable due to media data being fetched for object id "
 //						<< object->getID() << LL_ENDL;
 //						
@@ -1317,11 +1323,10 @@ void LLFloaterTools::getMediaState()
 	
 	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
 	std::string media_title = "";
-	mNeedMediaTitle = false;
 	// update UI depending on whether "object" (prim or face) has media
 	// and whether or not you are allowed to edit it.
 	
-	getChildView("Add_Media")->setEnabled(editable);
+	getChildView("add_media")->setEnabled(editable);
 	// IF all the faces have media (or all dont have media)
 	if ( LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo )
 	{
@@ -1335,23 +1340,15 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 			// else all faces might be empty. 
 		}
 		else // there' re Different Medias' been set on on the faces.
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		
-		getChildView("media_tex")->setEnabled(bool_has_media && editable);
-		getChildView("edit_media")->setEnabled(bool_has_media && LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo && editable );
 		getChildView("delete_media")->setEnabled(bool_has_media && editable );
-		getChildView("add_media")->setEnabled(editable);
 			// TODO: display a list of all media on the face - use 'identical' flag
 	}
 	else // not all face has media but at least one does.
@@ -1362,7 +1359,6 @@ void LLFloaterTools::getMediaState()
 		if(LLFloaterMediaSettings::getInstance()->mMultipleValidMedia)
 		{
 			media_title = multi_media_info_str;
-			mNeedMediaTitle = false;
 		}
 		else
 		{
@@ -1371,18 +1367,13 @@ void LLFloaterTools::getMediaState()
 			{
 				// initial media title is the media URL (until we get the name)
 				media_title = media_data_get.getHomeURL();
-
-				// kick off a navigate and flag that we need to update the title
-				navigateToTitleMedia( media_data_get.getHomeURL() );
-				mNeedMediaTitle = true;
 			}
 		}
 		
-		getChildView("media_tex")->setEnabled(TRUE);
-		getChildView("edit_media")->setEnabled(LLFloaterMediaSettings::getInstance()->mIdenticalHasMediaInfo);
 		getChildView("delete_media")->setEnabled(TRUE);
-		getChildView("add_media")->setEnabled(editable);
 	}
+
+	navigateToTitleMedia(media_title);
 	media_info->setText(media_title);
 	
 	// load values for media settings
@@ -1472,16 +1463,31 @@ void LLFloaterTools::clearMediaSettings()
 //
 void LLFloaterTools::navigateToTitleMedia( const std::string url )
 {
-	if ( mTitleMedia )
+	std::string multi_media_info_str = LLTrans::getString("Multiple Media");
+	if (url.empty() || multi_media_info_str == url)
+	{
+		// nothing to show
+		mNeedMediaTitle = false;
+	}
+	else if (mTitleMedia)
 	{
 		LLPluginClassMedia* media_plugin = mTitleMedia->getMediaPlugin();
-		if ( media_plugin )
+
+		if ( media_plugin ) // Shouldn't this be after navigateTo creates plugin?
 		{
 			// if it's a movie, we don't want to hear it
 			media_plugin->setVolume( 0 );
 		};
-		mTitleMedia->navigateTo( url );
-	};
+
+		// check if url changed or if we need a new media source
+		if (mTitleMedia->getCurrentNavUrl() != url || media_plugin == NULL)
+		{
+			mTitleMedia->navigateTo( url );
+		}
+
+		// flag that we need to update the title (even if no request were made)
+		mNeedMediaTitle = true;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

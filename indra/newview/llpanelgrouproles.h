@@ -132,7 +132,7 @@ protected:
 									BOOL is_owner_role);
 
 protected:
-	LLPanel* mHeader;
+	LLPanel* mHeader; // Might not be present in xui of derived class (NULL)
 	LLPanel* mFooter;
 
 	LLFilterEditor*	mSearchEditor;
@@ -182,6 +182,7 @@ public:
 	bool handleBanCallback(const LLSD& notification, const LLSD& response);
 	void confirmBanMembers();
 
+	void updateActionDescription();
 
 	void applyMemberChanges();
 	bool addOwnerCB(const LLSD& notification, const LLSD& response);
@@ -221,6 +222,8 @@ protected:
 	BOOL mChanged;
 	BOOL mPendingMemberUpdate;
 	BOOL mHasMatch;
+
+	LLTextEditor*	mActionDescription;
 
 	member_role_changes_map_t mMemberRoleChangeData;
 	U32 mNumOwnerAdditions;
@@ -266,8 +269,13 @@ public:
 	static void onCreateRole(void*);
 	void handleCreateRole();
 
+	static void onCopyRole(void*);
+	void handleCopyRole();
+
 	static void onDeleteRole(void*);
 	void handleDeleteRole();
+
+	void updateActionDescription();
 
 	void saveRoleChanges(bool select_saved_role);
 
@@ -282,6 +290,7 @@ protected:
 	LLScrollListCtrl* mRolesList;
 	LLNameListCtrl* mAssignedMembersList;
 	LLScrollListCtrl* mAllowedActionsList;
+	LLTextEditor* mActionDescription;
 
 	LLLineEditor* mRoleName;
 	LLLineEditor* mRoleTitle;
@@ -290,6 +299,7 @@ protected:
 	LLCheckBoxCtrl* mMemberVisibleCheck;
 	LLButton*       mDeleteRoleButton;
 	LLButton*       mCreateRoleButton;
+	LLButton*       mCopyRoleButton;
 
 	LLUUID	mSelectedRole;
 	BOOL	mHasRoleChange;
@@ -311,6 +321,7 @@ public:
 	virtual bool needsApply(std::string& mesg);
 	virtual bool apply(std::string& mesg);
 	virtual void update(LLGroupChange gc);
+	virtual void onFilterChanged();
 
 	void handleActionSelect();
 

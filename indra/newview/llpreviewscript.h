@@ -34,6 +34,7 @@
 #include "lliconctrl.h"
 #include "llframetimer.h"
 #include "llfloatergotoline.h"
+#include "lllivefile.h"
 #include "llsyntaxid.h"
 
 class LLLiveLSLFile;
@@ -52,6 +53,23 @@ class LLViewerInventoryItem;
 class LLScriptEdContainer;
 class LLFloaterGotoLine;
 class LLFloaterExperienceProfile;
+
+class LLLiveLSLFile : public LLLiveFile
+{
+public:
+    typedef boost::function<bool(const std::string& filename)> change_callback_t;
+
+    LLLiveLSLFile(std::string file_path, change_callback_t change_cb);
+    ~LLLiveLSLFile();
+
+    void ignoreNextUpdate() { mIgnoreNextUpdate = true; }
+
+protected:
+    /*virtual*/ bool loadFile();
+
+    change_callback_t	mOnChangeCallback;
+    bool				mIgnoreNextUpdate;
+};
 
 // Inner, implementation class.  LLPreviewScript and LLLiveLSLEditor each own one of these.
 class LLScriptEdCore : public LLPanel
@@ -90,6 +108,7 @@ public:
 	bool			canLoadOrSaveToFile( void* userdata );
 
 	void            setScriptText(const std::string& text, BOOL is_valid);
+	void			makeEditorPristine();
 	bool			loadScriptText(const std::string& filename);
 	bool			writeToFile(const std::string& filename);
 	void			sync();
@@ -108,7 +127,10 @@ public:
 	static void		onBtnInsertSample(void*);
 	static void		onBtnInsertFunction(LLUICtrl*, void*);
 	static void		onBtnLoadFromFile(void*);
-    static void		onBtnSaveToFile(void*);
+	static void		onBtnSaveToFile(void*);
+
+	static void		loadScriptFromFile(const std::vector<std::string>& filenames, void* data);
+	static void		saveScriptToFile(const std::vector<std::string>& filenames, void* data);
 
 	static bool		enableSaveToFileMenu(void* userdata);
 	static bool		enableLoadFromFileMenu(void* userdata);
@@ -166,6 +188,7 @@ private:
 	LLLiveLSLFile*	mLiveFile;
 	LLUUID			mAssociatedExperience;
 	BOOL			mScriptRemoved;
+	BOOL			mSaveDialogShown;
 
 	LLScriptEdContainer* mContainer; // parent view
 

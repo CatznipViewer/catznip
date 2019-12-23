@@ -234,7 +234,7 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 	mDataFP(NULL),
 	mIndexFP(NULL)
 {
-	mDataMutex = new LLMutex(0);
+	mDataMutex = new LLMutex();
 
 	S32 i;
 	for (i = 0; i < VFSLOCK_COUNT; i++)
@@ -2120,7 +2120,11 @@ time_t LLVFS::creationTime()
     int errors = LLFile::stat(mDataFilename, &data_file_stat);
     if (0 == errors)
     {
-        return data_file_stat.st_ctime;
+        time_t creation_time = data_file_stat.st_ctime;
+#if LL_DARWIN
+        creation_time = data_file_stat.st_birthtime;
+#endif
+        return creation_time;
     }
     return 0;
 }

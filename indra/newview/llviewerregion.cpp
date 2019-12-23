@@ -44,6 +44,7 @@
 
 #include "llagent.h"
 #include "llagentcamera.h"
+#include "llappviewer.h"
 #include "llavatarrenderinfoaccountant.h"
 #include "llcallingcard.h"
 #include "llcommandhandler.h"
@@ -78,6 +79,7 @@
 #include "llcoros.h"
 #include "lleventcoro.h"
 #include "llcorehttputil.h"
+#include "llcallstack.h"
 
 #ifdef LL_WINDOWS
 	#pragma warning(disable:4355)
@@ -103,6 +105,18 @@ S32  LLViewerRegion::sNewObjectCreationThrottle = -1;
 typedef std::map<std::string, std::string> CapabilityMap;
 
 static void log_capabilities(const CapabilityMap &capmap);
+
+namespace
+{
+
+void newRegionEntry(LLViewerRegion& region)
+{
+    LL_INFOS("LLViewerRegion") << "Entering region [" << region.getName() << "]" << LL_ENDL;
+    gDebugInfo["CurrentRegion"] = region.getName();
+    LLAppViewer::instance()->writeDebugInfo();
+}
+
+} // anonymous namespace
 
 // support for secondlife:///app/region/{REGION} SLapps
 // N.B. this is defined to work exactly like the classic secondlife://{REGION}
@@ -241,6 +255,8 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
             LL_WARNS("AppInit", "Capabilities") << "Attempting to get capabilities for region that no longer exists!" << LL_ENDL;
             return; // this error condition is not recoverable.
         }
+        LL_DEBUGS("AppInit", "Capabilities") << "requesting seed caps for handle " << regionHandle 
+                                             << " name " << regionp->getName() << LL_ENDL;
 
         std::string url = regionp->getCapability("Seed");
         if (url.empty())
@@ -248,6 +264,9 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
             LL_WARNS("AppInit", "Capabilities") << "Failed to get seed capabilities, and can not determine url!" << LL_ENDL;
             return; // this error condition is not recoverable.
         }
+
+        // record that we just entered a new region
+        newRegionEntry(*regionp);
 
         // After a few attempts, continue login.  But keep trying to get the caps:
         if (mSeedCapAttempts >= mSeedCapMaxAttemptsBeforeLogin &&
@@ -269,7 +288,8 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
         buildCapabilityNames(capabilityNames);
 
         LL_INFOS("AppInit", "Capabilities") << "Requesting seed from " << url 
-            << " (attempt #" << mSeedCapAttempts + 1 << ")" << LL_ENDL;
+                                            << " region name " << regionp->getName()
+                                            << " (attempt #" << mSeedCapAttempts + 1 << ")" << LL_ENDL;
 
         regionp = NULL;
         result = httpAdapter->postAndSuspend(httpRequest, url, capabilityNames);
@@ -286,6 +306,13 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
         if (id != mHttpResponderID) // region is no longer referring to this request
         {
             LL_WARNS("AppInit", "Capabilities") << "Received results for a stale capabilities request!" << LL_ENDL;
+            // setup for retry.
+            continue;
+        }
+
+        if (!result.isMap() || result.has("error"))
+        {
+            LL_WARNS("AppInit", "Capabilities") << "Malformed response" << LL_ENDL;
             // setup for retry.
             continue;
         }
@@ -316,6 +343,8 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
 #endif
 
         regionp->setCapabilitiesReceived(true);
+        LL_DEBUGS("AppInit", "Capabilities") << "received caps for handle " << regionHandle 
+                                             << " region name " << regionp->getName() << LL_ENDL;
 
         if (STATE_SEED_GRANTED_WAIT == LLStartUp::getStartupState())
         {
@@ -361,6 +390,9 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCompleteCoro(U64 regionHandle)
             LL_WARNS("AppInit", "Capabilities") << "Failed to get seed capabilities, and can not determine url!" << LL_ENDL;
             break; // this error condition is not recoverable.
         }
+
+        // record that we just entered a new region
+        newRegionEntry(*regionp);
 
         LLSD capabilityNames = LLSD::emptyArray();
         buildCapabilityNames(capabilityNames);
@@ -521,7 +553,7 @@ LLViewerRegion::LLViewerRegion(const U64 &handle,
 	mColoName("unknown"),
 	mProductSKU("unknown"),
 	mProductName("unknown"),
-	mHttpUrl(""),
+	mViewerAssetUrl(""),
 	mCacheLoaded(FALSE),
 	mCacheDirty(FALSE),
 	mReleaseNotesRequested(FALSE),
@@ -532,7 +564,9 @@ LLViewerRegion::LLViewerRegion(const U64 &handle,
 	mDead(FALSE),
 	mLastVisitedEntry(NULL),
 	mInvisibilityCheckHistory(-1),
-	mPaused(FALSE)
+	mPaused(FALSE),
+	mRegionCacheHitCount(0),
+	mRegionCacheMissCount(0)
 {
 	mWidth = region_width_meters;
 	mImpl->mOriginGlobal = from_region_handle(handle); 
@@ -1258,7 +1292,7 @@ void LLViewerRegion::updateVisibleEntries(F32 max_time)
 		LLPointer<LLViewerOctreeGroup> group = *group_iter;
 		if(group->getNumRefs() < 3 || //group to be deleted
 			!group->getOctreeNode() || group->isEmpty()) //group empty
-{
+        {
 			continue;
 		}
 
@@ -2161,6 +2195,26 @@ void LLViewerRegion::getInfo(LLSD& info)
 	info["Region"]["Handle"]["y"] = (LLSD::Integer)y;
 }
 
+void LLViewerRegion::requestSimulatorFeatures()
+{
+    LL_DEBUGS("SimulatorFeatures") << "region " << getName() << " ptr " << this
+                                   << " trying to request SimulatorFeatures" << LL_ENDL;
+    // kick off a request for simulator features
+    std::string url = getCapability("SimulatorFeatures");
+    if (!url.empty())
+    {
+        std::string coroname =
+            LLCoros::instance().launch("LLViewerRegionImpl::requestSimulatorFeatureCoro",
+                                       boost::bind(&LLViewerRegionImpl::requestSimulatorFeatureCoro, mImpl, url, getHandle()));
+        
+        LL_INFOS("AppInit", "SimulatorFeatures") << "Launching " << coroname << " requesting simulator features from " << url << LL_ENDL;
+    }
+    else
+    {
+        LL_WARNS("AppInit", "SimulatorFeatures") << "SimulatorFeatures cap not set" << LL_ENDL;
+    }
+}
+
 boost::signals2::connection LLViewerRegion::setSimulatorFeaturesReceivedCallback(const caps_received_signal_t::slot_type& cb)
 {
 	return mSimulatorFeaturesReceivedSignal.connect(cb);
@@ -2192,7 +2246,7 @@ void LLViewerRegion::setSimulatorFeatures(const LLSD& sim_features)
 	std::stringstream str;
 	
 	LLSDSerialize::toPrettyXML(sim_features, str);
-	LL_INFOS() << str.str() << LL_ENDL;
+	LL_INFOS() << "region " << getName() << " "  << str.str() << LL_ENDL;
 	mSimulatorFeatures = sim_features;
 
 	setSimulatorFeaturesReceived(true);
@@ -2238,7 +2292,7 @@ void LLViewerRegion::decodeBoundingInfo(LLVOCacheEntry* entry)
 	{
 		LLViewerRegion* old_regionp = ((LLDrawable*)entry->getEntry()->getDrawable())->getRegion();
 		if(old_regionp != this && old_regionp)
-{
+        {
 			LLViewerObject* obj = ((LLDrawable*)entry->getEntry()->getDrawable())->getVObj();
 			if(obj)
 			{
@@ -2401,12 +2455,18 @@ LLViewerRegion::eCacheUpdateResult LLViewerRegion::cacheFullUpdate(LLDataPackerB
 		// we've seen this object before
 		if (entry->getCRC() == crc)
 		{
+            LL_DEBUGS("AnimatedObjects") << " got dupe for local_id " << local_id << LL_ENDL;
+            dumpStack("AnimatedObjectsStack");
+
 			// Record a hit
 			entry->recordDupe();
 			result = CACHE_UPDATE_DUPE;
 		}
 		else //CRC changed
 		{
+            LL_DEBUGS("AnimatedObjects") << " got update for local_id " << local_id << LL_ENDL;
+            dumpStack("AnimatedObjectsStack");
+
 			// Update the cache entry
 			entry->updateEntry(crc, dp);
 
@@ -2417,6 +2477,9 @@ LLViewerRegion::eCacheUpdateResult LLViewerRegion::cacheFullUpdate(LLDataPackerB
 	}
 	else
 	{
+        LL_DEBUGS("AnimatedObjects") << " got first notification for local_id " << local_id << LL_ENDL;
+        dumpStack("AnimatedObjectsStack");
+
 		// we haven't seen this object before
 		// Create new entry and add to map
 		result = CACHE_UPDATE_ADDED;
@@ -2467,6 +2530,7 @@ LLVOCacheEntry* LLViewerRegion::getCacheEntry(U32 local_id, bool valid)
 
 void LLViewerRegion::addCacheMiss(U32 id, LLViewerRegion::eCacheMissType miss_type)
 {
+	mRegionCacheMissCount++;
 #if 0
 	mCacheMissList.insert(CacheMissItem(id, miss_type));
 #else
@@ -2518,8 +2582,9 @@ bool LLViewerRegion::probeCache(U32 local_id, U32 crc, U32 flags, U8 &cache_miss
 		if (entry->getCRC() == crc)
 		{
 			// Record a hit
+			mRegionCacheHitCount++;
 			entry->recordHit();
-		cache_miss_type = CACHE_MISS_TYPE_NONE;
+            cache_miss_type = CACHE_MISS_TYPE_NONE;
 			entry->setUpdateFlags(flags);
 			
 			if(entry->isState(LLVOCacheEntry::ACTIVE))
@@ -2542,12 +2607,14 @@ bool LLViewerRegion::probeCache(U32 local_id, U32 crc, U32 flags, U8 &cache_miss
 			// LL_INFOS() << "CRC miss for " << local_id << LL_ENDL;
 
 			addCacheMiss(local_id, CACHE_MISS_TYPE_CRC);
+            cache_miss_type = CACHE_MISS_TYPE_CRC;
 		}
 	}
 	else
 	{
 		// LL_INFOS() << "Cache miss for " << local_id << LL_ENDL;
 		addCacheMiss(local_id, CACHE_MISS_TYPE_FULL);
+        cache_miss_type = CACHE_MISS_TYPE_FULL;
 	}
 
 	return false;
@@ -2584,6 +2651,9 @@ void LLViewerRegion::requestCacheMisses()
 		msg->nextBlockFast(_PREHASH_ObjectData);
 		msg->addU8Fast(_PREHASH_CacheMissType, (*iter).mType);
 		msg->addU32Fast(_PREHASH_ID, (*iter).mID);
+
+        LL_DEBUGS("AnimatedObjects") << "Requesting cache missed object " << (*iter).mID << LL_ENDL;
+        
 		blocks++;
 
 		if (blocks >= 255)
@@ -2832,6 +2902,9 @@ void LLViewerRegion::unpackRegionHandshake()
 
 void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 {
+	capabilityNames.append("AbuseCategories");
+	capabilityNames.append("AcceptFriendship");
+	capabilityNames.append("AcceptGroupInvite"); // ReadOfflineMsgs recieved messages only!!!
 	capabilityNames.append("AgentPreferences");
 	capabilityNames.append("AgentState");
 	capabilityNames.append("AttachmentResources");
@@ -2841,14 +2914,14 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("ChatSessionRequest");
 	capabilityNames.append("CopyInventoryFromNotecard");
 	capabilityNames.append("CreateInventoryCategory");
+	capabilityNames.append("DeclineFriendship");
+	capabilityNames.append("DeclineGroupInvite"); // ReadOfflineMsgs recieved messages only!!!
 	capabilityNames.append("DispatchRegionInfo");
 	capabilityNames.append("DirectDelivery");
 	capabilityNames.append("EnvironmentSettings");
+	capabilityNames.append("EstateAccess");
 	capabilityNames.append("EstateChangeInfo");
 	capabilityNames.append("EventQueueGet");
-	capabilityNames.append("FacebookConnect");
-	capabilityNames.append("FlickrConnect");
-	capabilityNames.append("TwitterConnect");
 
 	capabilityNames.append("FetchLib2");
 	capabilityNames.append("FetchLibDescendents2");
@@ -2870,12 +2943,9 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("IsExperienceAdmin");
 	capabilityNames.append("IsExperienceContributor");
 	capabilityNames.append("RegionExperiences");
-	capabilityNames.append("GetMesh");
-	capabilityNames.append("GetMesh2");
 	capabilityNames.append("GetMetadata");
 	capabilityNames.append("GetObjectCost");
 	capabilityNames.append("GetObjectPhysicsData");
-	capabilityNames.append("GetTexture");
 	capabilityNames.append("GroupAPIv1");
 	capabilityNames.append("GroupMemberData");
 	capabilityNames.append("GroupProposalBallot");
@@ -2887,6 +2957,7 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("MeshUploadFlag");	
 	capabilityNames.append("NavMeshGenerationStatus");
 	capabilityNames.append("NewFileAgentInventory");
+	capabilityNames.append("ObjectAnimation");
 	capabilityNames.append("ObjectMedia");
 	capabilityNames.append("ObjectMediaNavigate");
 	capabilityNames.append("ObjectNavMeshProperties");
@@ -2894,6 +2965,7 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("ParcelVoiceInfoRequest");
 	capabilityNames.append("ProductInfoRequest");
 	capabilityNames.append("ProvisionVoiceAccountRequest");
+	capabilityNames.append("ReadOfflineMsgs"); // Requires to respond reliably: AcceptFriendship, AcceptGroupInvite, DeclineFriendship, DeclineGroupInvite
 	capabilityNames.append("RemoteParcelRequest");
 	capabilityNames.append("RenderMaterials");
 	capabilityNames.append("RequestTextureDownload");
@@ -2922,6 +2994,8 @@ void LLViewerRegionImpl::buildCapabilityNames(LLSD& capabilityNames)
 	capabilityNames.append("UpdateScriptAgent");
 	capabilityNames.append("UpdateScriptTask");
 	capabilityNames.append("UploadBakedTexture");
+    capabilityNames.append("UserInfo");
+	capabilityNames.append("ViewerAsset"); 
 	capabilityNames.append("ViewerMetrics");
 	capabilityNames.append("ViewerStartAuction");
 	capabilityNames.append("ViewerStats");
@@ -2978,19 +3052,26 @@ void LLViewerRegion::setCapability(const std::string& name, const std::string& u
 	}
 	else if (name == "SimulatorFeatures")
 	{
-		// kick off a request for simulator features
-        std::string coroname =
-            LLCoros::instance().launch("LLViewerRegionImpl::requestSimulatorFeatureCoro",
-            boost::bind(&LLViewerRegionImpl::requestSimulatorFeatureCoro, mImpl, url, getHandle()));
-
-        LL_INFOS("AppInit", "SimulatorFeatures") << "Launching " << coroname << " requesting simulator features from " << url << LL_ENDL;
+        mImpl->mCapabilities["SimulatorFeatures"] = url;
+        requestSimulatorFeatures();
 	}
 	else
 	{
 		mImpl->mCapabilities[name] = url;
-		if(name == "GetTexture")
+		if(name == "ViewerAsset")
 		{
-			mHttpUrl = url ;
+			/*==============================================================*/
+			// The following inserted lines are a hack for testing MAINT-7081,
+			// which is why the indentation and formatting are left ugly.
+			const char* VIEWERASSET = getenv("VIEWERASSET");
+			if (VIEWERASSET)
+			{
+				mImpl->mCapabilities[name] = VIEWERASSET;
+				mViewerAssetUrl = VIEWERASSET;
+			}
+			else
+			/*==============================================================*/
+			mViewerAssetUrl = url;
 		}
 	}
 }
@@ -3001,9 +3082,20 @@ void LLViewerRegion::setCapabilityDebug(const std::string& name, const std::stri
 	if ( ! ( name == "EventQueueGet" || name == "UntrustedSimulatorMessage" || name == "SimulatorFeatures" ) )
 	{
 		mImpl->mSecondCapabilitiesTracker[name] = url;
-		if(name == "GetTexture")
+		if(name == "ViewerAsset")
 		{
-			mHttpUrl = url ;
+			/*==============================================================*/
+			// The following inserted lines are a hack for testing MAINT-7081,
+			// which is why the indentation and formatting are left ugly.
+			const char* VIEWERASSET = getenv("VIEWERASSET");
+			if (VIEWERASSET)
+			{
+				mImpl->mSecondCapabilitiesTracker[name] = VIEWERASSET;
+				mViewerAssetUrl = VIEWERASSET;
+			}
+			else
+			/*==============================================================*/
+			mViewerAssetUrl = url;
 		}
 	}
 }
@@ -3165,6 +3257,12 @@ bool LLViewerRegion::meshUploadEnabled() const
 {
 	return (mSimulatorFeatures.has("MeshUploadEnabled") &&
 		mSimulatorFeatures["MeshUploadEnabled"].asBoolean());
+}
+
+bool LLViewerRegion::bakesOnMeshEnabled() const
+{
+	return (mSimulatorFeatures.has("BakesOnMeshEnabled") &&
+		mSimulatorFeatures["BakesOnMeshEnabled"].asBoolean());
 }
 
 bool LLViewerRegion::meshRezEnabled() const

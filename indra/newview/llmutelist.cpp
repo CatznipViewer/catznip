@@ -48,6 +48,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include "lldispatcher.h"
 #include "llxfermanager.h"
@@ -180,9 +181,10 @@ LLMuteList::~LLMuteList()
 
 BOOL LLMuteList::isLinden(const std::string& name) const
 {
+	std::string username = boost::replace_all_copy(name, ".", " ");
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep(" ");
-	tokenizer tokens(name, sep);
+	tokenizer tokens(username, sep);
 	tokenizer::iterator token_iter = tokens.begin();
 	
 	if (token_iter == tokens.end()) return FALSE;
@@ -190,7 +192,8 @@ BOOL LLMuteList::isLinden(const std::string& name) const
 	if (token_iter == tokens.end()) return FALSE;
 	
 	std::string last_name = *token_iter;
-	return last_name == "Linden";
+	LLStringUtil::toLower(last_name);
+	return last_name == "linden";
 }
 
 static LLVOAvatar* find_avatar(const LLUUID& id)
@@ -313,14 +316,7 @@ BOOL LLMuteList::add(const LLMute& mute, U32 flags)
 				updateAdd(localmute);
 				notifyObservers();
 				notifyObserversDetailed(localmute);
-				if(!(localmute.mFlags & LLMute::flagParticles))
-				{
-					//Kill all particle systems owned by muted task
-					if(localmute.mType == LLMute::AGENT || localmute.mType == LLMute::OBJECT)
-					{
-						LLViewerPartSim::getInstance()->clearParticlesByOwnerID(localmute.mID);
-					}
-				}
+
 				//mute local lights that are attached to the avatar
 				LLVOAvatar *avatarp = find_avatar(localmute.mID);
 				if (avatarp)

@@ -196,7 +196,7 @@ void LLPanelMediaSettingsGeneral::draw()
 
 ////////////////////////////////////////////////////////////////////////////////
 // static 
-void LLPanelMediaSettingsGeneral::clearValues( void* userdata, bool editable)
+void LLPanelMediaSettingsGeneral::clearValues( void* userdata, bool editable, bool update_preview)
 {	
 	LLPanelMediaSettingsGeneral *self =(LLPanelMediaSettingsGeneral *)userdata;
 	self->mAutoLoop->clear();
@@ -217,7 +217,10 @@ void LLPanelMediaSettingsGeneral::clearValues( void* userdata, bool editable)
 	self->mHeightPixels ->setEnabled(editable);
 	self->mHomeURL ->setEnabled(editable);
 	self->mWidthPixels ->setEnabled(editable);
-	self->updateMediaPreview();
+	if (update_preview)
+	{
+		self->updateMediaPreview();
+	}
 }
 
 // static
@@ -454,7 +457,7 @@ bool LLPanelMediaSettingsGeneral::navigateHomeSelectedFace(bool only_if_current_
 					if (!only_if_current_is_empty || (media_data->getCurrentURL().empty() && media_data->getAutoPlay()))
 					{
 						viewer_media_t media_impl =
-							LLViewerMedia::getMediaImplFromTextureID(object->getTE(face)->getMediaData()->getMediaID());
+							LLViewerMedia::getInstance()->getMediaImplFromTextureID(object->getTE(face)->getMediaData()->getMediaID());
 						if(media_impl)
 						{
 							media_impl->navigateHome();

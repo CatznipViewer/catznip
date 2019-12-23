@@ -192,7 +192,7 @@ LLModel::EModelStatus load_face_from_dom_triangles(std::vector<LLVolumeFace>& fa
 		{
 			return LLModel::BAD_ELEMENT;
 		}
-
+		// VFExtents change
 		face.mExtents[0].set(v[0], v[1], v[2]);
 		face.mExtents[1].set(v[0], v[1], v[2]);
 	}
@@ -254,6 +254,7 @@ LLModel::EModelStatus load_face_from_dom_triangles(std::vector<LLVolumeFace>& fa
 
 		if (!found)
 		{
+			// VFExtents change
 			update_min_max(face.mExtents[0], face.mExtents[1], cv.getPosition());
 			verts.push_back(cv);
 			if (verts.size() >= 65535)
@@ -305,6 +306,7 @@ LLModel::EModelStatus load_face_from_dom_triangles(std::vector<LLVolumeFace>& fa
 			}
 
 			face = LLVolumeFace();
+			// VFExtents change
 			face.mExtents[0].set(v[0], v[1], v[2]);
 			face.mExtents[1].set(v[0], v[1], v[2]);
 			point_map.clear();
@@ -383,6 +385,7 @@ LLModel::EModelStatus load_face_from_dom_polylist(std::vector<LLVolumeFace>& fac
 	if (pos_source)
 	{
 		v = pos_source->getFloat_array()->getValue();
+		// VFExtents change
 		face.mExtents[0].set(v[0], v[1], v[2]);
 		face.mExtents[1].set(v[0], v[1], v[2]);
 	}
@@ -482,6 +485,7 @@ LLModel::EModelStatus load_face_from_dom_polylist(std::vector<LLVolumeFace>& fac
 
 			if (!found)
 			{
+				// VFExtents change
 				update_min_max(face.mExtents[0], face.mExtents[1], cv.getPosition());
 				verts.push_back(cv);
 				if (verts.size() >= 65535)
@@ -551,6 +555,7 @@ LLModel::EModelStatus load_face_from_dom_polylist(std::vector<LLVolumeFace>& fac
 				}
 
 				face = LLVolumeFace();
+				// VFExtents change
 				face.mExtents[0].set(v[0], v[1], v[2]);
 				face.mExtents[1].set(v[0], v[1], v[2]);
 				verts.clear();
@@ -734,7 +739,7 @@ LLModel::EModelStatus load_face_from_dom_polygons(std::vector<LLVolumeFace>& fac
 	{
 		return LLModel::NO_ERRORS;
 	}
-
+	// VFExtents change
 	face.mExtents[0] = verts[0].getPosition();
 	face.mExtents[1] = verts[0].getPosition();
 	
@@ -758,6 +763,7 @@ LLModel::EModelStatus load_face_from_dom_polygons(std::vector<LLVolumeFace>& fac
 	for (std::map<LLVolumeFace::VertexData, U32>::iterator iter = vert_idx.begin(); iter != vert_idx.end(); ++iter)
 	{
 		new_verts[iter->second] = iter->first;
+		// VFExtents change
 		update_min_max(face.mExtents[0], face.mExtents[1], iter->first.getPosition());
 	}
 
@@ -862,16 +868,26 @@ bool LLDAELoader::OpenFile(const std::string& filename)
 	setLoadState( READING_FILE );
 
 	//no suitable slm exists, load from the .dae file
+
+	// Collada expects file and folder names to be escaped
+	// Note: cdom::nativePathToUri()
+	const char* allowed =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz"
+		"0123456789"
+		"%-._~:\"|\\/";
+	std::string uri_filename = LLURI::escape(filename, allowed);
+
 	DAE dae;
 	domCOLLADA* dom;
 	if (mPreprocessDAE)
 	{
-		dom = dae.openFromMemory(filename, preprocessDAE(filename).c_str());
+		dom = dae.openFromMemory(uri_filename, preprocessDAE(filename).c_str());
 	}
 	else
 	{
 		LL_INFOS() << "Skipping dae preprocessing" << LL_ENDL;
-		dom = dae.open(filename);
+		dom = dae.open(uri_filename);
 	}
 	
 	if (!dom)
@@ -900,7 +916,7 @@ bool LLDAELoader::OpenFile(const std::string& filename)
 	
 	daeInt count = db->getElementCount(NULL, COLLADA_TYPE_MESH);
 	
-	daeDocument* doc = dae.getDoc(filename);
+	daeDocument* doc = dae.getDoc(uri_filename);
 	if (!doc)
 	{
 		LL_WARNS() << "can't find internal doc" << LL_ENDL;

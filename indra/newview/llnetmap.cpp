@@ -496,7 +496,7 @@ void LLNetMap::draw()
 		S32 local_mouse_x;
 		S32 local_mouse_y;
 		//localMouse(&local_mouse_x, &local_mouse_y);
-		LLUI::getMousePositionLocal(this, &local_mouse_x, &local_mouse_y);
+		LLUI::getInstance()->getMousePositionLocal(this, &local_mouse_x, &local_mouse_y);
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		bool local_mouse = this->pointInView(local_mouse_x, local_mouse_y);
 // [/SL:KB]
@@ -929,7 +929,7 @@ void LLNetMap::renderPoint(const LLVector3 &pos_local, const LLColor4U &color,
 				continue;
 			}
 			S32 offset = px + py * image_width;
-			((U32*)datap)[offset] = color.mAll;
+			((U32*)datap)[offset] = color.asRGBA();
 		}
 
 		// top line
@@ -942,7 +942,7 @@ void LLNetMap::renderPoint(const LLVector3 &pos_local, const LLColor4U &color,
 				continue;
 			}
 			S32 offset = px + py * image_width;
-			((U32*)datap)[offset] = color.mAll;
+			((U32*)datap)[offset] = color.asRGBA();
 		}
 	}
 	else
@@ -964,7 +964,7 @@ void LLNetMap::renderPoint(const LLVector3 &pos_local, const LLColor4U &color,
 					continue;
 				}
 				S32 offset = p_x + p_y * image_width;
-				((U32*)datap)[offset] = color.mAll;
+				((U32*)datap)[offset] = color.asRGBA();
 			}
 		}
 	}
@@ -990,14 +990,14 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	{
 		S32 curX = llclamp(originX, 0, imgWidth), endX = llclamp(originX + ll_round(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgWidth - 1);
 		for (; curX <= endX; curX++)
-			pTextureData[borderY * imgWidth + curX] = clrOverlay.mAll;
+			pTextureData[borderY * imgWidth + curX] = clrOverlay.asRGBA();
 	}
 	const S32 borderX = originX + ll_round(REGION_WIDTH_METERS * mObjectMapTPM);
 	if ( (borderX >= 0) && (borderX < imgWidth) )
 	{
 		S32 curY = llclamp(originY, 0, imgHeight), endY = llclamp(originY + ll_round(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgHeight - 1);
 		for (; curY <= endY; curY++)
-			pTextureData[curY * imgWidth + borderX] = clrOverlay.mAll;
+			pTextureData[curY * imgWidth + borderX] = clrOverlay.asRGBA();
 	}
 
 	//
@@ -1032,8 +1032,8 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 					S32 curX = llclamp(posX, 0, imgWidth) , endX = llclamp(posX + ll_round(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
 					{
-						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).mAll
-						                                                  : LLColor4U(255, 128, 128, 192).mAll;
+						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).asRGBA()
+						                                                  : LLColor4U(255, 128, 128, 192).asRGBA();
 					}
 				}
 			}
@@ -1043,7 +1043,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 				{
 					S32 curX = llclamp(posX, 0, imgWidth), endX = llclamp(posX + ll_round(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
-						pTextureData[posY * imgWidth + curX] = clrOverlay.mAll;
+						pTextureData[posY * imgWidth + curX] = clrOverlay.asRGBA();
 				}
 			}
 			if (overlay & PARCEL_WEST_LINE)
@@ -1052,7 +1052,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 				{
 					S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + ll_round(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 					for (; curY <= endY; curY++)
-						pTextureData[curY * imgWidth + posX] = clrOverlay.mAll;
+						pTextureData[curY * imgWidth + posX] = clrOverlay.asRGBA();
 				}
 			}
 		}
@@ -1152,7 +1152,7 @@ BOOL LLNetMap::handleMouseUp( S32 x, S32 y, MASK mask )
 			LLRect clip_rect = getRect();
 			clip_rect.stretch(-8);
 			clip_rect.clipPointToRect(mMouseDown.mX, mMouseDown.mY, local_x, local_y);
-			LLUI::setMousePositionLocal(this, local_x, local_y);
+			LLUI::getInstance()->setMousePositionLocal(this, local_x, local_y);
 
 			// finish the pan
 			mPanning = false;
@@ -1413,6 +1413,6 @@ void LLNetMap::handleStopTracking (const LLSD& userdata)
 	if (mPopupMenu)
 	{
 //		mPopupMenu->setItemEnabled ("Stop Tracking", false);
-		LLTracker::stopTracking ((void*)LLTracker::isTracking(NULL));
+		LLTracker::stopTracking (LLTracker::isTracking(NULL));
 	}
 }

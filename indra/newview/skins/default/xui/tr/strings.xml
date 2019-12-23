@@ -38,7 +38,7 @@
 		Grafik başlatma başarılamadı. Lütfen grafik sürücünüzü güncelleştirin!
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) 
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
@@ -65,22 +65,25 @@ Grafik Kartı: [GRAPHICS_CARD]
 		OpenGL Sürümü: [OPENGL_VERSION]
 	</string>
 	<string name="AboutSettings">
-		Pencere büyüklüğü: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
-Font Büyüklüğü Ayarı: [FONT_SIZE_ADJUSTMENT] pt
-Kullanıcı Arayüzü Ölçekleme: [UI_SCALE]
-Çizme mesafesi: [DRAW_DISTANCE] m
-Bant genişliği: [NET_BANDWITH] kbit/sn
-Ayrıntı seviyesi faktörü: [LOD_FACTOR]
-İşleme kalitesi: [RENDER_QUALITY] / 7
+		Pencere boyutu: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+Yazı Tipi Boyutu Ayarı: [FONT_SIZE_ADJUSTMENT]pt
+UI Ölçeklendirme: [UI_SCALE]
+Çizim mesafesi: [DRAW_DISTANCE]m
+Bant genişliği: [NET_BANDWITH]kbit/s
+LOD faktörü: [LOD_FACTOR]
+İşleme kalitesi: [RENDER_QUALITY]
 Gelişmiş Aydınlatma Modeli: [GPU_SHADERS]
 Doku belleği: [TEXTURE_MEMORY]MB
-VFS (önbellek) oluşturma zamanı: [VFS_TIME]
+VFS (önbellek) oluşturma saati: [VFS_TIME]
+	</string>
+	<string name="AboutOSXHiDPI">
+		HiDPI görüntü modu: [HIDPI]
 	</string>
 	<string name="AboutLibs">
-		J2C Kod Çözücü Sürümü: [J2C_VERSION]
-Ses Sürücüsü Sürümü: [AUDIO_DRIVER_VERSION]
-LLCEFLib/CEF Sürümü: [LLCEFLIB_VERSION]
-LibVLC Sürümü: [LIBVLC_VERSION]
+		J2C Kod Çözücü Sürümü: [J2C_VERSION] 
+Ses Sürücüsü Sürümü: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+LibVLC Sürümü: [LIBVLC_VERSION] 
 Ses Sunucusu Sürümü: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
@@ -261,9 +264,8 @@ support@secondlife.com.
 Pasifik Saati ile [TIME].
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		Talebinizi şu anda tamamlayamıyoruz.
-Lütfen yardım almak için Second Life destek bölümüne başvurun: http://secondlife.com/support
-Eğer parolanızı değiştiremiyorsanız, lütfen şu numarayı arayın: (866) 476-9763.
+		Talebinizi şu anda tamamlayamıyoruz. 
+Lütfen yardım almak için http://support.secondlife.com adresinden Second Life destek bölümüyle iletişime geçin.
 	</string>
 	<string name="LoginFailedTransformError">
 		Oturum açılması sırasında veri tutarsızlığı saptandı.
@@ -279,9 +281,8 @@ Bunun bir hata olduğunu düşünüyorsanız, lütfen şu adrese başvurun: supp
 		Oturum kapatma talebi simülatörden bir hata yanıtı gelmesine neden oldu.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		Sistem şu anda oturumunuzu sonlandırıyor.
-Hesabınıza şu zamana kadar erişemeyeceksiniz:
-Pasifik Saati ile [TIME].
+		Sistem şu anda oturumunuzu kapatıyor. 
+Lütfen yeniden oturum açmayı denemeden önce bir dakika bekleyin.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		Geçerli bir oturum oluşturulamadı.
@@ -700,6 +701,19 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Bilinmeyen durum
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		Hizmet ulaşılamaz.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Sunucu beklenmeyen zorluklar yaşıyor.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		Hizmet kullanılabilir değil veya karşıya yükleme zaman aşımına ulaşıldı.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Karşıya yükleme talebinde hata. Bu sorunu çözmek için lütfen 
+http://secondlife.com/support adresini ziyaret edin.
 	</string>
 	<string name="texture">
 		doku
@@ -1431,6 +1445,9 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	<string name="InventoryNoMatchingItems">
 		Aradığınızı bulamadınız mı? [secondlife:///app/search/all/[SEARCH_TERM] Arama] ile bulmayı deneyin.
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Aradığınızı bulamadınız mı? [secondlife:///app/inventory/filters Show filters] seçeneğini deneyin.
+	</string>
 	<string name="PlacesNoMatchingItems">
 		Aradığınızı bulamadınız mı? [secondlife:///app/search/places/[SEARCH_TERM] Arama] ile bulmayı deneyin.
 	</string>
@@ -1460,6 +1477,15 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	</string>
 	<string name="MarketplaceURL_LearnMore">
 		https://marketplace.[MARKETPLACE_DOMAIN_NAME]/learn_more
+	</string>
+	<string name="InventoryPlayAnimationTooltip">
+		Pencereyi Oyun seçenekleri ile birlikte açın.
+	</string>
+	<string name="InventoryPlayGestureTooltip">
+		Seçilen mimiği SL dünyasında uygulayın.
+	</string>
+	<string name="InventoryPlaySoundTooltip">
+		Pencereyi Oyun seçenekleri ile birlikte açın.
 	</string>
 	<string name="InventoryOutboxNotMerchantTitle">
 		Pazaryerinde herkes öğe satabilir.
@@ -1496,6 +1522,9 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Klasörleri [[MARKETPLACE_DASHBOARD_URL] Pazaryerinde] satılık olarak listelemek için bu alana sürükleyin.
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Öğe )
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		stok klasörü bir sürüm klasöründe bulunmalıdır
@@ -2195,10 +2224,31 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 		[OWNER] adına yönettiğiniz tüm gayrimenkuller
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		İzin verilen Sakinler: ([ALLOWEDAGENTS], maks [MAXACCESS])
+		Her zaman izin verilen: ([ALLOWEDAGENTS], maks [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		İzin verilen gruplar: ([ALLOWEDGROUPS], maks [MAXACCESS])
+		Her zaman izin verilen gruplar: ([ALLOWEDGROUPS], maks [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Her zaman engellenen: ([BANNEDAGENTS], maks [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Her zaman izin verilen
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Her zaman engellenen
+	</string>
+	<string name="RegionInfoAllEstates">
+		tüm gayrimenkuller
+	</string>
+	<string name="RegionInfoManagedEstates">
+		yönetilen gayrimenkuller
+	</string>
+	<string name="RegionInfoThisEstate">
+		bu gayrimenkul
+	</string>
+	<string name="AndNMore">
+		ve [EXTRA_COUNT] tane daha
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Parsel Komut Dosyası Belleği
@@ -2243,7 +2293,7 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 		Göğüs
 	</string>
 	<string name="ATTACH_HEAD">
-		Baş
+		Kafatası
 	</string>
 	<string name="ATTACH_LSHOULDER">
 		Sol Omuz
@@ -2264,7 +2314,7 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 		Sağ Ayak
 	</string>
 	<string name="ATTACH_BACK">
-		Geri
+		Omurga
 	</string>
 	<string name="ATTACH_PELVIS">
 		Leğen Kemiği
@@ -2294,13 +2344,13 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 		Sol Üst Kol
 	</string>
 	<string name="ATTACH_RLARM">
-		Sağ Alt Kol
+		Sağ Ön Kol
 	</string>
 	<string name="ATTACH_LUARM">
 		Sol Üst Kol
 	</string>
 	<string name="ATTACH_LLARM">
-		Sol Alt Kol
+		Sol Ön Kol
 	</string>
 	<string name="ATTACH_RHIP">
 		Sağ Kalça
@@ -2321,7 +2371,7 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 		Sol Alt Bacak
 	</string>
 	<string name="ATTACH_BELLY">
-		Göbek
+		Karın
 	</string>
 	<string name="ATTACH_LEFT_PEC">
 		Sol Göğüs
@@ -5368,9 +5418,6 @@ Düzenleyici yolunu çift tırnakla çevrelemeyi deneyin.
 	<string name="Command_Destinations_Label">
 		Hedef Konum
 	</string>
-	<string name="Command_Facebook_Label">
-		Facebook
-	</string>
 	<string name="Command_Flickr_Label">
 		Flickr
 	</string>
@@ -5463,9 +5510,6 @@ Düzenleyici yolunu çift tırnakla çevrelemeyi deneyin.
 	</string>
 	<string name="Command_Destinations_Tooltip">
 		İlgilendiğiniz hedef konumlar
-	</string>
-	<string name="Command_Facebook_Tooltip">
-		Facebook&apos;ta Yayınla
 	</string>
 	<string name="Command_Flickr_Tooltip">
 		Flickr&apos;a yükle
@@ -5721,5 +5765,26 @@ Düzenleyici yolunu çift tırnakla çevrelemeyi deneyin.
 	</string>
 	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
 		Fiziksel şekil doğru sürüme sahip değil. Fiziksel model için doğru sürümü ayarlayın.
+	</string>
+	<string name="couldnt_resolve_host">
+		DNS sunucusu ana bilgisayar adını çözümleyemedi ([HOSTNAME]). 
+Lütfen www.secondlife.com web sitesine bağlanabildiğinizi doğrulayın. 
+Bağlanabiliyor, ancak bu hatayı almaya devam ediyorsanız, lütfen 
+destek bölümüne gidin ve bu sorunu bildirin.
+	</string>
+	<string name="ssl_peer_certificate">
+		Oturum açma sunucusu SSL aracılığıyla kendini doğrulayamadı. 
+Bu hatayı almaya devam ederseniz, lütfen 
+SecondLife.com web sitesinin Destek 
+bölümüne gidin ve sorunu bildirin.
+	</string>
+	<string name="ssl_connect_error">
+		Çoğunlukla, bu durum, bilgisayarınızın saatinin yanlış ayarlandığı anlamına gelir. 
+Lütfen Denetim Masası&apos;na gidin ve tarih ve saat ayarlarının doğru yapıldığından emin olun. 
+Ayrıca, ağınızın ve güvenlik duvarınızın doğru şekilde ayarlanıp ayarlanmadığını kontrol edin. 
+Bu hatayı almaya devam ederseniz, lütfen SecondLife.com web sitesinin Destek bölümüne 
+gidin ve sorunu bildirin. 
+
+[https://community.secondlife.com/knowledgebase/english/error-messages-r520/#Section__3 Bilgi Bankası]
 	</string>
 </strings>

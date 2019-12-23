@@ -43,6 +43,7 @@
 #include "llsdserialize.h"
 #include "lltooltip.h"
 #include "llbutton.h"
+#include "llscrollbar.h"
 
 #include "llappviewer.h"
 #include "llviewertexturelist.h"
@@ -128,7 +129,8 @@ void LLFastTimerView::setPauseState(bool pause_state)
 BOOL LLFastTimerView::postBuild()
 {
 	LLButton& pause_btn = getChildRef<LLButton>("pause_btn");
-	
+	mScrollBar = getChild<LLScrollbar>("scroll_vert");
+
 	pause_btn.setCommitCallback(boost::bind(&LLFastTimerView::onPause, this));
 	return TRUE;
 }
@@ -183,7 +185,7 @@ BOOL LLFastTimerView::handleDoubleClick(S32 x, S32 y, MASK mask)
 
 BOOL LLFastTimerView::handleMouseDown(S32 x, S32 y, MASK mask)
 {
-	if (x < mBarRect.mLeft) 
+	if (x < mScrollBar->getRect().mLeft)
 	{
 		BlockTimerStatHandle* idp = getLegendID(y);
 		if (idp)
@@ -284,7 +286,7 @@ BOOL LLFastTimerView::handleHover(S32 x, S32 y, MASK mask)
 			}
 		}
 	}
-	else if (x < mBarRect.mLeft) 
+	else if (x < mScrollBar->getRect().mLeft) 
 	{
 		BlockTimerStatHandle* timer_id = getLegendID(y);
 		if (timer_id)
@@ -335,7 +337,7 @@ BOOL LLFastTimerView::handleToolTip(S32 x, S32 y, MASK mask)
 	else
 	{
 		// tooltips for timer legend
-		if (x < mBarRect.mLeft) 
+		if (x < mScrollBar->getRect().mLeft) 
 		{
 			BlockTimerStatHandle* idp = getLegendID(y);
 			if (idp)
@@ -352,11 +354,19 @@ BOOL LLFastTimerView::handleToolTip(S32 x, S32 y, MASK mask)
 
 BOOL LLFastTimerView::handleScrollWheel(S32 x, S32 y, S32 clicks)
 {
-	setPauseState(true);
-	mScrollIndex = llclamp(	mScrollIndex + clicks,
-							0,
-							llmin((S32)mRecording.getNumRecordedPeriods(), (S32)mRecording.getNumRecordedPeriods() - MAX_VISIBLE_HISTORY));
-	return TRUE;
+    if (x < mBarRect.mLeft)
+    {
+        // Inside mScrollBar and list of timers
+        mScrollBar->handleScrollWheel(x,y,clicks);
+    }
+    else
+    {
+        setPauseState(true);
+        mScrollIndex = llclamp(mScrollIndex + clicks,
+            0,
+            llmin((S32)mRecording.getNumRecordedPeriods(), (S32)mRecording.getNumRecordedPeriods() - MAX_VISIBLE_HISTORY));
+    }
+    return TRUE;
 }
 
 static BlockTimerStatHandle FTM_RENDER_TIMER("Timers");
@@ -435,18 +445,22 @@ void LLFastTimerView::onClose(bool app_quitting)
 
 void saveChart(const std::string& label, const char* suffix, LLImageRaw* scratch)
 {
-	//read result back into raw image
-	glReadPixels(0, 0, 1024, 512, GL_RGB, GL_UNSIGNED_BYTE, scratch->getData());
+	// disable use of glReadPixels which messes up nVidia nSight graphics debugging
+	if (!LLRender::sNsightDebugSupport)
+	{
+		//read result back into raw image
+		glReadPixels(0, 0, 1024, 512, GL_RGB, GL_UNSIGNED_BYTE, scratch->getData());
 
-	//write results to disk
-	LLPointer<LLImagePNG> result = new LLImagePNG();
-	result->encode(scratch, 0.f);
+		//write results to disk
+		LLPointer<LLImagePNG> result = new LLImagePNG();
+		result->encode(scratch, 0.f);
 
-	std::string ext = result->getExtension();
-	std::string filename = llformat("%s_%s.%s", label.c_str(), suffix, ext.c_str());
+		std::string ext = result->getExtension();
+		std::string filename = llformat("%s_%s.%s", label.c_str(), suffix, ext.c_str());
 	
-	std::string out_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
-	result->save(out_file);
+		std::string out_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
+		result->save(out_file);
+	}
 }
 
 //static
@@ -463,7 +477,7 @@ void LLFastTimerView::exportCharts(const std::string& base, const std::string& t
 
 	{ //read base log into memory
 		S32 i = 0;
-		std::ifstream is(base.c_str());
+		llifstream is(base.c_str());
 		while (!is.eof() && LLSDParser::PARSE_FAILURE != LLSDSerialize::fromXML(cur, is))
 		{
 			base_data[i++] = cur;
@@ -476,7 +490,7 @@ void LLFastTimerView::exportCharts(const std::string& base, const std::string& t
 
 	{ //read current log into memory
 		S32 i = 0;
-		std::ifstream is(target.c_str());
+		llifstream is(target.c_str());
 		while (!is.eof() && LLSDParser::PARSE_FAILURE != LLSDSerialize::fromXML(cur, is))
 		{
 			cur_data[i++] = cur;
@@ -796,13 +810,13 @@ LLSD LLFastTimerView::analyzePerformanceLogDefault(std::istream& is)
 	for(stats_map_t::iterator it = time_stats.begin(); it != time_stats.end(); ++it)
 	{
 		std::string label = it->first;
-		ret[label]["TotalTime"] = time_stats[label].mSum;
+		ret[label]["TotalTime"] = time_stats[label].getSum();
 		ret[label]["MeanTime"] = time_stats[label].getMean();
 		ret[label]["MaxTime"] = time_stats[label].getMaxValue();
 		ret[label]["MinTime"] = time_stats[label].getMinValue();
 		ret[label]["StdDevTime"] = time_stats[label].getStdDev();
 		
-		ret[label]["Samples"] = sample_stats[label].mSum;
+        ret[label]["Samples"] = sample_stats[label].getSum();
 		ret[label]["MaxSamples"] = sample_stats[label].getMaxValue();
 		ret[label]["MinSamples"] = sample_stats[label].getMinValue();
 		ret[label]["StdDevSamples"] = sample_stats[label].getStdDev();
@@ -821,8 +835,8 @@ LLSD LLFastTimerView::analyzePerformanceLogDefault(std::istream& is)
 void LLFastTimerView::doAnalysisDefault(std::string baseline, std::string target, std::string output)
 {
 	// Open baseline and current target, exit if one is inexistent
-	std::ifstream base_is(baseline.c_str());
-	std::ifstream target_is(target.c_str());
+	llifstream base_is(baseline.c_str());
+	llifstream target_is(target.c_str());
 	if (!base_is.is_open() || !target_is.is_open())
 	{
 		LL_WARNS() << "'-analyzeperformance' error : baseline or current target file inexistent" << LL_ENDL;
@@ -840,7 +854,7 @@ void LLFastTimerView::doAnalysisDefault(std::string baseline, std::string target
 	target_is.close();
 
 	//output comparison
-	std::ofstream os(output.c_str());
+	llofstream os(output.c_str());
 
 	LLSD::Real session_time = current["SessionTime"].asReal();
 	os <<
@@ -904,8 +918,7 @@ void LLFastTimerView::doAnalysisDefault(std::string baseline, std::string target
 			base[label]["Samples"].asInteger());			
 	}
 
-	// This currently crashes, possibly due to a race condition in shutdown:
-	// exportCharts(baseline, target);
+	exportCharts(baseline, target);
 
 	os.flush();
 	os.close();
@@ -1194,6 +1207,7 @@ void LLFastTimerView::drawLegend()
 	{
 		LLLocalClipRect clip(mLegendRect);
 		S32 cur_line = 0;
+		S32 scroll_offset = 0; // element's y offset from top of the inner scroll's rect
 		ft_display_idx.clear();
 		std::map<BlockTimerStatHandle*, S32> display_line;
 		for (block_timer_tree_df_iterator_t it = LLTrace::begin_block_timer_tree_df(FTM_FRAME);
@@ -1201,10 +1215,24 @@ void LLFastTimerView::drawLegend()
 			++it)
 		{
 			BlockTimerStatHandle* idp = (*it);
+			// Needed to figure out offsets and parenting
 			display_line[idp] = cur_line;
-			ft_display_idx.push_back(idp);
 			cur_line++;
+			if (scroll_offset < mScrollBar->getDocPos())
+			{
+				// only offset for visible items
+				scroll_offset += TEXT_HEIGHT + 2;
+				if (idp->getTreeNode().mCollapsed)
+				{
+					it.skipDescendants();
+				}
+				continue;
+			}
 
+			// used for mouse clicks
+			ft_display_idx.push_back(idp);
+
+			// Actual draw, first bar (square), then text
 			x = MARGIN;
 
 			LLRect bar_rect(x, y, x + TEXT_HEIGHT, y - TEXT_HEIGHT);
@@ -1278,11 +1306,14 @@ void LLFastTimerView::drawLegend()
 
 			y -= (TEXT_HEIGHT + 2);
 
+			scroll_offset += TEXT_HEIGHT + 2;
 			if (idp->getTreeNode().mCollapsed) 
 			{
 				it.skipDescendants();
 			}
 		}
+		// Recalculate scroll size
+		mScrollBar->setDocSize(scroll_offset - mLegendRect.getHeight());
 	}
 }
 

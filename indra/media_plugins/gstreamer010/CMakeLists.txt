@@ -33,13 +33,13 @@ include_directories(SYSTEM
 
 ### media_plugin_gstreamer010
 
-if(NOT WORD_SIZE EQUAL 32)
+if(NOT ADDRESS_SIZE EQUAL 32)
   if(WINDOWS)
-    add_definitions(/FIXED:NO)
+    ##add_definitions(/FIXED:NO)
   else(WINDOWS) # not windows therefore gcc LINUX and DARWIN
     add_definitions(-fPIC)
   endif(WINDOWS)
-endif(NOT WORD_SIZE EQUAL 32)
+endif(NOT ADDRESS_SIZE EQUAL 32)
 
 set(media_plugin_gstreamer010_SOURCE_FILES
     media_plugin_gstreamer010.cpp
@@ -56,7 +56,7 @@ set(media_plugin_gstreamer010_HEADER_FILES
 add_library(media_plugin_gstreamer010
     SHARED
     ${media_plugin_gstreamer010_SOURCE_FILES}
-)
+    )
 
 target_link_libraries(media_plugin_gstreamer010
   ${LLPLUGIN_LIBRARIES}

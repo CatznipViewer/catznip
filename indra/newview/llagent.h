@@ -233,6 +233,8 @@ public:
 	void			setStartPosition(U32 location_id); // Marks current location as start, sends information to servers
 	void			setHomePosRegion(const U64& region_handle, const LLVector3& pos_region);
 	BOOL			getHomePosGlobal(LLVector3d* pos_global);
+	bool			isInHomeRegion();
+
 private:
     void            setStartPositionSuccess(const LLSD &result);
 
@@ -337,7 +339,7 @@ private:
 	//--------------------------------------------------------------------
 public:
 	BOOL			getFlying() const;
-	void			setFlying(BOOL fly);
+	void			setFlying(BOOL fly, BOOL fail_sound = FALSE);
 	static void		toggleFlying();
 	static bool		enableFlying();
 	BOOL			canFly(); 			// Does this parcel allow you to fly?
@@ -629,6 +631,7 @@ public:
 	void			teleportViaLocationLookAt(const LLVector3d& pos_global);// To a global location, preserving camera rotation
 	void 			teleportCancel();										// May or may not be allowed by server
     void            restoreCanceledTeleportRequest();
+    bool			canRestoreCanceledTeleport() { return mTeleportCanceled != NULL; }
 	bool			getTeleportKeepsLookAt() { return mbTeleportKeepsLookAt; } // Whether look-at reset after teleport
 protected:
 	bool 			teleportCore(bool is_local = false); 					// Stuff for all teleports; returns true if the teleport can proceed
@@ -912,8 +915,16 @@ public:
 	void			sendReliableMessage();
 	void 			sendAgentDataUpdateRequest();
 	void 			sendAgentUserInfoRequest();
-	// IM to Email and Online visibility
+
+// IM to Email and Online visibility
 	void			sendAgentUpdateUserInfo(bool im_to_email, const std::string& directory_visibility);
+
+private:
+    void            requestAgentUserInfoCoro(std::string capurl);
+    void            updateAgentUserInfoCoro(std::string capurl, bool im_via_email, std::string directory_visibility);
+    // DEPRECATED: may be removed when User Info cap propagates 
+    void 			sendAgentUserInfoRequestMessage();
+    void            sendAgentUpdateUserInfoMessage(bool im_via_email, const std::string& directory_visibility);
 
 	//--------------------------------------------------------------------
 	// Receive

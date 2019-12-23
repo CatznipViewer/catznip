@@ -9,6 +9,12 @@
 	<floater.string name="maturity_icon_adult">
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
+	<floater.string name="Hours">
+		[HOURS] sa
+	</floater.string>
+	<floater.string name="Hour">
+		sa
+	</floater.string>
 	<floater.string name="Minutes">
 		[MINUTES] dak.
 	</floater.string>
@@ -20,6 +26,9 @@
 	</floater.string>
 	<floater.string name="Remaining">
 		kaldı
+	</floater.string>
+	<floater.string name="Always">
+		Her zaman
 	</floater.string>
 	<tab_container name="landtab">
 		<panel label="GENEL" name="land_general_panel">
@@ -316,18 +325,18 @@ Sadece büyük parseller aramada görünür.
 			<text name="allow_label2">
 				İnşa Et:
 			</text>
-			<check_box label="Herkes" name="edit objects check"/>
-			<check_box label="Grup" name="edit group objects check"/>
+			<check_box label="Herkes" name="edit objects check" tool_tip="İşaretlendiğinde, Sakinler arazinizde nesneler oluşturabilir ve nesneleri canlandırabilir."/>
+			<check_box label="Grup" name="edit group objects check" tool_tip="İşaretlendiğinde, parsel grubu üyeleri arazinizde nesneler oluşturabilir ve nesneleri canlandırabilir."/>
 			<text name="allow_label3">
 				Nesne Girişi:
 			</text>
-			<check_box label="Herkes" name="all object entry check"/>
-			<check_box label="Grup" name="group object entry check"/>
+			<check_box label="Herkes" name="all object entry check" tool_tip="İşaretlendiğinde, Sakinler mevcut nesneleri diğer parsellerden bu parsele taşıyabilir."/>
+			<check_box label="Grup" name="group object entry check" tool_tip="İşaretlendiğinde, parsel grubu üyeleri mevcut nesneleri diğer parsellerden bu parsele taşıyabilir."/>
 			<text name="allow_label4">
 				Komut Dosyalarını Çalıştır:
 			</text>
-			<check_box label="Herkes" name="check other scripts"/>
-			<check_box label="Grup" name="check group scripts"/>
+			<check_box label="Herkes" name="check other scripts" tool_tip="İşaretlendiğinde, Sakinler parselinizde aksesuarlar dahil olmak üzere komut dosyalarını çalıştırabilir."/>
+			<check_box label="Grup" name="check group scripts" tool_tip="İşaretlendiğinde, parsel grubu üyeleri parselinizde aksesuarlar dahil olmak üzere komut dosyalarını çalıştırabilir."/>
 			<check_box label="Güvenli (hasar yok)" name="check safe" tool_tip="İşaretliyse, araziyi Güvenli moda getirerek hasar çarpışmasını etkinsizleştirir İşaretli değilse hasar çarpışması etkinleşir."/>
 			<check_box label="İtme Yok" name="PushRestrictCheck" tool_tip="Komut dosyalarının itmesini önler Bu seçeneğin işaretlenmesi arazinizdeki bozucu davranışları önlemeye yardımcı olabilir."/>
 			<check_box label="Konumu Arama sonuçlarında göster (L$30/hafta)" name="ShowDirectoryCheck" tool_tip="Arama sonuçlarında bu parsel görünsün"/>
@@ -351,8 +360,8 @@ Sadece büyük parseller aramada görünür.
 				Anlık Görüntü:
 			</text>
 			<texture_picker name="snapshot_ctrl" tool_tip="Bir resim seçmek için tıklayın"/>
-			<text name="allow_label5">
-				Başka parsellerdeki avatarlar bu parseldeki avatarları görebilir ve onlarla sohbet edebilir
+			<text name="allow_see_label">
+				Diğer parsellerdeki avatarlar bu parseldeki avatarları görebilir ve onlarla sohbet edebilir
 			</text>
 			<check_box label="Avatarları Gör" name="SeeAvatarsCheck" tool_tip="Diğer parsellerdeki avatarların bu parseldeki avatarları görmesine ve onlarla sohbet etmesine, sizin de onları görüp, onlarla sohbet etmenize imkan tanır."/>
 			<text name="landing_point">
@@ -430,13 +439,10 @@ Sadece büyük parseller aramada görünür.
 			<panel.string name="estate_override">
 				Bu seçeneklerden biri veya daha fazlası gayrimenkul düzeyinde ayarlanır
 			</panel.string>
-			<check_box label="Kamusal Erişime İzin Ver (Bunun işaretinin kaldırılması yasaklama çizgileri oluşturacaktır)" name="public_access"/>
-			<text name="Only Allow">
-				Sadece şu Sakinlere erişim izni verin:
-			</text>
-			<check_box label="Ödeme bilgileri kayıtlı [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Sakinlerin bu parsele erişebilmesi için ödeme bilgilerinin kayıtlı olması gerekir.  Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
-			<check_box label="18 veya üzeri bir yaşta [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Sakinlerin bu parsele erişebilmesi için 18 veya üzeri bir yaşta olmaları gerekir. Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
-			<check_box label="Grup Erişimine İzin Ver: [GROUP]" name="GroupCheck" tool_tip="Genel sekmesinde grup ayarla."/>
+			<check_box label="Herkes ziyaret edebilir (Bunun işaretinin kaldırılması yasaklama çizgileri oluşturacaktır)" name="public_access"/>
+			<check_box label="18 yaşından büyük olmalıdır [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="Sakinlerin bu parsele erişebilmesi için 18 veya üzeri bir yaşta olmaları gerekir. Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
+			<check_box label="Dosyadaki ödeme bilgisine sahip olmalıdır [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="Sakinlerin bu parsele erişebilmesi için ödeme bilgilerinin kayıtlı olması gerekir.  Daha fazla bilgi için [SUPPORT_SITE] adresini ziyaret edin."/>
+			<check_box label="[GROUP] grubuna kısıtlama olmadan izin ver" name="GroupCheck" tool_tip="Genel sekmesinde grup ayarla."/>
 			<check_box label="Geçiş haklr. şuna sat:" name="PassCheck" tool_tip="Bu parsele geçici erişim verir"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="Herkes" name="Anyone"/>
@@ -444,9 +450,12 @@ Sadece büyük parseller aramada görünür.
 			</combo_box>
 			<spinner label="L$ olarak Fiyat:" name="PriceSpin"/>
 			<spinner label="Erişim saatleri:" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				(Gayrimenkul sahibi, bu seçimleri kısıtlamış olabilir)
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="Her Zaman İzin Ver" name="AllowedText">
-					İzin Verilen Sakinler ([COUNT], maks. [MAX])
+					Her zaman izin verilen ([COUNT], maks. [MAX])
 				</text>
 				<name_list name="AccessList" tool_tip="([LISTED] listeli, [MAX] maksimum)"/>
 				<button label="Ekle" name="add_allowed"/>
@@ -454,9 +463,12 @@ Sadece büyük parseller aramada görünür.
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="Yasakla" name="BanCheck">
-					Engellenmiş Sakinler ([COUNT], maks. [MAX])
+					Engellenen ([COUNT], maks. [MAX])
 				</text>
-				<name_list name="BannedList" tool_tip="([LISTED] listeli, [MAX] maksimum)"/>
+				<name_list name="BannedList" tool_tip="([LISTED] listeli, [MAX] maksimum)">
+					<columns label="Ad" name="name"/>
+					<columns label="Süre" name="duration"/>
+				</name_list>
 				<button label="Ekle" name="add_banned"/>
 				<button label="Kaldır" label_selected="Kaldır" name="remove_banned"/>
 			</panel>

@@ -28,11 +28,7 @@
 
 #include "llfloatersnapshot.h"
 
-#include "llfacebookconnect.h"
 #include "llfloaterreg.h"
-#include "llfloaterfacebook.h"
-#include "llfloaterflickr.h"
-#include "llfloatertwitter.h"
 #include "llimagefiltersmanager.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
@@ -54,7 +50,7 @@ LLSnapshotFloaterView* gSnapshotFloaterView = NULL;
 
 const F32 AUTO_SNAPSHOT_TIME_DELAY = 1.f;
 
-const S32 MAX_POSTCARD_DATASIZE = 1024 * 1024; // one megabyte
+const S32 MAX_POSTCARD_DATASIZE = 1572864; // 1.5 megabyte, similar to simulator limit
 const S32 MAX_TEXTURE_SIZE = 512 ; //max upload texture size 512 * 512
 
 static LLDefaultChildRegistry::Register<LLSnapshotFloaterView> r("snapshot_floater_view");
@@ -314,8 +310,8 @@ void LLFloaterSnapshot::Impl::updateControls(LLFloaterSnapshotBase* floater)
 		}
 		else
 		{
-			width_ctrl->setMaxValue(6016);
-			height_ctrl->setMaxValue(6016);
+			width_ctrl->setMaxValue(MAX_SNAPSHOT_IMAGE_SIZE);
+			height_ctrl->setMaxValue(MAX_SNAPSHOT_IMAGE_SIZE);
 		}
 	}
 		
@@ -784,6 +780,7 @@ void LLFloaterSnapshot::Impl::onCommitLayerTypes(LLUICtrl* ctrl, void*data)
 			previewp->setSnapshotBufferType((LLSnapshotModel::ESnapshotLayerType)combobox->getCurrentIndex());
 		}
 		view->impl->checkAutoSnapshot(previewp, TRUE);
+		previewp->updateSnapshot(TRUE, TRUE);
 	}
 }
 
@@ -1100,6 +1097,7 @@ void LLFloaterSnapshot::onOpen(const LLSD& key)
 	if(preview)
 	{
 		LL_DEBUGS() << "opened, updating snapshot" << LL_ENDL;
+		preview->setAllowFullScreenPreview(TRUE);
 		preview->updateSnapshot(TRUE);
 	}
 	focusFirstItem(FALSE);
@@ -1129,6 +1127,7 @@ void LLFloaterSnapshotBase::onClose(bool app_quitting)
 	LLSnapshotLivePreview* previewp = getPreviewView();
 	if (previewp)
 	{
+		previewp->setAllowFullScreenPreview(FALSE);
 		previewp->setVisible(FALSE);
 		previewp->setEnabled(FALSE);
 	}
@@ -1232,13 +1231,14 @@ S32 LLFloaterSnapshot::notify(const LLSD& info)
 	return 0;
 }
 
+BOOL LLFloaterSnapshot::isWaitingState()
+{
+	return (impl->getStatus() == ImplBase::STATUS_WORKING);
+}
+
 BOOL LLFloaterSnapshotBase::ImplBase::updatePreviewList(bool initialized)
 {
-	LLFloaterFacebook* floater_facebook = LLFloaterReg::findTypedInstance<LLFloaterFacebook>("facebook");
-	LLFloaterFlickr* floater_flickr = LLFloaterReg::findTypedInstance<LLFloaterFlickr>("flickr");
-	LLFloaterTwitter* floater_twitter = LLFloaterReg::findTypedInstance<LLFloaterTwitter>("twitter");
-
-	if (!initialized && !floater_facebook && !floater_flickr && !floater_twitter)
+	if (!initialized)
 		return FALSE;
 
 	BOOL changed = FALSE;
@@ -1302,17 +1302,15 @@ void LLFloaterSnapshot::saveTexture()
 	previewp->saveTexture();
 }
 
-BOOL LLFloaterSnapshot::saveLocal()
+void LLFloaterSnapshot::saveLocal(const snapshot_saved_signal_t::slot_type& success_cb, const snapshot_saved_signal_t::slot_type& failure_cb)
 {
 	LL_DEBUGS() << "saveLocal" << LL_ENDL;
 	LLSnapshotLivePreview* previewp = getPreviewView();
-	if (!previewp)
+	llassert(previewp != NULL);
+	if (previewp)
 	{
-		llassert(previewp != NULL);
-		return FALSE;
+		previewp->saveLocal(success_cb, failure_cb);
 	}
-
-	return previewp->saveLocal();
 }
 
 void LLFloaterSnapshotBase::postSave()

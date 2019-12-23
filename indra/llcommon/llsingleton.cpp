@@ -134,12 +134,6 @@ LLSingletonBase::list_t& LLSingletonBase::get_initializing()
     return LLSingletonBase::MasterList::instance().get_initializing_();
 }
 
-//static
-LLSingletonBase::list_t& LLSingletonBase::get_initializing_from(MasterList* master)
-{
-    return master->get_initializing_();
-}
-
 LLSingletonBase::~LLSingletonBase() {}
 
 void LLSingletonBase::push_initializing(const char* name)
@@ -156,7 +150,7 @@ void LLSingletonBase::pop_initializing()
     if (list.empty())
     {
         logerrs("Underflow in stack of currently-initializing LLSingletons at ",
-                demangle(typeid(*this).name()).c_str(), "::getInstance()");
+                classname(this).c_str(), "::getInstance()");
     }
 
     // Now we know list.back() exists: capture it
@@ -178,12 +172,37 @@ void LLSingletonBase::pop_initializing()
     if (back != this)
     {
         logerrs("Push/pop mismatch in stack of currently-initializing LLSingletons: ",
-                demangle(typeid(*this).name()).c_str(), "::getInstance() trying to pop ",
-                demangle(typeid(*back).name()).c_str());
+                classname(this).c_str(), "::getInstance() trying to pop ",
+                classname(back).c_str());
     }
 
     // log AFTER popping so logging singletons don't cry circularity
     log_initializing("Popping", typeid(*back).name());
+}
+
+void LLSingletonBase::reset_initializing(list_t::size_type size)
+{
+    // called for cleanup in case the LLSingleton subclass constructor throws
+    // an exception
+
+    // The tricky thing about this, the reason we have a separate method
+    // instead of just calling pop_initializing(), is (hopefully remote)
+    // possibility that the exception happened *before* the
+    // push_initializing() call in LLSingletonBase's constructor. So only
+    // remove the stack top if in fact we've pushed something more than the
+    // previous size.
+    list_t& list(get_initializing());
+
+    while (list.size() > size)
+    {
+        list.pop_back();
+    }
+
+    // as in pop_initializing()
+    if (list.empty())
+    {
+        MasterList::instance().cleanup_initializing_();
+    }
 }
 
 //static
@@ -197,7 +216,7 @@ void LLSingletonBase::log_initializing(const char* verb, const char* name)
              ri != rend; ++ri)
         {
             LLSingletonBase* sb(*ri);
-            LL_CONT << ' ' << demangle(typeid(*sb).name());
+            LL_CONT << ' ' << classname(sb);
         }
         LL_ENDL;
     }
@@ -231,7 +250,7 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
                 // 'found' is an iterator; *found is an LLSingletonBase*; **found
                 // is the actual LLSingletonBase instance.
                 LLSingletonBase* foundp(*found);
-                out << demangle(typeid(*foundp).name()) << " -> ";
+                out << classname(foundp) << " -> ";
             }
             // We promise to capture dependencies from both the constructor
             // and the initSingleton() method, so an LLSingleton's instance
@@ -245,7 +264,7 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
             if (initState == CONSTRUCTING)
             {
                 logerrs("LLSingleton circularity in Constructor: ", out.str().c_str(),
-                    demangle(typeid(*this).name()).c_str(), "");
+                    classname(this).c_str(), "");
             }
             else if (it_next == initializing.end())
             {
@@ -256,14 +275,14 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
                 // Example: LLNotifications singleton initializes default channels.
                 // Channels register themselves with singleton once done.
                 logdebugs("LLSingleton circularity: ", out.str().c_str(),
-                    demangle(typeid(*this).name()).c_str(), "");
+                    classname(this).c_str(), "");
             }
             else
             {
                 // Actual circularity with other singleton (or single singleton is used extensively).
                 // Dependency can be unclear.
                 logwarns("LLSingleton circularity: ", out.str().c_str(),
-                    demangle(typeid(*this).name()).c_str(), "");
+                    classname(this).c_str(), "");
             }
         }
         else
@@ -276,8 +295,8 @@ void LLSingletonBase::capture_dependency(list_t& initializing, EInitState initSt
             if (current->mDepends.insert(this).second)
             {
                 // only log the FIRST time we hit this dependency!
-                logdebugs(demangle(typeid(*current).name()).c_str(),
-                          " depends on ", demangle(typeid(*this).name()).c_str());
+                logdebugs(classname(current).c_str(),
+                          " depends on ", classname(this).c_str());
             }
         }
     }
@@ -336,19 +355,19 @@ void LLSingletonBase::cleanupAll()
             sp->mCleaned = true;
 
             logdebugs("calling ",
-                      demangle(typeid(*sp).name()).c_str(), "::cleanupSingleton()");
+                      classname(sp).c_str(), "::cleanupSingleton()");
             try
             {
                 sp->cleanupSingleton();
             }
             catch (const std::exception& e)
             {
-                logwarns("Exception in ", demangle(typeid(*sp).name()).c_str(),
+                logwarns("Exception in ", classname(sp).c_str(),
                          "::cleanupSingleton(): ", e.what());
             }
             catch (...)
             {
-                logwarns("Unknown exception in ", demangle(typeid(*sp).name()).c_str(),
+                logwarns("Unknown exception in ", classname(sp).c_str(),
                          "::cleanupSingleton()");
             }
         }
@@ -363,7 +382,7 @@ void LLSingletonBase::deleteAll()
     {
         // Capture the class name first: in case of exception, don't count on
         // being able to extract it later.
-        const std::string name = demangle(typeid(*sp).name());
+        const std::string name = classname(sp);
         try
         {
             // Call static method through instance function pointer.
@@ -391,62 +410,20 @@ void LLSingletonBase::deleteAll()
     }
 }
 
-/*------------------------ Final cleanup management ------------------------*/
-class LLSingletonBase::MasterRefcount
-{
-public:
-    // store a POD int so it will be statically initialized to 0
-    int refcount;
-};
-static LLSingletonBase::MasterRefcount sMasterRefcount;
-
-LLSingletonBase::ref_ptr_t LLSingletonBase::get_master_refcount()
-{
-    // Calling this method constructs a new ref_ptr_t, which implicitly calls
-    // intrusive_ptr_add_ref(MasterRefcount*).
-    return &sMasterRefcount;
-}
-
-void intrusive_ptr_add_ref(LLSingletonBase::MasterRefcount* mrc)
-{
-    // Count outstanding SingletonLifetimeManager instances.
-    ++mrc->refcount;
-}
-
-void intrusive_ptr_release(LLSingletonBase::MasterRefcount* mrc)
-{
-    // Notice when each SingletonLifetimeManager instance is destroyed.
-    if (! --mrc->refcount)
-    {
-        // The last instance was destroyed. Time to kill any remaining
-        // LLSingletons -- but in dependency order.
-        LLSingletonBase::deleteAll();
-    }
-}
-
 /*---------------------------- Logging helpers -----------------------------*/
 namespace {
 bool oktolog()
 {
     // See comments in log() below.
-    return sMasterRefcount.refcount && LLError::is_available();
+    return LLError::is_available();
 }
 
 void log(LLError::ELevel level,
          const char* p1, const char* p2, const char* p3, const char* p4)
 {
-    // Check whether we're in the implicit final LLSingletonBase::deleteAll()
-    // call. We've carefully arranged for deleteAll() to be called when the
-    // last SingletonLifetimeManager instance is destroyed -- in other words,
-    // when the last translation unit containing an LLSingleton instance
-    // cleans up static data. That could happen after std::cerr is destroyed!
     // The is_available() test below ensures that we'll stop logging once
     // LLError has been cleaned up. If we had a similar portable test for
-    // std::cerr, this would be a good place to use it. As we do not, just
-    // don't log anything during implicit final deleteAll(). Detect that by
-    // the master refcount having gone to zero.
-    if (sMasterRefcount.refcount == 0)
-        return;
+    // std::cerr, this would be a good place to use it.
 
     // Check LLError::is_available() because some of LLError's infrastructure
     // is itself an LLSingleton. If that LLSingleton has not yet been
@@ -482,7 +459,17 @@ void LLSingletonBase::logerrs(const char* p1, const char* p2, const char* p3, co
     log(LLError::LEVEL_ERROR, p1, p2, p3, p4);
     // The other important side effect of LL_ERRS() is
     // https://www.youtube.com/watch?v=OMG7paGJqhQ (emphasis on OMG)
-    LLError::crashAndLoop(std::string());
+    std::ostringstream out;
+    out << p1 << p2 << p3 << p4;
+    auto crash = LLError::getFatalFunction();
+    if (crash)
+    {
+        crash(out.str());
+    }
+    else
+    {
+        LLError::crashAndLoop(out.str());
+    }
 }
 
 std::string LLSingletonBase::demangle(const char* mangled)

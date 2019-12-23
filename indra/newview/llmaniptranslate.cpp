@@ -386,7 +386,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 		}
 		else if (gSavedSettings.getBOOL("SnapToMouseCursor"))
 		{
-			LLUI::setMousePositionScreen(mouse_pos.mX, mouse_pos.mY);
+			LLUI::getInstance()->setMousePositionScreen(mouse_pos.mX, mouse_pos.mY);
 			x = mouse_pos.mX;
 			y = mouse_pos.mY;
 		}
@@ -1060,6 +1060,7 @@ void LLManipTranslate::render()
 		renderGuidelines();
 	}
 	{
+		LLGLDisable gls_stencil(GL_STENCIL_TEST);
 		renderTranslationHandles();
 		renderSnapGuides();
 	}
@@ -1638,8 +1639,8 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 	LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
 
 	
-	U32 types[] = { LLRenderPass::PASS_SIMPLE, LLRenderPass::PASS_ALPHA, LLRenderPass::PASS_FULLBRIGHT, LLRenderPass::PASS_SHINY };
-	U32 num_types = LL_ARRAY_SIZE(types);
+	static const U32 types[] = { LLRenderPass::PASS_SIMPLE, LLRenderPass::PASS_ALPHA, LLRenderPass::PASS_FULLBRIGHT, LLRenderPass::PASS_SHINY };
+	static const U32 num_types = LL_ARRAY_SIZE(types);
 
 	GLuint stencil_mask = 0xFFFFFFFF;
 	//stencil in volumes

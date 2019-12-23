@@ -188,6 +188,7 @@
      tool_tip="Category -- select the category that best describes this report"
      top_pad="5"
      width="313">
+      <!-- Values can be populated from capability -->
         <combo_box.item
          label="Select category"
          name="Select_category"
@@ -245,7 +246,7 @@
          name="Land__Encroachment__Objects_textures"
          value="63" />        
         <combo_box.item
-         label="Gaming Policy Violation"
+         label="Skill Gaming Policy Violation"
          name="Wagering_gambling"
          value="67" />       
     </combo_box>

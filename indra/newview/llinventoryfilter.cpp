@@ -29,6 +29,7 @@
 #include "llinventoryfilter.h"
 
 // viewer includes
+#include "llagent.h"
 #include "llfolderviewmodel.h"
 #include "llfolderviewitem.h"
 #include "llinventorymodel.h"
@@ -41,7 +42,7 @@
 #include "llviewerfoldertype.h"
 #include "llradiogroup.h"
 #include "llstartup.h"
-
+#include <boost/regex.hpp>
 // linden library includes
 #include "llclipboard.h"
 #include "lltrans.h"
@@ -57,6 +58,7 @@ LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 	mHoursAgo(p.hours_ago),
 	mDateSearchDirection(p.date_search_direction),
 	mShowFolderState(p.show_folder_state),
+	mFilterCreatorType(p.creator_type),
 	mPermissions(p.permissions),
 	mFilterTypes(p.types),
 	mFilterUUID(p.uuid),
@@ -76,10 +78,13 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 	mFilterSubString(p.substring),
 	mCurrentGeneration(0),
 	mFirstRequiredGeneration(0),
-	mFirstSuccessGeneration(0)
+	mFirstSuccessGeneration(0),
+	mSearchType(SEARCHTYPE_NAME)
 {
 	// copy mFilterOps into mDefaultFilterOps
 	markDefault();
+	mUsername = gAgentUsername;
+	LLStringUtil::toUpper(mUsername);
 }
 
 bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
@@ -93,10 +98,61 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 		return true;
 	}
 
-	bool passed = (mFilterSubString.size() ? listener->getSearchableName().find(mFilterSubString) != std::string::npos : true);
+	std::string desc = listener->getSearchableCreatorName();
+	switch(mSearchType)
+	{
+		case SEARCHTYPE_CREATOR:
+			desc = listener->getSearchableCreatorName();
+			break;
+		case SEARCHTYPE_DESCRIPTION:
+			desc = listener->getSearchableDescription();
+			break;
+		case SEARCHTYPE_UUID:
+			desc = listener->getSearchableUUIDString();
+			break;
+		case SEARCHTYPE_NAME:
+		default:
+			desc = listener->getSearchableName();
+			break;
+	}
+
+
+	bool passed = true;
+	if (!mExactToken.empty() && (mSearchType == SEARCHTYPE_NAME))
+	{
+		passed = false;
+		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+		boost::char_separator<char> sep(" ");
+		tokenizer tokens(desc, sep);
+
+		for (auto token_iter : tokens)
+		{
+			if (token_iter == mExactToken)
+			{
+				passed = true;
+				break;
+			}
+		}	
+	}
+	else if ((mFilterTokens.size() > 0) && (mSearchType == SEARCHTYPE_NAME))
+	{
+		for (auto token_iter : mFilterTokens)
+		{
+			if (desc.find(token_iter) == std::string::npos)
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		passed = (mFilterSubString.size() ? desc.find(mFilterSubString) != std::string::npos : true);
+	}
+
 	passed = passed && checkAgainstFilterType(listener);
 	passed = passed && checkAgainstPermissions(listener);
 	passed = passed && checkAgainstFilterLinks(listener);
+	passed = passed && checkAgainstCreator(listener);
 
 	return passed;
 }
@@ -245,6 +301,14 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		}
 	}
 	
+	if(filterTypes & FILTERTYPE_WORN)
+	{
+		if (!get_is_item_worn(object_id))
+		{
+			return FALSE;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// FILTERTYPE_UUID
 	// Pass if this item is the target UUID or if it links to the target UUID
@@ -453,6 +517,24 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	return TRUE;
 }
 
+bool LLInventoryFilter::checkAgainstCreator(const LLFolderViewModelItemInventory* listener) const
+{
+	if (!listener) return TRUE;
+	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+	switch (mFilterOps.mFilterCreatorType)
+	{
+		case FILTERCREATOR_SELF:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() == mUsername);
+		case FILTERCREATOR_OTHERS:
+			if(is_folder) return FALSE;
+			return (listener->getSearchableCreatorName() != mUsername);
+		case FILTERCREATOR_ALL:
+		default:
+			return TRUE;
+	}
+}
+
 const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 {
 	return mFilterSubString;
@@ -460,7 +542,14 @@ const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
 
 std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
 {
-	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+	if (mSearchType == SEARCHTYPE_NAME)
+	{
+		return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+	}
+	else
+	{
+		return std::string::npos;
+	}
 }
 
 bool LLInventoryFilter::isDefault() const
@@ -533,6 +622,24 @@ void LLInventoryFilter::updateFilterTypes(U64 types, U64& current_types)
 	}
 }
 
+void LLInventoryFilter::setSearchType(ESearchType type)
+{
+	if(mSearchType != type)
+	{
+		mSearchType = type;
+		setModified();
+	}
+}
+
+void LLInventoryFilter::setFilterCreator(EFilterCreatorType type)
+{
+	if (mFilterOps.mFilterCreatorType != type)
+	{
+		mFilterOps.mFilterCreatorType = type;
+		setModified();
+	}
+}
+
 void LLInventoryFilter::setFilterObjectTypes(U64 types)
 {
 	updateFilterTypes(types, mFilterOps.mFilterObjectTypes);
@@ -554,6 +661,11 @@ void LLInventoryFilter::setFilterWearableTypes(U64 types)
 void LLInventoryFilter::setFilterEmptySystemFolders()
 {
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
+}
+
+void LLInventoryFilter::setFilterWorn()
+{
+    mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
 }
 
 void LLInventoryFilter::setFilterMarketplaceActiveFolders()
@@ -613,6 +725,38 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 
 	if (mFilterSubString != filter_sub_string_new)
 	{
+		
+		mFilterTokens.clear();
+		if (filter_sub_string_new.find_first_of("+") != std::string::npos)
+		{
+			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+			boost::char_separator<char> sep("+");
+			tokenizer tokens(filter_sub_string_new, sep);
+
+			for (auto token_iter : tokens)
+			{
+				mFilterTokens.push_back(token_iter);
+			}
+		}
+
+		std::string old_token = mExactToken;
+		mExactToken.clear();
+		bool exact_token_changed = false;
+		if (mFilterTokens.empty() && filter_sub_string_new.size() > 2)
+		{
+			boost::regex mPattern = boost::regex("\"\\s*([^<]*)?\\s*\"",
+				boost::regex::perl | boost::regex::icase);
+			boost::match_results<std::string::const_iterator> matches;
+			mExactToken = (boost::regex_match(filter_sub_string_new, matches, mPattern) && matches[1].matched)
+				? matches[1]
+				: LLStringUtil::null;
+			if ((old_token.empty() && !mExactToken.empty()) 
+				|| (!old_token.empty() && mExactToken.empty()))
+			{
+				exact_token_changed = true;
+			}
+		}
+
 		// hitting BACKSPACE, for example
 		const BOOL less_restrictive = mFilterSubString.size() >= filter_sub_string_new.size()
 			&& !mFilterSubString.substr(0, filter_sub_string_new.size()).compare(filter_sub_string_new);
@@ -622,7 +766,11 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 			&& !filter_sub_string_new.substr(0, mFilterSubString.size()).compare(mFilterSubString);
 
 		mFilterSubString = filter_sub_string_new;
-		if (less_restrictive)
+		if (exact_token_changed)
+		{
+			setModified(FILTER_RESTART);
+		}
+		else if (less_restrictive)
 		{
 			setModified(FILTER_LESS_RESTRICTIVE);
 		}
@@ -1114,6 +1262,7 @@ void LLInventoryFilter::toParams(Params& params) const
 	params.filter_ops.hours_ago = getHoursAgo();
 	params.filter_ops.date_search_direction = getDateSearchDirection();
 	params.filter_ops.show_folder_state = getShowFolderState();
+	params.filter_ops.creator_type = getFilterCreatorType();
 	params.filter_ops.permissions = getFilterPermissions();
 	params.substring = getFilterSubString();
 	params.since_logoff = isSinceLogoff();
@@ -1136,6 +1285,7 @@ void LLInventoryFilter::fromParams(const Params& params)
 	setHoursAgo(params.filter_ops.hours_ago);
 	setDateSearchDirection(params.filter_ops.date_search_direction);
 	setShowFolderState(params.filter_ops.show_folder_state);
+	setFilterCreator(params.filter_ops.creator_type);
 	setFilterPermissions(params.filter_ops.permissions);
 	setFilterSubString(params.substring);
 	setDateRangeLastLogoff(params.since_logoff);
@@ -1196,6 +1346,11 @@ U64 LLInventoryFilter::getFilterLinks() const
 LLInventoryFilter::EFolderShow LLInventoryFilter::getShowFolderState() const
 { 
 	return mFilterOps.mShowFolderState; 
+}
+
+LLInventoryFilter::EFilterCreatorType LLInventoryFilter::getFilterCreatorType() const
+{
+	return mFilterOps.mFilterCreatorType;
 }
 
 bool LLInventoryFilter::isTimedOut()

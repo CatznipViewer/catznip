@@ -281,7 +281,7 @@ S32 LLImageJ2C::calcDataSizeJ2C(S32 w, S32 h, S32 comp, S32 discard_level, F32 r
 	S32 bytes;
 	S32 new_bytes = (S32) (sqrt((F32)(w*h))*(F32)(comp)*rate*1000.f/layer_factor);
 	S32 old_bytes = (S32)((F32)(w*h*comp)*rate);
-	bytes = (LLImage::useNewByteRange() && (new_bytes < old_bytes) ? new_bytes : old_bytes);
+	bytes = (LLImage::getInstance()->useNewByteRange() && (new_bytes < old_bytes) ? new_bytes : old_bytes);
 	bytes = llmax(bytes, calcHeaderSizeJ2C());
 	return bytes;
 }
@@ -322,7 +322,7 @@ S32 LLImageJ2C::calcDiscardLevelBytes(S32 bytes)
 	{
 		S32 bytes_needed = calcDataSize(discard_level);
 		// Use TextureReverseByteRange percent (see settings.xml) of the optimal size to qualify as correct rendering for the given discard level
-		if (bytes >= (bytes_needed*LLImage::getReverseByteRangePercent()/100))
+		if (bytes >= (bytes_needed*LLImage::getInstance()->getReverseByteRangePercent()/100))
 		{
 			break;
 		}
@@ -368,20 +368,29 @@ bool LLImageJ2C::loadAndValidate(const std::string &filename)
 	}
 	else
 	{
-		U8 *data = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), file_size);
-		apr_size_t bytes_read = file_size;
-		apr_status_t s = apr_file_read(apr_file, data, &bytes_read); // modifies bytes_read	
-		infile.close() ;
-
-		if (s != APR_SUCCESS || (S32)bytes_read != file_size)
+		U8 *data = (U8*)ll_aligned_malloc_16(file_size);
+		if (!data)
 		{
-			FREE_MEM(LLImageBase::getPrivatePool(), data);
-			setLastError("Unable to read entire file");
+			infile.close();
+			setLastError("Out of memory", filename);
 			res = false;
 		}
 		else
 		{
-			res = validate(data, file_size);
+			apr_size_t bytes_read = file_size;
+			apr_status_t s = apr_file_read(apr_file, data, &bytes_read); // modifies bytes_read	
+			infile.close();
+
+			if (s != APR_SUCCESS || (S32)bytes_read != file_size)
+			{
+				ll_aligned_free_16(data);
+				setLastError("Unable to read entire file");
+				res = false;
+			}
+			else
+			{
+				res = validate(data, file_size);
+			}
 		}
 	}
 	

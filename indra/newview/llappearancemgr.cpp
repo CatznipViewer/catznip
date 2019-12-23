@@ -148,7 +148,7 @@ public:
 	{
 		// support secondlife:///app/appearance/show, but for now we just
 		// make all secondlife:///app/appearance SLapps behave this way
-		if (!LLUI::sSettingGroups["config"]->getBOOL("EnableAppearance"))
+		if (!LLUI::getInstance()->mSettingGroups["config"]->getBOOL("EnableAppearance"))
 		{
 			LLNotificationsUtil::add("NoAppearance", LLSD(), LLSD(), std::string("SwitchToStandardSkinAndQuit"));
 			return true;
@@ -880,7 +880,10 @@ void LLWearableHoldingPattern::onAllComplete()
 			 ++it)
 		{
 			LLViewerObject *objectp = *it;
-			gAgentAvatarp->addAttachmentOverridesForObject(objectp);
+            if (!objectp->isAnimatedObject())
+            {
+                gAgentAvatarp->addAttachmentOverridesForObject(objectp);
+            }
 		}
 		
 		// Add new attachments to match those requested.
@@ -1321,6 +1324,8 @@ static void removeDuplicateItems(LLInventoryModel::item_array_t& items)
 
 //=========================================================================
 
+const std::string LLAppearanceMgr::sExpectedTextureName = "OutfitPreview";
+
 const LLUUID LLAppearanceMgr::getCOF() const
 {
 	return gInventory.findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT);
@@ -1571,7 +1576,14 @@ void LLAppearanceMgr::removeOutfitPhoto(const LLUUID& outfit_id)
     BOOST_FOREACH(LLViewerInventoryItem* outfit_item, outfit_item_array)
     {
         LLViewerInventoryItem* linked_item = outfit_item->getLinkedItem();
-        if (linked_item != NULL && linked_item->getActualType() == LLAssetType::AT_TEXTURE)
+        if (linked_item != NULL)
+        {
+            if (linked_item->getActualType() == LLAssetType::AT_TEXTURE)
+            {
+                gInventory.removeItem(outfit_item->getUUID());
+            }
+        }
+        else if (outfit_item->getActualType() == LLAssetType::AT_TEXTURE)
         {
             gInventory.removeItem(outfit_item->getUUID());
         }
@@ -1853,7 +1865,6 @@ bool LLAppearanceMgr::getCanRemoveOutfit(const LLUUID& outfit_cat_id)
 	LLFindNonRemovableObjects filter_non_removable;
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
-	LLInventoryModel::item_array_t::const_iterator it;
 	gInventory.collectDescendentsIf(outfit_cat_id, cats, items, false, filter_non_removable);
 	if (!cats.empty() || !items.empty())
 	{
@@ -1910,7 +1921,7 @@ bool LLAppearanceMgr::getCanReplaceCOF(const LLUUID& outfit_cat_id)
 	}
 
 	// Check whether it's the base outfit.
-	if (outfit_cat_id.isNull() || outfit_cat_id == getBaseOutfitUUID())
+	if (outfit_cat_id.isNull())
 	{
 		return false;
 	}
@@ -2900,7 +2911,7 @@ void LLAppearanceMgr::removeAllAttachmentsFromAvatar()
 			 attachment_iter != attachment->mAttachedObjects.end();
 			 ++attachment_iter)
 		{
-			LLViewerObject *attached_object = (*attachment_iter);
+			LLViewerObject *attached_object = attachment_iter->get();
 			if (attached_object)
 			{
 				objects_to_remove.push_back(attached_object);
@@ -3209,6 +3220,7 @@ void appearance_mgr_update_dirty_state()
 void update_base_outfit_after_ordering()
 {
 	LLAppearanceMgr& app_mgr = LLAppearanceMgr::instance();
+	app_mgr.setOutfitImage(LLUUID());
 	LLInventoryModel::cat_array_t sub_cat_array;
 	LLInventoryModel::item_array_t outfit_item_array;
 	gInventory.collectDescendents(app_mgr.getBaseOutfitUUID(),
@@ -3218,9 +3230,26 @@ void update_base_outfit_after_ordering()
 	BOOST_FOREACH(LLViewerInventoryItem* outfit_item, outfit_item_array)
 	{
 		LLViewerInventoryItem* linked_item = outfit_item->getLinkedItem();
-		if (linked_item != NULL && linked_item->getActualType() == LLAssetType::AT_TEXTURE)
+		if (linked_item != NULL)
 		{
-			app_mgr.setOutfitImage(linked_item->getLinkedUUID());
+			if (linked_item->getActualType() == LLAssetType::AT_TEXTURE)
+			{
+				app_mgr.setOutfitImage(linked_item->getLinkedUUID());
+				if (linked_item->getName() == LLAppearanceMgr::sExpectedTextureName)
+				{
+					// Images with "appropriate" name take priority
+					break;
+				}
+			}
+		}
+		else if (outfit_item->getActualType() == LLAssetType::AT_TEXTURE)
+		{
+			app_mgr.setOutfitImage(outfit_item->getUUID());
+			if (outfit_item->getName() == LLAppearanceMgr::sExpectedTextureName)
+			{
+				// Images with "appropriate" name take priority
+				break;
+			}
 		}
 	}
 

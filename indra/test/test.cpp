@@ -37,7 +37,6 @@
 #include "linden_common.h"
 #include "llerrorcontrol.h"
 #include "lltut.h"
-#include "tests/wrapllerrs.h"             // RecorderProxy
 #include "stringize.h"
 #include "namedtempfile.h"
 #include "lltrace.h"
@@ -135,7 +134,7 @@ public:
 
 private:
 	NamedTempFile mTempFile;
-	std::ofstream mFile;
+	llofstream mFile;
 };
 
 class LLReplayLogReal: public LLReplayLog, public boost::noncopyable
@@ -254,7 +253,7 @@ public:
 				break;
 			case tut::test_result::ex:
 				++mFailedTests;
-				out << "exception";
+				out << "exception: " << tr.exception_typeid;
 				break;
 			case tut::test_result::warn:
 				++mFailedTests;
@@ -265,7 +264,7 @@ public:
 				out << "abnormal termination";
 				break;
 			case tut::test_result::skip:
-				++mSkippedTests;			
+				++mSkippedTests;
 				out << "skipped known failure";
 				break;
 			default:
@@ -525,16 +524,15 @@ int main(int argc, char **argv)
 	const char* LOGTEST = getenv("LOGTEST");
 	if (LOGTEST)
 	{
-		LLError::initForApplication(".", true /* log to stderr */);
+		LLError::initForApplication(".", ".", true /* log to stderr */);
 		LLError::setDefaultLevel(LLError::decodeLevel(LOGTEST));
 	}
 	else
 	{
-		LLError::initForApplication(".", false /* do not log to stderr */);
+		LLError::initForApplication(".", ".", false /* do not log to stderr */);
 		LLError::setDefaultLevel(LLError::LEVEL_DEBUG);
 	}	
 	LLError::setFatalFunction(wouldHaveCrashed);
-	LLError::setPrintLocation(true);
 	std::string test_app_name(argv[0]);
 	std::string test_log = test_app_name + ".log";
 	LLFile::remove(test_log);
@@ -568,7 +566,7 @@ int main(int argc, char **argv)
 	apr_status_t apr_err;
 	const char* opt_arg = NULL;
 	int opt_id = 0;
-	boost::scoped_ptr<std::ofstream> output;
+	boost::scoped_ptr<llofstream> output;
 	const char *touch = NULL;
 
 	while(true)
@@ -598,7 +596,7 @@ int main(int argc, char **argv)
 				verbose_mode = true;
 				break;
 			case 'o':
-				output.reset(new std::ofstream);
+				output.reset(new llofstream);
 				output->open(opt_arg);
 				break;
 			case 's':	// --sourcedir
@@ -672,7 +670,7 @@ int main(int argc, char **argv)
 
 	if (touch && success)
 	{
-		std::ofstream s;
+		llofstream s;
 		s.open(touch);
 		s << "ok" << std::endl;
 		s.close();

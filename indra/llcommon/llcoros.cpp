@@ -35,10 +35,15 @@
 // external library headers
 #include <boost/bind.hpp>
 // other Linden headers
+#include "lltimer.h"
 #include "llevents.h"
 #include "llerror.h"
 #include "stringize.h"
 #include "llexception.h"
+
+#if LL_WINDOWS
+#include <excpt.h>
+#endif
 
 namespace {
 void no_op() {}
@@ -151,7 +156,11 @@ LLCoros::LLCoros():
     // Previously we used
     // boost::context::guarded_stack_allocator::default_stacksize();
     // empirically this is 64KB on Windows and Linux. Try quadrupling.
+#if ADDRESS_SIZE == 64
+    mStackSize(512*1024)
+#else
     mStackSize(256*1024)
+#endif
 {
     // Register our cleanup() method for "mainloop" ticks
     LLEventPumps::instance().obtain("mainloop").listen(
@@ -272,6 +281,62 @@ void LLCoros::setStackSize(S32 stacksize)
     mStackSize = stacksize;
 }
 
+void LLCoros::printActiveCoroutines()
+{
+    LL_INFOS("LLCoros") << "Number of active coroutines: " << (S32)mCoros.size() << LL_ENDL;
+    if (mCoros.size() > 0)
+    {
+        LL_INFOS("LLCoros") << "-------------- List of active coroutines ------------";
+        CoroMap::iterator iter;
+        CoroMap::iterator end = mCoros.end();
+        F64 time = LLTimer::getTotalSeconds();
+        for (iter = mCoros.begin(); iter != end; iter++)
+        {
+            F64 life_time = time - iter->second->mCreationTime;
+            LL_CONT << LL_NEWLINE << "Name: " << iter->first << " life: " << life_time;
+        }
+        LL_CONT << LL_ENDL;
+        LL_INFOS("LLCoros") << "-----------------------------------------------------" << LL_ENDL;
+    }
+}
+
+#if LL_WINDOWS
+
+static const U32 STATUS_MSC_EXCEPTION = 0xE06D7363; // compiler specific
+
+U32 exception_filter(U32 code, struct _EXCEPTION_POINTERS *exception_infop)
+{
+    if (code == STATUS_MSC_EXCEPTION)
+    {
+        // C++ exception, go on
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+    else
+    {
+        // handle it
+        return EXCEPTION_EXECUTE_HANDLER;
+    }
+}
+
+void LLCoros::winlevel(const callable_t& callable)
+{
+    __try
+    {
+        callable();
+    }
+    __except (exception_filter(GetExceptionCode(), GetExceptionInformation()))
+    {
+        // convert to C++ styled exception
+        // Note: it might be better to use _se_set_translator
+        // if you want exception to inherit full callstack
+        char integer_string[32];
+        sprintf(integer_string, "SEH, code: %lu\n", GetExceptionCode());
+        throw std::exception(integer_string);
+    }
+}
+
+#endif
+
 // Top-level wrapper around caller's coroutine callable. This function accepts
 // the coroutine library's implicit coro::self& parameter and saves it, but
 // does not pass it down to the caller's callable.
@@ -282,7 +347,11 @@ void LLCoros::toplevel(coro::self& self, CoroData* data, const callable_t& calla
     // run the code the caller actually wants in the coroutine
     try
     {
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+        winlevel(callable);
+#else
         callable();
+#endif
     }
     catch (const LLContinueError&)
     {
@@ -326,7 +395,8 @@ LLCoros::CoroData::CoroData(CoroData* prev, const std::string& name,
     mCoro(boost::bind(toplevel, _1, this, callable), stacksize),
     // don't consume events unless specifically directed
     mConsuming(false),
-    mSelf(0)
+    mSelf(0),
+    mCreationTime(LLTimer::getTotalSeconds())
 {
 }
 
@@ -335,7 +405,13 @@ std::string LLCoros::launch(const std::string& prefix, const callable_t& callabl
     std::string name(generateDistinctName(prefix));
     Current current;
     // pass the current value of Current as previous context
-    CoroData* newCoro = new CoroData(current, name, callable, mStackSize);
+    CoroData* newCoro = new(std::nothrow) CoroData(current, name, callable, mStackSize);
+    if (newCoro == NULL)
+    {
+        // Out of memory?
+        printActiveCoroutines();
+        LL_ERRS("LLCoros") << "Failed to start coroutine: " << name << " Stacksize: " << mStackSize << " Total coroutines: " << mCoros.size() << LL_ENDL;
+    }
     // Store it in our pointer map
     mCoros.insert(name, newCoro);
     // also set it as current
