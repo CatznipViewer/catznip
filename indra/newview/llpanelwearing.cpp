@@ -319,7 +319,8 @@ void LLWornItemsList::refreshList(const std::vector<LLPointer<LLViewerInventoryI
 		LLStringUtil::format_map_t args;
 		args["[WEARABLE_COUNT]"] = std::to_string(nWearableCount);
 		args["[ATTACH_COUNT]"] = std::to_string(nAttachCount);
-		args["[ATTACH_LIMIT]"] = std::to_string(MAX_AGENT_ATTACHMENTS);
+		// *TODO: max number of attachments is region-based, not grid based
+		args["[ATTACH_LIMIT]"] = std::to_string((isAgentAvatarValid()) ? gAgentAvatarp->getMaxAttachments() : 38);
 		pAccordionTab->setTitle(LLTrans::getString("WornItemsTabTitle", args));
 	}
 }
