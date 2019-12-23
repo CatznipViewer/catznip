@@ -392,5 +392,38 @@
         <key>Value</key>
         <string></string>
       </map>
+      <key>SnapshotBaseDir</key>
+      <map>
+        <key>Comment</key>
+        <string>Path to last snapshot save location</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>SnapshotBaseName</key>
+      <map>
+        <key>Comment</key>
+        <string>Pattern for naming snapshots</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string>Snapshot</string>
+      </map>
+      <key>ExperienceSearchMaturity</key>
+      <map>
+        <key>Comment</key>
+        <string>Setting for the user's preferred Max Content rating for Experiences search (Default rating is General)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>U32</string>
+        <key>Value</key>
+        <integer>2</integer>
+      </map>
     </map>
 </llsd>

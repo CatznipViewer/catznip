@@ -38,8 +38,8 @@
 		Échec d&apos;initialisation des graphiques. Veuillez mettre votre pilote graphique à jour.
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) ([CHANNEL])
-[[VIEWER_RELEASE_NOTES_URL] [Notes de version]]
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) 
+[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="BuildConfig">
 		Configuration de la construction [BUILD_CONFIG]
@@ -65,23 +65,26 @@ Carte graphique : [GRAPHICS_CARD]
 		Version OpenGL : [OPENGL_VERSION]
 	</string>
 	<string name="AboutSettings">
-		Taille de la fenêtre : [WINDOW_WIDTH]x[WINDOW_HEIGHT]
-Ajustement de la taille de la police : [FONT_SIZE_ADJUSTMENT] pts
+		Taille de la fenêtre: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+Ajustement de la taille de la police : [FONT_SIZE_ADJUSTMENT]pt
 Échelle de l’interface : [UI_SCALE]
-Limite d’affichage : [DRAW_DISTANCE] m
+Distance de dessin : [DRAW_DISTANCE]m
 Bande passante : [NET_BANDWITH] kbit/s
 Facteur LOD (niveau de détail) : [LOD_FACTOR]
-Qualité de rendu : [RENDER_QUALITY] / 7
+Qualité de rendu : [RENDER_QUALITY]
 Modèle d’éclairage avancé : [GPU_SHADERS]
 Mémoire textures : [TEXTURE_MEMORY] Mo
-Durée de création VFS (cache) : [VFS_TIME]
+Heure de création VFS (cache) : [VFS_TIME]
+	</string>
+	<string name="AboutOSXHiDPI">
+		Mode d&apos;affichage HiDPI : [HIDPI]
 	</string>
 	<string name="AboutLibs">
-		Version J2C Decoder : [J2C_VERSION]
-Version Audio Driver : [AUDIO_DRIVER_VERSION]
-Version CEF : [LIBCEF_VERSION]
-Version LibVLC : [LIBVLC_VERSION]
-Version serveur vocal : [VOICE_VERSION]
+		J2C Decoder Version: [J2C_VERSION] 
+Audio Driver Version: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+LibVLC Version: [LIBVLC_VERSION] 
+Voice Server Version: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
 		Paquets perdus : [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
@@ -278,9 +281,8 @@ Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez l&apos;Assist
 		Le simulateur a renvoyé une erreur en réponse à la demande de déconnexion.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		Le système est en train de vous déconnecter.
-Votre compte sera indisponible jusqu&apos;à
-[TIME], heure du Pacifique.
+		Le système est en train de vous déconnecter. 
+Veuillez réessayer de vous connecter dans une minute.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		Impossible de créer de session valide.
@@ -650,7 +652,7 @@ Veuillez réessayer de vous connecter dans une minute.
 		Notes de version
 	</string>
 	<string name="RELEASE_NOTES_BASE_URL">
-		http://wiki.secondlife.com/wiki/Release_Notes/
+		https://releasenotes.secondlife.com/viewer/
 	</string>
 	<string name="LoadingData">
 		Chargement...
@@ -1446,6 +1448,9 @@ http://secondlife.com/support pour vous aider à résoudre ce problème.
 	<string name="InventoryNoMatchingItems">
 		Vous n&apos;avez pas trouvé ce que vous cherchiez ? Essayez [secondlife:///app/search/all/[SEARCH_TERM] Rechercher].
 	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		Avez-vous trouvé ce que vous cherchiez ? Essayez [secondlife:///app/inventory/filters Show filters].
+	</string>
 	<string name="PlacesNoMatchingItems">
 		Vous n&apos;avez pas trouvé ce que vous cherchiez ? Essayez [secondlife:///app/search/places/[SEARCH_TERM] Rechercher].
 	</string>
@@ -1475,6 +1480,15 @@ http://secondlife.com/support pour vous aider à résoudre ce problème.
 	</string>
 	<string name="MarketplaceURL_LearnMore">
 		https://marketplace.[MARKETPLACE_DOMAIN_NAME]/learn_more
+	</string>
+	<string name="InventoryPlayAnimationTooltip">
+		Ouvrir la fenêtre avec les options Jeu
+	</string>
+	<string name="InventoryPlayGestureTooltip">
+		Exécuter le geste sélectionné dans le monde virtuel.
+	</string>
+	<string name="InventoryPlaySoundTooltip">
+		Ouvrir la fenêtre avec les options Jeu
 	</string>
 	<string name="InventoryOutboxNotMerchantTitle">
 		Tout le monde peut vendre des articles sur la Place du marché.
@@ -1511,6 +1525,9 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Pour mettre des dossiers en vente sur la [[MARKETPLACE_DASHBOARD_URL] Place du marché], faites-les glisser vers cette zone.
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Articles )
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		le dossier de stock doit être contenu dans un dossier de version
@@ -2224,6 +2241,18 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 	<string name="RegionInfoListTypeBannedAgents">
 		Toujours interdit
 	</string>
+	<string name="RegionInfoAllEstates">
+		tous les domaines
+	</string>
+	<string name="RegionInfoManagedEstates">
+		domaines gérés
+	</string>
+	<string name="RegionInfoThisEstate">
+		ce domaine
+	</string>
+	<string name="AndNMore">
+		et [EXTRA_COUNT] plus
+	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Mémoire des scripts de parcelles
 	</string>
@@ -2267,7 +2296,7 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 		Poitrine
 	</string>
 	<string name="ATTACH_HEAD">
-		Tête
+		Crâne
 	</string>
 	<string name="ATTACH_LSHOULDER">
 		Épaule gauche
@@ -2288,7 +2317,7 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 		Pied droit
 	</string>
 	<string name="ATTACH_BACK">
-		Précédent
+		Colonne vertébrale
 	</string>
 	<string name="ATTACH_PELVIS">
 		Bassin
@@ -2345,7 +2374,7 @@ Si vous continuez de recevoir ce message, contactez l’assistance Second Life �
 		Jambe gauche
 	</string>
 	<string name="ATTACH_BELLY">
-		Ventre
+		Estomac
 	</string>
 	<string name="ATTACH_LEFT_PEC">
 		Pectoral gauche
@@ -5382,9 +5411,6 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	<string name="Command_Destinations_Label">
 		Destinations
 	</string>
-	<string name="Command_Facebook_Label">
-		Facebook
-	</string>
 	<string name="Command_Flickr_Label">
 		Flickr
 	</string>
@@ -5477,9 +5503,6 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="Command_Destinations_Tooltip">
 		Destinations intéressantes
-	</string>
-	<string name="Command_Facebook_Tooltip">
-		Publier sur Facebook
 	</string>
 	<string name="Command_Flickr_Tooltip">
 		Charger sur Flickr
@@ -5735,5 +5758,26 @@ Essayez avec le chemin d&apos;accès à l&apos;éditeur entre guillemets doubles
 	</string>
 	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
 		La forme physique n’a pas la version correcte. Configurez la version correcte pour le modèle physique.
+	</string>
+	<string name="couldnt_resolve_host">
+		DNS n&apos;a pas pu résoudre le nom d&apos;hôte([HOSTNAME]). 
+Veuillez vérifier que vous parvenez à vous connecter au site www.secondlife.com. 
+Si c&apos;est le cas, et que vous continuez à recevoir ce message d&apos;erreur, veuillez vous 
+rendre à la section Support et signaler ce problème
+	</string>
+	<string name="ssl_peer_certificate">
+		Le serveur d&apos;identification a rencontré une erreur de connexion SSL. 
+Si vous continuez à recevoir ce message d&apos;erreur, 
+veuillez vous rendre à la section Support du site web 
+SecondLife.com et signaler ce problème
+	</string>
+	<string name="ssl_connect_error">
+		Ceci est souvent dû à un mauvais réglage de l&apos;horloge de votre ordinateur. 
+Veuillez aller à Tableaux de bord et assurez-vous que l&apos;heure et la date sont réglés 
+correctement. Vérifiez également que votre réseau et votre pare-feu sont configurés 
+correctement. Si vous continuez à recevoir ce message d&apos;erreur, veuillez vous rendre 
+à la section Support du site web SecondLife.com et signaler ce problème. 
+
+[https://community.secondlife.com/knowledgebase/english/error-messages-r520/#Section__3 Base de connaissances]
 	</string>
 </strings>

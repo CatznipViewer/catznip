@@ -137,7 +137,9 @@ protected:
 	friend class LLModelPreview;
 	friend class LLMeshFilePicker;
 	friend class LLPhysicsDecomp;
-	
+
+	void		onDescriptionKeystroke(LLUICtrl*);
+
 	static void		onImportScaleCommit(LLUICtrl*, void*);
 	static void		onPelvisOffsetCommit(LLUICtrl*, void*);
 	static void		onUploadJointsCommit(LLUICtrl*,void*);
@@ -169,7 +171,10 @@ protected:
 	void			draw();
 	
 	void initDecompControls();
-	
+
+    // FIXME - this function and mStatusMessage have no visible effect, and the
+    // actual status messages are managed by directly manipulation of
+    // the UI element.
 	void setStatusMessage(const std::string& msg);
 
 	LLModelPreview*	mModelPreview;
@@ -219,7 +224,7 @@ class LLMeshFilePicker : public LLFilePickerThread
 {
 public:
 	LLMeshFilePicker(LLModelPreview* mp, S32 lod);
-	virtual void notify(const std::string& filename);
+	virtual void notify(const std::vector<std::string>& filenames);
 
 private:
 	LLModelPreview* mMP;

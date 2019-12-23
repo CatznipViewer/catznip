@@ -455,6 +455,7 @@ clothing_to_string_map_t init_clothing_string_map()
 	w_map.insert(std::make_pair(LLWearableType::WT_SKIRT, "skirt_not_worn"));
 	w_map.insert(std::make_pair(LLWearableType::WT_ALPHA, "alpha_not_worn"));
 	w_map.insert(std::make_pair(LLWearableType::WT_TATTOO, "tattoo_not_worn"));
+	w_map.insert(std::make_pair(LLWearableType::WT_UNIVERSAL, "universal_not_worn"));
 	w_map.insert(std::make_pair(LLWearableType::WT_PHYSICS, "physics_not_worn"));
 	return w_map;
 }
@@ -645,7 +646,7 @@ LLWearableItemsList::LLWearableItemsList(const LLWearableItemsList::Params& p)
 		setRightMouseDownCallback(boost::bind(&LLWearableItemsList::onRightClick, this, _2, _3));
 	}
 	mWornIndicationEnabled = p.worn_indication_enabled;
-	setNoItemsCommentText(LLTrans::getString("NoneFound"));
+	setNoItemsCommentText(LLTrans::getString("LoadingData"));
 }
 
 // virtual

@@ -691,7 +691,7 @@ bool LLMediaCtrl::ensureMediaSourceExists()
 	if(mMediaSource.isNull())
 	{
 		// If we don't already have a media source, try to create one.
-		mMediaSource = LLViewerMedia::newMediaImpl(mMediaTextureID, mTextureWidth, mTextureHeight);
+		mMediaSource = LLViewerMedia::getInstance()->newMediaImpl(mMediaTextureID, mTextureWidth, mTextureHeight);
 		if ( mMediaSource )
 		{
 			mMediaSource->setUsedInUI(true);
@@ -1022,7 +1022,7 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 			// try as slurl first
 			if (!LLURLDispatcher::dispatch(url, "clicked", NULL, mTrusted))
 			{
-				LLWeb::loadURL(url, target, std::string());
+				LLWeb::loadURL(url, target, uuid);
 			}
 
 			// CP: removing this code because we no longer support popups so this breaks the flow.
@@ -1098,7 +1098,7 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 			auth_request_params.substitutions = args;
 
 			auth_request_params.payload = LLSD().with("media_id", mMediaTextureID);
-			auth_request_params.functor.function = boost::bind(&LLViewerMedia::onAuthSubmit, _1, _2);
+			auth_request_params.functor.function = boost::bind(&LLViewerMedia::authSubmitCallback, _1, _2);
 			LLNotifications::instance().add(auth_request_params);
 		};
 		break;
@@ -1144,7 +1144,7 @@ void LLMediaCtrl::onPopup(const LLSD& notification, const LLSD& response)
 	else
 	{
 		// Make sure the opening instance knows its window open request was denied, so it can clean things up.
-		LLViewerMedia::proxyWindowClosed(notification["payload"]["uuid"]);
+		LLViewerMedia::getInstance()->proxyWindowClosed(notification["payload"]["uuid"]);
 	}
 }
 
