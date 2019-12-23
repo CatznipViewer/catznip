@@ -266,7 +266,7 @@ BOOL LLFloaterIMContainerView::postBuild()
 
 	collapseMessagesPane(gSavedPerAccountSettings.getBOOL("ConversationsMessagePaneCollapsed"));
 	collapseConversationsPane(gSavedPerAccountSettings.getBOOL("ConversationsListPaneCollapsed"), false);
-	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
+	LLAvatarNameCache::getInstance()->addUseDisplayNamesCallback(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
 	mMicroChangedSignal = LLVoiceClient::getInstance()->MicroChangedCallback(boost::bind(&LLFloaterIMContainerView::updateSpeakBtnState, this));
 // [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
 	gAgent.setVoiceConnectedChangeCallback(boost::bind(&LLFloaterIMContainerView::updateSpeakBtnState, this));
@@ -299,7 +299,7 @@ BOOL LLFloaterIMContainerView::postBuild()
 	// We'll take care of view updates on idle
 	gIdleCallbacks.addFunction(idle, this);
 	// When display name option change, we need to reload all participant names
-	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLFloaterIMContainerView::processParticipantsStyleUpdate, this));
+	LLAvatarNameCache::getInstance()->addUseDisplayNamesCallback(boost::bind(&LLFloaterIMContainerView::processParticipantsStyleUpdate, this));
 
     mParticipantRefreshTimer.setTimerExpirySec(0);
     mParticipantRefreshTimer.start();
