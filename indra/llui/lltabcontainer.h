@@ -83,6 +83,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
+		Optional<bool>						hide_scroll_arrows;
 		Optional<S32>						tab_padding_right;
 
 		Optional<TabParams>					first_tab,
@@ -215,6 +216,8 @@ public:
 	S32			getMinTabWidth() const { return mMinTabWidth; }
 	S32			getMaxTabWidth() const { return mMaxTabWidth; }
 
+	void setTabVisibility( LLPanel const *aPanel, bool );
+
 	void		startDragAndDropDelayTimer() { mDragAndDropDelayTimer.start(); }
 	
 	void onTabBtn( const LLSD& data, LLPanel* panel );
@@ -262,6 +265,7 @@ private:
 	
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
+	BOOL							mHideScrollArrows;
 
 	BOOL							mScrolled;
 	LLFrameTimer					mScrollTimer;

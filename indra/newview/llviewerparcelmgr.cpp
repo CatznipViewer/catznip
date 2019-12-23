@@ -706,7 +706,7 @@ bool LLViewerParcelMgr::allowAgentScripts(const LLViewerRegion* region, const LL
 bool LLViewerParcelMgr::allowAgentDamage(const LLViewerRegion* region, const LLParcel* parcel) const
 {
 	return (region && region->getAllowDamage())
-		&& (parcel && parcel->getAllowDamage());
+		|| (parcel && parcel->getAllowDamage());
 }
 
 BOOL LLViewerParcelMgr::isOwnedAt(const LLVector3d& pos_global) const
@@ -957,7 +957,7 @@ void LLViewerParcelMgr::sendParcelGodForceOwner(const LLUUID& owner_id)
 		return;
 	}
 
-	LL_INFOS() << "Claiming " << mWestSouth << " to " << mEastNorth << LL_ENDL;
+	LL_INFOS("ParcelMgr") << "Claiming " << mWestSouth << " to " << mEastNorth << LL_ENDL;
 
 	// BUG: Only works for the region containing mWestSouthBottom
 	LLVector3d east_north_region_check( mEastNorth );
@@ -980,7 +980,7 @@ void LLViewerParcelMgr::sendParcelGodForceOwner(const LLUUID& owner_id)
 		return;
 	}
 
-	LL_INFOS() << "Region " << region->getOriginGlobal() << LL_ENDL;
+	LL_INFOS("ParcelMgr") << "Region " << region->getOriginGlobal() << LL_ENDL;
 
 	LLSD payload;
 	payload["owner_id"] = owner_id;
@@ -1120,8 +1120,8 @@ LLViewerParcelMgr::ParcelBuyInfo* LLViewerParcelMgr::setupParcelBuy(
 	
 	if (is_claim)
 	{
-		LL_INFOS() << "Claiming " << mWestSouth << " to " << mEastNorth << LL_ENDL;
-		LL_INFOS() << "Region " << region->getOriginGlobal() << LL_ENDL;
+		LL_INFOS("ParcelMgr") << "Claiming " << mWestSouth << " to " << mEastNorth << LL_ENDL;
+		LL_INFOS("ParcelMgr") << "Region " << region->getOriginGlobal() << LL_ENDL;
 
 		// BUG: Only works for the region containing mWestSouthBottom
 		LLVector3d east_north_region_check( mEastNorth );
@@ -1294,8 +1294,6 @@ void LLViewerParcelMgr::sendParcelPropertiesUpdate(LLParcel* parcel, bool use_ag
 	if (!region) 
         return;
 
-	//LL_INFOS() << "found region: " << region->getName() << LL_ENDL;
-
 	LLSD body;
 	std::string url = region->getCapability("ParcelPropertiesUpdate");
 	if (!url.empty())
@@ -1304,7 +1302,7 @@ void LLViewerParcelMgr::sendParcelPropertiesUpdate(LLParcel* parcel, bool use_ag
 		U32 message_flags = 0x01;
 		body["flags"] = ll_sd_from_U32(message_flags);
 		parcel->packMessage(body);
-		LL_INFOS() << "Sending parcel properties update via capability to: "
+		LL_INFOS("ParcelMgr") << "Sending parcel properties update via capability to: "
 			<< url << LL_ENDL;
 
         LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, body,
@@ -1333,21 +1331,17 @@ void LLViewerParcelMgr::sendParcelPropertiesUpdate(LLParcel* parcel, bool use_ag
 void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos)
 {
 	static U32 last_west, last_south;
-
+	static LLUUID last_region;
 
 	// only request parcel info if position has changed outside of the
 	// last parcel grid step
-	U32 west_parcel_step = (U32) floor( pos.mdV[VX] / PARCEL_GRID_STEP_METERS );
-	U32 south_parcel_step = (U32) floor( pos.mdV[VY] / PARCEL_GRID_STEP_METERS );
-	
+	const U32 west_parcel_step = (U32) floor( pos.mdV[VX] / PARCEL_GRID_STEP_METERS );
+	const U32 south_parcel_step = (U32) floor( pos.mdV[VY] / PARCEL_GRID_STEP_METERS );
+
 	if ((west_parcel_step == last_west) && (south_parcel_step == last_south))
 	{
+		// We are staying in same segment
 		return;
-	}
-	else 
-	{
-		last_west = west_parcel_step;
-		last_south = south_parcel_step;
 	}
 
 	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal( pos );
@@ -1356,34 +1350,95 @@ void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos)
 		return;
 	}
 
+	LLUUID region_id = region->getRegionID();
+	LLVector3 pos_in_region = region->getPosRegionFromGlobal(pos);
 
-	// Send a rectangle around the point.
-	// This means the parcel sent back is at least a rectangle around the point,
-	// which is more efficient for public land.  Fewer requests are sent.  JC
-	LLVector3 wsb_region = region->getPosRegionFromGlobal( pos );
+	bool request_properties = false;
+	if (region_id != last_region)
+	{
+		request_properties = true;
+	}
+	else
+	{
+		// Check if new position is in same parcel.
+		// This check is not ideal, since it checks by way of straight lines.
+		// So sometimes (small parcel in the middle of large one) it can
+		// decide that parcel actually changed, but it still allows to 
+		// reduce amount of requests significantly
 
-	F32 west  = PARCEL_GRID_STEP_METERS * floor( wsb_region.mV[VX] / PARCEL_GRID_STEP_METERS );
-	F32 south = PARCEL_GRID_STEP_METERS * floor( wsb_region.mV[VY] / PARCEL_GRID_STEP_METERS );
+		S32 west_parcel_local = (S32)(pos_in_region.mV[VX] / PARCEL_GRID_STEP_METERS);
+		S32 south_parcel_local = (S32)(pos_in_region.mV[VY] / PARCEL_GRID_STEP_METERS);
 
-	F32 east  = west  + PARCEL_GRID_STEP_METERS;
-	F32 north = south + PARCEL_GRID_STEP_METERS;
+		LLViewerParcelOverlay* overlay = region->getParcelOverlay();
+		if (!overlay)
+		{
+			 request_properties = true;
+		}
+		while (!request_properties && west_parcel_step < last_west)
+		{
+			S32 segment_shift = last_west - west_parcel_step;
+			request_properties = overlay->parcelLineFlags(south_parcel_local, west_parcel_local + segment_shift) & PARCEL_WEST_LINE;
+			last_west--;
+		}
+		while (!request_properties && south_parcel_step < last_south)
+		{
+			S32 segment_shift = last_south - south_parcel_step;
+			request_properties = overlay->parcelLineFlags(south_parcel_local + segment_shift, west_parcel_local) & PARCEL_SOUTH_LINE;
+			last_south--;
+		}
+		// Note: could have just swapped values, reused first two 'while' and set last_south, last_west separately,
+		// but this looks to be easier to understand/straightforward/less bulky
+		while (!request_properties && west_parcel_step > last_west)
+		{
+			S32 segment_shift = west_parcel_step - last_west;
+			request_properties = overlay->parcelLineFlags(south_parcel_local, west_parcel_local - segment_shift + 1) & PARCEL_WEST_LINE;
+			last_west++;
+		}
+		while (!request_properties && south_parcel_step > last_south)
+		{
+			S32 segment_shift = south_parcel_step - last_south;
+			request_properties = overlay->parcelLineFlags(south_parcel_local - segment_shift + 1, west_parcel_local) & PARCEL_SOUTH_LINE;
+			last_south++;
+		}
 
-	// Send request message
-	LLMessageSystem *msg = gMessageSystem;
-	msg->newMessageFast(_PREHASH_ParcelPropertiesRequest);
-	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID() );
-	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID() );
-	msg->nextBlockFast(_PREHASH_ParcelData);
-	msg->addS32Fast(_PREHASH_SequenceID,	HOVERED_PARCEL_SEQ_ID );
-	msg->addF32Fast(_PREHASH_West,			west );
-	msg->addF32Fast(_PREHASH_South,			south );
-	msg->addF32Fast(_PREHASH_East,			east );
-	msg->addF32Fast(_PREHASH_North,			north );
-	msg->addBOOL("SnapSelection",			FALSE );
-	msg->sendReliable( region->getHost() );
+		// if (!request_properties) last_south and last_west will be equal to new values
+	}
 
-	mHoverRequestResult = PARCEL_RESULT_NO_DATA;
+	if (request_properties)
+	{
+		last_west = west_parcel_step;
+		last_south = south_parcel_step;
+		last_region = region_id;
+
+		LL_DEBUGS("ParcelMgr") << "Requesting parcel properties on hover, for " << pos << LL_ENDL;
+
+
+		// Send a rectangle around the point.
+		// This means the parcel sent back is at least a rectangle around the point,
+		// which is more efficient for public land.  Fewer requests are sent.  JC
+		F32 west = PARCEL_GRID_STEP_METERS * floor(pos_in_region.mV[VX] / PARCEL_GRID_STEP_METERS);
+		F32 south = PARCEL_GRID_STEP_METERS * floor(pos_in_region.mV[VY] / PARCEL_GRID_STEP_METERS);
+
+		F32 east = west + PARCEL_GRID_STEP_METERS;
+		F32 north = south + PARCEL_GRID_STEP_METERS;
+
+		// Send request message
+		LLMessageSystem *msg = gMessageSystem;
+		msg->newMessageFast(_PREHASH_ParcelPropertiesRequest);
+		msg->nextBlockFast(_PREHASH_AgentData);
+		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+		msg->nextBlockFast(_PREHASH_ParcelData);
+		msg->addS32Fast(_PREHASH_SequenceID, HOVERED_PARCEL_SEQ_ID);
+		msg->addF32Fast(_PREHASH_West, west);
+		msg->addF32Fast(_PREHASH_South, south);
+		msg->addF32Fast(_PREHASH_East, east);
+		msg->addF32Fast(_PREHASH_North, north);
+		msg->addBOOL("SnapSelection", FALSE);
+		msg->sendReliable(region->getHost());
+
+		mHoverRequestResult = PARCEL_RESULT_NO_DATA;
+	}
 }
 
 
@@ -1427,124 +1482,132 @@ void LLViewerParcelMgr::processParcelOverlay(LLMessageSystem *msg, void **user)
 // static
 void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **user)
 {
-	S32		request_result;
-	S32		sequence_id;
-	BOOL	snap_selection = FALSE;
-	S32		self_count = 0;
-	S32		other_count = 0;
-	S32		public_count = 0;
-	S32		local_id;
-	LLUUID	owner_id;
-	BOOL	is_group_owned;
-	U32 auction_id = 0;
-	S32		claim_price_per_meter = 0;
-	S32		rent_price_per_meter = 0;
-	S32		claim_date = 0;
-	LLVector3	aabb_min;
-	LLVector3	aabb_max;
-	S32		area = 0;
-	S32		sw_max_prims = 0;
-	S32		sw_total_prims = 0;
-	//LLUUID	buyer_id;
-	U8 status = 0;
-	S32		max_prims = 0;
-	S32		total_prims = 0;
-	S32		owner_prims = 0;
-	S32		group_prims = 0;
-	S32		other_prims = 0;
-	S32		selected_prims = 0;
-	F32		parcel_prim_bonus = 1.f;
-	BOOL	region_push_override = false;
-	BOOL	region_deny_anonymous_override = false;
-	BOOL	region_deny_identified_override = false; // Deprecated
-	BOOL	region_deny_transacted_override = false; // Deprecated
-	BOOL	region_deny_age_unverified_override = false;
+    S32		request_result;
+    S32		sequence_id;
+    BOOL	snap_selection = FALSE;
+    S32		self_count = 0;
+    S32		other_count = 0;
+    S32		public_count = 0;
+    S32		local_id;
+    LLUUID	owner_id;
+    BOOL	is_group_owned;
+    U32 auction_id = 0;
+    S32		claim_price_per_meter = 0;
+    S32		rent_price_per_meter = 0;
+    S32		claim_date = 0;
+    LLVector3	aabb_min;
+    LLVector3	aabb_max;
+    S32		area = 0;
+    S32		sw_max_prims = 0;
+    S32		sw_total_prims = 0;
+    //LLUUID	buyer_id;
+    U8 status = 0;
+    S32		max_prims = 0;
+    S32		total_prims = 0;
+    S32		owner_prims = 0;
+    S32		group_prims = 0;
+    S32		other_prims = 0;
+    S32		selected_prims = 0;
+    F32		parcel_prim_bonus = 1.f;
+    BOOL	region_push_override = false;
+    BOOL	region_deny_anonymous_override = false;
+    BOOL	region_deny_identified_override = false; // Deprecated
+    BOOL	region_deny_transacted_override = false; // Deprecated
+    BOOL	region_deny_age_unverified_override = false;
+    BOOL    region_allow_access_override = true;
     BOOL	agent_parcel_update = false; // updating previous(existing) agent parcel
 
-	S32		other_clean_time = 0;
+    S32		other_clean_time = 0;
 
-	LLViewerParcelMgr& parcel_mgr = LLViewerParcelMgr::instance();
+    LLViewerParcelMgr& parcel_mgr = LLViewerParcelMgr::instance();
 
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_RequestResult, request_result );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SequenceID, sequence_id );
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_RequestResult, request_result);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SequenceID, sequence_id);
 
-	if (request_result == PARCEL_RESULT_NO_DATA)
-	{
-		// no valid parcel data
-		LL_INFOS() << "no valid parcel data" << LL_ENDL;
-		return;
-	}
+    if (request_result == PARCEL_RESULT_NO_DATA)
+    {
+        // no valid parcel data
+        LL_INFOS("ParcelMgr") << "no valid parcel data" << LL_ENDL;
+        return;
+    }
 
-	// Decide where the data will go.
-	LLParcel* parcel = NULL;
-	if (sequence_id == SELECTED_PARCEL_SEQ_ID)
-	{
-		// ...selected parcels report this sequence id
-		parcel_mgr.mRequestResult = PARCEL_RESULT_SUCCESS;
-		parcel = parcel_mgr.mCurrentParcel;
-	}
-	else if (sequence_id == HOVERED_PARCEL_SEQ_ID)
-	{
-		parcel_mgr.mHoverRequestResult = PARCEL_RESULT_SUCCESS;
-		parcel = parcel_mgr.mHoverParcel;
-	}
-	else if (sequence_id == COLLISION_NOT_IN_GROUP_PARCEL_SEQ_ID ||
-			 sequence_id == COLLISION_NOT_ON_LIST_PARCEL_SEQ_ID ||
-			 sequence_id == COLLISION_BANNED_PARCEL_SEQ_ID)
-	{
-		parcel_mgr.mHoverRequestResult = PARCEL_RESULT_SUCCESS;
-		parcel = parcel_mgr.mCollisionParcel;
-	}
-	else if (sequence_id == 0 || sequence_id > parcel_mgr.mAgentParcelSequenceID)
-	{
-		// new agent parcel
-		parcel_mgr.mAgentParcelSequenceID = sequence_id;
-		parcel = parcel_mgr.mAgentParcel;
-	}
-	else
-	{
-		LL_INFOS() << "out of order agent parcel sequence id " << sequence_id
-			<< " last good " << parcel_mgr.mAgentParcelSequenceID
-			<< LL_ENDL;
-		return;
-	}
+    // Decide where the data will go.
+    LLParcel* parcel = NULL;
+    if (sequence_id == SELECTED_PARCEL_SEQ_ID)
+    {
+        // ...selected parcels report this sequence id
+        parcel_mgr.mRequestResult = PARCEL_RESULT_SUCCESS;
+        parcel = parcel_mgr.mCurrentParcel;
+    }
+    else if (sequence_id == HOVERED_PARCEL_SEQ_ID)
+    {
+        parcel_mgr.mHoverRequestResult = PARCEL_RESULT_SUCCESS;
+        parcel = parcel_mgr.mHoverParcel;
+    }
+    else if (sequence_id == COLLISION_NOT_IN_GROUP_PARCEL_SEQ_ID ||
+        sequence_id == COLLISION_NOT_ON_LIST_PARCEL_SEQ_ID ||
+        sequence_id == COLLISION_BANNED_PARCEL_SEQ_ID)
+    {
+        parcel_mgr.mHoverRequestResult = PARCEL_RESULT_SUCCESS;
+        parcel = parcel_mgr.mCollisionParcel;
+    }
+    else if (sequence_id == 0 || sequence_id > parcel_mgr.mAgentParcelSequenceID)
+    {
+        // new agent parcel
+        parcel_mgr.mAgentParcelSequenceID = sequence_id;
+        parcel = parcel_mgr.mAgentParcel;
+    }
+    else
+    {
+        LL_INFOS("ParcelMgr") << "out of order agent parcel sequence id " << sequence_id
+            << " last good " << parcel_mgr.mAgentParcelSequenceID
+            << LL_ENDL;
+        return;
+    }
 
-	msg->getBOOL("ParcelData", "SnapSelection", snap_selection);
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SelfCount, self_count);
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OtherCount, other_count);
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_PublicCount, public_count);
-	msg->getS32Fast( _PREHASH_ParcelData, _PREHASH_LocalID,		local_id );
-	msg->getUUIDFast(_PREHASH_ParcelData, _PREHASH_OwnerID,		owner_id);
-	msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_IsGroupOwned, is_group_owned);
-	msg->getU32Fast(_PREHASH_ParcelData, _PREHASH_AuctionID, auction_id);
-	msg->getS32Fast( _PREHASH_ParcelData, _PREHASH_ClaimDate,	claim_date);
-	msg->getS32Fast( _PREHASH_ParcelData, _PREHASH_ClaimPrice,	claim_price_per_meter);
-	msg->getS32Fast( _PREHASH_ParcelData, _PREHASH_RentPrice,	rent_price_per_meter);
-	msg->getVector3Fast(_PREHASH_ParcelData, _PREHASH_AABBMin, aabb_min);
-	msg->getVector3Fast(_PREHASH_ParcelData, _PREHASH_AABBMax, aabb_max);
-	msg->getS32Fast(	_PREHASH_ParcelData, _PREHASH_Area, area );
-	//msg->getUUIDFast(	_PREHASH_ParcelData, _PREHASH_BuyerID, buyer_id);
-	msg->getU8("ParcelData", "Status", status);
-	msg->getS32("ParcelData", "SimWideMaxPrims", sw_max_prims );
-	msg->getS32("ParcelData", "SimWideTotalPrims", sw_total_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_MaxPrims, max_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_TotalPrims, total_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OwnerPrims, owner_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_GroupPrims, group_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OtherPrims, other_prims );
-	msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SelectedPrims, selected_prims );
-	msg->getF32Fast(_PREHASH_ParcelData, _PREHASH_ParcelPrimBonus, parcel_prim_bonus );
-	msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionPushOverride, region_push_override );
-	msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyAnonymous, region_deny_anonymous_override );
-	msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyIdentified, region_deny_identified_override ); // Deprecated
-	msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyTransacted, region_deny_transacted_override ); // Deprecated
-	if (msg->getNumberOfBlocksFast(_PREHASH_AgeVerificationBlock))
-	{
-		// this block was added later and may not be on older sims, so we have to test its existence first
-		msg->getBOOLFast(_PREHASH_AgeVerificationBlock, _PREHASH_RegionDenyAgeUnverified, region_deny_age_unverified_override );
-	}
+    msg->getBOOL("ParcelData", "SnapSelection", snap_selection);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SelfCount, self_count);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OtherCount, other_count);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_PublicCount, public_count);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_LocalID, local_id);
+    msg->getUUIDFast(_PREHASH_ParcelData, _PREHASH_OwnerID, owner_id);
+    msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_IsGroupOwned, is_group_owned);
+    msg->getU32Fast(_PREHASH_ParcelData, _PREHASH_AuctionID, auction_id);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_ClaimDate, claim_date);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_ClaimPrice, claim_price_per_meter);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_RentPrice, rent_price_per_meter);
+    msg->getVector3Fast(_PREHASH_ParcelData, _PREHASH_AABBMin, aabb_min);
+    msg->getVector3Fast(_PREHASH_ParcelData, _PREHASH_AABBMax, aabb_max);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_Area, area);
+    //msg->getUUIDFast(	_PREHASH_ParcelData, _PREHASH_BuyerID, buyer_id);
+    msg->getU8("ParcelData", "Status", status);
+    msg->getS32("ParcelData", "SimWideMaxPrims", sw_max_prims);
+    msg->getS32("ParcelData", "SimWideTotalPrims", sw_total_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_MaxPrims, max_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_TotalPrims, total_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OwnerPrims, owner_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_GroupPrims, group_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_OtherPrims, other_prims);
+    msg->getS32Fast(_PREHASH_ParcelData, _PREHASH_SelectedPrims, selected_prims);
+    msg->getF32Fast(_PREHASH_ParcelData, _PREHASH_ParcelPrimBonus, parcel_prim_bonus);
+    msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionPushOverride, region_push_override);
+    msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyAnonymous, region_deny_anonymous_override);
+    msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyIdentified, region_deny_identified_override); // Deprecated
+    msg->getBOOLFast(_PREHASH_ParcelData, _PREHASH_RegionDenyTransacted, region_deny_transacted_override); // Deprecated
+    if (msg->getNumberOfBlocksFast(_PREHASH_AgeVerificationBlock))
+    {
+        // this block was added later and may not be on older sims, so we have to test its existence first
+        msg->getBOOLFast(_PREHASH_AgeVerificationBlock, _PREHASH_RegionDenyAgeUnverified, region_deny_age_unverified_override);
+    }
+
+    if (msg->getNumberOfBlocks(_PREHASH_RegionAllowAccessBlock))
+    {
+        msg->getBOOLFast(_PREHASH_RegionAllowAccessBlock, _PREHASH_RegionAllowAccessOverride, region_allow_access_override);
+    }
 
 	msg->getS32("ParcelData", "OtherCleanTime", other_clean_time );
+
+	LL_DEBUGS("ParcelMgr") << "Processing parcel " << local_id << " update, target(sequence): " << sequence_id << LL_ENDL;
 
 	// Actually extract the data.
 	if (parcel)
@@ -1585,6 +1648,7 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 		parcel->setRegionPushOverride(region_push_override);
 		parcel->setRegionDenyAnonymousOverride(region_deny_anonymous_override);
 		parcel->setRegionDenyAgeUnverifiedOverride(region_deny_age_unverified_override);
+        parcel->setRegionAllowAccessOverride(region_allow_access_override);
 		parcel->unpackMessage(msg);
 
 		if (parcel == parcel_mgr.mAgentParcel)
@@ -1758,7 +1822,7 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 	else
 	{
 		// Check for video
-		LLViewerParcelMedia::update(parcel);
+		LLViewerParcelMedia::getInstance()->update(parcel);
 
 		// Then check for music
 		if (gAudiop)
@@ -1783,7 +1847,7 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
                         }
                         else
                         {
-                            LL_INFOS() << "Stopping parcel music (invalid audio stream URL)" << LL_ENDL;
+                            LL_INFOS("ParcelMgr") << "Stopping parcel music (invalid audio stream URL)" << LL_ENDL;
                             // clears the URL
                             // null value causes fade out
                             LLViewerAudio::getInstance()->startInternetStreamWithAutoFade(LLStringUtil::null);
@@ -1791,7 +1855,7 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
                     }
                     else if (!gAudiop->getInternetStreamURL().empty())
                     {
-                        LL_INFOS() << "Stopping parcel music (parcel stream URL is empty)" << LL_ENDL;
+                        LL_INFOS("ParcelMgr") << "Stopping parcel music (parcel stream URL is empty)" << LL_ENDL;
                         // null value causes fade out
                         LLViewerAudio::getInstance()->startInternetStreamWithAutoFade(LLStringUtil::null);
                     }
@@ -1820,7 +1884,7 @@ void LLViewerParcelMgr::optionally_start_music(const std::string& music_url)
 		     gSavedSettings.getBOOL(LLViewerMedia::AUTO_PLAY_MEDIA_SETTING) &&
 			 gSavedSettings.getBOOL("MediaTentativeAutoPlay")))
 		{
-			LL_INFOS() << "Starting parcel music " << music_url << LL_ENDL;
+			LL_INFOS("ParcelMgr") << "Starting parcel music " << music_url << LL_ENDL;
 			LLViewerAudio::getInstance()->startInternetStreamWithAutoFade(music_url);
 		}
 		else
@@ -1848,7 +1912,7 @@ void LLViewerParcelMgr::processParcelAccessListReply(LLMessageSystem *msg, void 
 
 	if (parcel_id != parcel->getLocalID())
 	{
-		LL_WARNS_ONCE("") << "processParcelAccessListReply for parcel " << parcel_id
+		LL_WARNS_ONCE("ParcelMgr") << "processParcelAccessListReply for parcel " << parcel_id
 			<< " which isn't the selected parcel " << parcel->getLocalID()<< LL_ENDL;
 		return;
 	}
@@ -2456,7 +2520,6 @@ void sanitize_corners(const LLVector3d &corner1,
 
 void LLViewerParcelMgr::cleanupGlobals()
 {
-	LLParcelSelection::sNullSelection = NULL;
 }
 
 LLViewerTexture* LLViewerParcelMgr::getBlockedImage() const

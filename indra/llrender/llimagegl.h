@@ -94,7 +94,7 @@ protected:
 public:
 	virtual void dump();	// debugging info to LL_INFOS()
 	
-	void setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level = -1);
+	bool setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level = -1);
 	void setComponents(S32 ncomponents) { mComponents = (S8)ncomponents ;}
 	void setAllowCompression(bool allow) { mAllowCompression = allow; }
 
@@ -105,7 +105,7 @@ public:
 		S32 category = sMaxCategories-1);
 	BOOL createGLTexture(S32 discard_level, const U8* data, BOOL data_hasmips = FALSE, S32 usename = 0);
 	void setImage(const LLImageRaw* imageraw);
-	void setImage(const U8* data_in, BOOL data_hasmips = FALSE);
+	BOOL setImage(const U8* data_in, BOOL data_hasmips = FALSE);
 	BOOL setSubImage(const LLImageRaw* imageraw, S32 x_pos, S32 y_pos, S32 width, S32 height, BOOL force_fast_update = FALSE);
 	BOOL setSubImage(const U8* datap, S32 data_width, S32 data_height, S32 x_pos, S32 y_pos, S32 width, S32 height, BOOL force_fast_update = FALSE);
 	BOOL setSubImageFromFrameBuffer(S32 fb_x, S32 fb_y, S32 x_pos, S32 y_pos, S32 width, S32 height);

@@ -4,6 +4,9 @@
 	<string name="status_parse_error">
 		Erro: Problema ao analisar .dae - consulte log para obter detalhes.
 	</string>
+	<string name="status_bind_shape_orientation">
+		Aviso: matriz de forma vincular não está na orientação X adiante padrão.
+	</string>
 	<string name="status_material_mismatch">
 		Erro: o material do modelo não é um subconjunto do modelo de referência.
 	</string>
@@ -245,6 +248,7 @@
 				</text>
 				<check_box label="Incluir peso da pele" name="upload_skin"/>
 				<check_box label="Incluir posições de junções" name="upload_joints"/>
+				<check_box label="Travar escala se posição de articulação estiver definida" name="lock_scale_if_joint_position"/>
 				<text name="pelvis_offset_label">
 					Desvio Z (subir ou baixar avatar):
 				</text>

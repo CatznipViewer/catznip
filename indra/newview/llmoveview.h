@@ -56,7 +56,7 @@ public:
 	static void setAlwaysRunMode(bool run);
 	void setAlwaysRunModeImpl(bool run);
 	static void setSittingMode(BOOL bSitting);
-	static void enableInstance(BOOL bEnable);
+	static void enableInstance();
 	/*virtual*/ void onOpen(const LLSD& key);
 
 	static void sUpdateFlyingStatus();
@@ -171,8 +171,6 @@ private:
 	 * @see reparent()
 	 */
 	LLHandle<LLPanel> mOriginalParent;
-
-	LLHandle<LLPanel> mStateManagementButtons;
 
 	/**
 	 * True if the panel is currently attached to the movement controls floater.

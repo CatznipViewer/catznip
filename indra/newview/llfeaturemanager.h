@@ -97,22 +97,13 @@ protected:
 
 class LLFeatureManager : public LLFeatureList, public LLSingleton<LLFeatureManager>
 {
-public:
-	LLFeatureManager()
-	:	LLFeatureList("default"),
-
-		mInited(FALSE),
-		mTableVersion(0),
-		mSafe(FALSE),
-		mGPUClass(GPU_CLASS_UNKNOWN),
-		mExpectedGLVersion(0.f),
-		mGPUSupported(FALSE)		
-	{
-	}
+	LLSINGLETON(LLFeatureManager);
 	~LLFeatureManager() {cleanupFeatureTables();}
 
 	// initialize this by loading feature table and gpu table
-	void init();
+	void initSingleton();
+
+public:
 
 	void maskCurrentList(const std::string& name); // Mask the current feature list with the named list
 
@@ -155,9 +146,6 @@ public:
 	// in the skip list if true
 	void applyFeatures(bool skipFeatures);
 
-	// load the dynamic GPU/feature table from a website
-	void fetchHTTPTables();
-
 	LLSD getRecommendedSettingsMap();
 
 protected:
@@ -167,8 +155,6 @@ protected:
 	///< @returns TRUE is file parsed correctly, FALSE if not
 
 	void initBaseMask();
-
-    void fetchFeatureTableCoro(std::string name);
 
 	std::map<std::string, LLFeatureList *> mMaskList;
 	std::set<std::string> mSkippedFeatures;
@@ -181,5 +167,17 @@ protected:
 	BOOL		mGPUSupported;
 };
 
+inline
+LLFeatureManager::LLFeatureManager()
+:	LLFeatureList("default"),
+
+	mInited(FALSE),
+	mTableVersion(0),
+	mSafe(FALSE),
+	mGPUClass(GPU_CLASS_UNKNOWN),
+	mExpectedGLVersion(0.f),
+	mGPUSupported(FALSE)
+{
+}
 
 #endif // LL_LLFEATUREMANAGER_H

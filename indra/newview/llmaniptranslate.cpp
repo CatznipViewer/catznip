@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llmaniptranslate.cpp
  * @brief LLManipTranslate class implementation
  *
@@ -386,7 +386,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 		}
 		else if (gSavedSettings.getBOOL("SnapToMouseCursor"))
 		{
-			LLUI::setMousePositionScreen(mouse_pos.mX, mouse_pos.mY);
+			LLUI::getInstance()->setMousePositionScreen(mouse_pos.mX, mouse_pos.mY);
 			x = mouse_pos.mX;
 			y = mouse_pos.mY;
 		}
@@ -548,12 +548,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 		if (off_axis_magnitude > mSnapOffsetMeters)
 		{
 			mInSnapRegime = TRUE;
-			LLVector3 mouse_down_offset(mDragCursorStartGlobal - mDragSelectionStartGlobal);
 			LLVector3 cursor_snap_agent = gAgent.getPosAgentFromGlobal(cursor_point_snap_line);
-			if (!gSavedSettings.getBOOL("SnapToMouseCursor"))
-			{
-				cursor_snap_agent -= mouse_down_offset;
-			}
 
 			F32 cursor_grid_dist = (cursor_snap_agent - mGridOrigin) * axis_f;
 			
@@ -1065,6 +1060,7 @@ void LLManipTranslate::render()
 		renderGuidelines();
 	}
 	{
+		LLGLDisable gls_stencil(GL_STENCIL_TEST);
 		renderTranslationHandles();
 		renderSnapGuides();
 	}
@@ -1643,8 +1639,8 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 	LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
 
 	
-	U32 types[] = { LLRenderPass::PASS_SIMPLE, LLRenderPass::PASS_ALPHA, LLRenderPass::PASS_FULLBRIGHT, LLRenderPass::PASS_SHINY };
-	U32 num_types = LL_ARRAY_SIZE(types);
+	static const U32 types[] = { LLRenderPass::PASS_SIMPLE, LLRenderPass::PASS_ALPHA, LLRenderPass::PASS_FULLBRIGHT, LLRenderPass::PASS_SHINY };
+	static const U32 num_types = LL_ARRAY_SIZE(types);
 
 	GLuint stencil_mask = 0xFFFFFFFF;
 	//stencil in volumes
@@ -1862,6 +1858,9 @@ void LLManipTranslate::renderTranslationHandles()
 			mArrowLengthMeters = 1.0f;
 		}
 	}
+	//Assume that UI scale factor is equivalent for X and Y axis
+	F32 ui_scale_factor = LLUI::getScaleFactor().mV[VX];
+	mArrowLengthMeters *= ui_scale_factor;
 
 	mPlaneManipOffsetMeters = mArrowLengthMeters * 1.8f;
 	mGridSizeMeters = gSavedSettings.getF32("GridDrawSize");

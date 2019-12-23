@@ -31,6 +31,9 @@
 
 // Freetype stuff
 #include <ft2build.h>
+#ifdef LL_WINDOWS
+#include <freetype2\freetype\ftsystem.h>
+#endif
 
 // For some reason, this won't work if it's not wrapped in the ifdef
 #ifdef FT_FREETYPE_H
@@ -106,6 +109,10 @@ LLFontFreetype::LLFontFreetype()
 	mAscender(0.f),
 	mDescender(0.f),
 	mLineHeight(0.f),
+#ifdef LL_WINDOWS
+	pFileStream(NULL),
+	pFtStream(NULL),
+#endif
 	mIsFallback(FALSE),
 	mFTFace(NULL),
 	mRenderGlyphCount(0),
@@ -127,11 +134,30 @@ LLFontFreetype::~LLFontFreetype()
 	std::for_each(mCharGlyphInfoMap.begin(), mCharGlyphInfoMap.end(), DeletePairedPointer());
 	mCharGlyphInfoMap.clear();
 
+#ifdef LL_WINDOWS
+	delete pFileStream; // closed by FT_Done_Face
+	delete pFtStream;
+#endif
 	delete mFontBitmapCachep;
 	// mFallbackFonts cleaned up by LLPointer destructor
 }
 
-BOOL LLFontFreetype::loadFace(const std::string& filename, F32 point_size, F32 vert_dpi, F32 horz_dpi, S32 components, BOOL is_fallback)
+#ifdef LL_WINDOWS
+unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count) {
+	if (count <= 0) return count;
+	llifstream *file_stream = static_cast<llifstream *>(stream->descriptor.pointer);
+	file_stream->seekg(offset, std::ios::beg);
+	file_stream->read((char*)buffer, count);
+	return file_stream->gcount();
+}
+
+void ft_close_cb(FT_Stream stream) {
+	llifstream *file_stream = static_cast<llifstream *>(stream->descriptor.pointer);
+	file_stream->close();
+}
+#endif
+
+BOOL LLFontFreetype::loadFace(const std::string& filename, F32 point_size, F32 vert_dpi, F32 horz_dpi, S32 components, BOOL is_fallback, S32 face_n)
 {
 	// Don't leak face objects.  This is also needed to deal with
 	// changed font file names.
@@ -142,14 +168,20 @@ BOOL LLFontFreetype::loadFace(const std::string& filename, F32 point_size, F32 v
 	}
 	
 	int error;
-
+#ifdef LL_WINDOWS
+	error = ftOpenFace(filename, face_n);
+#else
 	error = FT_New_Face( gFTLibrary,
 						 filename.c_str(),
 						 0,
-						 &mFTFace );
+						 &mFTFace);
+#endif
 
-    if (error)
+	if (error)
 	{
+#ifdef LL_WINDOWS
+		clearFontStreams();
+#endif
 		return FALSE;
 	}
 
@@ -166,6 +198,9 @@ BOOL LLFontFreetype::loadFace(const std::string& filename, F32 point_size, F32 v
 	{
 		// Clean up freetype libs.
 		FT_Done_Face(mFTFace);
+#ifdef LL_WINDOWS
+		clearFontStreams();
+#endif
 		mFTFace = NULL;
 		return FALSE;
 	}
@@ -210,17 +245,87 @@ BOOL LLFontFreetype::loadFace(const std::string& filename, F32 point_size, F32 v
 	if(mFTFace->style_flags & FT_STYLE_FLAG_BOLD)
 	{
 		mStyle |= LLFontGL::BOLD;
-		mStyle &= ~LLFontGL::NORMAL;
 	}
 
 	if(mFTFace->style_flags & FT_STYLE_FLAG_ITALIC)
 	{
 		mStyle |= LLFontGL::ITALIC;
-		mStyle &= ~LLFontGL::NORMAL;
 	}
 
 	return TRUE;
 }
+
+S32 LLFontFreetype::getNumFaces(const std::string& filename)
+{
+	if (mFTFace)
+	{
+		FT_Done_Face(mFTFace);
+		mFTFace = NULL;
+	}
+
+	S32 num_faces = 1;
+
+#ifdef LL_WINDOWS
+	int error = ftOpenFace(filename, 0);
+		
+	if (error)
+	{
+		return 0;
+	}
+	else
+	{
+		num_faces = mFTFace->num_faces;
+	}
+	
+	FT_Done_Face(mFTFace);
+	clearFontStreams();
+	mFTFace = NULL;
+#endif
+
+	return num_faces;
+}
+
+#ifdef LL_WINDOWS
+S32 LLFontFreetype::ftOpenFace(const std::string& filename, S32 face_n)
+{
+	S32 error = -1;
+	pFileStream = new llifstream(filename, std::ios::binary);
+	if (pFileStream->is_open())
+	{
+		std::streampos beg = pFileStream->tellg();
+		pFileStream->seekg(0, std::ios::end);
+		std::streampos end = pFileStream->tellg();
+		std::size_t file_size = end - beg;
+		pFileStream->seekg(0, std::ios::beg);
+
+		pFtStream = new LLFT_Stream();
+		pFtStream->base = 0;
+		pFtStream->pos = 0;
+		pFtStream->size = file_size;
+		pFtStream->descriptor.pointer = pFileStream;
+		pFtStream->read = ft_read_cb;
+		pFtStream->close = ft_close_cb;
+
+		FT_Open_Args args;
+		args.flags = FT_OPEN_STREAM;
+		args.stream = (FT_StreamRec*)pFtStream;
+		error = FT_Open_Face(gFTLibrary, &args, face_n, &mFTFace);
+	}
+	return error;
+}
+
+void LLFontFreetype::clearFontStreams()
+{
+	if (pFileStream)
+	{
+		pFileStream->close();
+	}
+	delete pFileStream;
+	delete pFtStream;
+	pFileStream = NULL;
+	pFtStream = NULL;
+}
+#endif
 
 void LLFontFreetype::setFallbackFonts(const font_vector_t &font)
 {

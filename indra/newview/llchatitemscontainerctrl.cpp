@@ -29,6 +29,7 @@
 #include "llchatitemscontainerctrl.h"
 #include "lltextbox.h"
 
+#include "llavataractions.h"
 #include "llavatariconctrl.h"
 #include "llcommandhandler.h"
 #include "llfloaterreg.h"
@@ -204,6 +205,7 @@ void LLFloaterIMNearbyChatToastPanel::init(LLSD& notification)
 	
 	mMsgText = getChild<LLChatMsgBox>("msg_text", false);
 	mMsgText->setContentTrusted(false);
+	mMsgText->setIsFriendCallback(LLAvatarActions::isFriend);
 
 	mMsgText->setText(std::string(""));
 
@@ -238,6 +240,33 @@ void LLFloaterIMNearbyChatToastPanel::init(LLSD& notification)
 		{
 			mMsgText->appendText(str_sender, false);
 		}
+	}
+
+	S32 chars_in_line = mMsgText->getRect().getWidth() / messageFont->getWidth("c");
+	S32 max_lines = notification["available_height"].asInteger() / (mMsgText->getTextPixelHeight() + 4);
+	int lines = 0;
+	int chars = 0;
+
+	//Remove excessive chars if message does not fit in available height. MAINT-6891
+	std::string::iterator it;
+	for (it = messageText.begin(); it < messageText.end() && lines < max_lines; it++)
+	{
+		if (*it == '\n')
+			++lines;
+		else
+			++chars;
+
+		if (chars >= chars_in_line)
+		{
+			chars = 0;
+			++lines;
+		}
+	}
+
+	if (it < messageText.end())
+	{
+		messageText.erase(it, messageText.end());
+		messageText += " ...";
 	}
 
 	//append text

@@ -60,6 +60,7 @@
 
 #include "llstoredmessage.h"
 #include "boost/function.hpp"
+#include "llpounceable.h"
 
 const U32 MESSAGE_MAX_STRINGS_LENGTH = 64;
 const U32 MESSAGE_NUMBER_OF_HASH_BUCKETS = 8192;
@@ -68,10 +69,10 @@ const S32 MESSAGE_MAX_PER_FRAME = 400;
 
 class LLMessageStringTable : public LLSingleton<LLMessageStringTable>
 {
-public:
-	LLMessageStringTable();
+	LLSINGLETON(LLMessageStringTable);
 	~LLMessageStringTable();
 
+public:
 	char *getString(const char *str);
 
 	U32	 mUsed;
@@ -832,7 +833,7 @@ private:
 
 
 // external hook into messaging system
-extern LLMessageSystem	*gMessageSystem;
+extern LLPounceable<LLMessageSystem*, LLPounceableStatic> gMessageSystem;
 
 // Must specific overall system version, which is used to determine
 // if a patch is available in the message template checksum verification.
@@ -859,10 +860,10 @@ void null_message_callback(LLMessageSystem *msg, void **data);
 //
 
 #if !defined( LL_BIG_ENDIAN ) && !defined( LL_LITTLE_ENDIAN )
-#error Unknown endianness for htonmemcpy. Did you miss a common include?
+#error Unknown endianness for htolememcpy. Did you miss a common include?
 #endif
 
-static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type, size_t n)
+static inline void *htolememcpy(void *vs, const void *vct, EMsgVariableType type, size_t n)
 {
 	char *s = (char *)vs;
 	const char *ct = (const char *)vct;
@@ -885,7 +886,7 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_S16:
 		if (n != 2)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
 		*(s + 1) = *(ct);
@@ -900,7 +901,7 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_F32:
 		if (n != 4)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
 		*(s + 3) = *(ct);
@@ -917,7 +918,7 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_F64:
 		if (n != 8)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
 		*(s + 7) = *(ct);
@@ -937,12 +938,12 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_LLQuaternion:  // We only send x, y, z and infer w (we set x, y, z to ensure that w >= 0)
 		if (n != 12)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
-		htonmemcpy(s + 8, ct + 8, MVT_F32, 4);
-		htonmemcpy(s + 4, ct + 4, MVT_F32, 4);
-		return(htonmemcpy(s, ct, MVT_F32, 4));
+		htolememcpy(s + 8, ct + 8, MVT_F32, 4);
+		htolememcpy(s + 4, ct + 4, MVT_F32, 4);
+		return(htolememcpy(s, ct, MVT_F32, 4));
 #else
 		return(memcpy(s,ct,n));	/* Flawfinder: ignore */ 
 #endif
@@ -950,12 +951,12 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_LLVector3d:
 		if (n != 24)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
-		htonmemcpy(s + 16, ct + 16, MVT_F64, 8);
-		htonmemcpy(s + 8, ct + 8, MVT_F64, 8);
-		return(htonmemcpy(s, ct, MVT_F64, 8));
+		htolememcpy(s + 16, ct + 16, MVT_F64, 8);
+		htolememcpy(s + 8, ct + 8, MVT_F64, 8);
+		return(htolememcpy(s, ct, MVT_F64, 8));
 #else
 		return(memcpy(s,ct,n));	/* Flawfinder: ignore */ 
 #endif
@@ -963,13 +964,13 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_LLVector4:
 		if (n != 16)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
-		htonmemcpy(s + 12, ct + 12, MVT_F32, 4);
-		htonmemcpy(s + 8, ct + 8, MVT_F32, 4);
-		htonmemcpy(s + 4, ct + 4, MVT_F32, 4);
-		return(htonmemcpy(s, ct, MVT_F32, 4));
+		htolememcpy(s + 12, ct + 12, MVT_F32, 4);
+		htolememcpy(s + 8, ct + 8, MVT_F32, 4);
+		htolememcpy(s + 4, ct + 4, MVT_F32, 4);
+		return(htolememcpy(s, ct, MVT_F32, 4));
 #else
 		return(memcpy(s,ct,n));	/* Flawfinder: ignore */ 
 #endif
@@ -977,12 +978,12 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_U16Vec3:
 		if (n != 6)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
-		htonmemcpy(s + 4, ct + 4, MVT_U16, 2);
-		htonmemcpy(s + 2, ct + 2, MVT_U16, 2);
-		return(htonmemcpy(s, ct, MVT_U16, 2));
+		htolememcpy(s + 4, ct + 4, MVT_U16, 2);
+		htolememcpy(s + 2, ct + 2, MVT_U16, 2);
+		return(htolememcpy(s, ct, MVT_U16, 2));
 #else
 		return(memcpy(s,ct,n));	/* Flawfinder: ignore */ 
 #endif
@@ -990,13 +991,13 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_U16Quat:
 		if (n != 8)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
-		htonmemcpy(s + 6, ct + 6, MVT_U16, 2);
-		htonmemcpy(s + 4, ct + 4, MVT_U16, 2);
-		htonmemcpy(s + 2, ct + 2, MVT_U16, 2);
-		return(htonmemcpy(s, ct, MVT_U16, 2));
+		htolememcpy(s + 6, ct + 6, MVT_U16, 2);
+		htolememcpy(s + 4, ct + 4, MVT_U16, 2);
+		htolememcpy(s + 2, ct + 2, MVT_U16, 2);
+		return(htolememcpy(s, ct, MVT_U16, 2));
 #else
 		return(memcpy(s,ct,n));	/* Flawfinder: ignore */ 
 #endif
@@ -1004,15 +1005,15 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 	case MVT_S16Array:
 		if (n % 2)
 		{
-			LL_ERRS() << "Size argument passed to htonmemcpy doesn't match swizzle type size" << LL_ENDL;
+			LL_ERRS() << "Size argument passed to htolememcpy doesn't match swizzle type size" << LL_ENDL;
 		}
 #ifdef LL_BIG_ENDIAN
 		length = n % 2;
 		for (i = 1; i < length; i++)
 		{
-			htonmemcpy(s + i*2, ct + i*2, MVT_S16, 2);
+			htolememcpy(s + i*2, ct + i*2, MVT_S16, 2);
 		}
-		return(htonmemcpy(s, ct, MVT_S16, 2));
+		return(htolememcpy(s, ct, MVT_S16, 2));
 #else
 		return(memcpy(s,ct,n));
 #endif
@@ -1024,7 +1025,7 @@ static inline void *htonmemcpy(void *vs, const void *vct, EMsgVariableType type,
 
 inline void *ntohmemcpy(void *s, const void *ct, EMsgVariableType type, size_t n)
 {
-	return(htonmemcpy(s,ct,type, n));
+	return(htolememcpy(s,ct,type, n));
 }
 
 inline const LLHost& LLMessageSystem::getReceivingInterface() const {return mLastReceivingIF;}

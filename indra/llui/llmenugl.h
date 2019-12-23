@@ -48,7 +48,7 @@ extern S32 MENU_BAR_WIDTH;
 // The LLMenuItemGL represents a single menu item in a menu. 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class LLMenuItemGL : public LLUICtrl
+class LLMenuItemGL: public LLUICtrl, public ll::ui::SearchableControl
 {
 public:
 	struct Params : public LLInitParam::Block<Params, LLUICtrl::Params>
@@ -175,7 +175,12 @@ protected:
 	// This function appends the character string representation of
 	// the current accelerator key and mask to the provided string.
 	void appendAcceleratorString( std::string& st ) const;
-		
+
+	virtual std::string _getSearchText() const
+	{
+		return mLabel.getString();
+	}
+
 protected:
 	KEY mAcceleratorKey;
 	MASK mAcceleratorMask;
@@ -347,7 +352,9 @@ private:
 
 // child widget registry
 struct MenuRegistry : public LLChildRegistry<MenuRegistry>
-{};
+{
+	LLSINGLETON_EMPTY_CTOR(MenuRegistry);
+};
 
 
 class LLMenuGL 
@@ -529,6 +536,9 @@ public:
 	void resetScrollPositionOnShow(bool reset_scroll_pos) { mResetScrollPositionOnShow = reset_scroll_pos; }
 	bool isScrollPositionOnShowReset() { return mResetScrollPositionOnShow; }
 
+	void setAlwaysShowMenu(BOOL show) { mAlwaysShowMenu = show; }
+	BOOL getAlwaysShowMenu() { return mAlwaysShowMenu; }
+
 	// add a context menu branch
 	BOOL appendContextSubMenu(LLMenuGL *menu);
 
@@ -569,6 +579,8 @@ private:
 
 	static LLColor4 sDefaultBackgroundColor;
 	static BOOL		sKeyboardMode;
+
+	BOOL			mAlwaysShowMenu;
 
 	LLUIColor		mBackgroundColor;
 	BOOL			mBgVisible;

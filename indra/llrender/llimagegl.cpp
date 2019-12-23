@@ -487,14 +487,15 @@ bool LLImageGL::checkSize(S32 width, S32 height)
 	return check_power_of_two(width) && check_power_of_two(height);
 }
 
-void LLImageGL::setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level)
+bool LLImageGL::setSize(S32 width, S32 height, S32 ncomponents, S32 discard_level)
 {
 	if (width != mWidth || height != mHeight || ncomponents != mComponents)
 	{
 		// Check if dimensions are a power of two!
 		if (!checkSize(width,height))
 		{
-			LL_ERRS() << llformat("Texture has non power of two dimension: %dx%d",width,height) << LL_ENDL;
+			LL_WARNS() << llformat("Texture has non power of two dimension: %dx%d",width,height) << LL_ENDL;
+			return false;
 		}
 		
 		if (mTexName)
@@ -529,6 +530,8 @@ void LLImageGL::setSize(S32 width, S32 height, S32 ncomponents, S32 discard_leve
 			mMaxDiscardLevel = MAX_DISCARD_LEVEL;
 		}
 	}
+
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -619,7 +622,7 @@ void LLImageGL::setImage(const LLImageRaw* imageraw)
 }
 
 static LLTrace::BlockTimerStatHandle FTM_SET_IMAGE("setImage");
-void LLImageGL::setImage(const U8* data_in, BOOL data_hasmips)
+BOOL LLImageGL::setImage(const U8* data_in, BOOL data_hasmips)
 {
 	LL_RECORD_BLOCK_TIME(FTM_SET_IMAGE);
 	bool is_compressed = false;
@@ -784,19 +787,33 @@ void LLImageGL::setImage(const U8* data_in, BOOL data_hasmips)
 						llassert(prev_mip_data);
 						llassert(cur_mip_size == bytes*4);
 #endif
-						U8* new_data = new U8[bytes];
+						U8* new_data = new(std::nothrow) U8[bytes];
+						if (!new_data)
+						{
+							stop_glerror();
+
+							if (prev_mip_data)
+								delete[] prev_mip_data;
+							if (cur_mip_data)
+								delete[] cur_mip_data;
+							
+							mGLTextureCreated = false;
+							return FALSE;
+						}
+						else
+						{
 
 #ifdef SHOW_ASSERT
-						llassert(prev_mip_data);
-						llassert(cur_mip_size == bytes*4);
-						llassert_always(new_data);
+							llassert(prev_mip_data);
+							llassert(cur_mip_size == bytes * 4);
 #endif
 
-						LLImageBase::generateMip(prev_mip_data, new_data, w, h, mComponents);
-						cur_mip_data = new_data;
+							LLImageBase::generateMip(prev_mip_data, new_data, w, h, mComponents);
+							cur_mip_data = new_data;
 #ifdef SHOW_ASSERT
-						cur_mip_size = bytes; 
+							cur_mip_size = bytes;
 #endif
+						}
 
 					}
 					llassert(w > 0 && h > 0 && cur_mip_data);
@@ -883,6 +900,7 @@ void LLImageGL::setImage(const U8* data_in, BOOL data_hasmips)
 	}
 	stop_glerror();
 	mGLTextureCreated = true;
+	return TRUE;
 }
 
 BOOL LLImageGL::preAddToAtlas(S32 discard_level, const LLImageRaw* raw_image)
@@ -909,7 +927,11 @@ BOOL LLImageGL::preAddToAtlas(S32 discard_level, const LLImageRaw* raw_image)
 	S32 h = raw_image->getHeight() << discard_level;
 
 	// setSize may call destroyGLTexture if the size does not match
-	setSize(w, h, raw_image->getComponents(), discard_level);
+	if (!setSize(w, h, raw_image->getComponents(), discard_level))
+	{
+		LL_WARNS() << "Trying to create a texture with incorrect dimensions!" << LL_ENDL;
+		return FALSE;
+	}
 
 	if( !mHasExplicitFormat )
 	{
@@ -1240,7 +1262,8 @@ BOOL LLImageGL::createGLTexture()
 	stop_glerror();
 	if (!mTexName)
 	{
-		LL_ERRS() << "LLImageGL::createGLTexture failed to make an empty texture" << LL_ENDL;
+		LL_WARNS() << "LLImageGL::createGLTexture failed to make an empty texture" << LL_ENDL;
+		return FALSE;
 	}
 
 	return TRUE ;
@@ -1260,6 +1283,12 @@ BOOL LLImageGL::createGLTexture(S32 discard_level, const LLImageRaw* imageraw, S
 	llassert(gGLManager.mInited);
 	stop_glerror();
 
+	if (!imageraw || imageraw->isBufferInvalid())
+	{
+		LL_WARNS() << "Trying to create a texture from invalid image data" << LL_ENDL;
+		return FALSE;
+	}
+
 	if (discard_level < 0)
 	{
 		llassert(mCurrentDiscardLevel >= 0);
@@ -1273,7 +1302,11 @@ BOOL LLImageGL::createGLTexture(S32 discard_level, const LLImageRaw* imageraw, S
 	S32 h = raw_h << discard_level;
 
 	// setSize may call destroyGLTexture if the size does not match
-	setSize(w, h, imageraw->getComponents(), discard_level);
+	if (!setSize(w, h, imageraw->getComponents(), discard_level))
+	{
+		LL_WARNS() << "Trying to create a texture with incorrect dimensions!" << LL_ENDL;
+		return FALSE;
+	}
 
 	if( !mHasExplicitFormat )
 	{
@@ -1338,8 +1371,7 @@ BOOL LLImageGL::createGLTexture(S32 discard_level, const U8* data_in, BOOL data_
 	if (mTexName != 0 && discard_level == mCurrentDiscardLevel)
 	{
 		// This will only be true if the size has not changed
-		setImage(data_in, data_hasmips);
-		return TRUE;
+		return setImage(data_in, data_hasmips);
 	}
 	
 	U32 old_name = mTexName;
@@ -1364,7 +1396,16 @@ BOOL LLImageGL::createGLTexture(S32 discard_level, const U8* data_in, BOOL data_
 	}
 	if (!mTexName)
 	{
-		LL_ERRS() << "LLImageGL::createGLTexture failed to make texture" << LL_ENDL;
+		if (old_name)
+		{
+			sGlobalTextureMemory -= mTextureMemory;
+			LLImageGL::deleteTextures(1, &old_name);
+			disclaimMem(mTextureMemory);
+			stop_glerror();
+		}
+
+		LL_WARNS() << "LLImageGL::createGLTexture failed to make texture" << LL_ENDL;
+		return FALSE;
 	}
 
 	if (mUseMipMaps)
@@ -1381,7 +1422,11 @@ BOOL LLImageGL::createGLTexture(S32 discard_level, const U8* data_in, BOOL data_
 
 	mCurrentDiscardLevel = discard_level;	
 
-	setImage(data_in, data_hasmips);
+	if (!setImage(data_in, data_hasmips))
+	{
+		stop_glerror();
+		return FALSE;
+	}
 
 	// Set texture options to our defaults.
 	gGL.getTexUnit(0)->setHasMipMaps(mHasMipMaps);

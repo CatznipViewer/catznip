@@ -68,6 +68,7 @@ public:
 	int getTextureHeight() const;
 	int getFullWidth() const { return mFullMediaWidth; };
 	int getFullHeight() const { return mFullMediaHeight; };
+	F64 getZoomFactor() const { return mZoomFactor; };
 	
 	// This may return NULL.  Callers need to check for and handle this case.
 	unsigned char* getBitsData();
@@ -83,7 +84,8 @@ public:
 
 	void setSize(int width, int height);
 	void setAutoScale(bool auto_scale);
-	
+	void setZoomFactor(F64 zoom_factor) { mZoomFactor = zoom_factor; }
+
 	void setBackgroundColor(LLColor4 color) { mBackgroundColor = color; };
 	
 	void setOwner(LLPluginClassMediaOwner *owner) { mOwner = owner; };
@@ -174,7 +176,7 @@ public:
 	
 	F64 getCPUUsage();
 	
-	void sendPickFileResponse(const std::string &file);
+	void sendPickFileResponse(const std::vector<std::string> files);
 
 	void sendAuthResponse(bool ok, const std::string &username, const std::string &password);
 
@@ -193,7 +195,7 @@ public:
 	bool	canPaste() const { return mCanPaste; };
 	
 	// These can be called before init(), and they will be queued and sent before the media init message.
-	void	setUserDataPath(const std::string &user_data_path_cache, const std::string &user_data_path_cookies);
+	void	setUserDataPath(const std::string &user_data_path_cache, const std::string &user_data_path_cookies, const std::string &user_data_path_cef_log);
 	void	setLanguageCode(const std::string &language_code);
 	void	setPluginsEnabled(const bool enabled);
 	void	setJavascriptEnabled(const bool enabled);
@@ -204,11 +206,11 @@ public:
 	bool pluginSupportsMediaBrowser(void);
 	
 	void focus(bool focused);
-	void set_page_zoom_factor( double factor );
+	void set_page_zoom_factor( F64 factor );
 	void clear_cache();
 	void clear_cookies();
 	void set_cookies(const std::string &cookies);
-	void enable_cookies(bool enable);
+	void cookies_enabled(bool enable);
 	void proxy_setup(bool enable, const std::string &host = LLStringUtil::null, int port = 0);
 	void browse_stop();
 	void browse_reload(bool ignore_cache = false);
@@ -275,6 +277,9 @@ public:
 	std::string	getAuthURL() const { return mAuthURL; };
 	std::string	getAuthRealm() const { return mAuthRealm; };
 
+	// These are valid during MEDIA_EVENT_PICK_FILE_REQUEST
+	bool getIsMultipleFilePick() const { return mIsMultipleFilePick; }
+
 	// These are valid during MEDIA_EVENT_LINK_HOVERED
 	std::string	getHoverText() const { return mHoverText; };
 	std::string	getHoverLink() const { return mHoverLink; };
@@ -311,6 +316,8 @@ public:
 	// Initialize the URL history of the plugin by sending
 	// "init_history" message 
 	void initializeUrlHistory(const LLSD& url_history);
+
+	boost::shared_ptr<LLPluginClassMedia> getSharedPrt() { return boost::dynamic_pointer_cast<LLPluginClassMedia>(shared_from_this()); } // due to enable_shared_from_this
 
 protected:
 
@@ -367,6 +374,8 @@ protected:
 	int			mTextureHeight;
 	int			mMediaWidth;
 	int			mMediaHeight;
+
+	F64			mZoomFactor;
 	
 	float		mRequestedVolume;
 	
@@ -431,6 +440,7 @@ protected:
 	std::string		mHoverText;
 	std::string		mHoverLink;
 	std::string     mFileDownloadFilename;
+	bool			mIsMultipleFilePick;
 	
 	/////////////////////////////////////////
 	// media_time class

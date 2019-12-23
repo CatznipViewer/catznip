@@ -108,6 +108,9 @@ public:
 		
 		Params();
 	};
+
+	void initFromParams(const LLLineEditor::Params& params);
+
 protected:
 	LLLineEditor(const Params&);
 	friend class LLUICtrlFactory;
@@ -205,12 +208,16 @@ public:
 	void			setCursor( S32 pos );
 	void			setCursorToEnd();
 
+	// set scroll to earliest position it can reasonable set
+	void			resetScrollPosition();
+
 	// Selects characters 'start' to 'end'.
 	void			setSelection(S32 start, S32 end);
 	virtual void	getSelectionRange(S32 *position, S32 *length) const;
 	
 	void			setCommitOnFocusLost( BOOL b )	{ mCommitOnFocusLost = b; }
 	void			setRevertOnEsc( BOOL b )		{ mRevertOnEsc = b; }
+	void			setKeystrokeOnEsc(BOOL b)		{ mKeystrokeOnEsc = b; }
 
 	void setCursorColor(const LLColor4& c)			{ mCursorColor = c; }
 	const LLColor4& getCursorColor() const			{ return mCursorColor.get(); }
@@ -272,7 +279,7 @@ public:
 
 	void			setReplaceNewlinesWithSpaces(BOOL replace);
 
-	void			setContextMenu(LLContextMenu* new_context_menu);
+	void			resetContextMenu() { setContextMenu(NULL); };
 
 private:
 	// private helper methods
@@ -308,6 +315,8 @@ private:
 	virtual S32		getPreeditFontSize() const;
 	virtual LLWString getPreeditString() const { return getWText(); }
 
+	void			setContextMenu(LLContextMenu* new_context_menu);
+
 protected:
 	LLUIString		mText;					// The string being edited.
 	std::string		mPrevText;				// Saved string for 'ESC' revert
@@ -333,6 +342,7 @@ protected:
 
 	BOOL		mCommitOnFocusLost;
 	BOOL		mRevertOnEsc;
+	BOOL		mKeystrokeOnEsc;
 
 	keystroke_callback_t mKeystrokeCallback;
 

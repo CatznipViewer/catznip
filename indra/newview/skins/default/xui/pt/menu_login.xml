@@ -2,6 +2,8 @@
 <menu_bar name="Login Menu">
 	<menu label="Eu" name="File">
 		<menu_item_call label="Preferências..." name="Preferences..."/>
+		<menu_item_call label="Fechar janela" name="Close Window"/>
+		<menu_item_check label="Exibir seletor da grade" name="Show Grid Picker"/>
 		<menu_item_call label="Sair do [APP_NAME]" name="Quit"/>
 	</menu>
 	<menu label="Ajuda" name="Help">
@@ -15,17 +17,15 @@
 		<menu_item_call label="Blogs do [SECOND_LIFE]" name="Second Life Blogs"/>
 		<menu_item_call label="Relatar bug" name="Report Bug"/>
 		<menu_item_call label="Sobre [APP_NAME]" name="About Second Life"/>
-		<menu_item_call label="Verificar atualizações" name="Check for Updates"/>
 	</menu>
 	<menu_item_check label="Exibir menu de depuração" name="Show Debug Menu"/>
 	<menu label="Depurar" name="Debug">
 		<menu_item_call label="Mostrar configurações" name="Debug Settings"/>
-		<menu_item_call label="Configurações da interface e cor" name="UI/Color Settings"/>
 		<menu label="Testes de UI" name="UI Tests"/>
 		<menu_item_call label="Definir tamanho da janela:" name="Set Window Size..."/>
 		<menu_item_call label="Mostrar TOS" name="TOS"/>
 		<menu_item_call label="Mostrar mensagem crítica" name="Critical"/>
-		<menu_item_call label="Test de Bugs de Conteúdo Web" name="Web Content Floater Debug Test"/>
+		<menu_item_call label="Navegador de Mídia" name="Media Browser"/>
 		<menu label="Configurar nível de registro em log" name="Set Logging Level">
 			<menu_item_check label="Depurar" name="Debug"/>
 			<menu_item_check label="Info" name="Info"/>
@@ -33,7 +33,6 @@
 			<menu_item_check label="Erro" name="Error"/>
 			<menu_item_check label="Nenhum" name="None"/>
 		</menu>
-		<menu_item_check label="Exibir seletor da grade" name="Show Grid Picker"/>
 		<menu_item_call label="Exibir painel de notificações" name="Show Notifications Console"/>
 	</menu>
 </menu_bar>

@@ -23,9 +23,10 @@
 #include "../test/lltut.h"
 #include "../test/namedtempfile.h"
 #include "../test/catch_and_store_what_in.h"
-#include "wrapllerrs.h"
+#include "wrapllerrs.h"             // CaptureLog
 #include "llevents.h"
 #include "llprocess.h"
+#include "llstring.h"
 #include "stringize.h"
 #include "StringVec.h"
 #include <functional>
@@ -110,10 +111,7 @@ namespace tut
                    // finding indra/lib/python. Use our __FILE__, with
                    // raw-string syntax to deal with Windows pathnames.
                    "mydir = os.path.dirname(r'" << __FILE__ << "')\n"
-                   // We expect mydir to be .../indra/llcommon/tests.
-                   "sys.path.insert(0,\n"
-                   "    os.path.join(mydir, os.pardir, os.pardir, 'lib', 'python'))\n"
-                   "from indra.base import llsd\n"
+                   "from llbase import llsd\n"
                    "\n"
                    "class ProtocolError(Exception):\n"
                    "    def __init__(self, msg, data):\n"
@@ -201,14 +199,12 @@ namespace tut
             // basename.
             reader_module(LLProcess::basename(
                               reader.getName().substr(0, reader.getName().length()-3))),
-            pPYTHON(getenv("PYTHON")),
-            PYTHON(pPYTHON? pPYTHON : "")
+            PYTHON(LLStringUtil::getenv("PYTHON"))
         {
-            ensure("Set PYTHON to interpreter pathname", pPYTHON);
+            ensure("Set PYTHON to interpreter pathname", !PYTHON.empty());
         }
         NamedExtTempFile reader;
         const std::string reader_module;
-        const char* pPYTHON;
         const std::string PYTHON;
     };
     typedef test_group<llleap_data> llleap_group;
@@ -294,12 +290,9 @@ namespace tut
     void object::test<6>()
     {
         set_test_name("empty plugin vector");
-        std::string threw;
-        try
-        {
-            LLLeap::create("empty", StringVec());
-        }
-        CATCH_AND_STORE_WHAT_IN(threw, LLLeap::Error)
+        std::string threw = catch_what<LLLeap::Error>([](){
+                LLLeap::create("empty", StringVec());
+            });
         ensure_contains("LLLeap::Error", threw, "no plugin");
         // try the suppress-exception variant
         ensure("bad launch returned non-NULL", ! LLLeap::create("empty", StringVec(), false));
@@ -312,12 +305,9 @@ namespace tut
         // Synthesize bogus executable name
         std::string BADPYTHON(PYTHON.substr(0, PYTHON.length()-1) + "x");
         CaptureLog log;
-        std::string threw;
-        try
-        {
-            LLLeap::create("bad exe", BADPYTHON);
-        }
-        CATCH_AND_STORE_WHAT_IN(threw, LLLeap::Error)
+        std::string threw = catch_what<LLLeap::Error>([&BADPYTHON](){
+                LLLeap::create("bad exe", BADPYTHON);
+            });
         ensure_contains("LLLeap::create() didn't throw", threw, "failed");
         log.messageWith("failed");
         log.messageWith(BADPYTHON);

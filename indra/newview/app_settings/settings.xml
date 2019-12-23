@@ -333,7 +333,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>0.5</real>
+      <real>0.3</real>
     </map>
     <key>AudioLevelMic</key>
     <map>
@@ -355,7 +355,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>0.5</real>
+      <real>0.3</real>
     </map>
     <key>AudioLevelRolloff</key>
     <map>
@@ -811,6 +811,17 @@
       <string>U32</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>FramePerSecondLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Controls upper limit of frames per second</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>120</integer>
     </map>
     <key>BackgroundYieldTime</key>
     <map>
@@ -1382,7 +1393,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>512</integer>
+      <integer>1024</integer>
     </map>
     <key>CacheValidateCounter</key>
     <map>
@@ -1608,18 +1619,6 @@
     <real>60.0</real>
   </map>
 
-  <key>CameraAspectRatio</key>
-  <map>
-    <key>Comment</key>
-    <string>Camera aspect ratio for DoF effect</string>
-    <key>Persist</key>
-    <integer>1</integer>
-    <key>Type</key>
-    <string>F32</string>
-    <key>Value</key>
-    <real>1.5</real>
-  </map>
-
   <key>CertStore</key>
     <map>
       <key>Comment</key>
@@ -1630,6 +1629,17 @@
       <string>String</string>
       <key>Value</key>
       <string>default</string>
+    </map>
+    <key>ChatAutocompleteGestures</key>
+    <map>
+      <key>Comment</key>
+      <string>Auto-complete gestures in nearby chat</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
     </map>
     <key>ChatBarStealsFocus</key>
     <map>
@@ -2045,11 +2055,11 @@
       <key>Comment</key>
       <string>Size (in bytes) for each coroutine stack</string>
       <key>Persist</key>
-      <integer>0</integer>
+      <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>262144</integer>
+      <integer>524288</integer>
     </map>
     <key>CrashOnStartup</key>
     <map>
@@ -2172,6 +2182,94 @@
       <key>Value</key>
       <string />
     </map>
+  <key>DebugAnimatedObjects</key>
+  <map>
+    <key>Comment</key>
+    <string>Show info related to animated objects</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>DebugObjectLODs</key>
+  <map>
+    <key>Comment</key>
+    <string>Show info related to lod calculations for attached or animated objects</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>AnimatedObjectsIgnoreLimits</key>
+  <map>
+    <key>Comment</key>
+    <string>Ignore server-enforced limits on animated objects. This is only useful for server testing.</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>AnimatedObjectsAllowLeftClick</key>
+  <map>
+    <key>Comment</key>
+    <string>Allow left-click interaction with animated objects. Uncertain how much performance impact this will have.</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>AnimatedObjectsGlobalScale</key>
+  <map>
+    <key>Comment</key>
+    <string>Temporary testing: allow an extra scale factor to be forced on animated objects.</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>F32</string>
+    <key>Value</key>
+    <real>1.00</real>
+  </map>
+  <key>AnimatedObjectsMaxLegalOffset</key>
+  <map>
+    <key>Comment</key>
+    <string>Max visual offset between object position and rendered position</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>F32</string>
+    <key>Value</key>
+    <real>3.0</real>
+  </map>
+  <key>AnimatedObjectsMaxLegalSize</key>
+  <map>
+    <key>Comment</key>
+    <string>Max bounding box size for animated object's rendered position</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>F32</string>
+    <key>Value</key>
+    <real>64.0</real>
+  </map>
+  <key>AvatarBoundingBoxComplexity</key>
+  <map>
+    <key>Comment</key>
+    <string>How many aspects to consider for avatar bounding box</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>S32</string>
+    <key>Value</key>
+    <integer>3</integer>
+  </map>
   <key>DebugAvatarAppearanceMessage</key>
   <map>
     <key>Comment</key>
@@ -2198,6 +2296,17 @@
     <map>
       <key>Comment</key>
       <string>URL to use for baked texture requests; overrides value returned by login server.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>DebugAvatarJoints</key>
+    <map>
+      <key>Comment</key>
+      <string>List of joints to emit additional debugging info about.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -2348,7 +2457,7 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>DebugShowPrivateMem</key>
+    <key>DEPRECATED: DebugShowPrivateMem</key>  <!-- deprecated (see MAINT-8091) -->
     <map>
       <key>Comment</key>
       <string>Show Private Mem Info</string>
@@ -3525,6 +3634,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>IncludeEnhancedSkeleton</key>
+    <map>
+      <key>Comment</key>
+      <string>Include extended skeleton joints when rendering skinned meshes.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>MinObjectsForUnlinkConfirm</key>
     <map>
       <key>Comment</key>
@@ -3671,13 +3791,13 @@
 	<key>FeatureManagerHTTPTable</key>
       <map>
         <key>Comment</key>
-        <string>Base directory for HTTP feature/gpu table fetches</string>
+        <string>Deprecated</string>
         <key>Persist</key>
-        <integer>1</integer>
+        <integer>0</integer>
         <key>Type</key>
         <string>String</string>
         <key>Value</key>
-        <string>http://viewer-settings.secondlife.com</string>
+        <string></string>
     </map>
     <key>FPSLogFrequency</key>
         <map>
@@ -4284,6 +4404,17 @@
       <key>Value</key>
       <real>96.0</real>
     </map>
+    <key>ForceAddressSize</key>
+    <map>
+      <key>Comment</key>
+      <string>Force Windows update to 32-bit or 64-bit viewer.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>ForceAssetFail</key>
     <map>
       <key>Comment</key>
@@ -4513,30 +4644,8 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://search.secondlife.com/viewer/[CATEGORY]/?q=[QUERY]&amp;p=[AUTH_TOKEN]&amp;r=[MATURITY]&amp;lang=[LANGUAGE]&amp;g=[GODLIKE]&amp;sid=[SESSION_ID]&amp;rid=[REGION_ID]&amp;pid=[PARCEL_ID]&amp;channel=[CHANNEL]&amp;version=[VERSION]&amp;major=[VERSION_MAJOR]&amp;minor=[VERSION_MINOR]&amp;patch=[VERSION_PATCH]&amp;build=[VERSION_BUILD]</string>
+      <string>https://search.[GRID]/viewer/[CATEGORY]/?q=[QUERY]&amp;p=[AUTH_TOKEN]&amp;r=[MATURITY]&amp;lang=[LANGUAGE]&amp;g=[GODLIKE]&amp;sid=[SESSION_ID]&amp;rid=[REGION_ID]&amp;pid=[PARCEL_ID]&amp;channel=[CHANNEL]&amp;version=[VERSION]&amp;major=[VERSION_MAJOR]&amp;minor=[VERSION_MINOR]&amp;patch=[VERSION_PATCH]&amp;build=[VERSION_BUILD]</string>
     </map>
-    <key>WebProfileURL</key>
-    <map>
-      <key>Comment</key>
-      <string>URL for Web Profiles</string>
-      <key>Persist</key>
-      <integer>0</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>https://my.secondlife.com/[AGENT_NAME]</string>
-    </map>
-	<key>WebProfileNonProductionURL</key>
-	<map>
-		<key>Comment</key>
-		<string>URL for Web Profiles on Non-Production grids</string>
-		<key>Persist</key>
-		<integer>0</integer>
-		<key>Type</key>
-		<string>String</string>
-		<key>Value</key>
-		<string>https://my-demo.secondlife.com/[AGENT_NAME]</string>
-	</map>
     <key>HighResSnapshot</key>
     <map>
       <key>Comment</key>
@@ -4635,6 +4744,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>IgnoreFOVZoomForLODs</key>
+    <map>
+      <key>Comment</key>
+      <string>Ignore zoom effect(CTRL+0) when calculating lods.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>IgnoreAllNotifications</key>
     <map>
@@ -4788,7 +4908,7 @@
 		<key>Type</key>
 		<string>Boolean</string>
 		<key>Value</key>
-		<integer>0</integer>
+		<integer>1</integer>
 	</map>
     <key>InventoryOutboxDisplayBoth</key>
     <map>
@@ -4881,7 +5001,7 @@
     <key>InventoryTrashMaxCapacity</key>
     <map>
         <key>Comment</key>
-        <string>Maximum capacity of the Trash folder. User will ve offered to clean it up when exceeded.</string>
+        <string>Maximum capacity of the Trash folder. User will be offered to clean it up when exceeded.</string>
         <key>Persist</key>
         <integer>1</integer>
         <key>Type</key>
@@ -5175,6 +5295,39 @@
       <key>Value</key>
       <string>http://wiki.secondlife.com/wiki/[LSL_STRING]</string>
     </map>
+    <key>GridStatusRSS</key>
+    <map>
+      <key>Comment</key>
+      <string>URL that points to SL Grid Status RSS</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>https://status.secondlifegrid.net/history.atom</string>
+    </map>
+    <key>GridStatusUpdateDelay</key>
+    <map>
+      <key>Comment</key>
+      <string>Timer delay for updating Grid Status RSS.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>60.0</real>
+    </map>
+    <key>TestGridStatusRSSFromFile</key>
+    <map>
+      <key>Comment</key>
+      <string>For testing only: Don't update rss xml file from server.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>LagMeterShrunk</key>
     <map>
       <key>Comment</key>
@@ -5256,6 +5409,17 @@
     <map>
       <key>Comment</key>
       <string>Last selected tab in preferences window</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>LastAppearanceTab</key>
+    <map>
+      <key>Comment</key>
+      <string>Last selected tab in appearance floater</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -5377,7 +5541,7 @@
     <key>LeftClickShowMenu</key>
     <map>
       <key>Comment</key>
-      <string>Left click opens pie menu (FALSE = left click touches or grabs object)</string>
+      <string>Unused obsolete setting</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -5406,6 +5570,28 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>LinkReplaceBatchSize</key>
+    <map>
+      <key>Comment</key>
+      <string>The maximum size of a batch in a link replace operation</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>25</integer>
+    </map>
+    <key>LinkReplaceBatchPauseTime</key>
+    <map>
+      <key>Comment</key>
+      <string>The time in seconds between two batches in a link replace operation</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>1.0</real>
     </map>
     <key>LipSyncAah</key>
     <map>
@@ -5516,12 +5702,12 @@
     <key>Type</key>
     <string>F32</string>
     <key>Value</key>
-    <real>10.0</real>
+    <real>40.0</real>
   </map>
   <key>LoginSRVPump</key>
   <map>
     <key>Comment</key>
-    <string>Name of the message pump that handles SRV request</string>
+    <string>Name of the message pump that handles SRV request (deprecated)</string>
     <key>Persist</key>
     <integer>0</integer>
     <key>Type</key>
@@ -6332,10 +6518,10 @@
         <key>Value</key>
             <real>600.0</real>
         </map>
-    <key>MemoryPrivatePoolEnabled</key>
+    <key>MemoryPrivatePoolEnabled</key>  <!-- deprecated (see MAINT-8091) -->
     <map>
       <key>Comment</key>
-      <string>Enable the private memory pool management</string>
+      <string>DEPRECATED: Enable the private memory pool management</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -6343,27 +6529,16 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>MemoryPrivatePoolSize</key>
+    <key>MemoryPrivatePoolSize</key>  <!-- deprecated (see MAINT-8091) -->
     <map>
       <key>Comment</key>
-      <string>Size of the private memory pool in MB (min. value is 256)</string>
+      <string>DEPRECATED: Size of the private memory pool in MB (min. value is 256)</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
       <integer>512</integer>
-    </map>
-    <key>MemProfiling</key>
-    <map>
-      <key>Comment</key>
-      <string>You want to use tcmalloc's memory profiling options.</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>0</integer>
     </map>
     <key>MenuAccessKeyTime</key>
     <map>
@@ -6429,7 +6604,7 @@
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>1</integer>
+    <integer>0</integer>
   </map>
   <key>MeshUploadLogXML</key>
   <map>
@@ -6628,6 +6803,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>MuteListLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Maximum number of entries in the mute list</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>1000</integer>
     </map>
 	<key>MyOutfitsAutofill</key>
 	<map>
@@ -7951,6 +8137,17 @@
       <key>Value</key>
       <integer>100000</integer>
     </map>
+    <key>PrimTextMaxDrawDistance</key>
+    <map>
+      <key>Comment</key>
+      <string>Maximum draw distance beyond which PRIM_TEXT won't be rendered</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>64.0</real>
+    </map>
     <key>ProbeHardwareOnStartup</key>
     <map>
       <key>Comment</key>
@@ -8372,6 +8569,17 @@
         <key>Value</key>
             <integer>1</integer>
         </map>
+  <key>AlwaysRenderFriends</key>
+    <map>
+      <key>Comment</key>
+      <string>Always render friends regardless of max complexity</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
   <key>RenderAvatar</key>
     <map>
       <key>Comment</key>
@@ -8519,6 +8727,17 @@
     <key>Value</key>
     <integer>0</integer>
   </map>
+   <key>RenderHiDPI</key>
+  <map>
+    <key>Comment</key>
+    <string>Enable support for HiDPI displays, like Retina (MacOS X ONLY, requires restart)</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>1</integer>
+  </map>
     <key>RenderPerformanceTest</key>
     <map>
       <key>Comment</key>
@@ -8533,7 +8752,19 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-
+  <key>RenderNsightDebugSupport</key>
+  <map>
+    <key>Comment</key>
+    <string>
+      Disable features which prevent nVidia nSight from being usable with SL. Requires restart.
+    </string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
   <key>RenderLocalLights</key>
   <map>
     <key>Comment</key>
@@ -10035,34 +10266,34 @@
     <key>Value</key>
     <integer>0</integer>
   </map>
-  <key>RenderUseFarClip</key>
-  <map>
-    <key>Comment</key>
-    <string>If false, frustum culling will ignore far clip plane.</string>
-    <key>Persist</key>
-    <integer>1</integer>
-    <key>Type</key>
-    <string>Boolean</string>
-    <key>Value</key>
-    <integer>1</integer>
-  </map>
-  <key>RenderUseImpostors</key>
-  <map>
-    <key>Comment</key>
+    <key>RenderUseFarClip</key>
+    <map>
+      <key>Comment</key>
+      <string>If false, frustum culling will ignore far clip plane.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>RenderUseImpostors</key>
+    <map>
+      <key>Comment</key>
     <string>OBSOLETE and UNUSED. See RenderAvatarMaxNonImpostors and RenderAvatarMaxComplexity.</string>
-    <key>Persist</key>
+      <key>Persist</key>
     <integer>0</integer>
-    <key>Type</key>
-    <string>Boolean</string>
-    <key>Value</key>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
     <integer>0</integer>
-  </map>
+    </map>
   <key>RenderAutoMuteByteLimit</key>
   <map>
     <key>Comment</key>
-    <string>OBSOLETE and UNUSED.</string>
+    <string>If avatar attachment size exceed this value (in bytes) attachment will not be rendered. Excludes attachments worn by own avatar.</string>
     <key>Persist</key>
-    <integer>0</integer>
+    <integer>1</integer>
     <key>Type</key>
     <string>U32</string>
     <key>Value</key>
@@ -10103,6 +10334,28 @@
     <key>Value</key>
     <integer>10</integer>
   </map>
+  <key>MaxAttachmentComplexity</key>
+  <map>
+    <key>Comment</key>
+    <string>Attachment's render weight limit</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>F32</string>
+    <key>Value</key>
+    <real>1.0E6</real>
+  </map>
+  <key>ComplexityChangesPopUpDelay</key>
+  <map>
+    <key>Comment</key>
+    <string>Delay before viewer will show avatar complexity notice again</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>U32</string>
+    <key>Value</key>
+    <integer>300</integer>
+  </map>
   <key>RenderAvatarMaxComplexity</key>
   <map>
     <key>Comment</key>
@@ -10114,6 +10367,50 @@
     <string>U32</string>
     <key>Value</key>
     <integer>0</integer>
+  </map>
+  <key>RenderHUDObjectsWarning</key>
+  <map>
+    <key>Comment</key>
+    <string>Viewer will warn user about HUD containing to many objects if objects count is above this value</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>U32</string>
+    <key>Value</key>
+    <integer>1000</integer>
+  </map>
+  <key>RenderHUDTexturesWarning</key>
+  <map>
+    <key>Comment</key>
+    <string>Viewer will warn user about HUD containing to many textures if texture count is above this value</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>U32</string>
+    <key>Value</key>
+    <integer>200</integer>
+  </map>
+  <key>RenderHUDOversizedTexturesWarning</key>
+  <map>
+    <key>Comment</key>
+    <string>How many textures with size 1024 * 1024 or bigger HUD can contain before notifying user</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>U32</string>
+    <key>Value</key>
+    <integer>6</integer>
+  </map>
+  <key>RenderHUDTexturesMemoryWarning</key>
+  <map>
+    <key>Comment</key>
+    <string>Viewer will warn user about HUD textures using memory above this value (in bytes)</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>U32</string>
+    <key>Value</key>
+    <integer>32000000</integer>
   </map>
   <key>RenderAutoMuteSurfaceAreaLimit</key>
   <map>
@@ -10614,6 +10911,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ScriptDialogLimitations</key>
+    <map>
+      <key>Comment</key>
+      <string>Limits amount of dialogs per script (0 - per object, 1 - per channel, 2 - per channel for attachments, 3 - per channel for HUDs, 4 -unconstrained for HUDs)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>SecondLifeEnterprise</key>
     <map>
       <key>Comment</key>
@@ -10911,6 +11219,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>BasicUITooltips</key>
+    <map>
+      <key>Comment</key>
+      <string>Show tooltips for various 2D UI elements like buttons or checkboxes, won't supress tooltips like drag'n'drop, inworld, links or media</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>ShowHoverTips</key>
     <map>
       <key>Comment</key>
@@ -11054,6 +11373,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>MenuSearch</key>
+    <map>
+      <key>Comment</key>
+      <string>Show/hide 'Search menus' field</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+  </map>
     <key>GroupListShowIcons</key>
     <map>
       <key>Comment</key>
@@ -11725,6 +12055,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>SyncMaterialSettings</key>
+    <map>
+      <key>Comment</key>
+      <string>SyncMaterialSettings</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>SnapshotQuality</key>
     <map>
       <key>Comment</key>
@@ -11735,6 +12076,17 @@
       <string>S32</string>
       <key>Value</key>
       <integer>75</integer>
+    </map>
+    <key>AbuseReportScreenshotDelay</key>
+    <map>
+      <key>Comment</key>
+      <string>Time delay before taking screenshot to avoid UI artifacts.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.3</real>
     </map>
     <key>SpeedTest</key>
     <map>
@@ -12060,7 +12412,7 @@
       <key>Comment</key>
       <string>If TRUE, always load textures at full resolution (discard = 0)</string>
       <key>Persist</key>
-      <integer>1</integer>
+      <integer>0</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
@@ -12130,12 +12482,12 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>500.0</real>
+      <real>3000.0</real>
     </map>
     <key>UpdaterMaximumBandwidth</key>
     <map>
       <key>Comment</key>
-      <string>Maximum allowable downstream bandwidth for updater service (kilo bits per second)</string>
+      <string>Obsolete: this parameter is no longer used.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -12792,10 +13144,32 @@
       <key>Value</key>
       <real>3</real>
     </map>
+    <key>HUDScaleFactor</key>
+    <map>
+    <key>Comment</key>
+      <string>Scale of HUD attachments</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>1.0</real>
+    </map>
     <key>UIScaleFactor</key>
     <map>
       <key>Comment</key>
       <string>Size of UI relative to default layout on 1024x768 screen</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>1.0</real>
+    </map>
+    <key>LastSystemUIScaleFactor</key>
+    <map>
+      <key>Comment</key>
+      <string>OBSOLETE: System UI scale factor is now automatically and independently from UIScaleFactor applied</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -13257,9 +13631,9 @@
     <key>UpdaterServiceCheckPeriod</key>
     <map>
       <key>Comment</key>
-      <string>Default period between update checking.</string>
+      <string>Obsolete; no longer used.</string>
       <key>Persist</key>
-      <integer>1</integer>
+      <integer>0</integer>
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
@@ -13268,7 +13642,7 @@
     <key>UpdaterServiceURL</key>
     <map>
       <key>Comment</key>
-      <string>Default location for the updater service.</string>
+      <string>Obsolete; no longer used.</string>
       <key>Persist</key>
       <integer>0</integer>
       <key>Type</key>
@@ -13279,7 +13653,7 @@
     <key>UpdaterServicePath</key>
     <map>
       <key>Comment</key>
-      <string>Path on the update server host.</string>
+      <string>Obsolete: no longer used</string>
       <key>Persist</key>
       <integer>0</integer>
       <key>Type</key>
@@ -13297,6 +13671,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <string>1</string>
+    </map>
+    <key>UpdaterShowReleaseNotes</key>
+    <map>
+        <key>Comment</key>
+        <string>Enables displaying of the Release notes in a web floater after update.</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>1</integer>
     </map>
     <key>UploadBakedTexOld</key>
     <map>
@@ -13738,16 +14123,16 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>VerboseLogs</key>
+    <key>RegionCrossingInterpolationTime</key>
     <map>
       <key>Comment</key>
-      <string>Display source file and line number for each log item for debugging purposes</string>
+      <string>How long to extrapolate object motion after crossing regions</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
-      <string>Boolean</string>
+      <string>F32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>VertexShaderEnable</key>
     <map>
@@ -13769,7 +14154,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>VivoxDebugLevel</key>
     <map>
@@ -14486,6 +14871,28 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>AssetStorageLogFrequency</key>
+        <map>
+        <key>Comment</key>
+        <string>Seconds between display of AssetStorage info in log (0 for never)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>F32</string>
+        <key>Value</key>
+        <real>60.0</real>
+        </map>
+    <key>LogWearableAssetSave</key>
+    <map>
+      <key>Comment</key>
+      <string>Save copy of saved wearables to log dir</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>LogTextureDownloadsToViewerLog</key>
     <map>
       <key>Comment</key>
@@ -14547,6 +14954,15 @@
             <string>U32</string>
         <key>Value</key>
             <real>1</real>
+        </map>
+    <key>PoolSizeAssetStorage</key>
+        <map>
+        <key>Comment</key>
+            <string>Coroutine Pool size for AssetStorage requests</string>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <real>12</real>
         </map>
 
     <!-- Settings below are for back compatibility only.
@@ -14623,6 +15039,7 @@
 	      <string>snapshot</string>
 	      <string>postcard</string>
 	      <string>mini_map</string>
+	      <string>beacons</string>
       </array>
     </map>
     <key>LandmarksSortedByDate</key>
@@ -15004,6 +15421,22 @@
         <integer>0</integer>
         </array>
         </map>
+    <key>GridStatusFloaterRect</key>
+    <map>
+        <key>Comment</key>
+        <string>Web profile floater dimensions</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Rect</string>
+        <key>Value</key>
+        <array>
+            <integer>0</integer>
+            <integer>520</integer>
+            <integer>625</integer>
+            <integer>0</integer>
+        </array>
+    </map>
     <key>HelpFloaterOpen</key>
     <map>
       <key>Comment</key>
@@ -15875,6 +16308,40 @@
       <string>U32</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>SkipBenchmark</key>
+    <map>
+      <key>Comment</key>
+      <string>if true, disables running the GPU benchmark at startup
+      (default to class 1)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>CefVerboseLog</key>
+    <map>
+      <key>Comment</key>
+      <string>Enable/disable CEF verbose loggingk</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>ResetUIScaleOnFirstRun</key>
+    <map>
+      <key>Comment</key>
+      <string>Resets the UI scale factor on first run due to changed display scaling behavior</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>        
     </map>
 </map>
 </llsd>

@@ -24,6 +24,7 @@
  * $/LicenseInfo$
  */
 
+
 #include "llviewerprecompiledheaders.h"
 
 #include "llagent.h" 
@@ -47,7 +48,9 @@
 #include "llfloatercamera.h"
 #include "llfloaterimcontainer.h"
 #include "llfloaterperms.h"
+#include "llfloaterpreference.h"
 #include "llfloaterreg.h"
+#include "llfloatersnapshot.h"
 #include "llfloatertools.h"
 #include "llgroupactions.h"
 #include "llgroupmgr.h"
@@ -740,7 +743,7 @@ BOOL LLAgent::getFlying() const
 //-----------------------------------------------------------------------------
 // setFlying()
 //-----------------------------------------------------------------------------
-void LLAgent::setFlying(BOOL fly)
+void LLAgent::setFlying(BOOL fly, BOOL fail_sound)
 {
 	if (isAgentAvatarValid())
 	{
@@ -769,7 +772,10 @@ void LLAgent::setFlying(BOOL fly)
 			// parcel doesn't let you start fly
 			// gods can always fly
 			// and it's OK if you're already flying
-			make_ui_sound("UISndBadKeystroke");
+			if (fail_sound)
+			{
+				make_ui_sound("UISndBadKeystroke");
+			}
 			return;
 		}
 		if( !was_flying )
@@ -879,6 +885,16 @@ void LLAgent::setRegion(LLViewerRegion *regionp)
 			{
 				gSky.mVOGroundp->setRegion(regionp);
 			}
+
+            if (regionp->capabilitiesReceived())
+            {
+                regionp->requestSimulatorFeatures();
+            }
+            else
+            {
+                regionp->setCapabilitiesReceivedCallback(boost::bind(&LLViewerRegion::requestSimulatorFeatures, regionp));
+            }
+
 		}
 		else
 		{
@@ -1578,6 +1594,8 @@ void LLAgent::setAutoPilotTargetGlobal(const LLVector3d &target_global)
 		LLViewerObject *obj;
 
 		LLWorld::getInstance()->resolveStepHeightGlobal(NULL, target_global, traceEndPt, targetOnGround, groundNorm, &obj);
+		// Note: this might malfunction for sitting agent, since pelvis stays same, but agent's position becomes lower
+		// But for autopilot to work we assume that agent is standing and ready to go.
 		F64 target_height = llmax((F64)gAgentAvatarp->getPelvisToFoot(), target_global.mdV[VZ] - targetOnGround.mdV[VZ]);
 
 		// clamp z value of target to minimum height above ground
@@ -1644,7 +1662,7 @@ void LLAgent::stopAutoPilot(BOOL user_cancel)
 		if (user_cancel && !mAutoPilotBehaviorName.empty())
 		{
 			if (mAutoPilotBehaviorName == "Sit")
-				LLNotificationsUtil::add("CancelledSit");
+				LL_INFOS("Agent") << "Autopilot-Sit was canceled by user action" << LL_ENDL;
 			else if (mAutoPilotBehaviorName == "Attach")
 				LLNotificationsUtil::add("CancelledAttach");
 			else
@@ -2050,7 +2068,10 @@ void LLAgent::endAnimationUpdateUI()
 			{
 				skip_list.insert(LLFloaterReg::findInstance("mini_map"));
 			}
-
+			if (LLFloaterReg::findInstance("beacons"))
+			{
+				skip_list.insert(LLFloaterReg::findInstance("beacons"));
+			}
 			LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 			LLFloaterIMContainer::floater_list_t conversations;
 			im_box->getDetachedConversationFloaters(conversations);
@@ -2172,6 +2193,7 @@ void LLAgent::endAnimationUpdateUI()
 #else // Use this for now
 		LLFloaterView::skip_list_t skip_list;
 		skip_list.insert(LLFloaterReg::findInstance("mini_map"));
+		skip_list.insert(LLFloaterReg::findInstance("beacons"));
 		gFloaterView->pushVisibleAll(FALSE, skip_list);
 #endif
 
@@ -3191,19 +3213,12 @@ void LLAgent::initOriginGlobal(const LLVector3d &origin_global)
 }
 
 BOOL LLAgent::leftButtonGrabbed() const	
-{
+{ 
 	const BOOL camera_mouse_look = gAgentCamera.cameraMouselook();
 	return (!camera_mouse_look && mControlsTakenCount[CONTROL_LBUTTON_DOWN_INDEX] > 0) 
 		|| (camera_mouse_look && mControlsTakenCount[CONTROL_ML_LBUTTON_DOWN_INDEX] > 0)
 		|| (!camera_mouse_look && mControlsTakenPassedOnCount[CONTROL_LBUTTON_DOWN_INDEX] > 0)
 		|| (camera_mouse_look && mControlsTakenPassedOnCount[CONTROL_ML_LBUTTON_DOWN_INDEX] > 0);
-}
-
-BOOL LLAgent::leftButtonBlocked() const
-{
-    const BOOL camera_mouse_look = gAgentCamera.cameraMouselook();
-    return (!camera_mouse_look && mControlsTakenCount[CONTROL_LBUTTON_DOWN_INDEX] > 0)
-        || (camera_mouse_look && mControlsTakenCount[CONTROL_ML_LBUTTON_DOWN_INDEX] > 0);
 }
 
 BOOL LLAgent::rotateGrabbed() const		
@@ -3663,14 +3678,7 @@ BOOL LLAgent::anyControlGrabbed() const
 
 BOOL LLAgent::isControlGrabbed(S32 control_index) const
 {
-    if (gAgent.mControlsTakenCount[control_index] > 0)
-        return TRUE;
-    return gAgent.mControlsTakenPassedOnCount[control_index] > 0;
-}
-
-BOOL LLAgent::isControlBlocked(S32 control_index) const
-{
-    return mControlsTakenCount[control_index] > 0;
+	return mControlsTakenCount[control_index] > 0;
 }
 
 void LLAgent::forceReleaseControls()
@@ -3700,6 +3708,23 @@ BOOL LLAgent::getHomePosGlobal( LLVector3d* pos_global )
 	from_region_handle( mHomeRegionHandle, &x, &y);
 	pos_global->setVec( x + mHomePosRegion.mV[VX], y + mHomePosRegion.mV[VY], mHomePosRegion.mV[VZ] );
 	return TRUE;
+}
+
+bool LLAgent::isInHomeRegion()
+{
+	if(!mHaveHomePosition)
+	{
+		return false;
+	}
+	if (!getRegion())
+	{
+		return false;
+	}
+	if (getRegion()->getHandle() != mHomeRegionHandle)
+	{
+		return false;
+	}
+	return true;
 }
 
 void LLAgent::clearVisualParams(void *data)
@@ -3895,11 +3920,17 @@ void LLAgent::handleTeleportFinished()
 		mIsMaturityRatingChangingDuringTeleport = false;
 	}
     
-    // Init SLM Marketplace connection so we know which UI should be used for the user as a merchant
-    // Note: Eventually, all merchant will be migrated to the new SLM system and there will be no reason to show the old UI at all.
-    // Note: Some regions will not support the SLM cap for a while so we need to do that check for each teleport.
-    // *TODO : Suppress that line from here once the whole grid migrated to SLM and move it to idle_startup() (llstartup.cpp)
-    check_merchant_status();
+    if (mRegionp)
+    {
+        if (mRegionp->capabilitiesReceived())
+        {
+            onCapabilitiesReceivedAfterTeleport();
+        }
+        else
+        {
+            mRegionp->setCapabilitiesReceivedCallback(boost::bind(&LLAgent::onCapabilitiesReceivedAfterTeleport));
+        }
+    }
 }
 
 void LLAgent::handleTeleportFailed()
@@ -3931,14 +3962,21 @@ void LLAgent::handleTeleportFailed()
 	}
 }
 
+/*static*/
+void LLAgent::onCapabilitiesReceivedAfterTeleport()
+{
+
+    check_merchant_status();
+}
+
+
 void LLAgent::teleportRequest(
 	const U64& region_handle,
 	const LLVector3& pos_local,
 	bool look_at_from_camera)
 {
 	LLViewerRegion* regionp = getRegion();
-	bool is_local = (region_handle == regionp->getHandle());
-	if(regionp && teleportCore(is_local))
+	if (regionp && teleportCore(region_handle == regionp->getHandle()))
 	{
 		LL_INFOS("") << "TeleportLocationRequest: '" << region_handle << "':"
 					 << pos_local << LL_ENDL;
@@ -4143,6 +4181,7 @@ void LLAgent::setTeleportState(ETeleportState state)
             " for previously failed teleport.  Ignore!" << LL_ENDL;
         return;
     }
+    LL_DEBUGS("Teleport") << "Setting teleport state to " << state << " Previous state: " << mTeleportState << LL_ENDL;
 	mTeleportState = state;
 	if (mTeleportState > TELEPORT_NONE && gSavedSettings.getBOOL("FreezeTime"))
 	{
@@ -4176,6 +4215,8 @@ void LLAgent::setTeleportState(ETeleportState state)
 
 void LLAgent::stopCurrentAnimations()
 {
+    LL_DEBUGS("Avatar") << "Stopping current animations" << LL_ENDL;
+
 	// This function stops all current overriding animations on this
 	// avatar, propagating this change back to the server.
 	if (isAgentAvatarValid())
@@ -4193,6 +4234,7 @@ void LLAgent::stopCurrentAnimations()
 				// don't cancel a ground-sit anim, as viewers
 				// use this animation's status in
 				// determining whether we're sitting. ick.
+                LL_DEBUGS("Avatar") << "sit or do-not-disturb animation will not be stopped" << LL_ENDL;
 			}
 			else
 			{
@@ -4222,8 +4264,7 @@ void LLAgent::stopCurrentAnimations()
 
 		// re-assert at least the default standing animation, because
 		// viewers get confused by avs with no associated anims.
-		sendAnimationRequest(ANIM_AGENT_STAND,
-				     ANIM_REQUEST_START);
+		sendAnimationRequest(ANIM_AGENT_STAND, ANIM_REQUEST_START);
 	}
 }
 
@@ -4328,14 +4369,144 @@ void LLAgent::sendAgentDataUpdateRequest()
 
 void LLAgent::sendAgentUserInfoRequest()
 {
-	if(getID().isNull())
-		return; // not logged in
-	gMessageSystem->newMessageFast(_PREHASH_UserInfoRequest);
-	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
-	gMessageSystem->addUUIDFast(_PREHASH_AgentID, getID());
-	gMessageSystem->addUUIDFast(_PREHASH_SessionID, getSessionID());
-	sendReliableMessage();
+    std::string cap;
+
+    if (getID().isNull())
+        return; // not logged in
+
+    if (mRegionp)
+        cap = mRegionp->getCapability("UserInfo");
+
+    if (!cap.empty())
+    {
+        LLCoros::instance().launch("requestAgentUserInfoCoro",
+            boost::bind(&LLAgent::requestAgentUserInfoCoro, this, cap));
+    }
+    else
+    { 
+        sendAgentUserInfoRequestMessage();
+    }
 }
+
+void LLAgent::requestAgentUserInfoCoro(std::string capurl)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("requestAgentUserInfoCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
+    LLCore::HttpHeaders::ptr_t httpHeaders;
+
+    httpOpts->setFollowRedirects(true);
+
+    LLSD result = httpAdapter->getAndSuspend(httpRequest, capurl, httpOpts, httpHeaders);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        LL_WARNS("UserInfo") << "Failed to get user information." << LL_ENDL;
+        return;
+    }
+    else if (!result["success"].asBoolean())
+    {
+        LL_WARNS("UserInfo") << "Failed to get user information: " << result["message"] << LL_ENDL;
+        return;
+    }
+
+    bool im_via_email;
+    bool is_verified_email;
+    std::string email;
+    std::string dir_visibility;
+
+    im_via_email = result["im_via_email"].asBoolean();
+    is_verified_email = result["is_verified"].asBoolean();
+    email = result["email"].asString();
+    dir_visibility = result["directory_visibility"].asString();
+
+    // TODO: This should probably be changed.  I'm not entirely comfortable 
+    // having LLAgent interact directly with the UI in this way.
+    LLFloaterPreference::updateUserInfo(dir_visibility, im_via_email, is_verified_email);
+    LLFloaterSnapshot::setAgentEmail(email);
+}
+
+void LLAgent::sendAgentUpdateUserInfo(bool im_via_email, const std::string& directory_visibility)
+{
+    std::string cap;
+
+    if (getID().isNull())
+        return; // not logged in
+
+    if (mRegionp)
+        cap = mRegionp->getCapability("UserInfo");
+
+    if (!cap.empty())
+    {
+        LLCoros::instance().launch("updateAgentUserInfoCoro",
+            boost::bind(&LLAgent::updateAgentUserInfoCoro, this, cap, im_via_email, directory_visibility));
+    }
+    else
+    {
+        sendAgentUpdateUserInfoMessage(im_via_email, directory_visibility);
+    }
+}
+
+
+void LLAgent::updateAgentUserInfoCoro(std::string capurl, bool im_via_email, std::string directory_visibility)
+{
+    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("requestAgentUserInfoCoro", httpPolicy));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
+    LLCore::HttpHeaders::ptr_t httpHeaders;
+
+    httpOpts->setFollowRedirects(true);
+    LLSD body(LLSDMap
+        ("dir_visibility",  LLSD::String(directory_visibility))
+        ("im_via_email",    LLSD::Boolean(im_via_email)));
+
+    LLSD result = httpAdapter->postAndSuspend(httpRequest, capurl, body, httpOpts, httpHeaders);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        LL_WARNS("UserInfo") << "Failed to set user information." << LL_ENDL;
+    }
+    else if (!result["success"].asBoolean())
+    {
+        LL_WARNS("UserInfo") << "Failed to set user information: " << result["message"] << LL_ENDL;
+    }
+}
+
+// deprecated:
+// May be removed when UserInfo cap propagates to all simhosts in grid
+void LLAgent::sendAgentUserInfoRequestMessage()
+{
+    gMessageSystem->newMessageFast(_PREHASH_UserInfoRequest);
+    gMessageSystem->nextBlockFast(_PREHASH_AgentData);
+    gMessageSystem->addUUIDFast(_PREHASH_AgentID, getID());
+    gMessageSystem->addUUIDFast(_PREHASH_SessionID, getSessionID());
+    sendReliableMessage();
+}
+
+void LLAgent::sendAgentUpdateUserInfoMessage(bool im_via_email, const std::string& directory_visibility)
+{
+    gMessageSystem->newMessageFast(_PREHASH_UpdateUserInfo);
+    gMessageSystem->nextBlockFast(_PREHASH_AgentData);
+    gMessageSystem->addUUIDFast(_PREHASH_AgentID, getID());
+    gMessageSystem->addUUIDFast(_PREHASH_SessionID, getSessionID());
+    gMessageSystem->nextBlockFast(_PREHASH_UserData);
+    gMessageSystem->addBOOLFast(_PREHASH_IMViaEMail, im_via_email);
+    gMessageSystem->addString("DirectoryVisibility", directory_visibility);
+    gAgent.sendReliableMessage();
+
+}
+// end deprecated
+//------
 
 void LLAgent::observeFriends()
 {
@@ -4402,18 +4573,6 @@ void LLAgent::parseTeleportMessages(const std::string& xml_filename)
 const void LLAgent::getTeleportSourceSLURL(LLSLURL& slurl) const
 {
 	slurl = *mTeleportSourceSLURL;
-}
-
-void LLAgent::sendAgentUpdateUserInfo(bool im_via_email, const std::string& directory_visibility )
-{
-	gMessageSystem->newMessageFast(_PREHASH_UpdateUserInfo);
-	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
-	gMessageSystem->addUUIDFast(_PREHASH_AgentID, getID());
-	gMessageSystem->addUUIDFast(_PREHASH_SessionID, getSessionID());
-	gMessageSystem->nextBlockFast(_PREHASH_UserData);
-	gMessageSystem->addBOOLFast(_PREHASH_IMViaEMail, im_via_email);
-	gMessageSystem->addString("DirectoryVisibility", directory_visibility);
-	gAgent.sendReliableMessage();
 }
 
 // static

@@ -172,6 +172,7 @@ public:
 	LLInventoryFilter& getFilter();
 	const LLInventoryFilter& getFilter() const;
 	void setFilterTypes(U64 filter, LLInventoryFilter::EFilterType = LLInventoryFilter::FILTERTYPE_OBJECT);
+	void setFilterWorn();
 	U32 getFilterObjectTypes() const;
 	void setFilterPermMask(PermissionMask filter_perm_mask);
 	U32 getFilterPermMask() const;
@@ -183,6 +184,8 @@ public:
 	void setDateSearchDirection(U32 direction);
 	BOOL getSinceLogoff();
 	void setFilterLinks(U64 filter_links);
+	void setSearchType(LLInventoryFilter::ESearchType type);
+	LLInventoryFilter::ESearchType getSearchType();
 
 	void setShowFolderState(LLInventoryFilter::EFolderShow show);
 	LLInventoryFilter::EFolderShow getShowFolderState();
@@ -201,8 +204,12 @@ public:
 	void doToSelected(const LLSD& userdata);
 	void doCreate(const LLSD& userdata);
 	bool beginIMSession();
+	void fileUploadLocation(const LLSD& userdata);
+	void purgeSelectedItems();
 	bool attachObject(const LLSD& userdata);
 	static void idle(void* user_data);
+
+	void updateFolderLabel(const LLUUID& folder_id);
 
 	// DEBUG ONLY:
 	static void dumpSelectionInformation(void* user_data);
@@ -215,8 +222,12 @@ public:
 	// Find whichever inventory panel is active / on top.
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
-	
-	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id);
+
+	static void openInventoryPanelAndSetSelection(BOOL auto_open,
+													const LLUUID& obj_id,
+													BOOL main_panel = FALSE,
+													BOOL take_keyboard_focus = TAKE_FOCUS_YES,
+													BOOL reset_filter = FALSE);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);
 	void removeItemID(const LLUUID& id);
@@ -230,6 +241,8 @@ public:
     
     // Clean up stuff when the folder root gets deleted
     void clearFolderRoot();
+
+    void callbackPurgeSelectedItems(const LLSD& notification, const LLSD& response);
 
 protected:
 	void openStartFolderOrMyInventory(); // open the first level of inventory
@@ -246,6 +259,8 @@ protected:
 
 	LLHandle<LLFolderView>      mFolderRoot;
 	LLScrollContainer*			mScroller;
+
+	LLUUID						mPreviousSelectedFolder;
 
 	LLFolderViewModelInventory	mInventoryViewModel;
     LLPointer<LLFolderViewGroupedItemBridge> mGroupedItemBridge;

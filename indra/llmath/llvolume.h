@@ -57,6 +57,7 @@ class LLVolumeTriangle;
 #include "llpointer.h"
 #include "llfile.h"
 #include "llalignedarray.h"
+#include "llrigginginfo.h"
 
 //============================================================================
 
@@ -198,6 +199,8 @@ const U8 LL_SCULPT_FLAG_MIRROR    = 128;
 const U8 LL_SCULPT_FLAG_MASK = LL_SCULPT_FLAG_INVERT | LL_SCULPT_FLAG_MIRROR;
 
 const S32 LL_SCULPT_MESH_MAX_FACES = 8;
+
+extern BOOL gDebugGL;
 
 class LLProfileParams
 {
@@ -679,6 +682,8 @@ protected:
 
 class LLProfile
 {
+	friend class LLVolume;
+
 public:
 	LLProfile()
 		: mOpen(FALSE),
@@ -688,8 +693,6 @@ public:
 		  mTotal(2)
 	{
 	}
-
-	~LLProfile();
 
 	S32	 getTotal() const								{ return mTotal; }
 	S32	 getTotalOut() const							{ return mTotalOut; }	// Total number of outside points
@@ -723,6 +726,8 @@ public:
 	friend std::ostream& operator<<(std::ostream &s, const LLProfile &profile);
 
 protected:
+	~LLProfile();
+
 	static S32 getNumNGonPoints(const LLProfileParams& params, S32 sides, F32 offset=0.0f, F32 bevel = 0.0f, F32 ang_scale = 1.f, S32 split = 0);
 	void genNGon(const LLProfileParams& params, S32 sides, F32 offset=0.0f, F32 bevel = 0.0f, F32 ang_scale = 1.f, S32 split = 0);
 
@@ -867,8 +872,6 @@ public:
 	BOOL create(LLVolume* volume, BOOL partial_build = FALSE);
 	void createTangents();
 	
-	void appendFace(const LLVolumeFace& face, LLMatrix4& transform, LLMatrix4& normal_tranform);
-
 	void resizeVertices(S32 num_verts);
 	void allocateTangents(S32 num_verts);
 	void allocateWeights(S32 num_verts);
@@ -899,7 +902,7 @@ public:
 	};
 
 	void optimize(F32 angle_cutoff = 2.f);
-	void cacheOptimize();
+	bool cacheOptimize();
 
 	void createOctree(F32 scaler = 0.25f, const LLVector4a& center = LLVector4a(0,0,0), const LLVector4a& size = LLVector4a(0.5f,0.5f,0.5f));
 
@@ -953,6 +956,12 @@ public:
 	// mWeights.size() should be empty or match mVertices.size()  
 	LLVector4a* mWeights;
 
+    mutable BOOL mWeightsScrubbed;
+
+    // Which joints are rigged to, and the bounding box of any rigged
+    // vertices per joint.
+    LLJointRiggingInfoTab mJointRiggingInfoTab;
+    
 	LLOctreeNode<LLVolumeTriangle>* mOctree;
 
 	//whether or not face has been cache optimized
@@ -1053,16 +1062,17 @@ public:
 	U32					mFaceMask;			// bit array of which faces exist in this volume
 	LLVector3			mLODScaleBias;		// vector for biasing LOD based on scale
 	
-	void sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level);
+	void sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level, bool visible_placeholder);
 	void copyVolumeFaces(const LLVolume* volume);
 	void copyFacesTo(std::vector<LLVolumeFace> &faces) const;
 	void copyFacesFrom(const std::vector<LLVolumeFace> &faces);
-	void cacheOptimize();
+	bool cacheOptimize();
 
 private:
 	void sculptGenerateMapVertices(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, U8 sculpt_type);
 	F32 sculptGetSurfaceArea();
-	void sculptGeneratePlaceholder();
+	void sculptGenerateEmptyPlaceholder();
+	void sculptGenerateSpherePlaceholder();
 	void sculptCalcMeshResolution(U16 width, U16 height, U8 type, S32& s, S32& t);
 
 	
@@ -1082,7 +1092,7 @@ public:
 	F32 mSurfaceArea; //unscaled surface area
 	BOOL mIsMeshAssetLoaded;
 	
-	LLVolumeParams mParams;
+	const LLVolumeParams mParams;
 	LLPath *mPathp;
 	LLProfile *mProfilep;
 	LLAlignedArray<LLVector4a,64> mMesh;

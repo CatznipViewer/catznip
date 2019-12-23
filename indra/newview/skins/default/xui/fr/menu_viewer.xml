@@ -9,9 +9,11 @@
 		<menu_item_call label="Endroits..." name="Places"/>
 		<menu_item_call label="Favoris..." name="Picks"/>
 		<menu_item_call label="Expériences..." name="Experiences"/>
+		<menu_item_call label="Mes scripts..." name="MyScripts"/>
 		<menu_item_call label="Contrôles de la caméra..." name="Camera Controls"/>
 		<menu label="Déplacement" name="Movement">
 			<menu_item_call label="M&apos;asseoir" name="Sit Down Here"/>
+			<menu_item_call label="Se lever" name="Stand up"/>
 			<menu_item_check label="Voler" name="Fly"/>
 			<menu_item_check label="Toujours courir" name="Always Run"/>
 			<menu_item_call label="Arrêter mon animation" name="Stop Animating My Avatar"/>
@@ -22,7 +24,6 @@
 			<menu_item_check label="Ne pas déranger" name="Do Not Disturb"/>
 		</menu>
 		<menu_item_call label="Acheter des L$..." name="Buy and Sell L$"/>
-		<menu_item_call label="Boîte d&apos;envoi vendeur..." name="MerchantOutbox"/>
 		<menu_item_call label="Annonces de Place du marché..." name="MarketplaceListings"/>
 		<menu_item_call label="Page d&apos;accueil du compte..." name="Manage My Account">
 			<menu_item_call.on_click name="ManageMyAccount_url" parameter="WebLaunchJoinNow,http://secondlife.com/account/index.php?lang=fr"/>
@@ -45,6 +46,7 @@
 			<menu_item_check label="Aucun effet de voix" name="NoVoiceMorphing"/>
 			<menu_item_check label="Aperçu..." name="Preview"/>
 			<menu_item_call label="S&apos;abonner..." name="Subscribe"/>
+			<menu_item_call label="Avantage Premium..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="Gestes..." name="Gestures"/>
 		<menu_item_check label="Amis" name="My Friends"/>
@@ -58,7 +60,8 @@
 		<menu_item_call label="Destinations..." name="Destinations"/>
 		<menu_item_check label="Carte du monde" name="World Map"/>
 		<menu_item_check label="Mini-carte" name="Mini-Map"/>
-		<menu_item_check label="Rechercher" name="Search"/>
+		<menu_item_call label="Événements" name="Events"/>
+		<menu_item_check label="Recherche..." name="Search"/>
 		<menu_item_call label="Me téléporter chez moi" name="Teleport Home"/>
 		<menu_item_call label="Définir le domicile ici" name="Set Home to Here"/>
 		<menu_item_call label="Photo" name="Take Snapshot"/>
@@ -76,9 +79,9 @@
 			<menu_item_check label="Propriétés de la parcelle" name="Parcel Properties"/>
 			<menu_item_check label="Menu Avancé" name="Show Advanced Menu"/>
 		</menu>
-		<menu label="Luminosité" name="Sun">
+		<menu label="Soleil" name="Sun">
 			<menu_item_check label="Aube" name="Sunrise"/>
-			<menu_item_check label="Milieu de journée" name="Noon"/>
+			<menu_item_check label="Midi" name="Noon"/>
 			<menu_item_check label="Coucher de soleil" name="Sunset"/>
 			<menu_item_check label="Minuit" name="Midnight"/>
 			<menu_item_check label="Utiliser les réglages de la région" name="Use Region Settings"/>
@@ -114,13 +117,13 @@
 		<menu_item_call label="Lien" name="Link"/>
 		<menu_item_call label="Annuler le lien" name="Unlink"/>
 		<menu_item_check label="Modifier les parties liées" name="Edit Linked Parts"/>
-		<menu label="Sélectionner les parties liées" name="Select Linked Parts">
-			<menu_item_call label="Sélectionner la partie suivante" name="Select Next Part"/>
-			<menu_item_call label="Sélectionner la partie précédente" name="Select Previous Part"/>
-			<menu_item_call label="Inclure la partie suivante" name="Include Next Part"/>
-			<menu_item_call label="Inclure la partie précédente" name="Include Previous Part"/>
+		<menu label="Sélectionner des éléments" name="Select Elements">
+			<menu_item_call label="Sélectionner la partie suivante ou le visage" name="Select Next Part or Face"/>
+			<menu_item_call label="Sélectionner la partie précédente ou le visage" name="Select Previous Part or Face"/>
+			<menu_item_call label="Inclure la partie suivante ou le visage" name="Include Next Part or Face"/>
+			<menu_item_call label="Inclure la partie précédente ou le visage" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="Groupes de liens..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Objets des régions" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="Point central sur la sélection" name="Focus on Selection"/>
 		<menu_item_call label="Zoomer sur la sélection" name="Zoom to Selection"/>
 		<menu label="Objet" name="Object">
@@ -129,8 +132,10 @@
 			<menu_item_call label="Prendre une copie" name="Take Copy"/>
 			<menu_item_call label="Enregistrer dans le contenu des objets" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="Renvoi de l&apos;objet" name="Return Object back to Owner"/>
+			<menu_item_call label="Dupliquer" name="DuplicateObject"/>
 		</menu>
 		<menu label="Scripts" name="Scripts">
+			<menu_item_check label="Avertissements/Erreurs de scripts..." name="Script debug"/>
 			<menu_item_call label="Recompiler les scripts (Mono)" name="Mono"/>
 			<menu_item_call label="Recompiler les scripts (LSL)" name="LSL"/>
 			<menu_item_call label="Réinitialiser les scripts" name="Reset Scripts"/>
@@ -138,7 +143,7 @@
 			<menu_item_call label="Définir les scripts sur Pas d&apos;exécution" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="Recherche de chemin" name="Pathfinding">
-			<menu_item_call label="Groupes de liens..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Objets des régions" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="Personnages..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="Vue / test..." name="pathfinding_console_menu_item"/>
 			<menu_item_call label="Refiger la région" name="pathfinding_rebake_navmesh_item"/>
@@ -170,6 +175,7 @@
 	</menu>
 	<menu label="Aide" name="Help">
 		<menu_item_call label="Aide rapide..." name="How To"/>
+		<menu_item_call label="Démarrage rapide" name="Quickstart"/>
 		<menu_item_call label="Base de connaissances" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="Forums de la communauté" name="Community Forums"/>
@@ -180,7 +186,6 @@
 		<menu_item_call label="Signaler un bug" name="Report Bug"/>
 		<menu_item_call label="Collisions, coups et bousculades" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="À propos de [APP_NAME]" name="About Second Life"/>
-		<menu_item_call label="Rechercher des mises à jour" name="Check for Updates"/>
 	</menu>
 	<menu label="Avancé" name="Advanced">
 		<menu_item_call label="Refixer les textures" name="Rebake Texture"/>
@@ -275,7 +280,6 @@
 			<menu_item_check label="Afficher les matrices" name="Show Matrices"/>
 			<menu_item_check label="Afficher la couleur sous le curseur" name="Show Color Under Cursor"/>
 			<menu_item_check label="Afficher la mémoire" name="Show Memory"/>
-			<menu_item_check label="Afficher les infos de mémoire privées" name="Show Private Mem Info"/>
 			<menu_item_check label="Afficher les mises à jour des objets" name="Show Updates"/>
 		</menu>
 		<menu label="Forcer une erreur" name="Force Errors">
@@ -310,6 +314,7 @@
 			<menu_item_check label="Zone de texture" name="Texture Area"/>
 			<menu_item_check label="Zone de face" name="Face Area"/>
 			<menu_item_check label="Infos sur le niveau de détail" name="LOD Info"/>
+			<menu_item_check label="Nombre de triangles" name="Triangle Count"/>
 			<menu_item_check label="File d&apos;attente pour la construction" name="Build Queue"/>
 			<menu_item_check label="Lumières" name="Lights"/>
 			<menu_item_check label="Particules" name="Particles"/>
@@ -369,8 +374,7 @@
 			<menu_item_call label="Vidage de cache d&apos;objet de la région" name="Dump Region Object Cache"/>
 		</menu>
 		<menu label="Interface" name="UI">
-			<menu_item_call label="Test du navigateur de médias" name="Web Browser Test"/>
-			<menu_item_call label="Navigateur du contenu Web" name="Web Content Browser"/>
+			<menu_item_call label="Navigateur de médias" name="Media Browser"/>
 			<menu_item_call label="Dump SelectMgr" name="Dump SelectMgr"/>
 			<menu_item_call label="Dump inventaire" name="Dump Inventory"/>
 			<menu_item_call label="Dump Timers" name="Dump Timers"/>
@@ -421,7 +425,9 @@
 			<menu_item_check label="Désactiver LOD" name="Disable LOD"/>
 			<menu_item_check label="Debogage Character Vis" name="Debug Character Vis"/>
 			<menu_item_check label="Afficher le squelette de collision" name="Show Collision Skeleton"/>
+			<menu_item_check label="Voir les os" name="Show Bones"/>
 			<menu_item_check label="Afficher la cible de l&apos;avatar" name="Display Agent Target"/>
+			<menu_item_check label="Afficher les étendues d&apos;imposteur" name="Show Impostor Extents"/>
 			<menu_item_call label="Dump Attachments" name="Dump Attachments"/>
 			<menu_item_call label="Débogage des textures des avatars" name="Debug Avatar Textures"/>
 			<menu_item_call label="Dump Local Textures" name="Dump Local Textures"/>

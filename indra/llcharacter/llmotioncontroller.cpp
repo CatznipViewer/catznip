@@ -37,7 +37,8 @@
 #include "llanimationstates.h"
 #include "llstl.h"
 
-const S32 NUM_JOINT_SIGNATURE_STRIDES = LL_CHARACTER_MAX_JOINTS / 4;
+// This is why LL_CHARACTER_MAX_ANIMATED_JOINTS needs to be a multiple of 4.
+const S32 NUM_JOINT_SIGNATURE_STRIDES = LL_CHARACTER_MAX_ANIMATED_JOINTS / 4;
 const U32 MAX_MOTION_INSTANCES = 32;
 
 //-----------------------------------------------------------------------------
@@ -134,11 +135,12 @@ LLMotionController::LLMotionController()
 	  mLastTime(0.0f),
 	  mHasRunOnce(FALSE),
 	  mPaused(FALSE),
-	  mPauseTime(0.f),
+	  mPausedFrame(0),
 	  mTimeStep(0.f),
 	  mTimeStepCount(0),
 	  mLastInterp(0.f),
-	  mIsSelf(FALSE)
+	  mIsSelf(FALSE),
+	  mLastCountAfterPurge(0)
 {
 }
 
@@ -237,10 +239,12 @@ void LLMotionController::purgeExcessMotions()
 		}
 	}
 
-	if (mLoadedMotions.size() > 2*MAX_MOTION_INSTANCES)
+	U32 loaded_count = mLoadedMotions.size();
+	if (loaded_count > (2 * MAX_MOTION_INSTANCES) && loaded_count > mLastCountAfterPurge)
 	{
-		LL_WARNS_ONCE("Animation") << "> " << 2*MAX_MOTION_INSTANCES << " Loaded Motions" << LL_ENDL;
+		LL_WARNS_ONCE("Animation") << loaded_count << " Loaded Motions. Amount of motions is over limit." << LL_ENDL;
 	}
+	mLastCountAfterPurge = loaded_count;
 }
 
 //-----------------------------------------------------------------------------
@@ -437,7 +441,8 @@ BOOL LLMotionController::stopMotionLocally(const LLUUID &id, BOOL stop_immediate
 {
 	// if already inactive, return false
 	LLMotion *motion = findMotion(id);
-	return stopMotionInstance(motion, stop_immediate);
+    // SL-1290: always stop immediate if paused 
+	return stopMotionInstance(motion, stop_immediate||mPaused);
 }
 
 BOOL LLMotionController::stopMotionInstance(LLMotion* motion, BOOL stop_immediate)
@@ -488,8 +493,8 @@ void LLMotionController::updateAdditiveMotions()
 //-----------------------------------------------------------------------------
 void LLMotionController::resetJointSignatures()
 {
-	memset(&mJointSignature[0][0], 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
-	memset(&mJointSignature[1][0], 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
+	memset(&mJointSignature[0][0], 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
+	memset(&mJointSignature[1][0], 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
 }
 
 //-----------------------------------------------------------------------------
@@ -553,9 +558,9 @@ static LLTrace::BlockTimerStatHandle FTM_MOTION_ON_UPDATE("Motion onUpdate");
 void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_type)
 {
 	BOOL update_result = TRUE;
-	U8 last_joint_signature[LL_CHARACTER_MAX_JOINTS];
+	U8 last_joint_signature[LL_CHARACTER_MAX_ANIMATED_JOINTS];
 
-	memset(&last_joint_signature, 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
+	memset(&last_joint_signature, 0, sizeof(U8) * LL_CHARACTER_MAX_ANIMATED_JOINTS);
 
 	// iterate through active motions in chronological order
 	for (motion_list_t::iterator iter = mActiveMotions.begin();
@@ -576,7 +581,6 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 		}
 		else
 		{
-			// NUM_JOINT_SIGNATURE_STRIDES should be multiple of 4
 			for (S32 i = 0; i < NUM_JOINT_SIGNATURE_STRIDES; i++)
 			{
 		 		U32 *current_signature = (U32*)&(mJointSignature[0][i * 4]);
@@ -811,6 +815,10 @@ void LLMotionController::updateLoadingMotions()
 //-----------------------------------------------------------------------------
 void LLMotionController::updateMotions(bool force_update)
 {
+    // SL-763: "Distant animated objects run at super fast speed"
+    // The use_quantum optimization or possibly the associated code in setTimeStamp()
+    // does not work as implemented.
+    // Currently setting mTimeStep to nonzero is disabled elsewhere.
 	BOOL use_quantum = (mTimeStep != 0.f);
 
 	// Always update mPrevTimerElapsed
@@ -1122,6 +1130,7 @@ void LLMotionController::pauseAllMotions()
 	{
 		//LL_INFOS() << "Pausing animations..." << LL_ENDL;
 		mPaused = TRUE;
+        mPausedFrame = LLFrameTimer::getFrameCount();
 	}
 	
 }

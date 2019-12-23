@@ -48,7 +48,6 @@ const char * LLDoNotDisturbNotificationStorage::offerName = "UserGiveItem";
 
 LLDoNotDisturbNotificationStorageTimer::LLDoNotDisturbNotificationStorageTimer() : LLEventTimer(DND_TIMER)
 {
-
 }
 
 LLDoNotDisturbNotificationStorageTimer::~LLDoNotDisturbNotificationStorageTimer()
@@ -69,12 +68,12 @@ BOOL LLDoNotDisturbNotificationStorageTimer::tick()
 }
 
 LLDoNotDisturbNotificationStorage::LLDoNotDisturbNotificationStorage()
-	: LLSingleton<LLDoNotDisturbNotificationStorage>()
-	, LLNotificationStorage("")
+	: LLNotificationStorage("")
     , mDirty(false)
 {
     nameToPayloadParameterMap[toastName] = "SESSION_ID";
     nameToPayloadParameterMap[offerName] = "object_id";
+    initialize();
 }
 
 LLDoNotDisturbNotificationStorage::~LLDoNotDisturbNotificationStorage()

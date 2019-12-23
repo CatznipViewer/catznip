@@ -48,6 +48,7 @@
 #include "lleventtimer.h"
 #include "google_breakpad/exception_handler.h"
 #include "stringize.h"
+#include "llcleanup.h"
 
 //
 // Signal handling
@@ -177,7 +178,7 @@ LLApp::~LLApp()
 	
 	if(mExceptionHandler != 0) delete mExceptionHandler;
 
-	LLCommon::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLCommon);
 }
 
 // static
@@ -255,6 +256,70 @@ bool LLApp::parseCommandOptions(int argc, char** argv)
 	return true;
 }
 
+bool LLApp::parseCommandOptions(int argc, wchar_t** wargv)
+{
+	LLSD commands;
+	std::string name;
+	std::string value;
+	for(int ii = 1; ii < argc; ++ii)
+	{
+		if(wargv[ii][0] != '-')
+		{
+			LL_INFOS() << "Did not find option identifier while parsing token: "
+				<< wargv[ii] << LL_ENDL;
+			return false;
+		}
+		int offset = 1;
+		if(wargv[ii][1] == '-') ++offset;
+
+#if LL_WINDOWS
+	name.assign(utf16str_to_utf8str(&wargv[ii][offset]));
+#else
+	name.assign(wstring_to_utf8str(&wargv[ii][offset]));
+#endif
+		if(((ii+1) >= argc) || (wargv[ii+1][0] == '-'))
+		{
+			// we found another option after this one or we have
+			// reached the end. simply record that this option was
+			// found and continue.
+			int flag = name.compare("logfile");
+			if (0 == flag)
+			{
+				commands[name] = "log";
+			}
+			else
+			{
+				commands[name] = true;
+			}
+			
+			continue;
+		}
+		++ii;
+
+#if LL_WINDOWS
+	value.assign(utf16str_to_utf8str((wargv[ii])));
+#else
+	value.assign(wstring_to_utf8str((wargv[ii])));
+#endif
+
+#if LL_WINDOWS
+		//Windows changed command line parsing.  Deal with it.
+		S32 slen = value.length() - 1;
+		S32 start = 0;
+		S32 end = slen;
+		if (wargv[ii][start]=='"')start++;
+		if (wargv[ii][end]=='"')end--;
+		if (start!=0 || end!=slen) 
+		{
+			value = value.substr (start,end);
+		}
+#endif
+
+		commands[name] = value;
+	}
+	setOptionData(PRIORITY_COMMAND_LINE, commands);
+	return true;
+}
 
 void LLApp::manageLiveFile(LLLiveFile* livefile)
 {
@@ -327,7 +392,7 @@ void LLApp::setupErrorHandling(bool second_instance)
 
 #if LL_WINDOWS
 
-#if LL_SEND_CRASH_REPORTS
+#if LL_SEND_CRASH_REPORTS && ! defined(LL_BUGSPLAT)
 	EnableCrashingOnCrashes();
 
 	// This sets a callback to handle w32 signals to the console window.
@@ -353,7 +418,7 @@ void LLApp::setupErrorHandling(bool second_instance)
 			std::wstring wpipe_name;
 			wpipe_name =  mCrashReportPipeStr + wstringize(getPid());
 
-			const std::wstring wdump_path(wstringize(mDumpPath));
+			const std::wstring wdump_path(utf8str_to_utf16str(mDumpPath));
 
 			int retries = 30;
 			for (; retries > 0; --retries)
@@ -389,8 +454,15 @@ void LLApp::setupErrorHandling(bool second_instance)
 			mExceptionHandler->set_handle_debug_exceptions(true);
 		}
 	}
-#endif
-#else
+#endif // LL_SEND_CRASH_REPORTS && ! defined(LL_BUGSPLAT)
+#else  // ! LL_WINDOWS
+
+#if defined(LL_BUGSPLAT)
+	// Don't install our own signal handlers -- BugSplat needs to hook them,
+	// or it's completely ineffectual.
+	bool installHandler = false;
+
+#else // ! LL_BUGSPLAT
 	//
 	// Start up signal handling.
 	//
@@ -398,9 +470,11 @@ void LLApp::setupErrorHandling(bool second_instance)
 	// thread, asynchronous signals can be delivered to any thread (in theory)
 	//
 	setup_signals();
-	
+
 	// Add google breakpad exception handler configured for Darwin/Linux.
 	bool installHandler = true;
+#endif // ! LL_BUGSPLAT
+
 #if LL_DARWIN
 	// For the special case of Darwin, we do not want to install the handler if
 	// the process is being debugged as the app will exit with value ABRT (6) if
@@ -433,7 +507,7 @@ void LLApp::setupErrorHandling(bool second_instance)
 		// installing the handler.
 		installHandler = true;
 	}
-	#endif
+	#endif // ! LL_RELEASE_FOR_DOWNLOAD
 
 	if(installHandler && (mExceptionHandler == 0))
 	{
@@ -449,9 +523,9 @@ void LLApp::setupErrorHandling(bool second_instance)
 		google_breakpad::MinidumpDescriptor desc(mDumpPath);
 	    mExceptionHandler = new google_breakpad::ExceptionHandler(desc, NULL, unix_minidump_callback, NULL, true, -1);
 	}
-#endif
+#endif // LL_LINUX
 
-#endif
+#endif // ! LL_WINDOWS
 	startErrorThread();
 }
 
@@ -514,9 +588,9 @@ void LLApp::setMiniDumpDir(const std::string &path)
 
 	if(mExceptionHandler == 0) return;
 #ifdef LL_WINDOWS
-	wchar_t buffer[MAX_MINDUMP_PATH_LENGTH];
-	mbstowcs(buffer, mDumpPath.c_str(), MAX_MINDUMP_PATH_LENGTH);
-	mExceptionHandler->set_dump_path(std::wstring(buffer));
+	std::wstring buffer(utf8str_to_utf16str(mDumpPath));
+	if (buffer.size() > MAX_MINDUMP_PATH_LENGTH) buffer.resize(MAX_MINDUMP_PATH_LENGTH);
+	mExceptionHandler->set_dump_path(buffer);
 #elif LL_LINUX
         //google_breakpad::MinidumpDescriptor desc("/tmp");	//path works in debug fails in production inside breakpad lib so linux gets a little less stack reporting until it is patched.
         google_breakpad::MinidumpDescriptor desc(mDumpPath);	//path works in debug fails in production inside breakpad lib so linux gets a little less stack reporting until it is patched.

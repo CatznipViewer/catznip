@@ -81,7 +81,10 @@ public:
 	LLFloaterReporter(const LLSD& key);
 	/*virtual*/ ~LLFloaterReporter();
 	/*virtual*/ BOOL postBuild();
-	virtual void draw();
+	/*virtual*/ void onOpen(const LLSD& key);
+	/*virtual*/ void onClose(bool app_quitting);
+
+	static void onIdle(void* user_data);
 	
 	void setReportType(EReportType type) { mReportType = type; }
 	
@@ -103,10 +106,14 @@ public:
 
 	void setPickedObjectProperties(const std::string& object_name, const std::string& owner_name, const LLUUID owner_id);
 
+	void onLoadScreenshotDialog(const LLSD& notification, const LLSD& response);
+
+	void takeNewSnapshot();
+
 private:
 	static void show(const LLUUID& object_id, const std::string& avatar_name = LLStringUtil::null, const LLUUID& experience_id = LLUUID::null);
 
-	void takeScreenshot();
+	void takeScreenshot(bool use_prev_screenshot = false);
 	void sendReportViaCaps(std::string url);
 	void uploadImage();
 	bool validateReport();
@@ -122,6 +129,7 @@ private:
 	void setFromAvatarID(const LLUUID& avatar_id);
 	void onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name);
 
+	static void requestAbuseCategoriesCoro(std::string url, LLHandle<LLFloater> handle);
     static void finishedARPost(const LLSD &);
 
 private:
@@ -140,6 +148,10 @@ private:
 	std::string		mDefaultSummary;
 	LLResourceData* mResourceDatap;
 	boost::signals2::connection mAvatarNameCacheConnection;
+
+	LLPointer<LLImageRaw> mImageRaw;
+	LLPointer<LLImageRaw> mPrevImageRaw;
+	LLFrameTimer	mSnapshotTimer;
 };
 
 #endif

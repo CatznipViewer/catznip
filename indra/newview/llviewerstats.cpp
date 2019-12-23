@@ -62,6 +62,7 @@
 #include "llmeshrepository.h" //for LLMeshRepository::sBytesReceived
 #include "llsdserialize.h"
 #include "llcorehttputil.h"
+#include "llvoicevivox.h"
 
 namespace LLStatViewer
 {
@@ -307,7 +308,8 @@ U32Bytes				gTotalWorldData,
 U32								gSimPingCount = 0;
 U32Bits				gObjectData;
 F32Milliseconds		gAvgSimPing(0.f);
-U32Bytes			gTotalTextureBytesPerBoostLevel[LLViewerTexture::MAX_GL_IMAGE_CATEGORY] = {U32Bytes(0)};
+// rely on default initialization
+U32Bytes			gTotalTextureBytesPerBoostLevel[LLViewerTexture::MAX_GL_IMAGE_CATEGORY];
 
 extern U32  gVisCompared;
 extern U32  gVisTested;
@@ -444,8 +446,6 @@ void send_stats()
 	
 	LLViewerStats::instance().getRecording().pause();
 
-	body["session_id"] = gAgentSessionID;
-	
 	LLSD &agent = body["agent"];
 	
 	time_t ltime;
@@ -489,8 +489,9 @@ void send_stats()
 	LLSD &system = body["system"];
 	
 	system["ram"] = (S32) gSysMemory.getPhysicalMemoryKB().value();
-	system["os"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	system["os"] = LLOSInfo::instance().getOSStringSimple();
 	system["cpu"] = gSysCPU.getCPUString();
+	system["address_size"] = ADDRESS_SIZE;
 	unsigned char MACAddress[MAC_ADDRESS_BYTES];
 	LLUUID::getNodeID(MACAddress);
 	std::string macAddressString = llformat("%02x-%02x-%02x-%02x-%02x-%02x",
@@ -570,6 +571,8 @@ void send_stats()
 	fail["off_circuit"] = (S32) gMessageSystem->mOffCircuitPackets;
 	fail["invalid"] = (S32) gMessageSystem->mInvalidOnCircuitPackets;
 
+	body["stats"]["voice"] = LLVoiceVivoxStats::getInstance()->read();
+
 	// Misc stats, two strings and two ints
 	// These are not expecticed to persist across multiple releases
 	// Comment any changes with your name and the expected release revision
@@ -585,9 +588,6 @@ void send_stats()
 	misc["string_1"] = llformat("%d", window_size);
 	misc["string_2"] = llformat("Texture Time: %.2f, Total Time: %.2f", gTextureTimer.getElapsedTimeF32(), gFrameTimeSeconds.value());
 
-// 	misc["int_1"] = LLSD::Integer(gSavedSettings.getU32("RenderQualityPerformance")); // Steve: 1.21
-// 	misc["int_2"] = LLSD::Integer(gFrameStalls); // Steve: 1.21
-
 	F32 unbaked_time = LLVOAvatar::sUnbakedTime * 1000.f / gFrameTimeSeconds;
 	misc["int_1"] = LLSD::Integer(unbaked_time); // Steve: 1.22
 	F32 grey_time = LLVOAvatar::sGreyTime * 1000.f / gFrameTimeSeconds;
@@ -601,9 +601,13 @@ void send_stats()
 	
 	body["MinimalSkin"] = false;
 
+	LL_INFOS("LogViewerStatsPacket") << "Sending viewer statistics: " << body << LL_ENDL;
+
+	// The session ID token must never appear in logs
+	body["session_id"] = gAgentSessionID;
+
 	LLViewerStats::getInstance()->addToMessage(body);
 
-	LL_INFOS("LogViewerStatsPacket") << "Sending viewer statistics: " << body << LL_ENDL;
     LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, body,
         "Statistics posted to sim", "Failed to post statistics to sim");
 	LLViewerStats::instance().getRecording().resume();

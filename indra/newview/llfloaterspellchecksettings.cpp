@@ -30,12 +30,13 @@
 #include "llfilepicker.h"
 #include "llfloaterreg.h"
 #include "llfloaterspellchecksettings.h"
+#include "llnotificationsutil.h"
 #include "llscrolllistctrl.h"
 #include "llsdserialize.h"
 #include "llspellcheck.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
-#include "llnotificationsutil.h"
+#include "llviewermenufile.h" // LLFilePickerReplyThread
 
 #include <boost/algorithm/string.hpp>
 
@@ -55,7 +56,7 @@ void LLFloaterSpellCheckerSettings::draw()
 	bool enable_remove = !sel_items.empty();
 	for (std::vector<LLScrollListItem*>::const_iterator sel_it = sel_items.begin(); sel_it != sel_items.end(); ++sel_it)
 	{
-		enable_remove &= LLSpellChecker::canRemoveDictionary((*sel_it)->getValue().asString());
+		enable_remove &= LLSpellChecker::getInstance()->canRemoveDictionary((*sel_it)->getValue().asString());
 	}
 	getChild<LLUICtrl>("spellcheck_remove_btn")->setEnabled(enable_remove);
 }
@@ -120,7 +121,7 @@ void LLFloaterSpellCheckerSettings::onClose(bool app_quitting)
 		for (std::vector<LLScrollListItem*>::const_iterator item_it = list_items.begin(); item_it != list_items.end(); ++item_it)
 		{
 			const std::string language = (*item_it)->getValue().asString();
-			if (LLSpellChecker::hasDictionary(language, true))
+			if (LLSpellChecker::getInstance()->hasDictionary(language, true))
 			{
 				list_dict.push_back(language);
 			}
@@ -163,7 +164,7 @@ void LLFloaterSpellCheckerSettings::refreshDictionaries(bool from_settings)
 	}
 	dict_combo->clearRows();
 
-	const LLSD& dict_map = LLSpellChecker::getDictionaryMap();
+	const LLSD& dict_map = LLSpellChecker::getInstance()->getDictionaryMap();
 	if (dict_map.size())
 	{
 		for (LLSD::array_const_iterator dict_it = dict_map.beginArray(); dict_it != dict_map.endArray(); ++dict_it)
@@ -215,7 +216,7 @@ void LLFloaterSpellCheckerSettings::refreshDictionaries(bool from_settings)
 	for (LLSpellChecker::dict_list_t::const_iterator it = active_list.begin(); it != active_list.end(); ++it)
 	{
 		const std::string language = *it;
-		const LLSD dict = LLSpellChecker::getDictionaryData(language);
+		const LLSD dict = LLSpellChecker::getInstance()->getDictionaryData(language);
 		row["value"] = language;
 		row["columns"][0]["value"] = (!dict["user_installed"].asBoolean()) ? language : language + " " + LLTrans::getString("UserDictionary");
 		active_ctrl->addElement(row);
@@ -258,13 +259,12 @@ BOOL LLFloaterSpellCheckerImport::postBuild(void)
 
 void LLFloaterSpellCheckerImport::onBtnBrowse()
 {
-	LLFilePicker& file_picker = LLFilePicker::instance();
-	if (!file_picker.getOpenFile(LLFilePicker::FFLOAD_DICTIONARY))
-	{
-		return;
-	}
+	(new LLFilePickerReplyThread(boost::bind(&LLFloaterSpellCheckerImport::importSelectedDictionary, this, _1), LLFilePicker::FFLOAD_DICTIONARY, false))->getFile();
+}
 
-	std::string filepath = file_picker.getFirstFile();
+void LLFloaterSpellCheckerImport::importSelectedDictionary(const std::vector<std::string>& filenames)
+{
+	std::string filepath = filenames[0];
 
 	const std::string extension = gDirUtilp->getExtension(filepath);
 	if ("xcu" == extension)
@@ -277,7 +277,7 @@ void LLFloaterSpellCheckerImport::onBtnBrowse()
 	}
 
 	getChild<LLUICtrl>("dictionary_path")->setValue(filepath);
-	
+
 	mDictionaryDir = gDirUtilp->getDirName(filepath);
 	mDictionaryBasename = gDirUtilp->getBaseFileName(filepath, true);
 	getChild<LLUICtrl>("dictionary_name")->setValue(mDictionaryBasename);
@@ -380,7 +380,7 @@ void LLFloaterSpellCheckerImport::onBtnOK()
 			custom_file_out.close();
 		}
 
-		LLSpellChecker::refreshDictionaryMap();
+		LLSpellChecker::getInstance()->refreshDictionaryMap();
 	}
 
 	closeFloater(false);

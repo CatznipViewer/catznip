@@ -124,6 +124,11 @@ template <typename T> struct LLSelectedTEGetFunctor
 	virtual T get(LLViewerObject* object, S32 te) = 0;
 };
 
+template <typename T> struct LLCheckIdenticalFunctor
+{
+	static bool same(const T& a, const T& b, const T& tolerance);
+};
+
 typedef enum e_send_type
 {
 	SEND_ONLY_ROOTS,
@@ -168,13 +173,14 @@ public:
 
 	void selectAllTEs(BOOL b);
 	void selectTE(S32 te_index, BOOL selected);
-	BOOL isTESelected(S32 te_index);
-	S32 getLastSelectedTE();
+	BOOL isTESelected(S32 te_index) const;
+	bool hasSelectedTE() const { return TE_SELECT_MASK_ALL & mTESelectMask; }
+	S32 getLastSelectedTE() const;
+	S32 getLastOperatedTE() const { return mLastTESelected; }
 	S32 getTESelectMask() { return mTESelectMask; }
-	void renderOneWireframe(const LLColor4& color);
 	void renderOneSilhouette(const LLColor4 &color);
 	void setTransient(BOOL transient) { mTransient = transient; }
-	BOOL isTransient() { return mTransient; }
+	BOOL isTransient() const { return mTransient; }
 	LLViewerObject* getObject();
 	void setObject(LLViewerObject* object);
 	// *NOTE: invalidate stored textures and colors when # faces change
@@ -232,6 +238,8 @@ protected:
 class LLObjectSelection : public LLRefCount
 {
 	friend class LLSelectMgr;
+	friend class LLSafeHandle<LLObjectSelection>;
+	friend class LLSelectionCallbackData;
 
 protected:
 	~LLObjectSelection();
@@ -311,7 +319,7 @@ public:
 	LLViewerObject* getPrimaryObject() { return mPrimaryObject; }
 
 	// iterate through texture entries
-	template <typename T> bool getSelectedTEValue(LLSelectedTEGetFunctor<T>* func, T& res);
+	template <typename T> bool getSelectedTEValue(LLSelectedTEGetFunctor<T>* func, T& res, bool has_tolerance = false, T tolerance = T());
 	template <typename T> bool isMultipleTEValue(LLSelectedTEGetFunctor<T>* func, const T& ignore_value);
 	
 	S32 getNumNodes();
@@ -338,6 +346,9 @@ public:
 	// returns TRUE is any node is currenly worn as an attachment
 	BOOL isAttachment();
 
+    bool checkAnimatedObjectEstTris();
+    bool checkAnimatedObjectLinkable();
+    
 	// Apply functors to various subsets of the selected objects
 	// If firstonly is FALSE, returns the AND of all apply() calls.
 	// Else returns TRUE immediately if any apply() call succeeds (i.e. OR with early exit)
@@ -386,8 +397,21 @@ extern template class LLSelectMgr* LLSingleton<class LLSelectMgr>::getInstance()
 // For use with getFirstTest()
 struct LLSelectGetFirstTest;
 
+// temporary storage, Ex: to attach objects after autopilot
+class LLSelectionCallbackData
+{
+public:
+    LLSelectionCallbackData();
+    LLObjectSelectionHandle	getSelection() { return mSelectedObjects; }
+private:
+    LLObjectSelectionHandle					mSelectedObjects;
+};
+
 class LLSelectMgr : public LLEditMenuHandler, public LLSingleton<LLSelectMgr>
 {
+	LLSINGLETON(LLSelectMgr);
+	~LLSelectMgr();
+
 public:
 	static BOOL					sRectSelectInclusive;	// do we need to surround an object to pick it?
 	static BOOL					sRenderHiddenSelections;	// do we show selection silhouettes that are occluded?
@@ -413,9 +437,6 @@ public:
 	LLCachedControl<bool>					mDebugSelectMgr;
 
 public:
-	LLSelectMgr();
-	~LLSelectMgr();
-
 	static void cleanupGlobals();
 
 	// LLEditMenuHandler interface
@@ -530,10 +551,10 @@ public:
 	EGridMode		getGridMode() { return mGridMode; }
 	void			getGrid(LLVector3& origin, LLQuaternion& rotation, LLVector3 &scale, bool for_snap_guides = false);
 
-	BOOL getTEMode()		{ return mTEMode; }
-	void setTEMode(BOOL b)	{ mTEMode = b; }
+	BOOL getTEMode() const { return mTEMode; }
+	void setTEMode(BOOL b) { mTEMode = b; }
 
-	BOOL shouldShowSelection()	{ return mShowSelection; }
+	BOOL shouldShowSelection() const { return mShowSelection; }
 
 	LLBBox getBBoxOfSelection() const;
 	LLBBox getSavedBBoxOfSelection() const { return mSavedSelectionBBox; }
@@ -589,7 +610,7 @@ public:
 	void selectionSetClickAction(U8 action);
 	void selectionSetIncludeInSearch(bool include_in_search);
 	void selectionSetGlow(const F32 glow);
-	void selectionSetMaterialParams(LLSelectedTEMaterialFunctor* material_func);
+	void selectionSetMaterialParams(LLSelectedTEMaterialFunctor* material_func, int specific_te = -1);
 	void selectionRemoveMaterial();
 
 	void selectionSetObjectPermissions(U8 perm_field, BOOL set, U32 perm_mask, BOOL override = FALSE);
@@ -622,6 +643,9 @@ public:
 	// returns TRUE if you can modify all selected objects. 
 	BOOL selectGetRootsModify();
 	BOOL selectGetModify();
+
+	// returns TRUE if all objects are in same region
+	BOOL selectGetSameRegion();
 
 	// returns TRUE if is all objects are non-permanent-enforced
 	BOOL selectGetRootsNonPermanentEnforced();
@@ -670,6 +694,11 @@ public:
 	// returns TRUE if all the nodes are valid. Accumulates
 	// permissions in the parameter.
 	BOOL selectGetPermissions(LLPermissions& perm);
+
+	// returns TRUE if all the nodes are valid. Depends onto "edit linked" state
+	// Children in linksets are a bit special - they require not only move permission
+	// but also modify if "edit linked" is set, since you move them relative to parent
+	BOOL selectGetEditMoveLinksetPermissions(bool &move, bool &modify);
 	
 	// Get a bunch of useful sale information for the object(s) selected.
 	// "_mixed" is true if not all objects have the same setting.
@@ -696,6 +725,8 @@ public:
 
 	LLPermissions* findObjectPermissions(const LLViewerObject* object);
 
+	BOOL isSelfAvatarSelected();
+
 	void selectDelete();							// Delete on simulator
 	void selectForceDelete();			// just delete, no into trash
 	void selectDuplicate(const LLVector3& offset, BOOL select_copy);	// Duplicate on simulator
@@ -720,6 +751,7 @@ public:
 	// canceled
 	void sendBuy(const LLUUID& buyer_id, const LLUUID& category_id, const LLSaleInfo sale_info);
 	void sendAttach(U8 attachment_point, bool replace);
+	void sendAttach(LLObjectSelectionHandle selection_handle, U8 attachment_point, bool replace);
 	void sendDetach();
 	void sendDropAttachment();
 	void sendLink();
@@ -737,6 +769,8 @@ public:
 
 	LLVector3d		getSelectionCenterGlobal() const	{ return mSelectionCenterGlobal; }
 	void			updateSelectionCenter();
+
+    void pauseAssociatedAvatars();
 
 	void resetAgentHUDZoom();
 	void setAgentHUDZoom(F32 target_zoom, F32 current_zoom);
@@ -763,6 +797,13 @@ private:
 							void (*pack_header)(void *user_data), 
 							void (*pack_body)(LLSelectNode* node, void *user_data), 
 							void (*log_func)(LLSelectNode* node, void *user_data), 
+							void *user_data,
+							ESendType send_type);
+	void sendListToRegions(	LLObjectSelectionHandle selected_handle,
+							const std::string& message_name,
+							void (*pack_header)(void *user_data),
+							void (*pack_body)(LLSelectNode* node, void *user_data),
+							void (*log_func)(LLSelectNode* node, void *user_data),
 							void *user_data,
 							ESendType send_type);
 
@@ -839,7 +880,7 @@ private:
 	LLFrameTimer			mEffectsTimer;
 	BOOL					mForceSelection;
 
-	LLAnimPauseRequest		mPauseRequest;
+    std::vector<LLAnimPauseRequest>	mPauseRequests;
 };
 
 // *DEPRECATED: For callbacks or observers, use
@@ -851,7 +892,7 @@ void dialog_refresh_all();
 //-----------------------------------------------------------------------------
 // getSelectedTEValue
 //-----------------------------------------------------------------------------
-template <typename T> bool LLObjectSelection::getSelectedTEValue(LLSelectedTEGetFunctor<T>* func, T& res)
+template <typename T> bool LLObjectSelection::getSelectedTEValue(LLSelectedTEGetFunctor<T>* func, T& res, bool has_tolerance, T tolerance)
 {
 	bool have_first = false;
 	bool have_selected = false;
@@ -887,7 +928,14 @@ template <typename T> bool LLObjectSelection::getSelectedTEValue(LLSelectedTEGet
 			{
 				if ( value != selected_value )
 				{
-					identical = false;
+                    if (!has_tolerance)
+                    {
+					    identical = false;
+                    }
+                    else if (!LLCheckIdenticalFunctor<T>::same(value, selected_value, tolerance))
+                    {
+                        identical = false;
+                    }
 				}
 				if (te == selected_te)
 				{

@@ -29,8 +29,11 @@
 		Error de inicialización de gráficos. Actualiza tu controlador de gráficos.
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[CHANNEL] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([ADDRESS_SIZE]bit) 
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
+	</string>
+	<string name="BuildConfig">
+		Configuración de constitución [BUILD_CONFIG]
 	</string>
 	<string name="AboutPosition">
 		Estás en la posición [POSITION_LOCAL_0,number,1], [POSITION_LOCAL_1,number,1], [POSITION_LOCAL_2,number,1], de [REGION], alojada en &lt;nolink&gt;[HOSTNAME]&lt;/nolink&gt; ([HOSTIP])
@@ -49,19 +52,42 @@ Tarjeta gráfica: [GRAPHICS_CARD]
 	<string name="AboutDriver">
 		Versión de Windows Graphics Driver: [GRAPHICS_DRIVER_VERSION]
 	</string>
-	<string name="AboutLibs">
+	<string name="AboutOGL">
 		Versión de OpenGL: [OPENGL_VERSION]
-
-Versión de J2C Decoder: [J2C_VERSION]
-Versión de Audio Driver: [AUDIO_DRIVER_VERSION]
-Versión de LLCEFLib/CEF: [LLCEFLIB_VERSION]
+	</string>
+	<string name="AboutSettings">
+		Tamaño de la ventana: [WINDOW_WIDTH]x[WINDOW_HEIGHT]
+Ajuste del tamaño de fuente: [FONT_SIZE_ADJUSTMENT]pt
+Escala UI: [UI_SCALE]
+Distancia de dibujo: [DRAW_DISTANCE]m
+Ancho de banda: [NET_BANDWITH]kbit/s
+Factor LOD: [LOD_FACTOR]
+Calidad de renderización: [RENDER_QUALITY]
+Modelo de iluminación avanzado: [GPU_SHADERS]
+Memoria de textura: [TEXTURE_MEMORY]MB
+VFS (cache) hora de creación: [VFS_TIME]
+	</string>
+	<string name="AboutOSXHiDPI">
+		Modo de visualización HiDPi: [HIDPI]
+	</string>
+	<string name="AboutLibs">
+		Versión de descodificador J2C: [J2C_VERSION] 
+Versión del controlador audio: [AUDIO_DRIVER_VERSION] 
+[LIBCEF_VERSION] 
+Versión LibVLC: [LIBVLC_VERSION] 
 Versión del servidor de voz: [VOICE_VERSION]
 	</string>
 	<string name="AboutTraffic">
 		Paquetes perdidos: [PACKETS_LOST,number,0]/[PACKETS_IN,number,0] ([PACKETS_PCT,number,1]%)
 	</string>
+	<string name="AboutTime">
+		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
+	</string>
 	<string name="ErrorFetchingServerReleaseNotesURL">
 		Error al obtener la URL de las notas de la versión del servidor.
+	</string>
+	<string name="BuildConfiguration">
+		Configuración de constitución
 	</string>
 	<string name="ProgressRestoring">
 		Restaurando...
@@ -229,9 +255,8 @@ support@secondlife.com.
 [HORA] (horario de la costa del Pacífico).
 	</string>
 	<string name="LoginFailedAccountDisabled">
-		En este momento no podemos completar la solicitud.
-Si deseas obtener asistencia, ponte en contacto con el departamento de soporte de Second Life a través de la página http://secondlife.com/support.
-Si no puedes cambiar la contraseña, llama al número (866) 476-9763.
+		En este momento no podemos completar la solicitud. 
+Por favor solicita ayuda al personal de asistencia de Second Life en http://support.secondlife.com.
 	</string>
 	<string name="LoginFailedTransformError">
 		Se han detectado datos incorrectos en el inicio de sesión.
@@ -247,9 +272,8 @@ Si crees que se trata de un error, ponte en contacto con support@secondlife.com.
 		La solicitud de cierre de sesión ha obtenido como resultado un error del simulador.
 	</string>
 	<string name="LoginFailedPendingLogout">
-		El sistema está cerrando tu sesión en estos momentos.
-Tu cuenta no estará disponible hasta las
-[HORA] (horario de la costa del Pacífico).
+		El sistema te desconectará. 
+Por favor, aguarda un momento antes de intentar conectarte nuevamente.
 	</string>
 	<string name="LoginFailedUnableToCreateSession">
 		No se ha podido crear una sesión válida.
@@ -619,7 +643,7 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Notas de la versión
 	</string>
 	<string name="RELEASE_NOTES_BASE_URL">
-		http://wiki.secondlife.com/wiki/Release_Notes/
+		https://releasenotes.secondlife.com/viewer/
 	</string>
 	<string name="LoadingData">
 		Cargando...
@@ -668,6 +692,19 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	</string>
 	<string name="AssetErrorUnknownStatus">
 		Estado desconocido
+	</string>
+	<string name="AssetUploadServerUnreacheble">
+		El servicio no está disponible.
+	</string>
+	<string name="AssetUploadServerDifficulties">
+		Se detectaron errores inesperados en el servidor.
+	</string>
+	<string name="AssetUploadServerUnavaliable">
+		El servicio no está disponible o se alcanzó el tiempo de carga máxima.
+	</string>
+	<string name="AssetUploadRequestInvalid">
+		Error en la solicitud de carga. Por favor, ingresa a 
+http://secondlife.com/support para obtener ayuda sobre cómo solucionar este problema.
 	</string>
 	<string name="texture">
 		la textura
@@ -1068,6 +1105,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="TeleportYourAgent">
 		Teleportarte
 	</string>
+	<string name="ForceSitAvatar">
+		Forzar que el avatar se siente
+	</string>
 	<string name="AgentNameSubst">
 		(Tú)
 	</string>
@@ -1372,6 +1412,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="BodyPartsRightLeg">
 		Pierna der.
 	</string>
+	<string name="BodyPartsEnhancedSkeleton">
+		Esqueleto mejorado
+	</string>
 	<string name="GraphicsQualityLow">
 		Bajo
 	</string>
@@ -1386,6 +1429,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	</string>
 	<string name="InventoryNoMatchingItems">
 		¿No encuentras lo que buscas? Prueba con [secondlife:///app/search/all/[SEARCH_TERM] Buscar].
+	</string>
+	<string name="InventoryNoMatchingRecentItems">
+		¿No encuentras lo que buscas? Intenta [secondlife:///app/inventory/filters Show filters].
 	</string>
 	<string name="PlacesNoMatchingItems">
 		¿No encuentras lo que buscas? Prueba con [secondlife:///app/search/places/[SEARCH_TERM] Buscar].
@@ -1417,6 +1463,15 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="MarketplaceURL_LearnMore">
 		https://marketplace.[MARKETPLACE_DOMAIN_NAME]/learn_more
 	</string>
+	<string name="InventoryPlayAnimationTooltip">
+		Abrir la ventana con las opciones del Juego
+	</string>
+	<string name="InventoryPlayGestureTooltip">
+		Realizar gesto seleccionado en el mundo.
+	</string>
+	<string name="InventoryPlaySoundTooltip">
+		Abrir la ventana con las opciones del Juego
+	</string>
 	<string name="InventoryOutboxNotMerchantTitle">
 		Cualquier usuario puede vender objetos en el mercado.
 	</string>
@@ -1444,13 +1499,17 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		La [[MARKETPLACE_CREATE_STORE_URL] tienda del Mercado] devuelve errores.
 	</string>
 	<string name="InventoryMarketplaceError">
-		Esta función está actualmente en versión beta. Si quieres participar, añade tu nombre a este [http://goo.gl/forms/FCQ7UXkakz Formulario de Google].
+		Se ha producido un error al abrir Artículos del Mercado.
+Si sigues recibiendo el mismo mensaje, solicita ayuda al personal de asistencia de Second Life en http://support.secondlife.com
 	</string>
 	<string name="InventoryMarketplaceListingsNoItemsTitle">
 		Tu carpeta Artículos del mercado está vacía.
 	</string>
 	<string name="InventoryMarketplaceListingsNoItems">
 		Arrastra carpetas a esta sección para incluirlas en la lista de venta del [[MARKETPLACE_DASHBOARD_URL] Mercado].
+	</string>
+	<string name="InventoryItemsCount">
+		( [ITEMS_COUNT] Objetos)
 	</string>
 	<string name="Marketplace Validation Warning Stock">
 		La carpeta de stock debe estar contenida en una carpeta de versión
@@ -1814,6 +1873,51 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="Avatar Center">
 		Centro del avatar
 	</string>
+	<string name="Left Ring Finger">
+		Dedo anular izquierdo
+	</string>
+	<string name="Right Ring Finger">
+		Dedo anular derecho
+	</string>
+	<string name="Tail Base">
+		Base de la cola
+	</string>
+	<string name="Tail Tip">
+		Extremo de la cola
+	</string>
+	<string name="Left Wing">
+		Ala izquierda
+	</string>
+	<string name="Right Wing">
+		Ala derecha
+	</string>
+	<string name="Jaw">
+		Mandíbula
+	</string>
+	<string name="Alt Left Ear">
+		Oreja izquierda alternativa
+	</string>
+	<string name="Alt Right Ear">
+		Oreja derecha alternativa
+	</string>
+	<string name="Alt Left Eye">
+		Ojo izquierdo alternativo
+	</string>
+	<string name="Alt Right Eye">
+		Ojo derecho alternativo
+	</string>
+	<string name="Tongue">
+		Lengua
+	</string>
+	<string name="Groin">
+		Ingle
+	</string>
+	<string name="Left Hind Foot">
+		Pata trasera izquierda
+	</string>
+	<string name="Right Hind Foot">
+		Pata trasera derecha
+	</string>
 	<string name="Invalid Attachment">
 		Punto de colocación no válido
 	</string>
@@ -1858,6 +1962,27 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	</string>
 	<string name="av_render_anyone">
 		Es posible que ninguno de los que están próximos pueda renderizarte.
+	</string>
+	<string name="hud_description_total">
+		Tu HUD
+	</string>
+	<string name="hud_name_with_joint">
+		[OBJ_NAME] (lo llevas en [JNT_NAME])
+	</string>
+	<string name="hud_render_memory_warning">
+		[HUD_DETAILS] usa mucha memoria de textura
+	</string>
+	<string name="hud_render_cost_warning">
+		[HUD_DETAILS] contiene muchas texturas y objetos complicados
+	</string>
+	<string name="hud_render_heavy_textures_warning">
+		[HUD_DETAILS] contiene muchas texturas grandes
+	</string>
+	<string name="hud_render_cramped_warning">
+		[HUD_DETAILS] contiene demasiados objetos
+	</string>
+	<string name="hud_render_textures_warning">
+		[HUD_DETAILS] contiene demasiadas texturas
 	</string>
 	<string name="AgeYearsA">
 		[COUNT] año
@@ -2018,6 +2143,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="ObjectOutOfRange">
 		Script (objeto fuera de rango)
 	</string>
+	<string name="ScriptWasDeleted">
+		Script (eliminado del inventario)
+	</string>
 	<string name="GodToolsObjectOwnedBy">
 		El objeto [OBJECT] es propiedad de [OWNER]
 	</string>
@@ -2075,10 +2203,31 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		todos los estados que administras para [OWNER]
 	</string>
 	<string name="RegionInfoAllowedResidents">
-		Resientes autorizados: ([ALLOWEDAGENTS], de un máx. de [MAXACCESS])
+		Siempre permitido: ([ALLOWEDAGENTS], de un máx. de [MAXACCESS])
 	</string>
 	<string name="RegionInfoAllowedGroups">
-		Grupos autorizados: ([ALLOWEDGROUPS], de un máx. de [MAXACCESS])
+		Grupos siempre permitidos: ([ALLOWEDGROUPS], de un máx. de [MAXACCESS])
+	</string>
+	<string name="RegionInfoBannedResidents">
+		Siempre prohibido: ([BANNEDAGENTS], de un máx. de [MAXBANNED])
+	</string>
+	<string name="RegionInfoListTypeAllowedAgents">
+		Siempre permitido
+	</string>
+	<string name="RegionInfoListTypeBannedAgents">
+		Siempre prohibido
+	</string>
+	<string name="RegionInfoAllEstates">
+		todos los estados
+	</string>
+	<string name="RegionInfoManagedEstates">
+		estados administrados
+	</string>
+	<string name="RegionInfoThisEstate">
+		este estado
+	</string>
+	<string name="AndNMore">
+		y [EXTRA_COUNT] más
 	</string>
 	<string name="ScriptLimitsParcelScriptMemory">
 		Memoria de los scripts de la parcela
@@ -2123,7 +2272,7 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Tórax
 	</string>
 	<string name="ATTACH_HEAD">
-		Cabeza
+		Cráneo
 	</string>
 	<string name="ATTACH_LSHOULDER">
 		Hombro izquierdo
@@ -2144,7 +2293,7 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Pie der.
 	</string>
 	<string name="ATTACH_BACK">
-		Anterior
+		Columna
 	</string>
 	<string name="ATTACH_PELVIS">
 		Pelvis
@@ -2174,13 +2323,13 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Brazo der.
 	</string>
 	<string name="ATTACH_RLARM">
-		Antebrazo der.
+		Antebrazo derecho
 	</string>
 	<string name="ATTACH_LUARM">
 		Brazo izq.
 	</string>
 	<string name="ATTACH_LLARM">
-		Antebrazo izq.
+		Antebrazo izquierdo
 	</string>
 	<string name="ATTACH_RHIP">
 		Cadera der.
@@ -2201,13 +2350,13 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Pantorrilla izq.
 	</string>
 	<string name="ATTACH_BELLY">
-		Vientre
+		Abdomen
 	</string>
-	<string name="ATTACH_RPEC">
-		Pecho derecho
+	<string name="ATTACH_LEFT_PEC">
+		Pectoral izquierdo
 	</string>
-	<string name="ATTACH_LPEC">
-		Pecho izquierdo
+	<string name="ATTACH_RIGHT_PEC">
+		Pectoral derecho
 	</string>
 	<string name="ATTACH_HUD_CENTER_2">
 		HUD: Centro 2
@@ -2238,6 +2387,51 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	</string>
 	<string name="ATTACH_AVATAR_CENTER">
 		Centro del avatar
+	</string>
+	<string name="ATTACH_LHAND_RING1">
+		Dedo anular izquierdo
+	</string>
+	<string name="ATTACH_RHAND_RING1">
+		Dedo anular derecho
+	</string>
+	<string name="ATTACH_TAIL_BASE">
+		Base de la cola
+	</string>
+	<string name="ATTACH_TAIL_TIP">
+		Extremo de la cola
+	</string>
+	<string name="ATTACH_LWING">
+		Ala izquierda
+	</string>
+	<string name="ATTACH_RWING">
+		Ala derecha
+	</string>
+	<string name="ATTACH_FACE_JAW">
+		Mandíbula
+	</string>
+	<string name="ATTACH_FACE_LEAR">
+		Oreja izquierda alternativa
+	</string>
+	<string name="ATTACH_FACE_REAR">
+		Oreja derecha alternativa
+	</string>
+	<string name="ATTACH_FACE_LEYE">
+		Ojo izquierdo alternativo
+	</string>
+	<string name="ATTACH_FACE_REYE">
+		Ojo derecho alternativo
+	</string>
+	<string name="ATTACH_FACE_TONGUE">
+		Lengua
+	</string>
+	<string name="ATTACH_GROIN">
+		Ingle
+	</string>
+	<string name="ATTACH_HIND_LFOOT">
+		Pata trasera izquierda
+	</string>
+	<string name="ATTACH_HIND_RFOOT">
+		Pata trasera derecha
 	</string>
 	<string name="CursorPos">
 		Línea [LINE], Columna [COLUMN]
@@ -2542,6 +2736,15 @@ Se esperaba .wav, .tga, .bmp, .jpg, .jpeg, o .bvh
 	</string>
 	<string name="Play Media">
 		Play/Pausa los media
+	</string>
+	<string name="IntelDriverPage">
+		http://www.intel.com/p/en_US/support/detect/graphics
+	</string>
+	<string name="NvidiaDriverPage">
+		http://www.nvidia.com/Download/index.aspx?lang=es
+	</string>
+	<string name="AMDDriverPage">
+		http://support.amd.com/us/Pages/AMDSupportHub.aspx
 	</string>
 	<string name="MBCmdLineError">
 		Ha habido un error analizando la línea de comando.
@@ -4165,6 +4368,12 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 	<string name="OfflineStatus">
 		Desconectado/a
 	</string>
+	<string name="not_online_msg">
+		El usuario no está conectado: el mensaje se almacenará para entregárselo más tarde.
+	</string>
+	<string name="not_online_inventory">
+		El usuario no está conectado: el inventario se ha guardado.
+	</string>
 	<string name="answered_call">
 		Han respondido a tu llamada
 	</string>
@@ -4196,7 +4405,10 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 		Conferencia con [AGENT_NAME]
 	</string>
 	<string name="inventory_item_offered-im">
-		Ofrecido el item del inventario
+		Ítem del inventario &apos;[ITEM_NAME]&apos; ofrecido
+	</string>
+	<string name="inventory_folder_offered-im">
+		Carpeta del inventario &apos;[ITEM_NAME]&apos; ofrecida
 	</string>
 	<string name="share_alert">
 		Arrastra los ítems desde el invenbtario hasta aquí
@@ -4283,16 +4495,25 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 		Posición inicial establecida.
 	</string>
 	<string name="voice_morphing_url">
-		http://secondlife.com/landing/voicemorphing
+		https://secondlife.com/destination/voice-island
+	</string>
+	<string name="premium_voice_morphing_url">
+		https://secondlife.com/destination/voice-morphing-premium
 	</string>
 	<string name="paid_you_ldollars">
 		[NAME] te ha pagado [AMOUNT] L$ [REASON].
+	</string>
+	<string name="paid_you_ldollars_gift">
+		[NAME] te ha pagado [AMOUNT] L$: [REASON]
 	</string>
 	<string name="paid_you_ldollars_no_reason">
 		[NAME] te ha pagado [AMOUNT] L$.
 	</string>
 	<string name="you_paid_ldollars">
 		Has pagado [AMOUNT] L$ a [NAME] por [REASON].
+	</string>
+	<string name="you_paid_ldollars_gift">
+		Has pagado [AMOUNT] L$ a [NAME]: [REASON]
 	</string>
 	<string name="you_paid_ldollars_no_info">
 		Has pagado[AMOUNT] L$
@@ -4305,6 +4526,9 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 	</string>
 	<string name="you_paid_failure_ldollars">
 		No has pagado a [NAME] [AMOUNT] L$ [REASON].
+	</string>
+	<string name="you_paid_failure_ldollars_gift">
+		No has pagado a [NAME] [AMOUNT] L$: [REASON]
 	</string>
 	<string name="you_paid_failure_ldollars_no_info">
 		No has pagado [AMOUNT] L$.
@@ -4483,7 +4707,7 @@ Denuncia de infracción
 		Varón - Encogimiento de hombros
 	</string>
 	<string name="Male - Stick tougue out">
-		Varón - Sacando la lengua
+		Hombre - Sacando la lengua
 	</string>
 	<string name="Male - Wow">
 		Varón - Admiración
@@ -4632,11 +4856,20 @@ Denuncia de infracción
 	<string name="texture_load_dimensions_error">
 		No se puede subir imágenes mayores de [WIDTH]*[HEIGHT]
 	</string>
+	<string name="outfit_photo_load_dimensions_error">
+		La foto del vestuario puede tener como máx. un tamaño de [WIDTH]*[HEIGHT]. Cambia el tamaño o utiliza otra imagen
+	</string>
+	<string name="outfit_photo_select_dimensions_error">
+		La foto del vestuario puede tener como máx. un tamaño de [WIDTH]*[HEIGHT]. Selecciona otra textura
+	</string>
+	<string name="outfit_photo_verify_dimensions_error">
+		No se pueden verificar las dimensiones de la foto. Espera hasta que aparezca el tamaño de la foto en el selector
+	</string>
 	<string name="words_separator" value=","/>
 	<string name="server_is_down">
 		Parece que hay algún problema que ha escapado a nuestros controles.
 
-	Visita status.secondlifegrid.net para ver si hay alguna incidencia conocida que esté afectando al servicio.
+Visita http://status.secondlifegrid.net para ver si hay alguna incidencia conocida que esté afectando al servicio.
         Si sigues teniendo problemas, comprueba la configuración de la red y del servidor de seguridad.
 	</string>
 	<string name="dateTimeWeekdaysNames">
@@ -5088,14 +5321,14 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	<string name="Command_Destinations_Label">
 		Destinos
 	</string>
-	<string name="Command_Facebook_Label">
-		Facebook
-	</string>
 	<string name="Command_Flickr_Label">
 		Flickr
 	</string>
 	<string name="Command_Gestures_Label">
 		Gestos
+	</string>
+	<string name="Command_Grid_Status_Label">
+		Estado del Grid
 	</string>
 	<string name="Command_HowTo_Label">
 		Cómo
@@ -5135,6 +5368,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	</string>
 	<string name="Command_Profile_Label">
 		Perfil
+	</string>
+	<string name="Command_Report_Abuse_Label">
+		Denunciar una infracción
 	</string>
 	<string name="Command_Search_Label">
 		Buscar
@@ -5178,14 +5414,14 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	<string name="Command_Destinations_Tooltip">
 		Destinos de interés
 	</string>
-	<string name="Command_Facebook_Tooltip">
-		Publicar en Facebook
-	</string>
 	<string name="Command_Flickr_Tooltip">
 		Subir a Flickr
 	</string>
 	<string name="Command_Gestures_Tooltip">
 		Gestos para tu avatar
+	</string>
+	<string name="Command_Grid_Status_Tooltip">
+		Mostrar el estado actual del Grid
 	</string>
 	<string name="Command_HowTo_Tooltip">
 		Cómo hacer las tareas habituales
@@ -5225,6 +5461,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	</string>
 	<string name="Command_Profile_Tooltip">
 		Consulta o edita tu perfil
+	</string>
+	<string name="Command_Report_Abuse_Tooltip">
+		Denunciar una infracción
 	</string>
 	<string name="Command_Search_Tooltip">
 		Buscar lugares, eventos y personas
@@ -5406,6 +5645,9 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	<string name="loading_chat_logs">
 		Cargando...
 	</string>
+	<string name="na">
+		n/c
+	</string>
 	<string name="preset_combo_label">
 		-Lista vacía-
 	</string>
@@ -5426,5 +5668,26 @@ Inténtalo incluyendo la ruta de acceso al editor entre comillas
 	</string>
 	<string name="Mav_Details_MAV_UNKNOWN_VERSION">
 		La versión de la forma física no es correcta. Configura la versión correcta del modelo físico.
+	</string>
+	<string name="couldnt_resolve_host">
+		Error de DNS al resolver el nombre del host([HOSTNAME]). 
+Por favor verifica si puedes conectarte al sitio web www.secondlife.com. 
+Si puedes conectarte, pero aún recibes este error, por favor accede a 
+la sección Soporte y genera un informe del problema.
+	</string>
+	<string name="ssl_peer_certificate">
+		El servidor de inicio de sesión no pudo verificarse vía SSL. 
+Si aún recibes este error, por favor accede a 
+la sección Soporte del sitio web Secondlife.com 
+y genera un informe del problema.
+	</string>
+	<string name="ssl_connect_error">
+		En general esto significa que el horario de tu computadora no está bien configurado. 
+Por favor accede al Panel de control y asegúrate de que la hora y la fecha estén 
+bien configurados. Verifica también que tu red y tu cortafuegos estén bien 
+configurados. Si aún recibes este error, por favor accede a la sección Soporte 
+del sitio web Secondlife.com y genera un informe del problema. 
+
+[https://community.secondlife.com/knowledgebase/english/error-messages-r520/#Section__3 Base de conocimientos]
 	</string>
 </strings>

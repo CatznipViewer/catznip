@@ -39,7 +39,6 @@
 #include "llslurl.h"
 #include "llvoiceclient.h"
 #include "lluictrlfactory.h"
-#include "llupdaterservice.h"
 #include "llviewertexteditor.h"
 #include "llviewercontrol.h"
 #include "llviewerstats.h"
@@ -63,6 +62,7 @@
 #include "llsdutil_math.h"
 #include "lleventapi.h"
 #include "llcorehttputil.h"
+#include "lldir.h"
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -90,10 +90,7 @@ public:
 	static LLSD getInfo();
 	void onClickCopyToClipboard();
 	void onClickUpdateCheck();
-
-	// checks state of updater service and starts a check outside of schedule.
-	// subscribes callback for closest state update
-	static void setUpdateListener();
+    static void setUpdateListener();
 
 private:
 	void setSupportText(const std::string& server_release_notes_url);
@@ -103,11 +100,12 @@ private:
 
 	// callback method for manual checks
 	static bool callbackCheckUpdate(LLSD const & event);
-
-	// listener name for update checks
-	static const std::string sCheckUpdateListenerName;
+    
+    // listener name for update checks
+    static const std::string sCheckUpdateListenerName;
 	
     static void startFetchServerReleaseNotes();
+    static void fetchServerReleaseNotesCoro(const std::string& cap_url);
     static void handleServerReleaseNotes(LLSD results);
 };
 
@@ -138,9 +136,9 @@ BOOL LLFloaterAbout::postBuild()
 
 	getChild<LLUICtrl>("copy_btn")->setCommitCallback(
 		boost::bind(&LLFloaterAbout::onClickCopyToClipboard, this));
-
-	getChild<LLUICtrl>("update_btn")->setCommitCallback(
-		boost::bind(&LLFloaterAbout::onClickUpdateCheck, this));
+    
+    getChild<LLUICtrl>("update_btn")->setCommitCallback(
+        boost::bind(&LLFloaterAbout::onClickUpdateCheck, this));
 
 	static const LLUIColor about_color = LLUIColorTable::instance().getColor("TextFgReadOnlyColor");
 
@@ -224,35 +222,62 @@ void LLFloaterAbout::startFetchServerReleaseNotes()
     // an URL suitable for external browsers in the "Location:" HTTP header.
     std::string cap_url = region->getCapability("ServerReleaseNotes");
 
-    LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpGet(cap_url,
-        &LLFloaterAbout::handleServerReleaseNotes, &LLFloaterAbout::handleServerReleaseNotes);
+    LLCoros::instance().launch("fetchServerReleaseNotesCoro", boost::bind(&LLFloaterAbout::fetchServerReleaseNotesCoro, cap_url));
 
+}
+
+/*static*/
+void LLFloaterAbout::fetchServerReleaseNotesCoro(const std::string& cap_url)
+{
+    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
+        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("fetchServerReleaseNotesCoro", LLCore::HttpRequest::DEFAULT_POLICY_ID));
+    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
+    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
+
+    httpOpts->setWantHeaders(true);
+    httpOpts->setFollowRedirects(false);
+
+    LLSD result = httpAdapter->getAndSuspend(httpRequest, cap_url, httpOpts);
+
+    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+
+    if (!status)
+    {
+        handleServerReleaseNotes(httpResults);
+    }
+    else
+    {
+        handleServerReleaseNotes(result);
+    }
 }
 
 /*static*/
 void LLFloaterAbout::handleServerReleaseNotes(LLSD results)
 {
-//     LLFloaterAbout* floater_about = LLFloaterReg::getTypedInstance<LLFloaterAbout>("sl_about");
-//     if (floater_about)
-//     {
-        LLSD http_headers;
-        if (results.has(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS))
-        {
-            LLSD http_results = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
-            http_headers = http_results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
-        }
-        else
-        {
-            http_headers = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
-        }
-        
-        std::string location = http_headers[HTTP_IN_HEADER_LOCATION].asString();
-        if (location.empty())
-        {
-            location = LLTrans::getString("ErrorFetchingServerReleaseNotesURL");
-        }
-        LLAppViewer::instance()->setServerReleaseNotesURL(location);
-//    }
+    LLSD http_headers;
+    if (results.has(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS))
+    {
+        LLSD http_results = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+        http_headers = http_results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
+    }
+    else
+    {
+        http_headers = results[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_HEADERS];
+    }
+
+    std::string location = http_headers[HTTP_IN_HEADER_LOCATION].asString();
+    if (location.empty())
+    {
+        location = LLTrans::getString("ErrorFetchingServerReleaseNotesURL");
+    }
+    LLAppViewer::instance()->setServerReleaseNotesURL(location);
+
+    LLFloaterAbout* floater_about = LLFloaterReg::findTypedInstance<LLFloaterAbout>("sl_about");
+    if (floater_about)
+    {
+        floater_about->setSupportText(location);
+    }
 }
 
 class LLFloaterAboutListener: public LLEventAPI
@@ -291,7 +316,7 @@ void LLFloaterAbout::onClickCopyToClipboard()
 
 void LLFloaterAbout::onClickUpdateCheck()
 {
-	setUpdateListener();
+    setUpdateListener();
 }
 
 void LLFloaterAbout::setSupportText(const std::string& server_release_notes_url)
@@ -314,66 +339,92 @@ void LLFloaterAbout::setSupportText(const std::string& server_release_notes_url)
 							   FALSE, LLStyle::Params() .color(about_color));
 }
 
-///----------------------------------------------------------------------------
-/// Floater About Update-check related functions
-///----------------------------------------------------------------------------
-
-const std::string LLFloaterAbout::sCheckUpdateListenerName = "LLUpdateNotificationListener";
-
-void LLFloaterAbout::showCheckUpdateNotification(S32 state)
-{
-	switch (state)
-	{
-	case LLUpdaterService::UP_TO_DATE:
-		LLNotificationsUtil::add("UpdateViewerUpToDate");
-		break;
-	case LLUpdaterService::DOWNLOADING:
-	case LLUpdaterService::INSTALLING:
-		LLNotificationsUtil::add("UpdateDownloadInProgress");
-		break;
-	case LLUpdaterService::TERMINAL:
-		// download complete, user triggered check after download pop-up appeared
-		LLNotificationsUtil::add("UpdateDownloadComplete");
-		break;
-	default:
-		LLNotificationsUtil::add("UpdateCheckError");
-		break;
-	}
-}
-
-bool LLFloaterAbout::callbackCheckUpdate(LLSD const & event)
-{
-	if (!event.has("payload"))
-	{
-		return false;
-	}
-
-	LLSD payload = event["payload"];
-	if (payload.has("type") && payload["type"].asInteger() == LLUpdaterService::STATE_CHANGE)
-	{
-		LLEventPumps::instance().obtain("mainlooprepeater").stopListening(sCheckUpdateListenerName);
-		showCheckUpdateNotification(payload["state"].asInteger());
-	}
-	return false;
-}
-
+//This is bound as a callback in postBuild()
 void LLFloaterAbout::setUpdateListener()
 {
-	LLUpdaterService update_service;
-	S32 service_state = update_service.getState();
-	// Note: Do not set state listener before forceCheck() since it set's new state
-	if (update_service.forceCheck() || service_state == LLUpdaterService::CHECKING_FOR_UPDATE)
-	{
-		LLEventPump& mainloop(LLEventPumps::instance().obtain("mainlooprepeater"));
-		if (mainloop.getListener(sCheckUpdateListenerName) == LLBoundListener()) // dummy listener
-		{
-			mainloop.listen(sCheckUpdateListenerName, boost::bind(&callbackCheckUpdate, _1));
-		}
-	}
-	else
-	{
-		showCheckUpdateNotification(service_state);
-	}
+    typedef std::vector<std::string> vec;
+    
+    //There are four possibilities:
+    //no downloads directory or version directory in "getOSUserAppDir()/downloads"
+    //   => no update
+    //version directory exists and .done file is not present
+    //   => download in progress
+    //version directory exists and .done file exists
+    //   => update ready for install
+    //version directory, .done file and either .skip or .next file exists
+    //   => update deferred
+    BOOL downloads = false;
+    std::string downloadDir = "";
+    BOOL done = false;
+    BOOL next = false;
+    BOOL skip = false;
+    
+    LLSD info(LLFloaterAbout::getInfo());
+    std::string version = info["VIEWER_VERSION_STR"].asString();
+    std::string appDir = gDirUtilp->getOSUserAppDir();
+    
+    //drop down two directory levels so we aren't searching for markers among the log files and crash dumps
+    //or among other possible viewer upgrade directories if the resident is running multiple viewer versions
+    //we should end up with a path like ../downloads/1.2.3.456789
+    vec file_vec = gDirUtilp->getFilesInDir(appDir);
+    
+    for(vec::const_iterator iter=file_vec.begin(); iter!=file_vec.end(); ++iter)
+    {
+        if ( (iter->rfind("downloads") ) )
+        {
+            vec dir_vec = gDirUtilp->getFilesInDir(*iter);
+            for(vec::const_iterator dir_iter=dir_vec.begin(); dir_iter!=dir_vec.end(); ++dir_iter)
+            {
+                if ( (dir_iter->rfind(version)))
+                {
+                    downloads = true;
+                    downloadDir = *dir_iter;
+                }
+            }
+        }
+    }
+    
+    if ( downloads )
+    {
+        for(vec::const_iterator iter=file_vec.begin(); iter!=file_vec.end(); ++iter)
+        {
+            if ( (iter->rfind(version)))
+            {
+                if ( (iter->rfind(".done") ) )
+                {
+                    done = true;
+                }
+                else if ( (iter->rfind(".next") ) )
+                {
+                    next = true;
+                }
+                else if ( (iter->rfind(".skip") ) )
+                {
+                    skip = true;
+                }
+            }
+        }
+    }
+    
+    if ( !downloads )
+    {
+        LLNotificationsUtil::add("UpdateViewerUpToDate");
+    }
+    else
+    {
+        if ( !done )
+        {
+            LLNotificationsUtil::add("UpdateDownloadInProgress");
+        }
+        else if ( (!next) && (!skip) )
+        {
+            LLNotificationsUtil::add("UpdateDownloadComplete");
+        }
+        else //done and there is a next or skip
+        {
+            LLNotificationsUtil::add("UpdateDeferred");
+        }
+    }
 }
 
 ///----------------------------------------------------------------------------
@@ -383,11 +434,10 @@ void LLFloaterAboutUtil::registerFloater()
 {
 	LLFloaterReg::add("sl_about", "floater_about.xml",
 		&LLFloaterReg::build<LLFloaterAbout>);
-
 }
 
 void LLFloaterAboutUtil::checkUpdatesAndNotify()
 {
-	LLFloaterAbout::setUpdateListener();
+    LLFloaterAbout::setUpdateListener();
 }
 

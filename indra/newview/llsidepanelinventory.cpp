@@ -34,6 +34,7 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
+#include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llfolderview.h"
@@ -175,9 +176,6 @@ BOOL LLSidepanelInventory::postBuild()
 		
 		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
 		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
-		
-		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
-		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
 		
 		mPanelMainInventory = mInventoryPanel->getChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
@@ -514,10 +512,6 @@ void LLSidepanelInventory::onTeleportButtonClicked()
 	performActionOnSelection("teleport");
 }
 
-void LLSidepanelInventory::onOverflowButtonClicked()
-{
-}
-
 void LLSidepanelInventory::onBackButtonClicked()
 {
 	showInventoryPanel();
@@ -570,6 +564,7 @@ void LLSidepanelInventory::updateVerbs()
 	mWearBtn->setEnabled(FALSE);
 	mPlayBtn->setVisible(FALSE);
 	mPlayBtn->setEnabled(FALSE);
+	mPlayBtn->setToolTip(std::string(""));
  	mTeleportBtn->setVisible(FALSE);
  	mTeleportBtn->setEnabled(FALSE);
  	mShopBtn->setVisible(TRUE);
@@ -594,11 +589,23 @@ void LLSidepanelInventory::updateVerbs()
 		 	mShopBtn->setVisible(FALSE);
 			break;
 		case LLInventoryType::IT_SOUND:
+			mPlayBtn->setVisible(TRUE);
+			mPlayBtn->setEnabled(TRUE);
+			mPlayBtn->setToolTip(LLTrans::getString("InventoryPlaySoundTooltip"));
+			mShopBtn->setVisible(FALSE);
+			break;
 		case LLInventoryType::IT_GESTURE:
+			mPlayBtn->setVisible(TRUE);
+			mPlayBtn->setEnabled(TRUE);
+			mPlayBtn->setToolTip(LLTrans::getString("InventoryPlayGestureTooltip"));
+			mShopBtn->setVisible(FALSE);
+			break;
 		case LLInventoryType::IT_ANIMATION:
 			mPlayBtn->setVisible(TRUE);
 			mPlayBtn->setEnabled(TRUE);
-		 	mShopBtn->setVisible(FALSE);
+			mPlayBtn->setEnabled(TRUE);
+			mPlayBtn->setToolTip(LLTrans::getString("InventoryPlayAnimationTooltip"));
+			mShopBtn->setVisible(FALSE);
 			break;
 		case LLInventoryType::IT_LANDMARK:
 			mTeleportBtn->setVisible(TRUE);
@@ -695,6 +702,19 @@ LLInventoryPanel *LLSidepanelInventory::getActivePanel()
 	return NULL;
 }
 
+void LLSidepanelInventory::selectAllItemsPanel()
+{
+	if (!getVisible())
+	{
+		return;
+	}
+	if (mInventoryPanel->getVisible())
+	{
+		 mPanelMainInventory->selectAllItemsPanel();
+	}
+
+}
+
 BOOL LLSidepanelInventory::isMainInventoryPanelActive() const
 {
 	return mInventoryPanel->getVisible();
@@ -730,4 +750,17 @@ std::set<LLFolderViewItem*> LLSidepanelInventory::getInboxSelectionList()
 	}
 	
 	return inventory_selected_uuids;
+}
+
+void LLSidepanelInventory::cleanup()
+{
+	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end();)
+	{
+		LLFloaterSidePanelContainer* iv = dynamic_cast<LLFloaterSidePanelContainer*>(*iter++);
+		if (iv)
+		{
+			iv->cleanup();
+		}
+	}
 }

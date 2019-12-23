@@ -61,12 +61,15 @@ public:
 							BOOL final,
 							void* userdata );
 	void 				openToSave();
+
+	void				saveTextureToFile(const std::vector<std::string>& filenames);
 	
 	static void			onSaveAsBtn(void* data);
 
 	/*virtual*/ void setObjectID(const LLUUID& object_id);
 protected:
 	void				init();
+	void				populateRatioList();
 	/* virtual */ BOOL	postBuild();
 	bool				setAspectRatio(const F32 width, const F32 height);
 	static void			onAspectRatioCommit(LLUICtrl*,void* userdata);

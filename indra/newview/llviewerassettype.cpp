@@ -48,8 +48,7 @@ struct ViewerAssetEntry : public LLDictionaryEntry
 class LLViewerAssetDictionary : public LLSingleton<LLViewerAssetDictionary>,
 						  public LLDictionary<LLViewerAssetType::EType, ViewerAssetEntry>
 {
-public:
-	LLViewerAssetDictionary();
+	LLSINGLETON(LLViewerAssetDictionary);
 };
 
 LLViewerAssetDictionary::LLViewerAssetDictionary()
@@ -84,6 +83,8 @@ LLViewerAssetDictionary::LLViewerAssetDictionary()
 	addEntry(LLViewerAssetType::AT_WIDGET, 				new ViewerAssetEntry(DAD_WIDGET));
 	
 	addEntry(LLViewerAssetType::AT_PERSON, 				new ViewerAssetEntry(DAD_PERSON));
+
+	addEntry(LLViewerAssetType::AT_UNKNOWN,				new ViewerAssetEntry(DAD_NONE));
 
 	addEntry(LLViewerAssetType::AT_NONE, 				new ViewerAssetEntry(DAD_NONE));
 };

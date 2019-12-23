@@ -56,13 +56,19 @@
 #include "llfloatergroups.h"
 #include "llfloaterreg.h"
 #include "llavataractions.h"
+#include "llavatariconctrl.h"
 #include "llnamebox.h"
 #include "llviewercontrol.h"
 #include "lluictrlfactory.h"
 #include "llspinctrl.h"
 #include "roles_constants.h"
 #include "llgroupactions.h"
+#include "llgroupiconctrl.h"
 #include "lltrans.h"
+#include "llinventorymodel.h"
+
+#include "llavatarnamecache.h"
+#include "llcachename.h"
 
 
 U8 string_value_to_click_action(std::string p_value);
@@ -94,6 +100,10 @@ U8 string_value_to_click_action(std::string p_value)
 	{
 		return CLICK_ACTION_ZOOM;
 	}
+	if (p_value == "None")
+	{
+		return CLICK_ACTION_DISABLED;
+	}
 	return CLICK_ACTION_TOUCH;
 }
 
@@ -119,6 +129,9 @@ std::string click_action_to_string_value( U8 action)
 			break;
 		case CLICK_ACTION_ZOOM:
 			return "Zoom";
+			break;
+		case CLICK_ACTION_DISABLED:
+			return "None";
 			break;
 	}
 }
@@ -165,6 +178,8 @@ BOOL LLPanelPermissions::postBuild()
 	childSetCommitCallback("search_check",LLPanelPermissions::onCommitIncludeInSearch,this);
 	
 	mLabelGroupName = getChild<LLNameBox>("Group Name Proxy");
+	mLabelOwnerName = getChild<LLTextBox>("Owner Name");
+	mLabelCreatorName = getChild<LLTextBox>("Creator Name");
 
 	return TRUE;
 }
@@ -172,6 +187,14 @@ BOOL LLPanelPermissions::postBuild()
 
 LLPanelPermissions::~LLPanelPermissions()
 {
+	if (mOwnerCacheConnection.connected())
+	{
+		mOwnerCacheConnection.disconnect();
+	}
+	if (mCreatorCacheConnection.connected())
+	{
+		mCreatorCacheConnection.disconnect();
+	}
 	// base class will take care of everything
 }
 
@@ -185,12 +208,15 @@ void LLPanelPermissions::disableAll()
 	getChild<LLUICtrl>("pathfinding_attributes_value")->setValue(LLStringUtil::null);
 
 	getChildView("Creator:")->setEnabled(FALSE);
-	getChild<LLUICtrl>("Creator Name")->setValue(LLStringUtil::null);
-	getChildView("Creator Name")->setEnabled(FALSE);
+	getChild<LLUICtrl>("Creator Icon")->setVisible(FALSE);
+	mLabelCreatorName->setValue(LLStringUtil::null);
+	mLabelCreatorName->setEnabled(FALSE);
 
 	getChildView("Owner:")->setEnabled(FALSE);
-	getChild<LLUICtrl>("Owner Name")->setValue(LLStringUtil::null);
-	getChildView("Owner Name")->setEnabled(FALSE);
+	getChild<LLUICtrl>("Owner Icon")->setVisible(FALSE);
+	getChild<LLUICtrl>("Owner Group Icon")->setVisible(FALSE);
+	mLabelOwnerName->setValue(LLStringUtil::null);
+	mLabelOwnerName->setEnabled(FALSE);
 
 	getChildView("Group:")->setEnabled(FALSE);
 	getChild<LLUICtrl>("Group Name Proxy")->setValue(LLStringUtil::null);
@@ -205,8 +231,6 @@ void LLPanelPermissions::disableAll()
 	getChildView("Description:")->setEnabled(FALSE);
 	getChild<LLUICtrl>("Object Description")->setValue(LLStringUtil::null);
 	getChildView("Object Description")->setEnabled(FALSE);
-
-	getChildView("Permissions:")->setEnabled(FALSE);
 		
 	getChild<LLUICtrl>("checkbox share with group")->setValue(FALSE);
 	getChildView("checkbox share with group")->setEnabled(FALSE);
@@ -360,45 +384,106 @@ void LLPanelPermissions::refresh()
 
 	getChildView("pathfinding_attributes_value")->setEnabled(TRUE);
 	getChild<LLUICtrl>("pathfinding_attributes_value")->setValue(LLTrans::getString(pfAttrName));
-
-	getChildView("Permissions:")->setEnabled(TRUE);
 	
 	// Update creator text field
 	getChildView("Creator:")->setEnabled(TRUE);
-	std::string creator_name;
-	LLSelectMgr::getInstance()->selectGetCreator(mCreatorID, creator_name);
+	std::string creator_app_link;
+	LLSelectMgr::getInstance()->selectGetCreator(mCreatorID, creator_app_link);
 
-	getChild<LLUICtrl>("Creator Name")->setValue(creator_name);
-	getChildView("Creator Name")->setEnabled(TRUE);
+	// Style for creator and owner links (both group and agent)
+	LLStyle::Params style_params;
+	LLColor4 link_color = LLUIColorTable::instance().getColor("HTMLLinkColor");
+	style_params.color = link_color;
+	style_params.readonly_color = link_color;
+	style_params.is_link = true; // link will be added later
+	const LLFontGL* fontp = mLabelCreatorName->getFont();
+	style_params.font.name = LLFontGL::nameFromFont(fontp);
+	style_params.font.size = LLFontGL::sizeFromFont(fontp);
+	style_params.font.style = "UNDERLINE";
+
+	LLAvatarName av_name;
+	style_params.link_href = creator_app_link;
+	if (LLAvatarNameCache::get(mCreatorID, &av_name))
+	{
+		updateCreatorName(mCreatorID, av_name, style_params);
+	}
+	else
+	{
+		if (mCreatorCacheConnection.connected())
+		{
+			mCreatorCacheConnection.disconnect();
+		}
+		mLabelCreatorName->setText(LLTrans::getString("None"));
+		mCreatorCacheConnection = LLAvatarNameCache::get(mCreatorID, boost::bind(&LLPanelPermissions::updateCreatorName, this, _1, _2, style_params));
+	}
+	getChild<LLAvatarIconCtrl>("Creator Icon")->setValue(mCreatorID);
+	getChild<LLAvatarIconCtrl>("Creator Icon")->setVisible(TRUE);
+	mLabelCreatorName->setEnabled(TRUE);
 
 	// Update owner text field
 	getChildView("Owner:")->setEnabled(TRUE);
 
-	std::string owner_name;
-	const BOOL owners_identical = LLSelectMgr::getInstance()->selectGetOwner(mOwnerID, owner_name);
-	if (mOwnerID.isNull())
+	std::string owner_app_link;
+	const BOOL owners_identical = LLSelectMgr::getInstance()->selectGetOwner(mOwnerID, owner_app_link);
+
+
+	if (LLSelectMgr::getInstance()->selectIsGroupOwned())
 	{
-		if (LLSelectMgr::getInstance()->selectIsGroupOwned())
+		// Group owned already displayed by selectGetOwner
+		LLGroupMgrGroupData* group_data = LLGroupMgr::getInstance()->getGroupData(mOwnerID);
+		if (group_data && group_data->isGroupPropertiesDataComplete())
 		{
-			// Group owned already displayed by selectGetOwner
+			style_params.link_href = owner_app_link;
+			mLabelOwnerName->setText(group_data->mName, style_params);
+			getChild<LLGroupIconCtrl>("Owner Group Icon")->setIconId(group_data->mInsigniaID);
+			getChild<LLGroupIconCtrl>("Owner Group Icon")->setVisible(TRUE);
+			getChild<LLUICtrl>("Owner Icon")->setVisible(FALSE);
 		}
 		else
 		{
+			// Triggers refresh
+			LLGroupMgr::getInstance()->sendGroupPropertiesRequest(mOwnerID);
+		}
+	}
+	else
+	{
+		LLUUID owner_id = mOwnerID;
+		if (owner_id.isNull())
+		{
 			// Display last owner if public
-			std::string last_owner_name;
-			LLSelectMgr::getInstance()->selectGetLastOwner(mLastOwnerID, last_owner_name);
+			std::string last_owner_app_link;
+			LLSelectMgr::getInstance()->selectGetLastOwner(mLastOwnerID, last_owner_app_link);
 
 			// It should never happen that the last owner is null and the owner
 			// is null, but it seems to be a bug in the simulator right now. JC
-			if (!mLastOwnerID.isNull() && !last_owner_name.empty())
+			if (!mLastOwnerID.isNull() && !last_owner_app_link.empty())
 			{
-				owner_name.append(", last ");
-				owner_name.append(last_owner_name);
+				owner_app_link.append(", last ");
+				owner_app_link.append(last_owner_app_link);
 			}
+			owner_id = mLastOwnerID;
 		}
+
+		style_params.link_href = owner_app_link;
+		if (LLAvatarNameCache::get(owner_id, &av_name))
+		{
+			updateOwnerName(owner_id, av_name, style_params);
+		}
+		else
+		{
+			if (mOwnerCacheConnection.connected())
+			{
+				mOwnerCacheConnection.disconnect();
+			}
+			mLabelOwnerName->setText(LLTrans::getString("None"));
+			mOwnerCacheConnection = LLAvatarNameCache::get(owner_id, boost::bind(&LLPanelPermissions::updateOwnerName, this, _1, _2, style_params));
+		}
+
+		getChild<LLAvatarIconCtrl>("Owner Icon")->setValue(owner_id);
+		getChild<LLAvatarIconCtrl>("Owner Icon")->setVisible(TRUE);
+		getChild<LLUICtrl>("Owner Group Icon")->setVisible(FALSE);
 	}
-	getChild<LLUICtrl>("Owner Name")->setValue(owner_name);
-	getChildView("Owner Name")->setEnabled(TRUE);
+	mLabelOwnerName->setEnabled(TRUE);
 
 	// update group text field
 	getChildView("Group:")->setEnabled(TRUE);
@@ -728,7 +813,7 @@ void LLPanelPermissions::refresh()
 		else
 		{
 			getChild<LLUICtrl>("checkbox share with group")->setValue(TRUE);
-			getChild<LLUICtrl>("checkbox share with group")->setTentative(	TRUE);
+			getChild<LLUICtrl>("checkbox share with group")->setTentative(!has_change_perm_ability);
 			getChildView("button deed")->setEnabled(gAgent.hasPowerInGroup(group_id, GP_OBJECT_DEED) && (group_mask_on & PERM_MOVE) && (owner_mask_on & PERM_TRANSFER) && !group_owned && can_transfer);
 		}
 	}			
@@ -887,6 +972,23 @@ void LLPanelPermissions::refresh()
 	getChildView("clickaction")->setEnabled(is_perm_modify && is_nonpermanent_enforced && all_volume);
 }
 
+void LLPanelPermissions::updateOwnerName(const LLUUID& owner_id, const LLAvatarName& owner_name, const LLStyle::Params& style_params)
+{
+	if (mOwnerCacheConnection.connected())
+	{
+		mOwnerCacheConnection.disconnect();
+	}
+	mLabelOwnerName->setText(owner_name.getCompleteName(), style_params);
+}
+
+void LLPanelPermissions::updateCreatorName(const LLUUID& creator_id, const LLAvatarName& creator_name, const LLStyle::Params& style_params)
+{
+	if (mCreatorCacheConnection.connected())
+	{
+		mCreatorCacheConnection.disconnect();
+	}
+	mLabelCreatorName->setText(creator_name.getCompleteName(), style_params);
+}
 
 // static
 void LLPanelPermissions::onClickClaim(void*)
@@ -1016,13 +1118,26 @@ void LLPanelPermissions::onCommitNextOwnerTransfer(LLUICtrl* ctrl, void* data)
 // static
 void LLPanelPermissions::onCommitName(LLUICtrl*, void* data)
 {
-	//LL_INFOS() << "LLPanelPermissions::onCommitName()" << LL_ENDL;
 	LLPanelPermissions* self = (LLPanelPermissions*)data;
 	LLLineEditor*	tb = self->getChild<LLLineEditor>("Object Name");
-	if(tb)
+	if (!tb)
 	{
-		LLSelectMgr::getInstance()->selectionSetObjectName(tb->getText());
-//		LLSelectMgr::getInstance()->selectionSetObjectName(self->mLabelObjectName->getText());
+		return;
+	}
+	LLSelectMgr::getInstance()->selectionSetObjectName(tb->getText());
+	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+	if (selection->isAttachment() && (selection->getNumNodes() == 1) && !tb->getText().empty())
+	{
+		LLUUID object_id = selection->getFirstObject()->getAttachmentItemID();
+		LLViewerInventoryItem* item = findItem(object_id);
+		if (item)
+		{
+			LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(item);
+			new_item->rename(tb->getText());
+			new_item->updateServer(FALSE);
+			gInventory.updateItem(new_item);
+			gInventory.notifyObservers();
+		}
 	}
 }
 
@@ -1030,12 +1145,26 @@ void LLPanelPermissions::onCommitName(LLUICtrl*, void* data)
 // static
 void LLPanelPermissions::onCommitDesc(LLUICtrl*, void* data)
 {
-	//LL_INFOS() << "LLPanelPermissions::onCommitDesc()" << LL_ENDL;
 	LLPanelPermissions* self = (LLPanelPermissions*)data;
 	LLLineEditor*	le = self->getChild<LLLineEditor>("Object Description");
-	if(le)
+	if (!le)
 	{
-		LLSelectMgr::getInstance()->selectionSetObjectDescription(le->getText());
+		return;
+	}
+	LLSelectMgr::getInstance()->selectionSetObjectDescription(le->getText());
+	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+	if (selection->isAttachment() && (selection->getNumNodes() == 1))
+	{
+		LLUUID object_id = selection->getFirstObject()->getAttachmentItemID();
+		LLViewerInventoryItem* item = findItem(object_id);
+		if (item)
+		{
+			LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(item);
+			new_item->setDescription(le->getText());
+			new_item->updateServer(FALSE);
+			gInventory.updateItem(new_item);
+			gInventory.notifyObservers();
+		}
 	}
 }
 
@@ -1081,23 +1210,34 @@ void LLPanelPermissions::setAllSaleInfo()
 	LLSaleInfo new_sale_info(sale_type, price);
 	LLSelectMgr::getInstance()->selectionSetObjectSaleInfo(new_sale_info);
 
-    struct f : public LLSelectedObjectFunctor
+    // Note: won't work right if a root and non-root are both single-selected (here and other places).
+    BOOL is_perm_modify = (LLSelectMgr::getInstance()->getSelection()->getFirstRootNode()
+                           && LLSelectMgr::getInstance()->selectGetRootsModify())
+                          || LLSelectMgr::getInstance()->selectGetModify();
+    BOOL is_nonpermanent_enforced = (LLSelectMgr::getInstance()->getSelection()->getFirstRootNode()
+                                     && LLSelectMgr::getInstance()->selectGetRootsNonPermanentEnforced())
+                                    || LLSelectMgr::getInstance()->selectGetNonPermanentEnforced();
+
+    if (is_perm_modify && is_nonpermanent_enforced)
     {
-        virtual bool apply(LLViewerObject* object)
+        struct f : public LLSelectedObjectFunctor
         {
-            return object->getClickAction() == CLICK_ACTION_BUY
-                || object->getClickAction() == CLICK_ACTION_TOUCH;
+            virtual bool apply(LLViewerObject* object)
+            {
+                return object->getClickAction() == CLICK_ACTION_BUY
+                    || object->getClickAction() == CLICK_ACTION_TOUCH;
+            }
+        } check_actions;
+
+        // Selection should only contain objects that are of target
+        // action already or of action we are aiming to remove.
+        bool default_actions = LLSelectMgr::getInstance()->getSelection()->applyToObjects(&check_actions);
+
+        if (default_actions && old_sale_info.isForSale() != new_sale_info.isForSale())
+        {
+            U8 new_click_action = new_sale_info.isForSale() ? CLICK_ACTION_BUY : CLICK_ACTION_TOUCH;
+            LLSelectMgr::getInstance()->selectionSetClickAction(new_click_action);
         }
-    } check_actions;
-
-    // Selection should only contain objects that are of target
-    // action already or of action we are aiming to remove.
-    bool default_actions = LLSelectMgr::getInstance()->getSelection()->applyToObjects(&check_actions);
-
-    if (default_actions && old_sale_info.isForSale() != new_sale_info.isForSale())
-    {
-        U8 new_click_action = new_sale_info.isForSale() ? CLICK_ACTION_BUY : CLICK_ACTION_TOUCH;
-        LLSelectMgr::getInstance()->selectionSetClickAction(new_click_action);
     }
 }
 
@@ -1159,3 +1299,12 @@ void LLPanelPermissions::onCommitIncludeInSearch(LLUICtrl* ctrl, void*)
 	LLSelectMgr::getInstance()->selectionSetIncludeInSearch(box->get());
 }
 
+
+LLViewerInventoryItem* LLPanelPermissions::findItem(LLUUID &object_id)
+{
+	if (!object_id.isNull())
+	{
+		return gInventory.getItem(object_id);
+	}
+	return NULL;
+}

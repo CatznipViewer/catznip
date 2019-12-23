@@ -97,7 +97,7 @@ public:
 			return false;
 		}
 
-		if (!LLUI::sSettingGroups["config"]->getBOOL("EnablePlaceProfile"))
+		if (!LLUI::getInstance()->mSettingGroups["config"]->getBOOL("EnablePlaceProfile"))
 		{
 			LLNotificationsUtil::add("NoPlaceInfo", LLSD(), LLSD(), std::string("SwitchToStandardSkinAndQuit"));
 			return true;
@@ -304,7 +304,11 @@ BOOL LLPanelPlaces::postBuild()
 	enable_registrar.add("Places.OverflowMenu.Enable",  boost::bind(&LLPanelPlaces::onOverflowMenuItemEnable, this, _2));
 
 	mPlaceMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_place.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
-	if (!mPlaceMenu)
+	if (mPlaceMenu)
+	{
+		mPlaceMenu->setAlwaysShowMenu(TRUE);
+	}
+	else
 	{
 		LL_WARNS() << "Error loading Place menu" << LL_ENDL;
 	}
@@ -391,11 +395,16 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 			mPlaceInfoType = key_type;
 			mPosGlobal.setZero();
 			mItem = NULL;
+			mRegionId.setNull();
 			togglePlaceInfoPanel(TRUE);
 
 			if (mPlaceInfoType == AGENT_INFO_TYPE)
 			{
 				mPlaceProfile->setInfoType(LLPanelPlaceInfo::AGENT);
+				if (gAgent.getRegion())
+				{
+					mRegionId = gAgent.getRegion()->getRegionID();
+				}
 			}
 			else if (mPlaceInfoType == CREATE_LANDMARK_INFO_TYPE)
 			{
@@ -467,6 +476,8 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 	LLViewerParcelMgr* parcel_mgr = LLViewerParcelMgr::getInstance();
 	if (!parcel_mgr)
 		return;
+
+	mParcelLocalId = parcel_mgr->getAgentParcel()->getLocalID();
 
 	// Start using LLViewerParcelMgr for land selection if
 	// information about nearby land is requested.
@@ -711,6 +722,34 @@ void LLPanelPlaces::onEditButtonClicked()
 	updateVerbs();
 }
 
+class LLUpdateLandmarkParent : public LLInventoryCallback
+{
+public:
+    LLUpdateLandmarkParent(LLPointer<LLViewerInventoryItem> item, LLUUID new_parent) :
+        mItem(item),
+        mNewParentId(new_parent)
+    {};
+    /* virtual */ void fire(const LLUUID& inv_item_id)
+    {
+        LLInventoryModel::update_list_t update;
+        LLInventoryModel::LLCategoryUpdate old_folder(mItem->getParentUUID(), -1);
+        update.push_back(old_folder);
+        LLInventoryModel::LLCategoryUpdate new_folder(mNewParentId, 1);
+        update.push_back(new_folder);
+        gInventory.accountForUpdate(update);
+
+        mItem->setParent(mNewParentId);
+        mItem->updateParentOnServer(FALSE);
+
+        gInventory.updateItem(mItem);
+        gInventory.notifyObservers();
+    }
+
+private:
+    LLPointer<LLViewerInventoryItem> mItem;
+    LLUUID mNewParentId;
+};
+
 void LLPanelPlaces::onSaveButtonClicked()
 {
 	if (!mLandmarkInfo || mItem.isNull())
@@ -726,6 +765,7 @@ void LLPanelPlaces::onSaveButtonClicked()
 
 	LLUUID item_id = mItem->getUUID();
 	LLUUID folder_id = mLandmarkInfo->getLandmarkFolder();
+	bool change_parent = folder_id != mItem->getParentUUID();
 
 	LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(mItem);
 
@@ -734,10 +774,16 @@ void LLPanelPlaces::onSaveButtonClicked()
 	{
 		new_item->rename(current_title_value);
 		new_item->setDescription(current_notes_value);
-		new_item->updateServer(FALSE);
+		LLPointer<LLInventoryCallback> cb;
+		if (change_parent)
+		{
+			cb = new LLUpdateLandmarkParent(new_item, folder_id);
+		}
+		LLInventoryModel::LLCategoryUpdate up(mItem->getParentUUID(), 0);
+		gInventory.accountForUpdate(up);
+		update_inventory_item(new_item, cb);
 	}
-
-	if(folder_id != mItem->getParentUUID())
+	else if (change_parent)
 	{
 		LLInventoryModel::update_list_t update;
 		LLInventoryModel::LLCategoryUpdate old_folder(mItem->getParentUUID(),-1);
@@ -789,10 +835,21 @@ void LLPanelPlaces::onOverflowButtonClicked()
 	{
 		menu = mPlaceMenu;
 
+		bool landmark_item_enabled = false;
+		LLViewerParcelMgr* parcel_mgr = LLViewerParcelMgr::getInstance();
+		if (is_agent_place_info_visible
+			&& gAgent.getRegion()
+			&& mRegionId == gAgent.getRegion()->getRegionID()
+			&& parcel_mgr
+			&& parcel_mgr->getAgentParcel()->getLocalID() == mParcelLocalId)
+		{
+			// Floater still shows location identical to agent's position
+			landmark_item_enabled = !LLLandmarkActions::landmarkAlreadyExists();
+		}
+
 		// Enable adding a landmark only for agent current parcel and if
 		// there is no landmark already pointing to that parcel in agent's inventory.
-		menu->getChild<LLMenuItemCallGL>("landmark")->setEnabled(is_agent_place_info_visible &&
-																 !LLLandmarkActions::landmarkAlreadyExists());
+		menu->getChild<LLMenuItemCallGL>("landmark")->setEnabled(landmark_item_enabled);
 		// STORM-411
 		// Creating landmarks for remote locations is impossible.
 		// So hide menu item "Make a Landmark" in "Teleport History Profile" panel.
@@ -971,7 +1028,7 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			 mPlaceInfoType == LANDMARK_TAB_INFO_TYPE)
 	{
 		mLandmarkInfo->setVisible(visible);
-
+		mPlaceProfile->setVisible(FALSE);
 		if (visible)
 		{
 			mLandmarkInfo->resetLocation();
@@ -979,8 +1036,6 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			LLRect rect = getRect();
 			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
 			mLandmarkInfo->reshape(new_rect.getWidth(), new_rect.getHeight());
-
-			mPlaceProfile->setVisible(FALSE);
 		}
 		else
 		{

@@ -63,8 +63,7 @@ struct InventoryEntry : public LLDictionaryEntry
 class LLInventoryDictionary : public LLSingleton<LLInventoryDictionary>,
 							  public LLDictionary<LLInventoryType::EType, InventoryEntry>
 {
-public:
-	LLInventoryDictionary();
+	LLSINGLETON(LLInventoryDictionary);
 };
 
 LLInventoryDictionary::LLInventoryDictionary()
@@ -182,7 +181,7 @@ LLInventoryType::EType LLInventoryType::defaultForAssetType(LLAssetType::EType a
 	}
 	else
 	{
-		return IT_NONE;
+		return IT_UNKNOWN;
 	}
 }
 

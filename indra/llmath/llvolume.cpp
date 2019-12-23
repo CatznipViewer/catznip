@@ -1,5 +1,4 @@
 /** 
-
  * @file llvolume.cpp
  *
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
@@ -89,7 +88,7 @@ const F32 SKEW_MAX	=  0.95f;
 const F32 SCULPT_MIN_AREA = 0.002f;
 const S32 SCULPT_MIN_AREA_DETAIL = 1;
 
-extern BOOL gDebugGL;
+BOOL gDebugGL = FALSE;
 
 BOOL check_same_clock_dir( const LLVector3& pt1, const LLVector3& pt2, const LLVector3& pt3, const LLVector3& norm)
 {    
@@ -545,7 +544,7 @@ void LLProfile::genNGon(const LLProfileParams& params, S32 sides, F32 offset, F3
 {
 	// Generate an n-sided "circular" path.
 	// 0 is (1,0), and we go counter-clockwise along a circular path from there.
-	const F32 tableScale[] = { 1, 1, 1, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f };
+	static const F32 tableScale[] = { 1, 1, 1, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f };
 	F32 scale = 0.5f;
 	F32 t, t_step, t_first, t_fraction, ang, ang_step;
 	LLVector4a pt1,pt2;
@@ -1304,7 +1303,7 @@ S32 LLPath::getNumNGonPoints(const LLPathParams& params, S32 sides, F32 startOff
 void LLPath::genNGon(const LLPathParams& params, S32 sides, F32 startOff, F32 end_scale, F32 twist_scale)
 {
 	// Generates a circular path, starting at (1, 0, 0), counterclockwise along the xz plane.
-	const F32 tableScale[] = { 1, 1, 1, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f };
+	static const F32 tableScale[] = { 1, 1, 1, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f };
 
 	F32 revolutions = params.getRevolutions();
 	F32 skew		= params.getSkew();
@@ -1602,7 +1601,8 @@ BOOL LLPath::generate(const LLPathParams& params, F32 detail, S32 split,
 			if (is_sculpted)
 				sides = llmax(sculpt_size, 1);
 			
-			genNGon(params, sides);
+			if (0 < sides)
+				genNGon(params, sides);
 		}
 		break;
 
@@ -2032,13 +2032,8 @@ void LLPathParams::copyParams(const LLPathParams &params)
 	setSkew(params.getSkew());
 }
 
-S32 profile_delete_lock = 1 ; 
 LLProfile::~LLProfile()
 {
-	if(profile_delete_lock)
-	{
-		LL_ERRS() << "LLProfile should not be deleted here!" << LL_ENDL ;
-	}
 }
 
 
@@ -2103,9 +2098,7 @@ LLVolume::~LLVolume()
 	sNumMeshPoints -= mMesh.size();
 	delete mPathp;
 
-	profile_delete_lock = 0 ;
 	delete mProfilep;
-	profile_delete_lock = 1 ;
 
 	mPathp = NULL;
 	mProfilep = NULL;
@@ -2143,19 +2136,22 @@ BOOL LLVolume::generate()
 	
 	F32 profile_detail = mDetail;
 	F32 path_detail = mDetail;
-	
-	U8 path_type = mParams.getPathParams().getCurveType();
-	U8 profile_type = mParams.getProfileParams().getCurveType();
-	
-	if (path_type == LL_PCODE_PATH_LINE && profile_type == LL_PCODE_PROFILE_CIRCLE)
-	{ //cylinders don't care about Z-Axis
-		mLODScaleBias.setVec(0.6f, 0.6f, 0.0f);
+
+	if ((mParams.getSculptType() & LL_SCULPT_TYPE_MASK) != LL_SCULPT_TYPE_MESH)
+	{
+		U8 path_type = mParams.getPathParams().getCurveType();
+		U8 profile_type = mParams.getProfileParams().getCurveType();
+		if (path_type == LL_PCODE_PATH_LINE && profile_type == LL_PCODE_PROFILE_CIRCLE)
+		{
+			//cylinders don't care about Z-Axis
+			mLODScaleBias.setVec(0.6f, 0.6f, 0.0f);
+		}
+		else if (path_type == LL_PCODE_PATH_CIRCLE)
+		{
+			mLODScaleBias.setVec(0.6f, 0.6f, 0.6f);
+		}
 	}
-	else if (path_type == LL_PCODE_PATH_CIRCLE) 
-	{	
-		mLODScaleBias.setVec(0.6f, 0.6f, 0.6f);
-	}
-	
+
 	BOOL regenPath = mPathp->generate(mParams.getPathParams(), path_detail, split);
 	BOOL regenProf = mProfilep->generate(mParams.getProfileParams(), mPathp->isOpen(),profile_detail, split);
 
@@ -2194,6 +2190,13 @@ BOOL LLVolume::generate()
 			LLVector4a* profile = mProfilep->mProfile.mArray;
 			LLVector4a* end_profile = profile+sizeT;
 			LLVector4a offset = mPathp->mPath[s].mPos;
+
+            // hack to work around MAINT-5660 for debug until we can suss out
+            // what is wrong with the path generated that inserts NaNs...
+            if (!offset.isFinite3())
+            {
+                offset.clear();
+            }
 
 			LLVector4a tmp;
 
@@ -2371,9 +2374,10 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 	//input stream is now pointing at a zlib compressed block of LLSD
 	//decompress block
 	LLSD mdl;
-	if (!unzip_llsd(mdl, is, size))
+	U32 uzip_result = LLUZipHelper::unzip_llsd(mdl, is, size);
+	if (uzip_result != LLUZipHelper::ZR_OK)
 	{
-		LL_DEBUGS("MeshStreaming") << "Failed to unzip LLSD blob for LoD, will probably fetch from sim again." << LL_ENDL;
+		LL_DEBUGS("MeshStreaming") << "Failed to unzip LLSD blob for LoD with code " << uzip_result << " , will probably fetch from sim again." << LL_ENDL;
 		return false;
 	}
 	
@@ -2415,7 +2419,7 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 			
 			if (idx.empty() || face.mNumIndices < 3)
 			{ //why is there an empty index list?
-				LL_WARNS() <<"Empty face present!" << LL_ENDL;
+				LL_WARNS() << "Empty face present! Face index: " << i << " Total: " << face_count << LL_ENDL;
 				continue;
 			}
 
@@ -2544,7 +2548,7 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 						U16 influence = weights[idx++];
 						influence |= ((U16) weights[idx++] << 8);
 
-						F32 w = llclamp((F32) influence / 65535.f, 0.f, 0.99999f);
+						F32 w = llclamp((F32) influence / 65535.f, 0.001f, 0.999f);
 						wght.mV[cur_influence] = w;
 						joints[cur_influence] = joint;
 						cur_influence++;
@@ -2561,11 +2565,15 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
                     F32 wsum = wght.mV[VX] + wght.mV[VY] + wght.mV[VZ] + wght.mV[VW];
                     if (wsum <= 0.f)
                     {
-                        wght = LLVector4(0.99999f,0.f,0.f,0.f);
+                        wght = LLVector4(0.999f,0.f,0.f,0.f);
                     }
                     for (U32 k=0; k<4; k++)
                     {
-                        joints_with_weights[k] = (F32) joints[k] + wght[k];
+                        F32 f_combined = (F32) joints[k] + wght[k];
+                        joints_with_weights[k] = f_combined;
+                        // Any weights we added above should wind up non-zero and applied to a specific bone.
+                        // A failure here would indicate a floating point precision error in the math.
+                        llassert((k >= cur_influence) || (f_combined - S32(f_combined) > 0.0f));
                     }
 					face.mWeights[cur_vertex].loadua(joints_with_weights.mV);
 
@@ -2637,6 +2645,7 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 			}
 
 			//calculate bounding box
+			// VFExtents change
 			LLVector4a& min = face.mExtents[0];
 			LLVector4a& max = face.mExtents[1];
 
@@ -2676,10 +2685,16 @@ bool LLVolume::unpackVolumeFaces(std::istream& is, S32 size)
 			}
 		}
 	}
+
+	if (!cacheOptimize())
+	{
+		// Out of memory?
+		LL_WARNS() << "Failed to optimize!" << LL_ENDL;
+		mVolumeFaces.clear();
+		return false;
+	}
 	
 	mSculptLevel = 0;  // success!
-
-	cacheOptimize();
 
 	return true;
 }
@@ -2712,12 +2727,16 @@ void LLVolume::copyVolumeFaces(const LLVolume* volume)
 	mSculptLevel = 0;
 }
 
-void LLVolume::cacheOptimize()
+bool LLVolume::cacheOptimize()
 {
 	for (S32 i = 0; i < mVolumeFaces.size(); ++i)
 	{
-		mVolumeFaces[i].cacheOptimize();
+		if (!mVolumeFaces[i].cacheOptimize())
+		{
+			return false;
+		}
 	}
+	return true;
 }
 
 
@@ -2910,15 +2929,41 @@ F32 LLVolume::sculptGetSurfaceArea()
 	return area;
 }
 
-// create placeholder shape
-void LLVolume::sculptGeneratePlaceholder()
+// create empty placeholder shape
+void LLVolume::sculptGenerateEmptyPlaceholder()
 {
 	S32 sizeS = mPathp->mPath.size();
 	S32 sizeT = mProfilep->mProfile.size();
-	
+
 	S32 line = 0;
 
-	// for now, this is a sphere.
+	for (S32 s = 0; s < sizeS; s++)
+	{
+		for (S32 t = 0; t < sizeT; t++)
+		{
+			S32 i = t + line;
+			LLVector4a& pt = mMesh[i];
+					
+			F32* p = pt.getF32ptr();
+
+			p[0] = 0;
+			p[1] = 0;
+			p[2] = 0;
+
+			llassert(pt.isFinite3());
+		}
+		line += sizeT;
+	}
+}
+
+// create sphere placeholder shape
+void LLVolume::sculptGenerateSpherePlaceholder()
+{
+	S32 sizeS = mPathp->mPath.size();
+	S32 sizeT = mProfilep->mProfile.size();
+
+	S32 line = 0;
+
 	for (S32 s = 0; s < sizeS; s++)
 	{
 		for (S32 t = 0; t < sizeT; t++)
@@ -2926,12 +2971,12 @@ void LLVolume::sculptGeneratePlaceholder()
 			S32 i = t + line;
 			LLVector4a& pt = mMesh[i];
 
-			
-			F32 u = (F32)s/(sizeS-1);
-			F32 v = (F32)t/(sizeT-1);
+
+			F32 u = (F32)s / (sizeS - 1);
+			F32 v = (F32)t / (sizeT - 1);
 
 			const F32 RADIUS = (F32) 0.3;
-					
+
 			F32* p = pt.getF32ptr();
 
 			p[0] = (F32)(sin(F_PI * v) * cos(2.0 * F_PI * u) * RADIUS);
@@ -2939,7 +2984,6 @@ void LLVolume::sculptGeneratePlaceholder()
 			p[2] = (F32)(cos(F_PI * v) * RADIUS);
 
 			llassert(pt.isFinite3());
-
 		}
 		line += sizeT;
 	}
@@ -3102,9 +3146,9 @@ void sculpt_calc_mesh_resolution(U16 width, U16 height, U8 type, F32 detail, S32
 }
 
 // sculpt replaces generate() for sculpted surfaces
-void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level)
+void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components, const U8* sculpt_data, S32 sculpt_level, bool visible_placeholder)
 {
-    U8 sculpt_type = mParams.getSculptType();
+	U8 sculpt_type = mParams.getSculptType();
 
 	BOOL data_is_empty = FALSE;
 
@@ -3152,13 +3196,22 @@ void LLVolume::sculpt(U16 sculpt_width, U16 sculpt_height, S8 sculpt_components,
 			if (area < SCULPT_MIN_AREA || area > SCULPT_MAX_AREA)
 			{
 				data_is_empty = TRUE;
+				visible_placeholder = true;
 			}
 		}
 	}
 
 	if (data_is_empty)
 	{
-		sculptGeneratePlaceholder();
+		if (visible_placeholder)
+		{
+			// Object should be visible since there will be nothing else to display
+			sculptGenerateSpherePlaceholder();
+		}
+		else
+		{
+			sculptGenerateEmptyPlaceholder();
+		}
 	}
 
 
@@ -3690,10 +3743,46 @@ void LLVolume::generateSilhouetteVertices(std::vector<LLVector3> &vertices,
 			continue;
 		}
 
-		if (face.mTypeMask & (LLVolumeFace::CAP_MASK)) {
+		if (face.mTypeMask & (LLVolumeFace::CAP_MASK))
+		{
+			LLVector4a* v = (LLVector4a*)face.mPositions;
+			LLVector4a* n = (LLVector4a*)face.mNormals;
+
+			for (U32 j = 0; j < face.mNumIndices / 3; j++)
+			{
+				for (S32 k = 0; k < 3; k++)
+				{
+					S32 index = face.mEdge[j * 3 + k];
+
+					if (index == -1)
+					{
+						// silhouette edge, currently only cubes, so no other conditions
+
+						S32 v1 = face.mIndices[j * 3 + k];
+						S32 v2 = face.mIndices[j * 3 + ((k + 1) % 3)];
+
+						LLVector4a t;
+						mat.affineTransform(v[v1], t);
+						vertices.push_back(LLVector3(t[0], t[1], t[2]));
+
+						norm_mat.rotate(n[v1], t);
+
+						t.normalize3fast();
+						normals.push_back(LLVector3(t[0], t[1], t[2]));
+
+						mat.affineTransform(v[v2], t);
+						vertices.push_back(LLVector3(t[0], t[1], t[2]));
+
+						norm_mat.rotate(n[v2], t);
+						t.normalize3fast();
+						normals.push_back(LLVector3(t[0], t[1], t[2]));
+					}
+				}
+			}
 	
 		}
-		else {
+		else
+		{
 
 			//==============================================
 			//DEBUG draw edge map instead of silhouette edge
@@ -4568,6 +4657,7 @@ LLVolumeFace::LLVolumeFace() :
 	mTexCoords(NULL),
 	mIndices(NULL),
 	mWeights(NULL),
+    mWeightsScrubbed(FALSE),
 	mOctree(NULL),
 	mOptimized(FALSE)
 {
@@ -4593,6 +4683,7 @@ LLVolumeFace::LLVolumeFace(const LLVolumeFace& src)
 	mTexCoords(NULL),
 	mIndices(NULL),
 	mWeights(NULL),
+    mWeightsScrubbed(FALSE),
 	mOctree(NULL)
 { 
 	mExtents = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*3);
@@ -4664,6 +4755,7 @@ LLVolumeFace& LLVolumeFace::operator=(const LLVolumeFace& src)
 			ll_aligned_free_16(mWeights);
 			mWeights = NULL;
 		}
+        mWeightsScrubbed = src.mWeightsScrubbed;
 	}
 
 	if (mNumIndices)
@@ -4683,6 +4775,7 @@ LLVolumeFace::~LLVolumeFace()
 {
 	ll_aligned_free_16(mExtents);
 	mExtents = NULL;
+	mCenter = NULL;
 
 	freeData();
 }
@@ -4864,7 +4957,7 @@ void LLVolumeFace::optimize(F32 angle_cutoff)
 	//
 	if (new_face.mNumVertices <= mNumVertices)
 	{
-	llassert(new_face.mNumIndices == mNumIndices);
+        llassert(new_face.mNumIndices == mNumIndices);
 		swapData(new_face);
 	}
 
@@ -5134,7 +5227,7 @@ public:
 };
 
 
-void LLVolumeFace::cacheOptimize()
+bool LLVolumeFace::cacheOptimize()
 { //optimize for vertex cache according to Forsyth method: 
   // http://home.comcast.net/~tom_forsyth/papers/fast_vert_cache_opt.html
 	
@@ -5143,9 +5236,9 @@ void LLVolumeFace::cacheOptimize()
 
 	LLVCacheLRU cache;
 	
-	if (mNumVertices < 3)
+	if (mNumVertices < 3 || mNumIndices < 3)
 	{ //nothing to do
-		return;
+		return true;
 	}
 
 	//mapping of vertices to triangles and indices
@@ -5154,8 +5247,16 @@ void LLVolumeFace::cacheOptimize()
 	//mapping of triangles do vertices
 	std::vector<LLVCacheTriangleData> triangle_data;
 
-	triangle_data.resize(mNumIndices/3);
-	vertex_data.resize(mNumVertices);
+	try
+	{
+		triangle_data.resize(mNumIndices / 3);
+		vertex_data.resize(mNumVertices);
+	}
+	catch (std::bad_alloc)
+	{
+		LL_WARNS("LLVOLUME") << "Resize failed" << LL_ENDL;
+		return false;
+	}
 
 	for (U32 i = 0; i < mNumIndices; i++)
 	{ //populate vertex data and triangle data arrays
@@ -5265,24 +5366,54 @@ void LLVolumeFace::cacheOptimize()
 	S32 num_verts = mNumVertices;
 	S32 size = ((num_verts*sizeof(LLVector2)) + 0xF) & ~0xF;
 	LLVector4a* pos = (LLVector4a*) ll_aligned_malloc<64>(sizeof(LLVector4a)*2*num_verts+size);
+	if (pos == NULL)
+	{
+		LL_WARNS("LLVOLUME") << "Allocation of positions vector[" << sizeof(LLVector4a) * 2 * num_verts + size  << "] failed. " << LL_ENDL;
+		return false;
+	}
 	LLVector4a* norm = pos + num_verts;
 	LLVector2* tc = (LLVector2*) (norm + num_verts);
 
 	LLVector4a* wght = NULL;
 	if (mWeights)
 	{
-		wght = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		wght = (LLVector4a*)ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		if (wght == NULL)
+		{
+			ll_aligned_free<64>(pos);
+			LL_WARNS("LLVOLUME") << "Allocation of weights[" << sizeof(LLVector4a) * num_verts << "] failed" << LL_ENDL;
+			return false;
+		}
 	}
 
 	LLVector4a* binorm = NULL;
 	if (mTangents)
 	{
 		binorm = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a)*num_verts);
+		if (binorm == NULL)
+		{
+			ll_aligned_free<64>(pos);
+			ll_aligned_free_16(wght);
+			LL_WARNS("LLVOLUME") << "Allocation of binormals[" << sizeof(LLVector4a)*num_verts << "] failed" << LL_ENDL;
+			return false;
+		}
 	}
 
 	//allocate mapping of old indices to new indices
 	std::vector<S32> new_idx;
-	new_idx.resize(mNumVertices, -1);
+
+	try
+	{
+		new_idx.resize(mNumVertices, -1);
+	}
+	catch (std::bad_alloc)
+	{
+		ll_aligned_free<64>(pos);
+		ll_aligned_free_16(wght);
+		ll_aligned_free_16(binorm);
+		LL_WARNS("LLVOLUME") << "Resize failed: " << mNumVertices << LL_ENDL;
+		return false;
+	}
 
 	S32 cur_idx = 0;
 	for (U32 i = 0; i < mNumIndices; ++i)
@@ -5328,6 +5459,7 @@ void LLVolumeFace::cacheOptimize()
 	//std::string result = llformat("ACMR pre/post: %.3f/%.3f  --  %d triangles %d breaks", pre_acmr, post_acmr, mNumIndices/3, breaks);
 	//LL_INFOS() << result << LL_ENDL;
 
+	return true;
 }
 
 void LLVolumeFace::createOctree(F32 scaler, const LLVector4a& center, const LLVector4a& size)
@@ -5446,7 +5578,7 @@ BOOL LLVolumeFace::createUnCutCubeCap(LLVolume* volume, BOOL partial_build)
 
 	// S32 i;
 	S32	grid_size = (profile.size()-1)/4;
-
+	// VFExtents change
 	LLVector4a& min = mExtents[0];
 	LLVector4a& max = mExtents[1];
 
@@ -5539,10 +5671,17 @@ BOOL LLVolumeFace::createUnCutCubeCap(LLVolume* volume, BOOL partial_build)
 	if (!partial_build)
 	{
 		resizeIndices(grid_size*grid_size*6);
+		if (!volume->isMeshAssetLoaded())
+		{
+			mEdge.resize(grid_size*grid_size * 6);
+		}
 
 		U16* out = mIndices;
 
 		S32 idxs[] = {0,1,(grid_size+1)+1,(grid_size+1)+1,(grid_size+1),0};
+
+		int cur_edge = 0;
+
 		for(S32 gx = 0;gx<grid_size;gx++)
 		{
 			
@@ -5553,7 +5692,49 @@ BOOL LLVolumeFace::createUnCutCubeCap(LLVolume* volume, BOOL partial_build)
 					for(S32 i=5;i>=0;i--)
 					{
 						*out++ = ((gy*(grid_size+1))+gx+idxs[i]);
-					}		
+					}
+
+					S32 edge_value = grid_size * 2 * gy + gx * 2;
+
+					if (gx > 0)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1; // Mark face to higlight it
+					}
+
+					if (gy < grid_size - 1)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					mEdge[cur_edge++] = edge_value;
+
+					if (gx < grid_size - 1)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					if (gy > 0)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					mEdge[cur_edge++] = edge_value;
 				}
 				else
 				{
@@ -5561,8 +5742,50 @@ BOOL LLVolumeFace::createUnCutCubeCap(LLVolume* volume, BOOL partial_build)
 					{
 						*out++ = ((gy*(grid_size+1))+gx+idxs[i]);
 					}
+
+					S32 edge_value = grid_size * 2 * gy + gx * 2;
+
+					if (gy > 0)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					if (gx < grid_size - 1)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					mEdge[cur_edge++] = edge_value;
+
+					if (gy < grid_size - 1)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					if (gx > 0)
+					{
+						mEdge[cur_edge++] = edge_value;
+					}
+					else
+					{
+						mEdge[cur_edge++] = -1;
+					}
+
+					mEdge[cur_edge++] = edge_value;
 				}
-			}	
+			}
 		}
 	}
 		
@@ -5632,7 +5855,7 @@ BOOL LLVolumeFace::createCap(LLVolume* volume, BOOL partial_build)
 	
 	LLVector2 cuv;
 	LLVector2 min_uv, max_uv;
-
+	// VFExtents change
 	LLVector4a& min = mExtents[0];
 	LLVector4a& max = mExtents[1];
 
@@ -6071,6 +6294,9 @@ void LLVolumeFace::resizeVertices(S32 num_verts)
 
 	mNumVertices = num_verts;
 	mNumAllocatedVertices = num_verts;
+
+    // Force update
+    mJointRiggingInfoTab.clear();
 }
 
 void LLVolumeFace::pushVertex(const LLVolumeFace::VertexData& cv)
@@ -6189,96 +6415,6 @@ void LLVolumeFace::fillFromLegacyData(std::vector<LLVolumeFace::VertexData>& v, 
 	for (U32 i = 0; i < idx.size(); ++i)
 	{
 		mIndices[i] = idx[i];
-	}
-}
-
-void LLVolumeFace::appendFace(const LLVolumeFace& face, LLMatrix4& mat_in, LLMatrix4& norm_mat_in)
-{
-	U16 offset = mNumVertices;
-
-	S32 new_count = face.mNumVertices + mNumVertices;
-
-	if (new_count > 65536)
-	{
-		LL_ERRS() << "Cannot append face -- 16-bit overflow will occur." << LL_ENDL;
-	}
-	
-	if (face.mNumVertices == 0)
-	{
-		LL_ERRS() << "Cannot append empty face." << LL_ENDL;
-	}
-
-	U32 old_vsize = mNumVertices*16;
-	U32 new_vsize = new_count * 16;
-	U32 old_tcsize = (mNumVertices*sizeof(LLVector2)+0xF) & ~0xF;
-	U32 new_tcsize = (new_count*sizeof(LLVector2)+0xF) & ~0xF;
-	U32 new_size = new_vsize * 2 + new_tcsize;
-
-	//allocate new buffer space
-	LLVector4a* old_buf = mPositions;
-	mPositions = (LLVector4a*) ll_aligned_malloc<64>(new_size);
-	mNormals = mPositions + new_count;
-	mTexCoords = (LLVector2*) (mNormals+new_count);
-
-	mNumAllocatedVertices = new_count;
-
-	LLVector4a::memcpyNonAliased16((F32*) mPositions, (F32*) old_buf, old_vsize);
-	LLVector4a::memcpyNonAliased16((F32*) mNormals, (F32*) (old_buf+mNumVertices), old_vsize);
-	LLVector4a::memcpyNonAliased16((F32*) mTexCoords, (F32*) (old_buf+mNumVertices*2), old_tcsize);
-	
-	mNumVertices = new_count;
-
-	//get destination address of appended face
-	LLVector4a* dst_pos = mPositions+offset;
-	LLVector2* dst_tc = mTexCoords+offset;
-	LLVector4a* dst_norm = mNormals+offset;
-
-	//get source addresses of appended face
-	const LLVector4a* src_pos = face.mPositions;
-	const LLVector2* src_tc = face.mTexCoords;
-	const LLVector4a* src_norm = face.mNormals;
-
-	//load aligned matrices
-	LLMatrix4a mat, norm_mat;
-	mat.loadu(mat_in);
-	norm_mat.loadu(norm_mat_in);
-
-	for (U32 i = 0; i < face.mNumVertices; ++i)
-	{
-		//transform appended face position and store
-		mat.affineTransform(src_pos[i], dst_pos[i]);
-
-		//transform appended face normal and store
-		norm_mat.rotate(src_norm[i], dst_norm[i]);
-		dst_norm[i].normalize3fast();
-
-		//copy appended face texture coordinate
-		dst_tc[i] = src_tc[i];
-
-		if (offset == 0 && i == 0)
-		{ //initialize bounding box
-			mExtents[0] = mExtents[1] = dst_pos[i];
-		}
-		else
-		{
-			//stretch bounding box
-			update_min_max(mExtents[0], mExtents[1], dst_pos[i]);
-		}
-	}
-
-
-	new_count = mNumIndices + face.mNumIndices;
-
-	//allocate new index buffer
-	mIndices = (U16*) ll_aligned_realloc_16(mIndices, (new_count*sizeof(U16)+0xF) & ~0xF, (mNumIndices*sizeof(U16)+0xF) & ~0xF);
-	
-	//get destination address into new index buffer
-	U16* dst_idx = mIndices+mNumIndices;
-	mNumIndices = new_count;
-
-	for (U32 i = 0; i < face.mNumIndices; ++i)
-	{ //copy indices, offsetting by old vertex count
-		dst_idx[i] = face.mIndices[i]+offset;
 	}
 }
 
@@ -6427,7 +6563,7 @@ BOOL LLVolumeFace::createSide(LLVolume* volume, BOOL partial_build)
 	{
 		update_min_max(face_min, face_max, *cur_pos++);
 	}
-
+	// VFExtents change
 	mExtents[0] = face_min;
 	mExtents[1] = face_max;
 

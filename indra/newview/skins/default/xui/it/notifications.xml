@@ -3,6 +3,10 @@
 	<global name="skipnexttime">
 		Non mostrare più la prossima volta
 	</global>
+	<global name="skipnexttimesessiononly">
+		Non mostrare più questo messaggio 
+(nella sessione attuale)
+	</global>
 	<global name="alwayschoose">
 		Scegli sempre questa opzione
 	</global>
@@ -144,8 +148,7 @@ L&apos;inizializzazione con il Marketplace non ha avuto successo a causa di un e
 	<notification name="MerchantTransactionFailed">
 		La transazione in Marketplace non è riuscita a causa dell&apos;errore seguente:
         
-        Motivo: &apos;[ERROR_REASON]&apos;
-        [ERROR_DESCRIPTION]
+        [ERROR_REASON][ERROR_DESCRIPTION]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="MerchantUnprocessableEntity">
@@ -241,6 +244,10 @@ Scegli solo un oggetto e riprova.
 		Nota: Se attivi questa opzione, chiunque usa questo computer può vedere l&apos;elenco di luoghi preferiti.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
+	<notification name="AllowMultipleViewers">
+		Non è possibile utilizzare più di un viewer Second Life contemporaneamente. L’utilizzo simultaneo potrebbe portare a collisioni o corruzione della cache texture, e ad un peggioramento nelle immagini e nella performance.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="GrantModifyRights">
 		Quando concedi i diritti di modifica ad un altro residente, gli permetti di modificare, eliminare o prendere QUALSIASI oggetto che possiedi in Second Life. Pertanto ti consigliamo di essere ben sicuro quando concedi questo diritto.
 Vuoi concedere i diritti di modifica a [NAME]?
@@ -330,6 +337,9 @@ Se non desideri che queste abilità siano assegnate a questo ruolo, disattivale 
 		Stai per espellere [COUNT] membri dal gruppo.
 		<usetemplate ignoretext="Conferma l&apos;espulsione di vari partecipanti dal gruppo" name="okcancelignore" notext="Annulla" yestext="Espelli"/>
 	</notification>
+	<notification name="GroupBanUserOnBanlist">
+		Ad alcuni residenti non è stato inviato l&apos;invito perché espulsi dal gruppo.
+	</notification>
 	<notification name="AttachmentDrop">
 		Stai per abbandonare il tuo accessorio.
     Vuoi continuare?
@@ -341,8 +351,8 @@ Vuoi proseguire?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="Iscriviti"/>
 	</notification>
 	<notification name="JoinGroupNoCost">
-		Aderisci al gruppo [NAME].
-Continuare?
+		Stai per entrare a far parte del gruppo &lt;nolink&gt;[NAME]&lt;/nolink&gt;. 
+Vuoi continuare?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="Iscriviti"/>
 	</notification>
 	<notification name="JoinGroupCannotAfford">
@@ -354,6 +364,40 @@ Non hai abbastanza L$ per iscriverti a questo gruppo.
 I gruppi devono avere più di un partecipante, o saranno eliminati definitivamente.
 Invita altri partecipanti entro le prossime 48 ore.
 		<usetemplate canceltext="Annulla" name="okcancelbuttons" notext="Annulla" yestext="Crea un gruppo per L$ 100"/>
+	</notification>
+	<notification name="JoinGroupInaccessible">
+		Non puoi accedere a questo gruppo.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupError">
+		Errore durante la richiesta di accesso al gruppo.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupErrorReason">
+		Impossibile unirsi al gruppo: [reason]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupTrialUser">
+		Siamo spiacenti, gli utenti in prova non possono unirsi ai gruppi.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupMaxGroups">
+		Non puoi unirti a ‘&lt;nolink&gt;[group_name]&lt;/nolink&gt;’: 
+Sei già membro di [group_count] gruppi, il numero massimo consentito è di [max_groups]
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupClosedEnrollment">
+		Non puoi unirti a ‘&lt;nolink&gt;[group_name]&lt;/nolink&gt;’: 
+Il gruppo non ha ancora aperto le iscrizioni.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupSuccess">
+		Sei stato aggiunto al gruppo.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="JoinGroupInsufficientFunds">
+		Impossibile trasferire la quota di abbonamento richiesta di [membership_fee] L$.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="LandBuyPass">
 		Pagando [COST]L$ puoi entrare in questa terra (&apos;[PARCEL_NAME]&apos;) per [TIME] ore.  Compri un pass?
@@ -376,9 +420,9 @@ Il prezzo di vendità sarà [SALE_PRICE]L$ e [NAME] viene autorizzato alla vendi
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="ReturnObjectsDeededToGroup">
-		Confermi di volere restituire tutti gli oggetti condivisi con il gruppo &apos;[NAME]&apos; di questo terreno agli inventari dei proprietari precedenti?
+		Confermi di voler restituire all’inventario del precedente proprietario tutti gli oggetti condivisi in questo lotto con il gruppo ‘&lt;nolink&gt;[NAME]&lt;/nolink&gt;’? 
 
-*ATTENZIONE* Questo cancellerà gli oggetti non trasferibili ceduti al gruppo!
+*ATTENZIONE* Così facendo, verranno  eliminati tutti gli oggetti non trasferibili ceduti al gruppo! 
 
 Oggetti: [N]
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
@@ -422,7 +466,7 @@ Oggetti: [N]
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="ReturnObjectsNotOwnedByGroup">
-		Restituisci gli oggetti in questo terreno che NON sono condivisi con il gruppo [NAME] ai loro proprietari?
+		Vuoi restituire gli oggetti di questo lotto di terra che NON sono condivisi con il gruppo &lt;nolink&gt;[NAME]&lt;/nolink&gt; ai loro proprietari? 
 
 Oggetti: [N]
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
@@ -457,6 +501,12 @@ Per collocare il media su una sola faccia, scegli Seleziona faccia, clicca su un
 	<notification name="ErrorEncodingSnapshot">
 		Errore nella codifica della fotografia.
 	</notification>
+	<notification name="ErrorPhotoCannotAfford">
+		Hai bisogno di L$ [COST] per salvare una foto nel tuo inventario. Puoi acquistare L$ o salvare la foto sul tuo computer.
+	</notification>
+	<notification name="ErrorTextureCannotAfford">
+		Hai bisogno di L$ [COST] per salvare una texture nel tuo inventario. Puoi acquistare L$ o salvare la foto sul tuo computer.
+	</notification>
 	<notification name="ErrorUploadingPostcard">
 		C&apos;è stato un problema inviando la fotografia per il seguente motivo: [REASON]
 	</notification>
@@ -464,7 +514,7 @@ Per collocare il media su una sola faccia, scegli Seleziona faccia, clicca su un
 		C&apos;è stato un problema importando la foto del rapporto per il seguente motivo: [REASON]
 	</notification>
 	<notification name="MustAgreeToLogIn">
-		Devi accettare i Termini di Servizio prima di proseguire il collegamento con [SECOND_LIFE].
+		Devi accettare i Termini e le Condizioni di Second Life, le clausole di riservatezza e i Termini del Servizio per continuare l’accesso a [SECOND_LIFE].
 	</notification>
 	<notification name="CouldNotPutOnOutfit">
 		Non è stato possibile indossare un equipaggiamento.
@@ -479,6 +529,9 @@ Superato il limite di oggetti collegati [MAX_ATTACHMENTS]. Per favore prima stac
 	</notification>
 	<notification name="CannotWearInfoNotComplete">
 		Non puoi indossare quell&apos;elemento perchè non è ancora stato caricato. Riprova fra un minuto.
+	</notification>
+	<notification name="MustEnterPasswordToLogIn">
+		Inserisci la tua password per accedere.
 	</notification>
 	<notification name="MustHaveAccountToLogIn">
 		Spiacenti. Un campo è vuoto.
@@ -548,6 +601,9 @@ Nota: questa operazione cancellerà la cache.
 	<notification name="ChangeConnectionPort">
 		Le impostazioni della porta avranno effetto dopo il riavvio di [APP_NAME].
 	</notification>
+	<notification name="ChangeDeferredDebugSetting">
+		La modifica della impostazione di debug avrà effetto dopo il riavvio di [APP_NAME].
+	</notification>
 	<notification name="ChangeSkin">
 		La nuova pelle comparirà dopo il riavvio di [APP_NAME].
 	</notification>
@@ -564,6 +620,10 @@ Nota: questa operazione cancellerà la cache.
 	</notification>
 	<notification name="DeleteNotecard">
 		Vuoi eliminare il biglietto?
+		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
+	</notification>
+	<notification name="LoadPreviousReportScreenshot">
+		Vuoi usare la precedente schermata per il tuo rapporto?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="GestureSaveFailedTooManySteps">
@@ -626,30 +686,15 @@ Visitare [_URL] per ulteriori informazioni?
 		</url>
 		<usetemplate ignoretext="L&apos;hardware di questo computer non è compatibile" name="okcancelignore" notext="No" yestext="Si"/>
 	</notification>
-	<notification name="IntelOldDriver">
-		È probabile che ci sia un driver aggiornato per il processore grafico.  L&apos;aggiornamento dei driver della grafica può migliorare le prestazioni in maniera significativa.
-
-    Visitare [_URL] per cercare un aggiornamento del driver?
-		<url name="url">
-			http://www.intel.com/p/it_IT/support/detect/graphics
-		</url>
-		<usetemplate ignoretext="Driver grafica obsoleto" name="okcancelignore" notext="No" yestext="Sì"/>
+	<notification name="RunLauncher">
+		Non avviare direttamente il viewer eseguibile. Aggiorna le scorciatoie attuali per avviare invece il Launcher_SL.
 	</notification>
-	<notification name="AMDOldDriver">
-		È probabile che ci sia un driver aggiornato per il processore grafico.  L&apos;aggiornamento dei driver della grafica può migliorare le prestazioni in maniera significativa.
+	<notification name="OldGPUDriver">
+		È probabile che ci sia un driver aggiornato per il processore grafico. L&apos;aggiornamento dei driver della grafica può migliorare le prestazioni in maniera significativa.
 
-    Visitare [_URL] per cercare un aggiornamento del driver?
+    Visitare [URL] per cercare un aggiornamento del driver?
 		<url name="url">
-			http://support.amd.com/it/Pages/AMDSupportHub.aspx
-		</url>
-		<usetemplate ignoretext="Driver grafica obsoleto" name="okcancelignore" notext="No" yestext="Sì"/>
-	</notification>
-	<notification name="NVIDIAOldDriver">
-		È probabile che ci sia un driver aggiornato per il processore grafico.  L&apos;aggiornamento dei driver della grafica può migliorare le prestazioni in maniera significativa.
-
-    Visitare [_URL] per cercare un aggiornamento del driver?
-		<url name="url">
-			http://www.nvidia.it/Download/index.aspx?lang=it
+			[URL]
 		</url>
 		<usetemplate ignoretext="Driver grafica obsoleto" name="okcancelignore" notext="No" yestext="Sì"/>
 	</notification>
@@ -675,8 +720,8 @@ La qualità grafica può essere aumentata in Preferenze &gt; Grafica.
 	</notification>
 	<notification name="CannotCopyWarning">
 		Non hai l&apos;autorizzazione a copiare i seguenti oggetti:
-[ITEMS]
-e se li dai via, verranno eliminati dal tuo inventario. Sicuro di volere offrire questi oggetti?
+&lt;nolink&gt;[ITEMS]&lt;/nolink&gt;
+e se li dai via, verranno eliminati dal tuo inventario. Sicuro di voler offrire questi oggetti?
 		<usetemplate name="okcancelbuttons" notext="No" yestext="Si"/>
 	</notification>
 	<notification name="CannotGiveItem">
@@ -723,7 +768,7 @@ Non potrà temporaneamente muoversi, chiacchierare in chat, o interagire con il 
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="Espelli"/>
 	</notification>
 	<notification name="EjectAvatarFromGroup">
-		Hai espulso [AVATAR_NAME] dal gruppo [GROUP_NAME]
+		Hai espulso [AVATAR_NAME] dal gruppo &lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;
 	</notification>
 	<notification name="AcquireErrorTooManyObjects">
 		ERRORE DI ACQUISIZIONE: hai selezionato troppi oggetti.
@@ -741,6 +786,9 @@ Vai su [_URL] per informazioni sull&apos;acquisto di L$?
 		</url>
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
+	<notification name="MuteLimitReached">
+		Impossibile aggiungere il nuovo elemento alla lista dei bloccati perché hai raggiunto il limite di [MUTE_LIMIT] immissioni.
+	</notification>
 	<notification name="UnableToLinkObjects">
 		Impossibile unire questi [COUNT] oggetti.
 Puoi unire al massimo [MAX] oggetti.
@@ -754,6 +802,9 @@ Puoi unire al massimo [MAX] oggetti.
 Accertati che nessuno sia bloccato e che li possiedi tutti.
 	</notification>
 	<notification name="CannotLinkPermanent">
+		Gli oggetti non possono essere collegati attraverso i confini.
+	</notification>
+	<notification name="CannotLinkAcrossRegions">
 		Gli oggetti non possono essere collegati attraverso i confini.
 	</notification>
 	<notification name="CannotLinkDifferentOwners">
@@ -1316,19 +1367,18 @@ Confermi di voler prendere questi elementi?
 Seleziona un&apos;area più piccola e riprova.
 	</notification>
 	<notification name="DeedLandToGroup">
-		Cedendo questo terreno al gruppo sara richiesto ai componenti di avere e di mantenere il terreno con un credito sufficiente.
-Il prezzo di acquisto del terreno non è rifondibile al proprietario.
-Se una terreno ceduto al gruppo viene venduto, il prezzo di vendita verrà diviso in parti uguali fra i membri del gruppo.
+		Completando la cessione del lotto, il gruppo dovrà avere e mantenere crediti sufficienti per l&apos;uso del terreno. 
+Il prezzo di acquisto del terreno non viene rimborsato al proprietario. Se un lotto ceduto viene venduto, il prezzo di vendita viene distribuito in parti uguali tra i membri del gruppo. 
 
-Cedi questo terreno di [AREA] m² al gruppo &apos;[GROUP_NAME]&apos;?
+Cedere questi [AREA] m² di terreno al gruppo ‘&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="DeedLandToGroupWithContribution">
-		Completando la cessione del lotto, il gruppo dovrà avere e mantenere crediti sufficienti per l&apos;uso del terreno.
-La cessione includerà un contributo contemporaneo di terreno al gruppo da &apos;[NAME]&apos;.
-Il prezzo di acquisto del terreno non viene rimborsato al proprietario. Se un lotto ceduto viene venduto, il prezzo di vendita viene distribuito in maniera paritetica tra i membri del gruppo.
+		Completando la cessione del lotto, il gruppo dovrà avere e mantenere crediti sufficienti per l&apos;uso del terreno. 
+La cessione includerà un contributo contemporaneo di terreno al gruppo da &apos;[NAME]&apos;. 
+Il prezzo di acquisto del terreno non viene rimborsato al proprietario. Se un lotto ceduto viene venduto, il prezzo di vendita viene distribuito in parti uguali tra i membri del gruppo. 
 
-Cedere questi [AREA] m² di terreno al gruppo &apos;[GROUP_NAME]&apos;?
+Cedere questi [AREA] m² di terreno al gruppo ‘&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="DisplaySetToSafe">
@@ -1366,12 +1416,18 @@ Puoi comunque usare [SECOND_LIFE] normalmente e gli altri residenti ti vedranno 
 			<ignore name="ignore" text="Lo scaricamento sta richiedendo parecchio tempo"/>
 		</form>
 	</notification>
-	<notification name="RegionAndAgentComplexity">
-		La tua [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Rendering-Complexity/ta-p/2967838 complessità visiva] è [AGENT_COMPLEXITY].
+	<notification name="AgentComplexityWithVisibility">
+		La [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Rendering-Complexity/ta-p/2967838 complessità del tuo avatar] è [AGENT_COMPLEXITY].
 [OVERLIMIT_MSG]
+		<usetemplate ignoretext="Avvisami se la complessità del mio avatar è eccessiva" name="notifyignore"/>
 	</notification>
 	<notification name="AgentComplexity">
-		La tua [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Rendering-Complexity/ta-p/2967838 complessità visiva] è [AGENT_COMPLEXITY].
+		La [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Rendering-Complexity/ta-p/2967838 complessità del tuo avatar] è [AGENT_COMPLEXITY].
+		<usetemplate ignoretext="Avvisami in caso di cambiamenti della complessità del mio avatar" name="notifyignore"/>
+	</notification>
+	<notification name="HUDComplexityWarning">
+		[HUD_REASON], è probabile che influisca negativamente sulle tue prestazioni.
+		<usetemplate ignoretext="Avvisami quando la complessità del mio HUD è eccessiva" name="notifyignore"/>
 	</notification>
 	<notification name="FirstRun">
 		L&apos;installazione di [APP_NAME] è terminata.
@@ -1463,6 +1519,10 @@ Scegli solo un oggetto e riprova.
 		Teleporta a casa tutti i residenti in questa regione?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
+	<notification name="ChangeObjectBonusFactor">
+		La riduzione del bonus oggetti dopo aver costruito in una regione può causare la restituzione o l&apos;eliminazione di oggetti. Vuoi comunque cambiare il bonus oggetti?
+		<usetemplate ignoretext="Conferma cambiamento fattore bonus oggetti" name="okcancelignore" notext="Annulla" yestext="OK"/>
+	</notification>
 	<notification name="EstateObjectReturn">
 		Confermi di voler restituire gli oggetti di proprietà di [USER_NAME] ?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
@@ -1486,6 +1546,10 @@ Sostituisci la texture [TEXTURE_NUM] con una a 24-bit 512x512 oppure con una imm
 		Vuoi veramente impostare come base il terreno corrente, impostarlo come riferimento per i limiti dei rialzi/abbassamenti di tutto il territorio ed il suo valore impostato come base per lo strumento &apos;Ripristina&apos;?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
+	<notification name="ConfirmTextureHeights">
+		Stai per usare valori bassi maggiori dei valori alti di Intervalli altitudine. Vuoi procedere?
+		<usetemplate canceltext="Non chiedere" name="yesnocancelbuttons" notext="Annulla" yestext="OK"/>
+	</notification>
 	<notification name="MaxAllowedAgentOnRegion">
 		Puoi avere al massimo [MAX_AGENTS] residenti consentiti.
 	</notification>
@@ -1506,6 +1570,33 @@ Eccede il [MAX_AGENTS] [LIST_TYPE] limite di [NUM_EXCESS].
 	<notification name="OwnerCanNotBeDenied">
 		Impossibile aggiungere i proprietari della proprietà immobiliare alla lista dei residenti bloccati.
 	</notification>
+	<notification name="ProblemAddingEstateManagerBanned">
+		Impossibile aggiungere il residente espulso alla lista dei gestori delle proprietà.
+	</notification>
+	<notification name="ProblemBanningEstateManager">
+		Impossibile aggiungere il gestore della proprietà immobiliare [AGENT] all’elenco degli espulsi.
+	</notification>
+	<notification name="GroupIsAlreadyInList">
+		&lt;nolink&gt;[GROUP]&lt;/nolink&gt; si trova già nell’elenco dei Gruppi ammessi.
+	</notification>
+	<notification name="AgentIsAlreadyInList">
+		[AGENT] è gia nel tuo elenco [LIST_TYPE].
+	</notification>
+	<notification name="AgentsAreAlreadyInList">
+		[AGENT] è gia nel tuo elenco [LIST_TYPE].
+	</notification>
+	<notification name="AgentWasAddedToList">
+		[AGENT] è stato aggiunto all’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentsWereAddedToList">
+		[AGENT] è stato aggiunto all’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentWasRemovedFromList">
+		[AGENT] è stato rimosso dall’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
+	<notification name="AgentsWereRemovedFromList">
+		[AGENT] è stato rimosso dall’elenco [LIST_TYPE] di [ESTATE].
+	</notification>
 	<notification name="CanNotChangeAppearanceUntilLoaded">
 		Impossibile cambiare l&apos;aspetto fisico finchè gli abiti e i vestiti non sono caricati.
 	</notification>
@@ -1521,156 +1612,29 @@ Imposta l&apos;oggetto per la vendita e riprova.
 		Hai terminato di scaricare il file del terreno nella cartella:
 [DOWNLOAD_PATH].
 	</notification>
-	<notification name="DownloadWindowsMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadWindows">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadWindowsReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadLinuxMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadLinux">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadLinuxReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica"/>
-	</notification>
-	<notification name="DownloadMacMandatory">
-		È disponibile una nuova versione di [APP_NAME].
-[MESSAGE]
-Devi scaricare questo aggiornamento per utilizzare [APP_NAME].
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Esci" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadMac">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="DownloadMacReleaseForDownload">
-		È disponibile una versione aggiornata di [APP_NAME].
-[MESSAGE]
-Questo aggiornamento non è necessario, ma ti consigliamo di installarlo per migliorare il rendimento e la stabilità.
-
-Scaricare nella cartella Applicazioni?
-		<usetemplate name="okcancelbuttons" notext="Continua" yestext="Scarica l&apos;aggiornamento"/>
-	</notification>
-	<notification name="FailedUpdateInstall">
-		Si è verificato un errore durante l&apos;aggiornamento del viewer.
-Scarica e installa la versione più recente del viewer da
-http://secondlife.com/download.
+	<notification name="RequiredUpdate">
+		Per effettuare l&apos;accesso è richiesta la versione [VERSION]. 
+Scaricala dal sito https://secondlife.com/support/downloads/
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="FailedRequiredUpdateInstall">
-		Non è stato possibile installare un aggiornamento richiesto. 
-Non potrai accedere fino a quando non verrà aggiornato [APP_NAME].
-
-Scarica e installa la versione più recente del viewer da
-http://secondlife.com/download.
-		<usetemplate name="okbutton" yestext="Esci"/>
-	</notification>
-	<notification name="UpdaterServiceNotRunning">
-		È disponibile un aggiornamento obbligatorio per l&apos;installazione di Second Life.
-
-Puoi scaricare questo aggiornamento da http://www.secondlife.com/downloads
-oppure puoi installarlo adesso.
-		<usetemplate name="okcancelbuttons" notext="Esci da Second Life" yestext="Scarica e aggiorna adesso"/>
-	</notification>
-	<notification name="DownloadBackgroundTip">
-		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
-		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
-	</notification>
-	<notification name="DownloadBackgroundDialog">
-		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
-		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
-	</notification>
-	<notification name="RequiredUpdateDownloadedVerboseDialog">
-		È stato scaricato un aggiornamento obbligatorio del software.
-Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
-
-Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
+	<notification name="PauseForUpdate">
+		Per effettuare l&apos;accesso è richiesta la versione [VERSION]. 
+Fai clic su OK per scaricarla e installarla.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="RequiredUpdateDownloadedDialog">
-		Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
-[[INFO_URL] Informazioni su questo aggiornamento]
+	<notification name="OptionalUpdateReady">
+		La versione [VERSION] è stata scaricata ed è pronta per essere installata. 
+Fai clic su OK per installarla.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
-	<notification name="OtherChannelDownloadBackgroundTip">
-		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] 
-Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] per informazioni su queesto aggiornamento]
-		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
+	<notification name="PromptOptionalUpdate">
+		La versione [VERSION] è stata scaricata ed è pronta per essere installata. 
+Vuoi procedere?
+		<usetemplate canceltext="Non adesso" name="yesnocancelbuttons" notext="Salta" yestext="Installa"/>
 	</notification>
-	<notification name="OtherChannelDownloadBackgroundDialog">
-		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION]
-Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
-		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
-		È stato scaricato un aggiornamento obbligatorio del software.
-Versione [VERSION]
-Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
-
-Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
-		Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
-Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadInProgress">
-		È disponibile un aggiornamento.
-È in fase di download. Al termine ti verrà chiesto di riavviare il computer per completare l&apos;installazione.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateDownloadComplete">
-		È stato scaricato un aggiornamento. Verrà installato durante il riavvio.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateCheckError">
-		Si è verificato un errore durante la ricerca dell&apos;aggiornamento.
-Riprova più tardi.
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="UpdateViewerUpToDate">
-		Il Viewer è aggiornato.
-Per provare le funzioni e modifiche più recenti, visita la pagina Alternate Viewers. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
-		<usetemplate name="okbutton" yestext="OK"/>
+	<notification name="LoginFailedUnknown">
+		Spiacenti, accesso non riuscito per ragioni sconosciute. Se continui a visualizzare questo messaggio, visita il [SUPPORT_SITE].
+		<usetemplate name="okbutton" yestext="Chiudi"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
 		La cessione di questo oggetto farà in modo che il gruppo:
@@ -1720,16 +1684,15 @@ Per provare le funzioni e modifiche più recenti, visita la pagina Alternate Vie
 Lasciare il gruppo?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
 	</notification>
+	<notification name="GroupDepart">
+		Hai abbandonato il gruppo “&lt;nolink&gt;[group_name]&lt;/nolink&gt;&quot;.
+	</notification>
 	<notification name="OwnerCannotLeaveGroup">
 		Impossibile abbandonare il gruppo. Non puoi abbandonare il gruppo perché sei l&apos;ultimo proprietario del gruppo. Devi prima assegnare a un altro membro il ruolo di proprietario.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="GroupDepartError">
-		Impossibile abbandonare il gruppo: [reason].
-		<usetemplate name="okbutton" yestext="OK"/>
-	</notification>
-	<notification name="GroupDepart">
-		Hai abbandonato il gruppo [group_name].
+		Impossibile abbandonare il gruppo.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmKick">
@@ -1761,11 +1724,10 @@ Vuoi cancellare quell&apos;elemento?
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DoNotDisturbModeSet">
-		Non disturbare è attivo.  Non riceverai la notifica delle comunicazioni in arrivo.
+		La funzione Non disturbare è attiva. Non riceverai nessuna comunicazione.
 
-- Gli altri residenti riceveranno la tua risposta Non disturbare (impostata in Preferenze &gt; Generali).
-- Le offerte di teleport verranno rifiutate.
-- Le chiamate voce verranno rifiutate.
+- Gli altri residenti riceveranno la risposta che hai impostato per la funzione &quot;Non disturbare&quot; in Preferenze &gt; Generali.
+- Le chiamate vocali verranno rifiutate.
 		<usetemplate ignoretext="Io cambio il mio stato alla modalità Non disturbare." name="okignore" yestext="OK"/>
 	</notification>
 	<notification name="JoinedTooManyGroupsMember">
@@ -1954,7 +1916,7 @@ Cambierà migliaia di regioni e produrrà seri problemi ai vari server.
 		<usetemplate canceltext="Annulla" name="yesnocancelbuttons" notext="Tutte le proprietà" yestext="Questa proprietà"/>
 	</notification>
 	<notification label="Seleziona la proprietà" name="EstateBannedAgentRemove">
-		Rimuovi questo residente dalla lista dei residenti bloccati nell&apos;accesso solo a questa proprietà oppure per [ALL_ESTATES]?
+		Vuoi rimuovere questo Residente dall’elenco degli espulsi solo per questa proprietà immobiliare oppure per [ALL_ESTATES]?
 		<usetemplate canceltext="Annulla" name="yesnocancelbuttons" notext="Tutte le proprietà" yestext="Questa proprietà"/>
 	</notification>
 	<notification label="Seleziona la proprietà" name="EstateManagerAdd">
@@ -1996,6 +1958,10 @@ Cambierà migliaia di regioni e produrrà seri problemi ai vari server.
 	<notification name="EstateChangeCovenant">
 		Confermi di voler cambiare il Regolamento della proprietà?
 		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
+	</notification>
+	<notification name="EstateParcelAccessOverride">
+		Togliendo la spunta a questa opzione potrebbero essere rimosse le restrizioni che i proprietari di lotti hanno aggiunto per tenere lontani disturbatori, mantenere la privacy, o evitare che minorenni abbiano accesso a materiale per adulti. Parla con i proprietari del tuo lotto se ce n’è bisogno.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RegionEntryAccessBlocked">
 		La regione che cerchi di visitare include contenuti che non corripondono al livello selezionato nelle preferenze.  Per cambiare le preferenze seleziona Io &gt; Preferenze &gt; Generale.
@@ -2130,6 +2096,10 @@ Cambierà migliaia di regioni e produrrà seri problemi ai vari server.
 	</notification>
 	<notification name="TooManyPrimsSelected">
 		Hai selezionato troppi prim.  Seleziona non più di [MAX_PRIM_COUNT] prim e riprova
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="TooManyScriptsSelected">
+		Troppi script negli oggetti selezionati. Seleziona meno oggetti e riprova.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="ProblemImportingEstateCovenant">
@@ -2301,6 +2271,10 @@ Trasferisci gli elementi nell&apos;inventario?
 		Pagamento non riuscito: oggetto non trovato.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
+	<notification name="PaymentBlockedButtonMismatch">
+		Pagamento interrotto: il prezzo pagato non corrisponde a nessuno dei pulsanti di pagamento impostati per questo oggetto.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="OpenObjectCannotCopy">
 		Non ci sono elementi in questo oggetto che tu possa copiare.
 	</notification>
@@ -2330,11 +2304,26 @@ Questa azione non può essere ripristinata
 	</notification>
 	<notification name="DeleteItems">
 		[QUESTION]
-		<usetemplate ignoretext="Conferma prima di cancellare gli elementi" name="okcancelignore" notext="Annulla" yestext="OK"/>
+		<form name="form">
+			<ignore name="ignore" text="Conferma prima di cancellare gli oggetti"/>
+			<button name="Yes" text="OK"/>
+			<button name="No" text="Annulla"/>
+		</form>
+	</notification>
+	<notification name="DeleteFilteredItems">
+		Nel tuo inventario è attualmente presente un filtro, e non tutti gli oggetti che stai per eliminare sono effettivamente visibili. 
+
+Sei sicuro di volerli eliminare?
+		<usetemplate ignoretext="Conferma prima di cancellare gli oggetti" name="okcancelignore" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="ConfirmUnlink">
 		Questa è una selezione di grandi dimensioni con set collegati. Se viene scollegata, potrebbe non essere possibile ricollegarla. Come precauzione ti consigliamo di salvare copie dei set collegati nel tuo inventario.
 		<usetemplate ignoretext="Conferma per scollegare un set collegato" name="okcancelignore" notext="Annulla" yestext="Scollega"/>
+	</notification>
+	<notification name="HelpReportAbuseConfirm">
+		Ti ringraziamo della segnalazione. 
+Esamineremo il tuo rapporto e, in caso di violazioni, prenderemo le misure appropriate.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="HelpReportAbuseSelectCategory">
 		Scegli una categoria per questa segnalazione di abuso.
@@ -2402,9 +2391,17 @@ Vuoi disattivare la modalità Non disturbare prima di completare questa transazi
 		La cartella &apos;[FOLDERNAME]&apos; è una cartella di sistema. L&apos;eliminazione di cartelle di sistema può creare instabilità.  Sei sicuro di volerla eliminare?
 		<usetemplate ignoretext="Chiedi conferma prima di eliminare una cartella di sistema" name="okcancelignore" notext="Annulla" yestext="OK"/>
 	</notification>
+	<notification name="PurgeSelectedItems">
+		[COUNT] oggetti verranno eliminati definitivamente. Vuoi veramente eliminare in modo permanente gli oggetti selezionati dal tuo Cestino?
+		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
+	</notification>
 	<notification name="ConfirmEmptyTrash">
-		Vuoi veramente eliminare in modo permanente il contenuto del tuo Cestino?
-		<usetemplate ignoretext="Conferma prima di svuotare la cartella del Cestino inventario" name="okcancelignore" notext="Annulla" yestext="OK"/>
+		[COUNT] oggetti e cartelle verranno eliminati definitivamente. Vuoi veramente eliminare in modo permanente il contenuto del tuo Cestino?
+		<usetemplate name="okcancelbuttons" notext="Annulla" yestext="OK"/>
+	</notification>
+	<notification name="TrashIsFull">
+		Il cestino è troppo pieno. Ciò potrebbe causare problemi durante l&apos;accesso.
+		<usetemplate name="okcancelbuttons" notext="Svuota il cestino più tardi" yestext="Controlla cartella cestino"/>
 	</notification>
 	<notification name="ConfirmClearBrowserCache">
 		Vuoi veramente eliminare la cronologia viaggi, web e ricerche fatte?
@@ -2518,9 +2515,6 @@ Inseriscilo in una pagina web per dare ad altri un accesso facile a questa ubica
 	<notification name="Cancelled">
 		Annullato
 	</notification>
-	<notification name="CancelledSit">
-		Seduta annullata
-	</notification>
 	<notification name="CancelledAttach">
 		Attaccamento annullato
 	</notification>
@@ -2535,6 +2529,9 @@ Inseriscilo in una pagina web per dare ad altri un accesso facile a questa ubica
 	</notification>
 	<notification name="AddSelfFriend">
 		Anche se sei molto simpatico, non puoi aggiungere te stesso all&apos;elenco degli amici.
+	</notification>
+	<notification name="AddSelfRenderExceptions">
+		Non puoi aggiungere te stesso alla lista delle eccezioni rendering.
 	</notification>
 	<notification name="UploadingAuctionSnapshot">
 		Sto importando le fotografie per l&apos;uso inworld e per il web...
@@ -2729,9 +2726,9 @@ Reinstalla il plugin o contatta il venditore se continui ad avere questi problem
 		Sono stati restituiti al proprietario gli oggetti selezionati sul lotto nella terra di proprietà del residente &apos;[NAME]&apos;.
 	</notification>
 	<notification name="GroupObjectsReturned">
-		Gli oggetti selezionati sul terreno e condivisi con il gruppo [GROUPNAME] sono stati restituiti nell&apos;inventario dei propietari.
-Gli oggetti trasferibili ceduti sono stati restituiti ai proprietari precedenti.
-Gli oggetti non trasferibili che erano stati ceduti al gruppo sono stati cancellati.
+		Gli oggetti del lotto di terra selezionato condivisi con il gruppo &lt;nolink[GROUPNAME]&lt;/nolink&gt; sono stati restituiti all’inventario del loro proprietario. 
+Gli oggetti ceduti trasferibili sono stati restituiti ai loro precedenti proprietari. 
+Gli oggetti non trasferibili ceduti al gruppo sono stati eliminati.
 	</notification>
 	<notification name="UnOwnedObjectsReturned">
 		Gli oggetti selezionati sul terreno che non sono di tua proprietà sono stati restituiti ai loro proprietari.
@@ -2759,6 +2756,10 @@ Qui non puoi volare.
 	</notification>
 	<notification name="PathfindingDirty">
 		La regione ha modifiche di pathfinding in sospeso.  Se hai le autorizzazioni necessarie per la costruzione puoi eseguire il rebake facendo clic sul pulsante “Rebake regione”.
+	</notification>
+	<notification name="PathfindingDirtyRebake">
+		La regione ha modifiche di pathfinding in sospeso. Se hai le autorizzazioni necessarie per la costruzione, puoi eseguire il rebake facendo clic sul pulsante “Rebake regione”.
+		<usetemplate name="okbutton" yestext="Rebake regione"/>
 	</notification>
 	<notification name="DynamicPathfindingDisabled">
 		Il pathfinding dinamico non è attivato in questa regione.  Gli oggetti scriptati che usano chiamate LSL di pathfinding potrebbero non funzionare come previsto in questa regione.
@@ -3094,15 +3095,6 @@ Non consentire l&apos;accesso se non comprendi perfettamente il motivo per cui d
 			<button name="Deny" text="Nega"/>
 		</form>
 	</notification>
-	<notification name="UnknownScriptQuestion">
-		L&apos;autorizzazione per script runtime richiesta da &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos;, un oggetto di proprietà di &apos;[NAME]&apos;, non è stata riconosciuta nel viewer e non può essere concessa.
-
-Per concedere questa autorizzazione è necessario che il viewer venga aggiornato alla versione più recente da [DOWNLOADURL].
-		<form name="form">
-			<button name="Deny" text="Ok"/>
-			<button name="Mute" text="Blocca"/>
-		</form>
-	</notification>
 	<notification name="ScriptDialog">
 		&apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos; di [NAME]
 [MESSAGE]
@@ -3112,7 +3104,7 @@ Per concedere questa autorizzazione è necessario che il viewer venga aggiornato
 		</form>
 	</notification>
 	<notification name="ScriptDialogGroup">
-		&apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos; di [GROUPNAME]
+		‘&lt;nolink&gt;[TITLE]&lt;/nolink&gt;’ di &lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt; 
 [MESSAGE]
 		<form name="form">
 			<button name="Client_Side_Mute" text="Blocca"/>
@@ -3159,8 +3151,8 @@ Clicca su Accetta per unirti alla chiamata oppure su Declina to declinare l&apos
 		[NAME] ha ricevuto un&apos;offerta di inventario ed è stato automaticamente sbloccato.
 	</notification>
 	<notification name="VoiceInviteGroup">
-		[NAME] si è aggiunto alla chiamata in chat vocale con il gruppo [GROUP].
-Clicca su Accetta per unirti alla chiamata oppure su Declina to declinare l&apos;invito. Clicca su Blocca per bloccare questo chiamante.
+		[NAME] si è aggiunto alla chiamata in chat vocale con il gruppo &lt;nolink&gt;[GROUP]&lt;/nolink&gt;. 
+Fai clic su Accetta per unirti alla chiamata oppure su Rifiuta per rifiutare l&apos;invito. Fai clic su Blocca per bloccare l’autore della chiamata.
 		<form name="form">
 			<button name="Accept" text="Accetta"/>
 			<button name="Decline" text="Rifiuta"/>
@@ -3206,20 +3198,23 @@ Clicca su Accetta per unirti alla chat oppure su Declina per declinare l&apos;in
 	<notification name="VoiceChannelJoinFailed">
 		Collegamento a [VOICE_CHANNEL_NAME] non riuscito, riprova più tardi.  Verrai ora ricollegato alla chat vocale nei dintorni.
 	</notification>
-	<notification name="VoiceLoginRetry">
-		Stiamo creando una canale voice per te. Questo può richiedere fino a un minuto.
-	</notification>
 	<notification name="VoiceEffectsExpired">
-		Almeno una delle manipolazioni vocali alle quali sei iscritto è scaduta.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Almeno una delle manipolazioni vocali alle quali sei iscritto è scaduta. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsExpiredInUse">
-		Poiché la manipolazione vocale attiva è scaduta, sono state applicate le tue impostazioni normali.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Poiché la manipolazione vocale attiva è scaduta, sono state applicate le tue impostazioni normali. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsWillExpire">
-		Almeno una delle tue manipolazioni vocali scadrà tra meno di [INTERVAL] giorni.
-[[URL] Fai clic qui] per rinnovare l&apos;abbonamento.
+		Almeno una delle tue manipolazioni vocali scadrà tra meno di [INTERVAL] giorni. 
+[[URL] Fai clic qui] per rinnovare l&apos;abbonamento. 
+
+Se sei un membro Premium, [[PREMIUM_URL] fai clic qui] per ricevere in regalo la manipolazione vocale.
 	</notification>
 	<notification name="VoiceEffectsNew">
 		Sono disponibili nuove manipolazioni vocali.
@@ -3262,8 +3257,23 @@ Per sicurezza, verranno bloccati per alcuni secondi.
 	<notification name="AttachmentSaved">
 		L&apos;elemento da collegare è stato salvato.
 	</notification>
+	<notification name="AppearanceToXMLSaved">
+		L&apos;aspetto è stato salvato in XML su [PATH]
+	</notification>
+	<notification name="AppearanceToXMLFailed">
+		Salvataggio aspetto in formato XML non riuscito.
+	</notification>
+	<notification name="SnapshotToComputerFailed">
+		Salvataggio istantanea in [PATH] non riuscito: Il disco è pieno. Sono necessari [NEED_MEMORY] KB ma sono disponibili solo [FREE_MEMORY] KB .
+	</notification>
+	<notification name="SnapshotToLocalDirNotExist">
+		Salvataggio istantanea in [PATH] non riuscito: La cartella non esiste.
+	</notification>
 	<notification name="PresetNotSaved">
 		Errore durante il salvataggio del valore predefinito [NAME].
+	</notification>
+	<notification name="DefaultPresetNotSaved">
+		Impossibile sovrascrivere l’impostazione predefinita.
 	</notification>
 	<notification name="PresetNotDeleted">
 		Errore durante l&apos;eliminazione del valore predefinito [NAME].
@@ -3299,9 +3309,14 @@ Il pulsante verrà visualizzato quando lo spazio sarà sufficiente.
 	<notification name="ShareNotification">
 		Scegli i residenti con i quali condividere.
 	</notification>
+	<notification name="MeshUploadErrorDetails">
+		[LABEL] caricamento fallito: [MESSAGE]
+[DETAILS]Vedi SecondLife.log per ulteriori dettagli
+	</notification>
 	<notification name="MeshUploadError">
-		[LABEL] non è stato caricato: [MESSAGE] [IDENTIFIER]
-[DETAILS]Consulta SecondLife.log per informazioni dettagliate
+		[LABEL] caricamento fallito: [MESSAGE] 
+
+Vedi SecondLife.log per ulteriori dettagli
 	</notification>
 	<notification name="MeshUploadPermError">
 		Errore durante la richiesta di autorizzazione al caricamento del reticolo.
@@ -3389,12 +3404,22 @@ Ti consigliamo di controllare le tue impostazioni di rete e della firewall.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="NoVoiceConnect">
-		A causa di problemi di connessione al server vocale
+		Non riusciamo a collegarci al server voce:
 
 [HOSTID]
 
-le comunicazioni tramite voce non saranno disponibili.
-Ti consigliamo di controllare le tue impostazioni di rete e della firewall.
+porte che devono avere il permesso voce sono: 
+:TCP: 80, 443
+:UDP: 3478, 3479, 5060, 5062, 6250, 12000-32000
+
+Controlla le tue impostazione di rete e della firewall. 
+Disabilita la funzione SIP ALG del router. 
+
+La comunicazione voce non sará possibile.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="NoVoiceConnect-GIAB">
+		Stiamo riscontrando dei problemi nel connetterci al tuo server di voce. La comunicazione voce non sará possibile. Controlla le tue impostazione di rete e della firewall.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -3475,13 +3500,6 @@ Clicca e trascina dovunque nel mondo per ruotare la visuale
 	</notification>
 	<notification name="ForceQuitDueToLowMemory">
 		SL verrà interrotto tra 30 secondi a causa di spazio di memoria insufficiente.
-	</notification>
-	<notification name="PopupAttempt">
-		Non è stato possibile aprire una finestra pop-up.
-		<form name="form">
-			<ignore name="ignore" text="Attiva tutti i pop-up"/>
-			<button name="open" text="Apri finestra pop-up"/>
-		</form>
 	</notification>
 	<notification name="SOCKS_NOT_PERMITTED">
 		Il proxy SOCKS 5 &quot;[HOST]:[PORT]&quot; ha rifiutato il collegamento, che non è consentito dalle regole.
@@ -3741,13 +3759,13 @@ non è nella stessa regione in cui ti trovi.
 		Non puoi creare alberi ed erba su terreni che non sono di tua proprietà.
 	</notification>
 	<notification name="NoCopyPermsNoObject">
-		Copia non riuscita perché non hai l&apos;autorizzazione necessaria per copiare l&apos;oggetto &apos;[OBJ_NAME]&apos;.
+		Copia non riuscita perché non hai il permesso per copiare l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt;.
 	</notification>
 	<notification name="NoTransPermsNoObject">
-		La copia non è riuscita perché &apos;[OBJ_NAME]&apos; non può essere trasferito a te.
+		Copia non riuscita perché l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; non può esserti trasferito.
 	</notification>
 	<notification name="AddToNavMeshNoCopy">
-		La copia non è riuscita perché &apos;[OBJ_NAME]&apos; contribuisce al navmesh.
+		Copia non riuscita perché l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; contribuisce al navmesh.
 	</notification>
 	<notification name="DupeWithNoRootsSelected">
 		Duplicato senza oggetto principale selezionato.
@@ -3792,34 +3810,34 @@ Riprova tra un minuto.
 		Opzione Salva nell&apos;inventario disattivata
 	</notification>
 	<notification name="NoExistNoSaveToContents">
-		Impossibile salvare &apos;[OBJ_NAME]&apos; nei contenuti dell&apos;oggetto perché l&apos;oggetto da cui è stato razzato non esiste più.
+		Impossibile salvare &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; in contenuti oggetto perché l’oggetto da cui è stato rezzato non esiste più.
 	</notification>
 	<notification name="NoModNoSaveToContents">
-		Impossibile salvare &apos;[OBJ_NAME]&apos; nei contenuti dell&apos;oggetto perché non hai l&apos;autorizzazione necessaria per modificare l&apos;oggetto &apos;[DEST_NAME]&apos;.
+		Impossibile salvare &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; in contenuti oggetto perché non hai i permessi per modificare l’oggetto &lt;nolink&gt;&apos;[DEST_NAME]’&lt;/nolink&gt;.
 	</notification>
 	<notification name="NoSaveBackToInvDisabled">
-		Impossibile riportare &apos;[OBJ_NAME]&apos; nell&apos;inventario -- questa operazione è stata disattivata.
+		Impossibile salvare &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; nell’inventario: questa operazione è stata disabilitata.
 	</notification>
 	<notification name="NoCopyNoSelCopy">
-		Non puoi copiare l&apos;elemento selezionato perché non hai l&apos;autorizzazione necessaria per copiare l&apos;oggetto &apos;[OBJ_NAME]&apos;.
+		Non puoi copiare la selezione perché non hai il permesso di copiare l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt;.
 	</notification>
 	<notification name="NoTransNoSelCopy">
-		Non puoi copiare la selezione perché l&apos;oggetto &apos;[OBJ_NAME]&apos; non può essere trasferito.
+		Non puoi copiare la selezione perché l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; non è trasferibile.
 	</notification>
 	<notification name="NoTransNoCopy">
-		Non puoi copiare la selezione perché l&apos;oggetto &apos;[OBJ_NAME]&apos; non può essere trasferito.
+		Non puoi copiare la selezione perché l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; non è trasferibile.
 	</notification>
 	<notification name="NoPermsNoRemoval">
-		La rimozione dell&apos;oggetto &apos;[OBJ_NAME]&apos; dal simulatore non è consentita dal sistema delle autorizzazioni.
+		La rimozione dell’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; dal simulatore è disattivata dal sistema dei permessi.
 	</notification>
 	<notification name="NoModNoSaveSelection">
-		Non puoi salvare l&apos;elemento selezionato perché non hai l&apos;autorizzazione necessaria per modificare l&apos;oggetto &apos;[OBJ_NAME]&apos;.
+		Non puoi copiare la selezione perché non hai il permesso di modificare l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt;.
 	</notification>
 	<notification name="NoCopyNoSaveSelection">
-		Non puoi salvare la selezione perché l&apos;oggetto &apos;[OBJ_NAME]&apos; non può essere copiato.
+		Non puoi copiare la selezione perché l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt; non è copiabile.
 	</notification>
 	<notification name="NoModNoTaking">
-		Non puoi prendere l&apos;elemento selezionato perché non hai l&apos;autorizzazione necessaria per modificare l&apos;oggetto &apos;[OBJ_NAME]&apos;.
+		Non puoi prendere ciò che hai selezionato perché non hai il permesso di modificare l’oggetto &lt;nolink&gt;&apos;[OBJ_NAME]&apos;&lt;/nolink&gt;.
 	</notification>
 	<notification name="RezDestInternalError">
 		Errore interno: Tipo di destinazione sconosciuto.
@@ -3845,32 +3863,34 @@ Riprova tra un minuto.
 	<notification name="AvatarEjectFailed">
 		L&apos;espulsione non ha avuto successo perché non hai l&apos;autorizzazione dell&apos;amministratore del lotto.
 	</notification>
-	<notification name="CantMoveObjectParcelFull">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] perché il lotto è pieno.
+	<notification name="CMOParcelFull">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] perché il lotto è pieno.
 	</notification>
-	<notification name="CantMoveObjectParcelPerms">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] perché i tuoi oggetti non sono ammessi su questo lotto.
+	<notification name="CMOParcelPerms">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] perché i tuoi oggetti non sono permessi in questo lotto.
 	</notification>
-	<notification name="CantMoveObjectParcelResources">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] perché non ci sono risorse sufficienti per l&apos;oggetto su questo lotto.
+	<notification name="CMOParcelResources">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] perché non esistono risorse sufficienti per questo oggetto nel lotto.
 	</notification>
-	<notification name="CantMoveObjectRegionVersion">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] perché nell&apos;altra regione è in esecuzione una versione precedente che non consente la ricezione di questo oggetto attraverso i confini tra regioni.
+	<notification name="NoParcelPermsNoObject">
+		Copia non riuscita perché non hai accesso a quel lotto.
 	</notification>
-	<notification name="CantMoveObjectNavMesh">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] perché non puoi modificare il navmesh attraverso il confine tra regioni.
+	<notification name="CMORegionVersion">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] perché l&apos;altra regione esegue una versione più vecchia, che non supporta il ricevimento di questo oggetto mediante attraversamento di regioni.
 	</notification>
-	<notification name="CantMoveObjectWTF">
-		Impossibile muovere l&apos;oggetto &apos;[OBJECT_NAME]&apos; a
-[OBJ_POSITION] nella regione [REGION_NAME] per un motivo sconosciuto. ([FAILURE_TYPE])
+	<notification name="CMONavMesh">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] perché non puoi modificare il navmesh attraverso i confini delle regioni.
+	</notification>
+	<notification name="CMOWTF">
+		Impossibile spostare l&apos;oggetto &quot;[O]&quot; su [P] nella regione [R] a causa di un motivo sconosciuto.
+ ([F])
 	</notification>
 	<notification name="NoPermModifyObject">
 		Non hai l&apos;autorizzazione necessaria per modificare questa immagine
+	</notification>
+	<notification name="TooMuchObjectInventorySelected">
+		Selezionati troppi oggetti con tanti elementi di inventario. Seleziona meno oggetti e riprova.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="CantEnablePhysObjContributesToNav">
 		Non è possibile attivare la fisica per un oggetto che contribuisce al navmesh.
@@ -3907,6 +3927,12 @@ Riprova tra un minuto.
 	</notification>
 	<notification name="CantSaveModifyAttachment">
 		Impossibile salvare i contenuti dell&apos;oggetto: Verrebbero modificate le autorizzazioni per il collegamento.
+	</notification>
+	<notification name="AttachmentHasTooMuchInventory">
+		Gli allegati contengono troppi elementi di inventario e non puoi aggiungerne altri.
+	</notification>
+	<notification name="IllegalAttachment">
+		Il collegamento ha richiesto un punto sull&apos;avatar che non esiste. È stato collegato al petto.
 	</notification>
 	<notification name="TooManyScripts">
 		Troppi script.
@@ -4000,8 +4026,17 @@ Riprova tra un minuto.
 	<notification name="TeleportedByObjectUnknownUser">
 		Sei stato teleportato dall&apos;oggetto &apos;[OBJECT_NAME]&apos; di proprietà di un utente sconosciuto.
 	</notification>
+	<notification name="StandDeniedByObject">
+		Al momento, &quot;[OBJECT_NAME]&quot; non ti permette di stare in piedi.
+	</notification>
+	<notification name="ResitDeniedByObject">
+		Al momento, &quot;[OBJECT_NAME]&quot; non ti permette di cambiare il posto a sedere.
+	</notification>
 	<notification name="CantCreateObjectRegionFull">
 		Impossibile creare l&apos;oggetto richiesto. La regione è piena.
+	</notification>
+	<notification name="CantCreateAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
 	</notification>
 	<notification name="CantAttackMultipleObjOneSpot">
 		Non puoi collegare più oggetti a un singolo luogo.
@@ -4050,6 +4085,21 @@ Riprova tra un minuto.
 	</notification>
 	<notification name="CantChangeShape">
 		Non ti è consentito modificare questa forma.
+	</notification>
+	<notification name="NoPermsTooManyAttachedAnimatedObjects">
+		L’operazione farebbe superare il limite consentito al numero di oggetti animati allegati.
+	</notification>
+	<notification name="NoPermsLinkAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
+	</notification>
+	<notification name="NoPermsSetFlagAnimatedObjectTooLarge">
+		Impossibile unire questi oggetti poichè l’oggetto animato che ne risulterebbe sarebbe superiore al limite triangolo con rig.
+	</notification>
+	<notification name="CantChangeAnimatedObjectStateInsufficientLand">
+		Impossibile cambiare lo stato dell’oggetto animato poichè andrebbe oltre il limite del lotto.
+	</notification>
+	<notification name="ErrorNoMeshData">
+		Errore del server: impossibile completare l’operazione poichè i dati mesh non sono stati caricati.
 	</notification>
 	<notification name="NoAccessToClaimObjects">
 		Le tue autorizzazioni di accesso non ti permettono di richiedere oggetti in questa posizione.
@@ -4296,6 +4346,9 @@ Prova a selezionare un pezzo di terreno più piccolo.
 	<notification name="CantTransfterMoneyRegionDisabled">
 		Il trasferimento di denaro agli oggetti è attualmente disattivato in questa regione.
 	</notification>
+	<notification name="DroppedMoneyTransferRequest">
+		Impossibile effettuare il pagamento a causa del carico del sistema.
+	</notification>
 	<notification name="CantPayNoAgent">
 		Non si capisce chi deve essere pagato.
 	</notification>
@@ -4309,7 +4362,7 @@ Prova a selezionare un pezzo di terreno più piccolo.
 		Un errore interno ha impedito l&apos;aggiornamento del Viewer.  Il saldo in L$ o i lotti posseduti mostrati nel Viewer potrebbero non corrispondere ai valori correnti sui server.
 	</notification>
 	<notification name="LargePrimAgentIntersect">
-		Non puoi creare prim grandi che intersecano altri giocatori.  Riprova quando gli altri giocatori si sono spostati.
+		Impossibile creare prim larghi che si intersechino con altri residenti. Si prega di riprovare quando gli altri residenti si saranno mossi.
 	</notification>
 	<notification name="PreferenceChatClearLog">
 		Verranno cancellati i registri delle conversazioni precedenti e tutti gli eventuali backup di quel file.
@@ -4329,6 +4382,10 @@ Prova a selezionare un pezzo di terreno più piccolo.
 	</notification>
 	<notification name="ChatHistoryIsBusyAlert">
 		Il file della cronologia del file sta ancora eseguendo l&apos;operazione precedente. Riprova nuovamente tra qualche minuto oppure chatta con un&apos;altra persona.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="OutfitPhotoLoadError">
+		[REASON]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 </notifications>

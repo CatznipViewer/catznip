@@ -28,13 +28,12 @@
 
 #include "linden_common.h"
 #include "llapr.h"
+#include "llmutex.h"
 #include "apr_dso.h"
 #include "llthreadlocalstorage.h"
 
 apr_pool_t *gAPRPoolp = NULL; // Global APR memory pool
 LLVolatileAPRPool *LLAPRFile::sAPRFilePoolp = NULL ; //global volatile APR memory pool.
-apr_thread_mutex_t *gLogMutexp = NULL;
-apr_thread_mutex_t *gCallStacksLogMutexp = NULL;
 
 const S32 FULL_VOLATILE_APR_POOL = 1024 ; //number of references to LLVolatileAPRPool
 
@@ -48,10 +47,6 @@ void ll_init_apr()
 	if (!gAPRPoolp)
 	{
 		apr_pool_create(&gAPRPoolp, NULL);
-		
-		// Initialize the logging mutex
-		apr_thread_mutex_create(&gLogMutexp, APR_THREAD_MUTEX_UNNESTED, gAPRPoolp);
-		apr_thread_mutex_create(&gCallStacksLogMutexp, APR_THREAD_MUTEX_UNNESTED, gAPRPoolp);
 	}
 
 	if(!LLAPRFile::sAPRFilePoolp)
@@ -74,23 +69,6 @@ void ll_cleanup_apr()
 	gAPRInitialized = false;
 
 	LL_INFOS("APR") << "Cleaning up APR" << LL_ENDL;
-
-	if (gLogMutexp)
-	{
-		// Clean up the logging mutex
-
-		// All other threads NEED to be done before we clean up APR, so this is okay.
-		apr_thread_mutex_destroy(gLogMutexp);
-		gLogMutexp = NULL;
-	}
-	if (gCallStacksLogMutexp)
-	{
-		// Clean up the logging mutex
-
-		// All other threads NEED to be done before we clean up APR, so this is okay.
-		apr_thread_mutex_destroy(gCallStacksLogMutexp);
-		gCallStacksLogMutexp = NULL;
-	}
 
 	LLThreadLocalPointerBase::destroyAllThreadLocalStorage();
 
@@ -168,26 +146,19 @@ apr_pool_t* LLAPRPool::getAPRPool()
 LLVolatileAPRPool::LLVolatileAPRPool(BOOL is_local, apr_pool_t *parent, apr_size_t size, BOOL releasePoolFlag) 
 				  : LLAPRPool(parent, size, releasePoolFlag),
 				  mNumActiveRef(0),
-				  mNumTotalRef(0),
-				  mMutexPool(NULL),
-				  mMutexp(NULL)
+				  mNumTotalRef(0)
 {
 	//create mutex
 	if(!is_local) //not a local apr_pool, that is: shared by multiple threads.
 	{
-		apr_pool_create(&mMutexPool, NULL); // Create a pool for mutex
-		apr_thread_mutex_create(&mMutexp, APR_THREAD_MUTEX_UNNESTED, mMutexPool);
+		mMutexp.reset(new std::mutex());
 	}
 }
 
 LLVolatileAPRPool::~LLVolatileAPRPool()
 {
 	//delete mutex
-	if(mMutexp)
-	{
-		apr_thread_mutex_destroy(mMutexp);
-		apr_pool_destroy(mMutexPool);
-	}
+    mMutexp.reset();
 }
 
 //
@@ -201,7 +172,7 @@ apr_pool_t* LLVolatileAPRPool::getAPRPool()
 
 apr_pool_t* LLVolatileAPRPool::getVolatileAPRPool() 
 {	
-	LLScopedLock lock(mMutexp) ;
+	LLScopedLock lock(mMutexp.get()) ;
 
 	mNumTotalRef++ ;
 	mNumActiveRef++ ;
@@ -216,7 +187,7 @@ apr_pool_t* LLVolatileAPRPool::getVolatileAPRPool()
 
 void LLVolatileAPRPool::clearVolatileAPRPool() 
 {
-	LLScopedLock lock(mMutexp) ;
+    LLScopedLock lock(mMutexp.get());
 
 	if(mNumActiveRef > 0)
 	{
@@ -250,76 +221,23 @@ BOOL LLVolatileAPRPool::isFull()
 {
 	return mNumTotalRef > FULL_VOLATILE_APR_POOL ;
 }
-//---------------------------------------------------------------------
-//
-// LLScopedLock
-//
-LLScopedLock::LLScopedLock(apr_thread_mutex_t* mutex) : mMutex(mutex)
-{
-	if(mutex)
-	{
-		if(ll_apr_warn_status(apr_thread_mutex_lock(mMutex)))
-		{
-			mLocked = false;
-		}
-		else
-		{
-			mLocked = true;
-		}
-	}
-	else
-	{
-		mLocked = false;
-	}
-}
-
-LLScopedLock::~LLScopedLock()
-{
-	unlock();
-}
-
-void LLScopedLock::unlock()
-{
-	if(mLocked)
-	{
-		if(!ll_apr_warn_status(apr_thread_mutex_unlock(mMutex)))
-		{
-			mLocked = false;
-		}
-	}
-}
 
 //---------------------------------------------------------------------
 
-bool ll_apr_warn_status(apr_status_t status)
+bool _ll_apr_warn_status(apr_status_t status, const char* file, int line)
 {
 	if(APR_SUCCESS == status) return false;
+#if !LL_LINUX
 	char buf[MAX_STRING];	/* Flawfinder: ignore */
 	apr_strerror(status, buf, sizeof(buf));
-	LL_WARNS("APR") << "APR: " << buf << LL_ENDL;
+	LL_WARNS("APR") << "APR: " << file << ":" << line << " " << buf << LL_ENDL;
+#endif
 	return true;
 }
 
-bool ll_apr_warn_status(apr_status_t status, apr_dso_handle_t *handle)
+void _ll_apr_assert_status(apr_status_t status, const char* file, int line)
 {
-    bool result = ll_apr_warn_status(status);
-    // Despite observed truncation of actual Mac dylib load errors, increasing
-    // this buffer to more than MAX_STRING doesn't help: it appears that APR
-    // stores the output in a fixed 255-character internal buffer. (*sigh*)
-    char buf[MAX_STRING];           /* Flawfinder: ignore */
-    apr_dso_error(handle, buf, sizeof(buf));
-    LL_WARNS("APR") << "APR: " << buf << LL_ENDL;
-    return result;
-}
-
-void ll_apr_assert_status(apr_status_t status)
-{
-	llassert(! ll_apr_warn_status(status));
-}
-
-void ll_apr_assert_status(apr_status_t status, apr_dso_handle_t *handle)
-{
-    llassert(! ll_apr_warn_status(status, handle));
+	llassert(! _ll_apr_warn_status(status, file, line));
 }
 
 //---------------------------------------------------------------------

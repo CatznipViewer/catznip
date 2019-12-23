@@ -147,6 +147,10 @@ public:
 	virtual const std::string& getDisplayName() const = 0;
 	virtual const std::string& getSearchableName() const = 0;
 
+	virtual std::string getSearchableDescription() const = 0;
+	virtual std::string getSearchableCreatorName()const = 0;
+	virtual std::string getSearchableUUIDString() const = 0;
+
 	virtual LLPointer<LLUIImage> getIcon() const = 0;
 	virtual LLPointer<LLUIImage> getIconOpen() const { return getIcon(); }
 	virtual LLPointer<LLUIImage> getIconOverlay() const { return NULL; }
@@ -173,6 +177,7 @@ public:
 	virtual BOOL isItemCopyable() const = 0;
 	virtual BOOL copyToClipboard() const = 0;
 	virtual BOOL cutToClipboard() = 0;
+	virtual bool isCutToClipboard() { return false; };
 
 	virtual BOOL isClipboardPasteable() const = 0;
 	virtual void pasteFromClipboard() = 0;

@@ -9,6 +9,12 @@
 	<floater.string name="maturity_icon_adult">
 		&quot;Parcel_R_Dark&quot;
 	</floater.string>
+	<floater.string name="Hours">
+		[HOURS] 時間
+	</floater.string>
+	<floater.string name="Hour">
+		時間
+	</floater.string>
 	<floater.string name="Minutes">
 		[MINUTES] 分
 	</floater.string>
@@ -20,6 +26,9 @@
 	</floater.string>
 	<floater.string name="Remaining">
 		残り
+	</floater.string>
+	<floater.string name="Always">
+		常時
 	</floater.string>
 	<tab_container name="landtab">
 		<panel label="一般" name="land_general_panel">
@@ -320,18 +329,18 @@
 			<text name="allow_label2">
 				制作：
 			</text>
-			<check_box label="全員" name="edit objects check"/>
-			<check_box label="グループ" name="edit group objects check"/>
+			<check_box label="全員" name="edit objects check" tool_tip="このオプションを選択すると、住人はあなたの土地でオブジェクトの制作や rez ができます。"/>
+			<check_box label="グループ" name="edit group objects check" tool_tip="このオプションを選択すると、区画のグループメンバーは、あなたの土地でオブジェクトの制作や rez ができます。"/>
 			<text name="allow_label3">
 				オブジェクトの進入：
 			</text>
-			<check_box label="全員" name="all object entry check"/>
-			<check_box label="グループ" name="group object entry check"/>
+			<check_box label="全員" name="all object entry check" tool_tip="このオプションを選択すると、住人は他の区画にあるオブジェクトをこの区画に移動することが可能です。"/>
+			<check_box label="グループ" name="group object entry check" tool_tip="このオプションを選択すると、区画のグループメンバーは他の区画にあるオブジェクトをこの区画に移動することが可能です。"/>
 			<text name="allow_label4">
 				スクリプトの実行：
 			</text>
-			<check_box label="全員" name="check other scripts"/>
-			<check_box label="グループ" name="check group scripts"/>
+			<check_box label="全員" name="check other scripts" tool_tip="このオプションを選択すると、住人はアタッチメントなどのスクリプトをあなたの区画で実行できます。"/>
+			<check_box label="グループ" name="check group scripts" tool_tip="このオプションを選択すると、区画のグループメンバーは、アタッチメントなどのスクリプトをあなたの区画で実行できます。"/>
 			<check_box label="安全（ダメージなし）" name="check safe" tool_tip="チェックを入れるとこの土地でのダメージコンバットが無効になり、「安全」に設定されます。 チェックを外すとダメージコンバットが有効になります。"/>
 			<check_box label="プッシュ禁止" name="PushRestrictCheck" tool_tip="スクリプトによるプッシュを禁止します。 このオプションを選択することにより、あなたの土地での破壊的行動を防ぐことができます。"/>
 			<check_box label="検索に区画を表示（週 L$ 30）" name="ShowDirectoryCheck" tool_tip="この区画を検索結果に表示します"/>
@@ -355,8 +364,8 @@
 				スナップショット：
 			</text>
 			<texture_picker label="" name="snapshot_ctrl" tool_tip="写真をクリックして選択"/>
-			<text name="allow_label5">
-				他の区画にいるアバターがこの区画にいるアバターに会ってチャットできる
+			<text name="allow_see_label">
+				他の区画にいるアバターがこの区画にいるアバターに会ってチャットできます
 			</text>
 			<check_box label="アバターを表示" name="SeeAvatarsCheck" tool_tip="他の区画のアバターが、この区画にいるアバターに会ってチャットすることを許可し、あなたもそれらアバターに会ってチャットできるようにします。"/>
 			<text name="landing_point">
@@ -434,13 +443,10 @@
 			<panel.string name="estate_override">
 				1 つ以上のオプションが、不動産レベルで設定されています。
 			</panel.string>
-			<check_box label="パブリックアクセスを許可（このオプションをオフにすると立入禁止ラインが作成されます）" name="public_access"/>
-			<text name="Only Allow">
-				次の住人にのみアクセスを許可：
-			</text>
-			<check_box label="支払情情報が登録されている [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="支払情報が登録されていないと、この区画にアクセスすることはできません。詳細については、[SUPPORT_SITE] をご覧ください。"/>
-			<check_box label="18 才以上です [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="この区画にアクセスするには、18 才以上でなければなりません。詳細については、[SUPPORT_SITE] をご覧ください。"/>
-			<check_box label="グループのアクセスを許可：[GROUP]" name="GroupCheck" tool_tip="「一般」タブで、グループを選択してください。"/>
+			<check_box label="誰でも訪問可（このオプションをオフにすると立入禁止ラインが作成されます）" name="public_access"/>
+			<check_box label="18 歳以上である必要があります [ESTATE_AGE_LIMIT]" name="limit_age_verified" tool_tip="この区画にアクセスするには、18 才以上でなければなりません。詳細については、[SUPPORT_SITE] をご覧ください。"/>
+			<check_box label="支払情報が登録されている必要があります [ESTATE_PAYMENT_LIMIT]" name="limit_payment" tool_tip="支払情報が登録されていないと、この区画にアクセスすることはできません。詳細については、[SUPPORT_SITE] をご覧ください。"/>
+			<check_box label="制約なしにグループ [GROUP] を許可する" name="GroupCheck" tool_tip="「一般」タブで、グループを選択してください。"/>
 			<check_box label="入場許可を販売：" name="PassCheck" tool_tip="この区画への一時的なアクセスを許可します。"/>
 			<combo_box name="pass_combo">
 				<combo_box.item label="誰でも" name="Anyone"/>
@@ -448,9 +454,12 @@
 			</combo_box>
 			<spinner label="価格（L$）：" name="PriceSpin"/>
 			<spinner label="アクセス時間：" name="HoursSpin"/>
+			<text name="OwnerLimited">
+				（不動産所有者がこのオプションに制約を与えている場合があります）
+			</text>
 			<panel name="Allowed_layout_panel">
 				<text label="常に許可" name="AllowedText">
-					立入を許可された住人 ([COUNT])
+					常に許可する （[COUNT] 人、最大 [MAX] 人）
 				</text>
 				<name_list name="AccessList" tool_tip="(合計[LISTED] 人、最大 [MAX] 人）"/>
 				<button label="追加" name="add_allowed"/>
@@ -458,9 +467,12 @@
 			</panel>
 			<panel name="Banned_layout_panel">
 				<text label="禁止" name="BanCheck">
-					立入を禁止された住人 ([COUNT])
+					禁止する （[COUNT] 人、最大 [MAX] 人）
 				</text>
-				<name_list name="BannedList" tool_tip="(合計 [LISTED] 人、最大 [MAX] 人）"/>
+				<name_list name="BannedList" tool_tip="(合計 [LISTED] 人、最大 [MAX] 人）">
+					<columns label="名前" name="name"/>
+					<columns label="期間" name="duration"/>
+				</name_list>
 				<button label="追加" name="add_banned"/>
 				<button label="削除" label_selected="削除" name="remove_banned"/>
 			</panel>

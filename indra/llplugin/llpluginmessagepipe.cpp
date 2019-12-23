@@ -92,8 +92,8 @@ void LLPluginMessagePipeOwner::killMessagePipe(void)
 }
 
 LLPluginMessagePipe::LLPluginMessagePipe(LLPluginMessagePipeOwner *owner, LLSocket::ptr_t socket):
-	mInputMutex(gAPRPoolp),
-	mOutputMutex(gAPRPoolp),
+	mInputMutex(),
+	mOutputMutex(),
 	mOutputStartIndex(0),
 	mOwner(owner),
 	mSocket(socket)
@@ -215,7 +215,7 @@ bool LLPluginMessagePipe::pumpOutput()
 			else if(APR_STATUS_IS_EOF(status))
 			{
 				// This is what we normally expect when a plugin exits.
-				LL_INFOS() << "Got EOF from plugin socket. " << LL_ENDL;
+				//LL_INFOS() << "Got EOF from plugin socket. " << LL_ENDL;
 
 				if(mOwner)
 				{
@@ -329,7 +329,7 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 				else if(APR_STATUS_IS_EOF(status))
 				{
 					// This is what we normally expect when a plugin exits.
-					LL_INFOS("PluginSocket") << "Got EOF from plugin socket. " << LL_ENDL;
+					//LL_INFOS("PluginSocket") << "Got EOF from plugin socket. " << LL_ENDL;
 
 					if(mOwner)
 					{

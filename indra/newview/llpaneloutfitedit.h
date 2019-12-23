@@ -80,7 +80,6 @@ public:
 	{
 		LVIT_ALL = 0,
 		LVIT_CLOTHING,
-		LVIT_GESTURES,
 		LVIT_BODYPART,
 		LVIT_ATTACHMENT,
 		LVIT_SHAPE,
@@ -99,6 +98,7 @@ public:
 		LVIT_ALPHA,
 		LVIT_TATTOO,
 		LVIT_PHYSICS,
+		LVIT_UNIVERSAL,
 		NUM_LIST_VIEW_ITEM_TYPES
 	} EListViewItemType; 
 
@@ -215,7 +215,6 @@ private:
 	LLFilterEditor*		mSearchFilter;
 	LLSaveFolderState*	mSavedFolderState;
 	std::string			mSearchString;
-	LLButton*			mEditWearableBtn;
 	LLButton*			mFolderViewBtn;
 	LLButton*			mListViewBtn;
 	LLButton*			mPlusBtn;

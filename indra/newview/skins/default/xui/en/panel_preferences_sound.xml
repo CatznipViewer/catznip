@@ -2,7 +2,7 @@
 <panel
  border="true"
  follows="all"
- height="408"
+ height="438"
  label="Sounds"
  layout="topleft"
  left="102"
@@ -12,6 +12,14 @@
     <panel.string
      name="middle_mouse">
      Middle Mouse
+    </panel.string>
+    <panel.string
+     name="button4_mouse">
+     Mouse Button 4
+    </panel.string>
+    <panel.string
+     name="button5_mouse">
+     Mouse Button 5
     </panel.string>
     <slider
      control_name="AudioLevelMaster"
@@ -394,7 +402,6 @@
    <radio_group
      enabled_control="EnableVoiceChat"
      control_name="VoiceEarLocation"
-     draw_border="false"
      follows="left|top"
      layout="topleft"
      left_delta="-168"

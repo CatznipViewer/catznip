@@ -267,7 +267,7 @@ BOOL LLToolCompTranslate::handleHover(S32 x, S32 y, MASK mask)
 BOOL LLToolCompTranslate::handleMouseDown(S32 x, S32 y, MASK mask)
 {
 	mMouseDown = TRUE;
-	gViewerWindow->pickAsync(x, y, mask, pickCallback, /*BOOL pick_transparent*/ TRUE);
+	gViewerWindow->pickAsync(x, y, mask, pickCallback, /*BOOL pick_transparent*/ TRUE, LLFloaterReg::instanceVisible("build"));
 	return TRUE;
 }
 
@@ -683,7 +683,7 @@ LLToolCompGun::LLToolCompGun()
 	: LLToolComposite(std::string("Mouselook"))
 {
 	mGun = new LLToolGun(this);
-	mGrab = new LLToolGrab(this);
+	mGrab = new LLToolGrabBase(this);
 	mNull = sNullTool;
 
 	setCurrentTool(mGun);
@@ -742,13 +742,12 @@ BOOL LLToolCompGun::handleHover(S32 x, S32 y, MASK mask)
 
 BOOL LLToolCompGun::handleMouseDown(S32 x, S32 y, MASK mask)
 { 
-    // if the left button is blocked, don't put up the pie menu
-    if (gAgent.leftButtonBlocked())
-    {
-        // in case of "grabbed" control flag will be set later
-        gAgent.setControlFlags(AGENT_CONTROL_ML_LBUTTON_DOWN);
-        return FALSE;
-    }
+	// if the left button is grabbed, don't put up the pie menu
+	if (gAgent.leftButtonGrabbed())
+	{
+		gAgent.setControlFlags(AGENT_CONTROL_ML_LBUTTON_DOWN);
+		return FALSE;
+	}
 
 	// On mousedown, start grabbing
 	gGrabTransientTool = this;
@@ -760,13 +759,12 @@ BOOL LLToolCompGun::handleMouseDown(S32 x, S32 y, MASK mask)
 
 BOOL LLToolCompGun::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
-    // if the left button is blocked, don't put up the pie menu
-    if (gAgent.leftButtonBlocked())
-    {
-        // in case of "grabbed" control flag will be set later
-        gAgent.setControlFlags(AGENT_CONTROL_ML_LBUTTON_DOWN);
-        return FALSE;
-    }
+	// if the left button is grabbed, don't put up the pie menu
+	if (gAgent.leftButtonGrabbed())
+	{
+		gAgent.setControlFlags(AGENT_CONTROL_ML_LBUTTON_DOWN);
+		return FALSE;
+	}
 
 	// On mousedown, start grabbing
 	gGrabTransientTool = this;

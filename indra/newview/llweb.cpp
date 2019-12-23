@@ -39,7 +39,6 @@
 #include "lllogininstance.h"
 #include "llparcel.h"
 #include "llsd.h"
-#include "lltoastalertpanel.h"
 #include "llui.h"
 #include "lluri.h"
 #include "llversioninfo.h"
@@ -55,32 +54,6 @@
 #include <boost/regex.hpp>
 
 bool on_load_url_external_response(const LLSD& notification, const LLSD& response, bool async );
-
-
-class URLLoader : public LLToastAlertPanel::URLLoader
-{
-	virtual void load(const std::string& url , bool force_open_externally)
-	{
-		if (force_open_externally)
-		{
-			LLWeb::loadURLExternal(url);
-		}
-		else
-		{
-			LLWeb::loadURL(url);
-		}
-	}
-};
-static URLLoader sAlertURLLoader;
-
-
-// static
-void LLWeb::initClass()
-{
-	LLToastAlertPanel::setURLLoader(&sAlertURLLoader);
-}
-
-
 
 
 // static
@@ -121,7 +94,7 @@ void LLWeb::loadURLExternal(const std::string& url, const std::string& uuid)
 void LLWeb::loadURLExternal(const std::string& url, bool async, const std::string& uuid)
 {
 	// Act like the proxy window was closed, since we won't be able to track targeted windows in the external browser.
-	LLViewerMedia::proxyWindowClosed(uuid);
+	LLViewerMedia::getInstance()->proxyWindowClosed(uuid);
 	
 	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
 	{
@@ -192,7 +165,7 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 	substitution["CHANNEL"] = LLVersionInfo::getChannel();
 	substitution["GRID"] = LLGridManager::getInstance()->getGridId();
 	substitution["GRID_LOWERCASE"] = utf8str_tolower(LLGridManager::getInstance()->getGridId());
-	substitution["OS"] = LLAppViewer::instance()->getOSInfo().getOSStringSimple();
+	substitution["OS"] = LLOSInfo::instance().getOSStringSimple();
 	substitution["SESSION_ID"] = gAgent.getSessionID();
 	substitution["FIRST_LOGIN"] = gAgent.isFirstLogin();
 
@@ -224,6 +197,22 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 	}
 	substitution["PARCEL_ID"] = llformat("%d", parcel_id);
 
+	// find the grid
+	std::string current_grid = LLGridManager::getInstance()->getGridId();
+	std::transform(current_grid.begin(), current_grid.end(), current_grid.begin(), ::tolower);
+	if (current_grid == "agni")
+	{
+		substitution["GRID"] = "secondlife.com";
+	}
+	else if (current_grid == "damballah")
+	{
+		// Staging grid has its own naming scheme.
+		substitution["GRID"] = "secondlife-staging.com";
+	}
+	else
+	{
+		substitution["GRID"] = llformat("%s.lindenlab.com", current_grid.c_str());
+	}
 	// expand all of the substitution strings and escape the url
 	std::string expanded_url = url;
 	LLStringUtil::format(expanded_url, substitution);
@@ -252,6 +241,11 @@ bool LLWeb::useExternalBrowser(const std::string &url)
 		boost::match_results<std::string::const_iterator> matches;
 		return !(boost::regex_search(uri_string, matches, pattern));
 	}
-	return false;
+	else
+	{
+		boost::regex pattern = boost::regex("^mailto:", boost::regex::perl | boost::regex::icase);
+		boost::match_results<std::string::const_iterator> matches;
+		return boost::regex_search(url, matches, pattern);
+	}
 #endif
 }

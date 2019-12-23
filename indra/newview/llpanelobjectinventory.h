@@ -105,9 +105,10 @@ private:
 	LLFolderView* mFolders;
 	
 	LLUUID mTaskUUID;
-	BOOL mHaveInventory;
-	BOOL mIsInventoryEmpty;
-	BOOL mInventoryNeedsUpdate;
+	LLUUID mAttachmentUUID;
+	BOOL mHaveInventory; // 'Loading' label and used for initial request
+	BOOL mIsInventoryEmpty; // 'Empty' label
+	BOOL mInventoryNeedsUpdate; // for idle, set on changed callback
 	LLFolderViewModelInventory	mInventoryViewModel;	
 };
 

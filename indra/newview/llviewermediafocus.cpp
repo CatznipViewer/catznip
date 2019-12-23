@@ -82,7 +82,7 @@ void LLViewerMediaFocus::setFocusFace(LLPointer<LLViewerObject> objectp, S32 fac
 	if (media_impl.notNull() && objectp.notNull())
 	{
 		bool face_auto_zoom = false;
-
+		mPrevFocusedImplID = LLUUID::null;
 		mFocusedImplID = media_impl->getMediaTextureID();
 		mFocusedObjectID = objectp->getID();
 		mFocusedObjectFace = face;
@@ -339,12 +339,12 @@ BOOL LLViewerMediaFocus::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 			clearFocus();
 		}
 		
-		if ( KEY_F1 == key && LLUI::sHelpImpl && mMediaControls.get())
+		if ( KEY_F1 == key && LLUI::getInstance()->mHelpImpl && mMediaControls.get())
 		{
 			std::string help_topic;
 			if (mMediaControls.get()->findHelpTopic(help_topic))
 			{
-				LLUI::sHelpImpl->showTopic(help_topic);
+				LLUI::getInstance()->mHelpImpl->showTopic(help_topic);
 			}
 		}
 	}
@@ -403,6 +403,7 @@ void LLViewerMediaFocus::update()
 			else
 			{
 				// Someone else has focus -- back off.
+				mPrevFocusedImplID = mFocusedImplID;
 				clearFocus();
 			}
 		}
@@ -536,7 +537,7 @@ bool LLViewerMediaFocus::isHoveringOverFace(LLPointer<LLViewerObject> objectp, S
 
 LLViewerMediaImpl* LLViewerMediaFocus::getFocusedMediaImpl()
 {
-	return LLViewerMedia::getMediaImplFromTextureID(mFocusedImplID);
+	return LLViewerMedia::getInstance()->getMediaImplFromTextureID(mFocusedImplID);
 }
 
 LLViewerObject* LLViewerMediaFocus::getFocusedObject()
@@ -546,7 +547,7 @@ LLViewerObject* LLViewerMediaFocus::getFocusedObject()
 
 LLViewerMediaImpl* LLViewerMediaFocus::getHoverMediaImpl()
 {
-	return LLViewerMedia::getMediaImplFromTextureID(mHoverImplID);
+	return LLViewerMedia::getInstance()->getMediaImplFromTextureID(mHoverImplID);
 }
 
 LLViewerObject* LLViewerMediaFocus::getHoverObject()
@@ -556,7 +557,7 @@ LLViewerObject* LLViewerMediaFocus::getHoverObject()
 
 void LLViewerMediaFocus::focusZoomOnMedia(LLUUID media_id)
 {
-	LLViewerMediaImpl* impl = LLViewerMedia::getMediaImplFromTextureID(media_id);
+	LLViewerMediaImpl* impl = LLViewerMedia::getInstance()->getMediaImplFromTextureID(media_id);
 	
 	if(impl)
 	{	
@@ -600,6 +601,15 @@ void LLViewerMediaFocus::unZoom()
 bool LLViewerMediaFocus::isZoomed() const
 {
 	return (mMediaControls.get() && mMediaControls.get()->getZoomLevel() != LLPanelPrimMediaControls::ZOOM_NONE);
+}
+
+bool LLViewerMediaFocus::isZoomedOnMedia(LLUUID media_id)
+{
+	if (isZoomed())
+	{
+		return (mFocusedImplID == media_id) || (mPrevFocusedImplID == media_id);
+	}
+	return false;
 }
 
 LLUUID LLViewerMediaFocus::getControlsMediaID()
