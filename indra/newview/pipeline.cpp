@@ -4062,7 +4062,6 @@ void LLPipeline::postSort(LLCamera& camera)
 
 void render_hud_elements()
 {
-	LL_RECORD_BLOCK_TIME(FTM_RENDER_UI);
 	gPipeline.disableLights();		
 	
 	LLGLDisable fog(GL_FOG);
@@ -4139,7 +4138,12 @@ void LLPipeline::renderHighlights()
 
 		glStencilFunc(GL_ALWAYS, 0, 0xFFFFFFFF);
 		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-				
+
+        if (canUseVertexShaders())
+        {
+            gHighlightProgram.bind();
+        }
+
 		gGL.setColorMask(false, false);
 		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(); iter != mHighlightSet.end(); ++iter)
 		{
@@ -10507,6 +10511,11 @@ void LLPipeline::generateHighlight(LLCamera& camera)
 		gGL.setColorMask(true, true);
 		mHighlight.clear();
 
+        if (canUseVertexShaders())
+        {
+            gHighlightProgram.bind();
+        }
+
 		gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sWhiteImagep);
 		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(); iter != mHighlightSet.end(); )
 		{
@@ -11425,7 +11434,7 @@ void LLPipeline::generateImpostor(LLVOAvatar* avatar)
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				if (LLViewerObject* attached_object = (*attachment_iter))
+				if (LLViewerObject* attached_object = attachment_iter->get())
 				{
 					markVisible(attached_object->mDrawable->getSpatialBridge(), *viewer_camera);
 				}
