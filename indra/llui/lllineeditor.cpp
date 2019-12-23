@@ -125,6 +125,7 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mTextLeftEdge(0),		// computed in updateTextPadding() below
 	mTextRightEdge(0),		// computed in updateTextPadding() below
 	mCommitOnFocusLost( p.commit_on_focus_lost ),
+	mKeystrokeOnEsc(FALSE),
 	mRevertOnEsc( p.revert_on_esc ),
 	mKeystrokeCallback( p.keystroke_callback() ),
 	mIsSelecting( FALSE ),
@@ -162,6 +163,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mContextMenuHandle()
 {
 	llassert( mMaxLengthBytes > 0 );
+
+	LLUICtrl::setEnabled(TRUE);
+	setEnabled(p.enabled);
 
 	mScrollTimer.reset();
 	mTripleClickTimer.reset();
@@ -216,6 +220,13 @@ LLLineEditor::~LLLineEditor()
 
 	// calls onCommit() while LLLineEditor still valid
 	gFocusMgr.releaseFocusIfNeeded( this );
+}
+
+void LLLineEditor::initFromParams(const LLLineEditor::Params& params)
+{
+	LLUICtrl::initFromParams(params);
+	LLUICtrl::setEnabled(TRUE);
+	setEnabled(params.enabled);
 }
 
 void LLLineEditor::onFocusReceived()
@@ -486,6 +497,13 @@ void LLLineEditor::setCursorToEnd()
 {
 	setCursor(mText.length());
 	deselect();
+}
+
+void LLLineEditor::resetScrollPosition()
+{
+	mScrollHPos = 0;
+	// make sure cursor says in visible range
+	setCursor(getCursor());
 }
 
 BOOL LLLineEditor::canDeselect() const
@@ -923,7 +941,7 @@ void LLLineEditor::removeChar()
 	}
 	else
 	{
-		LLUI::reportBadKeystroke();
+		LLUI::getInstance()->reportBadKeystroke();
 	}
 }
 
@@ -974,7 +992,7 @@ void LLLineEditor::addChar(const llwchar uni_char)
 	}
 	else
 	{
-		LLUI::reportBadKeystroke();
+		LLUI::getInstance()->reportBadKeystroke();
 	}
 
 	getWindow()->hideCursorUntilMouseMove();
@@ -1070,7 +1088,7 @@ BOOL LLLineEditor::handleSelectionKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			break;
 
@@ -1086,7 +1104,7 @@ BOOL LLLineEditor::handleSelectionKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			break;
 
@@ -1166,7 +1184,7 @@ void LLLineEditor::cut()
 		if( need_to_rollback )
 		{
 			rollback.doRollback( this );
-			LLUI::reportBadKeystroke();
+			LLUI::getInstance()->reportBadKeystroke();
 		}
 		else
 		{
@@ -1270,7 +1288,7 @@ void LLLineEditor::pasteHelper(bool is_primary)
 				}
 				// Truncate the clean string at the limit of what will fit
 				clean_string = clean_string.substr(0, wchars_that_fit);
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 
 			if (mMaxLengthChars)
@@ -1282,7 +1300,7 @@ void LLLineEditor::pasteHelper(bool is_primary)
 					clean_string = clean_string.substr(0, available_chars);
 				}
 
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 
 			mText.insert(getCursor(), clean_string);
@@ -1294,7 +1312,7 @@ void LLLineEditor::pasteHelper(bool is_primary)
 			if( need_to_rollback )
 			{
 				rollback.doRollback( this );
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			else
 			{
@@ -1358,7 +1376,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 		}
 		handled = TRUE;
@@ -1407,7 +1425,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}
@@ -1434,7 +1452,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}
@@ -1451,7 +1469,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}
@@ -1468,7 +1486,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}
@@ -1484,6 +1502,10 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 		{
 			setText(mPrevText);
 			// Note, don't set handled, still want to loose focus (won't commit becase text is now unchanged)
+			if (mKeystrokeOnEsc)
+			{
+				onKeystroke();
+			}
 		}
 		break;
 		
@@ -1545,7 +1567,7 @@ BOOL LLLineEditor::handleKeyHere(KEY key, MASK mask )
 			{
 				rollback.doRollback(this);
 
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 
 			// Notify owner if requested
@@ -1601,7 +1623,7 @@ BOOL LLLineEditor::handleUnicodeCharHere(llwchar uni_char)
 		{
 			rollback.doRollback( this );
 
-			LLUI::reportBadKeystroke();
+			LLUI::getInstance()->reportBadKeystroke();
 		}
 
 		// Notify owner if requested
@@ -1620,12 +1642,12 @@ BOOL LLLineEditor::handleUnicodeCharHere(llwchar uni_char)
 
 BOOL LLLineEditor::canDoDelete() const
 {
-	return ( !mReadOnly && mText.length() > 0 && (!mPassDelete || (hasSelection() || (getCursor() < mText.length()))) );
+	return ( !mReadOnly && (!mPassDelete || (hasSelection() || (getCursor() < mText.length()))) );
 }
 
 void LLLineEditor::doDelete()
 {
-	if (canDoDelete())
+	if (canDoDelete() && mText.length() > 0)
 	{
 		// Prepare for possible rollback
 		LLLineEditorRollback rollback( this );
@@ -1652,7 +1674,7 @@ void LLLineEditor::doDelete()
 		if( need_to_rollback )
 		{
 			rollback.doRollback( this );
-			LLUI::reportBadKeystroke();
+			LLUI::getInstance()->reportBadKeystroke();
 		}
 		else
 		{
@@ -2456,7 +2478,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 	{
 		LLRect control_rect_screen;
 		localRectToScreen(getRect(), &control_rect_screen);
-		LLUI::screenRectToGL(control_rect_screen, control);
+		LLUI::getInstance()->screenRectToGL(control_rect_screen, control);
 	}
 
 	S32 preedit_left_column, preedit_right_column;
@@ -2486,7 +2508,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 		S32 query_local = findPixelNearestPos(query - getCursor());
 		S32 query_screen_x, query_screen_y;
 		localPointToScreen(query_local, getRect().getHeight() / 2, &query_screen_x, &query_screen_y);
-		LLUI::screenPointToGL(query_screen_x, query_screen_y, &coord->mX, &coord->mY);
+		LLUI::getInstance()->screenPointToGL(query_screen_x, query_screen_y, &coord->mX, &coord->mY);
 	}
 
 	if (bounds)
@@ -2502,7 +2524,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 		LLRect preedit_rect_local(preedit_left_local, getRect().getHeight(), preedit_right_local, 0);
 		LLRect preedit_rect_screen;
 		localRectToScreen(preedit_rect_local, &preedit_rect_screen);
-		LLUI::screenRectToGL(preedit_rect_screen, bounds);
+		LLUI::getInstance()->screenRectToGL(preedit_rect_screen, bounds);
 	}
 
 	return TRUE;
@@ -2636,10 +2658,17 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 
 void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu)
 {
-	if (new_context_menu)
-		mContextMenuHandle = new_context_menu->getHandle();
-	else
-		mContextMenuHandle.markDead();
+    LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
+    if (menu)
+    {
+        menu->die();
+        mContextMenuHandle.markDead();
+    }
+
+    if (new_context_menu)
+    {
+        mContextMenuHandle = new_context_menu->getHandle();
+    }
 }
 
 void LLLineEditor::setFont(const LLFontGL* font)

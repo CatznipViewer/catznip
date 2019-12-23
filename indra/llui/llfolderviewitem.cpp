@@ -127,6 +127,8 @@ LLFolderViewItem::LLFolderViewItem(const LLFolderViewItem::Params& p)
 	mIsSelected( FALSE ),
 	mIsCurSelection( FALSE ),
 	mSelectPending(FALSE),
+	mIsItemCut(false),
+	mCutGeneration(0),
 	mLabelStyle( LLFontGL::NORMAL ),
 	mHasVisibleChildren(FALSE),
 	mIsFolderComplete(true),
@@ -546,7 +548,7 @@ BOOL LLFolderViewItem::handleMouseDown( S32 x, S32 y, MASK mask )
 
 BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 {
-	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::getInstance()->mSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
 
 	mIsMouseOverTitle = (y > (getRect().getHeight() - mItemHeight));
 
@@ -692,6 +694,19 @@ void LLFolderViewItem::drawOpenFolderArrow(const Params& default_params, const L
 /*virtual*/ bool LLFolderViewItem::isHighlightActive()
 {
 	return mIsCurSelection;
+}
+
+/*virtual*/ bool LLFolderViewItem::isFadeItem()
+{
+    LLClipboard& clipboard = LLClipboard::instance();
+    if (mCutGeneration != clipboard.getGeneration())
+    {
+        mCutGeneration = clipboard.getGeneration();
+        mIsItemCut = clipboard.isCutMode()
+                     && ((getParentFolder() && getParentFolder()->isFadeItem())
+                        || getViewModelItem()->isCutToClipboard());
+    }
+    return mIsItemCut;
 }
 
 void LLFolderViewItem::drawHighlight(const BOOL showContent, const BOOL hasKeyboardFocus, const LLUIColor &selectColor, const LLUIColor &flashColor,  
@@ -875,6 +890,12 @@ void LLFolderViewItem::draw()
     }
 
     LLColor4 color = (mIsSelected && filled) ? mFontHighlightColor : mFontColor;
+
+    if (isFadeItem())
+    {
+         // Fade out item color to indicate it's being cut
+         color.mV[VALPHA] *= 0.5f;
+    }
     drawLabel(font, text_left, y, color, right_x);
 
 	//--------------------------------------------------------------------------------//
@@ -882,7 +903,7 @@ void LLFolderViewItem::draw()
 	//
 	if (!mLabelSuffix.empty())
 	{
-		font->renderUTF8( mLabelSuffix, 0, right_x, y, sSuffixColor,
+		font->renderUTF8( mLabelSuffix, 0, right_x, y, isFadeItem() ? color : (LLColor4)sSuffixColor,
 						  LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL, LLFontGL::NO_SHADOW,
 						  S32_MAX, S32_MAX, &right_x, FALSE );
 	}
@@ -1153,6 +1174,11 @@ S32 LLFolderViewFolder::arrange( S32* width, S32* height )
 BOOL LLFolderViewFolder::needsArrange()
 {
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
+}
+
+bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
+{
+	return getViewModelItem()->descendantsPassedFilter(filter_generation);
 }
 
 // Passes selection information on to children and record selection

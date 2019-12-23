@@ -49,6 +49,8 @@ const std::string  GRID_UPDATE_SERVICE_URL = "update_query_url_base";
 const std::string  GRID_HELPER_URI_VALUE = "helper_uri";
 /// the splash page url
 const std::string  GRID_LOGIN_PAGE_VALUE = "login_page";
+/// url for the web profile site
+const std::string  GRID_WEB_PROFILE_VALUE = "web_profile_url";
 /// internal data on system grids
 const std::string  GRID_IS_SYSTEM_GRID_VALUE = "system_grid";
 /// whether this is single or double names
@@ -61,7 +63,7 @@ const std::string  GRID_LOGIN_IDENTIFIER_TYPES = "login_identifier_types";
 const std::string GRID_SLURL_BASE = "slurl_base";
 const std::string GRID_APP_SLURL_BASE = "app_slurl_base";
 
-const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+const std::string DEFAULT_LOGIN_PAGE = "https://viewer-splash.secondlife.com/";
 
 const std::string MAIN_GRID_LOGIN_URI = "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
 
@@ -69,6 +71,8 @@ const std::string SL_UPDATE_QUERY_URL = "https://update.secondlife.com/update";
 
 const std::string MAIN_GRID_SLURL_BASE = "http://maps.secondlife.com/secondlife/";
 const std::string SYSTEM_GRID_APP_SLURL_BASE = "secondlife:///app";
+
+const std::string MAIN_GRID_WEB_PROFILE_URL = "https://my.secondlife.com/";
 
 const char* SYSTEM_GRID_SLURL_BASE = "secondlife://%s/secondlife/";
 const char* DEFAULT_SLURL_BASE = "https://%s/region/";
@@ -90,13 +94,6 @@ LLGridManager::LLGridManager()
 
 }
 
-
-LLGridManager::LLGridManager(const std::string& grid_file)
-{
-	// initialize with an explicity grid file for testing.
-	LL_DEBUGS("GridManager")<<LL_ENDL;
-	initialize(grid_file);
-}
 
 //
 // LLGridManager - class for managing the list of known grids, and the current
@@ -125,13 +122,15 @@ void LLGridManager::initialize(const std::string& grid_file)
 				  "https://secondlife.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
+				  MAIN_GRID_WEB_PROFILE_URL,
 				  "Agni");
 	addSystemGrid(LLTrans::getString("AditiGridLabel"),
 				  "util.aditi.lindenlab.com",
 				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
-				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
+				  "https://secondlife.aditi.lindenlab.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
+				  "https://my.aditi.lindenlab.com/",
 				  "Aditi");
 
 	LLSD other_grids;
@@ -288,6 +287,10 @@ bool LLGridManager::addGrid(LLSD& grid_data)
 				{
 					grid_data[GRID_HELPER_URI_VALUE] = std::string("https://") + grid + "/helpers/";
 				}
+				if (!grid_data.has(GRID_WEB_PROFILE_VALUE))
+				{
+					grid_data[GRID_WEB_PROFILE_VALUE] = std::string("https://") + grid + "/";
+				}
 
 				if (!grid_data.has(GRID_LOGIN_IDENTIFIER_TYPES))
 				{
@@ -302,7 +305,8 @@ bool LLGridManager::addGrid(LLSD& grid_data)
 										 <<"  id:          "<<grid_data[GRID_ID_VALUE].asString()<<"\n"
 										 <<"  label:       "<<grid_data[GRID_LABEL_VALUE].asString()<<"\n"
 										 <<"  login page:  "<<grid_data[GRID_LOGIN_PAGE_VALUE].asString()<<"\n"
-										 <<"  helper page: "<<grid_data[GRID_HELPER_URI_VALUE].asString()<<"\n";
+										 <<"  helper page: "<<grid_data[GRID_HELPER_URI_VALUE].asString()<<"\n"
+										 <<"  web profile: "<<grid_data[GRID_WEB_PROFILE_VALUE].asString()<<"\n";
 				/* still in LL_DEBUGS */ 
 				for (LLSD::array_const_iterator login_uris = grid_data[GRID_LOGIN_URI_VALUE].beginArray();
 					 login_uris != grid_data[GRID_LOGIN_URI_VALUE].endArray();
@@ -339,6 +343,7 @@ void LLGridManager::addSystemGrid(const std::string& label,
 								  const std::string& helper,
 								  const std::string& login_page,
 								  const std::string& update_url_base,
+								  const std::string& web_profile_url,
 								  const std::string& login_id)
 {
 	LLSD grid = LLSD::emptyMap();
@@ -349,6 +354,7 @@ void LLGridManager::addSystemGrid(const std::string& label,
 	grid[GRID_LOGIN_URI_VALUE].append(login_uri);
 	grid[GRID_LOGIN_PAGE_VALUE] = login_page;
 	grid[GRID_UPDATE_SERVICE_URL] = update_url_base;
+	grid[GRID_WEB_PROFILE_VALUE] = web_profile_url;
 	grid[GRID_IS_SYSTEM_GRID_VALUE] = true;
 	grid[GRID_LOGIN_IDENTIFIER_TYPES] = LLSD::emptyArray();
 	grid[GRID_LOGIN_IDENTIFIER_TYPES].append(CRED_IDENTIFIER_TYPE_AGENT);
@@ -478,12 +484,19 @@ void LLGridManager::getLoginURIs(const std::string& grid, std::vector<std::strin
 	std::string grid_name = getGrid(grid);
 	if (!grid_name.empty())
 	{
-		for (LLSD::array_iterator llsd_uri = mGridList[grid_name][GRID_LOGIN_URI_VALUE].beginArray();
-			 llsd_uri != mGridList[grid_name][GRID_LOGIN_URI_VALUE].endArray();
-			 llsd_uri++)
-		{
-			uris.push_back(llsd_uri->asString());
-		}
+        if (mGridList[grid_name][GRID_LOGIN_URI_VALUE].isArray())
+        {
+		    for (LLSD::array_iterator llsd_uri = mGridList[grid_name][GRID_LOGIN_URI_VALUE].beginArray();
+			     llsd_uri != mGridList[grid_name][GRID_LOGIN_URI_VALUE].endArray();
+			     llsd_uri++)
+		    {
+			    uris.push_back(llsd_uri->asString());
+		    }
+        }
+        else
+        {
+            uris.push_back(mGridList[grid_name][GRID_LOGIN_URI_VALUE].asString());
+        }
 	}
 	else
 	{
@@ -533,6 +546,21 @@ std::string LLGridManager::getLoginPage()
 	std::string login_page = mGridList[mGrid][GRID_LOGIN_PAGE_VALUE].asString();
 	LL_DEBUGS("GridManager")<<"returning "<<login_page<<LL_ENDL;
 	return login_page;
+}
+
+std::string LLGridManager::getWebProfileURL(const std::string& grid)
+{
+	std::string web_profile_url;
+	std::string grid_name = getGrid(grid);
+	if (!grid_name.empty())
+	{
+		web_profile_url = mGridList[grid_name][GRID_WEB_PROFILE_VALUE].asString();
+	}
+	else
+	{
+		LL_WARNS("GridManager")<<"invalid grid '"<<grid<<"'"<<LL_ENDL;
+	}
+	return web_profile_url;
 }
 
 void LLGridManager::getLoginIdentifierTypes(LLSD& idTypes)

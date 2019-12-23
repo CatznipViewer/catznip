@@ -5,12 +5,21 @@
  name="menu_gesture_gear"
  visible="false">
     <menu_item_call
-     font="SansSerifBold"
-     label="Add/Remove from Favorites"
+     label="Activate/Deactivate selected gesture"
      layout="topleft"
      name="activate">
         <on_click
          function="Gesture.Action.ToogleActiveState" />
+    </menu_item_call>
+    <menu_item_call
+     label="Rename"
+     layout="topleft"
+     name="rename">
+        <on_click
+         function="Gesture.Action.Rename" />
+        <on_enable
+         function="Gesture.EnableAction"
+         parameter="rename_gesture" />
     </menu_item_call>
     <menu_item_call
      label="Copy"

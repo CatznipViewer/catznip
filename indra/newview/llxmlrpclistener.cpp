@@ -312,7 +312,7 @@ public:
         }
         XMLRPC_RequestSetData(request, xparams);
 
-        mTransaction.reset(new LLXMLRPCTransaction(mUri, request));
+        mTransaction.reset(new LLXMLRPCTransaction(mUri, request, true, command.has("http_params")? LLSD(command["http_params"]) : LLSD()));
 		mPreviousStatus = mTransaction->status(NULL);
 
         // Free the XMLRPC_REQUEST object and the attached data values.
@@ -322,7 +322,7 @@ public:
         mBoundListener =
             LLEventPumps::instance().
             obtain("mainloop").
-            listen(LLEventPump::inventName(), boost::bind(&Poller::poll, this, _1));
+            listen(LLEventPump::ANONYMOUS, boost::bind(&Poller::poll, this, _1));
 
         LL_INFOS("LLXMLRPCListener") << mMethod << " request sent to " << mUri << LL_ENDL;
     }
@@ -379,14 +379,9 @@ public:
 		{
 			case CURLE_SSL_PEER_CERTIFICATE:
 			case CURLE_SSL_CACERT:
-			{
-				LLPointer<LLCertificate> error_cert(mTransaction->getErrorCert());
-				if(error_cert)
-				{
-					data["certificate"] = error_cert->getPem();
-				}
+                data["certificate"] = mTransaction->getErrorCertData();
 				break;
-			}
+
 			default:
 				break;
 		}

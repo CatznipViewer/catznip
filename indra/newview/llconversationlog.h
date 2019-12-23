@@ -109,9 +109,8 @@ private:
 
 class LLConversationLog : public LLSingleton<LLConversationLog>, LLIMSessionObserver
 {
-	friend class LLSingleton<LLConversationLog>;
+	LLSINGLETON(LLConversationLog);
 public:
-
 	void removeConversation(const LLConversation& conversation);
 
 	/**
@@ -149,6 +148,12 @@ public:
 	bool isLogEmpty() { return mConversations.empty(); }
 
 	/**
+	 * inits connection to per account settings,
+	 * loads saved file and inits enabled state
+	 */
+	void initLoggingState();
+
+	/**
 	 * constructs file name in which conversations log will be saved
 	 * file name is conversation.log
 	 */
@@ -157,7 +162,6 @@ public:
 
 private:
 
-	LLConversationLog();
 	virtual ~LLConversationLog()
 	{
 		if (mAvatarNameCacheConnection.connected())

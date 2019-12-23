@@ -37,6 +37,7 @@
 #include "lllineeditor.h"
 #include "lluictrlfactory.h"
 #include "lluictrlfactory.h"
+#include "lldatapacker.h"
 
 extern LLAgent gAgent;
 
@@ -147,6 +148,12 @@ void LLPreviewAnim::draw()
 			}
 			if(gAgentAvatarp->isMotionActive(this->mItemID) && !this->mDidStart)
 			{
+				const LLInventoryItem *item = getItem();
+				LLMotion* motion = gAgentAvatarp->findMotion(this->mItemID);
+				if (item && motion)
+				{
+					motion->setName(item->getName());
+				}
 				this->mDidStart = true;
 			}
 		}

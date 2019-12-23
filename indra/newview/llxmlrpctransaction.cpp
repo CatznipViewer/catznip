@@ -206,9 +206,9 @@ public:
 	std::string			mResponseText;
 	XMLRPC_REQUEST		mResponse;
 	std::string         mCertStore;
-	LLPointer<LLCertificate> mErrorCert;
+	LLSD mErrorCertData;
 
-	Impl(const std::string& uri, XMLRPC_REQUEST request, bool useGzip);
+	Impl(const std::string& uri, XMLRPC_REQUEST request, bool useGzip, const LLSD& httpParams);
 	Impl(const std::string& uri,
 		const std::string& method, LLXMLRPCValue params, bool useGzip);
 	~Impl();
@@ -219,7 +219,7 @@ public:
 	void setHttpStatus(const LLCore::HttpStatus &status);
 
 private:
-	void init(XMLRPC_REQUEST request, bool useGzip);
+	void init(XMLRPC_REQUEST request, bool useGzip, const LLSD& httpParams);
 };
 
 LLXMLRPCTransaction::Handler::Handler(LLCore::HttpRequest::ptr_t &request, 
@@ -247,14 +247,8 @@ void LLXMLRPCTransaction::Handler::onCompleted(LLCore::HttpHandle handle,
 			// (a non cert error), then generate the error message as
 			// appropriate
 			mImpl->setHttpStatus(status);
-			LLCertificate *errordata = static_cast<LLCertificate *>(status.getErrorData());
-
-			if (errordata)
-			{
-				mImpl->mErrorCert = LLPointer<LLCertificate>(errordata);
-				status.setErrorData(NULL);
-				errordata->unref();
-			}
+			LLSD errordata = status.getErrorData();
+            mImpl->mErrorCertData = errordata;
 
 			LL_WARNS() << "LLXMLRPCTransaction error "
 				<< status.toHex() << ": " << status.toString() << LL_ENDL;
@@ -315,13 +309,13 @@ void LLXMLRPCTransaction::Handler::onCompleted(LLCore::HttpHandle handle,
 //=========================================================================
 
 LLXMLRPCTransaction::Impl::Impl(const std::string& uri,
-		XMLRPC_REQUEST request, bool useGzip)
+		XMLRPC_REQUEST request, bool useGzip, const LLSD& httpParams)
 	: mHttpRequest(),
 	  mStatus(LLXMLRPCTransaction::StatusNotStarted),
 	  mURI(uri),
 	  mResponse(0)
 {
-	init(request, useGzip);
+	init(request, useGzip, httpParams);
 }
 
 
@@ -337,7 +331,7 @@ LLXMLRPCTransaction::Impl::Impl(const std::string& uri,
 	XMLRPC_RequestSetRequestType(request, xmlrpc_request_call);
 	XMLRPC_RequestSetData(request, params.getValue());
 	
-	init(request, useGzip);
+	init(request, useGzip, LLSD());
     // DEV-28398: without this XMLRPC_RequestFree() call, it looks as though
     // the 'request' object is simply leaked. It's less clear to me whether we
     // should also ask to free request value data (second param 1), since the
@@ -345,7 +339,7 @@ LLXMLRPCTransaction::Impl::Impl(const std::string& uri,
     XMLRPC_RequestFree(request, 1);
 }
 
-void LLXMLRPCTransaction::Impl::init(XMLRPC_REQUEST request, bool useGzip)
+void LLXMLRPCTransaction::Impl::init(XMLRPC_REQUEST request, bool useGzip, const LLSD& httpParams)
 {
 	LLCore::HttpOptions::ptr_t httpOpts;
 	LLCore::HttpHeaders::ptr_t httpHeaders;
@@ -359,7 +353,19 @@ void LLXMLRPCTransaction::Impl::init(XMLRPC_REQUEST request, bool useGzip)
 	// LLRefCounted starts with a 1 ref, so don't add a ref in the smart pointer
 	httpOpts = LLCore::HttpOptions::ptr_t(new LLCore::HttpOptions()); 
 
-	httpOpts->setTimeout(40L);
+	// delay between repeats will start from 5 sec and grow to 20 sec with each repeat
+	httpOpts->setMinBackoff(5E6L);
+	httpOpts->setMaxBackoff(20E6L);
+
+	httpOpts->setTimeout(httpParams.has("timeout") ? httpParams["timeout"].asInteger() : 40L);
+	if (httpParams.has("retries"))
+	{
+		httpOpts->setRetries(httpParams["retries"].asInteger());
+	}
+	if (httpParams.has("DNSCacheTimeout"))
+	{
+		httpOpts->setDNSCacheTimeout(httpParams["DNSCacheTimeout"].asInteger());
+	}
 
 	bool vefifySSLCert = !gSavedSettings.getBOOL("NoVerifySSLCert");
 	mCertStore = gSavedSettings.getString("CertStore");
@@ -481,38 +487,24 @@ void LLXMLRPCTransaction::Impl::setHttpStatus(const LLCore::HttpStatus &status)
 {
 	CURLcode code = static_cast<CURLcode>(status.toULong());
 	std::string message;
-	std::string uri = "http://secondlife.com/community/support.php";
+	std::string uri = "http://support.secondlife.com";
 	LLURI failuri(mURI);
-
+	LLStringUtil::format_map_t args;
 
 	switch (code)
 	{
 	case CURLE_COULDNT_RESOLVE_HOST:
-		message =
-			std::string("DNS could not resolve the host name(") + failuri.hostName() + ").\n"
-			"Please verify that you can connect to the www.secondlife.com\n"
-			"web site.  If you can, but continue to receive this error,\n"
-			"please go to the support section and report this problem.";
+		args["[HOSTNAME]"] = failuri.hostName();
+		message = LLTrans::getString("couldnt_resolve_host", args);
 		break;
 
 	case CURLE_SSL_PEER_CERTIFICATE:
-		message =
-			"The login server couldn't verify itself via SSL.\n"
-			"If you continue to receive this error, please go\n"
-			"to the Support section of the SecondLife.com web site\n"
-			"and report the problem.";
+		message = LLTrans::getString("ssl_peer_certificate");
 		break;
 
 	case CURLE_SSL_CACERT:
-	case CURLE_SSL_CONNECT_ERROR:
-		message =
-			"Often this means that your computer\'s clock is set incorrectly.\n"
-			"Please go to Control Panels and make sure the time and date\n"
-			"are set correctly.\n"
-			"Also check that your network and firewall are set up correctly.\n"
-			"If you continue to receive this error, please go\n"
-			"to the Support section of the SecondLife.com web site\n"
-			"and report the problem.";
+	case CURLE_SSL_CONNECT_ERROR:		
+		message = LLTrans::getString("ssl_connect_error");
 		break;
 
 	default:
@@ -526,8 +518,8 @@ void LLXMLRPCTransaction::Impl::setHttpStatus(const LLCore::HttpStatus &status)
 
 
 LLXMLRPCTransaction::LLXMLRPCTransaction(
-	const std::string& uri, XMLRPC_REQUEST request, bool useGzip)
-: impl(* new Impl(uri, request, useGzip))
+	const std::string& uri, XMLRPC_REQUEST request, bool useGzip, const LLSD& httpParams)
+: impl(* new Impl(uri, request, useGzip, httpParams))
 { }
 
 
@@ -565,9 +557,9 @@ std::string LLXMLRPCTransaction::statusMessage()
 	return impl.mStatusMessage;
 }
 
-LLPointer<LLCertificate> LLXMLRPCTransaction::getErrorCert()
+LLSD LLXMLRPCTransaction::getErrorCertData()
 {
-	return impl.mErrorCert;
+	return impl.mErrorCertData;
 }
 
 std::string LLXMLRPCTransaction::statusURI()

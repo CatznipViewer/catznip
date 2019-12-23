@@ -41,6 +41,7 @@
 #include "lltooltip.h"	// positionViewNearMouse()
 #include "lltrans.h"
 #include "lluictrl.h"
+#include "llgroupiconctrl.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // LLInspectGroup
@@ -128,11 +129,11 @@ void LLInspectGroup::onOpen(const LLSD& data)
 	// See LLToolTipMgr::createToolTip
 	if (data.has("pos"))
 	{
-		LLUI::positionViewNearMouse(this, data["pos"]["x"].asInteger(), data["pos"]["y"].asInteger());
+		LLUI::getInstance()->positionViewNearMouse(this, data["pos"]["x"].asInteger(), data["pos"]["y"].asInteger());
 	}
 	else
 	{
-		LLUI::positionViewNearMouse(this);
+		LLUI::getInstance()->positionViewNearMouse(this);
 	}
 
 	// can't call from constructor as widgets are not built yet
@@ -204,7 +205,7 @@ void LLInspectGroup::nameUpdatedCallback(
 {
 	if (id == mGroupID)
 	{
-		getChild<LLUICtrl>("group_name")->setValue( LLSD(name) );
+		getChild<LLUICtrl>("group_name")->setValue(LLSD("<nolink>" + name + "</nolink>"));
 	}
 	
 	// Otherwise possibly a request for an older inspector, ignore it
@@ -233,7 +234,7 @@ void LLInspectGroup::processGroupData()
 
 		getChild<LLUICtrl>("group_details")->setValue( LLSD(data->mCharter) );
 
-		getChild<LLUICtrl>("group_icon")->setValue( LLSD(data->mInsigniaID) );
+		getChild<LLGroupIconCtrl>("group_icon")->setIconId(data->mInsigniaID);
 
 		std::string cost;
 		bool is_member = LLGroupActions::isInGroup(mGroupID);

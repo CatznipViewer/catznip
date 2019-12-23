@@ -30,6 +30,7 @@
 #include "lluuid.h"
 #include "llstring.h"
 #include "llpointer.h"
+#include "llsingleton.h"
 #include "lltrace.h"
 
 const S32 MIN_IMAGE_MIP =  2; // 4x4, only used for expand/contract power of 2
@@ -71,7 +72,6 @@ const S32 HTTP_PACKET_SIZE = 1496;
 class LLImageFormatted;
 class LLImageRaw;
 class LLColor4U;
-class LLPrivateMemoryPool;
 
 typedef enum e_image_codec
 {
@@ -89,23 +89,25 @@ typedef enum e_image_codec
 //============================================================================
 // library initialization class
 
-class LLImage
+class LLImage : public LLParamSingleton<LLImage>
 {
+	LLSINGLETON(LLImage, bool use_new_byte_range = false, S32 minimal_reverse_byte_range_percent = 75);
+	~LLImage();
 public:
-	static void initClass(bool use_new_byte_range = false, S32 minimal_reverse_byte_range_percent = 75);
-	static void cleanupClass();
 
-	static const std::string& getLastError();
-	static void setLastError(const std::string& message);
-	
-	static bool useNewByteRange() { return sUseNewByteRange; }
-    static S32  getReverseByteRangePercent() { return sMinimalReverseByteRangePercent; }
-	
-protected:
-	static LLMutex* sMutex;
-	static std::string sLastErrorMessage;
-	static bool sUseNewByteRange;
-    static S32  sMinimalReverseByteRangePercent;
+	const std::string& getLastErrorMessage();
+	static const std::string& getLastError() { return getInstance()->getLastErrorMessage(); };
+	void setLastErrorMessage(const std::string& message);
+	static void setLastError(const std::string& message) { getInstance()->setLastErrorMessage(message); }
+
+	bool useNewByteRange() { return mUseNewByteRange; }
+	S32  getReverseByteRangePercent() { return mMinimalReverseByteRangePercent; }
+
+private:
+	LLMutex* mMutex;
+	std::string mLastErrorMessage;
+	bool mUseNewByteRange;
+	S32  mMinimalReverseByteRangePercent;
 };
 
 //============================================================================
@@ -141,7 +143,7 @@ public:
 
 	const U8 *getData() const	;
 	U8 *getData()				;
-	bool isBufferInvalid() ;
+	bool isBufferInvalid() const;
 
 	void setSize(S32 width, S32 height, S32 ncomponents);
 	U8* allocateDataSize(S32 width, S32 height, S32 ncomponents, S32 size = -1); // setSize() + allocateData()
@@ -160,10 +162,6 @@ public:
 	static F32 calc_download_priority(F32 virtual_size, F32 visible_area, S32 bytes_sent);
 
 	static EImageCodec getCodecFromExtension(const std::string& exten);
-	
-	static void createPrivatePool() ;
-	static void destroyPrivatePool() ;
-	static LLPrivateMemoryPool* getPrivatePool() {return sPrivatePoolp;}
 
 	//static LLTrace::MemStatHandle sMemStat;
 
@@ -178,8 +176,6 @@ private:
 
 	bool mBadBufferAllocation ;
 	bool mAllowOverSize ;
-
-	static LLPrivateMemoryPool* sPrivatePoolp ;
 };
 
 // Raw representation of an image (used for textures, and other uncompressed formats
@@ -215,7 +211,8 @@ public:
 	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void contractToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
-	bool scale( S32 new_width, S32 new_height, bool scale_image = true );
+	bool scale(S32 new_width, S32 new_height, bool scale_image = true);
+    LLPointer<LLImageRaw> scaled(S32 new_width, S32 new_height);
 	
 	// Fill the buffer with a constant color
 	void fill( const LLColor4U& color );

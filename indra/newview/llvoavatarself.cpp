@@ -65,6 +65,7 @@
 #include "llsdutil.h"
 #include "llstartup.h"
 #include "llsdserialize.h"
+#include "llcallstack.h"
 #include "llcorehttputil.h"
 
 #if LL_MSVC
@@ -192,6 +193,7 @@ bool update_avatar_rez_metrics()
 		return true;
 	
 	gAgentAvatarp->updateAvatarRezMetrics(false);
+
 	return false;
 }
 
@@ -219,7 +221,6 @@ void LLVOAvatarSelf::initInstance()
 	{
 		mDebugBakedTextureTimes[i][0] = -1.0f;
 		mDebugBakedTextureTimes[i][1] = -1.0f;
-		mInitialBakeIDs[i] = LLUUID::null;
 	}
 
 	status &= buildMenus();
@@ -234,6 +235,8 @@ void LLVOAvatarSelf::initInstance()
 	//doPeriodically(output_self_av_texture_diagnostics, 30.0);
 	doPeriodically(update_avatar_rez_metrics, 5.0);
 	doPeriodically(boost::bind(&LLVOAvatarSelf::checkStuckAppearance, this), 30.0);
+
+    mInitFlags |= 1<<2;
 }
 
 void LLVOAvatarSelf::setHoverIfRegionEnabled()
@@ -340,6 +343,7 @@ BOOL LLVOAvatarSelf::buildSkeletonSelf(const LLAvatarSkeletonInfo *info)
 	F32 aspect = LLViewerCamera::getInstance()->getAspect();
 	LLVector3 scale(1.f, aspect, 1.f);
 	mScreenp->setScale(scale);
+	// SL-315
 	mScreenp->setWorldPosition(LLVector3::zero);
 	// need to update screen agressively when sidebar opens/closes, for example
 	mScreenp->mUpdateXform = TRUE;
@@ -381,6 +385,10 @@ BOOL LLVOAvatarSelf::buildMenus()
 	params.name(params.label);
 	gAttachBodyPartPieMenus[7] = LLUICtrlFactory::create<LLContextMenu> (params);
 
+	params.label(LLTrans::getString("BodyPartsEnhancedSkeleton"));
+	params.name(params.label);
+	gAttachBodyPartPieMenus[8] = LLUICtrlFactory::create<LLContextMenu>(params);
+
 	gDetachBodyPartPieMenus[0] = NULL;
 
 	params.label(LLTrans::getString("BodyPartsRightArm"));
@@ -409,7 +417,11 @@ BOOL LLVOAvatarSelf::buildMenus()
 	params.name(params.label);
 	gDetachBodyPartPieMenus[7] = LLUICtrlFactory::create<LLContextMenu> (params);
 
-	for (S32 i = 0; i < 8; i++)
+	params.label(LLTrans::getString("BodyPartsEnhancedSkeleton"));
+	params.name(params.label);
+	gDetachBodyPartPieMenus[8] = LLUICtrlFactory::create<LLContextMenu>(params);
+
+	for (S32 i = 0; i < 9; i++)
 	{
 		if (gAttachBodyPartPieMenus[i])
 		{
@@ -494,7 +506,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 		 ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
-		if (attachment && attachment->getGroup() == 8)
+		if (attachment->getGroup() == 9)
 		{
 			LLMenuItemCallGL::Params item_params;
 			std::string sub_piemenu_name = attachment->getName();
@@ -580,7 +592,7 @@ BOOL LLVOAvatarSelf::buildMenus()
 		}
 	}
 
-	for (S32 group = 0; group < 8; group++)
+	for (S32 group = 0; group < 9; group++)
 	{
 		// skip over groups that don't have sub menus
 		if (!gAttachBodyPartPieMenus[group] || !gDetachBodyPartPieMenus[group])
@@ -690,13 +702,23 @@ void LLVOAvatarSelf::idleUpdate(LLAgent &agent, const F64 &time)
 // virtual
 LLJoint *LLVOAvatarSelf::getJoint(const std::string &name)
 {
-	if (mScreenp)
+    LLJoint *jointp = NULL;
+    jointp = LLVOAvatar::getJoint(name);
+	if (!jointp && mScreenp)
 	{
-		LLJoint* jointp = mScreenp->findJoint(name);
-		if (jointp) return jointp;
+		jointp = mScreenp->findJoint(name);
+        if (jointp)
+        {
+            mJointMap[name] = jointp;
+        }
 	}
-	return LLVOAvatar::getJoint(name);
+    if (jointp && jointp != mScreenp && jointp != mRoot)
+    {
+        llassert(LLVOAvatar::getJoint((S32)jointp->getJointNum())==jointp);
+    }
+    return jointp;
 }
+
 // virtual
 BOOL LLVOAvatarSelf::setVisualParamWeight(const LLVisualParam *which_param, F32 weight)
 {
@@ -1186,7 +1208,7 @@ BOOL LLVOAvatarSelf::detachObject(LLViewerObject *viewer_object)
 		// the simulator should automatically handle permission revocation
 		
 		stopMotionFromSource(attachment_id);
-		LLFollowCamMgr::setCameraActive(viewer_object->getID(), FALSE);
+		LLFollowCamMgr::getInstance()->setCameraActive(viewer_object->getID(), FALSE);
 		
 		LLViewerObject::const_child_list_t& child_list = viewer_object->getChildren();
 		for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
@@ -1198,7 +1220,7 @@ BOOL LLVOAvatarSelf::detachObject(LLViewerObject *viewer_object)
 			// permissions revocation
 			
 			stopMotionFromSource(child_objectp->getID());
-			LLFollowCamMgr::setCameraActive(child_objectp->getID(), FALSE);
+			LLFollowCamMgr::getInstance()->setCameraActive(child_objectp->getID(), FALSE);
 		}
 		
 		// Make sure the inventory is in sync with the avatar.
@@ -2226,7 +2248,9 @@ bool LLVOAvatarSelf::updateAvatarRezMetrics(bool force_send)
 {
 	const F32 AV_METRICS_INTERVAL_QA = 30.0;
 	F32 send_period = 300.0;
-	if (gSavedSettings.getBOOL("QAModeMetrics"))
+
+	static LLCachedControl<bool> qa_mode_metrics(gSavedSettings,"QAModeMetrics");
+	if (qa_mode_metrics)
 	{
 		send_period = AV_METRICS_INTERVAL_QA;
 	}
@@ -2584,6 +2608,8 @@ void LLVOAvatarSelf::requestLayerSetUpdate(ETextureIndex index )
 			if( mUpperBodyLayerSet )
 				mUpperBodyLayerSet->requestUpdate(); */
 	const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture(index);
+	if (!texture_dict)
+		return;
 	if (!texture_dict->mIsLocalTexture || !texture_dict->mIsUsedByBakedTexture)
 		return;
 	const EBakedTextureIndex baked_index = texture_dict->mBakedTextureIndex;
@@ -2600,7 +2626,7 @@ LLViewerTexLayerSet* LLVOAvatarSelf::getLayerSet(ETextureIndex index) const
                case TEX_HEAD_BODYPAINT:
                        return mHeadLayerSet; */
        const LLAvatarAppearanceDictionary::TextureEntry *texture_dict = LLAvatarAppearanceDictionary::getInstance()->getTexture(index);
-       if (texture_dict->mIsUsedByBakedTexture)
+       if (texture_dict && texture_dict->mIsUsedByBakedTexture)
        {
                const EBakedTextureIndex baked_index = texture_dict->mBakedTextureIndex;
                return getLayerSet(baked_index);
@@ -2675,6 +2701,12 @@ void LLVOAvatarSelf::onCustomizeEnd(bool disable_camera_switch)
 	}
 }
 
+// virtual
+bool LLVOAvatarSelf::shouldRenderRigged() const
+{
+    return gAgent.needsRenderAvatar(); 
+}
+
 // HACK: this will null out the avatar's local texture IDs before the TE message is sent
 //       to ensure local texture IDs are not sent to other clients in the area.
 //       this is a short-term solution. The long term solution will be to not set the texture
@@ -2722,7 +2754,7 @@ bool LLVOAvatarSelf::sendAppearanceMessage(LLMessageSystem *mesgsys) const
 //------------------------------------------------------------------------
 void LLVOAvatarSelf::sendHoverHeight() const
 {
-	std::string url = gAgent.getRegion()->getCapability("AgentPreferences");
+	std::string url = gAgent.getRegionCapability("AgentPreferences");
 
 	if (!url.empty())
 	{
@@ -2736,7 +2768,7 @@ void LLVOAvatarSelf::sendHoverHeight() const
         // class responder if nothing else gets added. 
         // (comment from removed Responder)
         LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, update, 
-            "Hover hight sent to sim", "Hover hight not sent to sim");
+            "Hover height sent to sim", "Hover height not sent to sim");
 		mLastHoverOffsetSent = hover_offset;
 	}
 }
@@ -2769,7 +2801,7 @@ BOOL LLVOAvatarSelf::needsRenderBeam()
 		// don't render selection beam on hud objects
 		is_touching_or_grabbing = FALSE;
 	}
-	return is_touching_or_grabbing || (mState & AGENT_STATE_EDITING && LLSelectMgr::getInstance()->shouldShowSelection());
+	return is_touching_or_grabbing || (getAttachmentState() & AGENT_STATE_EDITING && LLSelectMgr::getInstance()->shouldShowSelection());
 }
 
 // static

@@ -3,8 +3,8 @@
 # cmake_minimum_required should appear before any
 # other commands to guarantee full compatibility
 # with the version specified
-## prior to 2.8, the add_custom_target commands used in setting the version did not work correctly
-cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
+## 3.8 added VS_DEBUGGER_WORKING_DIRECTORY support
+cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 
 set(ROOT_PROJECT_NAME "SecondLife" CACHE STRING
     "The root project/makefile/solution name. Defaults to SecondLife.")
@@ -44,6 +44,7 @@ if (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
 endif (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
 
 add_custom_target(viewer)
+
 add_subdirectory(${LIBS_OPEN_PREFIX}llcrashlogger)
 add_subdirectory(${LIBS_OPEN_PREFIX}llplugin)
 add_subdirectory(${LIBS_OPEN_PREFIX}llui)
@@ -63,7 +64,7 @@ if (LINUX)
       include(LLAppearanceUtility)
       add_subdirectory(${LLAPPEARANCEUTILITY_SRC_DIR} ${LLAPPEARANCEUTILITY_BIN_DIR})
   endif (INSTALL_PROPRIETARY)
-  add_dependencies(viewer linux-crash-logger-strip-target linux-updater)
+  add_dependencies(viewer linux-crash-logger-strip-target)
 elseif (DARWIN)
   add_subdirectory(${VIEWER_PREFIX}mac_crash_logger)
   add_dependencies(viewer mac-crash-logger)
@@ -75,15 +76,18 @@ elseif (WINDOWS)
   endif (EXISTS ${VIEWER_DIR}win_setup)
   # add_dependencies(viewer windows-setup windows-crash-logger)
   add_dependencies(viewer windows-crash-logger)
-elseif (SOLARIS)
-  add_subdirectory(solaris_crash_logger)
-  add_dependencies(viewer solaris-crash-logger)
 endif (LINUX)
 
 add_subdirectory(${VIEWER_PREFIX}newview)
 add_dependencies(viewer secondlife-bin)
 
 add_subdirectory(${VIEWER_PREFIX}doxygen EXCLUDE_FROM_ALL)
+
+# sets the 'startup project' for debugging from visual studio.
+set_property(
+    DIRECTORY ${VIEWER_PREFIX}
+    PROPERTY VS_STARTUP_PROJECT secondlife-bin
+    )
 
 if (LL_TESTS)
   # Define after the custom targets are created so

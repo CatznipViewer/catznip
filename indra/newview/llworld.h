@@ -61,8 +61,8 @@ class LLVOAvatar;
 
 class LLWorld : public LLSingleton<LLWorld>
 {
+	LLSINGLETON(LLWorld);
 public:
-	LLWorld();
 	void destroyClass();
 
 	LLViewerRegion*	addRegion(const U64 &region_handle, const LLHost &host);
@@ -199,7 +199,7 @@ private:
 	// Data for "Fake" objects
 	//
 
-	std::list<LLVOWater*> mHoleWaterObjects;
+	std::list<LLPointer<LLVOWater> > mHoleWaterObjects;
 	LLPointer<LLVOWater> mEdgeWaterObjects[8];
 
 	LLPointer<LLViewerTexture> mDefaultWaterTexturep;

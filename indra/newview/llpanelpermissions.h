@@ -28,6 +28,7 @@
 #define LL_LLPANELPERMISSIONS_H
 
 #include "llpanel.h"
+#include "llstyle.h"
 #include "lluuid.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,7 +37,10 @@
 // Panel for permissions of an object.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class LLAvatarName;
+class LLTextBox;
 class LLNameBox;
+class LLViewerInventoryItem;
 
 class LLPanelPermissions : public LLPanel
 {
@@ -45,7 +49,8 @@ public:
 	virtual ~LLPanelPermissions();
 
 	/*virtual*/	BOOL	postBuild();
-
+	void updateOwnerName(const LLUUID& owner_id, const LLAvatarName& owner_name, const LLStyle::Params& style_params);
+	void updateCreatorName(const LLUUID& creator_id, const LLAvatarName& creator_name, const LLStyle::Params& style_params);
 	void refresh();							// refresh all labels as needed
 
 protected:
@@ -77,15 +82,21 @@ protected:
 	static void	onCommitClickAction(LLUICtrl* ctrl, void*);
 	static void onCommitIncludeInSearch(LLUICtrl* ctrl, void*);
 
+	static LLViewerInventoryItem* findItem(LLUUID &object_id);
+
 protected:
 	void disableAll();
 	
 private:
 	LLNameBox*		mLabelGroupName;		// group name
-
+	LLTextBox*		mLabelOwnerName;
+	LLTextBox*		mLabelCreatorName;
 	LLUUID			mCreatorID;
 	LLUUID			mOwnerID;
 	LLUUID			mLastOwnerID;
+
+	boost::signals2::connection mOwnerCacheConnection;
+	boost::signals2::connection mCreatorCacheConnection;
 };
 
 

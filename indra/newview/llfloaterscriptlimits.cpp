@@ -90,19 +90,6 @@ LLFloaterScriptLimits::LLFloaterScriptLimits(const LLSD& seed)
 
 BOOL LLFloaterScriptLimits::postBuild()
 {
-	// a little cheap and cheerful - if there's an about land panel open default to showing parcel info,
-	// otherwise default to showing attachments (avatar appearance)
-	bool selectParcelPanel = false;
-	
-	LLFloaterLand* instance = LLFloaterReg::getTypedInstance<LLFloaterLand>("about_land");
-	if(instance)
-	{
-		if(instance->isShown())
-		{
-			selectParcelPanel = true;
-		}
-	}
-
 	mTab = getChild<LLTabContainer>("scriptlimits_panels");
 	
 	if(!mTab)
@@ -111,36 +98,12 @@ BOOL LLFloaterScriptLimits::postBuild()
 		return FALSE;
 	}
 
-	// contruct the panels
-	std::string land_url = gAgent.getRegion()->getCapability("LandResources");
-	if (!land_url.empty())
-	{
-		LLPanelScriptLimitsRegionMemory* panel_memory;
-		panel_memory = new LLPanelScriptLimitsRegionMemory;
-		mInfoPanels.push_back(panel_memory);
-		panel_memory->buildFromFile( "panel_script_limits_region_memory.xml");
-		mTab->addTabPanel(panel_memory);
-	}
-	
-	std::string attachment_url = gAgent.getRegion()->getCapability("AttachmentResources");
-	if (!attachment_url.empty())
-	{
-		LLPanelScriptLimitsAttachment* panel_attachments = new LLPanelScriptLimitsAttachment;
-		mInfoPanels.push_back(panel_attachments);
-		panel_attachments->buildFromFile("panel_script_limits_my_avatar.xml");
-		mTab->addTabPanel(panel_attachments);
-	}
-	
-	if(mInfoPanels.size() > 0)
-	{
-		mTab->selectTab(0);
-	}
-
-	if(!selectParcelPanel && (mInfoPanels.size() > 1))
-	{
-		mTab->selectTab(1);
-	}
-
+	// contruct the panel
+	LLPanelScriptLimitsRegionMemory* panel_memory = new LLPanelScriptLimitsRegionMemory;
+	mInfoPanels.push_back(panel_memory);
+	panel_memory->buildFromFile( "panel_script_limits_region_memory.xml");
+	mTab->addTabPanel(panel_memory);
+	mTab->selectTab(0);
 	return TRUE;
 }
 
@@ -195,6 +158,8 @@ LLPanelScriptLimitsRegionMemory::~LLPanelScriptLimitsRegionMemory()
 
 BOOL LLPanelScriptLimitsRegionMemory::getLandScriptResources()
 {
+	if (!gAgent.getRegion()) return FALSE;
+
 	LLSD body;
 	std::string url = gAgent.getRegion()->getCapability("LandResources");
 	if (!url.empty())
@@ -391,6 +356,14 @@ void LLPanelScriptLimitsRegionMemory::setErrorStatus(S32 status, const std::stri
 }
 
 // callback from the name cache with an owner name to add to the list
+void LLPanelScriptLimitsRegionMemory::onAvatarNameCache(
+    const LLUUID& id,
+    const LLAvatarName& av_name)
+{
+    onNameCache(id, av_name.getUserName());
+}
+
+// callback from the name cache with an owner name to add to the list
 void LLPanelScriptLimitsRegionMemory::onNameCache(
 						 const LLUUID& id,
 						 const std::string& full_name)
@@ -503,7 +476,9 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 				}
 				else
 				{
-					name_is_cached = gCacheName->getFullName(owner_id, owner_buf);  // username
+					LLAvatarName av_name;
+					name_is_cached = LLAvatarNameCache::get(owner_id, &av_name);
+					owner_buf = av_name.getUserName();
 					owner_buf = LLCacheName::buildUsername(owner_buf);
 				}
 				if(!name_is_cached)
@@ -511,9 +486,18 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 					if(std::find(names_requested.begin(), names_requested.end(), owner_id) == names_requested.end())
 					{
 						names_requested.push_back(owner_id);
-						gCacheName->get(owner_id, is_group_owned,  // username
-							boost::bind(&LLPanelScriptLimitsRegionMemory::onNameCache,
-							    this, _1, _2));
+						if (is_group_owned)
+						{
+							gCacheName->getGroup(owner_id,
+								boost::bind(&LLPanelScriptLimitsRegionMemory::onNameCache,
+								    this, _1, _2));
+						}
+						else
+						{
+							LLAvatarNameCache::get(owner_id,
+								boost::bind(&LLPanelScriptLimitsRegionMemory::onAvatarNameCache,
+								    this, _1, _2));
+						}
 					}
 				}
 			}
@@ -523,6 +507,8 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 
 			LLScrollListCell::Params cell_params;
 			cell_params.font = LLFontGL::getFontSansSerif();
+			// Start out right justifying numeric displays
+			cell_params.font_halign = LLFontGL::RIGHT;
 
 			cell_params.column = "size";
 			cell_params.value = size;
@@ -532,6 +518,8 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 			cell_params.value = urls;
 			item_params.columns.add(cell_params);
 
+			cell_params.font_halign = LLFontGL::LEFT;
+			// The rest of the columns are text to left justify them
 			cell_params.column = "name";
 			cell_params.value = name_buf;
 			item_params.columns.add(cell_params);
@@ -546,7 +534,7 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 
 			cell_params.column = "location";
 			cell_params.value = has_locations
-				? llformat("<%0.1f,%0.1f,%0.1f>", location_x, location_y, location_z)
+				? llformat("<%0.0f, %0.0f, %0.0f>", location_x, location_y, location_z)
 				: "";
 			item_params.columns.add(cell_params);
 
@@ -623,13 +611,20 @@ void LLPanelScriptLimitsRegionMemory::setRegionSummary(LLSD content)
 
 	if((mParcelMemoryUsed >= 0) && (mParcelMemoryMax >= 0))
 	{
-		S32 parcel_memory_available = mParcelMemoryMax - mParcelMemoryUsed;
-
 		LLStringUtil::format_map_t args_parcel_memory;
 		args_parcel_memory["[COUNT]"] = llformat ("%d", mParcelMemoryUsed);
-		args_parcel_memory["[MAX]"] = llformat ("%d", mParcelMemoryMax);
-		args_parcel_memory["[AVAILABLE]"] = llformat ("%d", parcel_memory_available);
-		std::string msg_parcel_memory = LLTrans::getString("ScriptLimitsMemoryUsed", args_parcel_memory);
+		std::string translate_message = "ScriptLimitsMemoryUsedSimple";
+
+		if (0 < mParcelMemoryMax)
+		{
+			S32 parcel_memory_available = mParcelMemoryMax - mParcelMemoryUsed;
+
+			args_parcel_memory["[MAX]"] = llformat ("%d", mParcelMemoryMax);
+			args_parcel_memory["[AVAILABLE]"] = llformat ("%d", parcel_memory_available);
+			translate_message = "ScriptLimitsMemoryUsed";
+		}
+
+		std::string msg_parcel_memory = LLTrans::getString(translate_message, args_parcel_memory);
 		getChild<LLUICtrl>("memory_used")->setValue(LLSD(msg_parcel_memory));
 	}
 
@@ -660,6 +655,8 @@ BOOL LLPanelScriptLimitsRegionMemory::postBuild()
 	{
 		return FALSE;
 	}
+	list->setCommitCallback(boost::bind(&LLPanelScriptLimitsRegionMemory::checkButtonsEnabled, this));
+	checkButtonsEnabled();
 
 	//set all columns to resizable mode even if some columns will be empty
 	for(S32 column = 0; column < list->getNumColumns(); column++)
@@ -686,10 +683,9 @@ BOOL LLPanelScriptLimitsRegionMemory::StartRequestChain()
 	LLParcel* parcel = instance->getCurrentSelectedParcel();
 	LLViewerRegion* region = LLViewerParcelMgr::getInstance()->getSelectionRegion();
 	
-	LLUUID current_region_id = gAgent.getRegion()->getRegionID();
-
 	if ((region) && (parcel))
 	{
+		LLUUID current_region_id = gAgent.getRegion()->getRegionID();
 		LLVector3 parcel_center = parcel->getCenterpoint();
 		
 		region_id = region->getRegionID();
@@ -750,6 +746,14 @@ void LLPanelScriptLimitsRegionMemory::clearList()
 	getChild<LLUICtrl>("parcels_listed")->setValue(LLSD(msg_empty_string));
 
 	mObjectListItems.clear();
+	checkButtonsEnabled();
+}
+
+void LLPanelScriptLimitsRegionMemory::checkButtonsEnabled()
+{
+	LLScrollListCtrl* list = getChild<LLScrollListCtrl>("scripts_list");
+	getChild<LLButton>("highlight_btn")->setEnabled(list->getNumSelected() > 0);
+	getChild<LLButton>("return_btn")->setEnabled(list->getNumSelected() > 0);
 }
 
 // static
@@ -932,262 +936,6 @@ void LLPanelScriptLimitsRegionMemory::onClickReturn(void* userdata)
 	else
 	{
 		LL_WARNS() << "could not find LLPanelScriptLimitsRegionMemory instance after highlight button clicked" << LL_ENDL;
-		return;
-	}
-}
-
-///----------------------------------------------------------------------------
-// Attachment Panel
-///----------------------------------------------------------------------------
-
-BOOL LLPanelScriptLimitsAttachment::requestAttachmentDetails()
-{
-	LLSD body;
-	std::string url = gAgent.getRegion()->getCapability("AttachmentResources");
-	if (!url.empty())
-	{
-        LLCoros::instance().launch("LLPanelScriptLimitsAttachment::getAttachmentLimitsCoro",
-            boost::bind(&LLPanelScriptLimitsAttachment::getAttachmentLimitsCoro, this, url));
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
-}
-
-void LLPanelScriptLimitsAttachment::getAttachmentLimitsCoro(std::string url)
-{
-    LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
-    LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
-        httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("getAttachmentLimitsCoro", httpPolicy));
-    LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
-
-    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
-
-    LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
-    LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
-
-    if (!status)
-    {
-        LL_WARNS() << "Unable to retrieve attachment limits." << LL_ENDL;
-        return;
-    }
-
-    LLFloaterScriptLimits* instance = LLFloaterReg::getTypedInstance<LLFloaterScriptLimits>("script_limits");
-
-    if (!instance)
-    {
-        LL_WARNS() << "Failed to get llfloaterscriptlimits instance" << LL_ENDL;
-        return;
-    }
-
-    LLTabContainer* tab = instance->getChild<LLTabContainer>("scriptlimits_panels");
-    if (!tab)
-    {
-        LL_WARNS() << "Failed to get scriptlimits_panels" << LL_ENDL;
-        return;
-    }
-
-    LLPanelScriptLimitsAttachment* panel = (LLPanelScriptLimitsAttachment*)tab->getChild<LLPanel>("script_limits_my_avatar_panel");
-    if (!panel)
-    {
-        LL_WARNS() << "Failed to get script_limits_my_avatar_panel" << LL_ENDL;
-        return;
-    }
-
-    panel->getChild<LLUICtrl>("loading_text")->setValue(LLSD(std::string("")));
-
-    LLButton* btn = panel->getChild<LLButton>("refresh_list_btn");
-    if (btn)
-    {
-        btn->setEnabled(true);
-    }
-
-    result.erase(LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS);
-    panel->setAttachmentDetails(result);
-}
-
-
-void LLPanelScriptLimitsAttachment::setAttachmentDetails(LLSD content)
-{
-	LLScrollListCtrl *list = getChild<LLScrollListCtrl>("scripts_list");
-	
-	if(!list)
-	{
-		return;
-	}
-	
-	S32 number_attachments = content["attachments"].size();
-
-	for(int i = 0; i < number_attachments; i++)
-	{
-		std::string humanReadableLocation = "";
-		if(content["attachments"][i].has("location"))
-		{
-			std::string actualLocation = content["attachments"][i]["location"];
-			humanReadableLocation = LLTrans::getString(actualLocation.c_str());
-		}
-		
-		S32 number_objects = content["attachments"][i]["objects"].size();
-		for(int j = 0; j < number_objects; j++)
-		{
-			LLUUID task_id = content["attachments"][i]["objects"][j]["id"].asUUID();
-			S32 size = 0;
-			if(content["attachments"][i]["objects"][j]["resources"].has("memory"))
-			{
-				size = content["attachments"][i]["objects"][j]["resources"]["memory"].asInteger() / SIZE_OF_ONE_KB;
-			}
-			S32 urls = 0;
-			if(content["attachments"][i]["objects"][j]["resources"].has("urls"))
-			{
-				urls = content["attachments"][i]["objects"][j]["resources"]["urls"].asInteger();
-			}
-			std::string name = content["attachments"][i]["objects"][j]["name"].asString();
-			
-			LLSD element;
-
-			element["id"] = task_id;
-			element["columns"][0]["column"] = "size";
-			element["columns"][0]["value"] = llformat("%d", size);
-			element["columns"][0]["font"] = "SANSSERIF";
-
-			element["columns"][1]["column"] = "urls";
-			element["columns"][1]["value"] = llformat("%d", urls);
-			element["columns"][1]["font"] = "SANSSERIF";
-			
-			element["columns"][2]["column"] = "name";
-			element["columns"][2]["value"] = name;
-			element["columns"][2]["font"] = "SANSSERIF";
-			
-			element["columns"][3]["column"] = "location";
-			element["columns"][3]["value"] = humanReadableLocation;
-			element["columns"][3]["font"] = "SANSSERIF";
-
-			list->addElement(element);
-		}
-	}
-	
-	setAttachmentSummary(content);
-
-	getChild<LLUICtrl>("loading_text")->setValue(LLSD(std::string("")));
-
-	LLButton* btn = getChild<LLButton>("refresh_list_btn");
-	if(btn)
-	{
-		btn->setEnabled(true);
-	}
-}
-
-BOOL LLPanelScriptLimitsAttachment::postBuild()
-{
-	childSetAction("refresh_list_btn", onClickRefresh, this);
-		
-	std::string msg_waiting = LLTrans::getString("ScriptLimitsRequestWaiting");
-	getChild<LLUICtrl>("loading_text")->setValue(LLSD(msg_waiting));
-	return requestAttachmentDetails();
-}
-
-void LLPanelScriptLimitsAttachment::clearList()
-{
-	LLCtrlListInterface *list = childGetListInterface("scripts_list");
-
-	if (list)
-	{
-		list->operateOnAll(LLCtrlListInterface::OP_DELETE);
-	}
-
-	std::string msg_waiting = LLTrans::getString("ScriptLimitsRequestWaiting");
-	getChild<LLUICtrl>("loading_text")->setValue(LLSD(msg_waiting));
-}
-
-void LLPanelScriptLimitsAttachment::setAttachmentSummary(LLSD content)
-{
-	if(content["summary"]["used"][0]["type"].asString() == std::string("memory"))
-	{
-		mAttachmentMemoryUsed = content["summary"]["used"][0]["amount"].asInteger() / SIZE_OF_ONE_KB;
-		mAttachmentMemoryMax = content["summary"]["available"][0]["amount"].asInteger() / SIZE_OF_ONE_KB;
-		mGotAttachmentMemoryUsed = true;
-	}
-	else if(content["summary"]["used"][1]["type"].asString() == std::string("memory"))
-	{
-		mAttachmentMemoryUsed = content["summary"]["used"][1]["amount"].asInteger() / SIZE_OF_ONE_KB;
-		mAttachmentMemoryMax = content["summary"]["available"][1]["amount"].asInteger() / SIZE_OF_ONE_KB;
-		mGotAttachmentMemoryUsed = true;
-	}
-	else
-	{
-		LL_WARNS() << "attachment details don't contain memory summary info" << LL_ENDL;
-		return;
-	}
-	
-	if(content["summary"]["used"][0]["type"].asString() == std::string("urls"))
-	{
-		mAttachmentURLsUsed = content["summary"]["used"][0]["amount"].asInteger();
-		mAttachmentURLsMax = content["summary"]["available"][0]["amount"].asInteger();
-		mGotAttachmentURLsUsed = true;
-	}
-	else if(content["summary"]["used"][1]["type"].asString() == std::string("urls"))
-	{
-		mAttachmentURLsUsed = content["summary"]["used"][1]["amount"].asInteger();
-		mAttachmentURLsMax = content["summary"]["available"][1]["amount"].asInteger();
-		mGotAttachmentURLsUsed = true;
-	}
-	else
-	{
-		LL_WARNS() << "attachment details don't contain urls summary info" << LL_ENDL;
-		return;
-	}
-
-	if((mAttachmentMemoryUsed >= 0) && (mAttachmentMemoryMax >= 0))
-	{
-		S32 attachment_memory_available = mAttachmentMemoryMax - mAttachmentMemoryUsed;
-
-		LLStringUtil::format_map_t args_attachment_memory;
-		args_attachment_memory["[COUNT]"] = llformat ("%d", mAttachmentMemoryUsed);
-		args_attachment_memory["[MAX]"] = llformat ("%d", mAttachmentMemoryMax);
-		args_attachment_memory["[AVAILABLE]"] = llformat ("%d", attachment_memory_available);
-		std::string msg_attachment_memory = LLTrans::getString("ScriptLimitsMemoryUsed", args_attachment_memory);
-		getChild<LLUICtrl>("memory_used")->setValue(LLSD(msg_attachment_memory));
-	}
-
-	if((mAttachmentURLsUsed >= 0) && (mAttachmentURLsMax >= 0))
-	{
-		S32 attachment_urls_available = mAttachmentURLsMax - mAttachmentURLsUsed;
-
-		LLStringUtil::format_map_t args_attachment_urls;
-		args_attachment_urls["[COUNT]"] = llformat ("%d", mAttachmentURLsUsed);
-		args_attachment_urls["[MAX]"] = llformat ("%d", mAttachmentURLsMax);
-		args_attachment_urls["[AVAILABLE]"] = llformat ("%d", attachment_urls_available);
-		std::string msg_attachment_urls = LLTrans::getString("ScriptLimitsURLsUsed", args_attachment_urls);
-		getChild<LLUICtrl>("urls_used")->setValue(LLSD(msg_attachment_urls));
-	}
-}
-
-// static
-void LLPanelScriptLimitsAttachment::onClickRefresh(void* userdata)
-{
-	LLFloaterScriptLimits* instance = LLFloaterReg::getTypedInstance<LLFloaterScriptLimits>("script_limits");
-	if(instance)
-	{
-		LLTabContainer* tab = instance->getChild<LLTabContainer>("scriptlimits_panels");
-		LLPanelScriptLimitsAttachment* panel_attachments = (LLPanelScriptLimitsAttachment*)tab->getChild<LLPanel>("script_limits_my_avatar_panel");
-		LLButton* btn = panel_attachments->getChild<LLButton>("refresh_list_btn");
-		
-		//To stop people from hammering the refesh button and accidentally dosing themselves - enough requests can crash the viewer!
-		//turn the button off, then turn it on when we get a response
-		if(btn)
-		{
-			btn->setEnabled(false);
-		}
-		panel_attachments->clearList();
-		panel_attachments->requestAttachmentDetails();
-		
-		return;
-	}
-	else
-	{
-		LL_WARNS() << "could not find LLPanelScriptLimitsRegionMemory instance after refresh button clicked" << LL_ENDL;
 		return;
 	}
 }

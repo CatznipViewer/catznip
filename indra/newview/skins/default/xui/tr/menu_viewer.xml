@@ -9,9 +9,11 @@
 		<menu_item_call label="Yerler..." name="Places"/>
 		<menu_item_call label="Favoriler..." name="Picks"/>
 		<menu_item_call label="Deneyimler..." name="Experiences"/>
+		<menu_item_call label="Komut Dosyalarım..." name="MyScripts"/>
 		<menu_item_call label="Kamera Denetimleri..." name="Camera Controls"/>
 		<menu label="Hareket" name="Movement">
 			<menu_item_call label="Otur" name="Sit Down Here"/>
+			<menu_item_call label="Kalk" name="Stand up"/>
 			<menu_item_check label="Uç" name="Fly"/>
 			<menu_item_check label="Daima Koş" name="Always Run"/>
 			<menu_item_call label="Beni Anime Etmeyi Durdur" name="Stop Animating My Avatar"/>
@@ -22,7 +24,6 @@
 			<menu_item_check label="Rahatsız Etme" name="Do Not Disturb"/>
 		</menu>
 		<menu_item_call label="L$ Satın Al..." name="Buy and Sell L$"/>
-		<menu_item_call label="Satıcı Giden Kutusu..." name="MerchantOutbox"/>
 		<menu_item_call label="Pazaryeri ilanları..." name="MarketplaceListings"/>
 		<menu_item_call label="Hesap kontrol paneli..." name="Manage My Account"/>
 		<menu_item_call label="Tercihler..." name="Preferences"/>
@@ -43,6 +44,7 @@
 			<menu_item_check label="Ses şekillendirme yok" name="NoVoiceMorphing"/>
 			<menu_item_check label="Önizleme..." name="Preview"/>
 			<menu_item_call label="Abone ol..." name="Subscribe"/>
+			<menu_item_call label="Özel üye avantajı..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="Mimikler..." name="Gestures"/>
 		<menu_item_check label="Arkadaşlar" name="My Friends"/>
@@ -56,7 +58,8 @@
 		<menu_item_call label="Hedef Konumlar..." name="Destinations"/>
 		<menu_item_check label="Dünya haritası" name="World Map"/>
 		<menu_item_check label="Mini-harita" name="Mini-Map"/>
-		<menu_item_check label="Ara" name="Search"/>
+		<menu_item_call label="Etkinlikler" name="Events"/>
+		<menu_item_check label="Ara..." name="Search"/>
 		<menu_item_call label="Ana konuma ışınlan" name="Teleport Home"/>
 		<menu_item_call label="Ana konumu burası olarak seç" name="Set Home to Here"/>
 		<menu_item_call label="Anlık Görüntü" name="Take Snapshot"/>
@@ -75,10 +78,10 @@
 			<menu_item_check label="Gelişmiş Menü" name="Show Advanced Menu"/>
 		</menu>
 		<menu label="Güneş" name="Sun">
-			<menu_item_check label="Gün Doğumu" name="Sunrise"/>
-			<menu_item_check label="Gün Ortası" name="Noon"/>
-			<menu_item_check label="Gün Batımı" name="Sunset"/>
-			<menu_item_check label="Gece Yarısı" name="Midnight"/>
+			<menu_item_check label="Gün doğumu" name="Sunrise"/>
+			<menu_item_check label="Öğle" name="Noon"/>
+			<menu_item_check label="Gün batımı" name="Sunset"/>
+			<menu_item_check label="Gece yarısı" name="Midnight"/>
 			<menu_item_check label="Bölge Ayarlarını Kullan" name="Use Region Settings"/>
 		</menu>
 		<menu label="Ortam Düzenleyici" name="Environment Editor">
@@ -112,13 +115,13 @@
 		<menu_item_call label="Bağla" name="Link"/>
 		<menu_item_call label="Bağlnty. Kopar" name="Unlink"/>
 		<menu_item_check label="Bağlantılı Parçaları Düzenle" name="Edit Linked Parts"/>
-		<menu label="Bağlantılı Parçaları Seç" name="Select Linked Parts">
-			<menu_item_call label="Sonraki Parçayı Seç" name="Select Next Part"/>
-			<menu_item_call label="Önceki Parçayı Seç" name="Select Previous Part"/>
-			<menu_item_call label="Sonraki Parçayı Dahil Et" name="Include Next Part"/>
-			<menu_item_call label="Önceki Parçayı Dahil Et" name="Include Previous Part"/>
+		<menu label="Öğeleri Seçin" name="Select Elements">
+			<menu_item_call label="Sonraki Parçayı veya Yüzü Seçin" name="Select Next Part or Face"/>
+			<menu_item_call label="Önceki Parçayı veya Yüzü Seçin" name="Select Previous Part or Face"/>
+			<menu_item_call label="Sonraki Parçayı veya Yüzü Dahil Et" name="Include Next Part or Face"/>
+			<menu_item_call label="Önceki Parçayı veya Yüzü Dahil Et" name="Include Previous Part or Face"/>
 		</menu>
-		<menu_item_call label="Bağlantı kümeleri..." name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Bölge Nesneleri" name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="Seçime Odaklan" name="Focus on Selection"/>
 		<menu_item_call label="Seçimi Yakınlaştır" name="Zoom to Selection"/>
 		<menu label="Nesne" name="Object">
@@ -127,8 +130,10 @@
 			<menu_item_call label="Kopya Al" name="Take Copy"/>
 			<menu_item_call label="Nesne İçeriklerine Geri Kaydet" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="Nesneyi İade Et" name="Return Object back to Owner"/>
+			<menu_item_call label="Çoğalt" name="DuplicateObject"/>
 		</menu>
 		<menu label="Komut Dosyaları" name="Scripts">
+			<menu_item_check label="Komut dosyası uyarıları/hataları..." name="Script debug"/>
 			<menu_item_call label="Komut Dosyalarını Tekrar Derle (Mono)" name="Mono"/>
 			<menu_item_call label="Komut Dosyalarını Tekrar Derle (LSL)" name="LSL"/>
 			<menu_item_call label="Komut Dosyalarını Sıfırla" name="Reset Scripts"/>
@@ -136,7 +141,7 @@
 			<menu_item_call label="Komut Dosyalarını Çalışmıyor Olarak Ayarla" name="Set Scripts to Not Running"/>
 		</menu>
 		<menu label="Yol bulma" name="Pathfinding">
-			<menu_item_call label="Bağlantı kümeleri..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Bölge Nesneleri" name="pathfinding_linksets_menu_item"/>
 			<menu_item_call label="Karakterler..." name="pathfinding_characters_menu_item"/>
 			<menu_item_call label="Görüntüleme / test..." name="pathfinding_console_menu_item"/>
 			<menu_item_call label="Bölgeyi tekrar kaydet" name="pathfinding_rebake_navmesh_item"/>
@@ -168,6 +173,7 @@
 	</menu>
 	<menu label="Yardım" name="Help">
 		<menu_item_call label="Nasıl yapılır..." name="How To"/>
+		<menu_item_call label="Hızlı Başlangıç" name="Quickstart"/>
 		<menu_item_call label="Bilgi Bankası" name="Knowledge Base"/>
 		<menu_item_call label="Wiki" name="Wiki"/>
 		<menu_item_call label="Topluluk Forumları" name="Community Forums"/>
@@ -178,7 +184,6 @@
 		<menu_item_call label="Hata Bildir" name="Report Bug"/>
 		<menu_item_call label="Toslamalar, İtmeler ve Vurmalar" name="Bumps, Pushes &amp;amp; Hits"/>
 		<menu_item_call label="[APP_NAME] Hakkında" name="About Second Life"/>
-		<menu_item_call label="Güncellemeleri Kontrol Et" name="Check for Updates"/>
 	</menu>
 	<menu label="Gelişmiş" name="Advanced">
 		<menu_item_call label="Dokuları Tekrar Kaydet" name="Rebake Texture"/>
@@ -273,7 +278,6 @@
 			<menu_item_check label="Matrisleri Göster" name="Show Matrices"/>
 			<menu_item_check label="İmlecin Altındaki Rengi Göster" name="Show Color Under Cursor"/>
 			<menu_item_check label="Belleği Göster" name="Show Memory"/>
-			<menu_item_check label="Özel Bellek Bilgisini Göster" name="Show Private Mem Info"/>
 			<menu_item_check label="Nesneler İçin Güncelleştirmeleri Göster" name="Show Updates"/>
 		</menu>
 		<menu label="Bir Hatayı Zorla" name="Force Errors">
@@ -308,6 +312,7 @@
 			<menu_item_check label="Doku Alanı" name="Texture Area"/>
 			<menu_item_check label="Yüz Alanı" name="Face Area"/>
 			<menu_item_check label="Ayrıntı Seviyesi Bilgisi" name="LOD Info"/>
+			<menu_item_check label="Üçgen Sayısı" name="Triangle Count"/>
 			<menu_item_check label="İnşa Kuyruğu" name="Build Queue"/>
 			<menu_item_check label="Işıklar" name="Lights"/>
 			<menu_item_check label="Parçacıklar" name="Particles"/>
@@ -367,8 +372,7 @@
 			<menu_item_call label="Bölge Nesne Önbelleğinin Dökümünü Al" name="Dump Region Object Cache"/>
 		</menu>
 		<menu label="KA" name="UI">
-			<menu_item_call label="Ortam Tarayıcı Testi" name="Web Browser Test"/>
-			<menu_item_call label="Web İçerik Tarayıcısı" name="Web Content Browser"/>
+			<menu_item_call label="Ortam Tarayıcı" name="Media Browser"/>
 			<menu_item_call label="SelectMgr&apos;i Dökümünü Al" name="Dump SelectMgr"/>
 			<menu_item_call label="Envanterin Dökümünü Al" name="Dump Inventory"/>
 			<menu_item_call label="Zamanlayıcıların Dökümünü Al" name="Dump Timers"/>
@@ -419,7 +423,9 @@
 			<menu_item_check label="Ayrıntı Seviyesi Bilgisini Devre Dışı Bırak" name="Disable LOD"/>
 			<menu_item_check label="Debug Character Vis" name="Debug Character Vis"/>
 			<menu_item_check label="Çarpışma İskeletini Göster" name="Show Collision Skeleton"/>
+			<menu_item_check label="Kemikleri Göster" name="Show Bones"/>
 			<menu_item_check label="Aracı Hedefini Göster" name="Display Agent Target"/>
+			<menu_item_check label="Düşük Grafik Özellikli Avatar Kapsamını Göster" name="Show Impostor Extents"/>
 			<menu_item_call label="Aksesuarların Dökümünü Al" name="Dump Attachments"/>
 			<menu_item_call label="Avatar Dokuları İçin Hata Ayıklama" name="Debug Avatar Textures"/>
 			<menu_item_call label="Yerel Dokuların Dökümünü Al" name="Dump Local Textures"/>

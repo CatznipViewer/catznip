@@ -115,6 +115,7 @@ public:
 	void uniform2i(const LLStaticHashedString& uniform, GLint i, GLint j);
 	void uniformMatrix2fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniformMatrix3fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
+	void uniformMatrix3x4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniformMatrix4fv(U32 index, U32 count, GLboolean transpose, const GLfloat *v);
 	void uniform1i(const LLStaticHashedString& uniform, GLint i);
 	void uniform1f(const LLStaticHashedString& uniform, GLfloat v);
@@ -166,7 +167,18 @@ public:
 	U32 mLightHash;
 
 	GLhandleARB mProgramObject;
+#if LL_RELEASE_WITH_DEBUG_INFO
+	struct attr_name
+	{
+		GLint loc;
+		const char *name;
+		void operator = (GLint _loc) { loc = _loc; }
+		operator GLint () { return loc; }
+	};
+	std::vector<attr_name> mAttribute; //lookup table of attribute enum to attribute channel
+#else
 	std::vector<GLint> mAttribute; //lookup table of attribute enum to attribute channel
+#endif
 	U32 mAttributeMask;  //mask of which reserved attributes are set (lines up with LLVertexBuffer::getTypeMask())
 	std::vector<GLint> mUniform;   //lookup table of uniform enum to uniform location
 	LLStaticStringTable<GLint> mUniformMap; //lookup map of uniform name to uniform location

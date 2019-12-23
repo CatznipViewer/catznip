@@ -551,6 +551,7 @@ namespace LLInitParam
 		}
 
 		virtual std::string getCurrentElementName() = 0;
+		virtual std::string getCurrentFileName() = 0;
 		virtual void parserWarning(const std::string& message);
 		virtual void parserError(const std::string& message);
 		void setParseSilently(bool silent) { mParseSilently = silent; }
@@ -2113,6 +2114,9 @@ namespace LLInitParam
 		public:
 			typedef typename super_t::iterator										iterator;
 			typedef typename super_t::const_iterator								const_iterator;
+
+			using super_t::operator();
+			using super_t::operator const container_t&;
 
 			explicit Multiple(const char* name = "")
 			:	super_t(DERIVED_BLOCK::getBlockDescriptor(), name, container_t(), &validate, RANGE::minCount, RANGE::maxCount)

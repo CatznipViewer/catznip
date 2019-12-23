@@ -76,6 +76,8 @@ const F32 AVATAR_ZOOM_MIN_Y_FACTOR = 0.7f;
 const F32 AVATAR_ZOOM_MIN_Z_FACTOR = 1.15f;
 
 const F32 MAX_CAMERA_DISTANCE_FROM_AGENT = 50.f;
+const F32 MAX_CAMERA_DISTANCE_FROM_OBJECT = 496.f;
+const F32 CAMERA_FUDGE_FROM_OBJECT = 16.f;
 
 const F32 MAX_CAMERA_SMOOTH_DISTANCE = 50.0f;
 
@@ -738,10 +740,7 @@ F32 LLAgentCamera::getCameraZoomFraction()
 	else
 	{
 		F32 min_zoom;
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_zoom = llmin(mDrawDistance - DIST_FUDGE, 
-								LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE,
-								MAX_CAMERA_DISTANCE_FROM_AGENT);
+		F32 max_zoom = getCameraMaxZoomDistance();
 
 		F32 distance = (F32)mCameraFocusOffsetTarget.magVec();
 		if (mFocusObject.notNull())
@@ -787,23 +786,17 @@ void LLAgentCamera::setCameraZoomFraction(F32 fraction)
 	else
 	{
 		F32 min_zoom = LAND_MIN_ZOOM;
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_zoom = llmin(mDrawDistance - DIST_FUDGE, 
-								LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE,
-								MAX_CAMERA_DISTANCE_FROM_AGENT);
+		F32 max_zoom = getCameraMaxZoomDistance();
 
 		if (mFocusObject.notNull())
 		{
-			if (mFocusObject.notNull())
+			if (mFocusObject->isAvatar())
 			{
-				if (mFocusObject->isAvatar())
-				{
-					min_zoom = AVATAR_MIN_ZOOM;
-				}
-				else
-				{
-					min_zoom = OBJECT_MIN_ZOOM;
-				}
+				min_zoom = AVATAR_MIN_ZOOM;
+			}
+			else
+			{
+				min_zoom = OBJECT_MIN_ZOOM;
 			}
 		}
 
@@ -814,6 +807,12 @@ void LLAgentCamera::setCameraZoomFraction(F32 fraction)
 	startCameraAnimation();
 }
 
+F32 LLAgentCamera::getAgentHUDTargetZoom()
+{
+	static LLCachedControl<F32> hud_scale_factor(gSavedSettings, "HUDScaleFactor");
+	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+	return (selection->getObjectCount() && selection->getSelectType() == SELECT_TYPE_HUD) ? hud_scale_factor*gAgentCamera.mHUDTargetZoom : hud_scale_factor;
+}
 
 //-----------------------------------------------------------------------------
 // cameraOrbitAround()
@@ -909,10 +908,7 @@ void LLAgentCamera::cameraZoomIn(const F32 fraction)
 
 	new_distance = llmax(new_distance, min_zoom); 
 
-	// Don't zoom too far back
-	const F32 DIST_FUDGE = 16.f; // meters
-	F32 max_distance = llmin(mDrawDistance - DIST_FUDGE, 
-							 LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
+	F32 max_distance = getCameraMaxZoomDistance();
 
     max_distance = llmin(max_distance, current_distance * 4.f); //Scaled max relative to current distance.  MAINT-3154
 
@@ -978,10 +974,7 @@ void LLAgentCamera::cameraOrbitIn(const F32 meters)
 
 		new_distance = llmax(new_distance, min_zoom);
 
-		// Don't zoom too far back
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_distance = llmin(mDrawDistance - DIST_FUDGE, 
-								 LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
+		F32 max_distance = getCameraMaxZoomDistance();
 
 		if (new_distance > max_distance)
 		{
@@ -1153,7 +1146,7 @@ void LLAgentCamera::updateCamera()
 		mCameraUpVector = mCameraUpVector * gAgentAvatarp->getRenderRotation();
 	}
 
-	if (cameraThirdPerson() && (mFocusOnAvatar || mAllowChangeToFollow) && LLFollowCamMgr::getActiveFollowCamParams())
+	if (cameraThirdPerson() && (mFocusOnAvatar || mAllowChangeToFollow) && LLFollowCamMgr::getInstance()->getActiveFollowCamParams())
 	{
 		mAllowChangeToFollow = FALSE;
 		mFocusOnAvatar = TRUE;
@@ -1253,7 +1246,7 @@ void LLAgentCamera::updateCamera()
 			// *TODO: use combined rotation of frameagent and sit object
 			LLQuaternion avatarRotationForFollowCam = gAgentAvatarp->isSitting() ? gAgentAvatarp->getRenderRotation() : gAgent.getFrameAgent().getQuaternion();
 
-			LLFollowCamParams* current_cam = LLFollowCamMgr::getActiveFollowCamParams();
+			LLFollowCamParams* current_cam = LLFollowCamMgr::getInstance()->getActiveFollowCamParams();
 			if (current_cam)
 			{
 				mFollowCam.copyParams(*current_cam);
@@ -1448,6 +1441,7 @@ void LLAgentCamera::updateCamera()
 			diff.mV[VZ] = 0.f;
 		}
 
+		// SL-315
 		gAgentAvatarp->mPelvisp->setPosition(gAgentAvatarp->mPelvisp->getPosition() + diff);
 
 		gAgentAvatarp->mRoot->updateWorldMatrixChildren();
@@ -1461,7 +1455,7 @@ void LLAgentCamera::updateCamera()
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				LLViewerObject *attached_object = (*attachment_iter);
+				LLViewerObject *attached_object = attachment_iter->get();
 				if (attached_object && !attached_object->isDead() && attached_object->mDrawable.notNull())
 				{
 					// clear any existing "early" movements of attachment
@@ -1536,6 +1530,14 @@ LLVector3d LLAgentCamera::calcFocusPositionTargetGlobal()
 	}
 	else if (mCameraMode == CAMERA_MODE_CUSTOMIZE_AVATAR)
 	{
+		if (mFocusOnAvatar)
+		{
+			LLVector3 focus_target = isAgentAvatarValid()
+				? gAgentAvatarp->mHeadp->getWorldPosition()
+				: gAgent.getPositionAgent();
+			LLVector3d focus_target_global = gAgent.getPosGlobalFromAgent(focus_target);
+			mFocusTargetGlobal = focus_target_global;
+		}
 		return mFocusTargetGlobal;
 	}
 	else if (!mFocusOnAvatar)
@@ -1937,6 +1939,13 @@ LLVector3 LLAgentCamera::getCameraOffsetInitial()
 	return convert_from_llsd<LLVector3>(mCameraOffsetInitial[mCameraPreset]->get(), TYPE_VEC3, "");
 }
 
+F32 LLAgentCamera::getCameraMaxZoomDistance()
+{
+    // Ignore "DisableCameraConstraints", we don't want to be out of draw range when we focus onto objects or avatars
+    return llmin(MAX_CAMERA_DISTANCE_FROM_OBJECT,
+                 mDrawDistance - 1, // convenience, don't hit draw limit when focusing on something
+                 LLWorld::getInstance()->getRegionWidthInMeters() - CAMERA_FUDGE_FROM_OBJECT);
+}
 
 //-----------------------------------------------------------------------------
 // handleScrollWheel()
@@ -2043,7 +2052,7 @@ void LLAgentCamera::changeCameraToMouselook(BOOL animate)
 
 	// Menus should not remain open on switching to mouselook...
 	LLMenuGL::sMenuContainer->hideMenus();
-	LLUI::clearPopups();
+	LLUI::getInstance()->clearPopups();
 
 	// unpause avatar animation
 	gAgent.unpauseAnimation();
@@ -2097,7 +2106,7 @@ void LLAgentCamera::changeCameraToDefault()
 		return;
 	}
 
-	if (LLFollowCamMgr::getActiveFollowCamParams())
+	if (LLFollowCamMgr::getInstance()->getActiveFollowCamParams())
 	{
 		changeCameraToFollow();
 	}
@@ -2144,6 +2153,7 @@ void LLAgentCamera::changeCameraToFollow(BOOL animate)
 
 		if (isAgentAvatarValid())
 		{
+			// SL-315
 			gAgentAvatarp->mPelvisp->setPosition(LLVector3::zero);
 			gAgentAvatarp->startMotion( ANIM_AGENT_BODY_NOISE );
 			gAgentAvatarp->startMotion( ANIM_AGENT_BREATHE_ROT );
@@ -2184,6 +2194,7 @@ void LLAgentCamera::changeCameraToThirdPerson(BOOL animate)
 	{
 		if (!gAgentAvatarp->isSitting())
 		{
+			// SL-315
 			gAgentAvatarp->mPelvisp->setPosition(LLVector3::zero);
 		}
 		gAgentAvatarp->startMotion(ANIM_AGENT_BODY_NOISE);

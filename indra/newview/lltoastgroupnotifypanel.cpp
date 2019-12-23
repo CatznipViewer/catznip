@@ -47,7 +47,6 @@
 #include "llglheaders.h"
 #include "llagent.h"
 #include "llavatariconctrl.h"
-#include "llfloaterinventory.h"
 #include "llinventorytype.h"
 
 const S32 LLToastGroupNotifyPanel::DEFAULT_MESSAGE_MAX_LINE_COUNT	= 7;
@@ -85,14 +84,14 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 	//message body
 	const std::string& message = payload["message"].asString();
 
-	std::string timeStr = "["+LLTrans::getString("UTCTimeWeek")+"],["
-							+LLTrans::getString("UTCTimeDay")+"] ["
-							+LLTrans::getString("UTCTimeMth")+"] ["
-							+LLTrans::getString("UTCTimeYr")+"] ["
-							+LLTrans::getString("UTCTimeHr")+"]:["
-							+LLTrans::getString("UTCTimeMin")+"]:["
-							+LLTrans::getString("UTCTimeSec")+"] ["
-							+LLTrans::getString("UTCTimeTimezone")+"]";
+	std::string timeStr = "[" + LLTrans::getString("TimeWeek") + "], ["
+							  + LLTrans::getString("TimeMonth") + "]/["
+							  + LLTrans::getString("TimeDay") + "]/["
+							  + LLTrans::getString("TimeYear") + "] ["
+							  + LLTrans::getString("TimeHour") + "]:["
+							  + LLTrans::getString("TimeMin") + "] ["
+							  + LLTrans::getString("TimeTimezone") + "]";
+
 	const LLDate timeStamp = notification->getDate();
 	LLDate notice_date = timeStamp.notNull() ? timeStamp : payload["received_time"].asDate();
 	LLSD substitution;

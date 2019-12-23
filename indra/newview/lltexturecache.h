@@ -46,10 +46,13 @@ class LLTextureCache : public LLWorkerThread
 
 private:
 	// Entries
+	static const U32 sHeaderEncoderStringSize = 32;
 	struct EntriesInfo
 	{
-		EntriesInfo() : mVersion(0.f), mEntries(0) {}
+		EntriesInfo() : mVersion(0.f), mAdressSize(0), mEntries(0) { memset(mEncoderVersion, 0, sHeaderEncoderStringSize); }
 		F32 mVersion;
+		U32 mAdressSize;
+		char mEncoderVersion[sHeaderEncoderStringSize];
 		U32 mEntries;
 	};
 	struct Entry
@@ -136,7 +139,7 @@ public:
 	U32 getEntries() { return mHeaderEntriesInfo.mEntries; }
 	U32 getMaxEntries() { return sCacheMaxEntries; };
 	BOOL isInCache(const LLUUID& id) ;
-	BOOL isInLocal(const LLUUID& id) ;
+	BOOL isInLocal(const LLUUID& id) ; //not thread safe at the moment
 
 protected:
 	// Accessed by LLTextureCacheWorker
@@ -152,10 +155,12 @@ private:
 	void readHeaderCache();
 	void clearCorruptedCache();
 	void purgeAllTextures(bool purge_directories);
+	void purgeTexturesLazy(F32 time_limit_sec);
 	void purgeTextures(bool validate);
 	LLAPRFile* openHeaderEntriesFile(bool readonly, S32 offset);
 	void closeHeaderEntriesFile();
 	void readEntriesHeader();
+	void setEntriesHeader();
 	void writeEntriesHeader();
 	S32 openAndReadEntry(const LLUUID& id, Entry& entry, bool create);
 	bool updateEntry(S32& idx, Entry& entry, S32 new_image_size, S32 new_body_size);
@@ -175,7 +180,7 @@ private:
 	
 	void openFastCache(bool first_time = false);
 	void closeFastCache(bool forced = false);
-	bool writeToFastCache(S32 id, LLPointer<LLImageRaw> raw, S32 discardlevel);	
+	bool writeToFastCache(LLUUID image_id, S32 cache_id, LLPointer<LLImageRaw> raw, S32 discardlevel);	
 
 private:
 	// Internal
@@ -185,6 +190,11 @@ private:
 	LLMutex mFastCacheMutex;
 	LLAPRFile* mHeaderAPRFile;
 	LLVolatileAPRPool* mFastCachePoolp;
+
+	// mLocalAPRFilePoolp is not thread safe and is meant only for workers
+	// howhever mHeaderEntriesFileName is accessed not from workers' threads
+	// so it needs own pool (not thread safe by itself, relies onto header's mutex)
+	LLVolatileAPRPool*   mHeaderAPRFilePoolp;
 	
 	typedef std::map<handle_t, LLTextureCacheWorker*> handle_map_t;
 	handle_map_t mReaders;
@@ -217,13 +227,17 @@ private:
 	typedef std::map<LLUUID,S32> size_map_t;
 	size_map_t mTexturesSizeMap;
 	S64 mTexturesSizeTotal;
-	LLAtomic32<BOOL> mDoPurge;
+	LLAtomicBool mDoPurge;
 
 	typedef std::map<S32, Entry> idx_entry_map_t;
 	idx_entry_map_t mUpdatedEntryMap;
+	typedef std::vector<std::pair<S32, Entry> > idx_entry_vector_t;
+	idx_entry_vector_t mPurgeEntryList;
 
 	// Statics
 	static F32 sHeaderCacheVersion;
+	static U32 sHeaderCacheAddressSize;
+	static std::string sHeaderCacheEncoderVersion;
 	static U32 sCacheMaxEntries;
 	static S64 sCacheMaxTexturesSize;
 };

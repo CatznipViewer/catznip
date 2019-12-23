@@ -38,22 +38,25 @@ class domMesh;
 
 #define MAX_MODEL_FACES 8
 
-
 class LLMeshSkinInfo 
 {
 public:
-	LLUUID mMeshID;
-	std::vector<std::string> mJointNames;
-	std::vector<LLMatrix4> mInvBindMatrix;
-	std::vector<LLMatrix4> mAlternateBindMatrix;
-	std::map<std::string, U32> mJointMap;
-
-	LLMeshSkinInfo() { }
+	LLMeshSkinInfo();
 	LLMeshSkinInfo(LLSD& data);
 	void fromLLSD(LLSD& data);
-	LLSD asLLSD(bool include_joints) const;
+	LLSD asLLSD(bool include_joints, bool lock_scale_if_joint_position) const;
+
+	LLUUID mMeshID;
+	std::vector<std::string> mJointNames;
+    mutable std::vector<S32> mJointNums;
+	std::vector<LLMatrix4> mInvBindMatrix;
+	std::vector<LLMatrix4> mAlternateBindMatrix;
+
 	LLMatrix4 mBindShapeMatrix;
 	float mPelvisOffset;
+    bool mLockScaleIfJointPosition;
+    bool mInvalidJointsScrubbed;
+    bool mJointNumsInitialized;
 };
 
 class LLModel : public LLVolume
@@ -138,6 +141,7 @@ public:
 		const LLModel::Decomposition& decomp,
 		BOOL upload_skin,
 		BOOL upload_joints,
+        BOOL lock_scale_if_joint_position,
 		BOOL nowrite = FALSE,
 		BOOL as_slm = FALSE,
 		int submodel_id = 0);
@@ -150,12 +154,8 @@ public:
 	void ClearFacesAndMaterials() { mVolumeFaces.clear(); mMaterialList.clear(); }
 
 	std::string getName() const;
-	std::string getMetric() const {return mMetric;}
 	EModelStatus getStatus() const {return mStatus;}
 	static std::string getStatusString(U32 status) ;
-
-	void appendFaces(LLModel* model, LLMatrix4& transform, LLMatrix4& normal_transform);
-	void appendFace(const LLVolumeFace& src_face, std::string src_material, LLMatrix4& mat, LLMatrix4& norm_mat);
 
 	void setNumVolumeFaces(S32 count);
 	void setVolumeFaceData(
@@ -258,8 +258,6 @@ public:
 	
 	std::string mRequestedLabel; // name requested in UI, if any.
 	std::string mLabel; // name computed from dae.
-
-	std::string mMetric; // user-supplied metric data for upload
 
 	LLVector3 mNormalizedScale;
 	LLVector3 mNormalizedTranslation;

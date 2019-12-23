@@ -175,6 +175,7 @@ class LLUrlEntrySLURL : public LLUrlEntryBase
 {
 public:
 	LLUrlEntrySLURL();
+	/*virtual*/ bool isTrusted() const { return true; }
 	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
 	/*virtual*/ std::string getLocation(const std::string &url) const;
 };
@@ -265,6 +266,14 @@ class LLUrlEntryAgentCompleteName : public LLUrlEntryAgentName
 {
 public:
 	LLUrlEntryAgentCompleteName();
+private:
+	/*virtual*/ std::string getName(const LLAvatarName& avatar_name);
+};
+
+class LLUrlEntryAgentLegacyName : public LLUrlEntryAgentName
+{
+public:
+	LLUrlEntryAgentLegacyName();
 private:
 	/*virtual*/ std::string getName(const LLAvatarName& avatar_name);
 };

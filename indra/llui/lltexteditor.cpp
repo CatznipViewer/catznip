@@ -732,14 +732,30 @@ BOOL LLTextEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		setFocus(TRUE);
 	}
+
+	bool show_menu = false;
+
 	// Prefer editor menu if it has selection. See EXT-6806.
-	if (hasSelection() || !LLTextBase::handleRightMouseDown(x, y, mask))
+	if (hasSelection())
 	{
-		if(getShowContextMenu())
+		S32 click_pos = getDocIndexFromLocalCoord(x, y, FALSE);
+		if (click_pos > mSelectionStart && click_pos < mSelectionEnd)
 		{
-			showContextMenu(x, y);
+			show_menu = true;
 		}
 	}
+
+	// Let segments handle the click, if nothing does, show editor menu
+	if (!show_menu && !LLTextBase::handleRightMouseDown(x, y, mask))
+	{
+		show_menu = true;
+	}
+
+	if (show_menu && getShowContextMenu())
+	{
+		showContextMenu(x, y);
+	}
+
 	return TRUE;
 }
 
@@ -1029,7 +1045,7 @@ void LLTextEditor::removeCharOrTab()
 	}
 	else
 	{
-		LLUI::reportBadKeystroke();
+		LLUI::getInstance()->reportBadKeystroke();
 	}
 }
 
@@ -1052,7 +1068,7 @@ void LLTextEditor::removeChar()
 	}
 	else
 	{
-		LLUI::reportBadKeystroke();
+		LLUI::getInstance()->reportBadKeystroke();
 	}
 }
 
@@ -1299,7 +1315,7 @@ BOOL LLTextEditor::handleNavigationKey(const KEY key, const MASK mask)
 				}
 				else
 				{
-					LLUI::reportBadKeystroke();
+					LLUI::getInstance()->reportBadKeystroke();
 				}
 			}
 			break;
@@ -1317,7 +1333,7 @@ BOOL LLTextEditor::handleNavigationKey(const KEY key, const MASK mask)
 				}
 				else
 				{
-					LLUI::reportBadKeystroke();
+					LLUI::getInstance()->reportBadKeystroke();
 				}
 			}	
 			break;
@@ -1459,6 +1475,10 @@ void LLTextEditor::pasteHelper(bool is_primary)
 // Clean up string (replace tabs and remove characters that our fonts don't support).
 void LLTextEditor::cleanStringForPaste(LLWString & clean_string)
 {
+	std::string clean_string_utf = wstring_to_utf8str(clean_string);
+	std::replace( clean_string_utf.begin(), clean_string_utf.end(), '\r', '\n');
+	clean_string = utf8str_to_wstring(clean_string_utf);
+
 	LLWStringUtil::replaceTabsWithSpaces(clean_string, SPACES_PER_TAB);
 	if( mAllowEmbeddedItems )
 	{
@@ -1645,7 +1665,7 @@ BOOL LLTextEditor::handleSpecialKey(const KEY key, const MASK mask)
 		}
 		else
 		{
-			LLUI::reportBadKeystroke();
+			LLUI::getInstance()->reportBadKeystroke();
 		}
 		break;
 
@@ -2489,11 +2509,11 @@ void LLTextEditor::updateLinkSegments()
 					}
 				}
 			}
-
+			
 			// if the link's label (what the user can edit) is a valid Url,
 			// then update the link's HREF to be the same as the label text.
 			// This lets users edit Urls in-place.
-			if (LLUrlRegistry::instance().hasUrl(url_label))
+			if (acceptsTextInput() && LLUrlRegistry::instance().hasUrl(url_label))
 			{
 				std::string new_url = wstring_to_utf8str(url_label);
 				LLStringUtil::trim(new_url);
@@ -2730,7 +2750,7 @@ BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 	{
 		LLRect control_rect_screen;
 		localRectToScreen(mVisibleTextRect, &control_rect_screen);
-		LLUI::screenRectToGL(control_rect_screen, control);
+		LLUI::getInstance()->screenRectToGL(control_rect_screen, control);
 	}
 
 	S32 preedit_left_position, preedit_right_position;
@@ -2784,7 +2804,7 @@ BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 		const S32 query_y = mVisibleTextRect.mTop - (current_line - first_visible_line) * line_height - line_height / 2;
 		S32 query_screen_x, query_screen_y;
 		localPointToScreen(query_x, query_y, &query_screen_x, &query_screen_y);
-		LLUI::screenPointToGL(query_screen_x, query_screen_y, &coord->mX, &coord->mY);
+		LLUI::getInstance()->screenPointToGL(query_screen_x, query_screen_y, &coord->mX, &coord->mY);
 	}
 
 	if (bounds)
@@ -2811,7 +2831,7 @@ BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 		const LLRect preedit_rect_local(preedit_left, preedit_top, preedit_right, preedit_bottom);
 		LLRect preedit_rect_screen;
 		localRectToScreen(preedit_rect_local, &preedit_rect_screen);
-		LLUI::screenRectToGL(preedit_rect_screen, bounds);
+		LLUI::getInstance()->screenRectToGL(preedit_rect_screen, bounds);
 	}
 
 	return TRUE;

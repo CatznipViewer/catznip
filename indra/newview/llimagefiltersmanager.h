@@ -1,6 +1,6 @@
 /** 
  * @file llimagefiltersmanager.h
- * @brief Load image filters list and retrieve their path. Mostly used for Flickr UI at the moment.
+ * @brief Load image filters list and retrieve their path.
  *
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
@@ -34,6 +34,8 @@
 
 class LLImageFiltersManager : public LLSingleton<LLImageFiltersManager>
 {
+	LLSINGLETON(LLImageFiltersManager);
+	~LLImageFiltersManager();
 	LOG_CLASS(LLImageFiltersManager);
 public:
     const std::vector<std::string> getFiltersList() const;
@@ -43,10 +45,7 @@ private:
 	void loadAllFilters();
 	void loadFiltersFromDir(const std::string& dir);
     
-    friend class LLSingleton<LLImageFiltersManager>;
 	/*virtual*/ void initSingleton();
-	LLImageFiltersManager();
-	~LLImageFiltersManager();
     
 	// List of filters : first is the user friendly localized name, second is the xml file name
     std::map<std::string,std::string> mFiltersList;

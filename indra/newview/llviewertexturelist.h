@@ -124,8 +124,6 @@ public:
 
 	void handleIRCallback(void **data, const S32 number);
 
-	void setUpdateStats(BOOL b)			{ mUpdateStats = b; }
-
 	S32Megabytes	getMaxResidentTexMem() const	{ return mMaxResidentTexMemInMegaBytes; }
 	S32Megabytes getMaxTotalTextureMem() const   { return mMaxTotalTextureMemInMegaBytes;}
 	S32 getNumImages()					{ return mImageList.size(); }
@@ -224,7 +222,6 @@ private:
 	std::set<LLPointer<LLViewerFetchedTexture> > mImagePreloads;
 
 	BOOL mInitialized ;
-	BOOL mUpdateStats;
 	S32Megabytes	mMaxResidentTexMemInMegaBytes;
 	S32Megabytes mMaxTotalTextureMemInMegaBytes;
 	LLFrameTimer mForceDecodeTimer;
@@ -237,6 +234,7 @@ private:
 
 class LLUIImageList : public LLImageProviderInterface, public LLSingleton<LLUIImageList>
 {
+	LLSINGLETON_EMPTY_CTOR(LLUIImageList);
 public:
 	// LLImageProviderInterface
 	/*virtual*/ LLPointer<LLUIImage> getUIImageByID(const LLUUID& id, S32 priority);

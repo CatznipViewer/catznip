@@ -176,10 +176,11 @@ private:
 	void moderateVoiceAllParticipants(bool unmute);
 	void moderateVoiceParticipant(const LLUUID& avatar_id, bool unmute);
 	void toggleAllowTextChat(const LLUUID& participant_uuid);
-	void toggleMute(const LLUUID& participant_id, U32 flags);
 	void banSelectedMember(const LLUUID& participant_uuid);
 	void openNearbyChat();
 	bool isParticipantListExpanded();
+
+	void idleUpdate(); // for convenience (self) from static idle
 
 	LLButton* mExpandCollapseBtn;
 	LLButton* mStubCollapseBtn;
@@ -227,6 +228,8 @@ private:
 	LLConversationViewModel mConversationViewModel;
 	LLFolderView* mConversationsRoot;
 	LLEventStream mConversationsEventStream; 
+
+	LLTimer mParticipantRefreshTimer;
 };
 
 #endif // LL_LLFLOATERIMCONTAINER_H

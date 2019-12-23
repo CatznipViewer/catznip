@@ -42,7 +42,6 @@
 #include "llcombobox.h"
 #include "lldatapacker.h"
 #include "lldrawable.h"
-#include "lldrawpoolavatar.h"
 #include "llrender.h"
 #include "llface.h"
 #include "lleconomy.h"
@@ -54,6 +53,7 @@
 #include "llmeshrepository.h"
 #include "llnotificationsutil.h"
 #include "llsdutil_math.h"
+#include "llskinningutil.h"
 #include "lltextbox.h"
 #include "lltoolmgr.h"
 #include "llui.h"
@@ -218,9 +218,17 @@ LLMeshFilePicker::LLMeshFilePicker(LLModelPreview* mp, S32 lod)
 		mLOD = lod;
 	}
 
-void LLMeshFilePicker::notify(const std::string& filename)
+void LLMeshFilePicker::notify(const std::vector<std::string>& filenames)
 {
-	mMP->loadModel(mFile, mLOD);
+	if (filenames.size() > 0)
+	{
+		mMP->loadModel(filenames[0], mLOD);
+	}
+	else
+	{
+		//closes floater
+		mMP->loadModel(std::string(), mLOD);
+	}
 }
 
 void FindModel(LLModelLoader::scene& scene, const std::string& name_to_match, LLModel*& baseModelOut, LLMatrix4& matOut)
@@ -258,7 +266,7 @@ mCalculateBtn(NULL)
 	sInstance = this;
 	mLastMouseX = 0;
 	mLastMouseY = 0;
-	mStatusLock = new LLMutex(NULL);
+	mStatusLock = new LLMutex();
 	mModelPreview = NULL;
 
 	mLODMode[LLModel::LOD_HIGH] = 0;
@@ -298,6 +306,7 @@ BOOL LLFloaterModelPreview::postBuild()
 
 	childSetCommitCallback("upload_skin", boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this), NULL);
 	childSetCommitCallback("upload_joints", boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this), NULL);
+	childSetCommitCallback("lock_scale_if_joint_position", boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this), NULL);
 	childSetCommitCallback("upload_textures", boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this), NULL);
 
 	childSetTextArg("status", "[STATUS]", getString("status_idle"));
@@ -311,9 +320,12 @@ BOOL LLFloaterModelPreview::postBuild()
 
 	childSetCommitCallback("upload_skin", onUploadSkinCommit, this);
 	childSetCommitCallback("upload_joints", onUploadJointsCommit, this);
+	childSetCommitCallback("lock_scale_if_joint_position", onUploadJointsCommit, this);
 
 	childSetCommitCallback("import_scale", onImportScaleCommit, this);
 	childSetCommitCallback("pelvis_offset", onPelvisOffsetCommit, this);
+
+	getChild<LLLineEditor>("description_form")->setKeystrokeCallback(boost::bind(&LLFloaterModelPreview::onDescriptionKeystroke, this, _1), NULL);
 
 	getChild<LLCheckBoxCtrl>("show_edges")->setCommitCallback(boost::bind(&LLFloaterModelPreview::onViewOptionChecked, this, _1));
 	getChild<LLCheckBoxCtrl>("show_physics")->setCommitCallback(boost::bind(&LLFloaterModelPreview::onViewOptionChecked, this, _1));
@@ -323,6 +335,7 @@ BOOL LLFloaterModelPreview::postBuild()
 
 	childDisable("upload_skin");
 	childDisable("upload_joints");
+	childDisable("lock_scale_if_joint_position");
 
 	initDecompControls();
 
@@ -488,15 +501,35 @@ void LLFloaterModelPreview::onClickCalculateBtn()
 
 	bool upload_skinweights = childGetValue("upload_skin").asBoolean();
 	bool upload_joint_positions = childGetValue("upload_joints").asBoolean();
+    bool lock_scale_if_joint_position = childGetValue("lock_scale_if_joint_position").asBoolean();
+
+    if (upload_joint_positions)
+    {
+        // Diagnostic message showing list of joints for which joint offsets are defined.
+        // FIXME - given time, would be much better to put this in the UI, in updateStatusMessages().
+		mModelPreview->getPreviewAvatar()->showAttachmentOverrides();
+    }
 
 	mUploadModelUrl.clear();
 
 	gMeshRepo.uploadModel(mModelPreview->mUploadData, mModelPreview->mPreviewScale,
-			childGetValue("upload_textures").asBoolean(), upload_skinweights, upload_joint_positions, mUploadModelUrl, false,
+                          childGetValue("upload_textures").asBoolean(), 
+                          upload_skinweights, upload_joint_positions, lock_scale_if_joint_position,
+                          mUploadModelUrl, false,
 						  getWholeModelFeeObserverHandle());
 
 	toggleCalculateButton(false);
 	mUploadBtn->setEnabled(false);
+}
+
+void LLFloaterModelPreview::onDescriptionKeystroke(LLUICtrl* ctrl)
+{
+	// Workaround for SL-4186, server doesn't allow name changes after 'calculate' stage
+	LLLineEditor* input = static_cast<LLLineEditor*>(ctrl);
+	if (input->isDirty()) // dirty will be reset after commit
+	{
+		toggleCalculateButton(true);
+	}
 }
 
 //static
@@ -664,6 +697,11 @@ void LLFloaterModelPreview::draw()
 			childSetTextArg("status", "[STATUS]", getString("status_parse_error"));
 			toggleCalculateButton(false);
 		}
+        else
+        if (mModelPreview->getLoadState() == LLModelLoader::WARNING_BIND_SHAPE_ORIENTATION)
+        {
+			childSetTextArg("status", "[STATUS]", getString("status_bind_shape_orientation"));
+        }
 		else
 		{
 			childSetTextArg("status", "[STATUS]", getString("status_idle"));
@@ -768,7 +806,7 @@ BOOL LLFloaterModelPreview::handleHover	(S32 x, S32 y, MASK mask)
 
 		mModelPreview->refresh();
 
-		LLUI::setMousePositionLocal(this, mLastMouseX, mLastMouseY);
+		LLUI::getInstance()->setMousePositionLocal(this, mLastMouseX, mLastMouseY);
 	}
 
 	if (!mPreviewRect.pointInRect(x, y) || !mModelPreview)
@@ -1182,15 +1220,15 @@ void LLFloaterModelPreview::onMouseCaptureLostModelPreview(LLMouseHandler* handl
 //-----------------------------------------------------------------------------
 
 LLModelPreview::LLModelPreview(S32 width, S32 height, LLFloater* fmp)
-: LLViewerDynamicTexture(width, height, 3, ORDER_MIDDLE, FALSE), LLMutex(NULL)
+: LLViewerDynamicTexture(width, height, 3, ORDER_MIDDLE, FALSE), LLMutex()
 , mLodsQuery()
+, mLodsWithParsingError()
 , mPelvisZOffset( 0.0f )
 , mLegacyRigValid( false )
 , mRigValidJointUpload( false )
 , mPhysicsSearchLOD( LLModel::LOD_PHYSICS )
 , mResetJoints( false )
 , mModelNoErrors( true )
-, mRigParityWithScene( false )
 , mLastJointUpdate( false )
 {
 	mNeedsUpdate = TRUE;
@@ -1249,6 +1287,10 @@ LLModelPreview::~LLModelPreview()
 	// glod.dll!glodShutdown()  + 0x77 bytes	
 	//
 	//glodShutdown();
+	if(mModelLoader)
+	{
+		mModelLoader->shutdown();
+	}
 }
 
 U32 LLModelPreview::calcResourceCost()
@@ -1317,9 +1359,10 @@ U32 LLModelPreview::calcResourceCost()
 					   decomp,
 					   mFMP->childGetValue("upload_skin").asBoolean(),
 					   mFMP->childGetValue("upload_joints").asBoolean(),
+					   mFMP->childGetValue("lock_scale_if_joint_position").asBoolean(),
 					   TRUE,
-						FALSE,
-						instance.mModel->mSubmodelID);
+					   FALSE,
+					   instance.mModel->mSubmodelID);
 			
 			num_hulls += decomp.mHull.size();
 			for (U32 i = 0; i < decomp.mHull.size(); ++i)
@@ -1342,7 +1385,11 @@ U32 LLModelPreview::calcResourceCost()
 
 			F32 radius = scale.length()*0.5f*debug_scale;
 
-			streaming_cost += LLMeshRepository::getStreamingCost(ret, radius);
+            LLMeshCostData costs;
+            if (gMeshRepo.getCostData(ret, costs))
+            {
+                streaming_cost += costs.getRadiusBasedStreamingCost(radius);
+            }
 		}
 	}
 
@@ -1382,8 +1429,6 @@ void LLModelPreview::rebuildUploadData()
 	//fill uploaddata instance vectors from scene data
 
 	std::string requested_name = mFMP->getChild<LLUICtrl>("description_form")->getValue().asString();
-
-	std::string metric = mFMP->getChild<LLUICtrl>("model_category_combo")->getValue().asString();
 
 	LLSpinCtrl* scale_spinner = mFMP->getChild<LLSpinCtrl>("import_scale");
 
@@ -1425,7 +1470,6 @@ void LLModelPreview::rebuildUploadData()
 			if (base_model && !requested_name.empty())
 			{
 				base_model->mRequestedLabel = requested_name;
-				base_model->mMetric = metric;
 			}
 
 			for (int i = LLModel::NUM_LODS - 1; i >= LLModel::LOD_IMPOSTOR; i--)
@@ -1592,6 +1636,19 @@ void LLModelPreview::rebuildUploadData()
 						mFMP->childDisable( "calculate_btn" );
 					}
 				}
+                LLFloaterModelPreview* fmp = (LLFloaterModelPreview*) mFMP;
+                bool upload_skinweights = fmp && fmp->childGetValue("upload_skin").asBoolean();
+                if (upload_skinweights && high_lod_model->mSkinInfo.mJointNames.size() > 0)
+                {
+                    LLQuaternion bind_rot = LLSkinningUtil::getUnscaledQuaternion(high_lod_model->mSkinInfo.mBindShapeMatrix);
+                    LLQuaternion identity;
+                    if (!bind_rot.isEqualEps(identity,0.01))
+                    {
+                        LL_WARNS() << "non-identity bind shape rot. mat is " << high_lod_model->mSkinInfo.mBindShapeMatrix 
+                                   << " bind_rot " << bind_rot << LL_ENDL;
+                        setLoadState( LLModelLoader::WARNING_BIND_SHAPE_ORIENTATION );
+                    }
+                }
 			}
 			instance.mTransform = mat;
 			mUploadData.push_back(instance);
@@ -1644,27 +1701,23 @@ void LLModelPreview::rebuildUploadData()
 
 }
 
-void LLModelPreview::saveUploadData(bool save_skinweights, bool save_joint_positions)
+void LLModelPreview::saveUploadData(bool save_skinweights, bool save_joint_positions, bool lock_scale_if_joint_position)
 {
 	if (!mLODFile[LLModel::LOD_HIGH].empty())
 	{
 		std::string filename = mLODFile[LLModel::LOD_HIGH];
-		
-		std::string::size_type i = filename.rfind(".");
-		if (i != std::string::npos)
-		{
-			filename.replace(i, filename.size()-1, ".slm");
-			saveUploadData(filename, save_skinweights, save_joint_positions);
+        std::string slm_filename;
+
+        if (LLModelLoader::getSLMFilename(filename, slm_filename))
+        {
+			saveUploadData(slm_filename, save_skinweights, save_joint_positions, lock_scale_if_joint_position);
 		}
 	}
 }
 
-void LLModelPreview::saveUploadData(const std::string& filename, bool save_skinweights, bool save_joint_positions)
+void LLModelPreview::saveUploadData(const std::string& filename, 
+                                    bool save_skinweights, bool save_joint_positions, bool lock_scale_if_joint_position)
 {
-	if (!gSavedSettings.getBOOL("MeshImportUseSLM"))
-	{
-		return;
-	}
 
 	std::set<LLPointer<LLModel> > meshes;
 	std::map<LLModel*, std::string> mesh_binary;
@@ -1704,7 +1757,9 @@ void LLModelPreview::saveUploadData(const std::string& filename, bool save_skinw
 				instance.mLOD[LLModel::LOD_LOW], 
 				instance.mLOD[LLModel::LOD_IMPOSTOR], 
 				decomp, 
-				save_skinweights, save_joint_positions,
+				save_skinweights, 
+                save_joint_positions,
+                lock_scale_if_joint_position,
                 FALSE, TRUE, instance.mModel->mSubmodelID);
 			
 			data["mesh"][instance.mModel->mLocalID] = str.str();
@@ -1731,6 +1786,28 @@ void LLModelPreview::clearModel(S32 lod)
 	mScene[lod].clear();
 }
 
+void LLModelPreview::getJointAliases( JointMap& joint_map)
+{
+    // Get all standard skeleton joints from the preview avatar.
+    LLVOAvatar *av = getPreviewAvatar();
+    
+    //Joint names and aliases come from avatar_skeleton.xml
+    
+    joint_map = av->getJointAliases();
+
+    std::vector<std::string> cv_names, attach_names;
+    av->getSortedJointNames(1, cv_names);
+    av->getSortedJointNames(2, attach_names);
+    for (std::vector<std::string>::iterator it = cv_names.begin(); it != cv_names.end(); ++it)
+    {
+        joint_map[*it] = *it;
+    }
+    for (std::vector<std::string>::iterator it = attach_names.begin(); it != attach_names.end(); ++it)
+    {
+        joint_map[*it] = *it;
+    }
+}
+
 void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable_slm)
 {
 	assert_main_thread();
@@ -1755,8 +1832,8 @@ void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable
 			// this is the initial file picking. Close the whole floater
 			// if we don't have a base model to show for high LOD.
 			mFMP->closeFloater(false);
-			mLoading = false;
 		}
+		mLoading = false;
 		return;
 	}
 
@@ -1773,6 +1850,9 @@ void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable
 		clearGLODGroup();
 	}
 
+    std::map<std::string, std::string> joint_alias_map;
+    getJointAliases(joint_alias_map);
+    
 	mModelLoader = new LLDAELoader(
 		filename,
 		lod, 
@@ -1783,6 +1863,8 @@ void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable
 		this,
 		mJointTransformMap,
 		mJointsFromNode,
+        joint_alias_map,
+		LLSkinningUtil::getMaxJointCount(),
 		gSavedSettings.getU32("ImporterModelLimit"),
 		gSavedSettings.getBOOL("ImporterPreprocessDAE"));
 
@@ -1792,6 +1874,12 @@ void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable
 	}
 	else
 	{
+        // For MAINT-6647, we have set force_disable_slm to true,
+        // which means this code path will never be taken. Trying to
+        // re-use SLM files has never worked properly; in particular,
+        // it tends to force the UI into strange checkbox options
+        // which cannot be altered.
+        
 		//only try to load from slm if viewer is configured to do so and this is the 
 		//initial model load (not an LoD or physics shape)
 		mModelLoader->mTrySLM = gSavedSettings.getBOOL("MeshImportUseSLM") && mUploadData.empty();
@@ -1902,7 +1990,14 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 	{
 		mLoading = false ;
 		mModelLoader = NULL;
+		mLodsWithParsingError.push_back(loaded_lod);
 		return ;
+	}
+
+	mLodsWithParsingError.erase(std::remove(mLodsWithParsingError.begin(), mLodsWithParsingError.end(), loaded_lod), mLodsWithParsingError.end());
+	if(mLodsWithParsingError.empty())
+	{
+		mFMP->childEnable( "calculate_btn" );
 	}
 
 	// Copy determinations about rig so UI will reflect them
@@ -1919,6 +2014,7 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 
 		bool skin_weights = false;
 		bool joint_positions = false;
+		bool lock_scale_if_joint_position = false;
 
 		for (S32 lod = 0; lod < LLModel::NUM_LODS; ++lod)
 		{ //for each LoD
@@ -1966,6 +2062,10 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 							{
 								joint_positions = true;
 							}
+							if (list_iter->mModel->mSkinInfo.mLockScaleIfJointPosition)
+							{
+								lock_scale_if_joint_position = true;
+							}
 						}
 					}
 				}
@@ -1988,6 +2088,13 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 				fmp->enableViewOption("show_joint_positions");
 				mViewOption["show_joint_positions"] = true;
 				fmp->childSetValue("upload_joints", true);
+			}
+
+			if (lock_scale_if_joint_position)
+			{
+				fmp->enableViewOption("lock_scale_if_joint_position");
+				mViewOption["lock_scale_if_joint_position"] = true;
+				fmp->childSetValue("lock_scale_if_joint_position", true);
 			}
 		}
 
@@ -2114,7 +2221,11 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 		if (!mBaseModel.empty())
 		{
 			const std::string& model_name = mBaseModel[0]->getName();
-			mFMP->getChild<LLUICtrl>("description_form")->setValue(model_name);
+			LLLineEditor* description_form = mFMP->getChild<LLLineEditor>("description_form");
+			if (description_form->getText().empty())
+			{
+				description_form->setText(model_name);
+			}
 		}
 	}
 	refresh();
@@ -2504,13 +2615,21 @@ void LLModelPreview::genLODs(S32 which_lod, U32 decimation, bool enforce_tri_lim
 
 				if (sizes[i*2+1] > 0 && sizes[i*2] > 0)
 				{
-					buff->allocateBuffer(sizes[i*2+1], sizes[i*2], true);
+					if (!buff->allocateBuffer(sizes[i * 2 + 1], sizes[i * 2], true))
+					{
+						// Todo: find a way to stop preview in this case instead of crashing
+						LL_ERRS() << "Failed buffer allocation during preview LOD generation."
+							<< " Vertices: " << sizes[i * 2 + 1]
+							<< " Indices: " << sizes[i * 2] << LL_ENDL;
+					}
 					buff->setBuffer(type_mask);
 					glodFillElements(mObject[base], names[i], GL_UNSIGNED_SHORT, (U8*) buff->getIndicesPointer());
 					stop_gloderror();
 				}
 				else
-				{ //this face was eliminated, create a dummy triangle (one vertex, 3 indices, all 0)
+				{
+					// This face was eliminated or we failed to allocate buffer,
+					// attempt to create a dummy triangle (one vertex, 3 indices, all 0)
 					buff->allocateBuffer(1, 3, true);
 					memset((U8*) buff->getMappedData(), 0, buff->getSize());
 					memset((U8*) buff->getIndicesPointer(), 0, buff->getIndicesSize());
@@ -2639,17 +2758,7 @@ void LLModelPreview::updateStatusMessages()
                 setLoadState( LLModelLoader::ERROR_MATERIALS );
                 mFMP->childDisable( "calculate_btn" );
             }
-
-            int refFaceCnt = 0;
-            int modelFaceCnt = 0;
-
-            if (!lod_model->matchMaterialOrder(model_high_lod, refFaceCnt, modelFaceCnt ) )
-			{
-                setLoadState( LLModelLoader::ERROR_MATERIALS );
-				mFMP->childDisable( "calculate_btn" );
-			}
-
-            if (lod_model)
+            else
 			{
 					//for each model in the lod
 				S32 cur_tris = 0;
@@ -2905,6 +3014,15 @@ void LLModelPreview::updateStatusMessages()
 	{
 		mFMP->childDisable("ok_btn");
 	}
+
+    if (mModelNoErrors && mLodsWithParsingError.empty())
+    {
+        mFMP->childEnable("calculate_btn");
+    }
+    else
+    {
+        mFMP->childDisable("calculate_btn");
+    }
 	
 	//add up physics triangles etc
 	S32 phys_tris = 0;
@@ -3268,7 +3386,13 @@ void LLModelPreview::genBuffers(S32 lod, bool include_skin_weights)
 
 			vb = new LLVertexBuffer(mask, 0);
 
-			vb->allocateBuffer(num_vertices, num_indices, TRUE);
+			if (!vb->allocateBuffer(num_vertices, num_indices, TRUE))
+			{
+				// We are likely to crash due this failure, if this happens, find a way to gracefully stop preview
+				LL_WARNS() << "Failed to allocate Vertex Buffer for model preview "
+					<< num_vertices << " vertices and "
+					<< num_indices << " indices" << LL_ENDL;
+			}
 
 			LLStrider<LLVector3> vertex_strider;
 			LLStrider<LLVector3> normal_strider;
@@ -3307,14 +3431,17 @@ void LLModelPreview::genBuffers(S32 lod, bool include_skin_weights)
 					LLVector3 pos(vf.mPositions[i].getF32ptr());
 
 					const LLModel::weight_list& weight_list = base_mdl->getJointInfluences(pos);
+                    llassert(weight_list.size()>0 && weight_list.size() <= 4); // LLModel::loadModel() should guarantee this
 
 					LLVector4 w(0,0,0,0);
 					
 					for (U32 i = 0; i < weight_list.size(); ++i)
 					{
-						F32 wght = llmin(weight_list[i].mWeight, 0.999999f);
+						F32 wght = llclamp(weight_list[i].mWeight, 0.001f, 0.999f);
 						F32 joint = (F32) weight_list[i].mJointIdx;
 						w.mV[i] = joint + wght;
+                        llassert(w.mV[i]-(S32)w.mV[i]>0.0f); // because weights are non-zero, and range of wt values
+                                                             //should not cause floating point precision issues.
 					}
 
 					*(weights_strider++) = w;
@@ -3368,33 +3495,15 @@ void LLModelPreview::update()
 }
 
 //-----------------------------------------------------------------------------
-// getTranslationForJointOffset()
-//-----------------------------------------------------------------------------
-LLVector3 LLModelPreview::getTranslationForJointOffset( std::string joint )
-{
-	LLMatrix4 jointTransform;
-	if ( mJointTransformMap.find( joint ) != mJointTransformMap.end() )
-	{
-		jointTransform = mJointTransformMap[joint];
-		return jointTransform.getTranslation();
-	}
-	return LLVector3(0.0f,0.0f,0.0f);								
-}
-//-----------------------------------------------------------------------------
 // createPreviewAvatar
 //-----------------------------------------------------------------------------
 void LLModelPreview::createPreviewAvatar( void )
 {
-	mPreviewAvatar = (LLVOAvatar*)gObjectList.createObjectViewer( LL_PCODE_LEGACY_AVATAR, gAgent.getRegion() );
+	mPreviewAvatar = (LLVOAvatar*)gObjectList.createObjectViewer( LL_PCODE_LEGACY_AVATAR, gAgent.getRegion(), LLViewerObject::CO_FLAG_UI_AVATAR );
 	if ( mPreviewAvatar )
 	{
 		mPreviewAvatar->createDrawable( &gPipeline );
-		mPreviewAvatar->mIsDummy = TRUE;
 		mPreviewAvatar->mSpecialRenderMode = 1;
-		mPreviewAvatar->setPositionAgent( LLVector3::zero );
-		mPreviewAvatar->slamPosition();
-		mPreviewAvatar->updateJointLODs();
-		mPreviewAvatar->updateGeometry( mPreviewAvatar->mDrawable );
 		mPreviewAvatar->startMotion( ANIM_AGENT_STAND );
 		mPreviewAvatar->hideSkirt();
 	}
@@ -3509,6 +3618,7 @@ void LLModelPreview::addEmptyFace( LLModel* pTarget )
 	pTarget->setVolumeFaceData( faceCnt+1, pos, norm, tc, index, buff->getNumVerts(), buff->getNumIndices() );
 	
 }	
+
 //-----------------------------------------------------------------------------
 // render()
 //-----------------------------------------------------------------------------
@@ -3591,7 +3701,7 @@ BOOL LLModelPreview::render()
 		}
 	}
 
-	if (has_skin_weights)
+	if (has_skin_weights && lodsReady())
 	{ //model has skin weights, enable view options for skin weights and joint positions
 		if (fmp && isLegacyRigValid() )
 		{
@@ -3627,7 +3737,17 @@ BOOL LLModelPreview::render()
 		mFMP->childSetValue("upload_joints", false);
 		upload_joints = false;		
 	}	
-		
+
+    if (upload_skin && upload_joints)
+    {
+        mFMP->childEnable("lock_scale_if_joint_position");
+    }
+    else
+    {
+        mFMP->childDisable("lock_scale_if_joint_position");
+        mFMP->childSetValue("lock_scale_if_joint_position", false);
+    }
+    
 	//Only enable joint offsets if it passed the earlier critiquing
 	if ( isRigValidForJointPositionUpload() )  
 	{
@@ -4002,20 +4122,6 @@ BOOL LLModelPreview::render()
 															  LLVector3::z_axis,																	// up
 															  target_pos);											// point of interest
 
-			if (joint_positions)
-			{
-				LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
-				if (shader)
-				{
-					gDebugProgram.bind();
-				}
-				getPreviewAvatar()->renderCollisionVolumes();
-				if (shader)
-				{
-					shader->bind();
-				}
-			}
-
 			for (LLModelLoader::scene::iterator iter = mScene[mPreviewLOD].begin(); iter != mScene[mPreviewLOD].end(); ++iter)
 			{
 				for (LLModelLoader::model_instance_list::iterator model_iter = iter->second.begin(); model_iter != iter->second.end(); ++model_iter)
@@ -4040,58 +4146,32 @@ BOOL LLModelPreview::render()
 							//quick 'n dirty software vertex skinning
 
 							//build matrix palette
-							
-							LLMatrix4 mat[64];
-							for (U32 j = 0; j < model->mSkinInfo.mJointNames.size(); ++j)
-							{
-								LLJoint* joint = getPreviewAvatar()->getJoint(model->mSkinInfo.mJointNames[j]);
-								if (joint)
-								{
-									mat[j] = model->mSkinInfo.mInvBindMatrix[j];
-									mat[j] *= joint->getWorldMatrix();
-								}
-							}
 
+							LLMatrix4a mat[LL_MAX_JOINTS_PER_MESH_OBJECT];
+                            const LLMeshSkinInfo *skin = &model->mSkinInfo;
+							U32 count = LLSkinningUtil::getMeshJointCount(skin);
+                            LLSkinningUtil::initSkinningMatrixPalette((LLMatrix4*)mat, count,
+                                                                        skin, getPreviewAvatar());
+                            LLMatrix4a bind_shape_matrix;
+                            bind_shape_matrix.loadu(skin->mBindShapeMatrix);
+                            U32 max_joints = LLSkinningUtil::getMaxJointCount();
 							for (U32 j = 0; j < buffer->getNumVerts(); ++j)
 							{
-								LLMatrix4 final_mat;
-								final_mat.mMatrix[0][0] = final_mat.mMatrix[1][1] = final_mat.mMatrix[2][2] = final_mat.mMatrix[3][3] = 0.f;
-
-								LLVector4 wght;
-								S32 idx[4];
-
-								F32 scale = 0.f;
-								for (U32 k = 0; k < 4; k++)
-								{
-									F32 w = weight[j].mV[k];
-
-									idx[k] = (S32) floorf(w);
-									wght.mV[k] = w - floorf(w);
-									scale += wght.mV[k];
-								}
-
-								wght *= 1.f/scale;
-
-								for (U32 k = 0; k < 4; k++)
-								{
-									F32* src = (F32*) mat[idx[k]].mMatrix;
-									F32* dst = (F32*) final_mat.mMatrix;
-
-									F32 w = wght.mV[k];
-
-									for (U32 l = 0; l < 16; l++)
-									{
-										dst[l] += src[l]*w;
-									}
-								}
+                                LLMatrix4a final_mat;
+                                F32 *wptr = weight[j].mV;
+                                LLSkinningUtil::getPerVertexSkinMatrix(wptr, mat, true, final_mat, max_joints);
 
 								//VECTORIZE THIS
-								LLVector3 v(face.mPositions[j].getF32ptr());
+                                LLVector4a& v = face.mPositions[j];
 
-								v = v * model->mSkinInfo.mBindShapeMatrix;
-								v = v * final_mat;
+                                LLVector4a t;
+                                LLVector4a dst;
+                                bind_shape_matrix.affineTransform(v, t);
+                                final_mat.affineTransform(t, dst);
 
-								position[j] = v;
+								position[j][0] = dst[0];
+								position[j][1] = dst[1];
+								position[j][2] = dst[2];
 							}
 
 							llassert(model->mMaterialList.size() > i); 
@@ -4125,6 +4205,22 @@ BOOL LLModelPreview::render()
 					}
 				}
 			}
+
+			if (joint_positions)
+			{
+				LLGLSLShader* shader = LLGLSLShader::sCurBoundShaderPtr;
+				if (shader)
+				{
+					gDebugProgram.bind();
+				}
+				getPreviewAvatar()->renderCollisionVolumes();
+				getPreviewAvatar()->renderBones();
+				if (shader)
+				{
+					shader->bind();
+				}
+			}
+
 		}
 	}
 
@@ -4245,11 +4341,17 @@ void LLFloaterModelPreview::onUpload(void* user_data)
 
 	bool upload_skinweights = mp->childGetValue("upload_skin").asBoolean();
 	bool upload_joint_positions = mp->childGetValue("upload_joints").asBoolean();
+    bool lock_scale_if_joint_position = mp->childGetValue("lock_scale_if_joint_position").asBoolean();
 
-	mp->mModelPreview->saveUploadData(upload_skinweights, upload_joint_positions);
+	if (gSavedSettings.getBOOL("MeshImportUseSLM"))
+	{
+        mp->mModelPreview->saveUploadData(upload_skinweights, upload_joint_positions, lock_scale_if_joint_position);
+    }
 
 	gMeshRepo.uploadModel(mp->mModelPreview->mUploadData, mp->mModelPreview->mPreviewScale,
-						  mp->childGetValue("upload_textures").asBoolean(), upload_skinweights, upload_joint_positions, mp->mUploadModelUrl,
+						  mp->childGetValue("upload_textures").asBoolean(), 
+                          upload_skinweights, upload_joint_positions, lock_scale_if_joint_position, 
+                          mp->mUploadModelUrl,
 						  true, LLHandle<LLWholeModelFeeObserver>(), mp->getWholeModelUploadObserverHandle());
 }
 
@@ -4261,7 +4363,14 @@ void LLFloaterModelPreview::refresh()
 }
 
 //static
-void LLModelPreview::textureLoadedCallback( BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* src_aux, S32 discard_level, BOOL final, void* userdata )
+void LLModelPreview::textureLoadedCallback(
+    BOOL success,
+    LLViewerFetchedTexture *src_vi,
+    LLImageRaw* src,
+    LLImageRaw* src_aux,
+    S32 discard_level,
+    BOOL final,
+    void* userdata )
 {
 	LLModelPreview* preview = (LLModelPreview*) userdata;
 	preview->refresh();
@@ -4517,4 +4626,12 @@ void LLFloaterModelPreview::setPermissonsErrorStatus(S32 status, const std::stri
 	LLNotificationsUtil::add("MeshUploadPermError");
 }
 
+bool LLFloaterModelPreview::isModelLoading()
+{
+	if(mModelPreview)
+	{
+		return mModelPreview->mLoading;
+	}
+	return false;
+}
 
