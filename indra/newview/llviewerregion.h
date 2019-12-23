@@ -304,7 +304,10 @@ public:
 	bool meshRezEnabled() const;
 	bool meshUploadEnabled() const;
 
+	bool bakesOnMeshEnabled() const;
+
 	// has region received its simulator features list? Requires an additional query after caps received.
+    void requestSimulatorFeatures();
 	void setSimulatorFeaturesReceived(bool);
 	bool simulatorFeaturesReceived() const;
 	boost::signals2::connection setSimulatorFeaturesReceivedCallback(const caps_received_signal_t::slot_type& cb);
@@ -440,7 +443,7 @@ public:
 
 	struct CompareRegionByLastUpdate
 	{
-		bool operator()(const LLViewerRegion* const& lhs, const LLViewerRegion* const& rhs)
+		bool operator()(const LLViewerRegion* const& lhs, const LLViewerRegion* const& rhs) const
 		{
 			S32 lpa = lhs->getLastUpdate();
 			S32 rpa = rhs->getLastUpdate();

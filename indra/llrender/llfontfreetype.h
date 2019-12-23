@@ -40,6 +40,8 @@
 // We'll forward declare the struct here.  JC
 struct FT_FaceRec_;
 typedef struct FT_FaceRec_* LLFT_Face;
+struct FT_StreamRec_;
+typedef struct FT_StreamRec_ LLFT_Stream;
 
 class LLFontManager
 {
@@ -82,7 +84,14 @@ public:
 
 	// is_fallback should be true for fallback fonts that aren't used
 	// to render directly (Unicode backup, primarily)
-	BOOL loadFace(const std::string& filename, F32 point_size, F32 vert_dpi, F32 horz_dpi, S32 components, BOOL is_fallback);
+	BOOL loadFace(const std::string& filename, F32 point_size, F32 vert_dpi, F32 horz_dpi, S32 components, BOOL is_fallback, S32 face_n = 0);
+
+	S32 getNumFaces(const std::string& filename);
+
+#ifdef LL_WINDOWS
+	S32 ftOpenFace(const std::string& filename, S32 face_n);
+	void clearFontStreams();
+#endif
 
 	typedef std::vector<LLPointer<LLFontFreetype> > font_vector_t;
 
@@ -158,6 +167,11 @@ private:
 	F32 mLineHeight;
 
 	LLFT_Face mFTFace;
+
+#ifdef LL_WINDOWS
+	llifstream *pFileStream;
+	LLFT_Stream *pFtStream;
+#endif
 
 	BOOL mIsFallback;
 	font_vector_t mFallbackFonts; // A list of fallback fonts to look for glyphs in (for Unicode chars)

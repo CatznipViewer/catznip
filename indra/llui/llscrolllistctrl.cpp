@@ -202,7 +202,8 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mHoveredColor(p.hovered_color()),
 	mSearchColumn(p.search_column),
 	mColumnPadding(p.column_padding),
-	mContextMenuType(MENU_NONE)
+	mContextMenuType(MENU_NONE),
+	mIsFriendSignal(NULL)
 {
 	mItemListRect.setOriginAndSize(
 		mBorderThickness,
@@ -326,6 +327,7 @@ LLScrollListCtrl::~LLScrollListCtrl()
 	mItemList.clear();
 	std::for_each(mColumns.begin(), mColumns.end(), DeletePairedPointer());
 	mColumns.clear();
+	delete mIsFriendSignal;
 }
 
 
@@ -1891,6 +1893,19 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 				menu_name, LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
 			if (mPopupMenu)
 			{
+				if (mIsFriendSignal)
+				{
+					bool isFriend = *(*mIsFriendSignal)(uuid);
+					LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
+					LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
+
+					if (addFriendButton && removeFriendButton)
+					{
+						addFriendButton->setEnabled(!isFriend);
+						removeFriendButton->setEnabled(isFriend);
+					}
+				}
+
 				mPopupMenu->show(x, y);
 				LLMenuGL::showPopup(this, mPopupMenu, x, y);
 				return TRUE;
@@ -2019,6 +2034,10 @@ BOOL LLScrollListCtrl::handleClick(S32 x, S32 y, MASK mask)
 					LLScrollListCell* cellp = item->getColumn(column_index);
 					cellp->setValue(item_value);
 					cellp->onCommit();
+					if (mLastSelected == NULL)
+					{
+						break;
+					}
 				}
 			}
 			//FIXME: find a better way to signal cell changes
@@ -2838,7 +2857,6 @@ void LLScrollListCtrl::onClickColumn(void *userdata)
 	}
 
 	// if this column is the primary sort key, reverse the direction
-	sort_column_t cur_sort_column;
 	if (!parent->mSortColumns.empty() && parent->mSortColumns.back().first == column_index)
 	{
 		ascending = !parent->mSortColumns.back().second;
@@ -3191,3 +3209,11 @@ void LLScrollListCtrl::onFocusLost()
 	LLUICtrl::onFocusLost();
 }
 
+boost::signals2::connection LLScrollListCtrl::setIsFriendCallback(const is_friend_signal_t::slot_type& cb)
+{
+	if (!mIsFriendSignal)
+	{
+		mIsFriendSignal = new is_friend_signal_t();
+	}
+	return mIsFriendSignal->connect(cb);
+}

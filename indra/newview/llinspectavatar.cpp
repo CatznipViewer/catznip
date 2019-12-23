@@ -207,15 +207,17 @@ void LLInspectAvatar::onOpen(const LLSD& data)
 	// See LLToolTipMgr::createToolTip
 	if (data.has("pos"))
 	{
-		LLUI::positionViewNearMouse(this, data["pos"]["x"].asInteger(), data["pos"]["y"].asInteger());
+		LLUI::getInstance()->positionViewNearMouse(this, data["pos"]["x"].asInteger(), data["pos"]["y"].asInteger());
 	}
 	else
 	{
-		LLUI::positionViewNearMouse(this);
+		LLUI::getInstance()->positionViewNearMouse(this);
 	}
 
 	// Generate link to avatar profile.
-	getChild<LLUICtrl>("avatar_profile_link")->setTextArg("[LINK]", LLSLURL("agent", mAvatarID, "about").getSLURLString());
+	LLTextBase* avatar_profile_link = getChild<LLTextBase>("avatar_profile_link");
+	avatar_profile_link->setTextArg("[LINK]", LLSLURL("agent", mAvatarID, "about").getSLURLString());
+	avatar_profile_link->setIsFriendCallback(LLAvatarActions::isFriend);
 
 	// can't call from constructor as widgets are not built yet
 	requestUpdate();

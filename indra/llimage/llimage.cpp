@@ -583,44 +583,29 @@ static void bilinear_scale(const U8 *src, U32 srcW, U32 srcH, U32 srcCh, U32 src
 // LLImage
 //---------------------------------------------------------------------------
 
-//static
-std::string LLImage::sLastErrorMessage;
-LLMutex* LLImage::sMutex = NULL;
-bool LLImage::sUseNewByteRange = false;
-S32  LLImage::sMinimalReverseByteRangePercent = 75;
-LLPrivateMemoryPool* LLImageBase::sPrivatePoolp = NULL ;
-
-//static
-void LLImage::initClass(bool use_new_byte_range, S32 minimal_reverse_byte_range_percent)
+LLImage::LLImage(bool use_new_byte_range, S32 minimal_reverse_byte_range_percent)
 {
-	sUseNewByteRange = use_new_byte_range;
-    sMinimalReverseByteRangePercent = minimal_reverse_byte_range_percent;
-	sMutex = new LLMutex(NULL);
-
-	LLImageBase::createPrivatePool() ;
+    mMutex = new LLMutex();
+    mUseNewByteRange = use_new_byte_range;
+    mMinimalReverseByteRangePercent = minimal_reverse_byte_range_percent;
 }
 
-//static
-void LLImage::cleanupClass()
+LLImage::~LLImage()
 {
-	delete sMutex;
-	sMutex = NULL;
-
-	LLImageBase::destroyPrivatePool() ;
+    delete mMutex;
+    mMutex = NULL;
 }
 
-//static
-const std::string& LLImage::getLastError()
+const std::string& LLImage::getLastErrorMessage()
 {
 	static const std::string noerr("No Error");
-	return sLastErrorMessage.empty() ? noerr : sLastErrorMessage;
+	return mLastErrorMessage.empty() ? noerr : mLastErrorMessage;
 }
 
-//static
-void LLImage::setLastError(const std::string& message)
+void LLImage::setLastErrorMessage(const std::string& message)
 {
-	LLMutexLock m(sMutex);
-	sLastErrorMessage = message;
+	LLMutexLock m(mMutex);
+	mLastErrorMessage = message;
 }
 
 //---------------------------------------------------------------------------
@@ -642,25 +627,6 @@ LLImageBase::LLImageBase()
 LLImageBase::~LLImageBase()
 {
 	deleteData(); // virtual
-}
-
-//static 
-void LLImageBase::createPrivatePool() 
-{
-	if(!sPrivatePoolp)
-	{
-		sPrivatePoolp = LLPrivateMemoryPoolManager::getInstance()->newPool(LLPrivateMemoryPool::STATIC_THREADED) ;
-	}
-}
-	
-//static 
-void LLImageBase::destroyPrivatePool() 
-{
-	if(sPrivatePoolp)
-	{
-		LLPrivateMemoryPoolManager::getInstance()->deletePool(sPrivatePoolp) ;
-		sPrivatePoolp = NULL ;
-	}
 }
 
 // virtual
@@ -696,7 +662,7 @@ void LLImageBase::sanityCheck()
 // virtual
 void LLImageBase::deleteData()
 {
-	FREE_MEM(sPrivatePoolp, mData) ;
+	ll_aligned_free_16(mData);
 	disclaimMem(mDataSize);
 	mDataSize = 0;
 	mData = NULL;
@@ -736,7 +702,7 @@ U8* LLImageBase::allocateData(S32 size)
 	if (!mBadBufferAllocation && (!mData || size != mDataSize))
 	{
 		deleteData(); // virtual
-		mData = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+		mData = (U8*)ll_aligned_malloc_16(size);
 		if (!mData)
 		{
 			LL_WARNS() << "Failed to allocate image data size [" << size << "]" << LL_ENDL;
@@ -763,7 +729,7 @@ U8* LLImageBase::allocateData(S32 size)
 // virtual
 U8* LLImageBase::reallocateData(S32 size)
 {
-	U8 *new_datap = (U8*)ALLOCATE_MEM(sPrivatePoolp, size);
+	U8 *new_datap = (U8*)ll_aligned_malloc_16(size);
 	if (!new_datap)
 	{
 		LL_WARNS() << "Out of memory in LLImageBase::reallocateData" << LL_ENDL;
@@ -773,7 +739,7 @@ U8* LLImageBase::reallocateData(S32 size)
 	{
 		S32 bytes = llmin(mDataSize, size);
 		memcpy(new_datap, mData, bytes);	/* Flawfinder: ignore */
-		FREE_MEM(sPrivatePoolp, mData) ;
+		ll_aligned_free_16(mData) ;
 	}
 	mData = new_datap;
 	disclaimMem(mDataSize);
@@ -913,7 +879,7 @@ void LLImageRaw::setDataAndSize(U8 *data, S32 width, S32 height, S8 components)
 
 bool LLImageRaw::resize(U16 width, U16 height, S8 components)
 {
-	if ((getWidth() == width) && (getHeight() == height) && (getComponents() == components))
+	if ((getWidth() == width) && (getHeight() == height) && (getComponents() == components) && !isBufferInvalid())
 	{
 		return true;
 	}
@@ -922,7 +888,7 @@ bool LLImageRaw::resize(U16 width, U16 height, S8 components)
 
 	allocateDataSize(width,height,components);
 
-	return true;
+	return !isBufferInvalid();
 }
 
 bool LLImageRaw::setSubImage(U32 x_pos, U32 y_pos, U32 width, U32 height,
@@ -1470,7 +1436,7 @@ bool LLImageRaw::scale( S32 new_width, S32 new_height, bool scale_image_data )
 
 		if (new_data_size > 0)
         {
-            U8 *new_data = (U8*)ALLOCATE_MEM(LLImageBase::getPrivatePool(), new_data_size); 
+            U8 *new_data = (U8*)ll_aligned_malloc_16(new_data_size); 
             if(NULL == new_data) 
             {
                 return false; 
@@ -2169,7 +2135,7 @@ void LLImageFormatted::appendData(U8 *data, S32 size)
 			S32 newsize = cursize + size;
 			reallocateData(newsize);
 			memcpy(getData() + cursize, data, size);
-			FREE_MEM(LLImageBase::getPrivatePool(), data);
+			ll_aligned_free_16(data);
 		}
 	}
 }
@@ -2202,19 +2168,27 @@ bool LLImageFormatted::load(const std::string &filename, int load_size)
 	}
 	bool res;
 	U8 *data = allocateData(load_size);
-	apr_size_t bytes_read = load_size;
-	apr_status_t s = apr_file_read(apr_file, data, &bytes_read); // modifies bytes_read
-	if (s != APR_SUCCESS || (S32) bytes_read != load_size)
+	if (data)
 	{
-		deleteData();
-		setLastError("Unable to read file",filename);
-		res = false;
+		apr_size_t bytes_read = load_size;
+		apr_status_t s = apr_file_read(apr_file, data, &bytes_read); // modifies bytes_read
+		if (s != APR_SUCCESS || (S32) bytes_read != load_size)
+		{
+			deleteData();
+			setLastError("Unable to read file",filename);
+			res = false;
+		}
+		else
+		{
+			res = updateData();
+		}
 	}
 	else
 	{
-		res = updateData();
+		setLastError("Allocation failure", filename);
+		res = false;
 	}
-	
+
 	return res;
 }
 

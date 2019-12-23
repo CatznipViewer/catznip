@@ -156,10 +156,10 @@ public:
 	S32 getNumFaces(U32 ch) const;
 	const ll_face_list_t* getFaceList(U32 channel) const {llassert(channel < LLRender::NUM_TEXTURE_CHANNELS); return &mFaceList[channel];}
 
-	virtual void addVolume(LLVOVolume* volumep);
-	virtual void removeVolume(LLVOVolume* volumep);
-	S32 getNumVolumes() const;
-	const ll_volume_list_t* getVolumeList() const { return &mVolumeList; }
+	virtual void addVolume(U32 channel, LLVOVolume* volumep);
+	virtual void removeVolume(U32 channel, LLVOVolume* volumep);
+	S32 getNumVolumes(U32 channel) const;
+	const ll_volume_list_t* getVolumeList(U32 channel) const { return &mVolumeList[channel]; }
 
 	
 	virtual void setCachedRawImage(S32 discard_level, LLImageRaw* imageraw) ;
@@ -186,6 +186,9 @@ private:
 	virtual void switchToCachedImage();
 	
 	static bool isMemoryForTextureLow() ;
+	static bool isMemoryForTextureSuficientlyFree();
+	static void getGPUMemoryForTextures(S32Megabytes &gpu, S32Megabytes &physical);
+
 protected:
 	LLUUID mID;
 	S32 mTextureListType; // along with mID identifies where to search for this texture in TextureList
@@ -201,8 +204,8 @@ protected:
 	U32               mNumFaces[LLRender::NUM_TEXTURE_CHANNELS];
 	LLFrameTimer      mLastFaceListUpdateTimer ;
 
-	ll_volume_list_t  mVolumeList;
-	U32					mNumVolumes;
+	ll_volume_list_t  mVolumeList[LLRender::NUM_VOLUME_TEXTURE_CHANNELS];
+	U32					mNumVolumes[LLRender::NUM_VOLUME_TEXTURE_CHANNELS];
 	LLFrameTimer	  mLastVolumeListUpdateTimer;
 
 	//do not use LLPointer here.
@@ -227,7 +230,7 @@ public:
 	static S32 sMaxSculptRez ;
 	static S32 sMinLargeImageSize ;
 	static S32 sMaxSmallImageSize ;
-	static BOOL sFreezeImageScalingDown ;//do not scale down image res if set.
+	static bool sFreezeImageUpdates;
 	static F32  sCurrentTime ;
 
 	enum EDebugTexels
@@ -543,7 +546,7 @@ public:
 	/*virtual*/ S8 getType() const;
 	// Process image stats to determine priority/quality requirements.
 	/*virtual*/ void processTextureStats();
-	BOOL isUpdateFrozen() ;
+	bool isUpdateFrozen() ;
 
 private:
 	void init(bool firstinit) ;

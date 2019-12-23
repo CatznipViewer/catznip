@@ -109,6 +109,7 @@ if (LINUX)
   set(CMAKE_SKIP_RPATH TRUE)
 
   add_definitions(-D_FORTIFY_SOURCE=2)
+
   set(CMAKE_CXX_FLAGS "-Wno-deprecated -Wno-unused-but-set-variable -Wno-unused-variable ${CMAKE_CXX_FLAGS}")
 
   # gcc 4.3 and above don't like the LL boost and also
@@ -153,6 +154,8 @@ endif (LINUX)
 
 
 if (DARWIN)
+  # Warnings should be fatal -- thanks, Nicky Perian, for spotting reversed default
+  set(CLANG_DISABLE_FATAL_WARNINGS OFF)
   set(CMAKE_CXX_LINK_FLAGS "-Wl,-headerpad_max_install_names,-search_paths_first")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
   set(DARWIN_extra_cstar_flags "-Wno-unused-local-typedef -Wno-deprecated-declarations")

@@ -124,30 +124,24 @@ BOOL LLSidepanelTaskInfo::postBuild()
 	childSetCommitCallback("search_check",						&LLSidepanelTaskInfo::onCommitIncludeInSearch,this);
 	
 	mDAPermModify = getChild<LLUICtrl>("perm_modify");
-	mDACreator = getChildView("Creator:");
 	mDACreatorName = getChild<LLUICtrl>("Creator Name");
 	mDAOwner = getChildView("Owner:");
 	mDAOwnerName = getChild<LLUICtrl>("Owner Name");
-	mDAGroup = getChildView("Group:");
-	mDAGroupName = getChild<LLUICtrl>("Group Name");
 	mDAButtonSetGroup = getChildView("button set group");
 	mDAObjectName = getChild<LLUICtrl>("Object Name");
 	mDAName = getChildView("Name:");
 	mDADescription = getChildView("Description:");
 	mDAObjectDescription = getChild<LLUICtrl>("Object Description");
-	mDAPermissions = getChildView("Permissions:");
 	mDACheckboxShareWithGroup = getChild<LLUICtrl>("checkbox share with group");
 	mDAButtonDeed = getChildView("button deed");
 	mDACheckboxAllowEveryoneMove = getChild<LLUICtrl>("checkbox allow everyone move");
 	mDACheckboxAllowEveryoneCopy = getChild<LLUICtrl>("checkbox allow everyone copy");
-	mDANextOwnerCan = getChildView("Next owner can:");
 	mDACheckboxNextOwnerCanModify = getChild<LLUICtrl>("checkbox next owner can modify");
 	mDACheckboxNextOwnerCanCopy = getChild<LLUICtrl>("checkbox next owner can copy");
 	mDACheckboxNextOwnerCanTransfer = getChild<LLUICtrl>("checkbox next owner can transfer");
 	mDACheckboxForSale = getChild<LLUICtrl>("checkbox for sale");
 	mDASearchCheck = getChild<LLUICtrl>("search_check");
 	mDAComboSaleType = getChild<LLComboBox>("sale type");
-	mDACost = getChild<LLUICtrl>("Cost");
 	mDAEditCost = getChild<LLUICtrl>("Edit Cost");
 	mDALabelClickAction = getChildView("label click action");
 	mDAComboClickAction = getChild<LLComboBox>("clickaction");
@@ -180,10 +174,6 @@ BOOL LLSidepanelTaskInfo::postBuild()
 
 void LLSidepanelTaskInfo::disableAll()
 {
-	mDAPermModify->setEnabled(FALSE);
-	mDAPermModify->setValue(LLStringUtil::null);
-
-	mDACreator->setEnabled(FALSE);
 	mDACreatorName->setValue(LLStringUtil::null);
 	mDACreatorName->setEnabled(FALSE);
 
@@ -191,25 +181,42 @@ void LLSidepanelTaskInfo::disableAll()
 	mDAOwnerName->setValue(LLStringUtil::null);
 	mDAOwnerName->setEnabled(FALSE);
 
-	mDAGroup->setEnabled(FALSE);
-	mDAGroupName->setValue(LLStringUtil::null);
-	mDAGroupName->setEnabled(FALSE);
-	mDAButtonSetGroup->setEnabled(FALSE);
-
 	mDAObjectName->setValue(LLStringUtil::null);
 	mDAObjectName->setEnabled(FALSE);
 	mDAName->setEnabled(FALSE);
-	mDAGroupName->setValue(LLStringUtil::null);
-	mDAGroupName->setEnabled(FALSE);
 	mDADescription->setEnabled(FALSE);
 	mDAObjectDescription->setValue(LLStringUtil::null);
 	mDAObjectDescription->setEnabled(FALSE);
 
-	mDAPermissions->setEnabled(FALSE);
-		
+	mDAPathfindingAttributes->setEnabled(FALSE);
+	mDAPathfindingAttributes->setValue(LLStringUtil::null);
+
+	mDAButtonSetGroup->setEnabled(FALSE);
+	mDAButtonDeed->setEnabled(FALSE);
+
+	mDAPermModify->setEnabled(FALSE);
+	mDAPermModify->setValue(LLStringUtil::null);
+	mDAEditCost->setValue(LLStringUtil::null);
+	mDAComboSaleType->setValue(LLSaleInfo::FS_COPY);
+
+	disablePermissions();
+
+	mDAB->setVisible(FALSE);
+	mDAO->setVisible(FALSE);
+	mDAG->setVisible(FALSE);
+	mDAE->setVisible(FALSE);
+	mDAN->setVisible(FALSE);
+	mDAF->setVisible(FALSE);
+
+	mOpenBtn->setEnabled(FALSE);
+	mPayBtn->setEnabled(FALSE);
+	mBuyBtn->setEnabled(FALSE);
+}
+
+void LLSidepanelTaskInfo::disablePermissions()
+{
 	mDACheckboxShareWithGroup->setValue(FALSE);
 	mDACheckboxShareWithGroup->setEnabled(FALSE);
-	mDAButtonDeed->setEnabled(FALSE);
 
 	mDACheckboxAllowEveryoneMove->setValue(FALSE);
 	mDACheckboxAllowEveryoneMove->setEnabled(FALSE);
@@ -217,7 +224,6 @@ void LLSidepanelTaskInfo::disableAll()
 	mDACheckboxAllowEveryoneCopy->setEnabled(FALSE);
 
 	//Next owner can:
-	mDANextOwnerCan->setEnabled(FALSE);
 	mDACheckboxNextOwnerCanModify->setValue(FALSE);
 	mDACheckboxNextOwnerCanModify->setEnabled(FALSE);
 	mDACheckboxNextOwnerCanCopy->setValue(FALSE);
@@ -232,35 +238,17 @@ void LLSidepanelTaskInfo::disableAll()
 	//checkbox include in search
 	mDASearchCheck->setValue(FALSE);
 	mDASearchCheck->setEnabled(FALSE);
-		
-	mDAComboSaleType->setValue(LLSaleInfo::FS_COPY);
+
 	mDAComboSaleType->setEnabled(FALSE);
-		
-	mDACost->setEnabled(FALSE);
-	mDACost->setValue(getString("Cost Default"));
-	mDAEditCost->setValue(LLStringUtil::null);
+
 	mDAEditCost->setEnabled(FALSE);
-		
+
 	mDALabelClickAction->setEnabled(FALSE);
 	if (mDAComboClickAction)
 	{
 		mDAComboClickAction->setEnabled(FALSE);
 		mDAComboClickAction->clear();
 	}
-
-	mDAPathfindingAttributes->setEnabled(FALSE);
-	mDAPathfindingAttributes->setValue(LLStringUtil::null);
-
-	mDAB->setVisible(FALSE);
-	mDAO->setVisible(FALSE);
-	mDAG->setVisible(FALSE);
-	mDAE->setVisible(FALSE);
-	mDAN->setVisible(FALSE);
-	mDAF->setVisible(FALSE);
-	
-	mOpenBtn->setEnabled(FALSE);
-	mPayBtn->setEnabled(FALSE);
-	mBuyBtn->setEnabled(FALSE);
 }
 
 void LLSidepanelTaskInfo::refresh()
@@ -365,8 +353,6 @@ void LLSidepanelTaskInfo::refresh()
 
 	mDAPathfindingAttributes->setEnabled(TRUE);
 	mDAPathfindingAttributes->setValue(LLTrans::getString(pfAttrName));
-
-	getChildView("Permissions:")->setEnabled(TRUE);
 	
 	// Update creator text field
 	getChildView("Creator:")->setEnabled(TRUE);
@@ -698,7 +684,6 @@ void LLSidepanelTaskInfo::refresh()
 		getChild<LLUICtrl>("checkbox for sale")->setTentative( 				is_for_sale_mixed);
 		getChildView("sale type")->setEnabled(num_for_sale && can_transfer && !is_sale_price_mixed);
 
-		getChildView("Next owner can:")->setEnabled(TRUE);
 		getChildView("checkbox next owner can modify")->setEnabled(base_mask_on & PERM_MODIFY);
 		getChildView("checkbox next owner can copy")->setEnabled(base_mask_on & PERM_COPY);
 		getChildView("checkbox next owner can transfer")->setEnabled(next_owner_mask_on & PERM_COPY);
@@ -708,7 +693,6 @@ void LLSidepanelTaskInfo::refresh()
 		getChildView("checkbox for sale")->setEnabled(FALSE);
 		getChildView("sale type")->setEnabled(FALSE);
 
-		getChildView("Next owner can:")->setEnabled(FALSE);
 		getChildView("checkbox next owner can modify")->setEnabled(FALSE);
 		getChildView("checkbox next owner can copy")->setEnabled(FALSE);
 		getChildView("checkbox next owner can transfer")->setEnabled(FALSE);
@@ -993,6 +977,12 @@ void LLSidepanelTaskInfo::onCommitPerm(LLUICtrl *ctrl, void *data, U8 field, U32
 	BOOL new_state = check->get();
 	
 	LLSelectMgr::getInstance()->selectionSetObjectPermissions(field, new_state, perm);
+
+    LLSidepanelTaskInfo* self = (LLSidepanelTaskInfo*)data;
+    if (self)
+    {
+        self->disablePermissions();
+    }
 }
 
 // static
@@ -1151,6 +1141,8 @@ static U8 string_value_to_click_action(std::string p_value)
 		return CLICK_ACTION_OPEN;
 	if (p_value == "Zoom")
 		return CLICK_ACTION_ZOOM;
+	if (p_value == "None")
+		return CLICK_ACTION_DISABLED;
 	return CLICK_ACTION_TOUCH;
 }
 
