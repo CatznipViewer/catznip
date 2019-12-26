@@ -39,7 +39,6 @@
 #include "lllogininstance.h"
 #include "llparcel.h"
 #include "llsd.h"
-#include "lltoastalertpanel.h"
 #include "llui.h"
 #include "lluri.h"
 #include "llversioninfo.h"
@@ -55,31 +54,6 @@
 #include <boost/regex.hpp>
 
 bool on_load_url_external_response(const LLSD& notification, const LLSD& response, bool async );
-
-
-class URLLoader : public LLToastAlertPanel::URLLoader
-{
-	virtual void load(const std::string& url , bool force_open_externally)
-	{
-		if (force_open_externally)
-		{
-			LLWeb::loadURLExternal(url);
-		}
-		else
-		{
-			LLWeb::loadURL(url);
-		}
-	}
-};
-static URLLoader sAlertURLLoader;
-
-
-// static
-void LLWeb::initClass()
-{
-	LLToastAlertPanel::setURLLoader(&sAlertURLLoader);
-}
-
 
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.3
@@ -172,7 +146,7 @@ void LLWeb::openURLExternal(const LLSD& sdData)
 	bool async = (sdData.has("async")) ? sdData["async"].asBoolean() : true;
 
 	// Act like the proxy window was closed, since we won't be able to track targeted windows in the external browser.
-	LLViewerMedia::proxyWindowClosed(uuid.asString());
+	LLViewerMedia::instance().proxyWindowClosed(uuid.asString());
 
 	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
 	{
