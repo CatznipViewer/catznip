@@ -89,7 +89,7 @@ BOOL LLProgressView::postBuild()
 	mMediaCtrl->setVisible( false );		// hidden initially
 //	mMediaCtrl->addObserver( this );		// watch events
 //	
-//	LLViewerMedia::setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
+//	LLViewerMedia::getInstance()->setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
 
 	mCancelBtn = getChild<LLButton>("cancel_btn");
 	mCancelBtn->setClickedCallback(  LLProgressView::onCancelButtonClicked, NULL );
@@ -188,7 +188,7 @@ void LLProgressView::revealIntroPanel()
 		
 // [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
 		mMediaCtrl->addObserver(this);		// watch events
-		LLViewerMedia::setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
+		LLViewerMedia::instance().setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
 // [/SL:KB]
 
 		// navigate to intro URL and reveal widget 
@@ -330,7 +330,7 @@ void LLProgressView::draw()
 			if (mMediaCtrl->getVisible())
 			{
 // [/SL:KB]
-				LLViewerMedia::setOnlyAudibleMediaTextureID(LLUUID::null);
+				LLViewerMedia::getInstance()->setOnlyAudibleMediaTextureID(LLUUID::null);
 
 //				// Fade is complete, release focus
 //				gFocusMgr.releaseFocusIfNeeded(this);
