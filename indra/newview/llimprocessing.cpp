@@ -719,7 +719,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
                 // The group notice packet does not have an AgentID.  Obtain one from the name cache.
                 // If last name is "Resident" strip it out so the cache name lookup works.
                 std::string legacy_name = gCacheName->buildLegacyName(original_name);
-                agent_id = LLAvatarNameCache::findIdByName(legacy_name);
+                agent_id = LLAvatarNameCache::getInstance()->findIdByName(legacy_name);
 
                 if (agent_id.isNull())
                 {
@@ -739,7 +739,7 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
             {
                 info = new LLOfferInfo();
 
-                info->mIM = IM_GROUP_NOTICE;
+                info->mIM = dialog;
                 info->mFromID = from_id;
                 info->mFromGroup = from_group;
                 info->mTransactionID = session_id;
@@ -885,14 +885,31 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
             }
             else // IM_TASK_INVENTORY_OFFERED
             {
-                if (sizeof(S8) != binary_bucket_size)
+                if (offline == IM_OFFLINE && session_id.isNull() && aux_id.notNull() && binary_bucket_size > sizeof(S8)* 5)
                 {
-                    LL_WARNS("Messaging") << "Malformed inventory offer from object" << LL_ENDL;
-                    delete info;
-                    break;
+                    // cap received offline message
+                    std::string str_bucket = ll_safe_string((char*)binary_bucket, binary_bucket_size);
+                    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+                    boost::char_separator<char> sep("|", "", boost::keep_empty_tokens);
+                    tokenizer tokens(str_bucket, sep);
+                    tokenizer::iterator iter = tokens.begin();
+
+                    info->mType = (LLAssetType::EType)(atoi((*(iter++)).c_str()));
+                    // Note There is more elements in 'tokens' ...
+
+                    info->mObjectID = LLUUID::null;
+                    info->mFromObject = TRUE;
                 }
-                info->mType = (LLAssetType::EType) binary_bucket[0];
-                info->mObjectID = LLUUID::null;
+                else
+                {
+                    if (sizeof(S8) != binary_bucket_size)
+                    {
+                        LL_WARNS("Messaging") << "Malformed inventory offer from object" << LL_ENDL;
+                        delete info;
+                        break;
+                    }
+                    info->mType = (LLAssetType::EType) binary_bucket[0];
+                    info->mObjectID = LLUUID::null;
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
 				if ( (from_id == gAgentID) && (region_id == gAgent.getRegion()->getRegionID()) )
 				{
@@ -917,7 +934,8 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
 					}
 				}
 // [/SL:KB]
-                info->mFromObject = TRUE;
+                    info->mFromObject = TRUE;
+                }
             }
 
             info->mIM = dialog;
@@ -933,12 +951,18 @@ void LLIMProcessing::processNewMessage(LLUUID from_id,
             if (is_muted)
             {
                 // Prefetch the offered item so that it can be discarded by the appropriate observer. (EXT-4331)
-                LLInventoryFetchItemsObserver* fetch_item = new LLInventoryFetchItemsObserver(info->mObjectID);
-                fetch_item->startFetch();
-                delete fetch_item;
-
-                // Same as closing window
-                info->forceResponse(IOR_DECLINE);
+                if (IM_INVENTORY_OFFERED == dialog)
+                {
+                    LLInventoryFetchItemsObserver* fetch_item = new LLInventoryFetchItemsObserver(info->mObjectID);
+                    fetch_item->startFetch();
+                    delete fetch_item;
+                    // Same as closing window
+                    info->forceResponse(IOR_DECLINE);
+                }
+                else
+                {
+                    info->forceResponse(IOR_MUTE);
+                }
             }
             // old logic: busy mode must not affect interaction with objects (STORM-565)
             // new logic: inventory offers from in-world objects should be auto-declined (CHUI-519)

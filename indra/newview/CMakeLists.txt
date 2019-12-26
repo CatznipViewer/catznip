@@ -201,7 +201,6 @@ set(viewer_SOURCE_FILES
     llexperiencelog.cpp
     llexternaleditor.cpp
     llface.cpp
-    llfacebookconnect.cpp
     llfasttimerview.cpp
     llfavoritesbar.cpp
     llfeaturemanager.cpp
@@ -209,7 +208,6 @@ set(viewer_SOURCE_FILES
     llfilteredwearablelist.cpp
     llfirstuse.cpp
     llflexibleobject.cpp
-    llflickrconnect.cpp
     llfloaterabout.cpp
     llfloaterbvhpreview.cpp
     llfloaterauction.cpp
@@ -245,8 +243,6 @@ set(viewer_SOURCE_FILES
     llfloaterexperiencepicker.cpp
     llfloaterexperienceprofile.cpp
     llfloaterexperiences.cpp
-    llfloaterfacebook.cpp
-    llfloaterflickr.cpp
     llfloaterfonttest.cpp
     llfloatergesture.cpp
     llfloatergodtools.cpp
@@ -277,6 +273,7 @@ set(viewer_SOURCE_FILES
     llfloatermemleak.cpp
     llfloatermodelpreview.cpp
     llfloatermodeluploadbase.cpp
+    llfloatermyscripts.cpp
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
     llfloaternotificationsflat.cpp
@@ -322,7 +319,6 @@ set(viewer_SOURCE_FILES
     llfloatertos.cpp
     llfloatertoybox.cpp
     llfloatertranslationsettings.cpp
-    llfloatertwitter.cpp
     llfloateruipreview.cpp
     llfloaterurlentry.cpp
     llfloatervoiceeffect.cpp
@@ -548,6 +544,7 @@ set(viewer_SOURCE_FILES
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
     llsculptidsize.cpp
+    llsearchableui.cpp
     llsearchcombobox.cpp
     llsearchhistory.cpp
     llsecapi.cpp
@@ -620,7 +617,6 @@ set(viewer_SOURCE_FILES
     lltransientdockablefloater.cpp
     lltransientfloatermgr.cpp
     lltranslate.cpp
-    lltwitterconnect.cpp
     lluiavatar.cpp
     lluilistener.cpp
     lluploaddialog.cpp
@@ -831,7 +827,6 @@ set(viewer_HEADER_FILES
     llexperiencelog.h
     llexternaleditor.h
     llface.h
-    llfacebookconnect.h
     llfasttimerview.h
     llfavoritesbar.h
     llfeaturemanager.h
@@ -839,7 +834,6 @@ set(viewer_HEADER_FILES
     llfilteredwearablelist.h
     llfirstuse.h
     llflexibleobject.h
-    llflickrconnect.h
     llfloaterabout.h
     llfloaterbvhpreview.h
     llfloaterauction.h
@@ -875,8 +869,6 @@ set(viewer_HEADER_FILES
     llfloaterexperiencepicker.h
     llfloaterexperienceprofile.h
     llfloaterexperiences.h
-    llfloaterfacebook.h
-    llfloaterflickr.h
     llfloaterfonttest.h
     llfloatergesture.h
     llfloatergodtools.h
@@ -910,6 +902,7 @@ set(viewer_HEADER_FILES
     llfloatermemleak.h
     llfloatermodelpreview.h
     llfloatermodeluploadbase.h
+    llfloatermyscripts.h
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
     llfloaternotificationsflat.h
@@ -955,7 +948,6 @@ set(viewer_HEADER_FILES
     llfloatertos.h
     llfloatertoybox.h
     llfloatertranslationsettings.h
-    llfloatertwitter.h
     llfloateruipreview.h
     llfloaterurlentry.h
     llfloatervoiceeffect.h
@@ -1170,6 +1162,7 @@ set(viewer_HEADER_FILES
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
     llsculptidsize.h
+    llsearchableui.h
     llsearchcombobox.h
     llsearchhistory.h
     llsecapi.h
@@ -1243,7 +1236,6 @@ set(viewer_HEADER_FILES
     lltransientdockablefloater.h
     lltransientfloatermgr.h
     lltranslate.h
-    lltwitterconnect.h
     lluiconstants.h
     lluiavatar.h
     lluilistener.h
@@ -1387,8 +1379,12 @@ if (DARWIN)
     PROPERTIES
     COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}"
     # BugsplatMac is a module, imported with @import. That language feature
-    # demands these switches.
-    COMPILE_FLAGS "-fmodules -fcxx-modules"
+    # demands these -f switches.
+    # Xcode 10.2 requires that Objective-C++ headers declare nullability of
+    # pointer variables. As of 2019-06-26, the BugsplatMac version we're using
+    # does not yet do so in its own header files. This -W flag prevents fatal
+    # warnings.
+    COMPILE_FLAGS "-fmodules -fcxx-modules -Wno-nullability-completeness"
     )
 
   find_library(AGL_LIBRARY AGL)
@@ -1630,6 +1626,7 @@ endif (WINDOWS)
 # from within the IDE.
 set(viewer_XUI_FILES
     skins/default/colors.xml
+    skins/default/default_languages.xml
     skins/default/textures/textures.xml
     )
 file(GLOB DEFAULT_XUI_FILE_GLOB_LIST
@@ -1899,6 +1896,15 @@ if (WINDOWS)
             )
     endif (NOT UNATTENDED)
 
+    # sets the 'working directory' for debugging from visual studio.
+    # Condition for version can be moved to requirements once build agents will be updated (see TOOL-3865)
+    if (NOT UNATTENDED)
+        set_property(
+          TARGET ${VIEWER_BINARY_NAME}
+          PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+          )
+    endif (NOT UNATTENDED)
+
     if (PACKAGE)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/event_host.tar.bz2
@@ -2130,9 +2136,9 @@ if (DARWIN)
   set(MACOSX_BUNDLE_BUNDLE_NAME "SecondLife")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright © Linden Research, Inc. 2007")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright © Linden Research, Inc. 2018")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "SecondLife.nib")
-  set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
+  set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "LLApplication")
 
   # https://blog.kitware.com/upcoming-in-cmake-2-8-12-osx-rpath-support/
   set(CMAKE_MACOSX_RPATH 1)

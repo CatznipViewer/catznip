@@ -854,6 +854,7 @@ void LLViewerObjectList::update(LLAgent &agent)
 	
 	F32 interp_time = gSavedSettings.getF32("InterpolationTime");
 	F32 phase_out_time = gSavedSettings.getF32("InterpolationPhaseOut");
+	F32 region_interp_time = llclamp(gSavedSettings.getF32("RegionCrossingInterpolationTime"), 0.5f, 5.f);
 	if (interp_time < 0.0 || 
 		phase_out_time < 0.0 ||
 		phase_out_time > interp_time)
@@ -864,6 +865,7 @@ void LLViewerObjectList::update(LLAgent &agent)
 	}
 	LLViewerObject::setPhaseOutUpdateInterpolationTime( interp_time );
 	LLViewerObject::setMaxUpdateInterpolationTime( phase_out_time );
+	LLViewerObject::setMaxRegionCrossingInterpolationTime(region_interp_time);
 
 	gAnimateTextures = gSavedSettings.getBOOL("AnimateTextures");
 
@@ -1381,7 +1383,11 @@ BOOL LLViewerObjectList::killObject(LLViewerObject *objectp)
 
 	if (objectp)
 	{
-		objectp->markDead(); // does the right thing if object already dead
+		// We are going to cleanup a lot of smart pointers to this object, they might be last,
+		// and object being NULLed while inside it's own function won't be pretty
+		// so create a pointer to make sure object will stay alive untill markDead() finishes
+		LLPointer<LLViewerObject> sp(objectp);
+		sp->markDead(); // does the right thing if object already dead
 		return TRUE;
 	}
 
@@ -1915,7 +1921,7 @@ void LLViewerObjectList::generatePickList(LLCamera &camera)
 						 attachment_iter != attachment->mAttachedObjects.end();
 						 ++attachment_iter)
 					{
-						if (LLViewerObject* attached_object = (*attachment_iter))
+						if (LLViewerObject* attached_object = attachment_iter->get())
 						{
 							mSelectPickList.insert(attached_object);
 							LLViewerObject::const_child_list_t& child_list = attached_object->getChildren();

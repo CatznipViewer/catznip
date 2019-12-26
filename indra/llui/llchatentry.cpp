@@ -213,7 +213,7 @@ BOOL LLChatEntry::handleSpecialKey(const KEY key, const MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}
@@ -237,7 +237,7 @@ BOOL LLChatEntry::handleSpecialKey(const KEY key, const MASK mask)
 			}
 			else
 			{
-				LLUI::reportBadKeystroke();
+				LLUI::getInstance()->reportBadKeystroke();
 			}
 			handled = TRUE;
 		}

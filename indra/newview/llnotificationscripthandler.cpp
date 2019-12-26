@@ -36,7 +36,6 @@
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
 #include "llscriptfloater.h"
-#include "llfacebookconnect.h"
 #include "llavatarname.h"
 #include "llavatarnamecache.h"
 

@@ -268,7 +268,7 @@ public:
 	/*virtual*/ void fromLLSD(const LLSD& params);
 	/*virtual*/ void handleRespond(const LLSD& notification, const LLSD& response);
 
-	void send_auto_receive_response(void);
+	void send_auto_receive_response() { sendReceiveResponse(true, mFolderID); }
 
 	// TODO - replace all references with handleRespond()
 	bool inventory_offer_callback(const LLSD& notification, const LLSD& response);
@@ -281,6 +281,7 @@ private:
 	std::string getSanitizedName() const;
 // [/SL:KB]
 	std::string getSanitizedDescription();
+	void sendReceiveResponse(bool accept, const LLUUID &destination_folder_id);
 
 	typedef boost::function<bool (const LLSD&, const LLSD&)> respond_function_t;
 	typedef std::map<std::string, respond_function_t> respond_function_map_t;

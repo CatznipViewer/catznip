@@ -263,7 +263,7 @@ void LLHandlerUtil::logGroupNoticeToIMGroup(
 	{
 		// Legacy support and fallback method
 		// if we can't retrieve sender id from group notice system message, try to lookup it from cache
-		sender_id = LLAvatarNameCache::findIdByName(sender_name);
+		sender_id = LLAvatarNameCache::getInstance()->findIdByName(sender_name);
 	}
 
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)

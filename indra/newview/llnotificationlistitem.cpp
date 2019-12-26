@@ -136,7 +136,8 @@ std::string LLNotificationListItem::buildNotificationDate(const LLDate& time_sta
 			   	+LLTrans::getString("TimeDay")+"]/["
 				+LLTrans::getString("TimeYear")+"] ["
 				+LLTrans::getString("TimeHour")+"]:["
-				+LLTrans::getString("TimeMin")+"]";
+				+LLTrans::getString("TimeMin")+"] ["
+				+LLTrans::getString("TimeTimezone")+"]";
 			break;
 	}
     LLSD substitution;
@@ -272,6 +273,7 @@ std::set<std::string> LLTransactionNotificationListItem::getTypes()
     std::set<std::string> types;
     types.insert("PaymentReceived");
     types.insert("PaymentSent");
+    types.insert("UploadPayment");
     return types;
 }
 
@@ -387,9 +389,9 @@ BOOL LLGroupNoticeNotificationListItem::postBuild()
     mTitleBoxExp->setValue(mParams.subject);
     mNoticeTextExp->setValue(mParams.message);
 
-// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.2
     mTimeBox->setValue(buildNotificationDate(mParams.time_stamp));
     mTimeBoxExp->setValue(buildNotificationDate(mParams.time_stamp));
+// [SL:KB] - Patch: UI-Notifications | Checked: Catznip-5.2
     //Workaround: in case server timestamp is 0 - we use the time when notification was actually received
     if (mParams.time_stamp.isNull())
     {
@@ -397,8 +399,6 @@ BOOL LLGroupNoticeNotificationListItem::postBuild()
         mTimeBoxExp->setValue(buildNotificationDate(mParams.received_time));
     }
 // [/SL:KB]
-//	mTimeBox->setValue(buildNotificationDate(mParams.time_stamp, UTC));
-//    mTimeBoxExp->setValue(buildNotificationDate(mParams.time_stamp, UTC));
 //    //Workaround: in case server timestamp is 0 - we use the time when notification was actually received
 //    if (mParams.time_stamp.isNull())
 //    {
