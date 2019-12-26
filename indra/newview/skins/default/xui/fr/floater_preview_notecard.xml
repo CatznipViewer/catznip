@@ -16,6 +16,7 @@
 		Chargement...
 	</text_editor>
 	<panel name="bottom_panel">
+	<button label="Modifier..." label_selected="Modifier" name="Edit"/>
 	<icon name="spacer_icon_2" width="-1" />
 	<button label="Enregistrer" label_selected="Enregistrer" name="Save" width="90"/>
 	<button label="Supprimer" label_selected="Supprimer" name="Delete" width="89"/>

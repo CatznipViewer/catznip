@@ -79,7 +79,7 @@ void LLTextSearchCtrl::setVisible(BOOL fVisible)
 				onRefreshHighlight();
 
 			// Listen for changes to the case insensitive setting
-			m_CaseInsensitiveConn = LLUI::sSettingGroups["config"]->getControl("LSLFindCaseInsensitivity")->getSignal()->connect(boost::bind(&LLTextSearchCtrl::onRefreshHighlight, this));
+			m_CaseInsensitiveConn = LLUI::instance().mSettingGroups["config"]->getControl("LSLFindCaseInsensitivity")->getSignal()->connect(boost::bind(&LLTextSearchCtrl::onRefreshHighlight, this));
 		}
 		else
 		{
@@ -115,7 +115,7 @@ void LLTextSearchCtrl::onRefreshHighlight()
 	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(getParent());
 	if (pEditor)
 	{
-		pEditor->setHighlightWord(m_pSearchEditor->getText(), LLUI::sSettingGroups["config"]->getBOOL("LSLFindCaseInsensitivity"));
+		pEditor->setHighlightWord(m_pSearchEditor->getText(), LLUI::instance().mSettingGroups["config"]->getBOOL("LSLFindCaseInsensitivity"));
 	}
 }
 
@@ -124,7 +124,7 @@ void LLTextSearchCtrl::onSearchClicked(bool fSearchDown)
 	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(getParent());
 	if (pEditor)
 	{
-		pEditor->selectNext(m_pSearchEditor->getText(), LLUI::sSettingGroups["config"]->getBOOL("LSLFindCaseInsensitivity"), TRUE, !fSearchDown);
+		pEditor->selectNext(m_pSearchEditor->getText(), LLUI::instance().mSettingGroups["config"]->getBOOL("LSLFindCaseInsensitivity"), TRUE, !fSearchDown);
 	}
 }
 
