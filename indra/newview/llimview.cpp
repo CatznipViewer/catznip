@@ -935,7 +935,7 @@ void LLIMModel::LLIMSession::loadHistory()
 		std::list<LLSD> chat_history;
 
 		//involves parsing of a chat history
-		LLLogChat::loadChatHistory(mHistoryFileName, chat_history);
+		LLLogChat::loadChatHistory(mHistoryFileName, chat_history, LLSD(), isGroupChat());
 		addMessagesFromHistory(chat_history);
 	}
 }
@@ -1064,6 +1064,11 @@ bool LLIMModel::LLIMSession::isP2P()
 	return IM_NOTHING_SPECIAL == mType;
 }
 
+bool LLIMModel::LLIMSession::isGroupChat()
+{
+	return IM_SESSION_GROUP_START == mType || (IM_SESSION_INVITE == mType && gAgent.isInGroup(mSessionID));
+}
+
 bool LLIMModel::LLIMSession::isOtherParticipantAvaline()
 {
 	return !mOtherParticipantIsAvatar;
@@ -1120,6 +1125,10 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 			// Incoming P2P sessions include a name that we can use to build a history file name
 			mHistoryFileName = LLCacheName::buildUsername(mName);
 		}
+	}
+	else if (isGroupChat())
+	{
+		mHistoryFileName = mName + GROUP_CHAT_SUFFIX;
 	}
 }
 
