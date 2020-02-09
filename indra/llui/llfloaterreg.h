@@ -42,6 +42,9 @@ class LLFloater;
 class LLUICtrl;
 
 typedef boost::function<LLFloater* (const LLSD& key)> LLFloaterBuildFunc;
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
+typedef boost::function<const std::string& (void)> LLFloaterFileFunc;
+// [/SL:KB]
 
 class LLFloaterReg
 {
@@ -56,6 +59,9 @@ public:
 	struct BuildData
 	{
 		LLFloaterBuildFunc mFunc;
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
+		LLFloaterFileFunc mFileFunc;
+// [/SL:KB]
 		std::string mFile;
 	};
 	typedef std::map<std::string, BuildData> build_map_t;
@@ -86,6 +92,11 @@ public:
 	static void add(const std::string& name, const std::string& file, const LLFloaterBuildFunc& func,
 					const std::string& groupname = LLStringUtil::null);
 
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
+	static void addWithFileCallback(const std::string& name, const LLFloaterFileFunc& fileFunc, const LLFloaterBuildFunc& func,
+	                                const std::string& groupname = LLStringUtil::null);
+// [/SL:KB]
+
 	// Helpers
 	static LLFloater* getLastFloaterInGroup(const std::string& name);
 	static LLFloater* getLastFloaterCascading();
@@ -108,6 +119,9 @@ public:
 	// return true if instance is visible:
 	static bool toggleInstance(const std::string& name, const LLSD& key = LLSD());
 	static bool instanceVisible(const std::string& name, const LLSD& key = LLSD());
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+	static bool instanceInVisibleChain(const std::string& name, const LLSD& key = LLSD());
+// [/SL:KB]
 
 	static void showInitialVisibleInstances();
 	static void hideVisibleInstances(const std::set<std::string>& exceptions = std::set<std::string>());

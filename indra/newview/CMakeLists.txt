@@ -244,6 +244,7 @@ set(viewer_SOURCE_FILES
     llfloaterexperienceprofile.cpp
     llfloaterexperiences.cpp
     llfloaterfonttest.cpp
+    llfloaterforgetuser.cpp
     llfloatergesture.cpp
     llfloatergodtools.cpp
     llfloatergotoline.cpp
@@ -259,6 +260,8 @@ set(viewer_SOURCE_FILES
     llfloaterimsessiontab.cpp
     llfloaterimsession.cpp
     llfloaterimcontainer.cpp
+    llfloaterimcontainerbase.cpp
+    llfloaterimcontainertab.cpp
     llfloaterinspect.cpp
     llfloaterjoystick.cpp
     llfloaterlagmeter.cpp
@@ -659,6 +662,7 @@ set(viewer_SOURCE_FILES
     llviewerobject.cpp
     llviewerobjectlist.cpp
     llvieweroctree.cpp
+    llviewerparcelaskplay.cpp
     llviewerparcelmedia.cpp
     llviewerparcelmediaautoplay.cpp
     llviewerparcelmgr.cpp
@@ -865,6 +869,7 @@ set(viewer_HEADER_FILES
     llfloaterexperienceprofile.h
     llfloaterexperiences.h
     llfloaterfonttest.h
+    llfloaterforgetuser.h
     llfloatergesture.h
     llfloatergodtools.h
     llfloatergotoline.h
@@ -883,6 +888,8 @@ set(viewer_HEADER_FILES
     llfloaterimsessiontab.h
     llfloaterimsession.h
     llfloaterimcontainer.h
+    llfloaterimcontainerbase.h
+    llfloaterimcontainertab.h
     llfloaterinspect.h
     llfloaterjoystick.h
     llfloaterlagmeter.h
@@ -1274,6 +1281,7 @@ set(viewer_HEADER_FILES
     llviewerobject.h
     llviewerobjectlist.h
     llvieweroctree.h
+    llviewerparcelaskplay.h
     llviewerparcelmedia.h
     llviewerparcelmediaautoplay.h
     llviewerparcelmgr.h

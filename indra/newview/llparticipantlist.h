@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2012-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,16 +34,26 @@
 class LLSpeakerMgr;
 class LLUICtrl;
 class LLAvalineUpdater;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLAvatarList;
+// [/SL:KB]
 
-class LLParticipantList : public LLConversationItemSession
+//class LLParticipantList : public LLConversationItemSession
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLParticipantList
+// [/SL:KB]
 {
 	LOG_CLASS(LLParticipantList);
 public:
 
 	typedef boost::function<bool (const LLUUID& speaker_id)> validate_speaker_callback_t;
 
-	LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model);
-	~LLParticipantList();
+//	LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model);
+//	~LLParticipantList();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	LLParticipantList(LLSpeakerMgr* data_source);
+	virtual ~LLParticipantList();
+// [/SL:KB]
 
 	/**
 	 * Adds specified avatar ID to the existing list if it is not Agent's ID
@@ -54,7 +65,10 @@ public:
 	/**
 	 * Refreshes the participant list.
 	 */
-	void update();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	virtual void update();
+// [/SL:KB]
+//	void update();
 
 	/**
 	 * Set a callback to be called before adding a speaker. Invalid speakers will not be added.
@@ -75,6 +89,20 @@ protected:
 	bool onModeratorUpdateEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 	bool onSpeakerUpdateEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 	bool onSpeakerMuteEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	std::set<LLUUID>& getModeratorList()         { return mModeratorList; }
+	std::set<LLUUID>& getModeratorToRemoveList() { return mModeratorToRemoveList; }
+
+	virtual const LLUUID& getSessionID() const = 0;
+
+	virtual void addAvatarParticipant(const LLUUID& particpant_id) = 0;
+	virtual void addAvalineParticipant(const LLUUID& particpant_id) = 0;
+	virtual void clearParticipants() = 0;
+	virtual bool isParticipant(const LLUUID& particpant_id) = 0;
+	virtual void removeParticipant(const LLUUID& particpant_id) = 0;
+	virtual void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) = 0;
+// [/SL:KB]
 
 	/**
 	 * List of listeners implementing LLOldEvents::LLSimpleListener.
@@ -158,5 +186,71 @@ private:
 	validate_speaker_callback_t mValidateSpeakerCallback;
 	LLAvalineUpdater* mAvalineUpdater;
 };
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLParticipantModelList : public LLConversationItemSession, public LLParticipantList
+{
+	LOG_CLASS(LLParticipantModelList);
+public:
+	LLParticipantModelList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model);
+	/*virtual*/ ~LLParticipantModelList();
+
+public:
+	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
+	/*virtual*/ void update() { LLParticipantList::update(); }
+protected:
+	/*virtual*/ const LLUUID& getSessionID() const                   { return mUUID; }
+
+	/*virtual*/ void addAvatarParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void addAvalineParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void clearParticipants()                            { LLConversationItemSession::clearParticipants(); }
+	/*virtual*/ bool isParticipant(const LLUUID& particpant_id)     { return NULL != LLConversationItemSession::findParticipant(particpant_id); }
+	/*virtual*/ void removeParticipant(const LLUUID& particpant_id) { LLConversationItemSession::removeParticipant(particpant_id); }
+	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) { LLConversationItemSession::setParticipantIsMuted(particpant_id, is_muted); }
+};
+
+class LLParticipantAvatarList : public LLParticipantList
+{
+	LOG_CLASS(LLParticipantAvatarList);
+
+	/*
+	 * Constructor
+	 */
+public:
+	LLParticipantAvatarList(LLSpeakerMgr* pDataSource, LLAvatarList* pAvatarList);
+	~LLParticipantAvatarList() override;
+
+	/*
+	 * Base class overrides
+	 */
+protected:
+	void addAvatarParticipant(const LLUUID& particpant_id) override;
+	void addAvalineParticipant(const LLUUID& particpant_id) override;
+	void clearParticipants() override;
+	const LLUUID& getSessionID() const override;
+	bool isParticipant(const LLUUID& particpant_id) override;
+	void removeParticipant(const LLUUID& particpant_id) override;
+	void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) override;
+
+	/*
+	 * Member functions
+	 */
+public:
+	void getSelectedUUIDs(uuid_vec_t& idsSelected);
+
+	/*
+	 * Event handlers
+	 */
+public:
+	void onAvatarListRefreshed();
+
+	/*
+	 * Member variables
+	 */
+protected:
+	LLAvatarList* m_pAvatarList;
+	boost::signals2::scoped_connection m_AvatarListRefreshConn;
+};
+// [/SL:KB]
 
 #endif // LL_PARTICIPANTLIST_H

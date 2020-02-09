@@ -291,7 +291,6 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible"))
 	{
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
-		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
 	}
     // hide marketplace listing box, unless we are a marketplace panel
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible") && !mParams.use_marketplace_folders)
@@ -1318,7 +1317,10 @@ bool LLInventoryPanel::beginIMSession()
 	LLUUID session_id = gIMMgr->addSession(name, type, members[0], members);
 	if (session_id != LLUUID::null)
 	{
-		LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance()->showConversation(session_id);
 	}
 		
 	return true;

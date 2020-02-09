@@ -12,7 +12,7 @@
  visible="false"
  width="394"
  can_resize="true"
- can_tear_off="false"
+ can_tear_off="true"
  min_height="190"
  positioning="relative">
     <floater.string name="call_btn_start">Conv_toolbar_open_call</floater.string>
@@ -65,6 +65,7 @@
     <view
      follows="all"
      layout="topleft"
+     mouse_opaque="false"
      name="contents_view"
      top="0"
      left="0"
@@ -77,6 +78,7 @@
          follows="all"
          left="3"
          layout="topleft"
+         mouse_opaque="false"
          name="main_stack"
          right="-3"
          orientation="vertical"
@@ -84,24 +86,23 @@
          top="0">
             <layout_panel
              auto_resize="false"
+             mouse_opaque="false"
              name="toolbar_panel"
              height="25">
-                <menu_button
-                 menu_filename="menu_im_session_showmodes.xml"
+                <button
                  follows="top|left"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"
-                 image_overlay="Conv_toolbar_sort"
+                 image_overlay="Conv_toolbar_collapse"
                  image_selected="Toolbar_Middle_Selected"
                  image_unselected="Toolbar_Middle_Off"
                  layout="topleft"
-                 left="5"
-                 name="view_options_btn"
-                 tool_tip="View/sort options"
                  top="1"
+                 left="5"
+                 name="expand_collapse_btn"
+                 tool_tip="Collapse/Expand this pane"
                  width="31" />
                 <menu_button
-                 menu_filename="menu_im_conversation.xml"
                  follows="top|left"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"
@@ -115,6 +116,20 @@
                  visible="false"
                  tool_tip="Actions on selected person"
                  width="31"/>
+                <menu_button
+                 menu_filename="menu_im_session_showmodes.xml"
+                 follows="top|left"
+                 height="25"
+                 image_hover_unselected="Toolbar_Middle_Over"
+                 image_overlay="Conv_toolbar_sort"
+                 image_selected="Toolbar_Middle_Selected"
+                 image_unselected="Toolbar_Middle_Off"
+                 layout="topleft"
+                 left_pad="2"
+                 name="view_options_btn"
+                 tool_tip="View/sort options"
+                 top="1"
+                 width="31" />
                 <button
                  enabled="false"
                  follows="top|left"
@@ -142,6 +157,7 @@
                  name="voice_call_btn"
                  tool_tip="Open voice connection"
                  width="31"/>                
+<!--
                 <button
                  follows="right|top"
                  height="25"
@@ -159,19 +175,6 @@
                  follows="right|top"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"
-                 image_overlay="Conv_toolbar_collapse"
-                 image_selected="Toolbar_Middle_Selected"
-                 image_unselected="Toolbar_Middle_Off"
-                 layout="topleft"
-                 top="1"
-                 left_pad="2"
-                 name="expand_collapse_btn"
-                 tool_tip="Collapse/Expand this pane"
-                 width="31" />
-                <button
-                 follows="right|top"
-                 height="25"
-                 image_hover_unselected="Toolbar_Middle_Over"
                  image_overlay="Conv_toolbar_arrow_ne"
                  image_selected="Toolbar_Middle_Selected"
                  image_unselected="Toolbar_Middle_Off"
@@ -180,6 +183,7 @@
                  name="tear_off_btn"
                  top="1"
                  width="31" />
+-->
             </layout_panel>
             <layout_panel
              name="body_panel"

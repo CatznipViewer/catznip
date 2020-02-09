@@ -27,12 +27,12 @@
 #ifndef LL_FLOATERIMSESSION_H
 #define LL_FLOATERIMSESSION_H
 
-#include "llimview.h"
+//#include "llimview.h"
 #include "llfloaterimsessiontab.h"
-#include "llinstantmessage.h"
-#include "lllogchat.h"
-#include "lltooldraganddrop.h"
-#include "llvoicechannel.h"
+//#include "llinstantmessage.h"
+//#include "lllogchat.h"
+//#include "lltooldraganddrop.h"
+//#include "llvoicechannel.h"
 #include "llvoiceclient.h"
 
 class LLAvatarName;
@@ -87,9 +87,9 @@ public:
 	// Make IM conversion visible and update the message history
 	static LLFloaterIMSession* show(const LLUUID& session_id);
 
-	// Toggle panel specified by session_id
-	// Returns true iff panel became visible
-	static bool toggle(const LLUUID& session_id);
+//	// Toggle panel specified by session_id
+//	// Returns true iff panel became visible
+//	static bool toggle(const LLUUID& session_id);
 
 	void sessionInitReplyReceived(const LLUUID& im_session_id);
 
@@ -128,7 +128,7 @@ public:
 
 	//used as a callback on receiving new IM message
 	static void sRemoveTypingIndicator(const LLSD& data);
-	static void onIMChicletCreated(const LLUUID& session_id);
+//	static void onIMChicletCreated(const LLUUID& session_id);
     const LLUUID& getOtherParticipantUUID() {return mOtherParticipantUUID;}
 
 	static boost::signals2::connection setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb);

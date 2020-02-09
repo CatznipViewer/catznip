@@ -401,23 +401,20 @@ void set_merchant_SLM_menu()
 
 void check_merchant_status(bool force)
 {
-    if (!gSavedSettings.getBOOL("InventoryOutboxDisplayBoth"))
+    if (force)
     {
-        if (force)
-        {
-            // Reset the SLM status: we actually want to check again, that's the point of calling check_merchant_status()
-            LLMarketplaceData::instance().setSLMStatus(MarketplaceStatusCodes::MARKET_PLACE_NOT_INITIALIZED);
-        }
-        // Hide SLM related menu item
-        gMenuHolder->getChild<LLView>("MarketplaceListings")->setVisible(FALSE);
-        
-        // Also disable the toolbar button for Marketplace Listings
-        LLCommand* command = LLCommandManager::instance().getCommand("marketplacelistings");
-		gToolBarView->enableCommand(command->id(), false);
-        
-        // Launch an SLM test connection to get the merchant status
-        LLMarketplaceData::instance().initializeSLM(boost::bind(&set_merchant_SLM_menu));
+        // Reset the SLM status: we actually want to check again, that's the point of calling check_merchant_status()
+        LLMarketplaceData::instance().setSLMStatus(MarketplaceStatusCodes::MARKET_PLACE_NOT_INITIALIZED);
     }
+    // Hide SLM related menu item
+    gMenuHolder->getChild<LLView>("MarketplaceListings")->setVisible(FALSE);
+
+    // Also disable the toolbar button for Marketplace Listings
+    LLCommand* command = LLCommandManager::instance().getCommand("marketplacelistings");
+    gToolBarView->enableCommand(command->id(), false);
+
+    // Launch an SLM test connection to get the merchant status
+    LLMarketplaceData::instance().initializeSLM(boost::bind(&set_merchant_SLM_menu));
 }
 
 void init_menus()
@@ -5862,9 +5859,12 @@ class LLCommunicateNearbyChat : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
-		bool nearby_visible	= LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain();
-		if(nearby_visible && im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2015-04-27 (Catznip-3.7)
+		LLFloaterIMContainerView* im_box = NULL;
+		if ( (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) &&
+		     (LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain()) &&
+		     (im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance())) &&
+		     (im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1) )
 		{
 			im_box->selectNextorPreviousConversation(false);
 		}
@@ -5872,6 +5872,17 @@ class LLCommunicateNearbyChat : public view_listener_t
 		{
 			LLFloaterReg::toggleInstanceOrBringToFront("nearby_chat");
 		}
+// [/SL:KB]
+//		LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+//		bool nearby_visible	= LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain();
+//		if(nearby_visible && im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1)
+//		{
+//			im_box->selectNextorPreviousConversation(false);
+//		}
+//		else
+//		{
+//			LLFloaterReg::toggleInstanceOrBringToFront("nearby_chat");
+//		}
 		return true;
 	}
 };
@@ -8821,7 +8832,10 @@ void initialize_menus()
 
 	view_listener_t::addEnable(new LLUploadCostCalculator(), "Upload.CalculateCosts");
 
-	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainer::isConversationLoggingAllowed));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainerBase::isConversationLoggingAllowed));
+// [/SL:KB]
+//	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainer::isConversationLoggingAllowed));
 
 	// Agent
 	commit.add("Agent.toggleFlying", boost::bind(&LLAgent::toggleFlying));

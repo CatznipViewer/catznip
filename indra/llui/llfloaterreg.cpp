@@ -56,6 +56,17 @@ void LLFloaterReg::add(const std::string& name, const std::string& filename, con
 	sGroupMap[groupname] = groupname; // for referencing directly by group name
 }
 
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
+//static
+void LLFloaterReg::addWithFileCallback(const std::string& name, const LLFloaterFileFunc& fileFunc, const LLFloaterBuildFunc& func, const std::string& groupname)
+{
+	sBuildMap[name].mFunc = func;
+	sBuildMap[name].mFileFunc = fileFunc;
+	sGroupMap[name] = groupname.empty() ? name : groupname;
+	sGroupMap[groupname] = groupname; // for referencing directly by group name
+}
+// [/SL:KB]
+
 //static
 LLFloater* LLFloaterReg::getLastFloaterInGroup(const std::string& name)
 {
@@ -140,7 +151,10 @@ LLFloater* LLFloaterReg::getInstance(const std::string& name, const LLSD& key)
 	if (!res)
 	{
 		const LLFloaterBuildFunc& build_func = sBuildMap[name].mFunc;
-		const std::string& xui_file = sBuildMap[name].mFile;
+//		const std::string& xui_file = sBuildMap[name].mFile;
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.5
+		const std::string& xui_file = (!sBuildMap[name].mFileFunc) ? sBuildMap[name].mFile : sBuildMap[name].mFileFunc();
+// [/SL:KB]
 		if (build_func)
 		{
 			const std::string& groupname = sGroupMap[name];
@@ -292,6 +306,16 @@ bool LLFloaterReg::instanceVisible(const std::string& name, const LLSD& key)
 	LLFloater* instance = findInstance(name, key); 
 	return LLFloater::isVisible(instance);
 }
+
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+//static
+// Returns true if the instance exists and is in the visible chain (doesn't matter if it's minimized or not)
+bool LLFloaterReg::instanceInVisibleChain(const std::string& name, const LLSD& key)
+{
+	LLFloater* instance = findInstance(name, key); 
+	return (instance) && (instance->isInVisibleChain());
+}
+// [/SL:KB]
 
 //static
 void LLFloaterReg::showInitialVisibleInstances() 
