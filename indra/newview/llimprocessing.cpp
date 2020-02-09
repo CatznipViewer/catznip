@@ -29,6 +29,7 @@
 #include "llimprocessing.h"
 
 #include "llagent.h"
+#include "llappviewer.h"
 #include "llavatarnamecache.h"
 #include "llfirstuse.h"
 #include "llfloaterreg.h"
@@ -1511,6 +1512,7 @@ void LLIMProcessing::requestOfflineMessages()
     static BOOL requested = FALSE;
     if (!requested
         && gMessageSystem
+        && !gDisconnected
         && LLMuteList::getInstance()->isLoaded()
         && isAgentAvatarValid()
         && gAgent.getRegion()
