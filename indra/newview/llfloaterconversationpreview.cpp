@@ -53,6 +53,7 @@ LLFloaterConversationPreview::LLFloaterConversationPreview(const LLSD& session_i
 	mShowHistory(false),
 	mMessages(NULL),
 	mHistoryThreadsBusy(false),
+	mIsGroup(false),
 	mOpened(false)
 {
 }
@@ -78,6 +79,7 @@ BOOL LLFloaterConversationPreview::postBuild()
 	{
 		name = conv->getConversationName();
 		file = conv->getHistoryFileName();
+		mIsGroup = (LLIMModel::LLIMSession::GROUP_SESSION == conv->getConversationType());
 	}
 	else
 	{
@@ -85,6 +87,10 @@ BOOL LLFloaterConversationPreview::postBuild()
 		file = "chat";
 	}
 	mChatHistoryFileName = file;
+	if (mIsGroup)
+	{
+		mChatHistoryFileName += GROUP_CHAT_SUFFIX;
+	}
 	LLStringUtil::format_map_t args;
 	args["[NAME]"] = name;
 	std::string title = getString("Title", args);
@@ -148,6 +154,7 @@ void LLFloaterConversationPreview::onOpen(const LLSD& key)
 	LLSD load_params;
 	load_params["load_all_history"] = true;
 	load_params["cut_off_todays_date"] = false;
+	load_params["is_group"] = mIsGroup;
 
 	// The temporary message list with "Loading..." text
 	// Will be deleted upon loading completion in setPages() method
