@@ -140,10 +140,13 @@ LLPointer<LLCredential> LLLoginHandler::initializeLoginInfo()
 	result = loadSavedUserLoginInfo();                                                                                   
 	if (result.isNull())                                                                                                 
 	{                                                                                                                    
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-		result = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid(), gSavedSettings.getString("LastUserID"));
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
+		result = gSecAPIHandler->loadFromCredentialMap("login_list", LLGridManager::getInstance()->getGrid(), gSavedSettings.getString("LastUserID"));
 // [/SL:KB]
-//		result =  gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());                       
+//        // Since legacy viewer store login info one per grid, newer viewers have to
+//        // reuse same information to remember last user and for compatibility,
+//        // but otherwise login info is stored in separate map in gSecAPIHandler
+//        result = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());
 	}                                                                                                                    
 	
 	return result;                                                                                                       
