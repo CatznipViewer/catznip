@@ -163,7 +163,7 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
 	mCommitOnSelectionChange(false),
 	mSelectionChanged(false),
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	mItemRemoved(false),
 // [/SL:KB]
 	mNeedsScroll(false),
@@ -174,7 +174,7 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mOnDoubleClickCallback( NULL ),
 	mOnMaximumSelectCallback( NULL ),
 	mOnSortChangedCallback( NULL ),
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	mOnUserRemoveCallback(NULL),
 // [/SL:KB]
 	mHighlightedItem(-1),
@@ -1544,7 +1544,7 @@ void LLScrollListCtrl::drawItems()
 
 				item->draw(item_rect, fg_color % alpha, bg_color% alpha, highlight_color % alpha, mColumnPadding);
 
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 				if (item->getUserRemovable())
 				{
 					if (mRemoveIcon.isNull())
@@ -1812,7 +1812,7 @@ BOOL LLScrollListCtrl::handleMouseDown(S32 x, S32 y, MASK mask)
 
 BOOL LLScrollListCtrl::handleMouseUp(S32 x, S32 y, MASK mask)
 {	
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	if (!mItemRemoved)
 	{
 // [/SL:KB]
@@ -1835,7 +1835,7 @@ BOOL LLScrollListCtrl::handleMouseUp(S32 x, S32 y, MASK mask)
 			mSelectionChanged = false;
 			onCommit();
 		}
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	}
 	mItemRemoved = false;
 // [/SL:KB]
@@ -1986,7 +1986,7 @@ BOOL LLScrollListCtrl::handleClick(S32 x, S32 y, MASK mask)
 	LLScrollListItem* hit_item = hitItem(x, y);
 	if (!hit_item) return FALSE;
 
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	// Check if the user hit the user-remove area
 	if (hit_item->getUserRemovable())
 	{

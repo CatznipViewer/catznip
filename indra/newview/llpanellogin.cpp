@@ -1135,6 +1135,9 @@ void LLPanelLogin::onUserListCommit(void*)
 void LLPanelLogin::onRememberUserCheck(void*)
 {
 //    if (sInstance && !sInstance->mFirstLoginThisInstall)
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+    if (sInstance)
+// [/SL:KB]
     {
         LLCheckBoxCtrl* remember_name(sInstance->getChild<LLCheckBoxCtrl>("remember_name"));
         LLCheckBoxCtrl* remember_psswrd(sInstance->getChild<LLCheckBoxCtrl>("remember_password"));
@@ -1145,7 +1148,10 @@ void LLPanelLogin::onRememberUserCheck(void*)
         {
             remember = true;
             remember_name->setValue(true);
-            LLNotificationsUtil::add("LoginCantRemoveUsername");
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+			sInstance->onRemoveUser(user_combo->getListCtrl()->getFirstSelected());
+// [/SL:KB]
+//            LLNotificationsUtil::add("LoginCantRemoveUsername");
         }
         remember_psswrd->setEnabled(remember);
     }
