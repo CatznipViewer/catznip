@@ -41,6 +41,9 @@
 #include "llcommandhandler.h"		// for secondlife:///app/login/
 #include "llcombobox.h"
 #include "llviewercontrol.h"
+ // [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+#include "llfavoritesbar.h"
+// [/SL:KB]
 #include "llfloaterpreference.h"
 #include "llfocusmgr.h"
 #include "lllineeditor.h"
@@ -1377,9 +1380,10 @@ void LLPanelLogin::onRemoveUserResponse(const LLSD& sdNotification, const LLSD& 
 	{
 		const LLSD& sdUserName = sdNotification["payload"];
 		LLPointer<LLCredential> userCredential = gSecAPIHandler->loadFromCredentialMap("login_list", LLGridManager::getInstance()->getGrid(), sdUserName.asStringRef());
+		const std::string userName = getUserName(userCredential);
 
 		LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
-		if (LLScrollListItem* pItem = pUserCombo->getListCtrl()->getItemByLabel(getUserName(userCredential)))
+		if (LLScrollListItem* pItem = pUserCombo->getListCtrl()->getItemByLabel(userName))
 		{
 			S32 idxCur = pUserCombo->getListCtrl()->getItemIndex(pItem);
 			pUserCombo->remove(idxCur);
@@ -1395,6 +1399,7 @@ void LLPanelLogin::onRemoveUserResponse(const LLSD& sdNotification, const LLSD& 
 		}
 
 		gSecAPIHandler->removeFromCredentialMap("login_list", userCredential);
+		LLFavoritesOrderStorage::removeFavoritesRecordOfUser(userName, userCredential->getGrid());
 	}
 }
 // [/SL:KB]
