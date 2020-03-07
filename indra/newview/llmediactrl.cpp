@@ -202,9 +202,26 @@ BOOL LLMediaCtrl::handleScrollWheel( S32 x, S32 y, S32 clicks )
 {
 	if (LLPanel::handleScrollWheel(x, y, clicks)) return TRUE;
 	if (mMediaSource && mMediaSource->hasMedia())
-		mMediaSource->getMediaPlugin()->scrollEvent(0, clicks, gKeyboard->currentMask(TRUE));
+	{
+		convertInputCoords(x, y);
+		mMediaSource->scrollWheel(x, y, 0, clicks, gKeyboard->currentMask(TRUE));
+	}
 
 	return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+BOOL LLMediaCtrl::handleScrollHWheel(S32 x, S32 y, S32 clicks)
+{
+    if (LLPanel::handleScrollHWheel(x, y, clicks)) return TRUE;
+    if (mMediaSource && mMediaSource->hasMedia())
+    {
+        convertInputCoords(x, y);
+        mMediaSource->scrollWheel(x, y, clicks, 0, gKeyboard->currentMask(TRUE));
+    }
+
+    return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -691,7 +708,7 @@ bool LLMediaCtrl::ensureMediaSourceExists()
 	if(mMediaSource.isNull())
 	{
 		// If we don't already have a media source, try to create one.
-		mMediaSource = LLViewerMedia::newMediaImpl(mMediaTextureID, mTextureWidth, mTextureHeight);
+		mMediaSource = LLViewerMedia::getInstance()->newMediaImpl(mMediaTextureID, mTextureWidth, mTextureHeight);
 		if ( mMediaSource )
 		{
 			mMediaSource->setUsedInUI(true);
@@ -1098,7 +1115,7 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 			auth_request_params.substitutions = args;
 
 			auth_request_params.payload = LLSD().with("media_id", mMediaTextureID);
-			auth_request_params.functor.function = boost::bind(&LLViewerMedia::onAuthSubmit, _1, _2);
+			auth_request_params.functor.function = boost::bind(&LLViewerMedia::authSubmitCallback, _1, _2);
 			LLNotifications::instance().add(auth_request_params);
 		};
 		break;
@@ -1144,7 +1161,7 @@ void LLMediaCtrl::onPopup(const LLSD& notification, const LLSD& response)
 	else
 	{
 		// Make sure the opening instance knows its window open request was denied, so it can clean things up.
-		LLViewerMedia::proxyWindowClosed(notification["payload"]["uuid"]);
+		LLViewerMedia::getInstance()->proxyWindowClosed(notification["payload"]["uuid"]);
 	}
 }
 

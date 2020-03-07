@@ -171,7 +171,10 @@ void LLControlAvatar::matchVolumeTransform()
             if (attached_av)
             {
                 LLViewerJointAttachment *attach = attached_av->getTargetAttachmentPoint(mRootVolp);
-                setPositionAgent(mRootVolp->getRenderPosition());
+                if (getRegion() && !isDead())
+                {
+                    setPositionAgent(mRootVolp->getRenderPosition());
+                }
 				attach->updateWorldPRSParent();
                 LLVector3 joint_pos = attach->getWorldPosition();
                 LLQuaternion joint_rot = attach->getWorldRotation();
@@ -227,7 +230,10 @@ void LLControlAvatar::matchVolumeTransform()
 #endif
 			setRotation(bind_rot*obj_rot);
             mRoot->setWorldRotation(bind_rot*obj_rot);
-			setPositionAgent(vol_pos);
+            if (getRegion() && !isDead())
+            {
+                setPositionAgent(vol_pos);
+            }
 			mRoot->setPosition(vol_pos + mPositionConstraintFixup);
 
             F32 global_scale = gSavedSettings.getF32("AnimatedObjectsGlobalScale");
@@ -327,10 +333,13 @@ LLControlAvatar *LLControlAvatar::createControlAvatar(LLVOVolume *obj)
 {
 	LLControlAvatar *cav = (LLControlAvatar*)gObjectList.createObjectViewer(LL_PCODE_LEGACY_AVATAR, gAgent.getRegion(), CO_FLAG_CONTROL_AVATAR);
 
-    cav->mRootVolp = obj;
+    if (cav)
+    {
+        cav->mRootVolp = obj;
 
-    // Sync up position/rotation with object
-    cav->matchVolumeTransform();
+        // Sync up position/rotation with object
+        cav->matchVolumeTransform();
+    }
 
     return cav;
 }
@@ -566,27 +575,49 @@ LLViewerObject* LLControlAvatar::lineSegmentIntersectRiggedAttachments(const LLV
 									  LLVector4a* normal,
 									  LLVector4a* tangent)
 {
-	LLViewerObject* hit = NULL;
+    if (!mRootVolp)
+    {
+        return NULL;
+    }
 
-	if (lineSegmentBoundingBox(start, end))
-	{
-		LLVector4a local_end = end;
-		LLVector4a local_intersection;
+    LLViewerObject* hit = NULL;
 
-        if (mRootVolp &&
-            mRootVolp->lineSegmentIntersect(start, local_end, face, pick_transparent, pick_rigged, face_hit, &local_intersection, tex_coord, normal, tangent))
+    if (lineSegmentBoundingBox(start, end))
+    {
+        LLVector4a local_end = end;
+        LLVector4a local_intersection;
+        if (mRootVolp->lineSegmentIntersect(start, local_end, face, pick_transparent, pick_rigged, face_hit, &local_intersection, tex_coord, normal, tangent))
         {
             local_end = local_intersection;
             if (intersection)
             {
                 *intersection = local_intersection;
             }
-			
             hit = mRootVolp;
         }
-	}
-		
-	return hit;
+        else
+        {
+            std::vector<LLVOVolume*> volumes;
+            getAnimatedVolumes(volumes);
+
+            for (std::vector<LLVOVolume*>::iterator vol_it = volumes.begin(); vol_it != volumes.end(); ++vol_it)
+            {
+                LLVOVolume *volp = *vol_it;
+                if (mRootVolp != volp && volp->lineSegmentIntersect(start, local_end, face, pick_transparent, pick_rigged, face_hit, &local_intersection, tex_coord, normal, tangent))
+                {
+                    local_end = local_intersection;
+                    if (intersection)
+                    {
+                        *intersection = local_intersection;
+                    }
+                    hit = volp;
+                    break;
+                }
+            }
+        }
+    }
+
+    return hit;
 }
 
 // virtual

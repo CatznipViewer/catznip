@@ -228,12 +228,6 @@ void LLFace::destroy()
 	mVObjp = NULL;
 }
 
-
-// static
-void LLFace::initClass()
-{
-}
-
 void LLFace::setWorldMatrix(const LLMatrix4 &mat)
 {
 	LL_ERRS() << "Faces on this drawable are not independently modifiable\n" << LL_ENDL;
@@ -462,7 +456,7 @@ void LLFace::setTextureIndex(U8 index)
 		}
 		else
 		{
-			if (mDrawInfo && !mDrawInfo->mTextureList.empty())
+			if (mDrawInfo && mDrawInfo->mTextureList.size() <= 1)
 			{
 				LL_ERRS() << "Face with no texture index references indexed texture draw info." << LL_ENDL;
 			}
