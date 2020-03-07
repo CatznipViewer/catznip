@@ -45,18 +45,18 @@ LLPopupView::LLPopupView(const LLPopupView::Params& p)
 {
 	// register ourself as handler of UI popups
 // [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
-	LLUI::setPopupFuncs(boost::bind(&LLPopupView::addPopup, this, _1), boost::bind(&LLPopupView::removePopup, this, _1),
-	                    boost::bind(&LLPopupView::clearPopups, this), boost::bind(&LLPopupView::getTopPopup, this));
+	LLUI::getInstance()->setPopupFuncs(boost::bind(&LLPopupView::addPopup, this, _1), boost::bind(&LLPopupView::removePopup, this, _1),
+	                                   boost::bind(&LLPopupView::clearPopups, this), boost::bind(&LLPopupView::getTopPopup, this));
 // [/SL:KB]
-//	LLUI::setPopupFuncs(boost::bind(&LLPopupView::addPopup, this, _1), boost::bind(&LLPopupView::removePopup, this, _1), boost::bind(&LLPopupView::clearPopups, this));
+//	LLUI::getInstance()->setPopupFuncs(boost::bind(&LLPopupView::addPopup, this, _1), boost::bind(&LLPopupView::removePopup, this, _1), boost::bind(&LLPopupView::clearPopups, this));
 }
 
 LLPopupView::~LLPopupView()
 {
 	// set empty callback function so we can't handle popups anymore
-//	LLUI::setPopupFuncs(LLUI::add_popup_t(), LLUI::remove_popup_t(), LLUI::clear_popups_t());
+//	LLUI::getInstance()->setPopupFuncs(LLUI::add_popup_t(), LLUI::remove_popup_t(), LLUI::clear_popups_t());
 // [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
-	LLUI::setPopupFuncs(LLUI::add_popup_t(), LLUI::remove_popup_t(), LLUI::clear_popups_t(), LLUI::top_popup_t());
+	LLUI::getInstance()->setPopupFuncs(LLUI::add_popup_t(), LLUI::remove_popup_t(), LLUI::clear_popups_t(), LLUI::top_popup_t());
 // [/SL:KB]
 }
 

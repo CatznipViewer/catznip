@@ -145,9 +145,9 @@ void LLInspectToast::onOpen(const LLSD& notification_id)
 				rctConstrain.mBottom += pChicletBar->getRect().getHeight();
 		}
 	}
-	LLUI::positionViewNearMouse(this, rctConstrain);
+	LLUI::getInstance()->positionViewNearMouse(this, rctConstrain);
 // [/SL:KB]
-//	LLUI::positionViewNearMouse(this);
+//	LLUI::getInstance()->positionViewNearMouse(this);
 }
 
 // virtual

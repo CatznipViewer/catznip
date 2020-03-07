@@ -467,24 +467,25 @@ void audio_update_volume(bool force_update)
 	F32 media_volume = LLAudioEngine::s_nLevelMedia;
 	BOOL media_muted = LLAudioEngine::s_fMuteMedia;
 	media_volume = mute_volume * master_volume * media_volume;
-	LLViewerMedia::setVolume( media_muted ? 0.0f : media_volume );
+	LLViewerMedia::getInstance()->setVolume( media_muted ? 0.0f : media_volume );
 
-	// Voice
-	if (LLVoiceClient::getInstance())
+	// Voice, this is parametric singleton, it gets initialized when ready
+	if (LLVoiceClient::instanceExists())
 	{
 		F32 voice_volume = LLAudioEngine::s_nLevelVoice;
 		voice_volume = mute_volume * master_volume * voice_volume;
 		BOOL voice_mute = LLAudioEngine::s_fMuteVoice;
-		LLVoiceClient::getInstance()->setVoiceVolume(voice_mute ? 0.f : voice_volume);
-		LLVoiceClient::getInstance()->setMicGain(voice_mute ? 0.f : LLAudioEngine::s_nLevelMic);
+		LLVoiceClient *voice_inst = LLVoiceClient::getInstance();
+		voice_inst->setVoiceVolume(voice_mute ? 0.f : voice_volume);
+		voice_inst->setMicGain(voice_mute ? 0.f : LLAudioEngine::s_nLevelMic);
 
 		if (!gViewerWindow->getActive() && (gSavedSettings.getBOOL("MuteWhenMinimized")))
 		{
-			LLVoiceClient::getInstance()->setMuteMic(true);
+			voice_inst->setMuteMic(true);
 		}
 		else
 		{
-			LLVoiceClient::getInstance()->setMuteMic(false);
+			voice_inst->setMuteMic(false);
 		}
 	}
 // [/SL:KB]

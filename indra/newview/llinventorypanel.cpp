@@ -1161,8 +1161,8 @@ BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
 		{
 			// Copy/pasted from LLView::handleToolTip()
 			F32 nTimeout = LLToolTipMgr::instance().toolTipVisible() 
-					? LLUI::sSettingGroups["config"]->getF32("ToolTipFastDelay")
-					: LLUI::sSettingGroups["config"]->getF32("ToolTipDelay");
+					? LLUI::instance().mSettingGroups["config"]->getF32("ToolTipFastDelay")
+					: LLUI::instance().mSettingGroups["config"]->getF32("ToolTipDelay");
 			LLToolTipMgr::instance().show(LLToolTip::Params()
 					.message(pHoverItem->getToolTip())
 					.sticky_rect(pHoverItem->calcScreenRect())

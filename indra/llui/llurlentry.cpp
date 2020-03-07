@@ -177,7 +177,7 @@ void LLUrlEntryBase::callObservers(const std::string &id,
 bool LLUrlEntryBase::isLinkDisabled() const
 {
 	// this allows us to have a global setting to turn off text hyperlink highlighting/action
-	bool globally_disabled = LLUI::sSettingGroups["config"]->getBOOL("DisableTextHyperlinkActions");
+	bool globally_disabled = LLUI::getInstance()->mSettingGroups["config"]->getBOOL("DisableTextHyperlinkActions");
 
 	return globally_disabled;
 }
@@ -1260,7 +1260,7 @@ std::string LLUrlEntrySetting::getLabel(const std::string& url, const LLUrlLabel
 	const LLSD sdPathArray = uri.pathArray();
 	if (sdPathArray.size() >= 3)
 	{
-		const LLControlVariable* pControl = LLUI::getControl(sdPathArray[2].asString());
+		const LLControlVariable* pControl = LLUI::instance().getControl(sdPathArray[2].asString());
 		if ( (pControl) && (!pControl->isHiddenFromSettingsEditor()) )
 			return pControl->getName();
 	}

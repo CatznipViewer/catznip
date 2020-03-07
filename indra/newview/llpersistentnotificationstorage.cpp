@@ -47,6 +47,7 @@ LLPersistentNotificationStorage::LLPersistentNotificationStorage():
 	, mPendingSave(false)
 // [/SL:KB]
 {
+    initialize();
 }
 
 LLPersistentNotificationStorage::~LLPersistentNotificationStorage()

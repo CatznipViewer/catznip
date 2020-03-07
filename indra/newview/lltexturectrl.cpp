@@ -421,7 +421,7 @@ BOOL LLFloaterTexturePicker::postBuild()
 	mLocalScrollCtrl->setCommitCallback(boost::bind(&LLFloaterTexturePicker::onLocalScrollCommit, this, _1));
 // /[SL:KB]
 //	mLocalScrollCtrl->setCommitCallback(onLocalScrollCommit, this);
-	LLLocalBitmapMgr::feedScrollList(mLocalScrollCtrl);
+	LLLocalBitmapMgr::getInstance()->feedScrollList(mLocalScrollCtrl);
 
 	mNoCopyTextureSelected = FALSE;
 
@@ -770,7 +770,7 @@ void LLFloaterTexturePicker::onBtnSelect(void* userdata)
 		if (self->mLocalScrollCtrl->getVisible() && !self->mLocalScrollCtrl->getAllSelected().empty())
 		{
 			LLUUID temp_id = self->mLocalScrollCtrl->getFirstSelected()->getColumn(LOCAL_TRACKING_ID_COLUMN)->getValue().asUUID();
-			local_id = LLLocalBitmapMgr::getWorldID(temp_id);
+			local_id = LLLocalBitmapMgr::getInstance()->getWorldID(temp_id);
 		}
 	}
 	
@@ -932,11 +932,11 @@ void LLFloaterTexturePicker::onBtnAdd()
 
 void LLFloaterTexturePicker::onFilePickerCallback(LLHandle<LLFloaterTexturePicker> hSelf, const std::vector<std::string>& files)
 {
-	if (LLLocalBitmapMgr::addUnits(files))
+	if (LLLocalBitmapMgr::instance().addUnits(files))
 	{
 		if (!hSelf.isDead())
 		{
-			LLLocalBitmapMgr::feedScrollList(hSelf.get()->mLocalScrollCtrl);
+			LLLocalBitmapMgr::instance().feedScrollList(hSelf.get()->mLocalScrollCtrl);
 		}
 	}
 }
@@ -962,13 +962,13 @@ void LLFloaterTexturePicker::onBtnRemove()
 			if (list_item)
 			{
 				LLUUID tracking_id = list_item->getColumn(LOCAL_TRACKING_ID_COLUMN)->getValue().asUUID();
-				LLLocalBitmapMgr::delUnit(tracking_id);
+				LLLocalBitmapMgr::getInstance()->delUnit(tracking_id);
 			}
 		}
 
 		self->getChild<LLButton>("l_rem_btn")->setEnabled(false);
 		self->getChild<LLButton>("l_upl_btn")->setEnabled(false);
-		LLLocalBitmapMgr::feedScrollList(self->mLocalScrollCtrl);
+		LLLocalBitmapMgr::getInstance()->feedScrollList(self->mLocalScrollCtrl);
 	}
 
 }
@@ -993,7 +993,7 @@ void LLFloaterTexturePicker::onBtnUpload()
 	   in the future, it might be a good idea to check the vector size and if more than one units is selected - opt for multi-image upload. */
 	
 	LLUUID tracking_id = (LLUUID)self->mLocalScrollCtrl->getSelectedItemLabel(LOCAL_TRACKING_ID_COLUMN);
-	std::string filename = LLLocalBitmapMgr::getFilename(tracking_id);
+	std::string filename = LLLocalBitmapMgr::getInstance()->getFilename(tracking_id);
 
 	if (!filename.empty())
 	{
@@ -1021,7 +1021,7 @@ void LLFloaterTexturePicker::onLocalScrollCommit(LLUICtrl* ctrl)
 	if (has_selection)
 	{
 		LLUUID tracking_id = (LLUUID)self->mLocalScrollCtrl->getSelectedItemLabel(LOCAL_TRACKING_ID_COLUMN); 
-		LLUUID inworld_id = LLLocalBitmapMgr::getWorldID(tracking_id);
+		LLUUID inworld_id = LLLocalBitmapMgr::getInstance()->getWorldID(tracking_id);
 		if (self->mSetImageAssetIDCallback)
 		{
 			self->mSetImageAssetIDCallback(inworld_id);

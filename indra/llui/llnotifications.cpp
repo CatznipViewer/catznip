@@ -160,7 +160,7 @@ bool handleIgnoredNotification(const LLSD& payload)
 			response = pNotif->getResponseTemplate(LLNotification::WITH_DEFAULT_BUTTON);
 			break;
 		case LLNotificationForm::IGNORE_WITH_LAST_RESPONSE:
-			response = LLUI::sSettingGroups["ignores"]->getLLSD("Default" + pNotif->getName());
+			response = LLUI::getInstance()->mSettingGroups["ignores"]->getLLSD("Default" + pNotif->getName());
 			break;
 		case LLNotificationForm::IGNORE_SHOW_AGAIN:
 			break;
@@ -227,6 +227,7 @@ LLNotificationForm::LLNotificationForm(const std::string& name, const LLNotifica
 	{
 		mIgnoreMsg = p.ignore.text;
 
+		LLUI *ui_inst = LLUI::getInstance();
 		if (!p.ignore.save_option)
 		{
 			mIgnore = p.ignore.session_only ? IGNORE_WITH_DEFAULT_RESPONSE_SESSION_ONLY : IGNORE_WITH_DEFAULT_RESPONSE;
@@ -235,19 +236,19 @@ LLNotificationForm::LLNotificationForm(const std::string& name, const LLNotifica
 		{
 			// remember last option chosen by user and automatically respond with that in the future
 			mIgnore = IGNORE_WITH_LAST_RESPONSE;
-			LLUI::sSettingGroups["ignores"]->declareLLSD(std::string("Default") + name, "", std::string("Default response for notification " + name));
+			ui_inst->mSettingGroups["ignores"]->declareLLSD(std::string("Default") + name, "", std::string("Default response for notification " + name));
 		}
 
 		BOOL show_notification = TRUE;
 		if (p.ignore.control.isProvided())
 		{
-			mIgnoreSetting = LLUI::sSettingGroups["config"]->getControl(p.ignore.control);
+			mIgnoreSetting = ui_inst->mSettingGroups["config"]->getControl(p.ignore.control);
 			mInvertSetting = p.ignore.invert_control;
 		}
 		else
 		{
-			LLUI::sSettingGroups["ignores"]->declareBOOL(name, show_notification, "Show notification with this name", LLControlVariable::PERSIST_NONDFT);
-			mIgnoreSetting = LLUI::sSettingGroups["ignores"]->getControl(name);
+			ui_inst->mSettingGroups["ignores"]->declareBOOL(name, show_notification, "Show notification with this name", LLControlVariable::PERSIST_NONDFT);
+			mIgnoreSetting = ui_inst->mSettingGroups["ignores"]->getControl(name);
 		}
 	}
 
@@ -457,21 +458,21 @@ bool LLNotificationTemplate::canLogToNearbyChat() const
 {
 	// If no setting is defined we don't log to nearby chat unless the notification type is "notifytip"
 	// (mimicks the default behaviour where log_to_chat is 'true' if unspecified but is only ever checked by LLTipHandler)
-	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	const LLControlVariable* pControl = LLUI::instance().mSettingGroups["config"]->getControl("Log" + mName);
 	return (pControl) ? (pControl->get().asInteger() & LOG_CHAT) : "notifytip" == mType;
 }
 
 bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
 {
 	// If no setting is defined we don't log to IMs by default (mimicks behaviour of log_to_im being set to false if unspecified)
-	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	const LLControlVariable* pControl = LLUI::instance().mSettingGroups["config"]->getControl("Log" + mName);
 	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
 	return (nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession));
 }
 
 void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
 {
-	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	LLControlVariable* pControl = LLUI::instance().mSettingGroups["config"]->getControl("Log" + mName);
 	if (pControl)
 	{
 		U32 nLogTo = pControl->get().asInteger();
@@ -485,7 +486,7 @@ void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
 
 void LLNotificationTemplate::setLogToIM(bool fLog)
 {
-	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	LLControlVariable* pControl = LLUI::instance().mSettingGroups["config"]->getControl("Log" + mName);
 	if (pControl)
 	{
 		U32 nLogTo = pControl->get().asInteger();
@@ -531,7 +532,7 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 		mCanLogTo = (p.can_logto.isProvided()) ? getLogTypeFromString(p.can_logto)
 		                                       : ("notifytip" == mType) ? LLNotificationTemplate::LOG_CHAT : 0;
 		U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
-		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
+		LLUI::instance().mSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
 	}
 
 #ifndef LL_RELEASE_FOR_DOWNLOAD
@@ -543,7 +544,7 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 // [/SL:KB]
 
 	if (p.sound.isProvided()
-		&& LLUI::sSettingGroups["config"]->controlExists(p.sound))
+		&& LLUI::getInstance()->mSettingGroups["config"]->controlExists(p.sound))
 	{
 		mSoundName = p.sound;
 	}
@@ -817,7 +818,7 @@ void LLNotification::respond(const LLSD& response)
 		mForm->setIgnored(mIgnored);
 		if (mIgnored && mForm->getIgnoreType() == LLNotificationForm::IGNORE_WITH_LAST_RESPONSE)
 		{
-			LLUI::sSettingGroups["ignores"]->setLLSD("Default" + getName(), response);
+			LLUI::getInstance()->mSettingGroups["ignores"]->setLLSD("Default" + getName(), response);
 		}
 	}
 

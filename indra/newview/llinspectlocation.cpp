@@ -146,9 +146,9 @@ void LLInspectLocation::onOpen(const LLSD& sdData)
 	// Position the inspector relative to the mouse cursor
 	// Similar to how tooltips are positioned [see LLToolTipMgr::createToolTip()]
 	if (sdData.has("pos"))
-		LLUI::positionViewNearMouse(this, sdData["pos"]["x"].asInteger(), sdData["pos"]["y"].asInteger());
+		LLUI::instance().positionViewNearMouse(this, sdData["pos"]["x"].asInteger(), sdData["pos"]["y"].asInteger());
 	else
-		LLUI::positionViewNearMouse(this);
+		LLUI::instance().positionViewNearMouse(this);
 
 	// Request the parcel id
 	requestRemoteParcel(posGlobal);
