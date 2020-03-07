@@ -3113,6 +3113,7 @@ BOOL LLTextSegment::handleRightMouseUp(S32 x, S32 y, MASK mask) { return FALSE; 
 BOOL LLTextSegment::handleDoubleClick(S32 x, S32 y, MASK mask) { return FALSE; }
 BOOL LLTextSegment::handleHover(S32 x, S32 y, MASK mask) { return FALSE; }
 BOOL LLTextSegment::handleScrollWheel(S32 x, S32 y, S32 clicks) { return FALSE; }
+BOOL LLTextSegment::handleScrollHWheel(S32 x, S32 y, S32 clicks) { return FALSE; }
 BOOL LLTextSegment::handleToolTip(S32 x, S32 y, MASK mask) { return FALSE; }
 const std::string&	LLTextSegment::getName() const 
 {
@@ -3246,7 +3247,7 @@ BOOL LLNormalTextSegment::handleHover(S32 x, S32 y, MASK mask)
 		// Only process the click if it's actually in this segment, not to the right of the end-of-line.
 		if(mEditor.getSegmentAtLocalPos(x, y, false) == this)
 		{
-			LLUI::getWindow()->setCursor(UI_CURSOR_HAND);
+			LLUI::getInstance()->getWindow()->setCursor(UI_CURSOR_HAND);
 			return TRUE;
 		}
 	}
