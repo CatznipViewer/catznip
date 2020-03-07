@@ -57,12 +57,10 @@
     combo_editor.prevalidate_callback="ascii"
     tool_tip="The username you chose when you registered, like bobsmith12 or Steller Sunshine"
     name="username_combo"
-    width="206">
+    width="236">
     <combo_box.combo_editor
       text_pad_left="8" 
       bg_image_always_focused="true"/>
-<!--
--->
   </combo_box>
   <line_editor
     follows="left|top"
@@ -134,7 +132,7 @@
     follows="left|top"
     font="SansSerifMedium"
     left="116"
-    bottom_delta="30"  	
+    bottom_delta="25"  	
     height="24"
     label="Remember me"
     word_wrap="down"
@@ -149,7 +147,7 @@
     text_color="EmphasisColor"
     height="16"
     left="369"    
-    bottom_delta="-2"
+    bottom_delta="0"
     label="Remember password"
     word_wrap="down"
     check_button.bottom="3"
@@ -160,7 +158,7 @@
     font="SansSerifTiny"
     follows="left|top"
     height="26"
-  	left="545"
+  	left_pad="15"
   	bottom_delta="4"
     max_chars="128"
     label="Select grid"    
@@ -173,8 +171,8 @@
     text_color="EmphasisColor"
     height="16"
     name="forgot_password_text"
-    left="778"
-    bottom_delta="-8"
+    left_pad="3"
+    bottom_delta="-5"
     width="120"
     halign="center">
     Password help

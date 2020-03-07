@@ -1615,7 +1615,7 @@ void LLFavoritesOrderStorage::load()
 }
 
 // static
-void LLFavoritesOrderStorage::removeFavoritesRecordOfUser(const std::string &user, const std::string &grid)
+void LLFavoritesOrderStorage::removeFavoritesRecordOfUser(const std::string& user, const std::string &grid)
 {
     std::string filename = getStoredFavoritesFilename(grid);
     if (!filename.empty())
@@ -1630,33 +1630,46 @@ void LLFavoritesOrderStorage::removeFavoritesRecordOfUser(const std::string &use
 
             // Note : use the "John Doe" and not the "john.doe" version of the name.
             // See saveFavoritesSLURLs() here above for the reason why.
-            if (fav_llsd.has(user))
-            {
-                LLSD user_llsd = fav_llsd[user];
-
-                if ((user_llsd.beginArray() != user_llsd.endArray()) && user_llsd.beginArray()->has("id"))
-                {
-                    for (LLSD::array_iterator iter = user_llsd.beginArray(); iter != user_llsd.endArray(); ++iter)
-                    {
-                        LLSD value;
-                        value["id"] = iter->get("id").asUUID();
-                        iter->assign(value);
-                    }
-                    fav_llsd[user] = user_llsd;
-                    llofstream file;
-                    file.open(filename.c_str());
-                    if (file.is_open())
-                    {
-                        LLSDSerialize::toPrettyXML(fav_llsd, file);
-                        file.close();
-                    }
-                }
-                else
-                {
-                    LL_INFOS("FavoritesBar") << "Removed favorites for " << user << LL_ENDL;
-                    fav_llsd.erase(user);
-                }
-            }
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+			// User names are case-sensitive and some of the conversion functions don't take this into account
+			LLSD user_llsd;
+			for (LLSD::map_const_iterator iter = fav_llsd.beginMap(); iter != fav_llsd.endMap(); ++iter)
+			{
+				if (LLStringUtil::compareInsensitive(user, iter->first) == 0)
+				{
+					LL_INFOS("FavoritesBar") << "Removed favorites for " << iter->first << LL_ENDL;
+					fav_llsd.erase(iter->first);
+					break;
+				}
+			}
+// [/SL:KB]
+//            if (fav_llsd.has(user))
+//            {
+//                LLSD user_llsd = fav_llsd[user];
+//
+//                if ((user_llsd.beginArray() != user_llsd.endArray()) && user_llsd.beginArray()->has("id"))
+//                {
+//                    for (LLSD::array_iterator iter = user_llsd.beginArray(); iter != user_llsd.endArray(); ++iter)
+//                    {
+//                        LLSD value;
+//                        value["id"] = iter->get("id").asUUID();
+//                        iter->assign(value);
+//                    }
+//                    fav_llsd[user] = user_llsd;
+//                    llofstream file;
+//                    file.open(filename.c_str());
+//                    if (file.is_open())
+//                    {
+//                        LLSDSerialize::toPrettyXML(fav_llsd, file);
+//                        file.close();
+//                    }
+//                }
+//                else
+//                {
+//                    LL_INFOS("FavoritesBar") << "Removed favorites for " << user << LL_ENDL;
+//                    fav_llsd.erase(user);
+//                }
+//            }
 
             llofstream out_file;
             out_file.open(filename.c_str());

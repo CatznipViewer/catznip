@@ -67,7 +67,7 @@ public:
 
 	// *TODO: Add callbacks to Params
 	typedef boost::function<void (void)> callback_t;
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	typedef boost::function<bool (LLScrollListItem*)> remove_callback_t;
 // [/SL:KB]
 
@@ -237,7 +237,7 @@ public:
 	void			setDoubleClickCallback( callback_t cb ) { mOnDoubleClickCallback = cb; }
 	void			setMaximumSelectCallback( callback_t cb) { mOnMaximumSelectCallback = cb; }
 	void			setSortChangedCallback( callback_t cb) 	{ mOnSortChangedCallback = cb; }
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	void			setUserRemoveCallback(remove_callback_t cb) { mOnUserRemoveCallback = cb; }
 // [/SL:KB]
 	// Convenience function; *TODO: replace with setter above + boost::bind() in calling code
@@ -486,7 +486,7 @@ private:
 	bool			mSelectOnFocus = true;
 // [/SL:KB]
 	bool			mSelectionChanged;
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	bool			mItemRemoved;	// TRUE if the user removed an item in the current mouse down/up cycle
 // [/SL:KB]
 	bool			mNeedsScroll;
@@ -522,11 +522,11 @@ private:
 	callback_t		mOnDoubleClickCallback;
 	callback_t 		mOnMaximumSelectCallback;
 	callback_t 		mOnSortChangedCallback;
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	remove_callback_t mOnUserRemoveCallback;
 // [/SL:KB]
 
-// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: Catznip-3.6
 	LLPointer<LLUIImage> mRemoveIcon;
 // [/SL:KB]
 
