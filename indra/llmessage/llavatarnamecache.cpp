@@ -50,8 +50,8 @@
 #include <set>
 
 // [RLVa:KB] - Checked: 2010-12-08 (RLVa-1.4.0a) | Added: RLVa-1.2.2c
-	// RLVa override for display names
-	bool sForceDisplayNames = false;
+// RLVa override for display names
+bool sForceDisplayNames = false;
 // [/RLVa:KB]
 
 
@@ -61,6 +61,7 @@ const F64 TEMP_CACHE_ENTRY_LIFETIME = 60.0;
 // [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6)
 const F64 MAX_UNREFRESHED_TIME = 90.0 * 60.0;
 // [/SL:KB]
+//const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
 
 // Send bulk lookup requests a few times a second at most.
 // Only need per-frame timing resolution.

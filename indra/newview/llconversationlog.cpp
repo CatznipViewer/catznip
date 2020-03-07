@@ -448,16 +448,19 @@ bool LLConversationLog::moveLog(const std::string &originDirectory, const std::s
 
 void LLConversationLog::initLoggingState()
 {
-    if (gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
-    {
 // [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+    if (gSavedPerAccountSettings.controlExists("LogConversations"))
+    {
 		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("LogConversations").get();
 		keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
 		if (keep_log_ctrlp->getValue().asBoolean())
 		{
 			enableLogging(true);
 		}
+    }
 // [/SL:KB]
+//    if (gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
+//    {
 //        LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("KeepConversationLogTranscripts").get();
 //        S32 log_mode = keep_log_ctrlp->getValue();
 //        keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
@@ -465,7 +468,7 @@ void LLConversationLog::initLoggingState()
 //        {
 //            enableLogging(log_mode);
 //        }
-    }
+//    }
 }
 
 std::string LLConversationLog::getFileName()
