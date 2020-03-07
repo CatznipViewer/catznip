@@ -628,12 +628,9 @@ BOOL LLPanelClassifiedEdit::postBuild()
 {
 	LLPanelClassifiedInfo::postBuild();
 
-	LLTextureCtrl* snapshot = getChild<LLTextureCtrl>("classified_snapshot");
-	snapshot->setOnSelectCallback(boost::bind(&LLPanelClassifiedEdit::onChange, this));
-
 	LLUICtrl* edit_icon = getChild<LLUICtrl>("edit_icon");
-	snapshot->setMouseEnterCallback(boost::bind(&LLPanelClassifiedEdit::onTexturePickerMouseEnter, this, edit_icon));
-	snapshot->setMouseLeaveCallback(boost::bind(&LLPanelClassifiedEdit::onTexturePickerMouseLeave, this, edit_icon));
+	mSnapshotCtrl->setMouseEnterCallback(boost::bind(&LLPanelClassifiedEdit::onTexturePickerMouseEnter, this, edit_icon));
+	mSnapshotCtrl->setMouseLeaveCallback(boost::bind(&LLPanelClassifiedEdit::onTexturePickerMouseLeave, this, edit_icon));
 	edit_icon->setVisible(false);
 
 	LLLineEditor* line_edit = getChild<LLLineEditor>("classified_name");
@@ -767,6 +764,7 @@ void LLPanelClassifiedEdit::processProperties(void* data, EAvatarProcessorType t
 			setClassifiedName(c_info->name);
 			setDescription(c_info->description);
 			setSnapshotId(c_info->snapshot_id);
+			setParcelId(c_info->parcel_id);
 			setPosGlobal(c_info->pos_global);
 
 			setClassifiedLocation(createLocationText(c_info->parcel_name, c_info->sim_name, c_info->pos_global));
@@ -1130,6 +1128,7 @@ void LLPanelClassifiedEdit::onTexturePickerMouseLeave(LLUICtrl* ctrl)
 void LLPanelClassifiedEdit::onTextureSelected()
 {
 	setSnapshotId(mSnapshotCtrl->getValue().asUUID());
+	onChange();
 }
 
 //////////////////////////////////////////////////////////////////////////

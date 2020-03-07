@@ -291,7 +291,6 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible"))
 	{
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
-		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
 	}
     // hide marketplace listing box, unless we are a marketplace panel
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible") && !mParams.use_marketplace_folders)
@@ -871,7 +870,8 @@ LLFolderViewItem* LLInventoryPanel::buildNewViews(const LLUUID& id)
 			
 			if (objectp->getType() >= LLAssetType::AT_COUNT)
   			{
-  				LL_WARNS() << "LLInventoryPanel::buildNewViews called with unknown objectp->mType : "
+				// Example: Happens when we add assets of new, not yet supported type to library
+				LL_DEBUGS() << "LLInventoryPanel::buildNewViews called with unknown objectp->mType : "
 				<< ((S32) objectp->getType()) << " name " << objectp->getName() << " UUID " << objectp->getUUID()
 				<< LL_ENDL;
 

@@ -103,6 +103,7 @@ public:
 	/*virtual*/ BOOL			handleDoubleClick(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL			handleHover(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL			handleScrollWheel(S32 x, S32 y, S32 clicks);
+	/*virtual*/ BOOL			handleScrollHWheel(S32 x, S32 y, S32 clicks);
 	/*virtual*/ BOOL			handleToolTip(S32 x, S32 y, MASK mask);
 	/*virtual*/ const std::string&	getName() const;
 	/*virtual*/ void			onMouseCaptureLost();
@@ -275,7 +276,8 @@ typedef LLPointer<LLTextSegment> LLTextSegmentPtr;
 class LLTextBase 
 :	public LLUICtrl,
 	protected LLEditMenuHandler,
-	public LLSpellCheckMenuHandler
+	public LLSpellCheckMenuHandler,
+	public ll::ui::SearchableControl
 {
 public:
 	friend class LLTextSegment;
@@ -439,6 +441,8 @@ public:
 
 	S32						getVPad() { return mVPad; }
 	S32						getHPad() { return mHPad; }
+	F32						getLineSpacingMult() { return mLineSpacingMult; }
+	S32						getLineSpacingPixels() { return mLineSpacingPixels; } // only for multiline
 
 	S32						getDocIndexFromLocalCoord( S32 local_x, S32 local_y, BOOL round, bool hit_past_end_of_line = true) const;
 	LLRect					getLocalRectFromDocIndex(S32 pos) const;
@@ -617,6 +621,11 @@ protected:
 	void							appendAndHighlightTextImpl(const std::string &new_text, S32 highlight_part, const LLStyle::Params& style_params, bool underline_on_hover_only = false);
 	S32 normalizeUri(std::string& uri);
 	
+protected:
+	virtual std::string _getSearchText() const
+	{
+		return mLabel.getString() + getToolTip();
+	}
 
 protected:
 	// text segmentation and flow

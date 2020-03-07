@@ -47,8 +47,22 @@ class LLViewBorder;
 
 class LLCheckBoxCtrl
 : public LLUICtrl
+, public ll::ui::SearchableControl
 {
 public:
+
+    enum EWordWrap
+    {
+        WRAP_NONE,
+        WRAP_UP,
+        WRAP_DOWN
+    };
+
+    struct WordWrap : public LLInitParam::TypeValuesHelper<EWordWrap, WordWrap>
+    {
+        static void declareValues();
+    };
+
 	struct Params 
 	:	public LLInitParam::Block<Params, LLUICtrl::Params>
 	{
@@ -56,6 +70,8 @@ public:
 
 		Optional<LLTextBox::Params> label_text;
 		Optional<LLButton::Params> check_button;
+
+		Optional<EWordWrap, WordWrap>	word_wrap;
 
 		Ignored					radio_style;
 
@@ -92,6 +108,8 @@ public:
 	// LLCheckBoxCtrl interface
 	virtual BOOL		toggle()				{ return mButton->toggleState(); }		// returns new state
 
+	void				setBtnFocus() { mButton->setFocus(TRUE); }
+
 	void				setEnabledColor( const LLColor4 &color ) { mTextEnabledColor = color; }
 	void				setDisabledColor( const LLColor4 &color ) { mTextDisabledColor = color; }
 
@@ -107,6 +125,18 @@ public:
 	virtual void		resetDirty();			// Clear dirty state
 
 protected:
+	virtual std::string _getSearchText() const
+	{
+		return getLabel() + getToolTip();
+	}
+
+	virtual void onSetHighlight() const // When highlight, really do highlight the label
+	{
+		if( mLabel )
+			mLabel->ll::ui::SearchableControl::setHighlighted( ll::ui::SearchableControl::getHighlighted() );
+	}
+
+protected:
 	// note: value is stored in toggle state of button
 	LLButton*		mButton;
 	LLTextBox*		mLabel;
@@ -114,6 +144,8 @@ protected:
 
 	LLUIColor		mTextEnabledColor;
 	LLUIColor		mTextDisabledColor;
+
+	EWordWrap		mWordWrap; // off, shifts text up, shifts text down
 };
 
 // Build time optimization, generate once in .cpp file
