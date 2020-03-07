@@ -2218,6 +2218,9 @@ void watchdog_llerrs_callback(const std::string &error_string)
 	gLLErrorLastMessage = error_string;
 // [/SL:KB]
 
+	gDebugInfo["FatalMessage"] = error_string;
+	LLAppViewer::instance()->writeDebugInfo();
+
 #ifdef LL_WINDOWS
 	RaiseException(0,0,0,0);
 #else
