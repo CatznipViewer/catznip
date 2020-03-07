@@ -211,17 +211,9 @@ class LLSecAPIBasicCredential : public LLCredential
 public:
 	LLSecAPIBasicCredential(const std::string& grid) : LLCredential(grid) {} 
 	virtual ~LLSecAPIBasicCredential() {}
-
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	static std::string userIDFromIdentifier(const LLSD& sdIdentifier);
-	static std::string userNameFromIdentifier(const LLSD& sdIdentifier);
-// [/SL:KB]
-
-	// return a value representing the user id, (could be guid, name, whatever)
-	virtual std::string userID() const;	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual std::string userName() const;	
-// [/SL:KB]
+	// return a value representing the user id, used for server and voice
+	// (could be guid, name in format "name_resident", whatever)
+	virtual std::string userID() const;
 	
 	// printible string identifying the credential.
 	virtual std::string asString() const;
@@ -255,7 +247,10 @@ public:
 	// exists, it'll be loaded.  If not, one will be created (but not
 	// persisted)
 	virtual LLPointer<LLCertificateStore> getCertificateStore(const std::string& store_id);
-	
+
+	// protectedData functions technically should be pretected or private,
+	// they are not because of llsechandler_basic_test imlementation
+
 	// persist data in a protected store
 	virtual void setProtectedData(const std::string& data_type,
 								  const std::string& data_id,
@@ -268,29 +263,71 @@ public:
 	// delete a protected data item from the store
 	virtual void deleteProtectedData(const std::string& data_type,
 									 const std::string& data_id);
-	
+
+	// persist data in a protected store's map
+	virtual void addToProtectedMap(const std::string& data_type,
+								   const std::string& data_id,
+								   const std::string& map_elem,
+								   const LLSD& data);
+
+	// remove data from protected store's map
+	virtual void removeFromProtectedMap(const std::string& data_type,
+										const std::string& data_id,
+										const std::string& map_elem);
+
 	// credential management routines
 	
 	virtual LLPointer<LLCredential> createCredential(const std::string& grid,
 													 const LLSD& identifier, 
 													 const LLSD& authenticator);
-	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const std::string& user_id);
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const LLSD& identifier);
+
+//	// load single credencial from default storage
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
+	// NOTE: we want to catch all LL calls to the old function since we don't want to support the legacy credential storage
+	LLPointer<LLCredential> loadCredentialFromDefaultStorage(const std::string& data_id) override;
 // [/SL:KB]
 //	virtual LLPointer<LLCredential> loadCredential(const std::string& grid);
 
+	// save credencial to default storage
 	virtual void saveCredential(LLPointer<LLCredential> cred, bool save_authenticator);
 	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual void deleteCredential(const std::string& grid, const LLSD& identifier);
-// [/SL:KB]
 	virtual void deleteCredential(LLPointer<LLCredential> cred);
 
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual bool getCredentialIdentifierList(const std::string& grid, std::vector<LLSD>& identifiers);
-// [/SL:KB]
+	// has map of credentials declared as specific storage
+	virtual bool hasCredentialMap(const std::string& storage,
+								  const std::string& grid);
+
+	// returns true if map is empty or does not exist
+	virtual bool emptyCredentialMap(const std::string& storage,
+									const std::string& grid);
+
+	// load map of credentials from specific storage
+	virtual void loadCredentialMap(const std::string& storage,
+								   const std::string& grid,
+								   credential_map_t& credential_map);
+
+	// load single username from map of credentials from specific storage
+	virtual LLPointer<LLCredential> loadFromCredentialMap(const std::string& storage,
+														  const std::string& grid,
+														  const std::string& userid);
+
+	// add item to map of credentials from specific storage
+	virtual void addToCredentialMap(const std::string& storage,
+									LLPointer<LLCredential> cred,
+									bool save_authenticator);
+
+	// remove item from map of credentials from specific storage
+	virtual void removeFromCredentialMap(const std::string& storage,
+										 LLPointer<LLCredential> cred);
+
+	// remove item from map of credentials from specific storage
+	virtual void removeFromCredentialMap(const std::string& storage,
+										 const std::string& grid,
+										 const std::string& userid);
+
+	virtual void removeCredentialMap(const std::string& storage,
+									 const std::string& grid);
+
 
 protected:
 	void _readProtectedData();

@@ -83,6 +83,7 @@
 #include "llfloaterfeedback.h"
 // [/SL:KB]
 #include "llfloaterfonttest.h"
+#include "llfloaterforgetuser.h"
 #include "llfloatergesture.h"
 #include "llfloatergodtools.h"
 #include "llfloatergridstatus.h"
@@ -311,6 +312,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("feedback", "floater_feedback.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterFeedback>);
 // [/SL:KB]
 	LLFloaterReg::add("font_test", "floater_font_test.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterFontTest>);
+	LLFloaterReg::add("forget_username", "floater_forget_user.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterForgetUser>);
 
 	LLFloaterReg::add("gestures", "floater_gesture.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterGesture>);
 	LLFloaterReg::add("god_tools", "floater_god_tools.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterGodTools>);

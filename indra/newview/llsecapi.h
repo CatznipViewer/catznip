@@ -316,24 +316,8 @@ public:
 	virtual std::string getGrid() { return mGrid; }
 	
 
-// [SL:KB] - Patch: Viewer-Login | Checked: 2015-12-20 (Catznip-4.0)
-	virtual bool hasIdentifier() { return !mIdentifier.isUndefined(); }
-	virtual bool hasAuthenticator() { return !mAuthenticator.isUndefined(); }
-// [/SL:KB]
 	virtual void clearAuthenticator() { mAuthenticator = LLSD(); } 
 	virtual std::string userID() const { return std::string("unknown");}
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual std::string userName() const { return std::string("unknown");}
-
-	virtual LLSD asLLSD(bool save_authenticator)
-	{
-		LLSD sdCredential = LLSD::emptyMap();
-		sdCredential["identifier"] = getIdentifier(); 
-		if (save_authenticator)
-			sdCredential["authenticator"] = getAuthenticator();
-		return sdCredential;
-	}
-// [/SL:KB]
 	virtual std::string asString() const { return std::string("unknown");}
 	operator std::string() const { return asString(); }
 protected:
@@ -480,27 +464,68 @@ public:
 	// delete a protected data item from the store
 	virtual void deleteProtectedData(const std::string& data_type,
 									 const std::string& data_id)=0;
-	
+
+	// persist data in a protected store's map
+	virtual void addToProtectedMap(const std::string& data_type,
+								   const std::string& data_id,
+								   const std::string& map_elem,
+								   const LLSD& data)=0;
+
+	// remove data from protected store's map
+	virtual void removeFromProtectedMap(const std::string& data_type,
+										const std::string& data_id,
+										const std::string& map_elem)=0;
+
+public:
 	virtual LLPointer<LLCredential> createCredential(const std::string& grid,
 													 const LLSD& identifier, 
 													 const LLSD& authenticator)=0;
 	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const std::string& user_id = LLStringUtil::null) = 0;
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const LLSD& identifier) = 0;
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
+	virtual LLPointer<LLCredential> loadCredentialFromDefaultStorage(const std::string& data_id) = 0;
 // [/SL:KB]
 //	virtual LLPointer<LLCredential> loadCredential(const std::string& grid)=0;
 	
 	virtual void saveCredential(LLPointer<LLCredential> cred, bool save_authenticator)=0;
 	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual void deleteCredential(const std::string& grid, const LLSD& identifier) = 0;
-// [/SL:KB]
 	virtual void deleteCredential(LLPointer<LLCredential> cred)=0;
+
+	// has map of credentials declared as specific storage
+	virtual bool hasCredentialMap(const std::string& storage,
+								  const std::string& grid)=0;
+
+	// returns true if map is empty or does not exist
+	virtual bool emptyCredentialMap(const std::string& storage,
+									const std::string& grid)=0;
+
+	// load map of credentials from specific storage
+	typedef std::map<std::string, LLPointer<LLCredential> > credential_map_t;
+	virtual void loadCredentialMap(const std::string& storage,
+								   const std::string& grid,
+								   credential_map_t& credential_map)=0;
+
+	// load single username from map of credentials from specific storage
+	virtual LLPointer<LLCredential> loadFromCredentialMap(const std::string& storage,
+														  const std::string& grid,
+														  const std::string& userid)=0;
+
+	// add item to map of credentials from specific storage
+	virtual void addToCredentialMap(const std::string& storage,
+									LLPointer<LLCredential> cred,
+									bool save_authenticator)=0;
+
+	// remove item from map of credentials from specific storage
+	virtual void removeFromCredentialMap(const std::string& storage,
+										 LLPointer<LLCredential> cred)=0;
+
+	// remove item from map of credentials from specific storage
+	virtual void removeFromCredentialMap(const std::string& storage,
+										 const std::string& grid,
+										 const std::string& userid)=0;
+
+	virtual void removeCredentialMap(const std::string& storage,
+									 const std::string& grid)=0;
 	
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	virtual bool getCredentialIdentifierList(const std::string& grid, std::vector<LLSD>& identifiers) = 0;
-// [/SL:KB]
 };
 
 void initializeSecHandler();
