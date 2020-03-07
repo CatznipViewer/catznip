@@ -37,6 +37,9 @@ class LLVOAvatar;
 #include "llcallingcard.h"   // for LLFriendObserver
 #include "llsecapi.h"
 #include "llcontrol.h"
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+#include "llmousehandler.h"
+// [/SL:KB]
 
 // devices
 
@@ -409,7 +412,7 @@ public:
 	void setPTTIsToggle(bool PTTIsToggle);
 	bool getPTTIsToggle();	
 // [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
-	bool isPTTMiddleMouse() const { return mPTTIsMiddleMouse; }
+	bool isPTTMiddleMouse() const { return mPTTMouseButton == LLMouseHandler::CLICK_MIDDLE; }
 // [/SL:KB]
 	void setPTTKey(std::string &key);
 	
@@ -420,8 +423,8 @@ public:
 	// PTT key triggering
 	void keyDown(KEY key, MASK mask);
 	void keyUp(KEY key, MASK mask);
-	void middleMouseState(bool down);
-	
+	void updateMouseState(S32 click, bool down);
+
 	boost::signals2::connection MicroChangedCallback(const micro_changed_signal_t::slot_type& cb ) { return mMicroChangedSignal.connect(cb); }
 
 	
@@ -489,7 +492,7 @@ protected:
 	bool		mPTT;
 	
 	bool		mUsePTT;
-	bool		mPTTIsMiddleMouse;
+	S32			mPTTMouseButton;
 	KEY			mPTTKey;
 	bool		mPTTIsToggle;
 	bool		mUserPTTState;

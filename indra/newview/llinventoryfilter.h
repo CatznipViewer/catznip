@@ -427,6 +427,9 @@ private:
 	std::string 			mEmptyLookupMessage;
 
 //	ESearchType 			mSearchType;
+
+	std::vector<std::string> mFilterTokens;
+	std::string				 mExactToken;
 };
 
 #endif

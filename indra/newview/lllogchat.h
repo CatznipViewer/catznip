@@ -115,9 +115,9 @@ public:
 	static void getListOfTranscriptBackupFiles(std::vector<std::string>& list_of_transcriptions);
 
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
-	static bool loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+	static bool loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD(), bool is_group = false);
 // [/SL:KB]
-//	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+//	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD(), bool is_group = false);
 
 	typedef boost::signals2::signal<void ()> save_history_signal_t;
 	boost::signals2::connection setSaveHistorySignal(const save_history_signal_t::slot_type& cb);
@@ -211,6 +211,7 @@ protected:
 	virtual ~LLChatLogParser() {};
 };
 
+extern const std::string GROUP_CHAT_SUFFIX;
 
 // LLSD map lookup constants
 extern const std::string LL_IM_TIME; //("time");

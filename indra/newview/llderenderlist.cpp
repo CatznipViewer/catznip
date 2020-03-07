@@ -427,9 +427,9 @@ bool LLDerenderList::processObjectUpdate(U64 idRegion, const LLUUID& idObject, U
 {
 	// Used by OUT_FULL_COMPRESSED
 	U32 idRootLocal = 0, nMask = 0;
-	htonmemcpy(&nMask, pBuffer + 64, MVT_U32, 4);			// "SpecialCode"
+	htolememcpy(&nMask, pBuffer + 64, MVT_U32, 4);			// "SpecialCode"
 	if (nMask & 0x20)
-		htonmemcpy(&idRootLocal, pBuffer + 84, MVT_U32, 4);	// "ParentID"
+		htolememcpy(&idRootLocal, pBuffer + 84, MVT_U32, 4);	// "ParentID"
 	return processObjectUpdate(idRegion, idObject, idObjectLocal, idRootLocal);
 }
 

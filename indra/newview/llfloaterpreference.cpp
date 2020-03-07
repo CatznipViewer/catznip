@@ -157,7 +157,9 @@ const U32 CLEAR_MASK_PEOPLE		= 0x10;
 // [/SL:KB]
 
 //control value for middle mouse as talk2push button
-const static std::string MIDDLE_MOUSE_CV = "MiddleMouse";
+const static std::string MIDDLE_MOUSE_CV = "MiddleMouse"; // for voice client and redability
+const static std::string MOUSE_BUTTON_4_CV = "MouseButton4";
+const static std::string MOUSE_BUTTON_5_CV = "MouseButton5";
 
 /// This must equal the maximum value set for the IndirectMaxComplexity slider in panel_preferences_graphics1.xml
 static const U32 INDIRECT_MAX_ARC_OFF = 101; // all the way to the right == disabled
@@ -201,6 +203,7 @@ public:
 	void setParent(LLFloaterPreference* parent) { mParent = parent; }
 	
 	BOOL handleKeyHere(KEY key, MASK mask);
+	BOOL handleAnyMouseClick(S32 x, S32 y, MASK mask, LLMouseHandler::EClickType clicktype, BOOL down);
 	static void onCancel(void* user_data);
 		
 private:
@@ -242,6 +245,25 @@ BOOL LLVoiceSetKeyDialog::handleKeyHere(KEY key, MASK mask)
 	}
 	closeFloater();
 	return result;
+}
+
+BOOL LLVoiceSetKeyDialog::handleAnyMouseClick(S32 x, S32 y, MASK mask, LLMouseHandler::EClickType clicktype, BOOL down)
+{
+    BOOL result = FALSE;
+    if (down
+        && (clicktype == LLMouseHandler::CLICK_MIDDLE || clicktype == LLMouseHandler::CLICK_BUTTON4 || clicktype == LLMouseHandler::CLICK_BUTTON5)
+        && mask == 0)
+    {
+        mParent->setMouse(clicktype);
+        result = TRUE;
+        closeFloater();
+    }
+    else
+    {
+        result = LLMouseHandler::handleAnyMouseClick(x, y, mask, clicktype, down);
+    }
+
+    return result;
 }
 
 //static
@@ -485,6 +507,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 //	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 //	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.PermsDefault",           boost::bind(&LLFloaterPreference::onClickPermsDefault, this));
+	mCommitCallbackRegistrar.add("Pref.RememberedUsernames",    boost::bind(&LLFloaterPreference::onClickRememberedUsernames, this));
 //	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 	mCommitCallbackRegistrar.add("Pref.Advanced",				boost::bind(&LLFloaterPreference::onClickAdvanced, this));
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
@@ -1438,7 +1461,7 @@ void LLFloaterPreference::buildPopupLists()
 		LLNotificationFormPtr formp = templatep->mForm;
 		
 		LLNotificationForm::EIgnoreType ignore = formp->getIgnoreType();
-		if (ignore == LLNotificationForm::IGNORE_NO)
+		if (ignore <= LLNotificationForm::IGNORE_NO)
 			continue;
 		
 		LLSD row;
@@ -1953,6 +1976,41 @@ void LLFloaterPreference::setKey(KEY key)
 	getChild<LLUICtrl>("modifier_combo")->onCommit();
 }
 
+void LLFloaterPreference::setMouse(LLMouseHandler::EClickType click)
+{
+    std::string bt_name;
+    std::string ctrl_value;
+    switch (click)
+    {
+        case LLMouseHandler::CLICK_MIDDLE:
+            bt_name = "middle_mouse";
+            ctrl_value = MIDDLE_MOUSE_CV;
+            break;
+        case LLMouseHandler::CLICK_BUTTON4:
+            bt_name = "button4_mouse";
+            ctrl_value = MOUSE_BUTTON_4_CV;
+            break;
+        case LLMouseHandler::CLICK_BUTTON5:
+            bt_name = "button5_mouse";
+            ctrl_value = MOUSE_BUTTON_5_CV;
+            break;
+        default:
+            break;
+    }
+
+    if (!ctrl_value.empty())
+    {
+        LLUICtrl* p2t_line_editor = getChild<LLUICtrl>("modifier_combo");
+        // We are using text control names for readability and compatibility with voice
+        p2t_line_editor->setControlValue(ctrl_value);
+        LLPanel* advanced_preferences = dynamic_cast<LLPanel*>(p2t_line_editor->getParent());
+        if (advanced_preferences)
+        {
+            p2t_line_editor->setValue(advanced_preferences->getString(bt_name));
+        }
+    }
+}
+
 void LLFloaterPreference::onClickSetMiddleMouse()
 {
 	LLUICtrl* p2t_line_editor = getChild<LLUICtrl>("modifier_combo");
@@ -2025,7 +2083,7 @@ void LLFloaterPreference::resetAllIgnored()
 		 iter != LLNotifications::instance().templatesEnd();
 		 ++iter)
 	{
-		if (iter->second->mForm->getIgnoreType() != LLNotificationForm::IGNORE_NO)
+		if (iter->second->mForm->getIgnoreType() > LLNotificationForm::IGNORE_NO)
 		{
 			iter->second->mForm->setIgnored(false);
 		}
@@ -2038,7 +2096,7 @@ void LLFloaterPreference::setAllIgnored()
 		 iter != LLNotifications::instance().templatesEnd();
 		 ++iter)
 	{
-		if (iter->second->mForm->getIgnoreType() != LLNotificationForm::IGNORE_NO)
+		if (iter->second->mForm->getIgnoreType() > LLNotificationForm::IGNORE_NO)
 		{
 			iter->second->mForm->setIgnored(true);
 		}
@@ -2517,6 +2575,11 @@ void LLFloaterPreference::onClickPermsDefault()
 	LLFloaterReg::showInstance("perms_default");
 }
 
+void LLFloaterPreference::onClickRememberedUsernames()
+{
+    LLFloaterReg::showInstance("forget_username");
+}
+
 void LLFloaterPreference::onDeleteTranscripts()
 {
 	LLSD args;
@@ -2829,9 +2892,18 @@ BOOL LLPanelPreference::postBuild()
 	if (hasChild("modifier_combo", TRUE))
 	{
 		//localizing if push2talk button is set to middle mouse
-		if (MIDDLE_MOUSE_CV == getChild<LLUICtrl>("modifier_combo")->getValue().asString())
+		std::string modifier_value = getChild<LLUICtrl>("modifier_combo")->getValue().asString();
+		if (MIDDLE_MOUSE_CV == modifier_value)
 		{
 			getChild<LLUICtrl>("modifier_combo")->setValue(getString("middle_mouse"));
+		}
+		else if (MOUSE_BUTTON_4_CV == modifier_value)
+		{
+			getChild<LLUICtrl>("modifier_combo")->setValue(getString("button4_mouse"));
+		}
+		else if (MOUSE_BUTTON_5_CV == modifier_value)
+		{
+			getChild<LLUICtrl>("modifier_combo")->setValue(getString("button5_mouse"));
 		}
 	}
 
@@ -3148,7 +3220,7 @@ void LLPanelPreference::updateMediaAutoPlayCheckbox(LLUICtrl* ctrl)
 		bool music_enabled = getChild<LLCheckBoxCtrl>("enable_music")->get();
 		bool media_enabled = getChild<LLCheckBoxCtrl>("enable_media")->get();
 
-		getChild<LLCheckBoxCtrl>("media_auto_play_btn")->setEnabled(music_enabled || media_enabled);
+		getChild<LLCheckBoxCtrl>("media_auto_play_combo")->setEnabled(music_enabled || media_enabled);
 	}
 }
 
@@ -3599,7 +3671,10 @@ BOOL LLFloaterPreferenceProxy::postBuild()
 	else
 	{
 		// Populate the SOCKS 5 credential fields with protected values.
-		LLPointer<LLCredential> socks_cred = gSecAPIHandler->loadCredential("SOCKS5");
+//		LLPointer<LLCredential> socks_cred = gSecAPIHandler->loadCredential("SOCKS5");
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
+		LLPointer<LLCredential> socks_cred = gSecAPIHandler->loadCredentialFromDefaultStorage("SOCKS5");
+// [/SL:KB]
 		getChild<LLLineEditor>("socks5_username")->setValue(socks_cred->getIdentifier()["username"].asString());
 		getChild<LLLineEditor>("socks5_password")->setValue(socks_cred->getAuthenticator()["creds"].asString());
 	}

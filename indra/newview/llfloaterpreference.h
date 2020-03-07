@@ -163,6 +163,7 @@ public:
 //	void onSelectSkin();
 	void onClickSetKey();
 	void setKey(KEY key);
+	void setMouse(LLMouseHandler::EClickType click);
 	void onClickSetMiddleMouse();
 	void onClickSetSounds();
 	void onClickEnablePopup();
@@ -191,7 +192,6 @@ public:
 	void onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope);
 // [/SL:KB]
 
-	void onCommitParcelMediaAutoPlayEnable();
 	void onCommitMediaEnabled();
 	void onCommitMusicEnabled();
 	void applyResolution();
@@ -204,6 +204,7 @@ public:
 	void onClickProxySettings();
 //	void onClickTranslationSettings();
 	void onClickPermsDefault();
+	void onClickRememberedUsernames();
 //	void onClickAutoReplace();
 //	void onClickSpellChecker();
 	void onClickRenderExceptions();

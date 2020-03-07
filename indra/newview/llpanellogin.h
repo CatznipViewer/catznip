@@ -55,17 +55,11 @@ public:
 		void (*callback)(S32 option, void* user_data), 
 		void* callback_data);
 
-//	static void setFields(LLPointer<LLCredential> credential, BOOL remember);
-  
-	static void getFields(LLPointer<LLCredential>& credential, BOOL& remember);
+	static void populateFields(LLPointer<LLCredential> credential, bool remember_user, bool remember_psswrd);
+	static void resetFields();
+	static void getFields(LLPointer<LLCredential>& credential, bool& remember_user, bool& remember_psswrd);
 
 	static BOOL isCredentialSet() { return sCredentialSet; }
-
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	static LLSD getIdentifier();
-
-	static void selectUser(LLPointer<LLCredential> credential, BOOL remember);
-// [/SL:KB]
 
 	static BOOL areCredentialFieldsDirty();
 	static void setLocation(const LLSLURL& slurl);
@@ -77,8 +71,6 @@ public:
 	static void closePanel();
 
 	void setSiteIsAlive( bool alive );
-
-	void showLoginWidgets();
 
 	static void loadLoginPage();	
 	static void giveFocus();
@@ -94,23 +86,30 @@ public:
 	// called from prefs when initializing panel
 	static bool getShowFavorites();
 
+	// extract name from cred in a format apropriate for username field
+	static std::string getUserName(LLPointer<LLCredential> &cred);
+
 private:
 	friend class LLPanelLoginListener;
 	void addFavoritesToStartLocation();
 	void addUsersWithFavoritesToUsername();
 	void onSelectServer();
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
-	void onSelectUser();
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
 	bool onRemoveUser(LLScrollListItem* itemp);
 	void onRemoveUserResponse(const LLSD& sdNotification, const LLSD& sdResponse);
 // [/SL:KB]
 	void onLocationSLURL();
 
+	static void setFields(LLPointer<LLCredential> credential);
+
 	static void onClickConnect(void*);
 	static void onClickNewAccount(void*);
 	static void onClickVersion(void*);
 	static void onClickForgotPassword(void*);
-//	static void onClickSignUp(void*);
+	static void onClickSignUp(void*);
+	static void onUserNameTextEnty(void*);
+	static void onUserListCommit(void*);
+	static void onRememberUserCheck(void*);
 	static void onPassKey(LLLineEditor* caller, void* user_data);
 	static void updateServerCombo();
 
@@ -118,6 +117,10 @@ private:
 	boost::scoped_ptr<LLPanelLoginListener> mListener;
 
 	void updateLoginButtons();
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+	void populateUserList(LLPointer<LLCredential> credential = nullptr);
+// [/SL:KB]
+//	void populateUserList(LLPointer<LLCredential> credential);
 
 	void			(*mCallback)(S32 option, void *userdata);
 	void*			mCallbackData;
@@ -127,7 +130,7 @@ private:
 
 	static LLPanelLogin* sInstance;
 	static BOOL		sCapslockDidNotification;
-	bool			mFirstLoginThisInstall;
+//	bool			mFirstLoginThisInstall;
     
     static BOOL sCredentialSet;
 

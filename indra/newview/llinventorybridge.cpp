@@ -5354,7 +5354,7 @@ bool move_task_inventory_callback(const LLSD& notification, const LLSD& response
 		{
 			LLInventoryObject::object_list_t inventory_objects;
 			object->getInventoryContents(inventory_objects);
-			int contents_count = inventory_objects.size()-1; //subtract one for containing folder
+			int contents_count = inventory_objects.size();
 			
 // [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
 			move_task_inventory_register_folder(cat_and_wear->mCatID, contents_count);

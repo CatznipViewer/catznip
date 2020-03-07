@@ -125,7 +125,7 @@ LLVoiceClient::LLVoiceClient(LLPumpIO *pump)
 	mPTTDirty(true),
 	mPTT(true),
 	mUsePTT(true),
-	mPTTIsMiddleMouse(false),
+	mPTTMouseButton(0),
 	mPTTKey(0),
 	mPTTIsToggle(false),
 	mUserPTTState(false),
@@ -655,13 +655,22 @@ bool LLVoiceClient::getPTTIsToggle()
 
 void LLVoiceClient::setPTTKey(std::string &key)
 {
+	// Value is stored as text for readability
 	if(key == "MiddleMouse")
 	{
-		mPTTIsMiddleMouse = true;
+		mPTTMouseButton = LLMouseHandler::CLICK_MIDDLE;
+	}
+	else if(key == "MouseButton4")
+	{
+		mPTTMouseButton = LLMouseHandler::CLICK_BUTTON4;
+	}
+	else if (key == "MouseButton5")
+	{
+		mPTTMouseButton = LLMouseHandler::CLICK_BUTTON5;
 	}
 	else
 	{
-		mPTTIsMiddleMouse = false;
+		mPTTMouseButton = 0;
 		if(!LLKeyboard::keyFromString(key, &mPTTKey))
 		{
 			// If the call failed, don't match any key.
@@ -698,7 +707,7 @@ void LLVoiceClient::keyDown(KEY key, MASK mask)
 		return;
 	}
 	
-	if (!mPTTIsMiddleMouse && LLAgent::isActionAllowed("speak") && (key == mPTTKey))
+	if (mPTTMouseButton == 0 && LLAgent::isActionAllowed("speak") && (key == mPTTKey))
 	{
 		bool down = gKeyboard->getKeyDown(mPTTKey);
 		if (down)
@@ -710,7 +719,7 @@ void LLVoiceClient::keyDown(KEY key, MASK mask)
 }
 void LLVoiceClient::keyUp(KEY key, MASK mask)
 {
-	if (!mPTTIsMiddleMouse && (key == mPTTKey))
+	if (mPTTMouseButton == 0 && (key == mPTTKey))
 	{
 		bool down = gKeyboard->getKeyDown(mPTTKey);
 		if (!down)
@@ -719,9 +728,9 @@ void LLVoiceClient::keyUp(KEY key, MASK mask)
 		}
 	}
 }
-void LLVoiceClient::middleMouseState(bool down)
+void LLVoiceClient::updateMouseState(S32 click, bool down)
 {
-	if(mPTTIsMiddleMouse && LLAgent::isActionAllowed("speak"))
+	if(mPTTMouseButton == click && LLAgent::isActionAllowed("speak"))
 	{
 		inputUserControlState(down);
 	}

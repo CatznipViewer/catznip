@@ -1499,16 +1499,22 @@ void LLFavoritesOrderStorage::getSLURL(const LLUUID& asset_id)
 }
 
 // static
-std::string LLFavoritesOrderStorage::getStoredFavoritesFilename()
+std::string LLFavoritesOrderStorage::getStoredFavoritesFilename(const std::string &grid)
 {
-	std::string user_dir = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "");
+    std::string user_dir = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "");
 
     return (user_dir.empty() ? ""
             : gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
                                              "stored_favorites_"
-                                          + LLGridManager::getInstance()->getGrid()
+                                          + grid
                                           + ".xml")
             );
+}
+
+// static
+std::string LLFavoritesOrderStorage::getStoredFavoritesFilename()
+{
+    return getStoredFavoritesFilename(LLGridManager::getInstance()->getGrid());
 }
 
 // static
@@ -1608,6 +1614,77 @@ void LLFavoritesOrderStorage::load()
 	}
 }
 
+// static
+void LLFavoritesOrderStorage::removeFavoritesRecordOfUser(const std::string& user, const std::string &grid)
+{
+    std::string filename = getStoredFavoritesFilename(grid);
+    if (!filename.empty())
+    {
+        LLSD fav_llsd;
+        llifstream file;
+        file.open(filename.c_str());
+        if (file.is_open())
+        {
+            LLSDSerialize::fromXML(fav_llsd, file);
+            file.close();
+
+            // Note : use the "John Doe" and not the "john.doe" version of the name.
+            // See saveFavoritesSLURLs() here above for the reason why.
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-6.3
+			// User names are case-sensitive and some of the conversion functions don't take this into account
+			LLSD user_llsd;
+			for (LLSD::map_const_iterator iter = fav_llsd.beginMap(); iter != fav_llsd.endMap(); ++iter)
+			{
+				if (LLStringUtil::compareInsensitive(user, iter->first) == 0)
+				{
+					LL_INFOS("FavoritesBar") << "Removed favorites for " << iter->first << LL_ENDL;
+					fav_llsd.erase(iter->first);
+					break;
+				}
+			}
+// [/SL:KB]
+//            if (fav_llsd.has(user))
+//            {
+//                LLSD user_llsd = fav_llsd[user];
+//
+//                if ((user_llsd.beginArray() != user_llsd.endArray()) && user_llsd.beginArray()->has("id"))
+//                {
+//                    for (LLSD::array_iterator iter = user_llsd.beginArray(); iter != user_llsd.endArray(); ++iter)
+//                    {
+//                        LLSD value;
+//                        value["id"] = iter->get("id").asUUID();
+//                        iter->assign(value);
+//                    }
+//                    fav_llsd[user] = user_llsd;
+//                    llofstream file;
+//                    file.open(filename.c_str());
+//                    if (file.is_open())
+//                    {
+//                        LLSDSerialize::toPrettyXML(fav_llsd, file);
+//                        file.close();
+//                    }
+//                }
+//                else
+//                {
+//                    LL_INFOS("FavoritesBar") << "Removed favorites for " << user << LL_ENDL;
+//                    fav_llsd.erase(user);
+//                }
+//            }
+
+            llofstream out_file;
+            out_file.open(filename.c_str());
+            if (out_file.is_open())
+            {
+                LLSDSerialize::toPrettyXML(fav_llsd, out_file);
+                LL_INFOS("FavoritesBar") << "saved favorites to '" << filename << "' "
+                    << LL_ENDL;
+                out_file.close();
+            }
+        }
+    }
+}
+
+// static
 void LLFavoritesOrderStorage::removeFavoritesRecordOfUser()
 {
 	std::string filename = getStoredFavoritesFilename();
