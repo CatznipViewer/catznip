@@ -238,7 +238,7 @@ public:
 			return false;
 		}
 
-		if (!LLUI::sSettingGroups["config"]->getBOOL("EnableInventory"))
+		if (!LLUI::getInstance()->mSettingGroups["config"]->getBOOL("EnableInventory"))
 		{
 				LLNotificationsUtil::add("NoInventory", LLSD(), LLSD(), std::string("SwitchToStandardSkinAndQuit"));
 				return true;
@@ -1754,7 +1754,7 @@ void menu_create_inventory_item(LLInventoryPanel* panel, LLFolderBridge *bridge,
 {
 	std::string type_name = userdata.asString();
 	
-	if (("inbox" == type_name) || ("outbox" == type_name) || ("category" == type_name) || ("current" == type_name) || ("outfit" == type_name) || ("my_otfts" == type_name))
+	if (("inbox" == type_name) || ("category" == type_name) || ("current" == type_name) || ("outfit" == type_name) || ("my_otfts" == type_name))
 	{
 		LLFolderType::EType preferred_type = LLFolderType::lookup(type_name);
 
