@@ -1383,10 +1383,14 @@ bool idle_startup()
 		{
 			if(process_login_success_response())
 			{
-// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Login | Checked: Catznip-3.6
 				// Only save credentials after successful login
-				gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
-				gSavedSettings.setString("LastUserID", gUserCredential->userID());
+				if (gUserCredential.notNull())
+				{
+					if (gRememberUser)
+						gSecAPIHandler->addToCredentialMap("login_list", gUserCredential, gRememberPassword);
+					gSavedSettings.setString("LastUserID", gUserCredential->userID());
+				}
 // [/SL:KB]
 				// Pass the user information to the voice chat server interface.
 				LLVoiceClient::getInstance()->userAuthorized(gUserCredential->userID(), gAgentID);
