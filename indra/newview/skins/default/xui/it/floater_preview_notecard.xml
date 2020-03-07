@@ -16,6 +16,7 @@
 		In caricamento...
 	</text_editor>
 	<panel name="bottom_panel">
+	<button label="Modifica..." label_selected="Modifica" name="Edit"/>
 	<button label="Salva" label_selected="Salva" name="Save"/>
 	<button label="Elimina" label_selected="Elimina" name="Delete"/>
 	</panel>

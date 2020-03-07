@@ -216,7 +216,7 @@ private:
 	// Data for "Fake" objects
 	//
 
-	std::list<LLVOWater*> mHoleWaterObjects;
+	std::list<LLPointer<LLVOWater> > mHoleWaterObjects;
 	LLPointer<LLVOWater> mEdgeWaterObjects[8];
 
 	LLPointer<LLViewerTexture> mDefaultWaterTexturep;
