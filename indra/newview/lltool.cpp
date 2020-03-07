@@ -115,6 +115,12 @@ BOOL LLTool::handleScrollWheel(S32 x, S32 y, S32 clicks)
 	return FALSE;
 }
 
+BOOL LLTool::handleScrollHWheel(S32 x, S32 y, S32 clicks)
+{
+    // by default, didn't handle it
+    return FALSE;
+}
+
 BOOL LLTool::handleDoubleClick(S32 x,S32 y,MASK mask)
 {
 	// LL_INFOS() << "LLTool::handleDoubleClick" << LL_ENDL;
@@ -191,7 +197,9 @@ LLTool* LLTool::getOverrideTool(MASK mask)
 	{
 		return NULL;
 	}
-	if (gSavedSettings.getBOOL("EnableAltZoom"))
+
+	static LLCachedControl<bool> alt_zoom(gSavedSettings, "EnableAltZoom", true);
+	if (alt_zoom)
 	{
 		if (mask & MASK_ALT)
 		{

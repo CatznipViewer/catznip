@@ -416,6 +416,7 @@ BOOL LLPanelLandGeneral::postBuild()
 	mTextSalePending = getChild<LLTextBox>("SalePending");
 	mTextOwnerLabel = getChild<LLTextBox>("Owner:");
 	mTextOwner = getChild<LLTextBox>("OwnerText");
+	mTextOwner->setIsFriendCallback(LLAvatarActions::isFriend);
 	
 	mContentRating = getChild<LLTextBox>("ContentRatingText");
 	mLandType = getChild<LLTextBox>("LandTypeText");
@@ -1192,6 +1193,7 @@ BOOL LLPanelLandObjects::postBuild()
 	mIconGroup = LLUIImageList::getInstance()->getUIImage("icon_group.tga", 0);
 
 	mOwnerList = getChild<LLNameListCtrl>("owner list");
+	mOwnerList->setIsFriendCallback(LLAvatarActions::isFriend);
 	mOwnerList->sortByColumnIndex(3, FALSE);
 	childSetCommitCallback("owner list", onCommitList, this);
 	mOwnerList->setDoubleClickCallback(onDoubleClickOwner, this);
@@ -1875,6 +1877,7 @@ LLPanelLandOptions::LLPanelLandOptions(LLParcelSelectionHandle& parcel)
 	mLandingTypeCombo(NULL),
 	mSnapshotCtrl(NULL),
 	mLocationText(NULL),
+	mSeeAvatarsText(NULL),
 	mSetBtn(NULL),
 	mClearBtn(NULL),
 	mMatureCtrl(NULL),
@@ -1920,6 +1923,14 @@ BOOL LLPanelLandOptions::postBuild()
 
 	mSeeAvatarsCtrl = getChild<LLCheckBoxCtrl>( "SeeAvatarsCheck");
 	childSetCommitCallback("SeeAvatarsCheck", onCommitAny, this);
+
+	mSeeAvatarsText = getChild<LLTextBox>("allow_see_label");
+	if (mSeeAvatarsText)
+	{
+		mSeeAvatarsText->setShowCursorHand(false);
+		mSeeAvatarsText->setSoundFlags(LLView::MOUSE_UP);
+		mSeeAvatarsText->setClickedCallback(boost::bind(&toggleSeeAvatars, this));
+	}
 
 	mCheckShowDirectory = getChild<LLCheckBoxCtrl>( "ShowDirectoryCheck");
 	childSetCommitCallback("ShowDirectoryCheck", onCommitAny, this);
@@ -2014,6 +2025,7 @@ void LLPanelLandOptions::refresh()
 
 		mSeeAvatarsCtrl->set(TRUE);
 		mSeeAvatarsCtrl->setEnabled(FALSE);
+		mSeeAvatarsText->setEnabled(FALSE);
 
 		mLandingTypeCombo->setCurrentByIndex(0);
 		mLandingTypeCombo->setEnabled(FALSE);
@@ -2072,6 +2084,7 @@ void LLPanelLandOptions::refresh()
 
 		mSeeAvatarsCtrl->set(parcel->getSeeAVs());
 		mSeeAvatarsCtrl->setEnabled(can_change_options && parcel->getHaveNewParcelLimitData());
+		mSeeAvatarsText->setEnabled(can_change_options && parcel->getHaveNewParcelLimitData());
 
 		BOOL can_change_landing_point = LLViewerParcelMgr::isParcelModifiableByAgent(parcel, 
 														GP_LAND_SET_LANDING_POINT);
@@ -2196,7 +2209,7 @@ void LLPanelLandOptions::refreshSearch()
 	// effort to reduce search spam from small parcels.  See also
 	// the search crawler "grid-crawl.py" in secondlife.com/doc/app/search/ JC
 	const S32 MIN_PARCEL_AREA_FOR_SEARCH = 128;
-	bool large_enough = parcel->getArea() > MIN_PARCEL_AREA_FOR_SEARCH;
+	bool large_enough = parcel->getArea() >= MIN_PARCEL_AREA_FOR_SEARCH;
 	if (large_enough)
 	{
 		if (can_change)
@@ -2362,7 +2375,16 @@ void LLPanelLandOptions::onClickClear(void* userdata)
 	self->refresh();
 }
 
-
+void LLPanelLandOptions::toggleSeeAvatars(void* userdata)
+{
+	LLPanelLandOptions* self = (LLPanelLandOptions*)userdata;
+	if (self)
+	{
+		self->getChild<LLCheckBoxCtrl>("SeeAvatarsCheck")->toggle();
+		self->getChild<LLCheckBoxCtrl>("SeeAvatarsCheck")->setBtnFocus();
+		self->onCommitAny(NULL, userdata);
+	}
+}
 //---------------------------------------------------------------------------
 // LLPanelLandAccess
 //---------------------------------------------------------------------------
