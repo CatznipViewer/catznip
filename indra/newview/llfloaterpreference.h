@@ -36,6 +36,7 @@
 #include "llfloater.h"
 #include "llavatarpropertiesprocessor.h"
 #include "llconversationlog.h"
+#include "llsearcheditor.h"
 
 class LLConversationLogObserver;
 class LLPanelPreference;
@@ -46,6 +47,14 @@ class LLScrollListCtrl;
 class LLSliderCtrl;
 class LLSD;
 class LLTextBox;
+
+namespace ll
+{
+	namespace prefs
+	{
+		struct SearchData;
+	}
+}
 
 typedef std::map<std::string, std::string> notifications_map;
 
@@ -139,6 +148,7 @@ public:
 	void onSelectSkin();
 	void onClickSetKey();
 	void setKey(KEY key);
+	void setMouse(LLMouseHandler::EClickType click);
 	void onClickSetMiddleMouse();
 	void onClickSetSounds();
 	void onClickEnablePopup();
@@ -158,7 +168,6 @@ public:
 	
 	void refreshUI();
 
-	void onCommitParcelMediaAutoPlayEnable();
 	void onCommitMediaEnabled();
 	void onCommitMusicEnabled();
 	void applyResolution();
@@ -171,6 +180,7 @@ public:
 	void onClickProxySettings();
 	void onClickTranslationSettings();
 	void onClickPermsDefault();
+	void onClickRememberedUsernames();
 	void onClickAutoReplace();
 	void onClickSpellChecker();
 	void onClickRenderExceptions();
@@ -189,6 +199,7 @@ private:
 	void onDeleteTranscriptsResponse(const LLSD& notification, const LLSD& response);
 	void updateDeleteTranscriptsButton();
 	void updateMaxComplexity();
+	static bool loadFromFilename(const std::string& filename, std::map<std::string, std::string> &label_map);
 
 	static std::string sSkin;
 	notifications_map mNotificationOptions;
@@ -205,6 +216,12 @@ private:
 	LLAvatarData mAvatarProperties;
 	std::string mSavedGraphicsPreset;
 	LOG_CLASS(LLFloaterPreference);
+
+	LLSearchEditor *mFilterEdit;
+	std::unique_ptr< ll::prefs::SearchData > mSearchData;
+
+	void onUpdateFilterTerm( bool force = false );
+	void collectSearchableItems();
 };
 
 class LLPanelPreference : public LLPanel

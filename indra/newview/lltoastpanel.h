@@ -49,6 +49,7 @@ public:
 	virtual const LLUUID& getID();
 
 	static const S32 MIN_PANEL_HEIGHT;
+	static const S32 MAX_TEXT_LENGTH;
 
 	/**
 	 * Builder method for constructing notification specific panels.
@@ -61,6 +62,25 @@ protected:
 	LLNotificationPtr mNotification;
 	void snapToMessageHeight(LLTextBase* message, S32 maxLineCount);
 	S32 computeSnappedToMessageHeight(LLTextBase* message, S32 maxLineCount);
+};
+
+class LLCheckBoxCtrl;
+
+// Wrapper with support for 'don't ask again' checkbox
+class LLCheckBoxToastPanel : public LLToastPanel
+{
+public:
+	LLCheckBoxToastPanel(const LLNotificationPtr& p_ntf);
+	virtual ~LLCheckBoxToastPanel() {};
+
+	// set checkboxes acording to defaults from form
+	void			setCheckBoxes(const S32 &h_pad, const S32 &v_pad, LLView *parent_view = NULL);
+	// set single checkbox
+	bool			setCheckBox(const std::string&, const std::string&, const commit_signal_t::slot_type& cb, const S32 &h_pad, const S32 &v_pad, LLView *parent_view = NULL);
+protected:
+	void onCommitCheckbox(LLUICtrl* ctrl);
+
+	LLCheckBoxCtrl* mCheck;
 };
 
 #endif /* LL_TOASTPANEL_H */

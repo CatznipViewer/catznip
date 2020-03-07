@@ -343,6 +343,10 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void) mouseDown:(NSEvent *)theEvent
 {
+    NSPoint mPoint = gHiDPISupport ? [self convertPointToBacking:[theEvent locationInWindow]] : [theEvent locationInWindow];
+    mMousePos[0] = mPoint.x;
+    mMousePos[1] = mPoint.y;
+
     // Apparently people still use this?
     if ([theEvent modifierFlags] & NSCommandKeyMask &&
         !([theEvent modifierFlags] & NSControlKeyMask) &&
@@ -380,11 +384,17 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void) rightMouseDown:(NSEvent *)theEvent
 {
+    NSPoint mPoint = gHiDPISupport ? [self convertPointToBacking:[theEvent locationInWindow]] : [theEvent locationInWindow];
+    mMousePos[0] = mPoint.x;
+    mMousePos[1] = mPoint.y;
 	callRightMouseDown(mMousePos, [theEvent modifierFlags]);
 }
 
 - (void) rightMouseUp:(NSEvent *)theEvent
 {
+    NSPoint mPoint = gHiDPISupport ? [self convertPointToBacking:[theEvent locationInWindow]] : [theEvent locationInWindow];
+    mMousePos[0] = mPoint.x;
+    mMousePos[1] = mPoint.y;
 	callRightMouseUp(mMousePos, [theEvent modifierFlags]);
 }
 
@@ -431,12 +441,18 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void) otherMouseDown:(NSEvent *)theEvent
 {
-	callMiddleMouseDown(mMousePos, [theEvent modifierFlags]);
+    NSPoint mPoint = gHiDPISupport ? [self convertPointToBacking:[theEvent locationInWindow]] : [theEvent locationInWindow];
+    mMousePos[0] = mPoint.x;
+    mMousePos[1] = mPoint.y;
+    callOtherMouseDown(mMousePos, [theEvent modifierFlags], [theEvent buttonNumber]);
 }
 
 - (void) otherMouseUp:(NSEvent *)theEvent
 {
-	callMiddleMouseUp(mMousePos, [theEvent modifierFlags]);
+    NSPoint mPoint = gHiDPISupport ? [self convertPointToBacking:[theEvent locationInWindow]] : [theEvent locationInWindow];
+    mMousePos[0] = mPoint.x;
+    mMousePos[1] = mPoint.y;
+    callOtherMouseUp(mMousePos, [theEvent modifierFlags], [theEvent buttonNumber]);
 }
 
 - (void) rightMouseDragged:(NSEvent *)theEvent
@@ -451,7 +467,7 @@ attributedStringInfo getSegments(NSAttributedString *str)
 
 - (void) scrollWheel:(NSEvent *)theEvent
 {
-	callScrollMoved(-[theEvent deltaY]);
+	callScrollMoved(-[theEvent deltaX], -[theEvent deltaY]);
 }
 
 - (void) mouseExited:(NSEvent *)theEvent
@@ -492,15 +508,6 @@ attributedStringInfo getSegments(NSAttributedString *str)
     } else
     {
         [[self inputContext] handleEvent:theEvent];
-    }
-    
-    // OS X intentionally does not send us key-up information on cmd-key combinations.
-    // This behaviour is not a bug, and only applies to cmd-combinations (no others).
-    // Since SL assumes we receive those, we fake it here.
-    if (mModifiers & NSCommandKeyMask && !mHasMarkedText)
-    {
-        eventData.mKeyEvent = NativeKeyEventData::KEYUP;
-        callKeyUp(&eventData, [theEvent keyCode], mModifiers);
     }
 }
 
@@ -809,7 +816,7 @@ attributedStringInfo getSegments(NSAttributedString *str)
     [super setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
     if ([aString length] == 0)      // this means Input Widow becomes empty
     {
-        [_window orderOut:_window];     // Close this to avoid empty Input Window
+        [self.window orderOut:self.window];     // Close this to avoid empty Input Window
     }
 }
 
@@ -833,7 +840,7 @@ attributedStringInfo getSegments(NSAttributedString *str)
         (mKeyPressed >= 0xF700 && mKeyPressed <= 0xF8FF))
     {
         // this is case a) of above comment
-        [_window orderOut:_window];     // to avoid empty Input Window
+        [self.window orderOut:self.window];     // to avoid empty Input Window
     }
 }
 

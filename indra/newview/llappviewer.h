@@ -43,6 +43,7 @@
 #define LL_LLAPPVIEWER_H
 
 #include "llallocator.h"
+#include "llapr.h"
 #include "llcontrol.h"
 #include "llsys.h"			// for LLOSInfo
 #include "lltimer.h"
@@ -189,6 +190,7 @@ public:
 
 	void addOnIdleCallback(const boost::function<void()>& cb); // add a callback to fire (once) when idle
 
+	void purgeUserDataOnExit() { mPurgeUserDataOnExit = true; }
 	void purgeCache(); // Clear the local cache. 
 	void purgeCacheImmediate(); //clear local cache immediately.
 	S32  updateTextureThreads(F32 max_time);
@@ -280,7 +282,8 @@ private:
 
 	std::string mSerialNumber;
 	bool mPurgeCache;
-    bool mPurgeOnExit;
+	bool mPurgeCacheOnExit;
+	bool mPurgeUserDataOnExit;
 	LLViewerJoystick* joystick;
 
 	bool mSavedFinalSnapshot;

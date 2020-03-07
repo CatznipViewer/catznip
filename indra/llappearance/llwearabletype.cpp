@@ -29,18 +29,6 @@
 #include "llinventorytype.h"
 #include "llinventorydefines.h"
 
-static LLTranslationBridge* sTrans = NULL;
-
-// static
-void LLWearableType::initClass(LLTranslationBridge* trans)
-{
-	sTrans = trans;
-}
-
-void LLWearableType::cleanupClass()
-{
-	delete sTrans;
-}
 
 struct WearableEntry : public LLDictionaryEntry
 {
@@ -53,7 +41,7 @@ struct WearableEntry : public LLDictionaryEntry
 		LLDictionaryEntry(name),
 		mAssetType(assetType),
 		mDefaultNewName(default_new_name),
-		mLabel(sTrans->getString(name)),
+		mLabel(LLWearableType::getInstance()->mTrans->getString(name)),
 		mIconName(iconName),
 		mDisableCameraSwitch(disable_camera_switch),
 		mAllowMultiwear(allow_multiwear)
@@ -76,6 +64,12 @@ class LLWearableDictionary : public LLSingleton<LLWearableDictionary>,
 
 LLWearableDictionary::LLWearableDictionary()
 {
+    if (!LLWearableType::instanceExists())
+    {
+        // LLWearableType is effectively a wrapper around LLWearableDictionary and is used as storage for LLTranslationBridge
+        // Todo: consider merging LLWearableType and LLWearableDictionary
+        LL_WARNS() << "Initing LLWearableDictionary without LLWearableType" << LL_ENDL;
+    }
 	addEntry(LLWearableType::WT_SHAPE,        new WearableEntry("shape",       "New Shape",			LLAssetType::AT_BODYPART, 	LLInventoryType::ICONNAME_BODYPART_SHAPE, FALSE, FALSE));
 	addEntry(LLWearableType::WT_SKIN,         new WearableEntry("skin",        "New Skin",			LLAssetType::AT_BODYPART, 	LLInventoryType::ICONNAME_BODYPART_SKIN, FALSE, FALSE));
 	addEntry(LLWearableType::WT_HAIR,         new WearableEntry("hair",        "New Hair",			LLAssetType::AT_BODYPART, 	LLInventoryType::ICONNAME_BODYPART_HAIR, FALSE, FALSE));
@@ -91,11 +85,26 @@ LLWearableDictionary::LLWearableDictionary()
 	addEntry(LLWearableType::WT_SKIRT,        new WearableEntry("skirt",       "New Skirt",			LLAssetType::AT_CLOTHING, 	LLInventoryType::ICONNAME_CLOTHING_SKIRT, FALSE, TRUE));
 	addEntry(LLWearableType::WT_ALPHA,        new WearableEntry("alpha",       "New Alpha",			LLAssetType::AT_CLOTHING, 	LLInventoryType::ICONNAME_CLOTHING_ALPHA, FALSE, TRUE));
 	addEntry(LLWearableType::WT_TATTOO,       new WearableEntry("tattoo",      "New Tattoo",		LLAssetType::AT_CLOTHING, 	LLInventoryType::ICONNAME_CLOTHING_TATTOO, FALSE, TRUE));
+	addEntry(LLWearableType::WT_UNIVERSAL,    new WearableEntry("universal",   "New Universal",     LLAssetType::AT_CLOTHING,   LLInventoryType::ICONNAME_CLOTHING_UNIVERSAL, FALSE, TRUE));
 
 	addEntry(LLWearableType::WT_PHYSICS,      new WearableEntry("physics",     "New Physics",		LLAssetType::AT_CLOTHING, 	LLInventoryType::ICONNAME_CLOTHING_PHYSICS, TRUE, TRUE));
 
 	addEntry(LLWearableType::WT_INVALID,      new WearableEntry("invalid",     "Invalid Wearable", 	LLAssetType::AT_NONE, 		LLInventoryType::ICONNAME_UNKNOWN, FALSE, FALSE));
 	addEntry(LLWearableType::WT_NONE,      	  new WearableEntry("none",        "Invalid Wearable", 	LLAssetType::AT_NONE, 		LLInventoryType::ICONNAME_NONE, FALSE, FALSE));
+}
+
+
+// class LLWearableType
+
+LLWearableType::LLWearableType(LLTranslationBridge* trans)
+{
+    // LLTranslationBridge exists, but is not ready at this point in time since strings.xml is not yet loaded
+    mTrans = trans;
+}
+
+LLWearableType::~LLWearableType()
+{
+    delete mTrans;
 }
 
 // static
