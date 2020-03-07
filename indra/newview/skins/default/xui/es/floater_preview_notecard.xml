@@ -16,6 +16,7 @@
 		Cargando...
 	</text_editor>
 	<panel name="bottom_panel">
+	<button label="Editar..." label_selected="Editar" name="Edit"/>
 	<button label="Guardar" label_selected="Guardar" name="Save"/>
 	<button label="Borrar" label_selected="Borrar" name="Delete"/>
 	</panel>

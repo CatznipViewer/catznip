@@ -140,6 +140,7 @@ void LLFloaterSearch::onOpen(const LLSD& key)
 		p.allow_address_entry = false;
 
 		LLFloaterWebContent::onOpen(p);
+	mWebBrowser->setFocus(TRUE);
 		search(p.search);
 // [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.1)
 	}
