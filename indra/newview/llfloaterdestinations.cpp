@@ -61,7 +61,7 @@ BOOL LLFloaterDestinations::postBuild()
 	url = LLWeb::expandURLSubstitutions(url, LLSD());
 	pMediaCtrl->navigateTo(url, "text/html");
 
-	LLViewerMedia::setOpenIDCookie(pMediaCtrl);
+	LLViewerMedia::instance().setOpenIDCookie(pMediaCtrl);
 // [/SL:KB]
 
 	return TRUE;

@@ -297,14 +297,14 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 // [/SL:KB]
 
 		// clean web
-		LLViewerMedia::clearAllCaches();
+		LLViewerMedia::getInstance()->clearAllCaches();
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
 		if (nClearMask & CLEAR_MASK_COOKIES)
 		{
-			LLViewerMedia::clearAllCookies();
+			LLViewerMedia::getInstance()->clearAllCookies();
 		}
 // [/SL:KB]
-//		LLViewerMedia::clearAllCookies();
+//		LLViewerMedia::getInstance()->clearAllCookies();
 		
 		// clean nav bar history
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
@@ -357,13 +357,13 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 
 void handleNameTagOptionChanged(const LLSD& newvalue)
 {
-//	LLAvatarNameCache::setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
+//	LLAvatarNameCache::getInstance()->setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
 	LLVOAvatar::invalidateNameTags();
 }
 
 void handleDisplayNamesOptionChanged(const LLSD& newvalue)
 {
-	LLAvatarNameCache::setUseDisplayNames(newvalue.asBoolean());
+	LLAvatarNameCache::getInstance()->setUseDisplayNames(newvalue.asBoolean());
 	LLVOAvatar::invalidateNameTags();
 }
 
@@ -615,7 +615,7 @@ BOOL LLFloaterPreference::postBuild()
 	// set 'enable' property for 'Clear log...' button
 	changed();
 
-	LLLogChat::setSaveHistorySignal(boost::bind(&LLFloaterPreference::onLogChatHistorySaved, this));
+	LLLogChat::getInstance()->setSaveHistorySignal(boost::bind(&LLFloaterPreference::onLogChatHistorySaved, this));
 
 	LLSliderCtrl* fov_slider = getChild<LLSliderCtrl>("camera_fov");
 	fov_slider->setMinValue(LLViewerCamera::getInstance()->getMinView());
@@ -815,14 +815,14 @@ void LLFloaterPreference::apply()
 	std::string cache_location = gDirUtilp->getExpandedFilename(LL_PATH_CACHE, "");
 	setCacheLocation(cache_location);
 	
-	LLViewerMedia::setCookiesEnabled(getChild<LLUICtrl>("cookies_enabled")->getValue());
+	LLViewerMedia::getInstance()->setCookiesEnabled(getChild<LLUICtrl>("cookies_enabled")->getValue());
 	
 	if (hasChild("web_proxy_enabled", TRUE) &&hasChild("web_proxy_editor", TRUE) && hasChild("web_proxy_port", TRUE))
 	{
 		bool proxy_enable = getChild<LLUICtrl>("web_proxy_enabled")->getValue();
 		std::string proxy_address = getChild<LLUICtrl>("web_proxy_editor")->getValue();
 		int proxy_port = getChild<LLUICtrl>("web_proxy_port")->getValue();
-		LLViewerMedia::setProxyConfig(proxy_enable, proxy_address, proxy_port);
+		LLViewerMedia::getInstance()->setProxyConfig(proxy_enable, proxy_address, proxy_port);
 	}
 	
 	if (mGotPersonalInfo)
@@ -1453,7 +1453,7 @@ void LLFloaterPreference::buildPopupLists()
 		{
 			if (ignore == LLNotificationForm::IGNORE_WITH_LAST_RESPONSE)
 			{
-				LLSD last_response = LLUI::sSettingGroups["config"]->getLLSD("Default" + templatep->mName);
+				LLSD last_response = LLUI::getInstance()->mSettingGroups["config"]->getLLSD("Default" + templatep->mName);
 				if (!last_response.isUndefined())
 				{
 					for (LLSD::map_const_iterator it = last_response.beginMap();
@@ -1998,7 +1998,7 @@ void LLFloaterPreference::onClickEnablePopup()
 		LLNotificationTemplatePtr templatep = LLNotifications::instance().getTemplate(*(std::string*)((*itor)->getUserdata()));
 		//gSavedSettings.setWarning(templatep->mName, TRUE);
 		std::string notification_name = templatep->mName;
-		LLUI::sSettingGroups["ignores"]->setBOOL(notification_name, TRUE);
+		LLUI::getInstance()->mSettingGroups["ignores"]->setBOOL(notification_name, TRUE);
 	}
 	
 	buildPopupLists();

@@ -683,7 +683,7 @@ void LLParticipantAvatarList::update()
 	if ( ((E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) || (m_NeedSort)) && (m_pAvatarList) )
 	{
 		S32 x, y;
-		LLUI::getMousePositionScreen(&x, &y);
+		LLUI::instance().getMousePositionScreen(&x, &y);
 		if (!m_pAvatarList->calcScreenRect().pointInRect(x, y))
 		{
 			sort();

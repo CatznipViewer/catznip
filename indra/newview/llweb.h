@@ -46,8 +46,6 @@ public:
 		BROWSER_INT_LL_EXT_OTHERS = 1,
 		BROWSER_INTERNAL_ONLY = 2
 	};
-
-	static void initClass();
 	
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.3
 	// We need a unique name because std::string implicitly casts to LLSD and confuses the compiler

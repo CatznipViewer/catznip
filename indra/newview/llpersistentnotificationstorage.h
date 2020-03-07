@@ -44,7 +44,7 @@ class LLSD;
 // be a) serializable(implement LLNotificationResponderInterface),
 // b) registered with LLResponderRegistry (found in llpersistentnotificationstorage.cpp).
 
-class LLPersistentNotificationStorage : public LLSingleton<LLPersistentNotificationStorage>, public LLNotificationStorage
+class LLPersistentNotificationStorage : public LLParamSingleton<LLPersistentNotificationStorage>, public LLNotificationStorage
 {
 	LLSINGLETON(LLPersistentNotificationStorage);
 	~LLPersistentNotificationStorage();
@@ -54,14 +54,14 @@ public:
 	void saveNotifications();
 	void loadNotifications();
 
-	void initialize();
-
 protected:
 // [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
 	void saveNotificationsCb();
 // [/SL:KB]
 
 private:
+	void initialize();
+
 	bool onPersistentChannelChanged(const LLSD& payload);
 	bool mLoaded;
 // [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
