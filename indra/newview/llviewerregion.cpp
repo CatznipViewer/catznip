@@ -2149,6 +2149,8 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 				const LLViewerObject* pAvatarObj = gObjectList.findObject(agent_id);
 				if (pAvatarObj)
 					z_pos16 = pAvatarObj->getPositionRegion().mV[VZ] / 4;
+				else
+					z_pos16 = MAX_OBJECT_Z / 4;
 			}
 // [/SL:KB]
 		}
