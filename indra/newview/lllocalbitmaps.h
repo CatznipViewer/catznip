@@ -110,34 +110,33 @@ class LLLocalBitmapTimer : public LLEventTimer
 
 };
 
-class LLLocalBitmapMgr
+class LLLocalBitmapMgr : public LLSingleton<LLLocalBitmapMgr>
 {
-	public:
-		LLLocalBitmapMgr();
-		~LLLocalBitmapMgr();
-
-	public:
-		static void			cleanupClass();
+	LLSINGLETON(LLLocalBitmapMgr);
+	~LLLocalBitmapMgr();
+public:
+	bool         addUnit();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		static bool         addUnit(const std::string& filename);
 // [/SL:KB]
 //		static bool         addUnit();
-		static void         delUnit(LLUUID tracking_id);
-		static bool 		checkTextureDimensions(std::string filename);
+	void         delUnit(LLUUID tracking_id);
+	bool 		checkTextureDimensions(std::string filename);
 
-		static LLUUID       getWorldID(LLUUID tracking_id);
-		static std::string  getFilename(LLUUID tracking_id);
-		
-		static void         feedScrollList(LLScrollListCtrl* ctrl);
-		static void         doUpdates();
-		static void         setNeedsRebake();
-		static void         doRebake();
-		
-	private:
-		static std::list<LLLocalBitmap*>    sBitmapList;
-		static LLLocalBitmapTimer           sTimer;
-		static bool                         sNeedsRebake;
-		typedef std::list<LLLocalBitmap*>::iterator local_list_iter;
+
+	LLUUID       getWorldID(LLUUID tracking_id);
+	std::string  getFilename(LLUUID tracking_id);
+
+	void         feedScrollList(LLScrollListCtrl* ctrl);
+	void         doUpdates();
+	void         setNeedsRebake();
+	void         doRebake();
+	
+private:
+	std::list<LLLocalBitmap*>    mBitmapList;
+	LLLocalBitmapTimer           mTimer;
+	bool                         mNeedsRebake;
+	typedef std::list<LLLocalBitmap*>::iterator local_list_iter;
 };
 
 #endif
