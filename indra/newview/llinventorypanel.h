@@ -93,11 +93,13 @@ public:
 		Optional<std::string>				sort_order_setting;
 		Optional<LLInventoryModel*>			inventory;
 		Optional<bool>						allow_multi_select;
+		Optional<bool>						allow_drag;
 		Optional<bool>						show_item_link_overlays;
 		Optional<Filter>					filter;
 		Optional<StartFolder>               start_folder;
 		Optional<bool>						use_label_suffix;
 		Optional<bool>						show_empty_message;
+		Optional<bool>						suppress_folder_menu;
 		Optional<bool>						show_root_folder;
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
 		Optional<bool>						show_items;
@@ -114,7 +116,9 @@ public:
 		:	sort_order_setting("sort_order_setting"),
 			inventory("", &gInventory),
 			allow_multi_select("allow_multi_select", true),
+			allow_drag("allow_drag", true),
 			show_item_link_overlays("show_item_link_overlays", false),
+			suppress_folder_menu("suppress_folder_menu", false),
 			filter("filter"),
 			start_folder("start_folder"),
 			use_label_suffix("use_label_suffix", true),
@@ -151,6 +155,8 @@ public:
 	virtual ~LLInventoryPanel();
 
 public:
+    typedef std::set<LLFolderViewItem*> selected_items_t;
+
 	LLInventoryModel* getModel() { return mInventory; }
 	LLFolderViewModelInventory& getRootViewModel() { return mInventoryViewModel; }
 
@@ -158,14 +164,14 @@ public:
 	void draw();
 	/*virtual*/ BOOL handleKeyHere( KEY key, MASK mask );
 	BOOL handleHover(S32 x, S32 y, MASK mask);
-// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
-	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
-// [/SL:KB]
-	BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 								   EDragAndDropType cargo_type,
 								   void* cargo_data,
 								   EAcceptance* accept,
 								   std::string& tooltip_msg);
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
+// [/SL:KB]
 	// LLUICtrl methods
 	 /*virtual*/ void onFocusLost();
 	 /*virtual*/ void onFocusReceived();
@@ -181,6 +187,8 @@ public:
 	void setSelection(const LLUUID& obj_id, BOOL take_keyboard_focus);
 	void setSelectCallback(const boost::function<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)>& cb);
 	void clearSelection();
+    selected_items_t getSelectedItems() const;
+
 	bool isSelectionRemovable();
 // [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
 	bool isSelectionWearable();
@@ -192,8 +200,9 @@ public:
 	U32 getFilterObjectTypes() const;
 	void setFilterPermMask(PermissionMask filter_perm_mask);
 	U32 getFilterPermMask() const;
-	void setFilterWearableTypes(U64 filter);
-	void setFilterSubString(const std::string& string);
+    void setFilterWearableTypes(U64 filter);
+    void setFilterSettingsTypes(U64 filter);
+    void setFilterSubString(const std::string& string);
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	bool hasFilterSubString() const;
 // [/SL:KB]
@@ -274,6 +283,8 @@ public:
 	void setSelectionByID(const LLUUID& obj_id, BOOL take_keyboard_focus);
 	void updateSelection();
 
+	void setSuppressOpenItemAction(bool supress_open_item) { mSuppressOpenItemAction = supress_open_item; }
+
 	LLFolderViewModelInventory* getFolderViewModel() { return &mInventoryViewModel; }
 	const LLFolderViewModelInventory* getFolderViewModel() const { return &mInventoryViewModel; }
     
@@ -292,8 +303,11 @@ protected:
 	LLInvPanelComplObserver*	mCompletionObserver;
 	bool						mAcceptsDragAndDrop;
 	bool 						mAllowMultiSelect;
+	bool 						mAllowDrag;
 	bool 						mShowItemLinkOverlays; // Shows link graphic over inventory item icons
 	bool						mShowEmptyMessage;
+	bool						mSuppressFolderMenu;
+	bool						mSuppressOpenItemAction;
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
 	bool						mShowItems = true;
 // [/SL:KB]
@@ -355,7 +369,9 @@ protected:
 	static LLUIColor			sLibraryColor;
 	static LLUIColor			sLinkColor;
 	
-	LLFolderViewItem*	buildNewViews(const LLUUID& id);
+	virtual LLFolderViewItem*	buildNewViews(const LLUUID& id);
+	LLFolderViewItem*			buildNewViews(const LLUUID& id, LLInventoryObject const* objectp);
+	virtual void				itemChanged(const LLUUID& item_id, U32 mask, const LLInventoryObject* model_item);
 	BOOL				getIsHiddenFolderType(LLFolderType::EType folder_type) const;
 	
     virtual LLFolderView * createFolderRoot(LLUUID root_id );

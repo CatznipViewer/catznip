@@ -124,6 +124,7 @@ private:
 	void			teleportToEmbeddedLandmark(LLPointer<LLInventoryItem> item_ptr, llwchar wc);
 // [/SL:KB]
 	void			openEmbeddedCallingcard( LLInventoryItem* item, llwchar wc);
+	void			openEmbeddedSetting(LLInventoryItem* item, llwchar wc);
 	void			showCopyToInvDialog( LLInventoryItem* item, llwchar wc );
 	void			showUnsavedAlertDialog( LLInventoryItem* item );
 

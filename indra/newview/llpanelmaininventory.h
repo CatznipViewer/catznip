@@ -223,6 +223,7 @@ protected:
 	bool onCheckFolderSortOrder(const LLSD& sdParam);
 // [/SL:KB]
 	bool handleDragAndDropToTrash(BOOL drop, EDragAndDropType cargo_type, EAcceptance* accept);
+    static bool hasSettingsInventory();
 	/**
 	 * Set upload cost in "Upload" sub menu.
 	 */
