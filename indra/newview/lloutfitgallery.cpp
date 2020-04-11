@@ -1225,7 +1225,6 @@ void LLOutfitGallery::uploadPhotoCallback(const LLUUID& outfit_id, const std::st
         checkRemovePhoto(outfit_id);
         std::string upload_pending_name = outfit_id.asString();
         std::string upload_pending_desc = "";
-//        LLAssetStorage::LLStoreAssetCallback callback = NULL;
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
         LLUUID photo_id = upload_new_resource(filename, // file
             upload_pending_name,
@@ -1234,7 +1233,7 @@ void LLOutfitGallery::uploadPhotoCallback(const LLUUID& outfit_id, const std::st
             LLFloaterPerms::getNextOwnerPerms("Uploads"),
             LLFloaterPerms::getGroupPerms("Uploads"),
             LLFloaterPerms::getEveryonePerms("Uploads"),
-            upload_pending_name, nullptr, expected_upload_cost);
+            upload_pending_name, LLAssetStorage::LLStoreAssetCallback(), expected_upload_cost);
 // [/SL:KB]
 //        LLUUID photo_id = upload_new_resource(filename, // file
 //            upload_pending_name,
@@ -1243,7 +1242,7 @@ void LLOutfitGallery::uploadPhotoCallback(const LLUUID& outfit_id, const std::st
 //            LLFloaterPerms::getNextOwnerPerms("Uploads"),
 //            LLFloaterPerms::getGroupPerms("Uploads"),
 //            LLFloaterPerms::getEveryonePerms("Uploads"),
-//            upload_pending_name, callback, expected_upload_cost, nruserdata, false);
+//            upload_pending_name, LLAssetStorage::LLStoreAssetCallback(), expected_upload_cost, nruserdata, false);
         mOutfitLinkPending = outfit_id;
     }
     delete unit;

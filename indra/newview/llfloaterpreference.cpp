@@ -102,7 +102,7 @@
 
 #include "llbutton.h"
 // [SL:KB] - Patch: Settings-Troubleshooting | Checked: Catznip-5.4
-#include "llenvmanager.h"
+#include "llenvironment.h"
 // [/SL:KB]
 #include "llflexibleobject.h"
 #include "lllineeditor.h"
@@ -492,7 +492,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.AvatarImpostorsEnable",	boost::bind(&LLFloaterPreference::onAvatarImpostorsEnable, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",	boost::bind(&LLFloaterPreference::updateMaxComplexity, this));
-	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreference::onVertexShaderEnable, this));
+    mCommitCallbackRegistrar.add("Pref.RenderOptionUpdate",     boost::bind(&LLFloaterPreference::onRenderOptionEnable, this));
 	mCommitCallbackRegistrar.add("Pref.WindowedMod",			boost::bind(&LLFloaterPreference::onCommitWindowedMode, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
@@ -1058,12 +1058,23 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	}
 }
 
-void LLFloaterPreference::onVertexShaderEnable()
+void LLFloaterPreference::onRenderOptionEnable()
 {
 	refreshEnabledGraphics();
 }
 
-void LLFloaterPreferenceGraphicsAdvanced::onVertexShaderEnable()
+void LLFloaterPreferenceGraphicsAdvanced::onRenderOptionEnable()
+{
+	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
+	if (instance)
+	{
+		instance->refresh();
+	}
+
+	refreshEnabledGraphics();
+}
+
+void LLFloaterPreferenceGraphicsAdvanced::onAdvancedAtmosphericsEnable()
 {
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance)
@@ -1513,20 +1524,19 @@ void LLFloaterPreference::refreshEnabledState()
 	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
 
 	// if vertex shaders off, disable all shader related products
-	if (!LLFeatureManager::getInstance()->isFeatureAvailable("VertexShaderEnable") ||
-		!LLFeatureManager::getInstance()->isFeatureAvailable("WindLightUseAtmosShaders"))
+	if (!LLFeatureManager::getInstance()->isFeatureAvailable("WindLightUseAtmosShaders"))
 	{
 		ctrl_wind_light->setEnabled(FALSE);
 		ctrl_wind_light->setValue(FALSE);
 	}
 	else
 	{
-		ctrl_wind_light->setEnabled(gSavedSettings.getBOOL("VertexShaderEnable"));
+		ctrl_wind_light->setEnabled(TRUE);
 	}
 
 	//Deferred/SSAO/Shadows
 	BOOL bumpshiny = gGLManager.mHasCubeMap && LLCubeMap::sUseCubeMaps && LLFeatureManager::getInstance()->isFeatureAvailable("RenderObjectBump") && gSavedSettings.getBOOL("RenderObjectBump");
-	BOOL shaders = gSavedSettings.getBOOL("WindLightUseAtmosShaders") && gSavedSettings.getBOOL("VertexShaderEnable");
+	BOOL shaders = gSavedSettings.getBOOL("WindLightUseAtmosShaders");
 	BOOL enabled = LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred") &&
 						bumpshiny &&
 						shaders && 
@@ -1555,9 +1565,7 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 // [/RLVa:KB]
 
 	// Reflections
-	BOOL reflections = gSavedSettings.getBOOL("VertexShaderEnable") 
-		&& gGLManager.mHasCubeMap
-		&& LLCubeMap::sUseCubeMaps;
+    BOOL reflections = gGLManager.mHasCubeMap && LLCubeMap::sUseCubeMaps;
 	ctrl_reflections->setEnabled(reflections);
 	reflections_text->setEnabled(reflections);
 	
@@ -1581,71 +1589,46 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 
 	ctrl_avatar_vp->setEnabled(avatar_vp_enabled);
 	
-	if (gSavedSettings.getBOOL("VertexShaderEnable") == FALSE || 
-		gSavedSettings.getBOOL("RenderAvatarVP") == FALSE)
-	{
-		ctrl_avatar_cloth->setEnabled(FALSE);
-	} 
-	else
-	{
-		ctrl_avatar_cloth->setEnabled(TRUE);
-	}
-	
-	// Vertex Shaders
-	// Global Shader Enable
-	LLCheckBoxCtrl* ctrl_shader_enable   = getChild<LLCheckBoxCtrl>("BasicShaders");
-	LLSliderCtrl* terrain_detail = getChild<LLSliderCtrl>("TerrainDetail");   // can be linked with control var
-	LLTextBox* terrain_text = getChild<LLTextBox>("TerrainDetailText");
+    if (gSavedSettings.getBOOL("RenderAvatarVP") == FALSE)
+    {
+        ctrl_avatar_cloth->setEnabled(FALSE);
+    } 
+    else
+    {
+        ctrl_avatar_cloth->setEnabled(TRUE);
+    }
 
-//	ctrl_shader_enable->setEnabled(LLFeatureManager::getInstance()->isFeatureAvailable("VertexShaderEnable"));
-// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a
-	// "Basic Shaders" can't be disabled - but can be enabled - under @setenv=n
-	bool fCtrlShaderEnable = LLFeatureManager::getInstance()->isFeatureAvailable("VertexShaderEnable");
-	ctrl_shader_enable->setEnabled(
-		fCtrlShaderEnable && ((!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV)) || (!gSavedSettings.getBOOL("VertexShaderEnable"))) );
+    // Vertex Shaders, Global Shader Enable
+    // SL-12594 Basic shaders are always enabled. DJH TODO clean up now-orphaned state handling code
+    LLSliderCtrl* terrain_detail = getChild<LLSliderCtrl>("TerrainDetail");   // can be linked with control var
+    LLTextBox* terrain_text = getChild<LLTextBox>("TerrainDetailText");
+
+    terrain_detail->setEnabled(FALSE);
+    terrain_text->setEnabled(FALSE);
+
+    // WindLight
+    LLCheckBoxCtrl* ctrl_wind_light = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
+    LLSliderCtrl* sky = getChild<LLSliderCtrl>("SkyMeshDetail");
+    LLTextBox* sky_text = getChild<LLTextBox>("SkyMeshDetailText");
+    ctrl_wind_light->setEnabled(TRUE);
+// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a//    // "Atmospheric Shaders" can't be disabled - but can be enabled - under @setenv=n
+//    bool fCtrlWindLightEnable = fCtrlShaderEnable && shaders;
+//    ctrl_wind_light->setEnabled(
+//        fCtrlWindLightEnable && ((!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV)) || (!gSavedSettings.getBOOL("WindLightUseAtmosShaders"))) );
 // [/RLVa:KB]
+    sky->setEnabled(TRUE);
+    sky_text->setEnabled(TRUE);
 
-	BOOL shaders = ctrl_shader_enable->get();
-	if (shaders)
-	{
-		terrain_detail->setEnabled(FALSE);
-		terrain_text->setEnabled(FALSE);
-	}
-	else
-	{
-		terrain_detail->setEnabled(TRUE);
-		terrain_text->setEnabled(TRUE);
-	}
-	
-	// WindLight
-	LLCheckBoxCtrl* ctrl_wind_light = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
-	LLSliderCtrl* sky = getChild<LLSliderCtrl>("SkyMeshDetail");
-	LLTextBox* sky_text = getChild<LLTextBox>("SkyMeshDetailText");
+    //Deferred/SSAO/Shadows
+    LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
+    
+    BOOL enabled = LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred") &&
+                        ((bumpshiny_ctrl && bumpshiny_ctrl->get()) ? TRUE : FALSE) &&
+                        gGLManager.mHasFramebufferObject &&
+                        gSavedSettings.getBOOL("RenderAvatarVP") &&
+                        (ctrl_wind_light->get()) ? TRUE : FALSE;
 
-	// *HACK just checks to see if we can use shaders... 
-	// maybe some cards that use shaders, but don't support windlight
-//	ctrl_wind_light->setEnabled(ctrl_shader_enable->getEnabled() && shaders);
-// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a
-	// "Atmospheric Shaders" can't be disabled - but can be enabled - under @setenv=n
-	bool fCtrlWindLightEnable = fCtrlShaderEnable && shaders;
-	ctrl_wind_light->setEnabled(
-		fCtrlWindLightEnable && ((!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV)) || (!gSavedSettings.getBOOL("WindLightUseAtmosShaders"))) );
-// [/RLVa:KB]
-
-	sky->setEnabled(ctrl_wind_light->get() && shaders);
-	sky_text->setEnabled(ctrl_wind_light->get() && shaders);
-
-	//Deferred/SSAO/Shadows
-	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
-	
-	BOOL enabled = LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred") &&
-						((bumpshiny_ctrl && bumpshiny_ctrl->get()) ? TRUE : FALSE) &&
-						shaders && 
-						gGLManager.mHasFramebufferObject &&
-						gSavedSettings.getBOOL("RenderAvatarVP") &&
-						(ctrl_wind_light->get()) ? TRUE : FALSE;
-
-	ctrl_deferred->setEnabled(enabled);
+    ctrl_deferred->setEnabled(enabled);
 
 	LLCheckBoxCtrl* ctrl_ssao = getChild<LLCheckBoxCtrl>("UseSSAO");
 	LLCheckBoxCtrl* ctrl_dof = getChild<LLCheckBoxCtrl>("UseDoF");
@@ -1690,7 +1673,7 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 // [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
 	// Setting should be disabled when basic shaders is unchecked or deferred rendering is enabled
 	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
-	ctrl_glow->setEnabled((ctrl_shader_enable->get()) && (!ctrl_deferred->get()));
+	ctrl_glow->setEnabled(!ctrl_deferred->get());
 // [/SL:TD]
 
 	// if no windlight shaders, turn off nighttime brightness, gamma, and fog distance
@@ -1756,7 +1739,6 @@ void LLFloaterPreferenceGraphicsAdvanced::disableUnavailableSettings()
 	LLTextBox* reflections_text = getChild<LLTextBox>("ReflectionsText");
 	LLCheckBoxCtrl* ctrl_avatar_vp     = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
 	LLCheckBoxCtrl* ctrl_avatar_cloth  = getChild<LLCheckBoxCtrl>("AvatarCloth");
-	LLCheckBoxCtrl* ctrl_shader_enable = getChild<LLCheckBoxCtrl>("BasicShaders");
 // [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
 	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
 // [/SL:TD]
@@ -1769,47 +1751,11 @@ void LLFloaterPreferenceGraphicsAdvanced::disableUnavailableSettings()
 	LLSliderCtrl* sky = getChild<LLSliderCtrl>("SkyMeshDetail");
 	LLTextBox* sky_text = getChild<LLTextBox>("SkyMeshDetailText");
 
-	// if vertex shaders off, disable all shader related products
-	if (!LLFeatureManager::getInstance()->isFeatureAvailable("VertexShaderEnable"))
-	{
-		ctrl_shader_enable->setEnabled(FALSE);
-		ctrl_shader_enable->setValue(FALSE);
-		
 // [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
 		ctrl_glow->setEnabled(FALSE);
 		ctrl_glow->setValue(FALSE);
 // [/SL:TD]
 
-		ctrl_wind_light->setEnabled(FALSE);
-		ctrl_wind_light->setValue(FALSE);
-
-		sky->setEnabled(FALSE);
-		sky_text->setEnabled(FALSE);
-
-		ctrl_reflections->setEnabled(FALSE);
-		ctrl_reflections->setValue(0);
-		reflections_text->setEnabled(FALSE);
-		
-		ctrl_avatar_vp->setEnabled(FALSE);
-		ctrl_avatar_vp->setValue(FALSE);
-		
-		ctrl_avatar_cloth->setEnabled(FALSE);
-		ctrl_avatar_cloth->setValue(FALSE);
-
-		ctrl_shadows->setEnabled(FALSE);
-		ctrl_shadows->setValue(0);
-		shadows_text->setEnabled(FALSE);
-		
-		ctrl_ssao->setEnabled(FALSE);
-		ctrl_ssao->setValue(FALSE);
-
-		ctrl_dof->setEnabled(FALSE);
-		ctrl_dof->setValue(FALSE);
-
-		ctrl_deferred->setEnabled(FALSE);
-		ctrl_deferred->setValue(FALSE);
-	}
-	
 	// disabled windlight
 	if (!LLFeatureManager::getInstance()->isFeatureAvailable("WindLightUseAtmosShaders"))
 	{
@@ -3411,7 +3357,29 @@ public:
 
 	static void onResetWindLight()
 	{
-		LLEnvManagerNew::resetUserPrefs();
+		// Close all WindLight related floaters (unless there's unsaved changes)
+		const std::vector<std::string> strEnvFloaterNames = { "env_edit_extdaycycle", "env_fixed_environmentent_water", "env_fixed_environmentent_sky" };
+		for (const std::string& strEnvFloaterName : strEnvFloaterNames)
+		{
+			if (LLFloater* pFloater = LLFloaterReg::findTypedInstance<LLFloater>(strEnvFloaterName))
+			{
+				if (!pFloater->isDirty())
+					pFloater->closeFloater();
+				else
+					pFloater->setFocus(FALSE);
+			}
+		}
+
+		// Reset the clouds
+		if (LLEnvironment::instance().isCloudScrollPaused())
+		{
+			LLEnvironment::instance().resumeCloudScroll();
+		}
+
+		// Clear the local environment and switch to the shared one
+		LLEnvironment::instance().clearEnvironment(LLEnvironment::ENV_LOCAL);
+		LLEnvironment::instance().setSelectedEnvironment(LLEnvironment::ENV_LOCAL, LLEnvironment::TRANSITION_INSTANT);
+		LLEnvironment::instance().updateEnvironment();
 	}
 };
 
@@ -3597,7 +3565,7 @@ void LLPanelPreferenceGraphics::setHardwareDefaults()
 LLFloaterPreferenceGraphicsAdvanced::LLFloaterPreferenceGraphicsAdvanced(const LLSD& key)
 	: LLFloater(key)
 {
-	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreferenceGraphicsAdvanced::onVertexShaderEnable, this));
+    mCommitCallbackRegistrar.add("Pref.RenderOptionUpdate",            boost::bind(&LLFloaterPreferenceGraphicsAdvanced::onRenderOptionEnable, this));
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxNonImpostors", boost::bind(&LLFloaterPreferenceGraphicsAdvanced::onMaxNonImpostorsChange, this));
 // [/SL:KB]

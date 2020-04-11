@@ -382,6 +382,8 @@ public:
 		static const std::string beacon_scripted_touch = LLTrans::getString("BeaconScriptedTouch");
 		static const std::string beacon_sound = LLTrans::getString("BeaconSound");
 		static const std::string beacon_media = LLTrans::getString("BeaconMedia");
+		static const std::string beacon_sun = LLTrans::getString("BeaconSun");
+		static const std::string beacon_moon = LLTrans::getString("BeaconMoon");
 		static const std::string particle_hiding = LLTrans::getString("ParticleHiding");
 
 		// Draw the statistics in a light gray
@@ -626,7 +628,7 @@ public:
 			addText(xpos, ypos, llformat("%d Unique Textures", LLImageGL::sUniqueCount));
 			ypos += y_inc;
 
-			addText(xpos, ypos, llformat("%d Render Calls", last_frame_recording.getSampleCount(LLPipeline::sStatBatchSize)));
+			addText(xpos, ypos, llformat("%d Render Calls", (U32)last_frame_recording.getSampleCount(LLPipeline::sStatBatchSize)));
             ypos += y_inc;
 
 			addText(xpos, ypos, llformat("%d/%d Objects Active", gObjectList.getNumActiveObjects(), gObjectList.getNumObjects()));
@@ -814,6 +816,20 @@ public:
 				addText(xpos, ypos, "Viewing physical object beacons (green)");
 				ypos += y_inc;
 			}
+		}
+
+		static LLUICachedControl<bool> show_sun_beacon("sunbeacon", false);
+		static LLUICachedControl<bool> show_moon_beacon("moonbeacon", false);
+
+		if (show_sun_beacon)
+		{
+			addText(xpos, ypos, beacon_sun);
+			ypos += y_inc;
+		}
+		if (show_moon_beacon)
+		{
+			addText(xpos, ypos, beacon_moon);
+			ypos += y_inc;
 		}
 
 		if(log_texture_traffic)
@@ -1419,7 +1435,13 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 
 								for (const drag_item_t& dragItem : mDragItems)
 								{
+#ifndef CATZNIP
+									LLSD msg;
+									msg["MESSAGE"] = llformat("Uploading %s...", dragItem.second.c_str());
+									LLNotificationsUtil::add("GenericAlert", msg);
+#else
 									upload_single_file(dragItem.second, getLoadFilterFromFilename(dragItem.second));
+#endif // CATZNIP
 								}
 							}
 							else
@@ -5346,7 +5368,6 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 				{
 					// Required for showing the GUI in snapshots and performing bloom composite overlay
 					// Call even if show_ui is FALSE
-					LL_RECORD_BLOCK_TIME(FTM_RENDER_UI);
 					render_ui(scale_factor, subfield);
 					swap();
 				}

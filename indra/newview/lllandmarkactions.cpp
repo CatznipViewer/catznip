@@ -316,7 +316,7 @@ void LLLandmarkActions::createLandmarkHere(
 		name, desc,
 		LLAssetType::AT_LANDMARK,
 		LLInventoryType::IT_LANDMARK,
-		NOT_WEARABLE, PERM_ALL, 
+        NO_INV_SUBTYPE, PERM_ALL,
 		cb);
 // [/SL:KB]
 //	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),

@@ -165,6 +165,7 @@ public:
 	/*virtual*/ LLAssetType::EType getAssetType() const { return mAssetType; }
 // [/SL:KB]
 	virtual LLWearableType::EType getWearableType() const { return LLWearableType::WT_NONE; }
+    virtual LLSettingsType::type_e getSettingsType() const { return LLSettingsType::ST_NONE; }
 	virtual EInventorySortGroup getSortGroup() const { return SG_ITEM; }
 	virtual LLInventoryObject* getInventoryObject() const { return findInvObject(); }
 
@@ -848,6 +849,7 @@ BOOL LLTaskCategoryBridge::dragOrDrop(MASK mask, BOOL drop,
 		case DAD_GESTURE:
 		case DAD_CALLINGCARD:
 		case DAD_MESH:
+        case DAD_SETTINGS:
 			accept = LLToolDragAndDrop::isInventoryDropAcceptable(object, (LLViewerInventoryItem*)cargo_data);
 			if(accept && drop)
 			{
@@ -1286,6 +1288,36 @@ LLUIImagePtr LLTaskWearableBridge::getIcon() const
 }
 
 ///----------------------------------------------------------------------------
+/// Class LLTaskSettingsBridge
+///----------------------------------------------------------------------------
+
+class LLTaskSettingsBridge : public LLTaskInvFVBridge
+{
+public:
+    LLTaskSettingsBridge(LLPanelObjectInventory* panel,
+        const LLUUID& uuid,
+        const std::string& name,
+        U32 flags) :
+        LLTaskInvFVBridge(panel, uuid, name, flags) {}
+
+    virtual LLUIImagePtr getIcon() const;
+    virtual LLSettingsType::type_e  getSettingsType() const;
+};
+
+LLUIImagePtr LLTaskSettingsBridge::getIcon() const
+{
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: Catznip-6.4
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
+//    return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE);
+}
+
+LLSettingsType::type_e LLTaskSettingsBridge::getSettingsType() const 
+{ 
+    return LLSettingsType::ST_NONE; 
+}
+
+///----------------------------------------------------------------------------
 /// LLTaskInvFVBridge impl
 //----------------------------------------------------------------------------
 
@@ -1365,6 +1397,12 @@ LLTaskInvFVBridge* LLTaskInvFVBridge::createObjectBridge(LLPanelObjectInventory*
 		new_bridge = new LLTaskLSLBridge(panel,
 						 object_id,
 						 object_name);
+		break;
+	case LLAssetType::AT_SETTINGS:
+		new_bridge = new LLTaskSettingsBridge(panel,
+										  object_id,
+										  object_name,
+                                          itemflags);
 		break;
 	default:
 		LL_INFOS() << "Unhandled inventory type (llassetstorage.h): "

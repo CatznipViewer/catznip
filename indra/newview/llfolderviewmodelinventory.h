@@ -69,8 +69,9 @@ public:
 		}
 	}
 // [/SL:KB]
-	virtual LLWearableType::EType getWearableType() const = 0;
-//	virtual EInventorySortGroup getSortGroup() const = 0;
+    virtual LLWearableType::EType getWearableType() const = 0;
+    virtual LLSettingsType::type_e getSettingsType() const = 0;
+//    virtual EInventorySortGroup getSortGroup() const = 0;
 //	virtual LLInventoryObject* getInventoryObject() const = 0;
 	virtual void requestSort();
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
