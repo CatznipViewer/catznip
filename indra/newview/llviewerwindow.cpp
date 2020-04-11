@@ -89,6 +89,9 @@
 
 // newview includes
 #include "llagent.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "llagentbenefits.h"
+// [/SL:KB]
 #include "llbox.h"
 #include "llchicletbar.h"
 #include "llconsole.h"
@@ -100,9 +103,6 @@
 #include "lldrawpoolalpha.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolwater.h"
-// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-#include "lleconomy.h"
-// [/SL:KB]
 #include "llmaniptranslate.h"
 #include "llface.h"
 #include "llfeaturemanager.h"
@@ -1319,24 +1319,6 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWind
 }
 
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-static void confirmDragNDropUpload(const LLSD& sdNotification, const LLSD& sdResponse)
-{
-	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
-	if (idxOption == 0)
-	{
-		const LLSD& sdPayload = sdNotification["payload"];
-		if (sdPayload.isArray())
-		{
-			std::vector<std::string> files;
-			for (LLSD::array_const_iterator itFile = sdPayload.beginArray(), endFile = sdPayload.endArray(); itFile != endFile; ++itFile)
-				files.push_back(*itFile);
-#ifdef CATZNIP
-			upload_bulk(files);
-#endif // CATZNIP
-		}
-	}
-}
-
 // This really should be standardized somewhere instead of having extensions duplicated all over the code
 typedef std::tuple<const char*, LLAssetType::EType, LLFilePicker::ELoadFilter> dragdrop_type_lookup_t;
 static dragdrop_type_lookup_t s_DragDropTypesLookup[] = {
@@ -1442,19 +1424,11 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 							}
 							else
 							{
-								// getPriceUpload() returns -1 if no data available yet.
-								S32 nUploadCost = LLGlobalEconomy::getInstance()->getPriceUpload();
-								std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
+								std::vector<std::string> files;
+								for (const drag_item_t& dragItem : mDragItems)
+									files.push_back(dragItem.second);
 
-								std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
-								for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
-								{
-									strUploadList += itItem->first->getName();
-									strUploadList += "\n";
-									sdFiles.append(itItem->second);
-								}
-
-								LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("UPLOAD_LIST", strUploadList), sdFiles, boost::bind(confirmDragNDropUpload, _1, _2));
+								upload_bulk(files, LLFilePicker::FFLOAD_ALL);
 							}
 						}
 						result = DND_COPY;
