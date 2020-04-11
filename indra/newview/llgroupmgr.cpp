@@ -44,9 +44,8 @@
 #include "roles_constants.h"
 #include "lltransactiontypes.h"
 #include "llstatusbar.h"
-#include "lleconomy.h"
 #include "llviewerwindow.h"
-#include "llpanelgroup.h"
+#include "llpanelgroupcreate.h"
 #include "llgroupactions.h"
 #include "llnotificationsutil.h"
 // [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
@@ -1456,7 +1455,7 @@ void LLGroupMgr::processCreateGroupReply(LLMessageSystem* msg, void ** data)
 
 		gAgent.mGroups.push_back(gd);
 
-		LLPanelGroup::refreshCreatedGroup(group_id);
+		LLPanelGroupCreate::refreshCreatedGroup(group_id);
 		//FIXME
 		//LLFloaterGroupInfo::closeCreateGroup();
 		//LLFloaterGroupInfo::showFromUUID(group_id,"roles_tab");

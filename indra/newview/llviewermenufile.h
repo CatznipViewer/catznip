@@ -43,7 +43,7 @@ void init_menu_file();
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 // NOTE: uploads the files without asking the user for confirmation
-void upload_bulk(const std::vector<std::string>& filenames);
+const void upload_bulk(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter type);
 // [/SL:KB]
 
 LLUUID upload_new_resource(
