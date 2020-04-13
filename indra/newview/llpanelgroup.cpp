@@ -129,10 +129,6 @@ void LLPanelGroup::onOpen(const LLSD& key)
 	{
 		onBackBtnClick();
 	}
-	else if(str_action == "create")
-	{
-		setGroupID(LLUUID::null);
-	}
 	else if(str_action == "refresh_notices")
 	{
 		LLPanelGroupNotices* panel_notices = findChild<LLPanelGroupNotices>("group_notices_tab_panel");
@@ -170,11 +166,7 @@ BOOL LLPanelGroup::postBuild()
 	button = getChild<LLButton>("btn_refresh");
 	button->setClickedCallback(onBtnRefresh, this);
 
-	getChild<LLButton>("btn_create")->setVisible(false);
-
 	childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
-
-	childSetCommitCallback("btn_create",boost::bind(&LLPanelGroup::onBtnCreate,this),NULL);
 
 	LLPanelGroupTab* panel_general = findChild<LLPanelGroupTab>("group_general_tab_panel");
 	LLPanelGroupTab* panel_roles = findChild<LLPanelGroupTab>("group_roles_tab_panel");
@@ -231,7 +223,6 @@ void LLPanelGroup::reposButtons()
 	}
 
 	reposButton("btn_apply");
-	reposButton("btn_create");
 	reposButton("btn_refresh");
 	reposButton("btn_cancel");
 	reposButton("btn_chat");
@@ -251,23 +242,6 @@ void LLPanelGroup::onBackBtnClick()
 	if(parent)
 	{
 		parent->openPreviousPanel();
-	}
-}
-
-
-void LLPanelGroup::onBtnCreate()
-{
-	LLPanelGroupGeneral* panel_general = findChild<LLPanelGroupGeneral>("group_general_tab_panel");
-	if(!panel_general)
-		return;
-	std::string apply_mesg;
-	if(panel_general->apply(apply_mesg))//yes yes you need to call apply to create...
-		return;
-	if ( !apply_mesg.empty() )
-	{
-		LLSD args;
-		args["MESSAGE"] = apply_mesg;
-		LLNotificationsUtil::add("GenericAlert", args);
 	}
 }
 
@@ -386,7 +360,6 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 
 	LLButton* button_apply = findChild<LLButton>("btn_apply");
 	LLButton* button_refresh = findChild<LLButton>("btn_refresh");
-	LLButton* button_create = findChild<LLButton>("btn_create");
 	
 	LLButton* button_cancel = findChild<LLButton>("btn_cancel");
 	LLButton* button_call = findChild<LLButton>("btn_call");
@@ -399,8 +372,6 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 	if(button_refresh)
 		button_refresh->setVisible(!is_null_group_id);
 
-	if(button_create)
-		button_create->setVisible(is_null_group_id);
 	if(button_cancel)
 		button_cancel->setVisible(!is_null_group_id);
 
@@ -617,18 +588,6 @@ void LLPanelGroup::showNotice(const std::string& subject,
 		return;
 	}
 	panel_notices->showNotice(subject,message,has_inventory,inventory_name,inventory_offer);
-}
-
-
-
-
-//static
-void LLPanelGroup::refreshCreatedGroup(const LLUUID& group_id)
-{
-	LLPanelGroup* panel = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
-	if(!panel)
-		return;
-	panel->setGroupID(group_id);
 }
 
 //static
