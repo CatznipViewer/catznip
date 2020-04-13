@@ -300,9 +300,6 @@ public:
 			id_end = uuids.end();
 
 //		LLAvatarItemDistanceComparator::id_to_pos_map_t pos_map;
-// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
-		const LLVector3& posAgentCam = gAgentCamera.getCameraPositionAgent();
-// [/SL:KB]
 
 		mAvatarsPositions.clear();
 
@@ -311,7 +308,7 @@ public:
 // [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
 			const LLVector3d& posAgent = *pos_it;
 			// NOTE-Catznip: this should match the 'unknown_relative_z' check in LLNetMap::draw()
-			mAvatarsPositions[*id_it] = ((posAgent.mdV[VZ] != COARSEUPDATE_MAX_Z) || (posAgentCam.mV[VZ] < COARSEUPDATE_MAX_Z)) ? *pos_it : LLVector3d::zero;
+			mAvatarsPositions[*id_it] = (posAgent.mdV[VZ] != MAX_OBJECT_Z) ? *pos_it : LLVector3d::zero;
 // [/SL:KB]
 //			mAvatarsPositions[*id_it] = *pos_it;
 		}
