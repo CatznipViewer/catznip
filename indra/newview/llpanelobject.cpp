@@ -65,6 +65,9 @@
 #include "lltoolpipette.h"
 // [/SL:KB]
 #include "llui.h"
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.3
+#include "llvoavatarself.h"
+// [/SL:KB]
 #include "llviewerobject.h"
 #include "llviewerregion.h"
 #include "llviewerwindow.h"
@@ -1760,7 +1763,33 @@ void LLPanelObject::sendPosition(BOOL btn_down)
 	// won't get dumped by the simulator.
 	LLVector3d new_pos_global = regionp->getPosGlobalFromRegion(newpos);
 
-	if ( LLWorld::getInstance()->positionRegionValidGlobal(new_pos_global) )
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-6.3
+	if (mObject->isAttachment())
+	{
+		// Handle attachments in local space (see LLManipTranslate::handleHover)
+		const LLVector3& oldpos = mObject->getPosition();
+
+		mObject->setPosition(newpos);
+		LLManip::rebuild(mObject);
+		gAgentAvatarp->clampAttachmentPositions();
+		newpos = mObject->getPosition();
+
+		if (mObject->isRootEdit())
+		{
+			// counter-translate child objects if we are moving the root as an individual
+			mObject->resetChildrenPosition(oldpos - newpos, TRUE) ;
+		}
+
+		if (!btn_down)
+		{
+			LLSelectMgr::getInstance()->sendMultipleUpdate(UPD_POSITION);
+		}
+
+		LLSelectMgr::getInstance()->updateSelectionCenter();
+	}
+	else if ( LLWorld::getInstance()->positionRegionValidGlobal(new_pos_global) )
+// [/SL:KB]
+//	if ( LLWorld::getInstance()->positionRegionValidGlobal(new_pos_global) )
 	{
 		// send only if the position is changed, that is, the delta vector is not zero
 		LLVector3d old_pos_global = mObject->getPositionGlobal();
