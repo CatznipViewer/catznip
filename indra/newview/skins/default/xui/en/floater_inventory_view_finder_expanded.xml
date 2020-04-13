@@ -308,6 +308,23 @@
              width="126" />
             <icon
              height="16"
+             image_name="Inv_Settings"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_settings"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Settings"
+             layout="topleft"
+             left_pad="4"
+             name="check_settings"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
              image_name="Inv_Snapshot"
              layout="topleft"
              left="160"
