@@ -56,8 +56,9 @@ public:
 //	virtual bool hasChildren() const = 0;
 //	virtual LLInventoryType::EType getInventoryType() const = 0;
 //	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
-	virtual LLWearableType::EType getWearableType() const = 0;
-//	virtual EInventorySortGroup getSortGroup() const = 0;
+    virtual LLWearableType::EType getWearableType() const = 0;
+    virtual LLSettingsType::type_e getSettingsType() const = 0;
+//    virtual EInventorySortGroup getSortGroup() const = 0;
 //	virtual LLInventoryObject* getInventoryObject() const = 0;
 	virtual void requestSort();
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2

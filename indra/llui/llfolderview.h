@@ -91,9 +91,11 @@ public:
 		Optional<std::string>   title;
 		Optional<bool>			use_label_suffix,
 								allow_multiselect,
+								allow_drag,
 								show_empty_message,
 								use_ellipses,
-								show_item_link_overlays;
+								show_item_link_overlays,
+								suppress_folder_menu;
 		Mandatory<LLFolderViewModelInterface*>	view_model;
 		Optional<LLFolderViewGroupedItemModel*> grouped_item_model;
         Mandatory<std::string>   options_menu;
@@ -130,6 +132,7 @@ public:
 	void setReshapeCallback(const signal_t::slot_type& cb) { mReshapeSignal.connect(cb); }
 	
 	bool getAllowMultiSelect() { return mAllowMultiSelect; }
+	bool getAllowDrag() { return mAllowDrag; }
 
 	// Close all folders in the view
 //	void closeAllFolders();
@@ -277,6 +280,8 @@ protected:
 
 	void closeRenamer( void );
 
+	bool isFolderSelected();
+
 	bool selectFirstItem();
 	bool selectLastItem();
 	
@@ -289,6 +294,7 @@ protected:
 	selected_items_t				mSelectedItems;
 	bool							mKeyboardSelection,
 									mAllowMultiSelect,
+									mAllowDrag,
 									mShowEmptyMessage,
 									mShowFolderHierarchy,
 									mNeedsScroll,
@@ -300,7 +306,8 @@ protected:
 									mDragAndDropThisFrame,
 									mShowItemLinkOverlays,
 									mShowSelectionContext,
-									mShowSingleSelection;
+									mShowSingleSelection,
+									mSuppressFolderMenu;
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
 	bool							mNeedsAutoOpen;
 // [/SL:KB]

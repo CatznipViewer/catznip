@@ -563,7 +563,9 @@ BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 			LLFolderView* root = getRoot();
 
 //		if( (x - mDragStartX) * (x - mDragStartX) + (y - mDragStartY) * (y - mDragStartY) > drag_and_drop_threshold() * drag_and_drop_threshold() 
+//			&& root->getAllowDrag()
 //			&& root->getCurSelectedItem()
+//			&& root->startDrag())
 //			&& root->startDrag())
 //		{
 //					// RN: when starting drag and drop, clear out last auto-open
