@@ -260,7 +260,7 @@ public:
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
 	static std::set<LLUUID> getInventorySelectedUUIDs(LLInventoryPanel* inv_panel);
 // [/SL:KB]
-//	static std::set<LLUUID> getInventorySelectedUUIDs();
+//	static std::set<LLUUID> getInventorySelectedUUIDs(LLInventoryPanel* active_panel = NULL);
 
 private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
