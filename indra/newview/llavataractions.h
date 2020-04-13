@@ -244,7 +244,7 @@ public:
 	 */
 	static void viewChatHistory(const LLUUID& id);
 
-	static std::set<LLUUID> getInventorySelectedUUIDs();
+	static std::set<LLUUID> getInventorySelectedUUIDs(LLInventoryPanel* active_panel = NULL);
 
 // [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4)
 	static void report(const LLUUID& idAgent);
