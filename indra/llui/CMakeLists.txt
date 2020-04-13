@@ -134,8 +134,10 @@ set(llui_SOURCE_FILES
     llview.cpp
     llviewquery.cpp
     llviewereventrecorder.cpp
+    llvirtualtrackball.cpp
     llwindowshade.cpp
     llxuiparser.cpp
+    llxyvector.cpp
     )
     
 set(llui_HEADER_FILES
@@ -252,8 +254,10 @@ set(llui_HEADER_FILES
     llview.h
     llviewereventrecorder.h
     llviewquery.h
+    llvirtualtrackball.h
     llwindowshade.h
     llxuiparser.h
+    llxyvector.h
     )
 
 set_source_files_properties(${llui_HEADER_FILES}

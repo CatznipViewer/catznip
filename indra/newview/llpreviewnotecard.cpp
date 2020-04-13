@@ -423,6 +423,7 @@ void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
 			previewEditor->makePristine();
 			BOOL modifiable = preview->canModify(preview->mObjectID, preview->getItem());
 			preview->setEnabled(modifiable);
+			preview->syncExternal();
 			preview->mAssetStatus = PREVIEW_ASSET_LOADED;
 		}
 		else
@@ -559,10 +560,6 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem, bool sync)
 		}
 
 		editor->makePristine();
-		if (sync)
-		{
-			syncExternal();
-		}
 		const LLInventoryItem* item = getItem();
 		// save it out to database
         if (item)
@@ -583,14 +580,19 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem, bool sync)
 
                 if (mObjectUUID.isNull() && !agent_url.empty())
                 {
-                    uploadInfo = LLResourceUploadInfo::ptr_t(new LLBufferedAssetUploadInfo(mItemUUID, LLAssetType::AT_NOTECARD, buffer, 
-                        boost::bind(&LLPreviewNotecard::finishInventoryUpload, _1, _2, _3)));
+                    uploadInfo = std::make_shared<LLBufferedAssetUploadInfo>(mItemUUID, LLAssetType::AT_NOTECARD, buffer, 
+                        [](LLUUID itemId, LLUUID newAssetId, LLUUID newItemId, LLSD) {
+                            LLPreviewNotecard::finishInventoryUpload(itemId, newAssetId, newItemId);
+                        });
                     url = agent_url;
                 }
                 else if (!mObjectUUID.isNull() && !task_url.empty())
                 {
-                    uploadInfo = LLResourceUploadInfo::ptr_t(new LLBufferedAssetUploadInfo(mObjectUUID, mItemUUID, LLAssetType::AT_NOTECARD, buffer, 
-                        boost::bind(&LLPreviewNotecard::finishTaskUpload, _1, _3, mObjectUUID)));
+                    LLUUID object_uuid(mObjectUUID);
+                    uploadInfo = std::make_shared<LLBufferedAssetUploadInfo>(mObjectUUID, mItemUUID, LLAssetType::AT_NOTECARD, buffer, 
+                        [object_uuid](LLUUID itemId, LLUUID, LLUUID newAssetId, LLSD) {
+                            LLPreviewNotecard::finishTaskUpload(itemId, newAssetId, object_uuid);
+                        });
                     url = task_url;
                 }
 
@@ -811,6 +813,7 @@ void LLPreviewNotecard::openInExternalEditor()
 
     // Start watching file changes.
     mLiveFile = new LLLiveLSLFile(filename, boost::bind(&LLPreviewNotecard::onExternalChange, this, _1));
+    mLiveFile->ignoreNextUpdate();
     mLiveFile->addToEventTimer();
 
     // Open it in external editor.
