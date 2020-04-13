@@ -41,6 +41,10 @@ class LLTransactionID;
 
 void init_menu_file();
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+// NOTE: uploads the files without asking the user for confirmation
+const void upload_bulk(const std::vector<std::string>& filenames, LLFilePicker::ELoadFilter type);
+// [/SL:KB]
 
 LLUUID upload_new_resource(
     const std::string& src_filename,
@@ -60,7 +64,7 @@ LLUUID upload_new_resource(
 
 void upload_new_resource(
     LLResourceUploadInfo::ptr_t &uploadInfo,
-    LLAssetStorage::LLStoreAssetCallback callback = NULL,
+    LLAssetStorage::LLStoreAssetCallback callback = LLAssetStorage::LLStoreAssetCallback(),
     void *userdata = NULL);
 
 
