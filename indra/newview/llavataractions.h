@@ -244,7 +244,7 @@ public:
 	 */
 	static void viewChatHistory(const LLUUID& id);
 
-	static std::set<LLUUID> getInventorySelectedUUIDs();
+	static std::set<LLUUID> getInventorySelectedUUIDs(LLInventoryPanel* active_panel = NULL);
 
 // [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
 	static void addContact(const LLUUID& id);
