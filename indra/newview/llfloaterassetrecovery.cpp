@@ -295,7 +295,7 @@ bool LLAssetRecoverQueue::recoverNext()
 	// Otherwise start the recovery cycle
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull,
 	                      itItem->strName, itItem->strDescription, itItem->eAssetType, itItem->eInvType,
-	                      NOT_WEARABLE, itItem->nNextOwnerPerm, new LLCreateRecoverAssetCallback(this));
+	                      NO_INV_SUBTYPE, itItem->nNextOwnerPerm, new LLCreateRecoverAssetCallback(this));
 	return true;
 }
 
