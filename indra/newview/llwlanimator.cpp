@@ -41,9 +41,6 @@ LLWLAnimator::LLWLAnimator() : mStartTime(0.f), mDayRate(1.f), mDayTime(0.f),
 							mInterpStartTime(), mInterpEndTime()
 {
 	mInterpBeginWL = new LLWLParamSet();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	mInterpEndWL = new LLWLParamSet();
-// [/SL:KB]
 	mInterpBeginWater = new LLWaterParamSet();
 	mInterpEndWater = new LLWaterParamSet();
 }
@@ -121,45 +118,19 @@ void LLWLAnimator::update(LLWLParamSet& curParams)
 		clock_t current = clock();
 		if(current >= mInterpEndTime)
 		{
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-			// Slam final sky/water values
-			if (mInterpEndWL->getAll().size())
-			{
-				deactivate();
-				curParams.setAll(mInterpEndWL->getAll());
-			}
-			LLWaterParamManager::getInstance()->mCurParams.setAll(mInterpEndWater->getAll());
-
-			mInterpEndWL->setAll(LLSD::emptyMap());
-			mInterpEndWater->setAll(LLSD::emptyMap());
-// [/SL:KB]
-
 			mIsInterpolating = false;
 			return;
 		}
 		
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-		if (mInterpEndWL->getAll().size())
-		{
-			// mix from previous value to end target
-			weight = (current - mInterpStartTime) / (INTERP_TOTAL_SECONDS * CLOCKS_PER_SEC);
-			curParams.mix(*mInterpBeginWL, *mInterpEndWL, weight);
-		}
-		else
-		{
-// [/SL:KB]
-			// determine moving target for final interpolation value
-			// *TODO: this will not work with lazy loading of sky presets.
-			LLWLParamSet buf = LLWLParamSet();
-			buf.setAll(LLWLParamManager::getInstance()->mParamList[mFirstIt->second].getAll());	// just give it some values, otherwise it has no params to begin with (see comment in constructor)
-			buf.mix(LLWLParamManager::getInstance()->mParamList[mFirstIt->second], LLWLParamManager::getInstance()->mParamList[mSecondIt->second], weight);	// mix to determine moving target for interpolation finish (as below)
+		// determine moving target for final interpolation value
+		// *TODO: this will not work with lazy loading of sky presets.
+		LLWLParamSet buf = LLWLParamSet();
+		buf.setAll(LLWLParamManager::getInstance()->mParamList[mFirstIt->second].getAll());	// just give it some values, otherwise it has no params to begin with (see comment in constructor)
+		buf.mix(LLWLParamManager::getInstance()->mParamList[mFirstIt->second], LLWLParamManager::getInstance()->mParamList[mSecondIt->second], weight);	// mix to determine moving target for interpolation finish (as below)
 
-			// mix from previous value to moving target
-			weight = (current - mInterpStartTime) / (INTERP_TOTAL_SECONDS * CLOCKS_PER_SEC);
-			curParams.mix(*mInterpBeginWL, buf, weight);
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-		}
-// [/SL:KB]
+		// mix from previous value to moving target
+		weight = (current - mInterpStartTime) / (INTERP_TOTAL_SECONDS * CLOCKS_PER_SEC);
+		curParams.mix(*mInterpBeginWL, buf, weight);
 		
 		// mix water
 		LLWaterParamManager::getInstance()->mCurParams.mix(*mInterpBeginWater, *mInterpEndWater, weight);
@@ -259,39 +230,19 @@ void LLWLAnimator::setTrack(std::map<F32, LLWLParamKey>& curTrack,
 	mIsRunning = run;
 }
 
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLWLAnimator::startInterpolation(const LLSD& targetSky, const LLSD& targetWater)
+void LLWLAnimator::startInterpolation(const LLSD& targetWater)
 {
 	mInterpBeginWL->setAll(LLWLParamManager::getInstance()->mCurParams.getAll());
 	mInterpBeginWater->setAll(LLWaterParamManager::getInstance()->mCurParams.getAll());
-
+	
 	mInterpStartTime = clock();
 	mInterpEndTime = mInterpStartTime + clock_t(INTERP_TOTAL_SECONDS) * CLOCKS_PER_SEC;
 
-	if (!targetSky.isUndefined())
-		mInterpEndWL->setAll(targetSky);
-
-	if (!targetWater.isUndefined())
-		mInterpEndWater->setAll(targetWater);
-	else if (!mInterpEndWater->getAll().size())
-		mInterpEndWater->setAll(mInterpBeginWater->getAll());
+	// Don't set any ending WL -- this is continuously calculated as the animator updates since it's a moving target
+	mInterpEndWater->setAll(targetWater);
 
 	mIsInterpolating = true;
 }
-// [/SL:KB]
-//void LLWLAnimator::startInterpolation(const LLSD& targetWater)
-//{
-//	mInterpBeginWL->setAll(LLWLParamManager::getInstance()->mCurParams.getAll());
-//	mInterpBeginWater->setAll(LLWaterParamManager::getInstance()->mCurParams.getAll());
-//	
-//	mInterpStartTime = clock();
-//	mInterpEndTime = mInterpStartTime + clock_t(INTERP_TOTAL_SECONDS) * CLOCKS_PER_SEC;
-//
-//	// Don't set any ending WL -- this is continuously calculated as the animator updates since it's a moving target
-//	mInterpEndWater->setAll(targetWater);
-//
-//	mIsInterpolating = true;
-//}
 
 std::string LLWLAnimator::timeToString(F32 curTime)
 {

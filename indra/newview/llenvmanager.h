@@ -275,26 +275,16 @@ public:
 	bool useRegionSettings();
 	bool useWaterPreset(const std::string& name);
 	bool useWaterParams(const LLSD& params);
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	bool useSkyPreset(const std::string& name, bool interpolate = false);
-	bool useSkyParams(const LLSD& params, bool interpolate = false);
-// [/SL:KB]
-//	bool useSkyPreset(const std::string& name);
-//	bool useSkyParams(const LLSD& params);
+	bool useSkyPreset(const std::string& name);
+	bool useSkyParams(const LLSD& params);
 	bool useDayCycle(const std::string& name, LLEnvKey::EScope scope);
 	bool useDayCycleParams(const LLSD& params, LLEnvKey::EScope scope, F32 time = 0.5);
 
 	// setters for user env. preferences
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	void setUseRegionSettings(bool val, bool interpolate = false);
-	void setUseWaterPreset(const std::string& name, bool interpolate = false);
-	void setUseSkyPreset(const std::string& name, bool interpolate = false);
-	void setUseDayCycle(const std::string& name, bool interpolate = false);
-// [/SL:KB]
-//	void setUseRegionSettings(bool val);
-//	void setUseWaterPreset(const std::string& name);
-//	void setUseSkyPreset(const std::string& name);
-//	void setUseDayCycle(const std::string& name);
+	void setUseRegionSettings(bool val);
+	void setUseWaterPreset(const std::string& name);
+	void setUseSkyPreset(const std::string& name);
+	void setUseDayCycle(const std::string& name);
 	void setUserPrefs(
 		const std::string& water_preset,
 		const std::string& sky_preset,
@@ -329,10 +319,7 @@ private:
 	void loadUserPrefs();
 	void saveUserPrefs();
 
-//	void updateSkyFromPrefs();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	void updateSkyFromPrefs(bool interpolate);
-// [/SL:KB]
+	void updateSkyFromPrefs();
 	void updateWaterFromPrefs(bool interpolate);
 	void updateManagersFromPrefs(bool interpolate);
 

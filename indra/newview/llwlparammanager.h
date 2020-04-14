@@ -149,10 +149,7 @@ public:
 	void setDefaultDay();
 
 	/// apply specified fixed sky params
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	bool applySkyParams(const LLSD& params, bool interpolate);
-// [/SL:KB]
-//	bool applySkyParams(const LLSD& params);
+	bool applySkyParams(const LLSD& params);
 
 	void setDefaultSky();
 

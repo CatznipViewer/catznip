@@ -207,10 +207,7 @@ void LLWaterParamManager::applyParams(const LLSD& params, bool interpolate)
 
 	if (interpolate)
 	{
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-		LLWLParamManager::getInstance()->mAnimator.startInterpolation(LLSD(), params);
-// [/SL:KB]
-//		LLWLParamManager::getInstance()->mAnimator.startInterpolation(params);
+		LLWLParamManager::getInstance()->mAnimator.startInterpolation(params);
 	}
 	else
 	{

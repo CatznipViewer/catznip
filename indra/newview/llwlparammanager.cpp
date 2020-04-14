@@ -490,29 +490,12 @@ void LLWLParamManager::setDefaultDay()
 	mDay.loadDayCycleFromFile("Default.xml");
 }
 
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-bool LLWLParamManager::applySkyParams(const LLSD& params, bool interpolate)
+bool LLWLParamManager::applySkyParams(const LLSD& params)
 {
-	if (interpolate)
-	{
-		if (!mAnimator.getIsRunning())
-			resetAnimator(0.f, true);
-		LLWLParamManager::getInstance()->mAnimator.startInterpolation(params, LLSD());
-	}
-	else
-	{
-		mAnimator.deactivate();
-		mCurParams.setAll(params);
-	}
+	mAnimator.deactivate();
+	mCurParams.setAll(params);
 	return true;
 }
-// [/SL:KB]
-//bool LLWLParamManager::applySkyParams(const LLSD& params)
-//{
-//	mAnimator.deactivate();
-//	mCurParams.setAll(params);
-//	return true;
-//}
 
 void LLWLParamManager::setDefaultSky()
 {

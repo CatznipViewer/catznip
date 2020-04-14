@@ -210,10 +210,7 @@ bool LLEnvManagerNew::useWaterParams(const LLSD& params)
 	return true;
 }
 
-//bool LLEnvManagerNew::useSkyPreset(const std::string& name)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-bool LLEnvManagerNew::useSkyPreset(const std::string& name, bool interpolate)
-// [/SL:KB]
+bool LLEnvManagerNew::useSkyPreset(const std::string& name)
 {
 	LLWLParamManager& sky_mgr = LLWLParamManager::instance();
 	LLWLParamSet param_set;
@@ -225,23 +222,14 @@ bool LLEnvManagerNew::useSkyPreset(const std::string& name, bool interpolate)
 	}
 
 	LL_DEBUGS("Windlight") << "Displaying sky preset " << name << LL_ENDL;
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	sky_mgr.applySkyParams(param_set.getAll(), interpolate);
-// [/SL:KB]
-//	sky_mgr.applySkyParams(param_set.getAll());
+	sky_mgr.applySkyParams(param_set.getAll());
 	return true;
 }
 
-//bool LLEnvManagerNew::useSkyParams(const LLSD& params)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-bool LLEnvManagerNew::useSkyParams(const LLSD& params, bool interpolate)
-// [/SL:KB]
+bool LLEnvManagerNew::useSkyParams(const LLSD& params)
 {
 	LL_DEBUGS("Windlight") << "Displaying sky params" << LL_ENDL;
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	LLWLParamManager::instance().applySkyParams(params, interpolate);
-// [/SL:KB]
-//	LLWLParamManager::instance().applySkyParams(params);
+	LLWLParamManager::instance().applySkyParams(params);
 	return true;
 }
 
@@ -276,23 +264,14 @@ bool LLEnvManagerNew::useDayCycleParams(const LLSD& params, LLEnvKey::EScope sco
 	return LLWLParamManager::instance().applyDayCycleParams(params, scope);
 }
 
-//void LLEnvManagerNew::setUseRegionSettings(bool val)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLEnvManagerNew::setUseRegionSettings(bool val, bool interpolate)
-// [/SL:KB]
+void LLEnvManagerNew::setUseRegionSettings(bool val)
 {
 	mUserPrefs.setUseRegionSettings(val);
 	saveUserPrefs();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	updateManagersFromPrefs(interpolate);
-// [/SL:KB]
-//	updateManagersFromPrefs(false);
+	updateManagersFromPrefs(false);
 }
 
-//void LLEnvManagerNew::setUseWaterPreset(const std::string& name)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLEnvManagerNew::setUseWaterPreset(const std::string& name, bool interpolate)
-// [/SL:KB]
+void LLEnvManagerNew::setUseWaterPreset(const std::string& name)
 {
 	// *TODO: make sure the preset exists.
 	if (name.empty())
@@ -303,16 +282,10 @@ void LLEnvManagerNew::setUseWaterPreset(const std::string& name, bool interpolat
 
 	mUserPrefs.setUseWaterPreset(name);
 	saveUserPrefs();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	updateManagersFromPrefs(interpolate);
-// [/SL:KB]
-//	updateManagersFromPrefs(false);
+	updateManagersFromPrefs(false);
 }
 
-//void LLEnvManagerNew::setUseSkyPreset(const std::string& name)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLEnvManagerNew::setUseSkyPreset(const std::string& name, bool interpolate)
-// [/SL:KB]
+void LLEnvManagerNew::setUseSkyPreset(const std::string& name)
 {
 	// *TODO: make sure the preset exists.
 	if (name.empty())
@@ -323,16 +296,10 @@ void LLEnvManagerNew::setUseSkyPreset(const std::string& name, bool interpolate)
 
 	mUserPrefs.setUseSkyPreset(name);
 	saveUserPrefs();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	updateManagersFromPrefs(interpolate);
-// [/SL:KB]
-//	updateManagersFromPrefs(false);
+	updateManagersFromPrefs(false);
 }
 
-//void LLEnvManagerNew::setUseDayCycle(const std::string& name)
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLEnvManagerNew::setUseDayCycle(const std::string& name, bool interpolate)
-// [/SL:KB]
+void LLEnvManagerNew::setUseDayCycle(const std::string& name)
 {
 	if (!LLDayCycleManager::instance().presetExists(name))
 	{
@@ -342,10 +309,7 @@ void LLEnvManagerNew::setUseDayCycle(const std::string& name, bool interpolate)
 
 	mUserPrefs.setUseDayCycle(name);
 	saveUserPrefs();
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	updateManagersFromPrefs(interpolate);
-// [/SL:KB]
-//	updateManagersFromPrefs(false);
+	updateManagersFromPrefs(false);
 }
 
 void LLEnvManagerNew::loadUserPrefs()
@@ -582,10 +546,7 @@ void LLEnvManagerNew::initSingleton()
 	LLWLParamManager::instance().resetAnimator(0.5 /*noon*/, getUseDayCycle());
 }
 
-//void LLEnvManagerNew::updateSkyFromPrefs()
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-void LLEnvManagerNew::updateSkyFromPrefs(bool interpolate)
-// [/SL:KB]
+void LLEnvManagerNew::updateSkyFromPrefs()
 {
 	bool success = true;
 
@@ -602,10 +563,7 @@ void LLEnvManagerNew::updateSkyFromPrefs(bool interpolate)
 		}
 		else
 		{
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-			success = useSkyPreset(getSkyPresetName(), interpolate);
-// [/SL:KB]
-//			success = useSkyPreset(getSkyPresetName());
+			success = useSkyPreset(getSkyPresetName());
 		}
 	}
 
@@ -671,10 +629,7 @@ void LLEnvManagerNew::updateManagersFromPrefs(bool interpolate)
 	updateWaterFromPrefs(interpolate);
 
 	// Apply sky settings.
-// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
-	updateSkyFromPrefs(interpolate);
-// [/SL:KB]
-//	updateSkyFromPrefs();
+	updateSkyFromPrefs();
 }
 
 bool LLEnvManagerNew::useRegionSky()
