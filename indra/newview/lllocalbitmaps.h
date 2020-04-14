@@ -117,9 +117,9 @@ class LLLocalBitmapMgr : public LLSingleton<LLLocalBitmapMgr>
 public:
 	bool         addUnit();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		static bool         addUnit(const std::string& filename);
+	bool         addUnit(const std::string& filename);
 // [/SL:KB]
-//		static bool         addUnit();
+//	bool         addUnit();
 	void         delUnit(LLUUID tracking_id);
 	bool 		checkTextureDimensions(std::string filename);
 

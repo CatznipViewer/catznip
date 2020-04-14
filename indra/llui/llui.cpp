@@ -399,7 +399,7 @@ LLControlGroup& LLUI::getControlControlGroup (const std::string& controlname)
 // [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
 LLControlVariable* LLUI::getControl(const std::string& controlname)
 {
-	for (auto& itGroup : sSettingGroups)
+	for (auto& itGroup : mSettingGroups)
 	{
 		LLControlGroup* pControlGroup = itGroup.second;
 		if ( (pControlGroup != NULL) && (pControlGroup->controlExists(controlname)) )

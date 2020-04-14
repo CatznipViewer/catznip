@@ -88,6 +88,7 @@
 #include "v3math.h"
 
 #include "llagent.h"
+#include "llagentbenefits.h"
 #include "llagentcamera.h"
 #include "llagentpicksinfo.h"
 #include "llagentwearables.h"
@@ -158,6 +159,7 @@
 #include "llviewermessage.h"
 #include "llviewernetwork.h"
 #include "llviewerobjectlist.h"
+#include "llviewerparcelaskplay.h"
 #include "llviewerparcelmedia.h"
 #include "llviewerparcelmgr.h"
 #include "llviewerregion.h"
@@ -208,7 +210,6 @@
 // exported globals
 //
 bool gAgentMovementCompleted = false;
-S32  gMaxAgentGroups;
 
 const std::string SCREEN_HOME_FILENAME = "screen_home%s.png";
 const std::string SCREEN_LAST_FILENAME = "screen_last%s.png";
@@ -236,7 +237,8 @@ LLSLURL LLStartUp::sStartSLURL;
 
 static LLPointer<LLCredential> gUserCredential;
 static std::string gDisplayName;
-static BOOL gRememberPassword = TRUE;     
+static bool gRememberPassword = true;
+static bool gRememberUser = true;
 
 static U64 gFirstSimHandle = 0;
 static LLHost gFirstSim;
@@ -244,9 +246,8 @@ static std::string gFirstSimSeedCap;
 static LLVector3 gAgentStartLookAt(1.0f, 0.f, 0.f);
 static std::string gAgentStartLocation = "safe";
 static bool mLoginStatePastUI = false;
+static bool mBenefitsSuccessfullyInit = false;
 
-const S32 DEFAULT_MAX_AGENT_GROUPS = 42;
-const S32 ALLOWED_MAX_AGENT_GROUPS = 500;
 const F32 STATE_AGENT_WAIT_TIMEOUT = 240; //seconds
 
 boost::scoped_ptr<LLEventPump> LLStartUp::sStateWatcher(new LLEventStream("StartupState"));
@@ -277,6 +278,7 @@ void general_cert_done(const LLSD& notification, const LLSD& response);
 void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
+void on_benefits_failed_callback(const LLSD& notification, const LLSD& response);
 void transition_back_to_login_panel(const std::string& emsg);
 
 void callback_cache_name(const LLUUID& id, const std::string& full_name, bool is_group)
@@ -350,13 +352,6 @@ bool idle_startup()
 	gIdleCallbacks.callFunctions();
 	gViewerWindow->updateUI();
 
-	// There is a crash on updateClass, this is an attempt to get more information
-	if (LLMortician::graveyardCount())
-	{
-		std::stringstream log_stream;
-		LLMortician::logClass(log_stream);
-		LL_INFOS() << log_stream.str() << LL_ENDL;
-	}
 	LLMortician::updateClass();
 
 	const std::string delims (" ");
@@ -701,19 +696,23 @@ bool idle_startup()
 		else if (gSavedSettings.getBOOL("AutoLogin"))  
 		{
 			// Log into last account
-			gRememberPassword = TRUE;
-			gSavedSettings.setBOOL("RememberPassword", TRUE);                                                      
+			gRememberPassword = true;
+			gRememberUser = true;
+			gSavedSettings.setBOOL("RememberPassword", TRUE);
+			gSavedSettings.setBOOL("RememberUser", TRUE);
 			show_connect_box = false;    			
 		}
 		else if (gSavedSettings.getLLSD("UserLoginInfo").size() == 3)
 		{
 			// Console provided login&password
 			gRememberPassword = gSavedSettings.getBOOL("RememberPassword");
+			gRememberUser = gSavedSettings.getBOOL("RememberUser");
 			show_connect_box = false;
 		}
 		else 
 		{
 			gRememberPassword = gSavedSettings.getBOOL("RememberPassword");
+			gRememberUser = gSavedSettings.getBOOL("RememberUser");
 			show_connect_box = TRUE;
 		}
 
@@ -781,10 +780,7 @@ bool idle_startup()
 			// Show the login dialog
 			login_show();
 			// connect dialog is already shown, so fill in the names
-			if (gUserCredential.notNull() && !LLPanelLogin::isCredentialSet())
-			{
-				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
-			}
+			LLPanelLogin::populateFields( gUserCredential, gRememberUser, gRememberPassword);
 			LLPanelLogin::giveFocus();
 
 			// MAINT-3231 Show first run dialog only for Desura viewer
@@ -873,7 +869,7 @@ bool idle_startup()
 		{
 			// TODO if not use viewer auth
 			// Load all the name information out of the login view
-			LLPanelLogin::getFields(gUserCredential, gRememberPassword); 
+			LLPanelLogin::getFields(gUserCredential, gRememberUser, gRememberPassword);
 			// end TODO
 	 
 			// HACK: Try to make not jump on login
@@ -885,14 +881,21 @@ bool idle_startup()
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
 
-		// save the credentials                                                                                        
-		std::string userid = "unknown";                                                                                
-		if(gUserCredential.notNull())                                                                                  
-		{  
-			userid = gUserCredential->userID();                                                                    
-			gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
-		}
-		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
+		// save the credentials
+		std::string userid = "unknown";
+        if (gUserCredential.notNull())
+        {
+            userid = gUserCredential->userID();
+            if (gRememberUser)
+            {
+                gSecAPIHandler->addToCredentialMap("login_list", gUserCredential, gRememberPassword);
+                // Legacy viewers use this method to store user credentials, newer viewers
+                // reuse it to be compatible and to remember last session
+                gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);
+            }
+        }
+		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);
+		gSavedSettings.setBOOL("RememberUser", gRememberUser);
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
 		gDebugInfo["LoginName"] = userid;                                                                              
          
@@ -1430,6 +1433,10 @@ bool idle_startup()
 		// create a container's instance for start a controlling conversation windows
 		// by the voice's events
 		LLFloaterIMContainer::getInstance();
+		if (gSavedSettings.getS32("ParcelMediaAutoPlayEnable") == 2)
+		{
+			LLViewerParcelAskPlay::getInstance()->loadSettings();
+		}
 
 		// *Note: this is where gWorldMap used to be initialized.
 
@@ -1581,8 +1588,6 @@ bool idle_startup()
 			send_complete_agent_movement(regionp->getHost());
 			gAssetStorage->setUpstream(regionp->getHost());
 			gCacheName->setUpstream(regionp->getHost());
-			msg->newMessageFast(_PREHASH_EconomyDataRequest);
-			gAgent.sendReliableMessage();
 		}
 		display_startup();
 
@@ -2168,6 +2173,11 @@ bool idle_startup()
 		set_startup_status(1.0, "", "");
 		display_startup();
 
+		if (!mBenefitsSuccessfullyInit)
+		{
+			LLNotificationsUtil::add("FailedToGetBenefits", LLSD(), LLSD(), boost::bind(on_benefits_failed_callback, _1, _2));
+		}
+
 		// Let the map know about the inventory.
 		LLFloaterWorldMap* floater_world_map = LLFloaterWorldMap::getInstance();
 		if(floater_world_map)
@@ -2713,6 +2723,15 @@ void LLStartUp::saveInitialOutfit()
 std::string& LLStartUp::getInitialOutfitName()
 {
 	return sInitialOutfit;
+}
+
+std::string LLStartUp::getUserId()
+{
+    if (gUserCredential.isNull())
+    {
+        return "";
+    }
+    return gUserCredential->userID();
 }
 
 // Loads a bitmap to display during load
@@ -3275,9 +3294,69 @@ void apply_udp_blacklist(const std::string& csv)
 	
 }
 
+void on_benefits_failed_callback(const LLSD& notification, const LLSD& response)
+{
+	LL_WARNS("Benefits") << "Failed to load benefits information" << LL_ENDL; 
+}
+
+bool init_benefits(LLSD& response)
+{
+	bool succ = true;
+
+	std::string package_name = response["account_type"].asString();
+	const LLSD& benefits_sd = response["account_level_benefits"];
+	if (!LLAgentBenefitsMgr::init(package_name, benefits_sd) ||
+		!LLAgentBenefitsMgr::initCurrent(package_name, benefits_sd))
+	{
+		succ = false;
+	}
+	else
+	{
+		LL_DEBUGS("Benefits") << "Initialized current benefits, level " << package_name << " from " << benefits_sd << LL_ENDL;
+	}
+	const LLSD& packages_sd = response["premium_packages"];
+	for(LLSD::map_const_iterator package_iter = packages_sd.beginMap();
+		package_iter != packages_sd.endMap();
+		++package_iter)
+	{
+		std::string package_name = package_iter->first;
+		const LLSD& benefits_sd = package_iter->second["benefits"];
+		if (LLAgentBenefitsMgr::init(package_name, benefits_sd))
+		{
+			LL_DEBUGS("Benefits") << "Initialized benefits for package " << package_name << " from " << benefits_sd << LL_ENDL;
+		}
+		else
+		{
+			LL_WARNS("Benefits") << "Failed init for package " << package_name << " from " << benefits_sd << LL_ENDL;
+			succ = false;
+		}
+	}
+
+	if (!LLAgentBenefitsMgr::has("Base"))
+	{
+		LL_WARNS("Benefits") << "Benefits info did not include required package Base" << LL_ENDL;
+		succ = false;
+	}
+	if (!LLAgentBenefitsMgr::has("Premium"))
+	{
+		LL_WARNS("Benefits") << "Benefits info did not include required package Premium" << LL_ENDL;
+		succ = false;
+	}
+
+	// FIXME PREMIUM - for testing if login does not yet provide Premium Plus. Should be removed thereafter.
+	//if (succ && !LLAgentBenefitsMgr::has("Premium Plus"))
+	//{
+	//	LLAgentBenefitsMgr::init("Premium Plus", packages_sd["Premium"]["benefits"]);
+	//	llassert(LLAgentBenefitsMgr::has("Premium Plus"));
+	//}
+	return succ;
+}
+
 bool process_login_success_response()
 {
 	LLSD response = LLLoginInstance::getInstance()->getResponse();
+
+	mBenefitsSuccessfullyInit = init_benefits(response);
 
 	std::string text(response["udp_blacklist"]);
 	if(!text.empty())
@@ -3621,27 +3700,6 @@ bool process_login_success_response()
 		LLViewerMedia::getInstance()->openIDSetup(openid_url, openid_token);
 	}
 
-	gMaxAgentGroups = DEFAULT_MAX_AGENT_GROUPS;
-	if(response.has("max-agent-groups"))
-	{
-		S32 agent_groups = atoi(std::string(response["max-agent-groups"]).c_str());
-		if (agent_groups > 0 && agent_groups <= ALLOWED_MAX_AGENT_GROUPS)
-		{
-			gMaxAgentGroups = agent_groups;
-			LL_INFOS("LLStartup") << "gMaxAgentGroups read from login.cgi: "
-				<< gMaxAgentGroups << LL_ENDL;
-		}
-		else
-		{
-			LL_INFOS("LLStartup") << "Invalid value received, using defaults for gMaxAgentGroups: "
-				<< gMaxAgentGroups << LL_ENDL;
-		}
-	}
-	else {
-		LL_INFOS("LLStartup") << "Missing max-agent-groups, using default value for gMaxAgentGroups: "
-							  << gMaxAgentGroups << LL_ENDL;
-	}
-		
 	bool success = false;
 	// JC: gesture loading done below, when we have an asset system
 	// in place.  Don't delete/clear gUserCredentials until then.

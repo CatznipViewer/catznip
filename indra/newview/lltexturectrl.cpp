@@ -919,14 +919,14 @@ void LLFloaterTexturePicker::onFilePickerCallback(LLHandle<LLFloaterTexturePicke
 	bool add_successful = false;
 	for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it)
 	{
-		add_successful |= LLLocalBitmapMgr::addUnit(*it);
+		add_successful |= LLLocalBitmapMgr::instance().addUnit(*it);
 	}
 
 	if (add_successful)
 	{
 		if (!hSelf.isDead())
 		{
-			LLLocalBitmapMgr::feedScrollList(hSelf.get()->mLocalScrollCtrl);
+			LLLocalBitmapMgr::instance().feedScrollList(hSelf.get()->mLocalScrollCtrl);
 		}
 	}
 }

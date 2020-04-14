@@ -477,7 +477,7 @@ void audio_update_volume(bool force_update)
 		BOOL voice_mute = LLAudioEngine::s_fMuteVoice;
 		LLVoiceClient *voice_inst = LLVoiceClient::getInstance();
 		voice_inst->setVoiceVolume(voice_mute ? 0.f : voice_volume);
-		voice_inst->setMicGain(voice_mute ? 0.f : LLAudioEngine::s_nLevelMic));
+		voice_inst->setMicGain(voice_mute ? 0.f : LLAudioEngine::s_nLevelMic);
 
 		if (!gViewerWindow->getActive() && (gSavedSettings.getBOOL("MuteWhenMinimized")))
 		{

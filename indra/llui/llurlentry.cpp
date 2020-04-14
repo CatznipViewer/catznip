@@ -1171,7 +1171,7 @@ std::string LLUrlEntrySetting::getLabel(const std::string& url, const LLUrlLabel
 	const LLSD sdPathArray = uri.pathArray();
 	if (sdPathArray.size() >= 3)
 	{
-		const LLControlVariable* pControl = LLUI::getControl(sdPathArray[2].asString());
+		const LLControlVariable* pControl = LLUI::instance().getControl(sdPathArray[2].asString());
 		if ( (pControl) && (!pControl->isHiddenFromSettingsEditor()) )
 			return pControl->getName();
 	}
