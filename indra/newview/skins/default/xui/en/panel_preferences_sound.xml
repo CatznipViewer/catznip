@@ -323,6 +323,7 @@
 		control_name="EnableGestureSounds"
 		disabled_control="MuteAudio"
 		follows="top|left"
+     font.style="BOLD"
 		height="20"
 		label="Play sounds from gestures"
 		layout="topleft"
@@ -355,16 +356,40 @@
     width="350">
         Streaming Media
     </text>
-    <check_box
-      control_name="ParcelMediaAutoPlayEnable"
-      enabled_control="AudioStreamingMedia"
-      follows="top|left"
-      height="20"
-      label="Allow streaming media to auto-play (parcel radio &amp; video)"
-      layout="topleft"
-      left="35"
-      name="media_auto_play_btn"
-      width="350"/>
+    <text
+        follows="left|top"
+        layout="topleft"
+        height="15"
+        left="0"
+        top_pad="3"
+        width="120"
+        halign="right"
+        name="media_autoplay_label">
+         Media auto-play
+    </text>
+    <combo_box
+        control_name="ParcelMediaAutoPlayEnable"
+        enabled_control="AudioStreamingMedia"
+        follows="left|top"
+        layout="topleft"
+        height="23"
+        left_pad="7"
+        top_delta="-4"
+        name="media_auto_play_combo"
+        width="100">
+      <item
+          label="Disabled"
+          name="autoplay_disabled"
+          value="0"/>      
+      <item
+          label="Enabled"
+          name="autoplay_enabled"
+          value="1"/>
+      <item
+          label="Ask"
+          name="autoplay_ask"
+          value="2"/>
+    </combo_box>
     <check_box
       control_name="MediaShowOnOthers"
       follows="top|left"
