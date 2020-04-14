@@ -125,6 +125,7 @@ public:
 
 
 	LLUUID       getWorldID(LLUUID tracking_id);
+    bool         isLocal(LLUUID world_id);
 	std::string  getFilename(LLUUID tracking_id);
 
 	void         feedScrollList(LLScrollListCtrl* ctrl);
