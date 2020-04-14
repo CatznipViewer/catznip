@@ -32,7 +32,6 @@
 #include "llaudioengine.h" 
 #include "llavataractions.h"
 #include "llavatarnamecache.h"		// IDEVO HACK
-#include "lleconomy.h"
 #include "lleventtimer.h"
 #include "llfloaterreg.h"
 #include "llfolderview.h"
@@ -51,6 +50,7 @@
 #include "mean_collision_data.h"
 
 #include "llagent.h"
+#include "llagentbenefits.h"
 #include "llagentcamera.h"
 #include "llcallingcard.h"
 #include "llbuycurrencyhtml.h"
@@ -380,6 +380,11 @@ void give_money(const LLUUID& uuid, LLViewerRegion* region, S32 amount, BOOL is_
 	LL_INFOS("Messaging") << "give_money(" << uuid << "," << amount << ")"<< LL_ENDL;
 	if(can_afford_transaction(amount))
 	{
+		if (uuid.isNull())
+		{
+			LL_WARNS() << "Failed to send L$ gift to to Null UUID." << LL_ENDL;
+			return;
+		}
 //		gStatusBar->debitBalance(amount);
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_MoneyTransferRequest);
@@ -909,7 +914,7 @@ bool join_group_response(const LLSD& notification, const LLSD& response)
 	if(option == 0 && !group_id.isNull())
 	{
 		// check for promotion or demotion.
-		S32 max_groups = gMaxAgentGroups;
+		S32 max_groups = LLAgentBenefitsMgr::current().getGroupMembershipLimit();
 		if(gAgent.isInGroup(group_id)) ++max_groups;
 
 		if(gAgent.mGroups.size() < max_groups)
@@ -1682,7 +1687,10 @@ void LLOfferInfo::sendReceiveResponse(bool accept, const LLUUID &destination_fol
 	if(IM_INVENTORY_OFFERED == mIM)
 	{
 		// add buddy to recent people list
-		LLRecentPeople::instance().add(mFromID);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+		LLRecentPeople::instance().add(mFromID, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//		LLRecentPeople::instance().add(mFromID);
 	}
 
 	if (mTransactionID.isNull())
@@ -5446,16 +5454,7 @@ void process_frozen_message(LLMessageSystem *msgsystem, void **user_data)
 // do some extra stuff once we get our economy data
 void process_economy_data(LLMessageSystem *msg, void** /*user_data*/)
 {
-	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::getInstance());
-
-	S32 upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
-
-	LL_INFOS_ONCE("Messaging") << "EconomyData message arrived; upload cost is L$" << upload_cost << LL_ENDL;
-
-	gMenuHolder->getChild<LLUICtrl>("Upload Image")->setLabelArg("[COST]", llformat("%d", upload_cost));
-	gMenuHolder->getChild<LLUICtrl>("Upload Sound")->setLabelArg("[COST]", llformat("%d", upload_cost));
-	gMenuHolder->getChild<LLUICtrl>("Upload Animation")->setLabelArg("[COST]", llformat("%d", upload_cost));
-	gMenuHolder->getChild<LLUICtrl>("Bulk Upload")->setLabelArg("[COST]", llformat("%d", upload_cost));
+	LL_DEBUGS("Benefits") << "Received economy data, not currently used" << LL_ENDL;
 }
 
 void notify_cautioned_script_question(const LLSD& notification, const LLSD& response, S32 orig_questions, BOOL granted)
