@@ -44,7 +44,6 @@
 
 // newview includes
 #include "llagent.h"
-#include "llenvmanager.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llinventoryobserver.h"
 #include "lllandmarkactions.h"
@@ -1103,9 +1102,7 @@ void LLLocationInputCtrl::changeLocationPresentation()
 
 	//change location presentation only if user does not select/paste anything and 
 	//human-readable region name is being displayed
-	std::string text = mTextEntry->getText();
-	LLStringUtil::trim(text);
-	if(!mTextEntry->hasSelection() && text == mHumanReadableLocation)
+	if(!mTextEntry->hasSelection() && mTextEntry->getText() == mHumanReadableLocation)
 	{
 		//needs unescaped one
 		LLSLURL slurl;
