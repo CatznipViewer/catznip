@@ -189,6 +189,10 @@ public:
 	virtual BOOL	isSelected(const LLSD& value) const;
 	virtual BOOL	operateOnSelection(EOperation op);
 	virtual BOOL	operateOnAll(EOperation op);
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
+	bool			selectPrevItem(bool extend_selection = false);
+	bool			selectNextItem(bool extend_selection = false);
+// [/SL:KB]
 
 	//========================================================================
 	
