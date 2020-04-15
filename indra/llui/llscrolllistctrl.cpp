@@ -1073,23 +1073,14 @@ S32 LLScrollListCtrl::getItemIndex( const LLUUID& target_id ) const
 	return -1;
 }
 
-//void LLScrollListCtrl::selectPrevItem( BOOL extend_selection)
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-bool LLScrollListCtrl::selectPrevItem(bool extend_selection)
-// [/SL:KB]
+void LLScrollListCtrl::selectPrevItem( BOOL extend_selection)
 {
 	LLScrollListItem* prev_item = NULL;
 
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	bool success = false;
-// [/SL:KB]
 	if (!getFirstSelected())
 	{
 		// select last item
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-		success = selectNthItem(getItemCount() - 1);
-// [/SL:KB]
-//		selectNthItem(getItemCount() - 1);
+		selectNthItem(getItemCount() - 1);
 	}
 	else
 	{
@@ -1105,9 +1096,6 @@ bool LLScrollListCtrl::selectPrevItem(bool extend_selection)
 				if (prev_item)
 				{
 					selectItem(prev_item, !extend_selection);
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-					success = true;
-// [/SL:KB]
 				}
 				else
 				{
@@ -1127,29 +1115,16 @@ bool LLScrollListCtrl::selectPrevItem(bool extend_selection)
 	}
 
 	mSearchString.clear();
-
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	return success;
-// [/SL:KB]
 }
 
 
-//void LLScrollListCtrl::selectNextItem( BOOL extend_selection)
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-bool LLScrollListCtrl::selectNextItem(bool extend_selection)
-// [/SL:KB]
+void LLScrollListCtrl::selectNextItem( BOOL extend_selection)
 {
 	LLScrollListItem* next_item = NULL;
 
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	bool success = false;
-// [/SL:KB]
 	if (!getFirstSelected())
 	{
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-		success = selectFirstItem();
-// [/SL:KB]
-//		selectFirstItem();
+		selectFirstItem();
 	}
 	else
 	{
@@ -1165,9 +1140,6 @@ bool LLScrollListCtrl::selectNextItem(bool extend_selection)
 				if (next_item)
 				{
 					selectItem(next_item, !extend_selection);
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-					success = true;
-// [/SL:KB]
 				}
 				else
 				{
@@ -1181,23 +1153,12 @@ bool LLScrollListCtrl::selectNextItem(bool extend_selection)
 		}
 	}
 
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	// NOTE: this should be kept consistent with selectPrevItem()
-	if ((mCommitOnSelectionChange || mCommitOnKeyboardMovement))
+	if (mCommitOnKeyboardMovement)
 	{
-		commitIfChanged();
+		onCommit();
 	}
-// [/SL:KB]
-//	if (mCommitOnKeyboardMovement)
-//	{
-//		onCommit();
-//	}
 
 	mSearchString.clear();
-
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	return success;
-// [/SL:KB]
 }
 
 

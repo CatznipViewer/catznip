@@ -493,30 +493,6 @@ void LLComboBox::setButtonVisible(BOOL visible)
 	}
 }
 
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-bool LLComboBox::selectPrevItem(bool extend_selection /*=false*/)
-{
-	bool found = mList->selectPrevItem(extend_selection);
-	if (found)
-	{
-		setLabel(getSelectedItemLabel());
-		mLastSelectedIndex = getCurrentIndex();
-	}
-	return found;
-}
-
-bool LLComboBox::selectNextItem(bool extend_selection /*=false*/)
-{
-	bool found = mList->selectNextItem(extend_selection);
-	if (found)
-	{
-		setLabel(getSelectedItemLabel());
-		mLastSelectedIndex = getCurrentIndex();
-	}
-	return found;
-}
-// [/SL:KB]
-
 BOOL LLComboBox::setCurrentByIndex( S32 index )
 {
 	BOOL found = mList->selectNthItem( index );

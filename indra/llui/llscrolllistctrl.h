@@ -250,10 +250,6 @@ public:
 	LLScrollListItem*  getItemByLabel( const std::string& item, BOOL case_sensitive = TRUE, S32 column = 0 );
 	const std::string	getSelectedItemLabel(S32 column = 0) const;
 	LLSD			getSelectedValue();
-// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-4.2
-	bool			selectPrevItem(bool extend_selection);
-	bool			selectNextItem(bool extend_selection);
-// [/SL:KB]
 
 	// DEPRECATED: Use LLSD versions of setCommentText() and getSelectedValue().
 	// "StringUUID" interface: use this when you're creating a list that contains non-unique strings each of which
@@ -429,8 +425,8 @@ protected:
 	void			updateLineHeight();
 
 private:
-//	void			selectPrevItem(BOOL extend_selection);
-//	void			selectNextItem(BOOL extend_selection);
+	void			selectPrevItem(BOOL extend_selection);
+	void			selectNextItem(BOOL extend_selection);
 	void			drawItems();
 	
 	void            updateLineHeightInsert(LLScrollListItem* item);
