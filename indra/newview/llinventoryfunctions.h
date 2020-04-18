@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -132,6 +133,27 @@ public:
 protected:
 	LLUUID mAssetID;
 };
+
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+class LLAssetIDsMatches : public LLInventoryCollectFunctor
+{
+	LLAssetIDsMatches(const LLUUID& id) { add(id); }
+public:
+	template <class... TArgs> LLAssetIDsMatches(const LLUUID& id, const TArgs&... idsRest) : LLAssetIDsMatches(idsRest...) { add(id); }
+	LLAssetIDsMatches(const uuid_set_t& asset_ids) : mAssetIDs(asset_ids) {}
+	~LLAssetIDsMatches() override {}
+	bool operator()(LLInventoryCategory* cat, LLInventoryItem* item) override;
+
+	void add(const LLUUID& id) {
+		if (id.notNull())
+		{
+			mAssetIDs.insert(id);
+		}
+	}
+protected:
+	uuid_set_t mAssetIDs;
+};
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLLinkedItemIDMatches
