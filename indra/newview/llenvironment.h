@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -325,6 +326,10 @@ public:
 protected:
     virtual void                initSingleton() override;
     virtual void                cleanupSingleton() override;
+// [SL:KB]
+    static void                 notifyInventoryChange(const LLUUID& idFirstAsset, const LLUUID& idSecondAsset = LLUUID::null);
+// [/SL:KB]
+
 
 
 private:

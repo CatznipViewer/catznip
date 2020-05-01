@@ -6,6 +6,7 @@
 * $LicenseInfo:2011&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2017, Linden Research, Inc.
+* Copyright (C) 2020, Kitty Barnett
 *
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -71,6 +72,9 @@ public:
     static const std::string SETTING_HASH;
     static const std::string SETTING_TYPE;
     static const std::string SETTING_ASSETID;
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    static const std::string SETTING_BASE_ASSETID;
+// [/SL:KB]
     static const std::string SETTING_FLAGS;
 
     static const U32 FLAG_NOCOPY;
@@ -134,6 +138,15 @@ public:
         return LLUUID();
     }
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    inline LLUUID getBaseAssetId() const
+    {
+        if (mSettings.has(SETTING_BASE_ASSETID))
+            return mSettings[SETTING_BASE_ASSETID].asUUID();
+        return getAssetId();
+    }
+// [/SL:KB]
+
     inline U32 getFlags() const
     {
         if (mSettings.has(SETTING_FLAGS))
@@ -195,6 +208,10 @@ public:
         mDirty = true;
         if (name != SETTING_ASSETID)
             clearAssetId();
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+        else
+            clearBaseAssetId();
+// [/SL:KB]
     }
 
     inline void setValue(const std::string &name, const LLSD &value)
@@ -311,13 +328,33 @@ public:
     inline void setAssetId(LLUUID value)
     {   // note that this skips setLLSD
         mSettings[SETTING_ASSETID] = value;
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+        clearBaseAssetId();
+// [/SL:KB]
     }
 
     inline void clearAssetId()
     {
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
         if (mSettings.has(SETTING_ASSETID))
+        {
+            mSettings[SETTING_BASE_ASSETID] = getAssetId();
             mSettings.erase(SETTING_ASSETID);
+        }
+// [/SL:KB]
+//        if (mSettings.has(SETTING_ASSETID))
+//            mSettings.erase(SETTING_ASSETID);
     }
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    inline void clearBaseAssetId()
+    {
+        if (mSettings.has(SETTING_BASE_ASSETID))
+        {
+            mSettings.erase(SETTING_BASE_ASSETID);
+        }
+    }
+// [/SL:KB]
 
     // Calculate any custom settings that may need to be cached.
     virtual void updateSettings() { mDirty = false; mReplaced = false; }

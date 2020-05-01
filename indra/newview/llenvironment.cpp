@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,6 +65,11 @@
 #include "lldispatcher.h"
 #include "llviewergenericmessage.h"
 #include "llexperiencelog.h"
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+#include "llinventoryfunctions.h"
+#include "llinventoryobserver.h"
+// [/SL:KB]
 
 //=========================================================================
 namespace
@@ -864,6 +870,27 @@ LLEnvironment::~LLEnvironment()
 {
 }
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+// static
+void LLEnvironment::notifyInventoryChange(const LLUUID& idFirstAsset, const LLUUID& idSecondAsset)
+{
+    // Early bail if we have nothing to update
+    if ( (idFirstAsset.isNull()) && (idSecondAsset.isNull()) )
+        return;
+
+    // *CATZNIP-TODO: there's a decent chance this will stall the viewer on slower computers with large inventories so check thoroughly
+    LLViewerInventoryCategory::cat_array_t cats;
+    LLViewerInventoryItem::item_array_t items;
+    LLAssetIDsMatches f(idFirstAsset, idSecondAsset);
+    gInventory.collectDescendentsIf(LLUUID::null, cats, items, LLInventoryModel::INCLUDE_TRASH, f);
+
+    for (const LLViewerInventoryItem* pItem : items)
+    {
+        gInventory.addChangedMask(LLInventoryObserver::LABEL, pItem->getUUID());
+    }
+}
+// [/SL:KB]
+
 bool LLEnvironment::canEdit() const
 {
     return true;
@@ -1239,6 +1266,19 @@ void LLEnvironment::clearEnvironment(LLEnvironment::EnvSelection_t env)
         LL_WARNS("ENVIRONMENT") << "Attempt to change invalid environment selection." << LL_ENDL;
         return;
     }
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if (LLEnvironment::ENV_LOCAL == env)
+    {
+        if (DayInstance::ptr_t pLocalEnv = getEnvironmentInstance(env, false))
+        {
+            LLUUID idDayOrSky = (pLocalEnv->getDayCycle()) ? pLocalEnv->getDayCycle()->getBaseAssetId()
+                                                           : (pLocalEnv->getSky()) ? pLocalEnv->getSky()->getBaseAssetId() : LLUUID::null;
+            LLUUID idWater = (pLocalEnv->getWater()) ? pLocalEnv->getWater()->getBaseAssetId() : LLUUID::null;
+            LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
+        }
+    }
+// [/SL:KB]
 
     mEnvironments[env].reset();
 
@@ -2494,6 +2534,12 @@ void LLEnvironment::DayInstance::setDay(const LLSettingsDay::ptr_t &pday, LLSett
 
     mAnimateFlags = 0;
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (mDayCycle != pday) )
+    {
+        LLEnvironment::notifyInventoryChange((mDayCycle) ? mDayCycle->getBaseAssetId() : LLUUID::null, pday->getBaseAssetId());
+    }
+// [/SL:KB]
     mDayCycle = pday;
     mDayLength = daylength;
     mDayOffset = dayoffset;
@@ -2514,6 +2560,12 @@ void LLEnvironment::DayInstance::setSky(const LLSettingsSky::ptr_t &psky)
 
     bool different_sky = mSky != psky;
     
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (different_sky) )
+    {
+        LLEnvironment::notifyInventoryChange((mSky) ? mSky->getBaseAssetId() : LLUUID::null, psky->getBaseAssetId());
+    }
+// [/SL:KB]
     mSky = psky;
     mSky->mReplaced |= different_sky;
     mSky->update();
@@ -2532,6 +2584,13 @@ void LLEnvironment::DayInstance::setWater(const LLSettingsWater::ptr_t &pwater)
     mInitialized = false;
 
     bool different_water = mWater != pwater;
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (different_water) )
+    {
+        LLEnvironment::notifyInventoryChange((mWater) ? mWater->getBaseAssetId() : LLUUID::null, pwater->getBaseAssetId());
+    }
+// [/SL:KB]
     mWater = pwater;
     mWater->mReplaced |= different_water;
     mWater->update();
