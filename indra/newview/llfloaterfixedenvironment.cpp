@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2011&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -199,7 +200,10 @@ void LLFloaterFixedEnvironment::refresh()
 
     bool is_inventory_avail = canUseInventory();
 
-    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull());
+//    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull());
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull() && !mIsLibrary);
+// [/SL:KB]
     mFlyoutControl->setMenuItemEnabled(ACTION_SAVEAS, is_inventory_avail && mCanCopy);
     mFlyoutControl->setMenuItemEnabled(ACTION_APPLY_PARCEL, canApplyParcel());
     mFlyoutControl->setMenuItemEnabled(ACTION_APPLY_REGION, canApplyRegion());
@@ -256,6 +260,9 @@ void LLFloaterFixedEnvironment::loadInventoryItem(const LLUUID  &inventoryId, bo
     {
         mInventoryItem = nullptr;
         mInventoryId.setNull();
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        mIsLibrary = false;
+// [/SL:KB]
         mCanMod = true;
         mCanCopy = true;
         mCanTrans = true;
@@ -288,8 +295,18 @@ void LLFloaterFixedEnvironment::loadInventoryItem(const LLUUID  &inventoryId, bo
         return;
     }
 
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mIsLibrary = gInventory.isObjectDescendentOf(mInventoryId, gInventory.getLibraryRootFolderID());
+    if (mIsLibrary)
+    {
+        mFlyoutControl->setSelectedItem(ACTION_SAVEAS);
+    }
+// [/SL:KB]
     mCanCopy = mInventoryItem->getPermissions().allowCopyBy(gAgent.getID());
-    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID());
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID()) || mIsLibrary;
+// [/SL:KB]
+//    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID());
     mCanTrans = can_trans && mInventoryItem->getPermissions().allowOperationBy(PERM_TRANSFER, gAgent.getID());
 
     LLSettingsVOBase::getSettingsAsset(mInventoryItem->getAssetUUID(),
@@ -495,8 +512,14 @@ void LLFloaterFixedEnvironment::onSaveAsCommit(const LLSD& notification, const L
         else if (mInventoryItem)
         {
             const LLUUID &marketplacelistings_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+            const LLUUID& trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH, false);
+// [/SL:KB]
             LLUUID parent_id = mInventoryItem->getParentUUID();
-            if (marketplacelistings_id == parent_id)
+//            if (marketplacelistings_id == parent_id)
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+            if ( (gInventory.isObjectDescendentOf(mInventoryItem->getUUID(), trash_id)) || (gInventory.isObjectDescendentOf(mInventoryItem->getUUID(), marketplacelistings_id)) )
+// [/SL:KB]
             {
                 parent_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_SETTINGS);
             }
@@ -532,9 +555,19 @@ void LLFloaterFixedEnvironment::onButtonLoad()
 
 void LLFloaterFixedEnvironment::doApplyCreateNewInventory(std::string settings_name, const LLSettingsBase::ptr_t &settings)
 {
-    if (mInventoryItem)
+//    if (mInventoryItem)
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    if ( (mInventoryItem) && (!mIsLibrary) )
+// [/SL:KB]
     {
         LLUUID parent_id = mInventoryItem->getParentUUID();
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        const LLUUID& trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH, false);
+        if (gInventory.isObjectDescendentOf(mInventoryItem->getUUID(), trash_id))
+        {
+            parent_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_SETTINGS);
+        }
+// [/SL:KB]
         U32 next_owner_perm = mInventoryItem->getPermissions().getMaskNextOwner();
         LLSettingsVOBase::createInventoryItem(settings, next_owner_perm, parent_id, settings_name,
             [this](LLUUID asset_id, LLUUID inventory_id, LLUUID, LLSD results) { onInventoryCreated(asset_id, inventory_id, results); });

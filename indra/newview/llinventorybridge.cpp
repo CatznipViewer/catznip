@@ -7119,10 +7119,13 @@ void LLSettingsBridge::openItem()
     LLViewerInventoryItem* item = getItem();
     if (item)
     {
-        if (item->getPermissions().getOwner() != gAgent.getID())
-            LLNotificationsUtil::add("NoEditFromLibrary");
-        else
-            LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+		LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
+// [/SL:KB]
+//        if (item->getPermissions().getOwner() != gAgent.getID())
+//            LLNotificationsUtil::add("NoEditFromLibrary");
+//        else
+//            LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
     }
 }
 
