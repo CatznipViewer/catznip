@@ -77,6 +77,9 @@ void copy_inventory_category_content(const LLUUID& new_cat_uuid, LLInventoryMode
 
 // Generates a string containing the path to the item specified by item_id.
 void append_path(const LLUUID& id, std::string& path);
+// [SL:KB] - Patch: World-WindLightQuickPrefs | Checked: Catznip-6.4
+std::string get_item_path(const LLUUID& item_id, bool include_root = true);
+// [/SL:KB]
 
 typedef boost::function<void(std::string& validation_message, S32 depth, LLError::ELevel log_level)> validation_callback_t;
 

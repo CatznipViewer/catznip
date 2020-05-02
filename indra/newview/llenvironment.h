@@ -326,7 +326,7 @@ public:
 protected:
     virtual void                initSingleton() override;
     virtual void                cleanupSingleton() override;
-// [SL:KB]
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
     static void                 notifyInventoryChange(const LLUUID& idFirstAsset, const LLUUID& idSecondAsset = LLUUID::null);
 // [/SL:KB]
 
