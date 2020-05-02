@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,6 +54,9 @@ LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
 	mFont(p.font),
 	mShowText(p.show_text),
 	mCanEditText(p.can_edit_text),
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+	mTextSuffix(p.text_suffix),
+// [/SL:KB]
 	mPrecision(p.decimal_digits),
 	mTextEnabledColor(p.text_color()),
 	mTextDisabledColor(p.text_disabled_color()),
@@ -100,6 +104,11 @@ LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
 
 		if ( p.min_value < 0.0f || p.max_value < 0.0f )
 			text_width += p.font()->getWidth(std::string("-"));	// (mostly) take account of minus sign 
+
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+		if (!mTextSuffix.empty())
+			text_width += p.font()->getWidth(mTextSuffix);	// (mostly) take account of text suffix
+// [/SL:KB]
 
 		// padding to make things look nicer
 		text_width += 8;
@@ -267,7 +276,10 @@ void LLSliderCtrl::updateText()
 		F32 displayed_value = (F32)(floor(getValueF32() * pow(10.0, (F64)mPrecision) + 0.5) / pow(10.0, (F64)mPrecision));
 
 		std::string format = llformat("%%.%df", mPrecision);
-		std::string text = llformat(format.c_str(), displayed_value);
+//		std::string text = llformat(format.c_str(), displayed_value);
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+		std::string text = llformat(format.c_str(), displayed_value) + mTextSuffix;
+// [/SL:KB]
 		if( mEditor )
 		{
 			// Setting editor text here to "" before using actual text is here because if text which
