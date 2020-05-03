@@ -1415,10 +1415,16 @@ void LLEnvironment::updateEnvironment(LLSettingsBase::Seconds transition, bool f
 	        trans->animate();
 	
 	        mCurrentEnvironment = trans;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            mSignalEnvUpdated();
+// [/SL:KB]
         }
         else
         {
             mCurrentEnvironment = pinstance;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            mSignalEnvUpdated();
+// [/SL:KB]
         }
     }
 }
@@ -2609,6 +2615,15 @@ void LLEnvironment::DayInstance::initialize()
 
 void LLEnvironment::DayInstance::clear()
 {
+// [SL:KB] This code block shouldn't be needed?
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+//    if (LLEnvironment::ENV_LOCAL == mEnv)
+//    {
+//        LLUUID idDayOrSky = (mDayCycle) ? mDayCycle->getAssetId() : ((mSky) ? mSky->getAssetId() : LLUUID::null);
+//        LLUUID idWater = (mWater) ? mWater->getAssetId() : LLUUID::null;
+//        LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
+//    }
+// [/SL:KB]
     mDayCycle.reset();
     mSky.reset();
     mWater.reset();
@@ -2727,10 +2742,21 @@ void LLEnvironment::DayTransition::animate()
         [this](LLSettingsBlender::ptr_t blender) { 
             mBlenderWater.reset();
 
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
             if (!mBlenderSky && !mBlenderWater)
+            {
                 LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+                LLEnvironment::instance().mSignalEnvUpdated();
+            }
             else
+            {
                 setWater(mNextInstance->getWater());
+            }
+// [/SL:KB]
+//            if (!mBlenderSky && !mBlenderWater)
+//                LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+//            else
+//                setWater(mNextInstance->getWater());
     });
 
     mSky = mStartSky->buildClone();
@@ -2739,10 +2765,21 @@ void LLEnvironment::DayTransition::animate()
         [this](LLSettingsBlender::ptr_t blender) {
         mBlenderSky.reset();
 
-        if (!mBlenderSky && !mBlenderWater)
-            LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
-        else
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            if (!mBlenderSky && !mBlenderWater)
+            {
+                LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+                LLEnvironment::instance().mSignalEnvUpdated();
+            }
+            else
+            {
             setSky(mNextInstance->getSky());
+            }
+// [/SL:KB]
+//        if (!mBlenderSky && !mBlenderWater)
+//            LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+//        else
+//            setSky(mNextInstance->getSky());
     });
 }
 

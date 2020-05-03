@@ -112,6 +112,10 @@ public:
     typedef std::function<void(S32, EnvironmentInfo::ptr_t)>        environment_apply_fn;
     typedef boost::signals2::signal<void(EnvSelection_t, S32)>      env_changed_signal_t;
     typedef env_changed_signal_t::slot_type                         env_changed_fn;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    typedef boost::signals2::signal<void(void)>                     env_updated_signal_t;
+    typedef env_updated_signal_t::slot_type                         env_updated_fn;
+// [/SL:KB]
     typedef std::array<F32, 4>                                      altitude_list_t;
     typedef std::vector<F32>                                        altitudes_vect_t;
 
@@ -209,6 +213,9 @@ public:
 
     //-------------------------------------------
     connection_t                setEnvironmentChanged(env_changed_fn cb)    { return mSignalEnvChanged.connect(cb); }
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    connection_t                setEnvironmentUpdated(env_updated_fn cb)    { return mSignalEnvUpdated.connect(cb); }
+// [/SL:KB]
 
     void                        requestRegion(environment_apply_fn cb = environment_apply_fn());
     void                        updateRegion(const LLUUID &asset_id, std::string display_name, S32 track_num, S32 day_length, S32 day_offset, U32 flags, altitudes_vect_t altitudes = altitudes_vect_t(), environment_apply_fn cb = environment_apply_fn());
@@ -369,6 +376,9 @@ private:
     LLSettingsBlender::ptr_t    mBlenderWater;
 
     env_changed_signal_t        mSignalEnvChanged;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    env_updated_signal_t        mSignalEnvUpdated;
+// [/SL:KB]
 
     S32                         mCurrentTrack;
     altitude_list_t             mTrackAltitudes;
