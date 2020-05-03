@@ -8593,6 +8593,8 @@ class LLWorldEnvSettings : public view_listener_t
             LLEnvironment::instance().setSelectedEnvironment(LLEnvironment::ENV_LOCAL);
             LLEnvironment::instance().updateEnvironment();
 // [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+			LLEnvironment::instance().resetCurrentDayOffset();
+			LLEnvironment::instance().setCurrentDayRunning(true);
 			defocus_env_floaters();
 // [/SL:KB]
 //            defocusEnvFloaters();

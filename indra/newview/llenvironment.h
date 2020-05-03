@@ -413,6 +413,9 @@ private:
     typedef std::map<std::string, LLUUID> experience_overrides_t;
     experience_overrides_t      mExperienceOverrides;
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    DayInstance::ptr_t          getEnvironmentInstance(EnvSelection_t env) const;
+// [/SL:KB]
     DayInstance::ptr_t          getEnvironmentInstance(EnvSelection_t env, bool create = false);
 
     void                        updateCloudScroll();
