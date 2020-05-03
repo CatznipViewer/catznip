@@ -933,6 +933,47 @@ LLSettingsWater::ptr_t LLEnvironment::getCurrentWater() const
 }
 
 // [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+bool LLEnvironment::isCurrentSkyFixed() const
+{
+    if (LLSettingsDay::ptr_t pCurDay = mCurrentEnvironment->getDayCycle())
+        return pCurDay->getCycleTrackConst(mCurrentEnvironment->getSkyTrack()).size() <= 1;
+    return true;
+}
+
+void LLEnvironment::resetCurrentDayOffset()
+{
+    if (mCurrentEnvironment->getEnvironmentSelection() > LLEnvironment::ENV_LOCAL)
+    {
+        mCurrentEnvironment->resetDayOffset();
+    }
+}
+
+void LLEnvironment::setCurrentDayOffset(LLSettingsDay::Seconds seconds)
+{
+    U32 maskFlags = mCurrentEnvironment->getFlags();
+    mCurrentEnvironment->clearFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY | LLEnvironment::DayInstance::NO_ANIMATE_WATER);
+    mCurrentEnvironment->setDayOffset(seconds);
+    mCurrentEnvironment->setFlags(maskFlags);
+}
+
+bool LLEnvironment::getCurrentDayRunning() const
+{
+    return mCurrentEnvironment->getFlags() & LLEnvironment::DayInstance::NO_ANIMATE_SKY;
+}
+
+void LLEnvironment::setCurrentDayRunning(bool is_running)
+{
+    if ( (is_running) && (mCurrentEnvironment->getFlags() & LLEnvironment::DayInstance::NO_ANIMATE_SKY) )
+    {
+        mCurrentEnvironment->clearFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY);
+        mCurrentEnvironment->animate();
+    }
+    else if (!is_running)
+    {
+        mCurrentEnvironment->setFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY);
+    }
+}
+
 LLSettingsDay::ptr_t LLEnvironment::getLocalDay() const
 {
     if (DayInstance::ptr_t pEnvironment = getEnvironmentInstance(ENV_LOCAL))
@@ -2550,6 +2591,9 @@ LLEnvironment::DayInstance::ptr_t LLEnvironment::DayInstance::clone() const
     environment->mWater = mWater;
     environment->mDayLength = mDayLength;
     environment->mDayOffset = mDayOffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    environment->mDayOffsetOriginal = mDayOffsetOriginal;
+// [/SL:KB]
     environment->mBlenderSky = mBlenderSky;
     environment->mBlenderWater = mBlenderWater;
     environment->mInitialized = mInitialized;
@@ -2567,10 +2611,16 @@ bool LLEnvironment::DayInstance::applyTimeDelta(const LLSettingsBase::Seconds& d
     if (!mInitialized)
         initialize();
 
-    if (mBlenderSky)
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    if ( (mBlenderSky) && (!(mAnimateFlags & NO_ANIMATE_SKY)) )
         changed |= mBlenderSky->applyTimeDelta(delta);
-    if (mBlenderWater)
+    if ( (mBlenderWater) && (!(mAnimateFlags & NO_ANIMATE_WATER)) )
         changed |= mBlenderWater->applyTimeDelta(delta);
+// [/SL:KB]
+//    if (mBlenderSky)
+//        changed |= mBlenderSky->applyTimeDelta(delta);
+//    if (mBlenderWater)
+//        changed |= mBlenderWater->applyTimeDelta(delta);
     return changed;
 }
 
@@ -2589,6 +2639,9 @@ void LLEnvironment::DayInstance::setDay(const LLSettingsDay::ptr_t &pday, LLSett
     mDayCycle = pday;
     mDayLength = daylength;
     mDayOffset = dayoffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    mDayOffsetOriginal = dayoffset;
+// [/SL:KB]
 
     mBlenderSky.reset();
     mBlenderWater.reset();
@@ -2669,6 +2722,9 @@ void LLEnvironment::DayInstance::clear()
     mWater.reset();
     mDayLength = LLSettingsDay::DEFAULT_DAYLENGTH;
     mDayOffset = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    mDayOffsetOriginal = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [/SL:KB]
     mBlenderSky.reset();
     mBlenderWater.reset();
     mSkyTrack = 1;

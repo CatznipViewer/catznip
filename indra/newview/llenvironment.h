@@ -131,6 +131,16 @@ public:
     LLSettingsDay::ptr_t        getCurrentDay() const { return mCurrentEnvironment->getDayCycle(); }
     LLSettingsSky::ptr_t        getCurrentSky() const;
     LLSettingsWater::ptr_t      getCurrentWater() const;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    LLSettingsDay::Seconds      getCurrentDayLength() const { return mCurrentEnvironment->getDayLength(); }
+    LLSettingsDay::Seconds      getCurrentDayOffset() const { return mCurrentEnvironment->getDayOffset(); }
+    EnvSelection_t              getCurrentSelection() const { return mCurrentEnvironment->getEnvironmentSelection(); }
+    bool                        isCurrentSkyFixed() const;
+    void                        resetCurrentDayOffset();
+    void                        setCurrentDayOffset(LLSettingsDay::Seconds seconds);
+    bool                        getCurrentDayRunning() const;
+    void                        setCurrentDayRunning(bool is_running);
+// [/SL:KB]
 
 // [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
     LLSettingsDay::ptr_t        getLocalDay() const;
@@ -281,6 +291,9 @@ public:
         LLSettingsDay::Seconds          getDayOffset() const    { return mDayOffset; }
         S32                             getSkyTrack() const     { return mSkyTrack; }
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        void                            resetDayOffset() { mDayOffset = mDayOffsetOriginal; animate(); }
+// [/SL:KB]
         void                            setDayOffset(LLSettingsBase::Seconds offset) { mDayOffset = offset; animate(); }
 
         virtual void                    animate();
@@ -308,6 +321,9 @@ public:
 
         LLSettingsDay::Seconds      mDayLength;
         LLSettingsDay::Seconds      mDayOffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        LLSettingsDay::Seconds      mDayOffsetOriginal = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [/SL:KB]
         S32                         mLastTrackAltitude;
 
         LLSettingsBlender::ptr_t    mBlenderSky;
