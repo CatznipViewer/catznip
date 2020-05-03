@@ -132,6 +132,12 @@ public:
     LLSettingsSky::ptr_t        getCurrentSky() const;
     LLSettingsWater::ptr_t      getCurrentWater() const;
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    LLSettingsDay::ptr_t        getLocalDay() const;
+    LLSettingsSky::ptr_t        getLocalSky() const;
+    LLSettingsWater::ptr_t      getLocalWater() const;
+// [/SL:KB]
+
     static void                 getAtmosphericModelSettings(AtmosphericModelSettings& settingsOut, const LLSettingsSky::ptr_t &psky);
 
     void                        update(const LLViewerCamera * cam);
@@ -262,6 +268,9 @@ public:
         bool                            isInitialized();
 
         void                            clear();
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        void                            clearDay();
+// [/SL:KB]
 
         void                            setSkyTrack(S32 trackno);
 
