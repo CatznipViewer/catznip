@@ -161,7 +161,7 @@
      name="inventory search editor"
      top="20"
      width="231" />
-    <asset_filtered_inv_panel
+    <inventory_panel
      allow_multi_select="false"
      bg_visible="true"
      bg_alpha_color="DkGray2"
@@ -172,8 +172,7 @@
      left_delta="0"
      name="inventory panel"
      top_pad="4"
-     width="231"
-     filter_asset_type="texture"/>
+     width="231" />
      <check_box
      height="14"
      initial_value="false"
