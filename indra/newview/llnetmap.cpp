@@ -537,8 +537,12 @@ void LLNetMap::draw()
 
 			LLColor4 color = show_as_friend ? map_avatar_friend_color : map_avatar_color;
 
-			unknown_relative_z = positions[i].mdV[VZ] >= COARSEUPDATE_MAX_Z &&
-					camera_position.mV[VZ] >= COARSEUPDATE_MAX_Z;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: Catznip-6.3
+			// See LLViewerRegion::updateCoarseLocations()
+			unknown_relative_z = positions[i].mdV[VZ] == MAX_OBJECT_Z;
+// [/SL:KB]
+//			unknown_relative_z = positions[i].mdV[VZ] >= COARSEUPDATE_MAX_Z &&
+//					camera_position.mV[VZ] >= COARSEUPDATE_MAX_Z;
 
 			LLWorldMapView::drawAvatar(
 				pos_map.mV[VX], pos_map.mV[VY], 

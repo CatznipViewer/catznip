@@ -1208,7 +1208,10 @@ void LLWorldMapView::drawAvatar(F32 x_pixels,
 {
 	const F32 HEIGHT_THRESHOLD = 7.f;
 	LLUIImagePtr dot_image = sAvatarLevelImage;
-	if (unknown_relative_z && llabs(relative_z) > HEIGHT_THRESHOLD)
+//	if (unknown_relative_z && llabs(relative_z) > HEIGHT_THRESHOLD)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: Catznip-6.3
+	if (unknown_relative_z)
+// [/SL:KB]
 	{
 		dot_image = sAvatarUnknownImage;
 	}
