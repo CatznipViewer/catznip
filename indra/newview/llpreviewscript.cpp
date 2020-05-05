@@ -1464,6 +1464,17 @@ LLScriptEdContainer::LLScriptEdContainer(const LLSD& key) :
 {
 }
 
+// [SL:KB] - Patch: UI-PreviewScript | Checked: Catznip-6.4
+void LLScriptEdContainer::reloadKeywords()
+{
+	if (LLScriptEditor* pEditor = getEditor())
+	{
+		pEditor->initKeywords();
+		pEditor->loadKeywords();
+	}
+}
+// [/SL:KB]
+
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 void LLScriptEdContainer::onBackupTimer()
 {
