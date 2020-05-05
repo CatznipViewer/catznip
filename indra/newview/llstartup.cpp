@@ -1878,7 +1878,10 @@ bool idle_startup()
 		}
 
 		display_startup();
-        
+
+        // Load stored local environment if needed.
+        LLEnvironment::instance().loadFromSettings();
+
         // *TODO : Uncomment that line once the whole grid migrated to SLM and suppress it from LLAgent::handleTeleportFinished() (llagent.cpp)
         //check_merchant_status();
 
