@@ -1998,7 +1998,7 @@ void LLItemBridge::confirmRestoreToWorld(const LLSD& notification, const LLSD& r
 
 		msg->nextBlockFast(_PREHASH_InventoryData);
 		itemp->packMessage(msg);
-		msg->sendReliable(gAgent.getRegion()->getHost());
+		msg->sendReliable(gAgent.getRegionHost());
 
 		//remove local inventory copy, sim will deal with permissions and removing the item
 		//from the actual inventory if its a no-copy etc
