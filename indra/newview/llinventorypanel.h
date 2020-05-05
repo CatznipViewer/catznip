@@ -161,7 +161,7 @@ public:
 // [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
 	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
 // [/SL:KB]
-	BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 								   EDragAndDropType cargo_type,
 								   void* cargo_data,
 								   EAcceptance* accept,
@@ -355,7 +355,9 @@ protected:
 	static LLUIColor			sLibraryColor;
 	static LLUIColor			sLinkColor;
 	
-	LLFolderViewItem*	buildNewViews(const LLUUID& id);
+	virtual LLFolderViewItem*	buildNewViews(const LLUUID& id);
+	LLFolderViewItem*			buildNewViews(const LLUUID& id, LLInventoryObject const* objectp);
+	virtual void				itemChanged(const LLUUID& item_id, U32 mask, const LLInventoryObject* model_item);
 	BOOL				getIsHiddenFolderType(LLFolderType::EType folder_type) const;
 	
     virtual LLFolderView * createFolderRoot(LLUUID root_id );
@@ -365,5 +367,44 @@ private:
 	bool				mBuildDefaultHierarchy; // default inventory hierarchy should be created in postBuild()
 	bool				mViewsInitialized; // Views have been generated
 };
+
+// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
+/************************************************************************/
+/* Asset Pre-Filtered Inventory Panel related class                     */
+/* Exchanges filter's flexibility for speed of generation and           */
+/* improved performance                                                 */
+/************************************************************************/
+class LLAssetFilteredInventoryPanel : public LLInventoryPanel
+{
+public:
+    struct Params
+        : public LLInitParam::Block<Params, LLInventoryPanel::Params>
+    {
+        Mandatory<std::string>	filter_asset_type;
+
+        Params() : filter_asset_type("filter_asset_type") {}
+    };
+
+    void initFromParams(const Params& p);
+protected:
+    LLAssetFilteredInventoryPanel(const Params& p) : LLInventoryPanel(p) {}
+    friend class LLUICtrlFactory;
+public:
+    ~LLAssetFilteredInventoryPanel() {}
+
+    /*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+                                       EDragAndDropType cargo_type,
+                                       void* cargo_data,
+                                       EAcceptance* accept,
+                                       std::string& tooltip_msg) override;
+
+protected:
+    /*virtual*/ LLFolderViewItem*	buildNewViews(const LLUUID& id) override;
+    /*virtual*/ void				itemChanged(const LLUUID& item_id, U32 mask, const LLInventoryObject* model_item) override;
+
+private:
+    LLAssetType::EType mAssetType;
+};
+// [/SL:KB]
 
 #endif // LL_LLINVENTORYPANEL_H
