@@ -2397,7 +2397,18 @@
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
+      <integer>3</integer>
+    </map>
+    <key>DebugBeaconLineLengthZ</key>
+    <map>
+      <key>Comment</key>
+      <string>Length of Z-aligned line for Debug Beacons</string>
+      <key>Persist</key>
       <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>50</integer>
     </map>
     <key>DebugForceAppearanceRequestFailure</key>
     <map>

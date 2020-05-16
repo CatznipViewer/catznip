@@ -146,6 +146,9 @@ bool LLPipeline::RenderDelayCreation;
 bool LLPipeline::RenderAnimateRes;
 bool LLPipeline::FreezeTime;
 S32 LLPipeline::DebugBeaconLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+S32 LLPipeline::DebugBeaconLineLengthZ;
+// [/SL:KB]
 F32 LLPipeline::RenderHighlightBrightness;
 LLColor4 LLPipeline::RenderHighlightColor;
 F32 LLPipeline::RenderHighlightThickness;
@@ -591,6 +594,9 @@ void LLPipeline::init()
 	connectRefreshCachedSettingsSafe("RenderAnimateRes");
 	connectRefreshCachedSettingsSafe("FreezeTime");
 	connectRefreshCachedSettingsSafe("DebugBeaconLineWidth");
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	connectRefreshCachedSettingsSafe("DebugBeaconLineLengthZ");
+// [/SL:KB]
 	connectRefreshCachedSettingsSafe("RenderHighlightBrightness");
 	connectRefreshCachedSettingsSafe("RenderHighlightColor");
 	connectRefreshCachedSettingsSafe("RenderHighlightThickness");
@@ -1111,6 +1117,9 @@ void LLPipeline::refreshCachedSettings()
 	RenderAnimateRes = gSavedSettings.getBOOL("RenderAnimateRes");
 	FreezeTime = gSavedSettings.getBOOL("FreezeTime");
 	DebugBeaconLineWidth = gSavedSettings.getS32("DebugBeaconLineWidth");
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	DebugBeaconLineLengthZ = gSavedSettings.getS32("DebugBeaconLineLengthZ");
+// [/SL:KB]
 	RenderHighlightBrightness = gSavedSettings.getF32("RenderHighlightBrightness");
 	RenderHighlightColor = gSavedSettings.getColor4("RenderHighlightColor");
 	RenderHighlightThickness = gSavedSettings.getF32("RenderHighlightThickness");
@@ -3661,7 +3670,10 @@ void renderScriptedBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3691,7 +3703,10 @@ void renderScriptedTouchBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3720,7 +3735,10 @@ void renderPhysicalBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3748,7 +3766,7 @@ void renderLightsBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(pVolumeObj->getPositionAgent(), "", LLColor4::orange, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+			gObjectList.addDebugBeacon(pVolumeObj->getPositionAgent(), "", LLColor4::orange, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3789,7 +3807,10 @@ void renderMOAPBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3818,7 +3839,10 @@ void renderParticleBeacons(LLDrawable* drawablep)
 		if (gPipeline.sRenderBeacons)
 		{
 			LLColor4 light_blue(0.5f, 0.5f, 1.f, 0.5f);
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -4052,7 +4076,10 @@ void LLPipeline::postSort(LLCamera& camera)
 				if (gPipeline.sRenderBeacons)
 				{
 					//pos += LLVector3(0.f, 0.f, 0.2f);
-					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth, DebugBeaconLineLengthZ);
+// [/SL:KB]
+//					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth);
 				}
 			}
 			// now deal with highlights for all those seeable sound sources

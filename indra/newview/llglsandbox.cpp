@@ -796,7 +796,10 @@ void LLViewerObjectList::renderObjectBeacons()
 			const LLDebugBeacon &debug_beacon = *iter;
 			LLColor4 color = debug_beacon.mColor;
 			color.mV[3] *= 0.25f;
-			S32 line_width = debug_beacon.mLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			S32 line_width = debug_beacon.mLineThickness;
+// [/SL:KB]
+//			S32 line_width = debug_beacon.mLineWidth;
 			if (line_width != last_line_width)
 			{
 				gGL.flush();
@@ -808,8 +811,12 @@ void LLViewerObjectList::renderObjectBeacons()
 		
 			gGL.begin(LLRender::LINES);
 			gGL.color4fv(color.mV);
-			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] - 50.f);
-			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] + 50.f);
+//			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] - 50.f);
+//			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] + 50.f);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] - debug_beacon.mLineHeight);
+			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY],thisline.mV[VZ] + debug_beacon.mLineHeight);
+// [/SL:KB]
 			gGL.vertex3f(thisline.mV[VX] - 2.f,thisline.mV[VY],thisline.mV[VZ]);
 			gGL.vertex3f(thisline.mV[VX] + 2.f,thisline.mV[VY],thisline.mV[VZ]);
 			gGL.vertex3f(thisline.mV[VX],thisline.mV[VY] - 2.f,thisline.mV[VZ]);
@@ -832,7 +839,10 @@ void LLViewerObjectList::renderObjectBeacons()
 		{
 			const LLDebugBeacon &debug_beacon = *iter;
 
-			S32 line_width = debug_beacon.mLineWidth;
+//			S32 line_width = debug_beacon.mLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			S32 line_width = debug_beacon.mLineThickness;
+// [/SL:KB]
 			if (line_width != last_line_width)
 			{
 				gGL.flush();

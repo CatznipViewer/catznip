@@ -917,6 +917,9 @@ public:
 	static bool RenderAnimateRes;
 	static bool FreezeTime;
 	static S32 DebugBeaconLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	static S32 DebugBeaconLineLengthZ; // Length of the Z-axis line in the marker 
+// [/SL:KB]
 	static F32 RenderHighlightBrightness;
 	static LLColor4 RenderHighlightColor;
 	static F32 RenderHighlightThickness;
