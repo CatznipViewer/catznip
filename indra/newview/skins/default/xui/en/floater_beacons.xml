@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- height="245"
+ height="265"
  layout="topleft"
  name="beacons"
  help_topic="beacons"
@@ -130,6 +130,15 @@
          label="Particle sources"
          layout="topleft"
          name="particles" >
+          <check_box.commit_callback
+           function="Beacons.UICheck" />
+        </check_box>
+        <check_box
+         control_name="lightsbeacon"
+         height="16"
+         label="Light sources"
+         layout="topleft"
+         name="lights" >
           <check_box.commit_callback
            function="Beacons.UICheck" />
         </check_box>
