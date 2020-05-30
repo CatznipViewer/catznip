@@ -729,38 +729,28 @@
         <key>version</key>
         <string>2.1.1.500375</string>
       </map>
-      <key>fmodex</key>
+      <key>fmodstudio</key>
       <map>
         <key>copyright</key>
-        <string>COPYRIGHT 2014 FIRELIGHT TECHNOLOGIES PTY LTD. ALL RIGHTS RESERVED</string>
+        <string>FMOD Studio by Firelight Technologies Pty Ltd.</string>
+        <key>description</key>
+        <string>FMOD Studio API</string>
         <key>license</key>
-        <string>fmodex</string>
+        <string>fmod</string>
         <key>license_file</key>
-        <string>LICENSES/fmodex.txt</string>
+        <string>LICENSES/fmodstudio.txt</string>
         <key>name</key>
-        <string>fmodex</string>
+        <string>fmodstudio</string>
         <key>platforms</key>
         <map>
-          <key>darwin</key>
-          <map>
-            <key>archive</key>
-            <map>
-              <key>hash</key>
-              <string>ed0d8767652aecd65a7fef3e28645bad</string>
-              <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/hg/repo/fmodex_3p-update-fmodex/rev/297261/arch/Darwin/installer/fmodex-4.44.31.297261-darwin-297261.tar.bz2</string>
-            </map>
-            <key>name</key>
-            <string>darwin</string>
-          </map>
           <key>darwin64</key>
           <map>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>cba1feed7f6bb671d791a517fddf205a</string>
+              <string>2bdcd463bb0e5f610f9af0c073f58066</string>
               <key>url</key>
-              <string>https://downloads.catznip.com/packages/fmodex-44461-darwin-201601300040-r23.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/54587/506858/fmodstudio-2.00.07.538806-darwin64-538806.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -770,9 +760,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>b847ec838da1ad1dd646df9d74e9b395</string>
+              <string>ae75cdb1cc9da824c9e270bf97bfdd6c</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/hg/repo/p64_3p-fmodex/rev/314207/arch/Linux/installer/fmodex-4.44.61.314207-linux-314207.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/54589/506866/fmodstudio-2.00.07.538806-linux64-538806.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux</string>
@@ -782,9 +772,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>89a75d8719f7b2cbe1e54cd8407bb992</string>
+              <string>ae75cdb1cc9da824c9e270bf97bfdd6c</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/1544/3476/fmodex-4.44.64.501533-linux64-501533.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/54589/506866/fmodstudio-2.00.07.538806-linux64-538806.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -794,9 +784,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>2038da4ab71da8dc086738007c0acdd3</string>
+              <string>5bc07fe561bf8fdf9060c60e247564a9</string>
               <key>url</key>
-              <string>http://viewer.catznip.com/downloads/packages/fmodex-4.44.61-windows-171261212.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/54591/506881/fmodstudio-2.00.07.538806-windows-538806.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -806,16 +796,16 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>b4b73cd64bfd72e7ae84aad429d69cf6</string>
+              <string>90cd0547c8cf6957a9d1083c83ee4a8e</string>
               <key>url</key>
-              <string>http://viewer.catznip.com/downloads/packages/fmodex-4.44.61-windows64-171261211.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/54590/506880/fmodstudio-2.00.07.538806-windows64-538806.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
           </map>
         </map>
         <key>version</key>
-        <string>4.44.64.501533</string>
+        <string>2.00.07.538806</string>
       </map>
       <key>fontconfig</key>
       <map>
@@ -1430,9 +1420,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>a0c4405c9e44d4a0135fe20ba8cfbace</string>
+              <string>7e883d641b5e541c3c46fb6efbbd06ca</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/4693/14627/havok_source-2012.1-2-darwin64-504680.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/51113/463266/havok_source-2012.1-2-darwin64-536003.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -1466,9 +1456,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>035572a1929be66f6c56468e0ef7fe74</string>
+              <string>81e15d58f3ce98f8342842b62bce08f0</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/4695/14637/havok_source-2012.1-2-windows-504680.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/51115/463279/havok_source-2012.1-2-windows-536003.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -1478,9 +1468,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>d8525d2fbb9e0f7bc31427b47350e468</string>
+              <string>df66566126db0f7b75af024b0768a541</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/4694/14634/havok_source-2012.1-2-windows64-504680.tar.bz2</string>
+              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/51114/463273/havok_source-2012.1-2-windows64-536003.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2940,9 +2930,11 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>f824d586ab5de6edd14ef6828e9e4b66</string>
+              <string>d02241c69dc4fac8e270f9bdc0460a90</string>
+              <key>hash_algorithm</key>
+              <string>md5</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/44719/395040/slvoice-4.10.0000.32327.5fc3fe7c.531581-darwin64-531581.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/51111/463254/slvoice-4.10.0000.32327.5fc3fe7c.536001-darwin64-536001.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -2976,9 +2968,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>1941c17c81905f23b4928288bcf719fb</string>
+              <string>6c9c0f59e4974e131456c3ced2b6b23f</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/44720/395047/slvoice-4.10.0000.32327.5fc3fe7c.531581-windows-531581.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/51107/463239/slvoice-4.10.0000.32327.5fc3fe7c.536001-windows-536001.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -2988,16 +2980,16 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>baa6cdc8e8762d5519996ed9faa0bf3f</string>
+              <string>05341caee4c837fe732702fa18a7ed98</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/44721/395056/slvoice-4.10.0000.32327.5fc3fe7c.531581-windows64-531581.tar.bz2</string>
+              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/51108/463245/slvoice-4.10.0000.32327.5fc3fe7c.536001-windows64-536001.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
           </map>
         </map>
         <key>version</key>
-        <string>4.10.0000.32327.5fc3fe7c.531581</string>
+        <string>4.10.0000.32327.5fc3fe7c.536001</string>
       </map>
       <key>tut</key>
       <map>
