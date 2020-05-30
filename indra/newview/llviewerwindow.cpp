@@ -5618,6 +5618,14 @@ void LLViewerWindow::revealIntroPanel()
 	}
 }
 
+void LLViewerWindow::initTextures(S32 location_id)
+{
+    if (mProgressView)
+    {
+        mProgressView->initTextures(location_id, LLGridManager::getInstance()->isInProductionGrid());
+    }
+}
+
 // [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
 void LLViewerWindow::setShowProgress(bool show, F32 fade_duration /*=0.0f*/)
 {
@@ -5686,7 +5694,6 @@ void LLViewerWindow::setProgressCancelButtonVisible( BOOL b, const std::string& 
 		mProgressView->setCancelButtonVisible( b, label );
 	}
 }
-
 
 LLProgressView *LLViewerWindow::getProgressView() const
 {

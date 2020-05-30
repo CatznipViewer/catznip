@@ -133,7 +133,7 @@ void LLAudioEngine::setDefaults()
 }
 
 
-bool LLAudioEngine::init(const S32 num_channels, void* userdata)
+bool LLAudioEngine::init(const S32 num_channels, void* userdata, const std::string &app_title)
 {
 	setDefaults();
 
