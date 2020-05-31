@@ -42,7 +42,10 @@ public:
     bool stopStream(); // Returns true if the stream was successfully stopped.
     bool ready();
 
-    const std::string& getURL() 	{ return mInternetStreamURL; }
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+    const std::string& getURL() const { return mInternetStreamURL; }
+// [/SL:KB]
+//    const std::string& getURL() 	{ return mInternetStreamURL; }
 
     FMOD_OPENSTATE getOpenState(unsigned int* percentbuffered = NULL, bool* starving = NULL, bool* diskbusy = NULL);
 protected:
@@ -281,7 +284,10 @@ F32 LLStreamingAudio_FMODSTUDIO::getGain()
 }
 
 
-std::string LLStreamingAudio_FMODSTUDIO::getURL()
+//std::string LLStreamingAudio_FMODSTUDIO::getURL()
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+const std::string& LLStreamingAudio_FMODSTUDIO::getURL() const
+// [/SL:KB]
 {
     return mURL;
 }
