@@ -1040,6 +1040,9 @@ const std::string& fttype_to_string(const FTType& fttype)
 	static const std::string ftt_host_bake("FTT_HOST_BAKE");
 	static const std::string ftt_map_tile("FTT_MAP_TILE");
 	static const std::string ftt_local_file("FTT_LOCAL_FILE");
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	static const std::string ftt_fetched_file("FTT_FETCHED_FILE");
+// [/SL:KB]
 	static const std::string ftt_error("FTT_ERROR");
 	switch(fttype)
 	{
@@ -1049,6 +1052,9 @@ const std::string& fttype_to_string(const FTType& fttype)
 		case FTT_HOST_BAKE: return ftt_host_bake; break;
 		case FTT_MAP_TILE: return ftt_map_tile; break;
 		case FTT_LOCAL_FILE: return ftt_local_file; break;
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+		case FTT_FETCHED_FILE: return ftt_fetched_file; break;
+// [/SL:KB]
 	}
 	return ftt_error;
 }
@@ -1480,7 +1486,10 @@ BOOL LLViewerFetchedTexture::createTexture(S32 usename/*= 0*/)
 	BOOL res = TRUE;
 
 	// store original size only for locally-sourced images
-	if (mUrl.compare(0, 7, "file://") == 0)
+//	if (mUrl.compare(0, 7, "file://") == 0)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	if ( (FTT_FETCHED_FILE == mFTType) || (mUrl.compare(0, 7, "file://") == 0) )
+// [/SL:KB]
 	{
 		mOrigWidth = mRawImage->getWidth();
 		mOrigHeight = mRawImage->getHeight();
@@ -2025,7 +2034,10 @@ bool LLViewerFetchedTexture::updateFetch()
 				mFullHeight = mRawImage->getHeight() << mRawDiscardLevel;
 				setTexelsPerImage();
 
-				if(mFullWidth > MAX_IMAGE_SIZE || mFullHeight > MAX_IMAGE_SIZE)
+//				if(mFullWidth > MAX_IMAGE_SIZE || mFullHeight > MAX_IMAGE_SIZE)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+				if ( (FTT_FETCHED_FILE != mFTType) && (mFullWidth > MAX_IMAGE_SIZE || mFullHeight > MAX_IMAGE_SIZE) )
+// [/SL:KB]
 				{ 
 					//discard all oversized textures.
 					destroyRawImage();

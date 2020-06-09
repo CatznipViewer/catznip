@@ -1641,6 +1641,18 @@ void LLUIImageList::cleanUp()
 	mUITextureList.clear() ;
 }
 
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+LLPointer<LLTexture> LLUIImageList::getFetchedTexture(const std::string& strUrl, S32 nWidth, S32 nHeight)
+{
+	LLViewerFetchedTexture* pTexture = LLViewerTextureManager::getFetchedTextureFromUrl(strUrl, FTT_FETCHED_FILE, TRUE, LLGLTexture::BOOST_PREVIEW);
+	if (pTexture)
+	{
+		pTexture->setKnownDrawSize(nWidth, nHeight);
+	}
+	return pTexture;
+}
+// [/SL:KB]
+
 LLUIImagePtr LLUIImageList::getUIImageByID(const LLUUID& image_id, S32 priority)
 {
 	// use id as image name
