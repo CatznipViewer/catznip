@@ -6857,6 +6857,9 @@ BOOL LLViewerObject::isHiglightedOrBeacon() const
 
 		return (isParticleSource() && gPipeline.getRenderParticleBeacons())
 				|| (isAudioSource() && gPipeline.getRenderSoundBeacons())
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+				|| (gPipeline.getRenderLightBeacons() && LL_PCODE_VOLUME == getPCode() && static_cast<const LLVOVolume*>(this)->getIsLight())
+// [/SL:KB]
 				|| (has_media && gPipeline.getRenderMOAPBeacons())
 				|| (is_scripted && gPipeline.getRenderScriptedBeacons())
 				|| (is_scripted && flagHandleTouch() && gPipeline.getRenderScriptedTouchBeacons())

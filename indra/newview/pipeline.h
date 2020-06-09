@@ -384,6 +384,12 @@ public:
 	static void toggleRenderSoundBeacons();
 	static bool getRenderSoundBeacons();
 
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+	static void setRenderLightBeacons(bool val);
+	static void toggleRenderLightBeacons();
+	static bool getRenderLightBeacons();
+// [/SL:KB]
+
 	static void setRenderMOAPBeacons(bool val);
 	static void toggleRenderMOAPBeacons();
 	static bool getRenderMOAPBeacons();
@@ -549,6 +555,35 @@ public:
 	};
 
 public:
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+	struct Light
+	{
+		Light(LLDrawable* ptr, F32 d, F32 f = 0.0f)
+			: drawable(ptr),
+			  dist(d),
+			  fade(f)
+		{}
+		LLPointer<LLDrawable> drawable;
+		F32 dist;
+		F32 fade;
+		struct compare
+		{
+			bool operator()(const Light& a, const Light& b) const
+			{
+				if ( a.dist < b.dist )
+					return true;
+				else if ( a.dist > b.dist )
+					return false;
+				else
+					return a.drawable < b.drawable;
+			}
+		};
+	};
+	typedef std::set< Light, Light::compare > light_set_t;
+
+	const LLDrawable::drawable_set_t& getLights() const { return mLights; }
+	const light_set_t& getNearbyLights() const { return mNearbyLights; }
+// [/SL:KB]
 	
 	LLSpatialPartition* getSpatialPartition(LLViewerObject* vobj);
 
@@ -702,30 +737,30 @@ protected:
 	/////////////////////////////////////////////
 	//
 	//
-	struct Light
-	{
-		Light(LLDrawable* ptr, F32 d, F32 f = 0.0f)
-			: drawable(ptr),
-			  dist(d),
-			  fade(f)
-		{}
-		LLPointer<LLDrawable> drawable;
-		F32 dist;
-		F32 fade;
-		struct compare
-		{
-			bool operator()(const Light& a, const Light& b) const
-			{
-				if ( a.dist < b.dist )
-					return true;
-				else if ( a.dist > b.dist )
-					return false;
-				else
-					return a.drawable < b.drawable;
-			}
-		};
-	};
-	typedef std::set< Light, Light::compare > light_set_t;
+	//struct Light
+	//{
+	//	Light(LLDrawable* ptr, F32 d, F32 f = 0.0f)
+	//		: drawable(ptr),
+	//		  dist(d),
+	//		  fade(f)
+	//	{}
+	//	LLPointer<LLDrawable> drawable;
+	//	F32 dist;
+	//	F32 fade;
+	//	struct compare
+	//	{
+	//		bool operator()(const Light& a, const Light& b) const
+	//		{
+	//			if ( a.dist < b.dist )
+	//				return true;
+	//			else if ( a.dist > b.dist )
+	//				return false;
+	//			else
+	//				return a.drawable < b.drawable;
+	//		}
+	//	};
+	//};
+	//typedef std::set< Light, Light::compare > light_set_t;
 	
 	LLDrawable::drawable_set_t		mLights;
 	light_set_t						mNearbyLights; // lights near camera
@@ -862,6 +897,9 @@ protected:
 	S32						mLightingDetail;
 		
 	static bool				sRenderPhysicalBeacons;
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+	static bool				sRenderLightBeacons;
+// [/SL:KB]
 	static bool				sRenderMOAPBeacons;
 	static bool				sRenderScriptedTouchBeacons;
 	static bool				sRenderScriptedBeacons;
@@ -894,6 +932,9 @@ public:
 	static bool RenderAnimateRes;
 	static bool FreezeTime;
 	static S32 DebugBeaconLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	static S32 DebugBeaconLineLengthZ; // Length of the Z-axis line in the marker 
+// [/SL:KB]
 	static F32 RenderHighlightBrightness;
 	static LLColor4 RenderHighlightColor;
 	static F32 RenderHighlightThickness;

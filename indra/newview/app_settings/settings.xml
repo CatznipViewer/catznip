@@ -2445,7 +2445,18 @@
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
+      <integer>3</integer>
+    </map>
+    <key>DebugBeaconLineLengthZ</key>
+    <map>
+      <key>Comment</key>
+      <string>Length of Z-aligned line for Debug Beacons</string>
+      <key>Persist</key>
       <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>50</integer>
     </map>
     <key>DebugForceAppearanceRequestFailure</key>
     <map>
@@ -15018,6 +15029,17 @@
       <string>F32</string>
       <key>Value</key>
       <real>0.40000000596</real>
+    </map>
+    <key>lightsbeacon</key>
+    <map>
+      <key>Comment</key>
+      <string>Beacon / Highlight lights</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
 	<key>moapbeacon</key>
 	<map>
