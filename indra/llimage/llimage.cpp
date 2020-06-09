@@ -976,14 +976,24 @@ void LLImageRaw::verticalFlip()
 }
 
 
-void LLImageRaw::expandToPowerOfTwo(S32 max_dim, bool scale_image)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+void LLImageRaw::expandToPowerOfTwo(S32 max_width, S32 max_height, bool scale_image)
 {
 	// Find new sizes
-	S32 new_width  = expandDimToPowerOfTwo(getWidth(), max_dim);
-	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_dim);
+	S32 new_width = expandDimToPowerOfTwo(getWidth(), max_width);
+	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_height);
 
-	scale( new_width, new_height, scale_image );
+	scale(new_width, new_height, scale_image);
 }
+// [/SL:KB]
+//void LLImageRaw::expandToPowerOfTwo(S32 max_dim, bool scale_image)
+//{
+//	// Find new sizes
+//	S32 new_width  = expandDimToPowerOfTwo(getWidth(), max_dim);
+//	S32 new_height = expandDimToPowerOfTwo(getHeight(), max_dim);
+//
+//	scale( new_width, new_height, scale_image );
+//}
 
 void LLImageRaw::contractToPowerOfTwo(S32 max_dim, bool scale_image)
 {
@@ -1034,14 +1044,24 @@ S32 LLImageRaw::contractDimToPowerOfTwo(S32 curr_dim, S32 min_dim)
     return new_dim;
 }
 
-void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_dim)
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_width, S32 max_height)
 {
 	// Find new sizes
-	S32 new_width  = biasedDimToPowerOfTwo(getWidth(),max_dim);
-	S32 new_height = biasedDimToPowerOfTwo(getHeight(),max_dim);
+	S32 new_width = biasedDimToPowerOfTwo(getWidth(), max_width);
+	S32 new_height = biasedDimToPowerOfTwo(getHeight(), max_height);
 
-	scale( new_width, new_height );
+	scale( new_width, new_height);
 }
+// [/SL:KB]
+//void LLImageRaw::biasedScaleToPowerOfTwo(S32 max_dim)
+//{
+//	// Find new sizes
+//	S32 new_width  = biasedDimToPowerOfTwo(getWidth(),max_dim);
+//	S32 new_height = biasedDimToPowerOfTwo(getHeight(),max_dim);
+//
+//	scale( new_width, new_height );
+//}
 
 // Calculates (U8)(255*(a/255.f)*(b/255.f) + 0.5f).  Thanks, Jim Blinn!
 inline U8 LLImageRaw::fastFractionalMult( U8 a, U8 b )
@@ -1804,6 +1824,47 @@ static std::string find_file(std::string &name, S8 *codec)
 	return std::string("");
 }
 #endif
+
+// [SL:KB] - Patch: Viewer-Textures | Checked: Catznip-5.4
+// static
+EImageCodec LLImageBase::getCodec(const std::string& strExtension, const U8* pData, unsigned int szData)
+{
+	EImageCodec eCodec = getCodecFromData(pData, szData);
+	if (IMG_CODEC_INVALID == eCodec)
+		return getCodecFromExtension(strExtension);
+	return eCodec;
+}
+
+// static
+EImageCodec LLImageBase::getCodecFromData(const U8* pData, unsigned int szData)
+{
+	if (szData >= 8)
+	{
+		switch ((char)pData[0])
+		{
+			// BMP
+			case 'B':
+				if (pData[1] == 'M')
+					return IMG_CODEC_BMP;
+				break;
+			// JPG
+			case '\x0ff':
+				if (!strncmp((const char*)pData, "\x0ff\x0d8", 2))
+					return IMG_CODEC_JPEG;
+				break;
+			// PNG
+			case '\x089':
+				if (!strncmp((const char*)pData, "\x89PNG\x00d\x00a\x01a\x00a", 8))
+					return  IMG_CODEC_PNG;
+				break;
+			default:
+				break;
+		}
+	}
+	return IMG_CODEC_INVALID;
+}
+// [/SL:KB]
+
 EImageCodec LLImageBase::getCodecFromExtension(const std::string& exten)
 {
 	if (!exten.empty())
