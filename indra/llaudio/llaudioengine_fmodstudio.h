@@ -30,9 +30,6 @@
 
 #include "llaudioengine.h"
 #include "llwindgen.h"
-// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
-#include "fmod.h"
-// [/SL:KB]
 
 //Stubs
 class LLAudioStreamManagerFMODSTUDIO;
@@ -74,10 +71,6 @@ protected:
 
 	/*virtual*/ void setInternalGain(F32 gain);
 
-// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
-	static FMOD_RESULT F_CALLBACK systemCallback(FMOD_SYSTEM* pSystem, FMOD_SYSTEM_CALLBACKTYPE cbType, void* pParam1, void* pParam2);
-// [/SL:KB]
-
 	bool mInited;
 
 	LLWindGen<MIXBUFFERFORMAT> *mWindGen;
@@ -85,9 +78,6 @@ protected:
 	FMOD_DSP_DESCRIPTION *mWindDSPDesc;
 	FMOD::DSP *mWindDSP;
 	FMOD::System *mSystem;
-// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
-	FMOD_GUID mDeviceId;
-// [/SL:KB]
 	bool mEnableProfiler;
 
 public:

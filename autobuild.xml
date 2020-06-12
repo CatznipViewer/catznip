@@ -730,9 +730,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>7f0294b038eab2d89ecc73bbf08b6d94</string>
+              <string>fbd53fad464526e9331332fc0b3fee0b</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/59042/554668/fmodstudio-2.00.07.541681-windows-541681.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/fmodstudio-2.00.09-windows-201512304.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -742,9 +742,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>da2e8e2b809d8fe635ee437baa2a7386</string>
+              <string>af7446fdf8d39e114feae354878ec54b</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/ct2/59041/554656/fmodstudio-2.00.07.541681-windows64-541681.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/fmodstudio-2.00.09-windows64-201512258.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>

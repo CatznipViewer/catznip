@@ -54,7 +54,10 @@ public:
     /*virtual*/ S32 isPlaying();
     /*virtual*/ void setGain(F32 vol);
     /*virtual*/ F32 getGain();
-    /*virtual*/ std::string getURL();
+// [SL:KB] - Patch: Viewer-Audio | Checked: Catznip-5.4
+	const std::string& getURL() const override;
+// [/SL:KB]
+//    /*virtual*/ std::string getURL();
 
     /*virtual*/ bool supportsAdjustableBufferSizes(){return true;}
     /*virtual*/ void setBufferSizes(U32 streambuffertime, U32 decodebuffertime);
