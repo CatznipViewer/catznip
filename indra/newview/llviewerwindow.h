@@ -313,6 +313,7 @@ public:
 	BOOL            getCursorHidden() { return mCursorHidden; }
 	void			moveCursorToCenter();								// move to center of window
 													
+	void			initTextures(S32 location_id);
 //	void			setShowProgress(const BOOL show);
 // [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
 	void			setShowProgress(bool show, F32 fade_duration = 0.0f);
