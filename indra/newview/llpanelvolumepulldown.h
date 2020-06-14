@@ -30,19 +30,12 @@
 
 #include "linden_common.h"
 
-#include "llpanel.h"
+#include "llpanelpulldown.h"
 
-class LLFrameTimer;
-
-class LLPanelVolumePulldown : public LLPanel
+class LLPanelVolumePulldown : public LLPanelPulldown
 {
  public:
 	LLPanelVolumePulldown();
-	/*virtual*/ void draw();
-	/*virtual*/ void onMouseEnter(S32 x, S32 y, MASK mask);
-	/*virtual*/ void onMouseLeave(S32 x, S32 y, MASK mask);
-	/*virtual*/ void onTopLost();
-	/*virtual*/ void onVisibilityChange ( BOOL new_visibility );
 	/*virtual*/ BOOL postBuild();
 	
  private:
@@ -55,10 +48,6 @@ class LLPanelVolumePulldown : public LLPanel
 // [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
 	void onToggleMuteSounds();
 // [/Sl:KB]
-
-	LLFrameTimer mHoverTimer;
-	static const F32 sAutoCloseFadeStartTimeSec;
-	static const F32 sAutoCloseTotalTimeSec;
 };
 
 
