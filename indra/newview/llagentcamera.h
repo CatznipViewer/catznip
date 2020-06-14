@@ -58,9 +58,12 @@ enum ECameraPreset
 	/** "Above and to the left, over the shoulder, pulled back a little on the zoom" */
 	CAMERA_PRESET_GROUP_VIEW,
 
+	/** Current view when a preset is saved */
+	CAMERA_PRESET_CUSTOM,
+
 // [RLVa:KB] - Checked: RLVa-2.0.0
 	/* Used by RLVa */
-	CAMERA_RLV_SETCAM_VIEW
+	CAMERA_RLV_SETCAM_VIEW,
 // [/RLVa:KB]
 };
 
@@ -113,21 +116,55 @@ private:
 	// Preset
 	//--------------------------------------------------------------------
 public:
+// [RLVa:KB] - @setcam family
+	/** Determines default camera offset scale depending on the current camera preset */
+	ECameraPreset getCameraPreset() const { return mCameraPreset; }
+// [/RLVa:KB]
 	void switchCameraPreset(ECameraPreset preset);
-private:
 	/** Determines default camera offset depending on the current camera preset */
 	LLVector3 getCameraOffsetInitial();
+// [RLVa:KB] - @setcam_eyeoffsetscale
+	/** Determines default camera offset scale depending on the current camera preset */
+	F32 getCameraOffsetScale() const;
+// [/RLVa:KB]
+	/** Determines default focus offset depending on the current camera preset */
+	LLVector3d getFocusOffsetInitial();
+
+	LLVector3 getCurrentCameraOffset();
+	LLVector3d getCurrentFocusOffset();
+	LLQuaternion getCurrentAvatarRotation();
+	bool isJoystickCameraUsed();
+	void setInitSitRot(LLQuaternion sit_rot) { mInitSitRot = sit_rot; };
+	void rotateToInitSitRot();
+
+private:
 	/** Determines maximum camera distance from target for mouselook, opposite to LAND_MIN_ZOOM */
 	F32 getCameraMaxZoomDistance();
 
 	/** Camera preset in Third Person Mode */
 	ECameraPreset mCameraPreset; 
 
-	/** Initial camera offsets */
-	std::map<ECameraPreset, LLPointer<LLControlVariable> > mCameraOffsetInitial;
+	/** Initial camera offset */
+//	LLPointer<LLControlVariable> mCameraOffsetInitial;
+// [RLVa:KB] - @setcam_eyeoffset
+	// Renamed to catch their uses
+	LLPointer<LLControlVariable> mCameraOffsetInitialControl;
+	LLPointer<LLControlVariable> mRlvCameraOffsetInitialControl;
+// [/RLVa:KB]
 
-	/** Initial focus offsets */
-	std::map<ECameraPreset, LLPointer<LLControlVariable> > mFocusOffsetInitial;
+// [RLVa:KB] - @setcam_eyeoffsetscale
+	LLPointer<LLControlVariable> mRlvCameraOffsetScaleControl;
+// [/RLVa:KB]
+
+	/** Initial focus offset */
+//	LLPointer<LLControlVariable> mFocusOffsetInitial;
+// [RLVa:KB] - @setcam_focusoffset
+	// Renamed to catch their uses
+	LLPointer<LLControlVariable> mFocusOffsetInitialControl;
+	LLPointer<LLControlVariable> mRlvFocusOffsetInitialControl;
+// [/RLVa:KB]
+
+	LLQuaternion mInitSitRot;
 
 	//--------------------------------------------------------------------
 	// Position
@@ -142,6 +179,8 @@ public:
 	F32				getCurrentCameraBuildOffset() 	{ return (F32)mCameraFocusOffset.length(); }
 	void			clearCameraLag() { mCameraLag.clearVec(); }
 private:
+	LLVector3		getAvatarRootPosition();
+
 	F32				mCurrentCameraDistance;	 		// Current camera offset from avatar
 	F32				mTargetCameraDistance;			// Target camera offset from avatar
 	F32				mCameraFOVZoomFactor;			// Amount of fov zoom applied to camera when zeroing in on an object
@@ -209,7 +248,7 @@ public:
 	void			validateFocusObject();
 	void			setFocusGlobal(const LLPickInfo& pick);
 	void			setFocusGlobal(const LLVector3d &focus, const LLUUID &object_id = LLUUID::null);
-	void			setFocusOnAvatar(BOOL focus, BOOL animate);
+	void			setFocusOnAvatar(BOOL focus, BOOL animate, BOOL reset_axes = TRUE);
 	void			setCameraPosAndFocusGlobal(const LLVector3d& pos, const LLVector3d& focus, const LLUUID &object_id);
 	void			clearFocusObject();
 	void			setFocusObject(LLViewerObject* object);
@@ -261,17 +300,21 @@ public:
 	void			cameraOrbitAround(const F32 radians);	// Rotate camera CCW radians about build focus point
 	void			cameraOrbitOver(const F32 radians);		// Rotate camera forward radians over build focus point
 	void			cameraOrbitIn(const F32 meters);		// Move camera in toward build focus point
-
+	void			resetCameraOrbit();
+	void			resetOrbitDiff();
 	//--------------------------------------------------------------------
 	// Zoom
 	//--------------------------------------------------------------------
 public:
-	void			handleScrollWheel(S32 clicks); 			// Mousewheel driven zoom
-	void			cameraZoomIn(const F32 factor);			// Zoom in by fraction of current distance
-	F32				getCameraZoomFraction();				// Get camera zoom as fraction of minimum and maximum zoom
-	void			setCameraZoomFraction(F32 fraction);	// Set camera zoom as fraction of minimum and maximum zoom
+	void			handleScrollWheel(S32 clicks); 							// Mousewheel driven zoom
+	void			cameraZoomIn(const F32 factor);							// Zoom in by fraction of current distance
+	F32				getCameraZoomFraction(bool get_third_person = false);	// Get camera zoom as fraction of minimum and maximum zoom
+	void			setCameraZoomFraction(F32 fraction);					// Set camera zoom as fraction of minimum and maximum zoom
 	F32				calcCameraFOVZoomFactor();
 	F32				getAgentHUDTargetZoom();
+
+	void			resetCameraZoomFraction();
+	F32				getCurrentCameraZoomFraction() { return mCameraZoomFraction; }
 
 	//--------------------------------------------------------------------
 	// Pan
@@ -279,8 +322,9 @@ public:
 public:
 	void			cameraPanIn(const F32 meters);
 	void			cameraPanLeft(const F32 meters);
-	void			cameraPanUp(const F32 meters);
-	
+	void			cameraPanUp(const F32 meters);	
+	void			resetCameraPan();
+	void			resetPanDiff();
 	//--------------------------------------------------------------------
 	// View
 	//--------------------------------------------------------------------
@@ -379,6 +423,9 @@ private:
 	F32				mOrbitInKey;
 	F32				mOrbitOutKey;
 
+	F32				mOrbitAroundRadians;
+	F32				mOrbitOverAngle;
+
 	//--------------------------------------------------------------------
 	// Pan
 	//--------------------------------------------------------------------
@@ -405,6 +452,8 @@ private:
 	F32				mPanRightKey;					
 	F32				mPanInKey;
 	F32				mPanOutKey;
+
+	LLVector3d		mPanFocusDiff;
 
 /**                    Keys
  **                                                                            **
