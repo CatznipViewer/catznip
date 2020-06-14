@@ -4317,7 +4317,7 @@ bool show_sitdown_self()
 bool enable_sitdown_self()
 {
 // [RLVa:KB] - Checked: 2010-08-28 (RLVa-1.2.1a) | Added: RLVa-1.2.1a
-	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
+	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
 // [/RLVa:KB]
 //	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
 }
@@ -8124,17 +8124,16 @@ BOOL object_selected_and_point_valid(const LLSD& sdParam)
 		(selection->getFirstRootObject()->getNVPair("AssetContainer") == NULL);
 }
 
-
 BOOL object_is_wearable()
 {
 	if (!isAgentAvatarValid())
 	{
 		return FALSE;
 	}
+//	if (!object_selected_and_point_valid())
 // [RLVa:KB] - Checked: 2010-03-16 (RLVa-1.2.0a) | Added: RLVa-1.2.0a
 	if (!object_selected_and_point_valid(LLSD(0)))
 // [/RLVa:KB]
-//	if (!object_selected_and_point_valid())
 	{
 		return FALSE;
 	}

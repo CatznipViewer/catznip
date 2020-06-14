@@ -39,6 +39,9 @@
 #include "llpresetsmanager.h"
 #include "llradiogroup.h"
 #include "lltrans.h"
+// [SL:KB - Patch: UI-Misc | Checked: Catznip-6.4
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 
 LLFloaterSaveCameraPreset::LLFloaterSaveCameraPreset(const LLSD &key)
