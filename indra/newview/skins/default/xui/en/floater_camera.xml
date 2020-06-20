@@ -149,6 +149,16 @@
               tool_tip="Orbit camera around focus"
               top="5"
               width="78" />
+
+           <icon
+            height="14"
+            image_name="Cam_FreeCam_Off"
+            tool_tip="Camera Zoom"
+            mouse_opaque="true"
+            name="icon_bodypart"
+            left_pad="4"
+            width="14"
+            top="0" />
            <button
               follows="top|left"
               height="18"
@@ -156,10 +166,10 @@
               image_selected="AddItem_Press"
               image_unselected="AddItem_Off"
               layout="topleft"
-              left_pad="14" 
+              left_delta="-1"
               name="zoom_plus_btn"
               width="18"
-              top="3">
+              top="10">
              <commit_callback
                 function="Zoom.plus" />
              <mouse_held_callback
@@ -171,8 +181,9 @@
               name="zoom_slider"
               orientation="vertical"
               tool_tip="Zoom camera toward focus"
-              top_pad="0"
+              top_pad="-2"
               min_val="0"
+              increment="0.05"
               max_val="1" 
               width="18">
              <commit_callback function="Slider.value_changed"/>
@@ -185,13 +196,69 @@
               image_unselected="MinusItem_Off"
               layout="topleft"
               name="zoom_minus_btn"
-              top_pad="0"
+              top_pad="-3"
               width="18">
              <commit_callback
                 function="Zoom.minus" />
              <mouse_held_callback
                 function="Zoom.minus" />
            </button>
+
+           <icon
+            height="14"
+            image_name="Cam_Avatar_Off"
+            mouse_opaque="true"
+            name="icon_bodypart"
+            left_pad="7"
+            tool_tip="Camera Field of View"
+            top="0"
+            width="14" />
+           <button
+              follows="top|left"
+              height="18"
+              image_disabled="AddItem_Disabled"
+              image_selected="AddItem_Press"
+              image_unselected="AddItem_Off"
+              layout="topleft"
+              left_delta="-1"
+              name="view_plus_btn"
+              width="18"
+              top="10">
+             <commit_callback
+                function="View.plus" />
+             <mouse_held_callback
+                function="View.plus" />
+           </button>
+           <button
+              follows="top|left"
+              height="18"
+              image_disabled="MinusItem_Disabled"
+              image_selected="MinusItem_Press"
+              image_unselected="MinusItem_Off"
+              layout="topleft"
+              name="view_minus_btn"
+              top="73"
+              width="18">
+             <commit_callback
+                function="View.minus" />
+             <mouse_held_callback
+                function="View.minus" />
+           </button>
+           <slider_bar
+              commit_callback.function="View.value_changed"
+              control_name="CameraAngle"
+              height="50"
+              increment="0.05"
+              layout="topleft"
+              max_val="2.97"
+              min_val="0.17"
+              name="view_slider"
+              orientation="vertical"
+              tool_tip="Zoom camera toward focus"
+              top="26"
+              width="18">
+           </slider_bar>
+
          <joystick_track
          follows="top|left"
          height="78"

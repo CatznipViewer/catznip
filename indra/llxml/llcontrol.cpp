@@ -974,7 +974,10 @@ U32 LLControlGroup::saveToFile(const std::string& filename, BOOL nondefault_only
 	return num_saved;
 }
 
-U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values)
+//U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values)
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_values, bool save_values, const std::vector<std::string>* allowed_controls_p)
+// [/SL:KB]
 {
 	LLSD settings;
 	llifstream infile;
@@ -1000,6 +1003,15 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 		LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT;
 		std::string const & name = itr->first;
 		LLSD const & control_map = itr->second;
+
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+		if ( (allowed_controls_p) && (allowed_controls_p->end() == std::find(allowed_controls_p->begin(), allowed_controls_p->end(), name)) )
+		{
+			// Not on the allowed list
+			continue;
+		}
+// [/SL:KB]
+
 		
 		if(control_map.has("Persist")) 
 		{

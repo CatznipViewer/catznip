@@ -81,6 +81,10 @@ protected:
 	void	onZoomPlusHeldDown();
 	void	onZoomMinusHeldDown();
 	void	onSliderValueChanged();
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	void	onViewHeldDown(F32 nMult);
+	void	onViewValueChanged();
+// [/SL:KB]
 	void	onCameraTrack();
 	void	onCameraRotate();
 	F32		getOrbitRate(F32 time);
@@ -88,7 +92,11 @@ protected:
 private:
 	LLButton*	mPlusBtn;
 	LLButton*	mMinusBtn;
-	LLSlider*	mSlider;
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	LLSlider*	mZoomSlider = nullptr;
+	LLSlider*	mViewSlider = nullptr;
+// [/SL:KB]
+//	LLSlider*	mSlider;
 };
 
 //LLPanelCameraItem::Params::Params()
@@ -166,12 +174,17 @@ static LLPanelInjector<LLPanelCameraZoom> t_camera_zoom_panel("camera_zoom_panel
 
 LLPanelCameraZoom::LLPanelCameraZoom()
 :	mPlusBtn( NULL ),
-	mMinusBtn( NULL ),
-	mSlider( NULL )
+	mMinusBtn( NULL )
+//	mSlider( NULL )
 {
 	mCommitCallbackRegistrar.add("Zoom.minus", boost::bind(&LLPanelCameraZoom::onZoomMinusHeldDown, this));
 	mCommitCallbackRegistrar.add("Zoom.plus", boost::bind(&LLPanelCameraZoom::onZoomPlusHeldDown, this));
 	mCommitCallbackRegistrar.add("Slider.value_changed", boost::bind(&LLPanelCameraZoom::onSliderValueChanged, this));
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	mCommitCallbackRegistrar.add("View.minus", boost::bind(&LLPanelCameraZoom::onViewHeldDown, this, -1));
+	mCommitCallbackRegistrar.add("View.plus", boost::bind(&LLPanelCameraZoom::onViewHeldDown, this, 1));
+	mCommitCallbackRegistrar.add("View.value_changed", boost::bind(&LLPanelCameraZoom::onViewValueChanged, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Camera.track", boost::bind(&LLPanelCameraZoom::onCameraTrack, this));
 	mCommitCallbackRegistrar.add("Camera.rotate", boost::bind(&LLPanelCameraZoom::onCameraRotate, this));
 }
@@ -180,21 +193,39 @@ BOOL LLPanelCameraZoom::postBuild()
 {
 	mPlusBtn  = getChild <LLButton> ("zoom_plus_btn");
 	mMinusBtn = getChild <LLButton> ("zoom_minus_btn");
-	mSlider   = getChild <LLSlider> ("zoom_slider");
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	mZoomSlider = getChild<LLSlider>("zoom_slider");
+	mViewSlider = getChild<LLSlider>("view_slider");
+// [/SL:KB]
+//	mSlider   = getChild <LLSlider> ("zoom_slider");
 	return LLPanel::postBuild();
 }
 
 void LLPanelCameraZoom::draw()
 {
-	mSlider->setValue(gAgentCamera.getCameraZoomFraction());
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	F32 zoom_level = gAgentCamera.getCameraZoomFraction();
+	zoom_level = 1 - sqrt(1.f - zoom_level);
+	mZoomSlider->setValue(zoom_level);
+
+	const LLViewerCamera* pCamera = LLViewerCamera::getInstance();
+	mViewSlider->setMinValue(pCamera->getMinView());
+	mViewSlider->setMaxValue(pCamera->getMaxView());
+// [/SL:KB]
+//	mSlider->setValue(gAgentCamera.getCameraZoomFraction());
 	LLPanel::draw();
 }
 
 void LLPanelCameraZoom::onZoomPlusHeldDown()
 {
-	F32 val = mSlider->getValueF32();
-	F32 inc = mSlider->getIncrement();
-	mSlider->setValue(val - inc);
+//	F32 val = mSlider->getValueF32();
+//	F32 inc = mSlider->getIncrement();
+//	mSlider->setValue(val - inc);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	F32 val = mZoomSlider->getValueF32();
+	F32 inc = mZoomSlider->getIncrement();
+	mZoomSlider->setValue(val - inc);
+// [/SL:KB]
 	F32 time = mPlusBtn->getHeldDownTime();
 	gAgentCamera.unlockView();
 	gAgentCamera.setOrbitInKey(getOrbitRate(time));
@@ -202,13 +233,28 @@ void LLPanelCameraZoom::onZoomPlusHeldDown()
 
 void LLPanelCameraZoom::onZoomMinusHeldDown()
 {
-	F32 val = mSlider->getValueF32();
-	F32 inc = mSlider->getIncrement();
-	mSlider->setValue(val + inc);
+//	F32 val = mSlider->getValueF32();
+//	F32 inc = mSlider->getIncrement();
+//	mSlider->setValue(val + inc);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	F32 val = mZoomSlider->getValueF32();
+	F32 inc = mZoomSlider->getIncrement();
+	mZoomSlider->setValue(val + inc);
+// [/SL:KB]
 	F32 time = mMinusBtn->getHeldDownTime();
 	gAgentCamera.unlockView();
 	gAgentCamera.setOrbitOutKey(getOrbitRate(time));
 }
+
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+void LLPanelCameraZoom::onViewHeldDown(F32 nMult)
+{
+	F32 val = mViewSlider->getValueF32();
+	F32 inc = mViewSlider->getIncrement();
+	mViewSlider->setValue(val + nMult * inc);
+	onViewValueChanged();
+}
+// [/SL:KB]
 
 void LLPanelCameraZoom::onCameraTrack()
 {
@@ -237,9 +283,21 @@ F32 LLPanelCameraZoom::getOrbitRate(F32 time)
 
 void  LLPanelCameraZoom::onSliderValueChanged()
 {
-	F32 zoom_level = mSlider->getValueF32();
+//	F32 zoom_level = mSlider->getValueF32();
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	F32 zoom_level = mZoomSlider->getValueF32();
+	zoom_level = -zoom_level * (zoom_level - 2);
+// [/SL:KB]
 	gAgentCamera.setCameraZoomFraction(zoom_level);
 }
+
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+void  LLPanelCameraZoom::onViewValueChanged()
+{
+	LLViewerCamera::getInstance()->setDefaultFOV(mViewSlider->getValueF32());
+	gSavedSettings.setF32("CameraAngle", LLViewerCamera::getInstance()->getView()); // setView may have clamped it.
+}
+// [/SL:KB]
 
 void activate_camera_tool()
 {
@@ -611,6 +669,10 @@ void LLFloaterCamera::switchToPreset(const std::string& name)
 		}
 	}
 	gAgentCamera.resetCameraZoomFraction();
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	LLViewerCamera::getInstance()->setDefaultFOV(DEFAULT_FIELD_OF_VIEW);
+	gSavedSettings.setF32("CameraAngle", DEFAULT_FIELD_OF_VIEW);
+// [/SL:KB]
 
 	LLFloaterCamera* camera_floater = LLFloaterCamera::findInstance();
 	if (camera_floater)
