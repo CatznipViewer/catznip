@@ -263,6 +263,11 @@ public:
 	// FIXME: this should really be a separate signal, since "Commit" implies explicit user action, and selection changes can happen more indirectly.
 	void setCommitOnSelectionChange(bool b)		{ mCommitOnSelectionChange = b; }
 
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+	/** Sets flag whether onCommit should be fired if selection was changed due to a user (mouse) action */
+	void setCommitOnUserSelection(bool b)		{ mCommitOnUserSelection = b; }
+// [/SL:KB]
+
 	/** Get number of selected items in the list */
 	U32 numSelected() const {return mSelectedItemPairs.size(); }
 
@@ -420,6 +425,10 @@ private:
 	 * @see resetSelection()
 	 */
 	bool mCommitOnSelectionChange;
+
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+	bool mCommitOnUserSelection = false;
+// [/SL:KB]
 
 	bool mKeepOneItemSelected;
 

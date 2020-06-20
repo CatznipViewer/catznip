@@ -34,27 +34,27 @@ class LLComboBox;
 class LLRadioGroup;
 class LLLineEditor;
 
-class LLFloaterSaveCameraPreset : public LLModalDialog
-{
-
-public:
-	LLFloaterSaveCameraPreset(const LLSD &key);
-
-	/*virtual*/	BOOL	postBuild();
-	/*virtual*/ void	onOpen(const LLSD& key);
-
-	void onBtnSave();
-	void onBtnCancel();
-	void onSwitchSaveReplace();
-
-private:
-	LLRadioGroup*	mSaveRadioGroup;
-	LLLineEditor*	mNameEditor;
-	LLComboBox*		mPresetCombo;
-	LLButton*		mSaveButton;
-
-	void onPresetsListChange();
-	void onPresetNameEdited();
-};
+//class LLFloaterSaveCameraPreset : public LLModalDialog
+//{
+//
+//public:
+//	LLFloaterSaveCameraPreset(const LLSD &key);
+//
+//	/*virtual*/	BOOL	postBuild();
+//	/*virtual*/ void	onOpen(const LLSD& key);
+//
+//	void onBtnSave();
+//	void onBtnCancel();
+//	void onSwitchSaveReplace();
+//
+//private:
+//	LLRadioGroup*	mSaveRadioGroup;
+//	LLLineEditor*	mNameEditor;
+//	LLComboBox*		mPresetCombo;
+//	LLButton*		mSaveButton;
+//
+//	void onPresetsListChange();
+//	void onPresetNameEdited();
+//};
 
 #endif // LL_LLFLOATERSAVECAMERAPRESET_H

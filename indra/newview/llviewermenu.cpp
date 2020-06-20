@@ -4304,6 +4304,12 @@ class LLSelfSitDown : public view_listener_t
         }
     };
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+//bool visible_sitdown_self()
+//{
+//    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
+//}
+//// [/SL:KB]
 
 
 bool show_sitdown_self()
@@ -10462,6 +10468,9 @@ void initialize_menus()
 // [/SL:KB]
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
+//// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+//	enable.add("Self.VisibleSitDown", boost::bind(&visible_sitdown_self));
+//// [/SL:KB]
 	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self)); 
 	enable.add("Self.ShowSitDown", boost::bind(&show_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");

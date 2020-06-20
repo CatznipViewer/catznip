@@ -57,6 +57,9 @@
 
 // for registration
 #include "llfiltereditor.h"
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+#include "llflatbutton.h"
+// [/SL:KB]
 #include "llflyoutbutton.h"
 #include "llsearcheditor.h"
 #include "lltoolbar.h"
@@ -84,6 +87,9 @@ static LLDefaultChildRegistry::Register<LLSearchEditor> register_search_editor("
 // register other widgets which otherwise may not be linked in
 static LLDefaultChildRegistry::Register<LLLoadingIndicator> register_loading_indicator("loading_indicator");
 static LLDefaultChildRegistry::Register<LLToolBar> register_toolbar("toolbar");
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+static LLDefaultChildRegistry::Register<LLFlatButton> register_flat_button("flat_button");
+// [/SL:KB]
 
 //
 // Functions

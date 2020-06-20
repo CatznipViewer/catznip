@@ -350,8 +350,11 @@ public:
 	U32	loadFromFileLegacy(const std::string& filename, BOOL require_declaration = TRUE, eControlType declare_as = TYPE_STRING);
  	U32 saveToFile(const std::string& filename, BOOL nondefault_only);
 // [SL:KB] - Patch: Settings-ControlPreset | Checked: Catznip-5.2)
- 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true, bool is_preset = false);
+ 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true, bool is_preset = false, const std::vector<std::string>* allowed_controls_p = nullptr);
 // [/SL:KB]
+//// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+//	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true, const std::vector<std::string>* allowed_controls_p = nullptr);
+//// [/SL:KB]
 // 	U32	loadFromFile(const std::string& filename, bool default_values = false, bool save_values = true);
 	void	resetToDefaults();
 	void	incrCount(const std::string& name);
