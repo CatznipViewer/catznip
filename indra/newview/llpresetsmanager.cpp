@@ -480,6 +480,9 @@ void LLPresetsManager::loadPreset(const std::string& subdirectory, std::string n
 		if(PRESETS_CAMERA == subdirectory)
 		{
 			gSavedSettings.setString("PresetCameraActive", name);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+			setCameraDirty(false);
+// [/SL:KB]
 			triggerChangeCameraSignal();
 		}
 	}

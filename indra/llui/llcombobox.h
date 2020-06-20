@@ -148,10 +148,16 @@ public:
 
 	// Sets the label, which doesn't have to exist in the label.
 	// This is probably a UI abuse.
-	void			setLabel(const LLStringExplicit& name);
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	virtual void	setLabel(const LLStringExplicit& name);
+// [/SL:KB]
+//	void			setLabel(const LLStringExplicit& name);
 
 	// Updates the combobox label to match the selected list item.
-	void			updateLabel();
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	virtual void	updateLabel();
+// [/SL:KB]
+//	void			updateLabel();
 
 	BOOL			remove(const std::string& name);	// remove item "name", return TRUE if found and removed
 	
@@ -163,6 +169,9 @@ public:
 	//========================================================================
 	LLCtrlSelectionInterface* getSelectionInterface()	{ return (LLCtrlSelectionInterface*)this; };
 	LLCtrlListInterface* getListInterface()				{ return (LLCtrlListInterface*)this; };
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-3.3
+	LLScrollListCtrl* getListControl() const			{ return mList; }
+// [/SL:KB]
 
 	// LLCtrlListInterface functions
 	// See llscrolllistctrl.h

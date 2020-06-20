@@ -229,7 +229,8 @@ set(viewer_SOURCE_FILES
     llfloaterbuycurrencyhtml.cpp
     llfloaterbuyland.cpp
     llfloatercamera.cpp
-    llfloatercamerapresets.cpp
+    #llfloatercamerapresets.cpp
+    llfloatercamerapresetsex.cpp
     llfloaterchatvoicevolume.cpp
     llfloatercolorpicker.cpp
     llfloaterconversationlog.cpp
@@ -292,7 +293,7 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
-    llfloaterpreferenceviewadvanced.cpp
+    #llfloaterpreferenceviewadvanced.cpp
     llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterregiondebugconsole.cpp
@@ -859,7 +860,8 @@ set(viewer_HEADER_FILES
     llfloaterbuycurrency.h
     llfloaterbuycurrencyhtml.h
     llfloaterbuyland.h
-    llfloatercamerapresets.h
+    #llfloatercamerapresets.h
+    llfloatercamerapresetsex.h
     llfloatercamera.h
     llfloaterchatvoicevolume.h
     llfloatercolorpicker.h
@@ -926,7 +928,7 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
-    llfloaterpreferenceviewadvanced.h
+    #llfloaterpreferenceviewadvanced.h
     llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterregiondebugconsole.h

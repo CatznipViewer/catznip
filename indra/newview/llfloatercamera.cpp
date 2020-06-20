@@ -34,6 +34,9 @@
 // Viewer includes
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+#include "llflatbutton.h"
+// [/SL:KB]
 #include "llpresetsmanager.h"
 #include "lljoystickbutton.h"
 #include "llviewercontrol.h"
@@ -44,9 +47,12 @@
 #include "llfirstuse.h"
 #include "llhints.h"
 #include "lltabcontainer.h"
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+#include "llviewermenu.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 
-static LLDefaultChildRegistry::Register<LLPanelCameraItem> r("panel_camera_item");
+//static LLDefaultChildRegistry::Register<LLPanelCameraItem> r("panel_camera_item");
 
 const F32 NUDGE_TIME = 0.25f;		// in seconds
 const F32 ORBIT_NUDGE_RATE = 0.05f; // fraction of normal speed
@@ -85,72 +91,72 @@ private:
 	LLSlider*	mSlider;
 };
 
-LLPanelCameraItem::Params::Params()
-:	icon_over("icon_over"),
-	icon_selected("icon_selected"),
-	picture("picture"),
-	text("text"),
-	selected_picture("selected_picture"),
-	mousedown_callback("mousedown_callback")
-{
-}
+//LLPanelCameraItem::Params::Params()
+//:	icon_over("icon_over"),
+//	icon_selected("icon_selected"),
+//	picture("picture"),
+//	text("text"),
+//	selected_picture("selected_picture"),
+//	mousedown_callback("mousedown_callback")
+//{
+//}
 
-LLPanelCameraItem::LLPanelCameraItem(const LLPanelCameraItem::Params& p)
-:	LLPanel(p)
-{
-	LLIconCtrl::Params icon_params = p.picture;
-	mPicture = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
-	addChild(mPicture);
+//LLPanelCameraItem::LLPanelCameraItem(const LLPanelCameraItem::Params& p)
+//:	LLPanel(p)
+//{
+//	LLIconCtrl::Params icon_params = p.picture;
+//	mPicture = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
+//	addChild(mPicture);
+//
+//	icon_params = p.icon_over;
+//	mIconOver = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
+//	addChild(mIconOver);
+//
+//	icon_params = p.icon_selected;
+//	mIconSelected = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
+//	addChild(mIconSelected);
+//
+//	icon_params = p.selected_picture;
+//	mPictureSelected = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
+//	addChild(mPictureSelected);
+//
+//	LLTextBox::Params text_params = p.text;
+//	mText = LLUICtrlFactory::create<LLTextBox>(text_params);
+//	addChild(mText);
+//
+//	if (p.mousedown_callback.isProvided())
+//	{
+//		setCommitCallback(initCommitCallback(p.mousedown_callback));
+//	}
+//}
 
-	icon_params = p.icon_over;
-	mIconOver = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
-	addChild(mIconOver);
+//void set_view_visible(LLView* parent, const std::string& name, bool visible)
+//{
+//	parent->getChildView(name)->setVisible(visible);
+//}
 
-	icon_params = p.icon_selected;
-	mIconSelected = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
-	addChild(mIconSelected);
+//BOOL LLPanelCameraItem::postBuild()
+//{
+//	setMouseEnterCallback(boost::bind(set_view_visible, this, "hovered_icon", true));
+//	setMouseLeaveCallback(boost::bind(set_view_visible, this, "hovered_icon", false));
+//	setMouseDownCallback(boost::bind(&LLPanelCameraItem::onAnyMouseClick, this));
+//	setRightMouseDownCallback(boost::bind(&LLPanelCameraItem::onAnyMouseClick, this));
+//	return TRUE;
+//}
 
-	icon_params = p.selected_picture;
-	mPictureSelected = LLUICtrlFactory::create<LLIconCtrl>(icon_params);
-	addChild(mPictureSelected);
+//void LLPanelCameraItem::onAnyMouseClick()
+//{
+//	if (mCommitSignal) (*mCommitSignal)(this, LLSD());
+//}
 
-	LLTextBox::Params text_params = p.text;
-	mText = LLUICtrlFactory::create<LLTextBox>(text_params);
-	addChild(mText);
-
-	if (p.mousedown_callback.isProvided())
-	{
-		setCommitCallback(initCommitCallback(p.mousedown_callback));
-	}
-}
-
-void set_view_visible(LLView* parent, const std::string& name, bool visible)
-{
-	parent->getChildView(name)->setVisible(visible);
-}
-
-BOOL LLPanelCameraItem::postBuild()
-{
-	setMouseEnterCallback(boost::bind(set_view_visible, this, "hovered_icon", true));
-	setMouseLeaveCallback(boost::bind(set_view_visible, this, "hovered_icon", false));
-	setMouseDownCallback(boost::bind(&LLPanelCameraItem::onAnyMouseClick, this));
-	setRightMouseDownCallback(boost::bind(&LLPanelCameraItem::onAnyMouseClick, this));
-	return TRUE;
-}
-
-void LLPanelCameraItem::onAnyMouseClick()
-{
-	if (mCommitSignal) (*mCommitSignal)(this, LLSD());
-}
-
-void LLPanelCameraItem::setValue(const LLSD& value)
-{
-	if (!value.isMap()) return;;
-	if (!value.has("selected")) return;
-	getChildView("selected_icon")->setVisible( value["selected"]);
-	getChildView("picture")->setVisible( !value["selected"]);
-	getChildView("selected_picture")->setVisible( value["selected"]);
-}
+//void LLPanelCameraItem::setValue(const LLSD& value)
+//{
+//	if (!value.isMap()) return;;
+//	if (!value.has("selected")) return;
+//	getChildView("selected_icon")->setVisible( value["selected"]);
+//	getChildView("picture")->setVisible( !value["selected"]);
+//	getChildView("selected_picture")->setVisible( value["selected"]);
+//}
 
 static LLPanelInjector<LLPanelCameraZoom> t_camera_zoom_panel("camera_zoom_panel");
 
@@ -266,13 +272,13 @@ void LLFloaterCamera::onAvatarEditingAppearance(bool editing)
 	sAppearanceEditing = editing;
 	LLFloaterCamera* floater_camera = LLFloaterCamera::findInstance();
 	if (!floater_camera) return;
-	floater_camera->handleAvatarEditingAppearance(editing);
+//	floater_camera->handleAvatarEditingAppearance(editing);
 }
 
-void LLFloaterCamera::handleAvatarEditingAppearance(bool editing)
-{
-
-}
+//void LLFloaterCamera::handleAvatarEditingAppearance(bool editing)
+//{
+//
+//}
 
 void LLFloaterCamera::update()
 {
@@ -351,7 +357,7 @@ LLFloaterCamera::LLFloaterCamera(const LLSD& val)
 {
 	LLHints::getInstance()->registerHintTarget("view_popup", getHandle());
 	mCommitCallbackRegistrar.add("CameraPresets.ChangeView", boost::bind(&LLFloaterCamera::onClickCameraItem, _2));
-	mCommitCallbackRegistrar.add("CameraPresets.Save", boost::bind(&LLFloaterCamera::onSavePreset, this));
+//	mCommitCallbackRegistrar.add("CameraPresets.Save", boost::bind(&LLFloaterCamera::onSavePreset, this));
 	mCommitCallbackRegistrar.add("CameraPresets.ShowPresetsList", boost::bind(&LLFloaterReg::showInstance, "camera_presets", LLSD(), FALSE));
 }
 
@@ -379,8 +385,8 @@ BOOL LLFloaterCamera::postBuild()
 
 	update();
 
-	// ensure that appearance mode is handled while building. See EXT-7796.
-	handleAvatarEditingAppearance(sAppearanceEditing);
+//	// ensure that appearance mode is handled while building. See EXT-7796.
+//	handleAvatarEditingAppearance(sAppearanceEditing);
 
 	return LLFloater::postBuild();
 }
@@ -504,18 +510,23 @@ void LLFloaterCamera::updateState()
 
 void LLFloaterCamera::updateItemsSelection()
 {
-	ECameraPreset preset = (ECameraPreset) gSavedSettings.getU32("CameraPresetType");
-	LLSD argument;
-	argument["selected"] = (preset == CAMERA_PRESET_REAR_VIEW) && !sFreeCamera;
-	getChild<LLPanelCameraItem>("rear_view")->setValue(argument);
-	argument["selected"] = (preset == CAMERA_PRESET_GROUP_VIEW) && !sFreeCamera;
-	getChild<LLPanelCameraItem>("group_view")->setValue(argument);
-	argument["selected"] = (preset == CAMERA_PRESET_FRONT_VIEW) && !sFreeCamera;
-	getChild<LLPanelCameraItem>("front_view")->setValue(argument);
-	argument["selected"] = gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK;
-	getChild<LLPanelCameraItem>("mouselook_view")->setValue(argument);
-	argument["selected"] = mCurrMode == CAMERA_CTRL_MODE_FREE_CAMERA;
-	getChild<LLPanelCameraItem>("object_view")->setValue(argument);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+//	findChild<LLFlatButton>("normal_view")->setValue(mCurrMode == CAMERA_CTRL_MODE_PAN);
+	findChild<LLFlatButton>("object_view")->setValue(mCurrMode == CAMERA_CTRL_MODE_FREE_CAMERA);
+	findChild<LLFlatButton>("mouselook_view")->setValue(gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK);
+// [/SL:KB]
+//	ECameraPreset preset = (ECameraPreset) gSavedSettings.getU32("CameraPresetType");
+//	LLSD argument;
+//	argument["selected"] = (preset == CAMERA_PRESET_REAR_VIEW) && !sFreeCamera;
+//	getChild<LLPanelCameraItem>("rear_view")->setValue(argument);
+//	argument["selected"] = (preset == CAMERA_PRESET_GROUP_VIEW) && !sFreeCamera;
+//	getChild<LLPanelCameraItem>("group_view")->setValue(argument);
+//	argument["selected"] = (preset == CAMERA_PRESET_FRONT_VIEW) && !sFreeCamera;
+//	getChild<LLPanelCameraItem>("front_view")->setValue(argument);
+//	argument["selected"] = gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK;
+//	getChild<LLPanelCameraItem>("mouselook_view")->setValue(argument);
+//	argument["selected"] = mCurrMode == CAMERA_CTRL_MODE_FREE_CAMERA;
+//	getChild<LLPanelCameraItem>("object_view")->setValue(argument);
 }
 
 void LLFloaterCamera::onClickCameraItem(const LLSD& param)
@@ -531,9 +542,20 @@ void LLFloaterCamera::onClickCameraItem(const LLSD& param)
 		LLFloaterCamera* camera_floater = LLFloaterCamera::findInstance();
 		if (camera_floater)
 		{
-			camera_floater->switchMode(CAMERA_CTRL_MODE_FREE_CAMERA);
-			camera_floater->updateItemsSelection();
-			camera_floater->fromFreeToPresets();
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+			if (camera_floater->mCurrMode != CAMERA_CTRL_MODE_FREE_CAMERA)
+			{
+// [/SL:KB]
+				camera_floater->switchMode(CAMERA_CTRL_MODE_FREE_CAMERA);
+				camera_floater->updateItemsSelection();
+				camera_floater->fromFreeToPresets();
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+			}
+			else
+			{
+				handle_reset_view();
+			}
+// [/SL:KB]
 		}
 	}
 	else
@@ -567,7 +589,10 @@ void LLFloaterCamera::switchToPreset(const std::string& name)
 		gAgentCamera.switchCameraPreset(CAMERA_PRESET_CUSTOM);
 	}
 	
-	if (gSavedSettings.getString("PresetCameraActive") != name)
+//	if (gSavedSettings.getString("PresetCameraActive") != name)
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	if ( (gSavedSettings.getString("PresetCameraActive") != name) || (LLPresetsManager::instance().isCameraDirty()) )
+// [/SL:KB]
 	{
 		LLPresetsManager::getInstance()->loadPreset(PRESETS_CAMERA, name);
 	}
@@ -605,37 +630,54 @@ void LLFloaterCamera::fromFreeToPresets()
 
 void LLFloaterCamera::populatePresetCombo()
 {
-	LLPresetsManager::getInstance()->setPresetNamesInComboBox(PRESETS_CAMERA, mPresetCombo, EDefaultOptions::DEFAULT_HIDE);
+//	LLPresetsManager::getInstance()->setPresetNamesInComboBox(PRESETS_CAMERA, mPresetCombo, EDefaultOptions::DEFAULT_HIDE);
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+	LLPresetsManager::getInstance()->setPresetNamesInComboBox(PRESETS_CAMERA, mPresetCombo, EDefaultOptions::DEFAULT_SHOW);
+// [/SL:KB]
 	std::string active_preset_name = gSavedSettings.getString("PresetCameraActive");
-	if (active_preset_name.empty())
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+	if ( (active_preset_name.empty()) || (LLPresetsManager::instance().isCameraDirty()) )
 	{
 		gSavedSettings.setU32("CameraPresetType", CAMERA_PRESET_CUSTOM);
 		updateItemsSelection();
-		mPresetCombo->setLabel(getString("inactive_combo_text"));
+		mPresetCombo->setLabel(getString("custom_combo_text"));
 	}
-	else if ((ECameraPreset)gSavedSettings.getU32("CameraPresetType") == CAMERA_PRESET_CUSTOM)
+// [/SL:KB]
+//	if (active_preset_name.empty())
+//	{
+//		gSavedSettings.setU32("CameraPresetType", CAMERA_PRESET_CUSTOM);
+//		updateItemsSelection();
+//		mPresetCombo->setLabel(getString("inactive_combo_text"));
+//	}
+//	else if ((ECameraPreset)gSavedSettings.getU32("CameraPresetType") == CAMERA_PRESET_CUSTOM)
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+	else
+// [/SL:KB]
 	{
 		mPresetCombo->selectByValue(active_preset_name);
 	}
-	else
-	{
-		mPresetCombo->setLabel(getString("inactive_combo_text"));
-	}
+//	else
+//	{
+//		mPresetCombo->setLabel(getString("inactive_combo_text"));
+//	}
 	updateItemsSelection();
 }
 
-void LLFloaterCamera::onSavePreset()
-{
-	LLFloaterReg::hideInstance("delete_pref_preset", PRESETS_CAMERA);
-	LLFloaterReg::hideInstance("load_pref_preset", PRESETS_CAMERA);
-	
-	LLFloaterReg::showInstance("save_camera_preset");
-}
+//void LLFloaterCamera::onSavePreset()
+//{
+//	LLFloaterReg::hideInstance("delete_pref_preset", PRESETS_CAMERA);
+//	LLFloaterReg::hideInstance("load_pref_preset", PRESETS_CAMERA);
+//	
+//	LLFloaterReg::showInstance("save_camera_preset");
+//}
 
 void LLFloaterCamera::onCustomPresetSelected()
 {
 	std::string selected_preset = mPresetCombo->getSelectedItemLabel();
-	if (getString("inactive_combo_text") != selected_preset)
+//	if (getString("inactive_combo_text") != selected_preset)
+// [SL:KB] - Patch: Control-FlatButton | Checked: Catznip-6.4
+	if (-1 != mPresetCombo->getFirstSelectedIndex())
+// [/SL:KB]
 	{
 		switchToPreset(selected_preset);
 	}
