@@ -99,6 +99,13 @@
          function="Floater.ToggleOrBringToFront"
          parameter="camera" />
       </menu_item_call>
+      <menu_item_call
+       label="Camera Presets..."
+       name="Camera Presets">
+        <menu_item_call.on_click
+         function="Floater.ToggleOrBringToFront"
+         parameter="camera_presets" />
+      </menu_item_call>
       <menu
        create_jump_keys="true"
        label="Movement"

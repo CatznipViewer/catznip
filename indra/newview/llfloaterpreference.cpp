@@ -1325,6 +1325,9 @@ void LLFloaterPreference::refreshEnabledState()
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
 
 	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	getChildView("presets_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
+// [/SL:KB]
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
