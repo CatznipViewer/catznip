@@ -423,11 +423,6 @@ LLFloaterCamera::LLFloaterCamera(const LLSD& val)
 BOOL LLFloaterCamera::postBuild()
 {
 	updateTransparency(TT_ACTIVE); // force using active floater transparency (STORM-730)
-// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
-	F32 nTransparency = gSavedSettings.getF32("ChromeFloaterTransparency");
-	setActiveTransparency(nTransparency);
-	setTitleVisible(nTransparency != .0f);
-// [/SL:KB]
 
 	mRotate = getChild<LLJoystickCameraRotate>(ORBIT);
 	mZoom = findChild<LLPanelCameraZoom>(ZOOM);
@@ -451,10 +446,14 @@ BOOL LLFloaterCamera::postBuild()
 
 F32	LLFloaterCamera::getCurrentTransparency()
 {
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+	static LLCachedControl<F32> sChromeFloaterTransparency(gSavedSettings, "ChromeFloaterTransparency");
+	return sChromeFloaterTransparency;
+// [/SL:KB]
 
-	static LLCachedControl<F32> camera_opacity(gSavedSettings, "CameraOpacity");
-	static LLCachedControl<F32> active_floater_transparency(gSavedSettings, "ActiveFloaterTransparency");
-	return llmin(camera_opacity(), active_floater_transparency());
+//	static LLCachedControl<F32> camera_opacity(gSavedSettings, "CameraOpacity");
+//	static LLCachedControl<F32> active_floater_transparency(gSavedSettings, "ActiveFloaterTransparency");
+//	return llmin(camera_opacity(), active_floater_transparency());
 
 }
 
