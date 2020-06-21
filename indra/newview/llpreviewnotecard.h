@@ -61,10 +61,10 @@ public:
 
 	// llview
 	void draw() override;
+	BOOL handleKeyHere(KEY key, MASK mask) override;
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	virtual bool hasAccelerators() const { return true; }
 // [/SL:KB]
-	BOOL handleKeyHere(KEY key, MASK mask) override;
 	void setEnabled( BOOL enabled ) override;
 
 	// llfloater
@@ -92,7 +92,6 @@ public:
 // [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
 	void callbackSaveComplete();
 // [/SL:KB]
-
 // [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
 	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
 // [/SL:KB]

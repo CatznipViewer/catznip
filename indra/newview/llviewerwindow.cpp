@@ -773,6 +773,14 @@ public:
 		// only display these messages if we are actually rendering beacons at this moment
 		if (LLPipeline::getRenderBeacons() && LLFloaterReg::instanceVisible("beacons"))
 		{
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+			if (LLPipeline::getRenderLightBeacons())
+			{
+				addText(xpos, ypos, "Viewing light beacons (orange)");
+				ypos += y_inc;
+			}
+// [/SL:KB]
+
 			if (LLPipeline::getRenderMOAPBeacons())
 			{
 				addText(xpos, ypos, "Viewing media beacons (white)");
