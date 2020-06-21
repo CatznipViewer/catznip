@@ -78,6 +78,9 @@ private:
 	void onWalkButtonClick();
 	void onRunButtonClick();
 	void onFlyButtonClick();
+// [SL:KB] - Patch: UI-Misc | Checked: Catznip-3.6
+	F32 getCurrentTransparency() override;
+// [/SL:KB]
 	void initMovementMode();
 	void setMovementMode(const EMovementMode mode);
 	void initModeTooltips();

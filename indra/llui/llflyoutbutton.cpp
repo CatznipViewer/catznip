@@ -38,6 +38,10 @@ LLFlyoutButton::LLFlyoutButton(const Params& p)
 	mToggleState(FALSE),
 	mActionButton(NULL)
 {
+// [SL:KB] - Patch: Control-FlyoutButton | Checked: Catznip-6.4
+	mButton->setLabel(LLStringUtil::null);
+// [/SL:KB]
+
 	// Always use text box 
 	// Text label button
 	LLButton::Params bp(p.action_button);
@@ -65,9 +69,24 @@ void LLFlyoutButton::draw()
 
 	//FIXME: this should be an attribute of comboboxes, whether they have a distinct label or
 	// the label reflects the last selected item, for now we have to manually remove the label
-	setLabel(LLStringUtil::null);
+//	setLabel(LLStringUtil::null);
 	LLComboBox::draw();	
 }
+
+// [SL:KB] - Patch: Control-FlyoutButton | Checked: Catznip-6.4
+// override
+void LLFlyoutButton::setLabel(const LLStringExplicit& name)
+{
+	mActionButton->setLabel(name);
+	mButton->setLabel(LLStringUtil::null);
+}
+
+// override
+void LLFlyoutButton::updateLabel()
+{
+	mButton->setLabel(LLStringUtil::null);
+}
+// [/SL:KB]
 
 void LLFlyoutButton::setToggleState(BOOL state)
 {

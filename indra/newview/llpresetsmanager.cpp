@@ -252,10 +252,10 @@ void LLPresetsManager::getControlNames(std::vector<std::string>& names)
 {
 	const std::vector<std::string> camera_controls = boost::assign::list_of
 		// From panel_preferences_move.xml
-		("CameraAngle")
+//		("CameraAngle")
 		("CameraOffsetScale")
-		("EditCameraMovement")
-		("AppearanceCameraMovement")
+//		("EditCameraMovement")
+//		("AppearanceCameraMovement")
 		// From llagentcamera.cpp
 		("CameraOffsetBuild")
 		("TrackFocusObject")
@@ -309,7 +309,7 @@ bool LLPresetsManager::savePreset(const std::string& subdirectory, std::string n
 	{
 		name_list.clear();
 		getControlNames(name_list);
-		name_list.push_back("PresetCameraActive");
+//		name_list.push_back("PresetCameraActive");
 	}
 	else
 	{
@@ -463,7 +463,13 @@ void LLPresetsManager::loadPreset(const std::string& subdirectory, std::string n
     LL_DEBUGS() << "attempting to load preset '"<<name<<"' from '"<<full_path<<"'" << LL_ENDL;
 
 	mIgnoreChangedSignal = true;
-	if(gSavedSettings.loadFromFile(full_path, false, true) > 0)
+//	if(gSavedSettings.loadFromFile(full_path, false, true) > 0)
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	std::vector<std::string> name_list;
+	getControlNames(name_list);
+
+	if(gSavedSettings.loadFromFile(full_path, false, true, &name_list) > 0)
+// [/SL:KB]
 	{
 		mIgnoreChangedSignal = false;
 		if(PRESETS_GRAPHIC == subdirectory)
@@ -480,6 +486,9 @@ void LLPresetsManager::loadPreset(const std::string& subdirectory, std::string n
 		if(PRESETS_CAMERA == subdirectory)
 		{
 			gSavedSettings.setString("PresetCameraActive", name);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+			setCameraDirty(false);
+// [/SL:KB]
 			triggerChangeCameraSignal();
 		}
 	}
