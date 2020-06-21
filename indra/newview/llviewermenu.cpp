@@ -9452,6 +9452,13 @@ class LLViewToggleBeacon : public view_listener_t
 			LLPipeline::toggleRenderPhysicalBeacons();
 			gSavedSettings.setBOOL( "physicalbeacon", LLPipeline::getRenderPhysicalBeacons() );
 		}
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+		else if (beacon == "lightsbeacon")
+		{
+			LLPipeline::toggleRenderLightBeacons();
+			gSavedSettings.setBOOL( "lightsbeacon", LLPipeline::getRenderLightBeacons() );
+		}
+// [/SL:KB]
 		else if (beacon == "moapbeacon")
 		{
 			LLPipeline::toggleRenderMOAPBeacons();
@@ -9516,6 +9523,13 @@ class LLViewCheckBeaconEnabled : public view_listener_t
 			new_value = gSavedSettings.getBOOL( "scriptsbeacon");
 			LLPipeline::setRenderScriptedBeacons(new_value);
 		}
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+		else if (beacon == "lightsbeacon")
+		{
+			new_value = gSavedSettings.getBOOL( "lightsbeacon");
+			LLPipeline::setRenderLightBeacons(new_value);
+		}
+// [/SL:KB]
 		else if (beacon == "moapbeacon")
 		{
 			new_value = gSavedSettings.getBOOL( "moapbeacon");
