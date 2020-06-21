@@ -16,8 +16,8 @@
 		Загрузка...
 	</text_editor>
 	<panel name="bottom_panel">
-	<icon name="spacer_icon_2" width="8" />
 	<button label="Pедактировать..." label_selected="Редактировать" name="Edit"/>
+	<icon name="spacer_icon_2" width="8" />
 	<button label="Сохранить" label_selected="Сохранить" name="Save" width="90">
 	<button label="Удалить" label_selected="Удалить" name="Delete"/>
 	</panel>

@@ -240,10 +240,6 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
-	LLScriptEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
-// [/SL:KB]
-
 protected:
 	virtual void draw();
 	virtual BOOL canClose();
@@ -302,10 +298,6 @@ public:
 	void experienceChanged();
 	void addAssociatedExperience(const LLSD& experience);
 	
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
-	LLScriptEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
-// [/SL:KB]
-
 private:
 	virtual BOOL canClose();
 	void closeIfNeeded();
