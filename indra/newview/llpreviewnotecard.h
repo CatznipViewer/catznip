@@ -92,7 +92,6 @@ public:
 // [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
 	void callbackSaveComplete();
 // [/SL:KB]
-
 // [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
 	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
 // [/SL:KB]

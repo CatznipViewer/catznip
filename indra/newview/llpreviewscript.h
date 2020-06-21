@@ -212,6 +212,12 @@ public:
 	LLScriptEdContainer(const LLSD& key);
 	LLScriptEdContainer(const LLSD& key, const bool live);
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	LLScriptEditor* getEditor() const { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
+// [/SL:KB]
+// [SL:KB] - Patch: UI-PreviewScript | Checked: Catznip-6.4
+	void            reloadKeywords();
+// [/SL:KB]
 protected:
 	std::string		getTmpFileName();
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
