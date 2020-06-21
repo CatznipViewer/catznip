@@ -413,10 +413,9 @@ void LLStatusBar::setVisibleForMouselook(bool visible)
 //	getChild<LLUICtrl>("balance_bg")->setVisible(visible);
 //	mBoxBalance->setVisible(visible);
 //	mBtnVolume->setVisible(visible);
-//	mMediaToggle->setVisible(visible);
+//	mSearchPanel->setVisible(visible && gSavedSettings.getBOOL("MenuSearch"));
 //	mSGBandwidth->setVisible(visible);
 //	mSGPacketLoss->setVisible(visible);
-	mSearchPanel->setVisible(visible && gSavedSettings.getBOOL("MenuSearch"));
 	setBackgroundVisible(visible);
 	mIconPresetsCamera->setVisible(visible);
 	mIconPresetsGraphic->setVisible(visible);

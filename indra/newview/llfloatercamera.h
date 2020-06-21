@@ -76,7 +76,7 @@ public:
 	virtual void onOpen(const LLSD& key);
 	virtual void onClose(bool app_quitting);
 
-	void onSavePreset();
+//	void onSavePreset();
 	void onCustomPresetSelected();
 
 	void populatePresetCombo();
@@ -119,7 +119,7 @@ private:
 	// fills flatlist with items from given panel
 	void fillFlatlistFromPanel (LLFlatListView* list, LLPanel* panel);
 
-	void handleAvatarEditingAppearance(bool editing);
+//	void handleAvatarEditingAppearance(bool editing);
 
 	// set to true when free camera mode is selected in modes list
 	// remains true until preset camera mode is chosen, or pan button is clicked, or escape pressed
@@ -140,34 +140,34 @@ private:
  * are changed in setValue()). This class doesn't implement selection logic-
  * it's items are used inside of flatlist.
  */
-class LLPanelCameraItem 
-	: public LLPanel
-{
-public:
-	struct Params :	public LLInitParam::Block<Params, LLPanel::Params>
-	{
-		Optional<LLIconCtrl::Params> icon_over;
-		Optional<LLIconCtrl::Params> icon_selected;
-		Optional<LLIconCtrl::Params> picture;
-		Optional<LLIconCtrl::Params> selected_picture;
-
-		Optional<LLTextBox::Params> text;
-		Optional<CommitCallbackParam> mousedown_callback;
-		Params();
-	};
-	/*virtual*/ BOOL postBuild();
-	/** setting on/off background icon to indicate selected state */
-	/*virtual*/ void setValue(const LLSD& value);
-	// sends commit signal
-	void onAnyMouseClick();
-protected:
-	friend class LLUICtrlFactory;
-	LLPanelCameraItem(const Params&);
-	LLIconCtrl* mIconOver;
-	LLIconCtrl* mIconSelected;
-	LLIconCtrl* mPicture;
-	LLIconCtrl* mPictureSelected;
-	LLTextBox* mText;
-};
+//class LLPanelCameraItem 
+//	: public LLPanel
+//{
+//public:
+//	struct Params :	public LLInitParam::Block<Params, LLPanel::Params>
+//	{
+//		Optional<LLIconCtrl::Params> icon_over;
+//		Optional<LLIconCtrl::Params> icon_selected;
+//		Optional<LLIconCtrl::Params> picture;
+//		Optional<LLIconCtrl::Params> selected_picture;
+//
+//		Optional<LLTextBox::Params> text;
+//		Optional<CommitCallbackParam> mousedown_callback;
+//		Params();
+//	};
+//	/*virtual*/ BOOL postBuild();
+//	/** setting on/off background icon to indicate selected state */
+//	/*virtual*/ void setValue(const LLSD& value);
+//	// sends commit signal
+//	void onAnyMouseClick();
+//protected:
+//	friend class LLUICtrlFactory;
+//	LLPanelCameraItem(const Params&);
+//	LLIconCtrl* mIconOver;
+//	LLIconCtrl* mIconSelected;
+//	LLIconCtrl* mPicture;
+//	LLIconCtrl* mPictureSelected;
+//	LLTextBox* mText;
+//};
 
 #endif

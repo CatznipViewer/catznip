@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ height="240"
+ layout="topleft"
+ name="camera_presets"
+ help_topic="floaterviewadvanced"
+ title="CAMERA PRESETS"
+ save_rect="true"
+ width="490">
+  <string name="custom_text">&lt;Custom&gt;</string>
+  <string name="default_name">New Preset</string>
+  <string name="new_preset_suffix"> (new)</string>
+
+  <flat_list_view
+   allow_select="true"
+   bottom="-8"
+   follows="top|bottom|left"
+   keep_one_selected="true"
+   layout="topleft"
+   left="5"
+   multi_select="false"
+   name="preset_list"
+   top="5"
+   width="195"
+   />
+
+  <panel
+   bevel_style="none"
+   border="true"
+   bottom="-8"
+   follows="all"
+   layout="topleft"
+   left_pad="10"
+   name="edit_panel"
+   right="-8"
+   top="5"
+   >
+
+    <text
+     follows="top|left|right"
+     height="16"
+     name="edit_name_text"
+     layout="topleft"
+     left="10"
+     top="11"
+     width="80"
+     >
+      Preset name:
+    </text>
+    <line_editor
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left_pad="0"
+     max_length_bytes="50"
+     name="edit_name"
+     select_on_focus="true"
+     right="-10"
+     top_delta="-4"
+     />
+
+    <check_box
+     height="16"
+     label="Sync with camera"
+     layout="topleft"
+     left="8"
+     name="camera_sync_check"
+     tool_tip="Keep the camera and focus offset in sync with the current camera position."
+     top_pad="6"
+     width="130" />
+
+    <text
+     follows="top|left|right"
+     name="edit_camoffset_text"
+     height="16"
+     layout="topleft"
+     left="10"
+     top_pad="5"
+     width="100">
+      Camera offset:
+    </text>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="X"
+     label_width="12"
+     follows="top|left"
+     left="10"
+     name="edit_camoffset_x"
+     top_pad="2"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="Y"
+     label_width="12"
+     follows="top|left"
+     name="edit_camoffset_y"
+     left_pad="20"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="Z"
+     label_width="12"
+     follows="top|left"
+     name="edit_camoffset_z"
+     left_pad="20"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+
+    <text
+     follows="top|left|right"
+     name="edit_focusoffset_text"
+     height="16"
+     layout="topleft"
+     left="10"
+     top_pad="10"
+     width="100">
+      Focus offset:
+    </text>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="X"
+     label_width="12"
+     follows="top|left"
+     left="10"
+     name="edit_focusoffset_x"
+     top_pad="2"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="Y"
+     label_width="12"
+     follows="top|left"
+     name="edit_focusoffset_y"
+     left_pad="20"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+    <spinner
+     commit_callback.function="CameraPresets.CommitSettings"
+     height="20"
+     label="Z"
+     label_width="12"
+     follows="top|left"
+     name="edit_focusoffset_z"
+     left_pad="20"
+     min_val="-1e+007"
+     max_val="1e+007"
+     width="70">
+    </spinner>
+
+    <text
+     follows="top|left|right"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="edit_offset_text"
+     top_pad="10"
+     width="140"
+     >
+      Camera offset scale:
+    </text>
+    <slider
+     control_name="CameraOffsetScale"
+     follows="top|left|right"
+     height="16"
+     top_pad="3"
+     increment="0.1"
+     min_val="-3"
+     max_val="5"
+     show_text="false"
+     layout="topleft"
+     left="3"
+     name="edit_offset_slider"
+     width="196"
+     />
+    <spinner
+     control_name="CameraOffsetScale"
+     follows="top|left|right"
+     height="20"
+     left_pad="5"
+     name="edit_offset_spin"
+     min_val="-3"
+     max_val="5"
+     width="58">
+      <spinner.commit_callback
+       function="CommitSettings" />
+    </spinner>
+
+    <flyout_button
+     follows="left|bottom"
+     height="23"
+     label="Save"
+     layout="topleft"
+     left="10"
+     name="save_btn"
+     top_pad="8"
+     width="87">
+      <item
+       label="Save"
+       name="save_item"
+       value="save"
+       />
+      <item
+       label="Save As..."
+       name="save_as_item"
+       value="save_as"
+        />
+    </flyout_button>
+    <button
+     commit_callback.function="CameraPresets.New"
+     follows="left|bottom"
+     height="23"
+     label="New"
+     layout="topleft"
+     left_pad="5"
+     name="new_btn"
+     top_delta="0"
+     width="65"
+     />
+  </panel>
+
+</floater>
