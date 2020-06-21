@@ -45,13 +45,12 @@ struct LLSearchPlaceResult
 class LLSearchDirectory : public LLSingleton<LLSearchDirectory>
 {
 	LLSINGLETON(LLSearchDirectory);
-private:
+public:
 	/*virtual*/ ~LLSearchDirectory();
 
 	/*
 	 * Member functions
 	 */
-public:
 	void cancelQuery(const LLUUID& idQuery);
 
 	typedef std::vector<LLSearchPlaceResult> places_results_vec_t;
