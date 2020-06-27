@@ -1,17 +1,17 @@
-/** 
+/**
  *
- * Copyright (c) 2012, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2012-2020, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -27,6 +27,7 @@
 #include "llnotificationsutil.h"
 #include "llpanelgroupnotices.h"
 #include "llslurl.h"
+#include "lltextbox.h"
 #include "lltexteditor.h"
 #include "llviewerinventory.h"
 #include "llviewermessage.h"
@@ -52,6 +53,8 @@ BOOL LLFloaterGroupCreateNotice::postBuild()
 
 	m_pSubjectCtrl = findChild<LLLineEditor>("subject_editor");
 	m_pMessageCtrl = findChild<LLTextEditor>("message_editor");
+	m_pMessageCtrl->setKeystrokeCallback(std::bind(&LLFloaterGroupCreateNotice::onMessageChanged, this));
+	m_pMessageCountCtrl = findChild<LLTextBox>("message_count_label");
 
 	m_pAttachIconCtrl = findChild<LLIconCtrl>("attach_icon");
 	m_pAttachTextCtrl = findChild<LLLineEditor>("attach_editor");
@@ -60,6 +63,8 @@ BOOL LLFloaterGroupCreateNotice::postBuild()
 	m_pAttachClearBtn = findChild<LLButton>("attach_clear_btn");
 	m_pAttachClearBtn->setCommitCallback(boost::bind(&LLFloaterGroupCreateNotice::onClickClearAttach, this));
 	m_pAttachClearBtn->setVisible(false);
+
+	onMessageChanged();
 
 	return TRUE;
 }
@@ -122,6 +127,27 @@ void LLFloaterGroupCreateNotice::onClickSend()
 void LLFloaterGroupCreateNotice::onClickCancel()
 {
 	closeFloater();
+}
+
+void LLFloaterGroupCreateNotice::onMessageChanged()
+{
+	float nMaxByteLength = m_pMessageCtrl->getMaxTextLength();
+	float nCharLength = m_pMessageCtrl->getLength();
+	float nByteLength = m_pMessageCtrl->getViewModel()->getValue().size();
+
+	LLStringUtil::format_map_t args;
+	args["[COUNT]"] = llformat("%.0f", nCharLength);
+	if (nMaxByteLength - nByteLength >= nMaxByteLength / 3)
+	{
+		// More than 1/3rd remaining - show only the total character count
+		m_pMessageCountCtrl->setText(getString("characters", args));
+	}
+	else
+	{
+		// Less than 1/3rd remaining - guess remaining count based on average byte use
+		args["[REMAINING]"] = llformat("%.0f", (nMaxByteLength - nByteLength) / nByteLength * nCharLength);
+		m_pMessageCountCtrl->setText(getString("characters_plus_remaining", args));
+	}
 }
 
 // =========================================================================
