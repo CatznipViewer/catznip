@@ -205,6 +205,9 @@ public:
 	LLScriptEdContainer(const LLSD& key);
 	LLScriptEdContainer(const LLSD& key, const bool live);
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	LLScriptEditor* getEditor() const { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
+// [/SL:KB]
 protected:
 	std::string		getTmpFileName();
 	bool			onExternalChange(const std::string& filename);
@@ -222,10 +225,6 @@ public:
 	virtual void callbackLSLCompileFailed(const LLSD& compile_errors);
 
 	/*virtual*/ BOOL postBuild();
-
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
-	LLScriptEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
-// [/SL:KB]
 
 protected:
 	virtual void draw();
@@ -285,10 +284,6 @@ public:
 	void experienceChanged();
 	void addAssociatedExperience(const LLSD& experience);
 	
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
-	LLScriptEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
-// [/SL:KB]
-
 private:
 	virtual BOOL canClose();
 	void closeIfNeeded();
