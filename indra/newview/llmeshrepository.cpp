@@ -41,7 +41,6 @@
 #include "lldeadmantimer.h"
 #include "llfloatermodelpreview.h"
 #include "llfloaterperms.h"
-#include "lleconomy.h"
 #include "llimagej2c.h"
 #include "llhost.h"
 #include "llmath.h"
@@ -1889,7 +1888,7 @@ EMeshProcessingResult LLMeshRepoThread::lodReceived(const LLVolumeParams& mesh_p
 		std::string mesh_string((char*)data, data_size);
 		stream.str(mesh_string);
 	}
-	catch (std::bad_alloc)
+	catch (std::bad_alloc&)
 	{
 		// out of memory, we won't be able to process this mesh
 		return MESH_OUT_OF_MEMORY;

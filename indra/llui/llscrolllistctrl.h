@@ -108,7 +108,8 @@ public:
 
 		// layout
 		Optional<S32>	column_padding,
-							page_lines,
+						row_padding,
+						page_lines,
 						heading_height;
 
 		// sort and search behavior
@@ -289,8 +290,10 @@ public:
 
 	void setBackgroundVisible(BOOL b)			{ mBackgroundVisible = b; }
 	void setDrawStripes(BOOL b)					{ mDrawStripes = b; }
-	void setColumnPadding(const S32 c)          { mColumnPadding = c; }
-	S32  getColumnPadding()						{ return mColumnPadding; }
+	void setColumnPadding(const S32 c)			{ mColumnPadding = c; }
+	S32  getColumnPadding() const				{ return mColumnPadding; }
+	void setRowPadding(const S32 c)				{ mColumnPadding = c; }
+	S32  getRowPadding() const					{ return mColumnPadding; }
 	void setCommitOnKeyboardMovement(BOOL b)	{ mCommitOnKeyboardMovement = b; }
 	void setCommitOnSelectionChange(BOOL b)		{ mCommitOnSelectionChange = b; }
 // [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.3
@@ -484,6 +487,7 @@ private:
 
 	LLRect			mItemListRect;
 	S32             mColumnPadding;
+	S32             mRowPadding;
 
 	BOOL			mBackgroundVisible;
 	BOOL			mDrawStripes;
