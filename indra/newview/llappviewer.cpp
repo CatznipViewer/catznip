@@ -62,7 +62,9 @@
 #include "llallocator.h"
 #include "llcalc.h"
 #include "llconversationlog.h"
+#if LL_WINDOWS
 #include "lldxhardware.h"
+#endif
 #include "lltexturestats.h"
 #include "lltrace.h"
 #include "lltracethreadrecorder.h"
@@ -127,7 +129,7 @@
 #include "llcoros.h"
 #include "llexception.h"
 #if !LL_LINUX
-#include "cef/dullahan.h"
+#include "cef/dullahan_version.h"
 #include "vlc/libvlc_version.h"
 #endif // LL_LINUX
 
@@ -1134,7 +1136,7 @@ bool LLAppViewer::init()
 	try {
 		initializeSecHandler();
 	}
-	catch (LLProtectedDataException ex)
+	catch (LLProtectedDataException&)
 	{
 	  LLNotificationsUtil::add("CorruptedProtectedDataStore");
 	}
@@ -1348,7 +1350,7 @@ bool LLAppViewer::frame()
 		{
 			LOG_UNHANDLED_EXCEPTION("");
 		}
-		catch (std::bad_alloc)
+		catch (std::bad_alloc&)
 		{
 			LLMemory::logMemoryInfo(TRUE);
 			LLFloaterMemLeak* mem_leak_instance = LLFloaterReg::findTypedInstance<LLFloaterMemLeak>("mem_leaking");
@@ -1717,6 +1719,11 @@ bool LLAppViewer::cleanup()
 	disconnectViewer();
 
 	LL_INFOS() << "Viewer disconnected" << LL_ENDL;
+	
+	if (gKeyboard)
+	{
+		gKeyboard->resetKeys();
+	}
 
 	display_cleanup();
 
@@ -3218,12 +3225,16 @@ LLSD LLAppViewer::getViewerInfo() const
 	cef_ver_codec << ".";
 	cef_ver_codec << DULLAHAN_VERSION_MINOR;
 	cef_ver_codec << ".";
+	cef_ver_codec << DULLAHAN_VERSION_POINT;
+	cef_ver_codec << ".";
 	cef_ver_codec << DULLAHAN_VERSION_BUILD;
 
-	cef_ver_codec << " / CEF: ";
+	cef_ver_codec << std::endl;
+	cef_ver_codec << "  CEF: ";
 	cef_ver_codec << CEF_VERSION;
 
-	cef_ver_codec << " / Chromium: ";
+	cef_ver_codec << std::endl;
+	cef_ver_codec << "  Chromium: ";
 	cef_ver_codec << CHROME_VERSION_MAJOR;
 	cef_ver_codec << ".";
 	cef_ver_codec << CHROME_VERSION_MINOR;
@@ -4002,7 +4013,10 @@ static LLNotificationFunctorRegistration finish_quit_reg("ConfirmQuit", finish_q
 
 void LLAppViewer::userQuit()
 {
-	if (gDisconnected || gViewerWindow->getProgressView()->getVisible())
+	if (gDisconnected
+		|| !gViewerWindow
+		|| !gViewerWindow->getProgressView()
+		|| gViewerWindow->getProgressView()->getVisible())
 	{
 		requestQuit();
 	}
