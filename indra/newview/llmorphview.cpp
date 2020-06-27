@@ -42,6 +42,9 @@
 #include "lltoolmorph.h"
 #include "llviewercamera.h"
 #include "llvoavatarself.h"
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-6.4
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerwindow.h"
 #include "pipeline.h"
 
@@ -78,7 +81,15 @@ void	LLMorphView::initialize()
 	}
 
 	gAgentAvatarp->stopMotion( ANIM_AGENT_BODY_NOISE );
-	gAgentAvatarp->mSpecialRenderMode = 3;
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-6.4
+	auto fnUpdateRenderMode = [](const LLSD& sdValue) { gAgentAvatarp->mSpecialRenderMode = (sdValue.asBoolean()) ? 3 : 0; };
+	if (!mAppearanceCameraLightingConn.connected())
+	{
+		mAppearanceCameraLightingConn = gSavedSettings.getControl("AppearanceCameraLighting")->getSignal()->connect(std::bind(fnUpdateRenderMode, std::placeholders::_2));
+	}
+	fnUpdateRenderMode(gSavedSettings.getBOOL("AppearanceCameraLighting"));
+// [/SL:KB]
+//	gAgentAvatarp->mSpecialRenderMode = 3;
 	
 	// set up camera for close look at avatar
 	mOldCameraNearClip = LLViewerCamera::getInstance()->getNear();
@@ -97,6 +108,13 @@ void	LLMorphView::shutdown()
 		// reset camera
 		LLViewerCamera::getInstance()->setNear(mOldCameraNearClip);
 	}
+
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-6.4
+	if (mAppearanceCameraLightingConn.connected())
+	{
+		mAppearanceCameraLightingConn.disconnect();
+	}
+// [/SL:KB]
 }
 
 
