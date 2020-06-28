@@ -219,10 +219,8 @@ public:
 
 	virtual void	setColor(const LLColor4& color);
 
-// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
-	virtual F32 	getCurrentTransparency();
-// [/SL:KB]
-//	F32 			getCurrentTransparency();
+	// Ansariel: Changed to virtual. We might want to change the transparency ourself!
+	virtual F32	getCurrentTransparency();
 
 	void				setTransparencyType(ETypeTransparency type);
 	ETypeTransparency	getTransparencyType() const {return mTransparencyType;}
