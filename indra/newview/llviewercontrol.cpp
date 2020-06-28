@@ -42,7 +42,9 @@
 #include "llflexibleobject.h"
 #include "llfeaturemanager.h"
 #include "llviewershadermgr.h"
-
+// [SL:KB] - Patch: Build-SendPointAt | Checked: Catznip-3.6
+#include "llselectmgr.h"
+// [/SL:KB]
 #include "llsky.h"
 #include "llvieweraudio.h"
 #include "llviewermenu.h"
@@ -476,6 +478,26 @@ static bool handleLogFileChanged(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: Build-SendPointAt | Checked: Catznip-3.6
+bool handleSendPointAtChanged(const LLSD& sdValue)
+{
+	if (LLSelectMgr::instanceExists())
+	{
+		if ( (sdValue.asBoolean()) && (POINTAT_TARGET_NONE == gAgentCamera.getPointAtType()) && (!LLSelectMgr::getInstance()->getSelection()->isEmpty())  )
+		{
+			LLSelectMgr::getInstance()->updatePointAt();
+		}
+		else if ( (!sdValue.asBoolean()) && (POINTAT_TARGET_NONE != gAgentCamera.getPointAtType()) )
+		{
+			// Prevent the user from being stuck with their arm up in the air (for themselves and others around them)
+			gAgentCamera.setPointAt(POINTAT_TARGET_CLEAR);
+		}
+	}
+
+	return true;
+}
+// [/SL:KB]
+
 bool handleHideGroupTitleChanged(const LLSD& newvalue)
 {
 	gAgent.setHideGroupTitle(newvalue);
@@ -660,6 +682,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderShadowDetail")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderDeferredSSAO")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderPerformanceTest")->getSignal()->connect(boost::bind(&handleRenderPerfTestChanged, _2));
+// [SL:KB] - Patch: Build-SendPointAt | Checked: Catznip-3.6
+	gSavedSettings.getControl("SendPointAt")->getSignal()->connect(boost::bind(&handleSendPointAtChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("TextureMemory")->getSignal()->connect(boost::bind(&handleVideoMemoryChanged, _2));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
 	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));

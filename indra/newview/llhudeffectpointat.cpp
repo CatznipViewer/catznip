@@ -255,10 +255,7 @@ BOOL LLHUDEffectPointAt::setPointAt(EPointAtType target_type, LLViewerObject *ob
 		mLastSentOffsetGlobal = position;
 		setDuration(POINTAT_TIMEOUTS[target_type]);
 // [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
-		if ( (!getOriginatedHere()) || (getSendPointAt()) )
-		{
-			setNeedsSendToSim(TRUE);
-		}
+		setNeedsSendToSim( (getSendPointAt()) || (POINTAT_TARGET_CLEAR == target_type) );
 // [/SL:KB]
 //		setNeedsSendToSim(TRUE);
 //		LL_INFOS() << "Sending pointat data" << LL_ENDL;
@@ -388,7 +385,7 @@ void LLHUDEffectPointAt::update()
 		else
 		{
 // [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
-			if ( (calcTargetPosition()) && ((!getOriginatedHere()) || (getSendPointAt())) )
+			if ( (calcTargetPosition()) && (getSendPointAt()) )
 			{
 				((LLVOAvatar*)(LLViewerObject*)mSourceObject)->startMotion(ANIM_AGENT_EDITING);
 			}
