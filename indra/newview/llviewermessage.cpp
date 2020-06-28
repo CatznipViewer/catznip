@@ -2307,7 +2307,9 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				{
 					std::string::size_type idxToken = mDesc.find("'  ( http://");
 					if (std::string::npos != idxToken)
+					{
 						RlvBehaviourNotifyHandler::sendNotification("accepted_in_inv inv_offer " + mDesc.substr(1, idxToken - 1));
+					}
 				}
 			}
 // [/RLVa:KB]

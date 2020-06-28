@@ -28,46 +28,46 @@
 #include "llfloater.h"
 #include "llflatlistview.h"
 
-class LLFloaterReg;
+//class LLFloaterReg;
 
-class LLFloaterCameraPresets : public LLFloater
-{
-    friend class LLFloaterReg;
+//class LLFloaterCameraPresets : public LLFloater
+//{
+//    friend class LLFloaterReg;
+//
+//    virtual BOOL postBuild();
+//    virtual void onOpen(const LLSD& key);
+//
+//    void populateList();
+//
+//private:
+//    LLFloaterCameraPresets(const LLSD& key);
+//    ~LLFloaterCameraPresets();
+//
+//    LLFlatListView* mPresetList;
+//};
 
-    virtual BOOL postBuild();
-    virtual void onOpen(const LLSD& key);
-
-    void populateList();
-
-private:
-    LLFloaterCameraPresets(const LLSD& key);
-    ~LLFloaterCameraPresets();
-
-    LLFlatListView* mPresetList;
-};
-
-class LLCameraPresetFlatItem : public LLPanel
-{
-public:
-    LLCameraPresetFlatItem(const std::string &preset_name, bool is_default);
-    virtual ~LLCameraPresetFlatItem();
-
-    void setValue(const LLSD& value);
-
-    virtual BOOL postBuild();
-    virtual void onMouseEnter(S32 x, S32 y, MASK mask);
-    virtual void onMouseLeave(S32 x, S32 y, MASK mask);
-
-private:
-    void onDeleteBtnClick();
-    void onResetBtnClick();
-
-    LLButton* mDeleteBtn;
-    LLButton* mResetBtn;
-
-    std::string mPresetName;
-    bool mIsDefaultPrest;
-
-};
+//class LLCameraPresetFlatItem : public LLPanel
+//{
+//public:
+//    LLCameraPresetFlatItem(const std::string &preset_name, bool is_default);
+//    virtual ~LLCameraPresetFlatItem();
+//
+//    void setValue(const LLSD& value);
+//
+//    virtual BOOL postBuild();
+//    virtual void onMouseEnter(S32 x, S32 y, MASK mask);
+//    virtual void onMouseLeave(S32 x, S32 y, MASK mask);
+//
+//private:
+//    void onDeleteBtnClick();
+//    void onResetBtnClick();
+//
+//    LLButton* mDeleteBtn;
+//    LLButton* mResetBtn;
+//
+//    std::string mPresetName;
+//    bool mIsDefaultPrest;
+//
+//};
 
 #endif

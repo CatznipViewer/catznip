@@ -4968,7 +4968,7 @@ BOOL LLFolderBridge::dragOrDrop(MASK mask, BOOL drop,
 		case DAD_ANIMATION:
 		case DAD_GESTURE:
 		case DAD_MESH:
-       case DAD_SETTINGS:
+        case DAD_SETTINGS:
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4)
 		// Moving a folder link to a different folder should move the *link* and not the target folder
 		case DAD_LINK:

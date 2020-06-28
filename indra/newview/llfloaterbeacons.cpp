@@ -48,6 +48,9 @@ LLFloaterBeacons::LLFloaterBeacons(const LLSD& seed)
 	LLPipeline::setRenderParticleBeacons(     gSavedSettings.getBOOL("particlesbeacon"));
 	LLPipeline::setRenderHighlights(          gSavedSettings.getBOOL("renderhighlights"));
 	LLPipeline::setRenderBeacons(             gSavedSettings.getBOOL("renderbeacons"));
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+	LLPipeline::setRenderLightBeacons(		  gSavedSettings.getBOOL("lightsbeacon"));
+// [/SL:KB]
 	LLPipeline::setRenderMOAPBeacons(		  gSavedSettings.getBOOL("moapbeacon"));
 	mCommitCallbackRegistrar.add("Beacons.UICheck",	boost::bind(&LLFloaterBeacons::onClickUICheck, this,_1));
 }
@@ -97,6 +100,9 @@ void LLFloaterBeacons::onClickUICheck(LLUICtrl *ctrl)
 	else if(name == "physical")       LLPipeline::setRenderPhysicalBeacons(check->get());
 	else if(name == "sounds")         LLPipeline::setRenderSoundBeacons(check->get());
 	else if(name == "particles")      LLPipeline::setRenderParticleBeacons(check->get());
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+	else if(name == "lights")   LLPipeline::setRenderLightBeacons(check->get());
+// [/SL:KB]
 	else if(name == "moapbeacon")     LLPipeline::setRenderMOAPBeacons(check->get());
 	else if(name == "highlights")
 	{

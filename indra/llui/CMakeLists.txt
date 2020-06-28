@@ -56,6 +56,7 @@ set(llui_SOURCE_FILES
     llf32uictrl.cpp
     llfiltereditor.cpp
     llflashtimer.cpp
+    llflatbutton.cpp
     llflatlistview.cpp
     llfloater.cpp
     llfloaterreg.cpp
@@ -166,6 +167,7 @@ set(llui_HEADER_FILES
     llf32uictrl.h
     llfiltereditor.h 
     llflashtimer.h
+    llflatbutton.h
     llflatlistview.h
     llfloater.h
     llfloaterreg.h

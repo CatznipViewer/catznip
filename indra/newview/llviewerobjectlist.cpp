@@ -2039,14 +2039,23 @@ void LLViewerObjectList::addDebugBeacon(const LLVector3 &pos_agent,
 										const std::string &string,
 										const LLColor4 &color,
 										const LLColor4 &text_color,
-										S32 line_width)
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+										S32 line_thickness,
+										S32 line_height)
+// [/SL:KB]
+
+//										S32 line_width)
 {
 	LLDebugBeacon beacon;
 	beacon.mPositionAgent = pos_agent;
 	beacon.mString = string;
 	beacon.mColor = color;
 	beacon.mTextColor = text_color;
-	beacon.mLineWidth = line_width;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	beacon.mLineThickness = line_thickness;
+	beacon.mLineHeight = line_height;
+// [/SL:KB]
+//	beacon.mLineWidth = line_width;
 
 	mDebugBeacons.push_back(beacon);
 }

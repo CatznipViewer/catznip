@@ -16,7 +16,7 @@
  title="CAMERA CONTROLS"
  chrome="true"
  save_rect="true"
- width="400">
+ width="220">
     <floater.string
      name="rotate_tooltip">
         Rotate Camera Around Focus
@@ -33,13 +33,96 @@
      name="free_mode_title">
         View Object
     </floater.string>
+    <string name="custom_combo_text">&lt;Custom&gt;</string>
     <string name="inactive_combo_text">Use preset</string>
+
     <panel
      border="false"
-     height="123"
+     follows="top|left|right"
+     height="24"
      layout="topleft"
-     left="2"
-     top="0"
+     left="7"
+     mouse_opaque="false"
+     name="preset_controls"
+     right="-7"
+     top="20"
+     >
+        <!--
+        <flat_button
+         commit_callback.function="CameraPresets.ChangeView"
+         commit_callback.parameter="normal_view"
+         height="22"
+         image.image_name="Cam_Preset_Front_Off"
+         image_selected.image_name="Cam_Preset_Front_On"
+         left="0"
+         name="normal_view"
+         tool_tip="Normal view"
+         top="0"
+         width="22"
+         />
+        -->
+        <flat_button
+         commit_callback.function="CameraPresets.ChangeView"
+         commit_callback.parameter="object_view"
+         height="22"
+         image.image_name="Object_View_Off"
+         image_selected.image_name="Object_View_On"
+         left="0"
+         name="object_view"
+         tool_tip="Object view"
+         top="0"
+         width="22"
+         />
+        <flat_button
+         commit_callback.function="CameraPresets.ChangeView"
+         commit_callback.parameter="mouselook_view"
+         name="mouselook_view"
+         height="22"
+         image.image_name="MouseLook_View_Off"
+         image_selected.image_name="MouseLook_View_On"
+         left_pad="5"
+         tool_tip="Mouselook view"
+         width="22"
+         />
+        <combo_box
+         follows="top|left|right"
+         height="24"
+         left_pad="5"
+         mouse_opaque="true"
+         name="preset_combo"
+         right="-23"
+         top_delta="-1"
+         >
+            <combo_list mouse_wheel_opaque="true" />
+            <combo_box.item
+             label="Use preset"
+             name="Use preset"
+             value="default" />
+        </combo_box>
+        <button
+         commit_callback.function="CameraPresets.ShowPresetsList"
+         follows="top|right"
+         height="18"
+         layout="topleft"
+         mouse_opaque="true"
+         name="gear_btn"
+         image_pressed="Icon_Gear"
+         image_selected="Icon_Gear"
+         image_unselected="Icon_Gear"
+         left_pad="5"
+         tool_tip="Camera Presets"
+         top_delta="3"
+         width="18"
+         />
+    </panel>
+
+    <panel
+     border="false"
+     follows="all"
+     height="93"
+     layout="topleft"
+     left="0"
+     top_pad="0"
      mouse_opaque="false"
      name="controls"
      width="220">
@@ -64,8 +147,18 @@
               sound_flags="3"
               visible="true"
               tool_tip="Orbit camera around focus"
-              top="25"
+              top="5"
               width="78" />
+
+           <icon
+            height="14"
+            image_name="Cam_FreeCam_Off"
+            tool_tip="Camera Zoom"
+            mouse_opaque="true"
+            name="icon_bodypart"
+            left_pad="4"
+            width="14"
+            top="0" />
            <button
               follows="top|left"
               height="18"
@@ -73,10 +166,10 @@
               image_selected="AddItem_Press"
               image_unselected="AddItem_Off"
               layout="topleft"
-              left_pad="14" 
+              left_delta="-1"
               name="zoom_plus_btn"
               width="18"
-              top="23">
+              top="10">
              <commit_callback
                 function="Zoom.plus" />
              <mouse_held_callback
@@ -88,8 +181,9 @@
               name="zoom_slider"
               orientation="vertical"
               tool_tip="Zoom camera toward focus"
-              top_pad="0"
+              top_pad="-2"
               min_val="0"
+              increment="0.05"
               max_val="1" 
               width="18">
              <commit_callback function="Slider.value_changed"/>
@@ -102,13 +196,69 @@
               image_unselected="MinusItem_Off"
               layout="topleft"
               name="zoom_minus_btn"
-              top_pad="0"
+              top_pad="-3"
               width="18">
              <commit_callback
                 function="Zoom.minus" />
              <mouse_held_callback
                 function="Zoom.minus" />
            </button>
+
+           <icon
+            height="14"
+            image_name="Cam_Avatar_Off"
+            mouse_opaque="true"
+            name="icon_bodypart"
+            left_pad="7"
+            tool_tip="Camera Field of View"
+            top="0"
+            width="14" />
+           <button
+              follows="top|left"
+              height="18"
+              image_disabled="AddItem_Disabled"
+              image_selected="AddItem_Press"
+              image_unselected="AddItem_Off"
+              layout="topleft"
+              left_delta="-1"
+              name="view_plus_btn"
+              width="18"
+              top="10">
+             <commit_callback
+                function="View.plus" />
+             <mouse_held_callback
+                function="View.plus" />
+           </button>
+           <button
+              follows="top|left"
+              height="18"
+              image_disabled="MinusItem_Disabled"
+              image_selected="MinusItem_Press"
+              image_unselected="MinusItem_Off"
+              layout="topleft"
+              name="view_minus_btn"
+              top="73"
+              width="18">
+             <commit_callback
+                function="View.minus" />
+             <mouse_held_callback
+                function="View.minus" />
+           </button>
+           <slider_bar
+              commit_callback.function="View.value_changed"
+              control_name="CameraAngle"
+              height="50"
+              increment="0.05"
+              layout="topleft"
+              max_val="2.97"
+              min_val="0.17"
+              name="view_slider"
+              orientation="vertical"
+              tool_tip="Zoom camera toward focus"
+              top="26"
+              width="18">
+           </slider_bar>
+
          <joystick_track
          follows="top|left"
          height="78"
@@ -121,136 +271,8 @@
          scale_image="false"
          sound_flags="3"
          tool_tip="Move camera up and down, left and right"
-         top="25"
+         top="5"
          width="78"/>
-         <text
-          type="string"
-          length="1"
-          follows="left|top"
-          height="15"
-          layout="topleft"
-          left="41"
-          top_pad="9"
-          name="precise_ctrs_label"
-          width="200">
-            Use precise controls
-        </text>
         </panel>
     </panel>
-    <panel
-     follows="all"
-     height="102"
-     layout="topleft"
-     left_pad="2"
-     name="buttons_panel"
-     top="22"
-     width="212">
-    <panel_camera_item
-      name="front_view"
-      tool_tip="Front View"
-      width="30">
-      <panel_camera_item.mousedown_callback
-        function="CameraPresets.ChangeView"
-        parameter="Front View" />
-      <panel_camera_item.picture
-        image_name="Cam_Preset_Front_Off" />
-      <panel_camera_item.selected_picture
-        image_name="Cam_Preset_Front_On" />
-    </panel_camera_item>
-    <panel_camera_item
-      name="group_view"
-      tool_tip="Side View"
-      width="30"
-      left_pad="4">
-      <panel_camera_item.mousedown_callback
-        function="CameraPresets.ChangeView"
-        parameter="Side View" />
-      <panel_camera_item.picture
-        image_name="Cam_Preset_Side_Off" />
-      <panel_camera_item.selected_picture
-        image_name="Cam_Preset_Side_On" />
-    </panel_camera_item>
-    <panel_camera_item
-      name="rear_view"
-      tool_tip="Rear View"
-      width="30"
-      left_pad="4">
-      <panel_camera_item.mousedown_callback
-        function="CameraPresets.ChangeView"
-        tool_tip="Rear View"
-        parameter="Rear View" />
-      <panel_camera_item.picture
-        image_name="Cam_Preset_Back_Off" />
-      <panel_camera_item.selected_picture
-        image_name="Cam_Preset_Back_On" />
-    </panel_camera_item>
-    <panel_camera_item
-        name="object_view"
-        tool_tip="Object View"
-        width="30"
-        left_pad="4">
-        <panel_camera_item.mousedown_callback
-          function="CameraPresets.ChangeView"
-          parameter="object_view" />
-        <panel_camera_item.picture
-          image_name="Object_View_Off" />
-        <panel_camera_item.selected_picture
-          image_name="Object_View_On" />
-      </panel_camera_item>
-      <panel_camera_item
-        name="mouselook_view"
-        tool_tip="Mouselook View"
-        width="30"
-        left_pad="4">
-        <panel_camera_item.mousedown_callback
-          function="CameraPresets.ChangeView"
-          parameter="mouselook_view" />
-        <panel_camera_item.picture
-          image_name="MouseLook_View_Off" />
-        <panel_camera_item.selected_picture
-          image_name="MouseLook_View_On" />
-      </panel_camera_item>
-      <combo_box
-        height="23"
-        left="0"
-        mouse_opaque="true"
-        name="preset_combo"
-        top_pad="10"
-        width="136">
-        <combo_list
-        mouse_wheel_opaque="true"/>
-        <combo_box.item
-         label="Use preset"
-         name="Use preset"
-         value="default" />
-      </combo_box>
-      <button
-        height="16"
-        width="16"  
-        layout="topleft"
-        mouse_opaque="true"
-        name="gear_btn"
-        tool_tip="My Camera Presets"
-        top_delta="3"
-        left_pad="10" 
-        image_selected="Icon_Gear"
-        image_pressed="Icon_Gear"
-        image_unselected="Icon_Gear"
-        is_toggle="true">
-        <button.commit_callback
-          function="CameraPresets.ShowPresetsList"/>
-      </button>
-      <button
-        follows="top|left"
-        height="25"
-        label="Save as preset..."
-        layout="topleft"
-        left="0"
-        name="save_preset_btn"
-        top_pad="18"
-        width="150">
-        <button.commit_callback
-          function="CameraPresets.Save"/>
-      </button>
-  </panel>
 </floater>

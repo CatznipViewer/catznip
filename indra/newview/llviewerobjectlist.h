@@ -121,7 +121,10 @@ public:
 	void addDebugBeacon(const LLVector3 &pos_agent, const std::string &string,
 						const LLColor4 &color=LLColor4(1.f, 0.f, 0.f, 0.5f),
 						const LLColor4 &text_color=LLColor4(1.f, 1.f, 1.f, 1.f),
-						S32 line_width = 1);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+						S32 line_thickness = 1, S32 line_height = 50);
+// [/SL:KB]
+//						S32 line_width = 1);
 	void renderObjectBeacons();
 	void resetObjectBeacons();
 
@@ -255,7 +258,11 @@ public:
 	std::string mString;
 	LLColor4 mColor;
 	LLColor4 mTextColor;
-	S32 mLineWidth;
+//	S32 mLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	S32 mLineThickness;
+	S32 mLineHeight;
+// [/SL:KB]
 	LLPointer<class LLHUDObject> mHUDObject;
 };
 

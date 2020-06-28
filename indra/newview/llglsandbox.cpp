@@ -854,7 +854,10 @@ void LLViewerObjectList::renderObjectBeacons()
 			const LLDebugBeacon &debug_beacon = *iter;
 			LLColor4 color = debug_beacon.mColor;
 			color.mV[3] *= 0.25f;
-			S32 line_width = debug_beacon.mLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			S32 line_width = debug_beacon.mLineThickness;
+// [/SL:KB]
+//			S32 line_width = debug_beacon.mLineWidth;
 			if (line_width != last_line_width)
 			{
 				gGL.flush();
@@ -866,7 +869,10 @@ void LLViewerObjectList::renderObjectBeacons()
 		
 			gGL.begin(LLRender::LINES);
 			gGL.color4fv(color.mV);
-			draw_cross_lines(thisline, 2.0f, 2.0f, 50.f);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			draw_cross_lines(thisline, 2.0f, 2.0f, debug_beacon.mLineHeight);
+// [/SL:KB]
+//			draw_cross_lines(thisline, 2.0f, 2.0f, 50.f);
 			draw_line_cube(0.10f, thisline);
 			
 			gGL.end();
@@ -884,7 +890,10 @@ void LLViewerObjectList::renderObjectBeacons()
 		{
 			const LLDebugBeacon &debug_beacon = *iter;
 
-			S32 line_width = debug_beacon.mLineWidth;
+//			S32 line_width = debug_beacon.mLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			S32 line_width = debug_beacon.mLineThickness;
+// [/SL:KB]
 			if (line_width != last_line_width)
 			{
 				gGL.flush();

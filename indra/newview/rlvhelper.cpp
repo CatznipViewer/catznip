@@ -189,10 +189,12 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addModifier(RLV_BHVR_SETCAM_ORIGINDISTMIN, RLV_MODIFIER_SETCAM_ORIGINDISTMIN, new RlvBehaviourModifier("Camera - Focus Distance (Min)", 0.0f, true, new RlvBehaviourModifierCompMax));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_MODIFIER>("setcam_origindistmax", RLV_BHVR_SETCAM_ORIGINDISTMAX, RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addModifier(RLV_BHVR_SETCAM_ORIGINDISTMAX, RLV_MODIFIER_SETCAM_ORIGINDISTMAX, new RlvBehaviourModifier("Camera - Focus Distance (Max)", F32_MAX, true, new RlvBehaviourModifierCompMin));
-	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_EYEOFFSET, RLV_OPTION_MODIFIER, RlvBehaviourCamEyeFocusOffsetHandler>("setcam_eyeoffset", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
+	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_EYEOFFSET, RLV_OPTION_MODIFIER, RlvBehaviourCamEyeFocusOffsetHandler>("setcam_eyeoffset"));
 	addModifier(RLV_BHVR_SETCAM_EYEOFFSET, RLV_MODIFIER_SETCAM_EYEOFFSET, new RlvBehaviourModifierHandler<RLV_MODIFIER_SETCAM_EYEOFFSET>("Camera - Eye Offset", LLVector3::zero, true, nullptr));
-	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_FOCUSOFFSET, RLV_OPTION_MODIFIER, RlvBehaviourCamEyeFocusOffsetHandler>("setcam_focusoffset", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
-	addModifier(RLV_BHVR_SETCAM_FOCUSOFFSET, RLV_MODIFIER_SETCAM_FOCUSOFFSET, new RlvBehaviourModifierHandler<RLV_MODIFIER_SETCAM_FOCUSOFFSET>("Camera - Focus Offset", LLVector3::zero, true, nullptr));
+	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_EYEOFFSETSCALE, RLV_OPTION_MODIFIER, RlvBehaviourCamEyeFocusOffsetHandler>("setcam_eyeoffsetscale"));
+	addModifier(RLV_BHVR_SETCAM_EYEOFFSETSCALE, RLV_MODIFIER_SETCAM_EYEOFFSETSCALE, new RlvBehaviourModifierHandler<RLV_MODIFIER_SETCAM_EYEOFFSETSCALE>("Camera - Eye Offset Scale", 0, true, nullptr));
+	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_FOCUSOFFSET, RLV_OPTION_MODIFIER, RlvBehaviourCamEyeFocusOffsetHandler>("setcam_focusoffset"));
+	addModifier(RLV_BHVR_SETCAM_FOCUSOFFSET, RLV_MODIFIER_SETCAM_FOCUSOFFSET, new RlvBehaviourModifierHandler<RLV_MODIFIER_SETCAM_FOCUSOFFSET>("Camera - Focus Offset", LLVector3d::zero, true, nullptr));
 	addEntry(new RlvBehaviourProcessor<RLV_BHVR_SETCAM_FOVMIN, RlvBehaviourSetCamFovHandler>("setcam_fovmin"));
 	addModifier(RLV_BHVR_SETCAM_FOVMIN, RLV_MODIFIER_SETCAM_FOVMIN, new RlvBehaviourModifierHandler<RLV_MODIFIER_SETCAM_FOVMIN>("Camera - FOV (Min)", DEFAULT_FIELD_OF_VIEW, true, new RlvBehaviourModifierCompMax));
 	addEntry(new RlvBehaviourProcessor<RLV_BHVR_SETCAM_FOVMAX, RlvBehaviourSetCamFovHandler>("setcam_fovmax"));
@@ -261,8 +263,9 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvForceProcessor<RLV_BHVR_DETACHME>("detachme"));
 	addEntry(new RlvForceProcessor<RLV_BHVR_FLY>("fly"));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_FOCUS>("setcam_focus", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
-	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_EYEOFFSET, RlvForceCamEyeFocusOffsetHandler>("setcam_eyeoffset", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
-	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_FOCUSOFFSET, RlvForceCamEyeFocusOffsetHandler>("setcam_focusoffset", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
+	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_EYEOFFSET, RlvForceCamEyeFocusOffsetHandler>("setcam_eyeoffset"));
+	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_EYEOFFSETSCALE, RlvForceCamEyeFocusOffsetHandler>("setcam_eyeoffsetscale"));
+	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_FOCUSOFFSET, RlvForceCamEyeFocusOffsetHandler>("setcam_focusoffset"));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_FOV>("setcam_fov", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_MODE>("setcam_mode", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETGROUP>("setgroup"));
@@ -642,8 +645,9 @@ RlvCommand::RlvCommand(const LLUUID& idObj, const std::string& strCommand)
 }
 
 RlvCommand::RlvCommand(const RlvCommand& rlvCmd, ERlvParamType eParamType)
-	: m_fValid(rlvCmd.m_fValid), m_idObj(rlvCmd.m_idObj), m_strBehaviour(rlvCmd.m_strBehaviour), m_pBhvrInfo(rlvCmd.m_pBhvrInfo),
-	  m_eParamType( (RLV_TYPE_UNKNOWN == eParamType) ? rlvCmd.m_eParamType : eParamType),m_fStrict(rlvCmd.m_fStrict), m_strOption(rlvCmd.m_strOption), m_strParam(rlvCmd.m_strParam), m_fRefCounted(false)
+	: m_fValid(rlvCmd.m_fValid), m_idObj(rlvCmd.m_idObj), m_strBehaviour(rlvCmd.m_strBehaviour), m_pBhvrInfo(rlvCmd.m_pBhvrInfo)
+	, m_eParamType( (RLV_TYPE_UNKNOWN == eParamType) ? rlvCmd.m_eParamType : eParamType),m_fStrict(rlvCmd.m_fStrict), m_strOption(rlvCmd.m_strOption)
+	, m_strParam(rlvCmd.m_strParam), m_fRefCounted(rlvCmd.m_fRefCounted)
 {
 }
 
@@ -989,7 +993,7 @@ RlvObject::RlvObject(const LLUUID& idObj) : m_idObj(idObj), m_nLookupMisses(0)
 	m_idRoot = (pObj) ? pObj->getRootEdit()->getID() : LLUUID::null;
 }
 
-bool RlvObject::addCommand(const RlvCommand& rlvCmd)
+const RlvCommand& RlvObject::addCommand(const RlvCommand& rlvCmd, bool& fAdded)
 {
 	RLV_ASSERT(RLV_TYPE_ADD == rlvCmd.getParamType());
 
@@ -999,14 +1003,15 @@ bool RlvObject::addCommand(const RlvCommand& rlvCmd)
 		if ( (itCmd->getBehaviour() == rlvCmd.getBehaviour()) && (itCmd->getOption() == rlvCmd.getOption()) && 
 			 (itCmd->isStrict() == rlvCmd.isStrict() ) )
 		{
-			return false;
+			fAdded = false;
+			return *itCmd;
 		}
 	}
 
 	// Now that we know it's not a duplicate, add it to the end of the list
 	m_Commands.push_back(rlvCmd);
-
-	return true;
+	fAdded = true;
+	return m_Commands.back();
 }
 
 bool RlvObject::removeCommand(const RlvCommand& rlvCmd)
