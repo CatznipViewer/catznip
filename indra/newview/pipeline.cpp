@@ -154,6 +154,9 @@ bool LLPipeline::RenderDelayCreation;
 bool LLPipeline::RenderAnimateRes;
 bool LLPipeline::FreezeTime;
 S32 LLPipeline::DebugBeaconLineWidth;
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+S32 LLPipeline::DebugBeaconLineLengthZ;
+// [/SL:KB]
 F32 LLPipeline::RenderHighlightBrightness;
 LLColor4 LLPipeline::RenderHighlightColor;
 F32 LLPipeline::RenderHighlightThickness;
@@ -321,6 +324,9 @@ S32		LLPipeline::sCompiles = 0;
 bool	LLPipeline::sPickAvatar = true;
 bool	LLPipeline::sDynamicLOD = true;
 bool	LLPipeline::sShowHUDAttachments = true;
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+bool	LLPipeline::sRenderLightBeacons = false;
+// [/SL:KB]
 bool	LLPipeline::sRenderMOAPBeacons = false;
 bool	LLPipeline::sRenderPhysicalBeacons = true;
 bool	LLPipeline::sRenderScriptedBeacons = false;
@@ -559,6 +565,9 @@ void LLPipeline::init()
 	connectRefreshCachedSettingsSafe("RenderAnimateRes");
 	connectRefreshCachedSettingsSafe("FreezeTime");
 	connectRefreshCachedSettingsSafe("DebugBeaconLineWidth");
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	connectRefreshCachedSettingsSafe("DebugBeaconLineLengthZ");
+// [/SL:KB]
 	connectRefreshCachedSettingsSafe("RenderHighlightBrightness");
 	connectRefreshCachedSettingsSafe("RenderHighlightColor");
 	connectRefreshCachedSettingsSafe("RenderHighlightThickness");
@@ -1135,6 +1144,9 @@ void LLPipeline::refreshCachedSettings()
 	RenderAnimateRes = gSavedSettings.getBOOL("RenderAnimateRes");
 	FreezeTime = gSavedSettings.getBOOL("FreezeTime");
 	DebugBeaconLineWidth = gSavedSettings.getS32("DebugBeaconLineWidth");
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	DebugBeaconLineLengthZ = gSavedSettings.getS32("DebugBeaconLineLengthZ");
+// [/SL:KB]
 	RenderHighlightBrightness = gSavedSettings.getF32("RenderHighlightBrightness");
 	RenderHighlightColor = gSavedSettings.getColor4("RenderHighlightColor");
 	RenderHighlightThickness = gSavedSettings.getF32("RenderHighlightThickness");
@@ -3672,7 +3684,10 @@ void renderScriptedBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3702,7 +3717,10 @@ void renderScriptedTouchBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 0.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3731,7 +3749,10 @@ void renderPhysicalBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(0.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3749,6 +3770,35 @@ void renderPhysicalBeacons(LLDrawable* drawablep)
 	}
 }
 }
+
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+void renderLightsBeacons(LLDrawable* drawablep)
+{
+	// Look for attachments, objects, etc.
+	LLVOVolume* pVolumeObj = drawablep->getVOVolume();
+	if ( (pVolumeObj) && (pVolumeObj->getIsLight()) )
+	{
+		if (gPipeline.sRenderBeacons)
+		{
+			gObjectList.addDebugBeacon(pVolumeObj->getPositionAgent(), "", LLColor4::orange, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+		}
+
+		if (gPipeline.sRenderHighlight)
+		{
+			S32 face_id;
+			S32 count = drawablep->getNumFaces();
+			for (face_id = 0; face_id < count; face_id++)
+			{
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 void renderMOAPBeacons(LLDrawable* drawablep)
 {
@@ -3771,7 +3821,10 @@ void renderMOAPBeacons(LLDrawable* drawablep)
 	{
 		if (gPipeline.sRenderBeacons)
 		{
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", LLColor4(1.f, 1.f, 1.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -3800,7 +3853,10 @@ void renderParticleBeacons(LLDrawable* drawablep)
 		if (gPipeline.sRenderBeacons)
 		{
 			LLColor4 light_blue(0.5f, 0.5f, 1.f, 0.5f);
-			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth, LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB]
+//			gObjectList.addDebugBeacon(vobj->getPositionAgent(), "", light_blue, LLColor4(1.f, 1.f, 1.f, 0.5f), LLPipeline::DebugBeaconLineWidth);
 		}
 
 		if (gPipeline.sRenderHighlight)
@@ -4003,6 +4059,13 @@ void LLPipeline::postSort(LLCamera& camera)
 			forAllVisibleDrawables(renderPhysicalBeacons);
 		}
 
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+		if (sRenderLightBeacons)
+		{
+			forAllVisibleDrawables(renderLightsBeacons);
+		}
+// [/SL:KB]
+
 		if(sRenderMOAPBeacons)
 		{
 			forAllVisibleDrawables(renderMOAPBeacons);
@@ -4027,7 +4090,10 @@ void LLPipeline::postSort(LLCamera& camera)
 				if (gPipeline.sRenderBeacons)
 				{
 					//pos += LLVector3(0.f, 0.f, 0.2f);
-					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth, DebugBeaconLineLengthZ);
+// [/SL:KB]
+//					gObjectList.addDebugBeacon(pos, "", LLColor4(1.f, 1.f, 0.f, 0.5f), LLColor4(1.f, 1.f, 1.f, 0.5f), DebugBeaconLineWidth);
 				}
 			}
 			// now deal with highlights for all those seeable sound sources
@@ -7011,6 +7077,26 @@ bool LLPipeline::getRenderScriptedTouchBeacons()
 {
 	return sRenderScriptedTouchBeacons;
 }
+
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+// static
+void LLPipeline::setRenderLightBeacons(bool val)
+{
+	sRenderLightBeacons = val;
+}
+
+// static
+void LLPipeline::toggleRenderLightBeacons()
+{
+	sRenderLightBeacons = !sRenderLightBeacons;
+}
+
+// static
+bool LLPipeline::getRenderLightBeacons()
+{
+	return sRenderLightBeacons;
+}
+// [/SL:KB]
 
 // static
 void LLPipeline::setRenderMOAPBeacons(bool val)

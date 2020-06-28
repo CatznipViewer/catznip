@@ -1360,7 +1360,6 @@ void LLTextureCtrl::setEnabled( BOOL enabled )
 	{
 		floaterp->setActive(enabled);
 	}
-
 //	if( enabled )
 // [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
 	if  ( (enabled) && (mControlMode == EControlMode::EDIT) )

@@ -622,7 +622,18 @@ void LLFlatListView::onItemMouseClick(item_pair_t* item_pair, MASK mask)
 	bool select_item = !isSelected(item_pair);
 
 	//*TODO find a better place for that enforcing stuff
-	if (mKeepOneItemSelected && numSelected() == 1 && !select_item) return;
+//	if (mKeepOneItemSelected && numSelected() == 1 && !select_item) return;
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+	if (mKeepOneItemSelected && numSelected() == 1 && !select_item)
+	{
+		if (mCommitOnUserSelection)
+		{
+			// Commit even when the user clicks on the same item
+			onCommit();
+		}
+		return;
+	}
+// [/SL:KB]
 
 	if ( (mask & MASK_SHIFT) && !(mask & MASK_CONTROL)
 		 && mMultipleSelection && !mSelectedItemPairs.empty() )
@@ -694,6 +705,12 @@ void LLFlatListView::onItemMouseClick(item_pair_t* item_pair, MASK mask)
 			// Update last selected item border.
 			mSelectedItemsBorder->setRect(getLastSelectedItemRect().stretch(-1));
 		}
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+		if (mCommitOnUserSelection)
+		{
+			onCommit();
+		}
+// [/SL:KB]
 		return;
 	}
 
@@ -705,6 +722,13 @@ void LLFlatListView::onItemMouseClick(item_pair_t* item_pair, MASK mask)
 	selectItemPair(item_pair, select_item);
 	else
 		selectItemPair(item_pair, true);
+
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+	if (mCommitOnUserSelection)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 // [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
@@ -750,6 +774,12 @@ BOOL LLFlatListView::handleKeyHere(KEY key, MASK mask)
 				if(notifyParent(LLSD().with("action","select_prev")) > 0 )//message was processed
 					resetSelection();
 			}
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+			else if (mCommitOnUserSelection)
+			{
+				onCommit();
+			}
+// [/SL:KB]
 			break;
 		}
 		case KEY_DOWN:
@@ -760,6 +790,12 @@ BOOL LLFlatListView::handleKeyHere(KEY key, MASK mask)
 				if( notifyParent(LLSD().with("action","select_next")) > 0 ) //message was processed
 					resetSelection();
 			}
+// [SL:KB] - Patch: Control-FlatListView | Checked: Catznip-6.4
+			else if (mCommitOnUserSelection)
+			{
+				onCommit();
+			}
+// [/SL:KB]
 			break;
 		}
 		case KEY_ESCAPE:

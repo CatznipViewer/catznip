@@ -38,6 +38,9 @@ class LLFloaterScriptEdPrefs : public LLFloater
 public:
 	LLFloaterScriptEdPrefs(const LLSD& key);
 	BOOL postBuild();
+// [SL:KB] - Patch: UI-PreviewScript | Checked: Catznip-6.4
+    void onClose(bool app_quitting) override;
+// [/SL:KB]
 	
 private:
 	~LLFloaterScriptEdPrefs() {};

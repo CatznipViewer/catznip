@@ -4301,6 +4301,12 @@ class LLSelfSitDown : public view_listener_t
         }
     };
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+//bool visible_sitdown_self()
+//{
+//    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
+//}
+//// [/SL:KB]
 
 
 bool show_sitdown_self()
@@ -4314,7 +4320,7 @@ bool show_sitdown_self()
 bool enable_sitdown_self()
 {
 // [RLVa:KB] - Checked: 2010-08-28 (RLVa-1.2.1a) | Added: RLVa-1.2.1a
-	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
+	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying() && !gRlvHandler.hasBehaviour(RLV_BHVR_SIT);
 // [/RLVa:KB]
 //	return show_sitdown_self() && !gAgentAvatarp->isEditingAppearance() && !gAgent.getFlying();
 }
@@ -8121,17 +8127,16 @@ BOOL object_selected_and_point_valid(const LLSD& sdParam)
 		(selection->getFirstRootObject()->getNVPair("AssetContainer") == NULL);
 }
 
-
 BOOL object_is_wearable()
 {
 	if (!isAgentAvatarValid())
 	{
 		return FALSE;
 	}
+//	if (!object_selected_and_point_valid())
 // [RLVa:KB] - Checked: 2010-03-16 (RLVa-1.2.0a) | Added: RLVa-1.2.0a
 	if (!object_selected_and_point_valid(LLSD(0)))
 // [/RLVa:KB]
-//	if (!object_selected_and_point_valid())
 	{
 		return FALSE;
 	}
@@ -9478,6 +9483,13 @@ class LLViewToggleBeacon : public view_listener_t
 			LLPipeline::toggleRenderPhysicalBeacons();
 			gSavedSettings.setBOOL( "physicalbeacon", LLPipeline::getRenderPhysicalBeacons() );
 		}
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+		else if (beacon == "lightsbeacon")
+		{
+			LLPipeline::toggleRenderLightBeacons();
+			gSavedSettings.setBOOL( "lightsbeacon", LLPipeline::getRenderLightBeacons() );
+		}
+// [/SL:KB]
 		else if (beacon == "moapbeacon")
 		{
 			LLPipeline::toggleRenderMOAPBeacons();
@@ -9550,6 +9562,13 @@ class LLViewCheckBeaconEnabled : public view_listener_t
 			new_value = gSavedSettings.getBOOL( "scriptsbeacon");
 			LLPipeline::setRenderScriptedBeacons(new_value);
 		}
+// [SL:KB] - Patch: Build-LightBeacons | Checked: Catznip-6.4
+		else if (beacon == "lightsbeacon")
+		{
+			new_value = gSavedSettings.getBOOL( "lightsbeacon");
+			LLPipeline::setRenderLightBeacons(new_value);
+		}
+// [/SL:KB]
 		else if (beacon == "moapbeacon")
 		{
 			new_value = gSavedSettings.getBOOL( "moapbeacon");
@@ -10503,6 +10522,9 @@ void initialize_menus()
 // [/SL:KB]
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
+//// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+//	enable.add("Self.VisibleSitDown", boost::bind(&visible_sitdown_self));
+//// [/SL:KB]
 	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self)); 
 	enable.add("Self.ShowSitDown", boost::bind(&show_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");

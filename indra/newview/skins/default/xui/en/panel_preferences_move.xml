@@ -33,6 +33,7 @@
    width="100">
     Camera
   </text>
+  <!--
   <slider
    can_edit_text="true"
    control_name="CameraAngle"
@@ -69,15 +70,17 @@
    show_text="false"
    width="240"
    top_pad="5"/>
+  -->
   <text
   follows="left|top"
   type="string"
+  layout="topleft"
   length="1"
   height="10"
   left="75"
   name="heading2"
   width="270"
-  top_pad="5">
+  top_delta="3">
     Automatic position for:
   </text>
   <check_box
@@ -100,6 +103,23 @@
    name="appearance_camera_movement"
    tool_tip="Use automatic camera positioning while in edit mode"
    width="242" />
+  <button
+   commit_callback.function="Pref.CameraPresets"
+   enabled="false"
+   follows="left|top"
+   height="23"
+   label="Camera Presets..."
+   label_selected="Browse"
+   layout="topleft"
+   left_delta="-30"
+   name="presets_list"
+   top_pad="5"
+   width="140">
+    <button.commit_callback
+     function="Floater.Show"
+     parameter="camera_presets" />
+  </button>
+
   <icon
 	 follows="left|top"
 	 height="18"

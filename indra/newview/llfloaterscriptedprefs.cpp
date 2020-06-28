@@ -30,7 +30,10 @@
 
 #include "llcolorswatch.h"
 #include "llscripteditor.h"
-
+// [SL:KB] - Patch: UI-PreviewScript | Checked: Catznip-6.4
+#include "llfloaterreg.h"
+#include "llpreviewscript.h"
+// [/SL:KB]
 
 LLFloaterScriptEdPrefs::LLFloaterScriptEdPrefs(const LLSD& key)
 :	LLFloater(key)
@@ -50,6 +53,26 @@ BOOL LLFloaterScriptEdPrefs::postBuild()
 	}
 	return TRUE;
 }
+
+// [SL:KB] - Patch: UI-PreviewScript | Checked: Catznip-6.4
+// override
+void LLFloaterScriptEdPrefs::onClose(bool app_quitting)
+{
+	if (!app_quitting)
+	{
+		// We want "preview_script" and "preview_scriptedit" but both map to instance name "preview"
+		for (LLFloater* pFloater : LLFloaterReg::getFloaterList("preview"))
+		{
+			if (LLScriptEdContainer* pScriptFloater = dynamic_cast<LLScriptEdContainer*>(pFloater))
+			{
+				pScriptFloater->reloadKeywords();
+			}
+		}
+	}
+
+	LLFloater::onClose(app_quitting);
+}
+// [/SL:KB]
 
 void LLFloaterScriptEdPrefs::applyUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
