@@ -11142,7 +11142,7 @@
     <key>SendPointAt</key>
     <map>
       <key>Comment</key>
-      <string>Shows the arm-movement editing motion for your avatart and sends point-at updates to the region when enabled</string>
+      <string>Shows the arm-movement editing motion for your avatar and sends point-at updates to the region when enabled</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
