@@ -5558,6 +5558,9 @@ void LLViewerWindow::setUIVisibility(bool visible)
 	{
 		gToolBarView->setToolBarsVisible(visible);
 	}
+// [SL:KB] - Patch: Chat-Chiclets | Checked: Catznip-6.4
+	LLChicletBar::getInstance()->setVisible(visible);
+// [/SL:KB]
 
 	LLNavigationBar::getInstance()->setVisible(visible ? gSavedSettings.getBOOL("ShowNavbarNavigationPanel") : FALSE);
 	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
