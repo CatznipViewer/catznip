@@ -406,6 +406,9 @@ public:
 	// TODO: add optional style parameter
 	virtual void			setText(const LLStringExplicit &utf8str , const LLStyle::Params& input_params = LLStyle::Params()); // uses default style
 	virtual std::string		getText() const;
+// [SL:KB] - Patch: UI-GroupNotices | Checked: Catznip-6.4
+	S32						getMaxTextLength() const { return mMaxTextByteLength; }
+// [/SL:KB]
 	void					setMaxTextLength(S32 length) { mMaxTextByteLength = length; }
 
 	// wide-char versions
