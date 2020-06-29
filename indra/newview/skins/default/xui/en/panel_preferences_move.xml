@@ -103,6 +103,17 @@
    name="appearance_camera_movement"
    tool_tip="Use automatic camera positioning while in edit mode"
    width="242" />
+  <check_box
+   control_name="AppearanceCameraLighting"
+   enabled_control="AppearanceCameraMovement"
+   follows="left|top"
+   height="16"
+   label="Add extra lighting while editing appearance"
+   left_delta="18"
+   layout="topleft"
+   name="appearance_camera_lighting"
+   top_pad="5"
+   width="242" />
   <button
    commit_callback.function="Pref.CameraPresets"
    enabled="false"
