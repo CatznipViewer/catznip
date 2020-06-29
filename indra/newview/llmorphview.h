@@ -76,6 +76,10 @@ protected:
 	F32			mCameraYaw;
 
 	BOOL		mCameraDrivenByKeys;
+
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-6.4
+	boost::signals2::connection mAppearanceCameraLightingConn;
+// [/SL:KB]
 };
 
 //

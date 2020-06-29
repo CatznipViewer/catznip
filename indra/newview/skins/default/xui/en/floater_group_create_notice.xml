@@ -14,6 +14,8 @@
  save_visibility="false"
  title="NEW GROUP NOTICE"
  width="400">
+    <string name="characters">([COUNT] characters)</string>
+    <string name="characters_plus_remaining">([COUNT] characters / ±[REMAINING] remaining)</string>
     <panel
      follows="all"
      height="230"
@@ -21,7 +23,7 @@
      left="5"
      name="panel_create_new_notice"
      right="-5"
-     top="20"
+     top="17"
      visible="true">
         <group_drop_target
          follows="all"
@@ -112,11 +114,22 @@
          label="Type your message here."
          layout="topleft"
          left_pad="0"
-         max_length="511"
+         max_length="950"
          name="message_editor"
          right="-5"
          top_delta="-2"
          word_wrap="true" />
+        <text
+         type="string"
+         length="1"
+         top_pad="5"
+         follows="top|left"
+         layout="topleft"
+         left_delta="0"
+         name="message_count_label"
+         right="-5">
+          (500 characters / ±500 remaining)
+        </text>
         <text
          type="string"
          length="1"

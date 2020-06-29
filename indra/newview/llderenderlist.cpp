@@ -243,9 +243,9 @@ void LLDerenderList::removeObjects(LLDerenderEntry::EEntryType eType, const uuid
 	bool fSave = false;
 	std::map<LLViewerRegion*, std::list<U32>> idRegionObjectMap; // TYPE_OBJECT
 
-	for (uuid_vec_t::const_iterator itObject = idsObject.begin(); itObject != idsObject.end(); ++itObject)
+	for (const auto& idObject : idsObject)
 	{
-		entry_list_t::iterator itEntry = findEntry(eType, *itObject);
+		entry_list_t::iterator itEntry = findEntry(eType, idObject);
 		if (m_Entries.end() == itEntry)
 			continue;
 
@@ -253,10 +253,11 @@ void LLDerenderList::removeObjects(LLDerenderEntry::EEntryType eType, const uuid
 		{
 			case LLDerenderEntry::TYPE_OBJECT:
 				{
-					LLDerenderObject* pObjEntry = (LLDerenderObject*)&*itEntry;
+					LLDerenderObject* pObjEntry = static_cast<LLDerenderObject*>(*itEntry);
+					if (0 == pObjEntry->idRegion)
+						continue;
 
-					LLViewerRegion* pRegion = (0 != pObjEntry->idRegion) ? LLWorld::getInstance()->getRegionFromHandle(pObjEntry->idRegion) : NULL;
-					if (pRegion)
+					if (LLViewerRegion* pRegion = LLWorld::getInstance()->getRegionFromHandle(pObjEntry->idRegion))
 					{
 						std::list<U32>& idsLocal = idRegionObjectMap[pRegion];
 						if (pObjEntry->idRootLocal)
