@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
         border="true"
+        border_margin_horz="3"
         follows="all"
+        height="320"
         label="Sun &amp; Moon"
         layout="topleft"
         left="0"
         name="panel_settings_sky_hbodies"
-        top="0">
+        top="0"
+        width="505">
     <layout_stack 
             follows="all"
             layout="topleft"
@@ -16,7 +19,7 @@
             bottom="-5"
             orientation="horizontal">
         <layout_panel
-                border="true"
+                border="false"
                 bevel_style="in"
                 auto_resize="true"
                 user_resize="false"
@@ -27,18 +30,19 @@
                     follows="left|top"
                     height="10"
                     layout="topleft"
-                    left_delta="15"
-                    top_pad="15"
+                    left="7"
+                    top_pad="5"
                     font="SansSerifBold"
+                    font.size="Large"
                     width="120">
-                Sun &amp; Stars
+                Sun
             </text>
             <text
                     follows="left|top"
                     height="10"
                     layout="topleft"
-                    left_delta="10"
-                    top_delta="30"
+                    left="7"
+                    top_delta="22"
                     width="100">
                 Position:
             </text>
@@ -46,7 +50,7 @@
                     name="sun_rotation"
                     follows="left|top"
                     left_delta="0"
-                    top_delta="20"
+                    top_pad="5"
                     height="150"
                     width="150"
                     thumb_mode="sun" />
@@ -55,29 +59,48 @@
                     height="10"
                     layout="topleft"
                     left_delta="160"
-                    top_delta="-20"
+                    top_delta="-15"
                     width="200">
                 Image:
             </text>
             <texture_picker
-                    height="123"
+                    height="87"
                     layout="topleft"
-                    left_delta="5"
+                    left_delta="0"
                     name="sun_image"
-                    top_pad="10"
-                    width="100"/>
+                    top_pad="5"
+                    width="64"/>
             <text
                     follows="left|top"
                     height="10"
                     layout="topleft"
-                    left_delta="-5"
-                    top_delta="110"
+                    left_delta="0"
+                    top_pad="-15"
+                    width="64">
+                Color:
+            </text>
+            <color_swatch
+                    can_apply_immediately="true"
+                    follows="left|top"
+                    height="32"
+                    label_height="0"
+                    layout="topleft"
+                    left_delta="0"
+                    name="sun_moon_color"
+                    top_pad="5"
+                    width="64" />
+            <text
+                    follows="left|top"
+                    height="10"
+                    layout="topleft"
+                    left_delta="-160"
+                    top_pad="37"
                     width="80">
                 Scale:
             </text>
             <slider
                     decimal_digits="2"
-                    follows="left|top"
+                    follows="top|left|right"
                     height="16"
                     increment="0.01"
                     initial_value="0"
@@ -87,39 +110,21 @@
                     max_val="20"
                     name="sun_scale"
                     top_delta="15"
-                    width="130"
+                    right="-15"
+                    text_width="35"
                     can_edit_text="true"/>
             <text
                     follows="left|top"
                     height="10"
                     layout="topleft"
                     left_delta="-5"
-                    top_delta="20"
-                    width="80">
-                Color:
-            </text>
-            <color_swatch
-                    can_apply_immediately="true"
-                    follows="left|top"
-                    height="37"
-                    label_height="0"
-                    layout="topleft"
-                    left_delta="5"
-                    name="sun_moon_color"
                     top_pad="5"
-                    width="60" />
-            <text
-                    follows="left|top"
-                    height="10"
-                    layout="topleft"
-                    left_delta="-160"
-                    top_delta="27"
                     width="200">
                 Glow Focus:
             </text>
             <slider
                     decimal_digits="2"
-                    follows="left|top"
+                    follows="top|left|right"
                     height="16"
                     increment="0.01"
                     initial_value="0"
@@ -129,20 +134,21 @@
                     max_val="2"
                     name="glow_focus"
                     top_delta="15"
-                    width="250"
+                    right="-15"
+                    text_width="35"
                     can_edit_text="true"/>
             <text
                     follows="left|top"
                     height="10"
                     layout="topleft"
                     left_delta="-5"
-                    top_delta="22"
+                    top_pad="5"
                     width="200">
                 Glow Size:
             </text>
             <slider
                     decimal_digits="2"
-                    follows="left|top"
+                    follows="top|left|right"
                     height="16"
                     increment="0.01"
                     initial_value="0"
@@ -152,30 +158,8 @@
                     max_val="1.99"
                     name="glow_size"
                     top_delta="15"
-                    width="250"
-                    can_edit_text="true"/>
-            <text
-                    follows="left|top"
-                    height="10"
-                    layout="topleft"
-                    left_delta="-5"
-                    top_delta="22"
-                    width="200">
-                Star Brightness:
-            </text>
-            <slider
-                    decimal_digits="2"
-                    follows="left|top"
-                    height="16"
-                    increment="0.01"
-                    initial_value="0"
-                    layout="topleft"
-                    left_delta="5"
-                    min_val="0"
-                    max_val="500"
-                    name="star_brightness"
-                    top_delta="15"
-                    width="250"
+                    right="-15"
+                    text_width="35"
                     can_edit_text="true"/>
                     
             <check_box
@@ -186,26 +170,22 @@
                     layout="topleft"
                     name="sunbeacon" 
                     right="-50"
-                    bottom="-10"
-                    follows="bottom|right"/>
+                    top="8"
+                    follows="top|right"/>
                     
+                    <view_border
+                     top="1"
+                     right="-1"
+                     bottom="-1"
+                     width="1"
+                     follows="top|bottom|right"
+                     bevel_style="none"
+                     border_thickness="1"
+                     mouse_opaque="false"
+                     name="divisor1"/>
         </layout_panel>
-        <layout_panel
-                border="false"
-                bevel_style="in"
-                auto_resize="true"
-                user_resize="false"
-                visible="true"
-                height="400">
-            <layout_stack 
-                    left="5"
-                    top="5"
-                    right="-5"
-                    bottom="-5"
-                    follows="left|top|right|bottom"
-                    orientation="vertical">
                 <layout_panel
-                        border="true"
+                        border="false"
                         bevel_style="in"
                         auto_resize="true"
                         user_resize="false"
@@ -216,18 +196,19 @@
                             follows="left|top"
                             height="10"
                             layout="topleft"
-                            left_delta="15"
-                            top_pad="15"
+                            left="7"
+                            top="5"
                             font="SansSerifBold"
-                            width="80">
-                        Moon
+                            font.size="Large"
+                            width="280">
+                        Moon &amp; Stars
                     </text>
                     <text
                             follows="left|top"
                             height="10"
                             layout="topleft"
-                            left_delta="10"
-                            top_delta="30"
+                            left="7"
+                            top_delta="22"
                             width="100">
                         Position:
                     </text>
@@ -235,7 +216,7 @@
                             name="moon_rotation"
                             follows="left|top"
                             left_delta="0"
-                            top_delta="20"
+                            top_pad="5"
                             height="150"
                             width="150"
                             thumb_mode="moon" />
@@ -244,29 +225,29 @@
                             height="10"
                             layout="topleft"
                             left_delta="160"
-                            top_delta="-20"
+                            top_delta="-15"
                             width="200">
                         Image:
                     </text>
                     <texture_picker
-                            height="123"
+                            height="87"
                             layout="topleft"
-                            left_delta="5"
+                            left_delta="0"
                             name="moon_image"
-                            top_pad="10"
-                            width="100"/>
+                            top_pad="5"
+                            width="64"/>
                     <text
                             follows="left|top"
                             height="10"
                             layout="topleft"
-                            left_delta="-5"
-                            top_delta="110"
+                            left="7"
+                            top_pad="70"
                             width="80">
                         Scale:
                     </text>
                     <slider
                             decimal_digits="2"
-                            follows="left|top"
+                            follows="top|left|right"
                             height="16"
                             increment="0.01"
                             initial_value="0"
@@ -276,7 +257,8 @@
                             max_val="20"
                             name="moon_scale"
                             top_delta="15"
-                            width="130"
+                            right="-15"
+                            text_width="42"
                             can_edit_text="true"/>
                     <text
                             follows="left|top"
@@ -289,7 +271,7 @@
                     </text>
                     <slider
                             decimal_digits="2"
-                            follows="left|top"
+                            follows="top|left|right"
                             height="16"
                             increment="0.01"
                             initial_value="0"
@@ -299,7 +281,32 @@
                             max_val="1.0"
                             name="moon_brightness"
                             top_delta="15"
-                            width="130"
+                            right="-15"
+                            text_width="42"
+                            can_edit_text="true"/>
+                    <text
+                            follows="left|top"
+                            height="10"
+                            layout="topleft"
+                            left_delta="-5"
+                            top_delta="22"
+                            width="200">
+                        Star Brightness:
+                    </text>
+                    <slider
+                            decimal_digits="2"
+                            follows="top|left|right"
+                            height="16"
+                            increment="0.01"
+                            initial_value="0"
+                            layout="topleft"
+                            left_delta="5"
+                            min_val="0"
+                            max_val="500"
+                            name="star_brightness"
+                            top_pad="5"
+                            right="-15"
+                            text_width="42"
                             can_edit_text="true"/>
                 <check_box
                         control_name="moonbeacon"
@@ -309,11 +316,9 @@
                         layout="topleft"
                         name="moonbeacon" 
                         right="-50"
-                        bottom="-10"
-                        follows="bottom|right"/>
+                        top="8"
+                        follows="top|right"/>
                             
-                </layout_panel>
-            </layout_stack>
         </layout_panel>
     </layout_stack>
 </panel>                

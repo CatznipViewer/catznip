@@ -5,10 +5,10 @@
         help_topic="day_presets"
         save_rect="false"
         title="Edit Day Cycle"
-        width="705"
-        height="700"
+        width="605"
+        height="635"
         min_width="705"
-        min_height="700"
+        min_height="600"
         single_instance="true" 
         can_resize="false">
 
@@ -29,8 +29,8 @@
 
     <!-- Layout -->
     <layout_stack name="outer_stack"
-            width="705"
-            height="700"
+            width="605"
+            bottom="-1"
             follows="all"
             animate="false"
             top="0"
@@ -39,7 +39,7 @@
                 border="false"
                 auto_resize="false"
                 user_resize="false"
-                height="29"
+                height="31"
                 min_height="29"
                 background_visible="false">
             <!-- This layout_panel is for loading legacy presets -->
@@ -50,7 +50,7 @@
                     layout="topleft"
                     name="label"
                     left="15"
-                    top="5"
+                    top="9"
                     width="105">
                 Day Cycle Name:
             </text>
@@ -61,9 +61,9 @@
                     max_length_bytes="100"
                     name="day_cycle_name"
                     prevalidate_callback="ascii"
-                    top="5"
-                    width="200"
-                    height="21" />
+                    top_delta="-4"
+                    right="-110"
+                    height="23" />
             <button
                     height="23"
                     label="Import"
@@ -81,7 +81,7 @@
                 user_resize="false"
                 background_visible="false">
             <layout_stack name="content_stack"
-                    width="705"
+                    width="605"
                     follows="all"
                     animate="false"
                     top="0"
@@ -91,14 +91,14 @@
                         bevel_style="in"
                         auto_resize="false"
                         user_resize="false"
-                        height="150"
+                        height="190"
                         min_height="0"
                         visible="true">
                     <panel name="timeline_layers"
                             border="false"
                             follows="left|top"
-                            height="150"
-                            width="110"
+                            height="27"
+                            right="-10"
                             top_pad="0"
                             min_height="0"
                             visible="true">
@@ -107,8 +107,8 @@
                                 height="23"
                                 label="Sky 4"
                                 layout="topleft"
-                                top_pad="5"
-                                left="10"
+                                top="0"
+                                left="30"
                                 name="sky4_track"
                                 width="100"> 
                             <button.commit_callback
@@ -120,8 +120,8 @@
                                 height="23"
                                 label="Sky 3"
                                 layout="topleft"
-                                top_pad="0"
-                                left="10"
+                                top_delta="0"
+                                left_pad="10"
                                 name="sky3_track"
                                 width="100"> 
                             <button.commit_callback
@@ -133,8 +133,8 @@
                                 height="23"
                                 label="Sky 2"
                                 layout="topleft"
-                                top_pad="0"
-                                left="10"
+                                top_delta="0"
+                                left_pad="10"
                                 name="sky2_track"
                                 width="100"> 
                             <button.commit_callback
@@ -146,8 +146,8 @@
                                 height="23"
                                 label="Ground Level"
                                 layout="topleft"
-                                top_pad="0"
-                                left="10"
+                                top_delta="0"
+                                left_pad="10"
                                 name="sky1_track"
                                 width="100"> 
                             <button.commit_callback
@@ -159,8 +159,8 @@
                                 height="23"
                                 label="Water"
                                 layout="topleft"
-                                top_pad="0"
-                                left="10"
+                                top_delta="0"
+                                left_pad="10"
                                 name="water_track"
                                 width="100"> 
                             <button.commit_callback
@@ -171,11 +171,11 @@
                     <panel name="timeline"
                             border="true"
                             follows="left|top"
-                            height="150"
-                            min_height="0"
-                            width="595"
+                            top="30"
+                            bottom="-5"
+                            right="-7"
                             min_width="595"
-                            left_pad="0"
+                            left="7"
                             visible="true">              
                         <!-- Todo: These 5 tests might be subjected to a change to be dynamically generated, consider using layout_stack to get dynamic width adjustment-->
                         <text
@@ -494,9 +494,9 @@
                 <layout_panel name="frame_edit_controls"
                         auto_resize="false"
                         user_resize="false"
-                        height="30"
+                        height="17"
                         width="700"
-                        min_height="30"
+                        min_height="20"
                         visible="true">
                     <!--bg_alpha_color="blue"
                 background_visible="true" -->
@@ -504,9 +504,9 @@
                             name="icn_lock_edit"
                             follows="bottom"
                             height="10"
-                            layout="bottomleft"
+                            layout="topleft"
                             left_delta="15"
-                            top_pad="15"
+                            top="0"
                             font="SansSerif"
                             text_color="Yellow"
                             width="500">
@@ -546,23 +546,23 @@
                 <layout_panel name="frame_settings_sky"
                         auto_resize="true"
                         user_resize="false"
-                        height="420"
+                        height="443"
                         width="700"
                         min_height="0"
                         visible="true">
                     <tab_container
                             follows="all"
                             halign="left"
-                            height="420"
+                            height="443"
                             visible="true"
                             layout="topleft"
-                            left="0"
+                            left="3"
                             name="sky_tabs"
                             tab_position="top"
                             tab_width="140"
                             tab_padding_right="3"
-                            top_pad="0"
-                            width="700">
+                            top="0"
+                            right="-3">
                         <panel
                                 border="true"
                                 class="panel_settings_atmos"
@@ -608,8 +608,7 @@
         <layout_panel name="buttons"
                 auto_resize="false"
                 user_resize="false"
-                height="26"
-                min_height="26"
+                height="31"
                 visible="true"
                 width="700">
             <button
@@ -617,9 +616,9 @@
                     height="23"
                     label="Save"
                     left="5"
-                    top_pad="0"
+                    top="0"
                     name="save_btn"
-                    width="156" />
+                    width="105" />
 
             <button
                     follows="top|left"
@@ -643,7 +642,7 @@
                     layout="topleft"
                     left_pad="10"
                     name="cancel_btn"
-                    width="150" /> 
+                    width="87" /> 
 
         </layout_panel>
     </layout_stack>

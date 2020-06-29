@@ -68,6 +68,10 @@ public:
 	{
 		Optional<bool>			has_border;
 		Optional<LLViewBorder::Params>	border;
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+		Optional<S32>			border_margin_horz;
+		Optional<S32>			border_margin_vert;
+// [/SL:KB]
 
 		Optional<bool>			background_visible,
 								background_opaque;
@@ -127,7 +131,10 @@ public:
 	virtual 	void	clearCtrls(); // overridden in LLPanelObject and LLPanelVolume
 
 	// Border controls
-	void addBorder( LLViewBorder::Params p);
+//	void addBorder( LLViewBorder::Params p);
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+	void addBorder( LLViewBorder::Params p, S32 margin_horz = 0, S32 margin_vert = 0);
+// [/SL:KB]
 	void addBorder();
 	void			removeBorder();
 	BOOL			hasBorder() const { return mBorder != NULL; }

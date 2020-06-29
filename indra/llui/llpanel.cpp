@@ -70,6 +70,10 @@ const LLPanel::Params& LLPanel::getDefaultParams()
 LLPanel::Params::Params()
 :	has_border("border", false),
 	border(""),
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+	border_margin_horz("border_margin_horz", 0),
+	border_margin_vert("border_margin_vert", 0),
+// [/SL:KB]
 	background_visible("background_visible", false),
 	background_opaque("background_opaque", false),
 	bg_opaque_color("bg_opaque_color"),
@@ -117,7 +121,10 @@ LLPanel::LLPanel(const LLPanel::Params& p)
 {
 	if (p.has_border)
 	{
-		addBorder(p.border);
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+		addBorder(p.border, p.border_margin_horz, p.border_margin_vert);
+// [/SL:KB]
+//		addBorder(p.border);
 	}
 }
 
@@ -132,10 +139,18 @@ BOOL LLPanel::isPanel() const
 	return TRUE;
 }
 
-void LLPanel::addBorder(LLViewBorder::Params p)
+//void LLPanel::addBorder(LLViewBorder::Params p)
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+void LLPanel::addBorder(LLViewBorder::Params p, S32 margin_horz, S32 margin_vert)
+// [/SL:KB]
 {
 	removeBorder();
-	p.rect = getLocalRect();
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+	LLRect rct = getLocalRect();
+	rct.stretch(-margin_horz, -margin_vert);
+	p.rect = rct;
+// [/SL:KB]
+//	p.rect = getLocalRect();
 
 	mBorder = LLUICtrlFactory::create<LLViewBorder>(p);
 	addChild( mBorder );
@@ -478,7 +493,10 @@ void LLPanel::initFromParams(const LLPanel::Params& p)
 	
 	if (p.has_border)
 	{
-		addBorder(p.border);
+// [SL:KB] - Patch: Control-PanelBorder | Checked: Catznip-6.4
+		addBorder(p.border, p.border_margin_horz, p.border_margin_vert);
+// [/SL:KB]
+//		addBorder(p.border);
 	}
 	// let constructors set this value if not provided
 	if (p.use_bounding_rect.isProvided())
