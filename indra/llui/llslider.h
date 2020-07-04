@@ -58,7 +58,7 @@ public:
 
 // [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
 		Optional<bool> show_default_value;
-
+		Optional<F32>  default_value;
 		Optional<S32>  default_value_dead_zone;
 // [/SL:KB]
 

@@ -55,6 +55,7 @@ LLSlider::Params::Params()
 	track_image_vertical("track_image_vertical"),
 // [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
 	divet_image("divet_image"),
+	default_value("default_value", F32_MAX),
 	show_default_value("show_default_value", true),
 	default_value_dead_zone("default_value_dead_zone", 10),
 // [/SL:KB]
@@ -82,6 +83,7 @@ LLSlider::LLSlider(const LLSlider::Params& p)
 // [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
 	mDivetImage(p.divet_image),
 	mShowDefaultValue(p.show_default_value),
+	mDefaultValue(p.default_value),
 	mDefaultValueDeadZone(p.default_value_dead_zone),
 // [/SL:KB]
 	mTrackHighlightHorizontalImage(p.track_highlight_horizontal_image),
@@ -97,6 +99,9 @@ LLSlider::LLSlider(const LLSlider::Params& p)
 // [/SL:KB]
     mViewModel->setValue(p.initial_value);
 	updateThumbRect();
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	updateDivetRect();
+// [/SL:KB]
 	mDragStartThumbRect = mThumbRect;
 	setControlName(p.control_name, NULL);
 	setValue(getValueF32());
@@ -128,7 +133,8 @@ void LLSlider::setValue(F32 value, BOOL from_event)
 	value += mMinValue;
 
 // [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
-	if ( (mShowDefaultValue) && (mDefaultValue != F32_MAX) && (llabs(mDefaultValue - value) < mIncrement) )
+	// Only make the default value sticky when moving the slider with the mouse
+	if ( (mShowDefaultValue) && (mDefaultValue != F32_MAX) && (hasMouseCapture()) && (llabs(mDefaultValue - value) < mIncrement) )
 	{
 		value = mDefaultValue;
 	}
