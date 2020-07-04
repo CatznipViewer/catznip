@@ -252,7 +252,7 @@ void LLPresetsManager::getControlNames(std::vector<std::string>& names)
 {
 	const std::vector<std::string> camera_controls = boost::assign::list_of
 		// From panel_preferences_move.xml
-//		("CameraAngle")
+		("CameraAngle")
 		("CameraOffsetScale")
 //		("EditCameraMovement")
 //		("AppearanceCameraMovement")
