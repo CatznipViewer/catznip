@@ -1005,7 +1005,7 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 		LLSD const & control_map = itr->second;
 
 // [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
-		if ( (allowed_controls_p) && (allowed_controls_p->end() == std::find(allowed_controls_p->begin(), allowed_controls_p->end(), name)) )
+		if ( (allowed_controls_p) && (allowed_controls_p->size()) && (allowed_controls_p->end() == std::find(allowed_controls_p->begin(), allowed_controls_p->end(), name)) )
 		{
 			// Not on the allowed list
 			continue;
