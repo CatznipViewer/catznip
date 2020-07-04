@@ -95,6 +95,7 @@ private:
 // [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
 	LLSlider*	mZoomSlider = nullptr;
 	LLSlider*	mViewSlider = nullptr;
+	LLTimer m_CameraSyncTimer;
 // [/SL:KB]
 //	LLSlider*	mSlider;
 };
@@ -204,17 +205,22 @@ BOOL LLPanelCameraZoom::postBuild()
 void LLPanelCameraZoom::draw()
 {
 // [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
-	F32 zoom_level = gAgentCamera.getCameraZoomFraction();
-	zoom_level = 1 - sqrt(1.f - zoom_level);
-	mZoomSlider->setValue(zoom_level);
+	if (m_CameraSyncTimer.hasExpired())
+	{
+		F32 zoom_level = gAgentCamera.getCameraZoomFraction();
+		zoom_level = 1 - sqrt(1.f - zoom_level);
+		mZoomSlider->setValue(zoom_level);
 
-	// NOTE: the FoV value is inverted since most people end up using it as a secondary zoom slider and a tighter (= lower) FoV "zooms" in
-	//       by pressing the minus button which feels wrong so we flip the values around instead
-	const LLViewerCamera* pCamera = LLViewerCamera::getInstance();
-	mViewSlider->setMinValue(pCamera->getMinView());
-	mViewSlider->setMaxValue(pCamera->getMaxView());
-	mViewSlider->setDefaultValue(pCamera->getMaxView() - DEFAULT_FIELD_OF_VIEW + pCamera->getMinView());
-	mViewSlider->setValue(pCamera->getMaxView() - pCamera->getView() + pCamera->getMinView());
+		// NOTE: the FoV value is inverted since most people end up using it as a secondary zoom slider and a tighter (= lower) FoV "zooms" in
+		//       by pressing the minus button which feels wrong so we flip the values around instead
+		const LLViewerCamera* pCamera = LLViewerCamera::getInstance();
+		mViewSlider->setMinValue(pCamera->getMinView());
+		mViewSlider->setMaxValue(pCamera->getMaxView());
+		mViewSlider->setDefaultValue(pCamera->getMaxView() - DEFAULT_FIELD_OF_VIEW + pCamera->getMinView());
+		mViewSlider->setValue(pCamera->getMaxView() - pCamera->getView() + pCamera->getMinView());
+
+		m_CameraSyncTimer.setTimerExpirySec(1.f / 15);
+	}
 // [/SL:KB]
 //	mSlider->setValue(gAgentCamera.getCameraZoomFraction());
 	LLPanel::draw();
@@ -300,7 +306,7 @@ void LLPanelCameraZoom::onViewSliderChanged()
 {
 	LLViewerCamera* pCamera = LLViewerCamera::getInstance();
 	pCamera->setDefaultFOV(pCamera->getMaxView() - mViewSlider->getValueF32() + pCamera->getMinView());
-	gSavedSettings.setF32("CameraAngle", pCamera->getView()); // setView may have clamped it.
+//	gSavedSettings.setF32("CameraAngle", pCamera->getView()); // setView may have clamped it.
 }
 // [/SL:KB]
 
@@ -673,10 +679,6 @@ void LLFloaterCamera::switchToPreset(const std::string& name)
 		}
 	}
 	gAgentCamera.resetCameraZoomFraction();
-// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
-	LLViewerCamera::getInstance()->setDefaultFOV(DEFAULT_FIELD_OF_VIEW);
-	gSavedSettings.setF32("CameraAngle", DEFAULT_FIELD_OF_VIEW);
-// [/SL:KB]
 
 	LLFloaterCamera* camera_floater = LLFloaterCamera::findInstance();
 	if (camera_floater)

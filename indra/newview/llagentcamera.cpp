@@ -2280,6 +2280,9 @@ void LLAgentCamera::changeCameraToThirdPerson(BOOL animate)
 	gViewerWindow->getWindow()->resetBusyCount();
 
 	mCameraZoomFraction = INITIAL_ZOOM_FRACTION;
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	LLViewerCamera::instance().setDefaultFOV(gSavedSettings.getF32("CameraAngle"));
+// [/SL:KB]
 
 	if (isAgentAvatarValid())
 	{
