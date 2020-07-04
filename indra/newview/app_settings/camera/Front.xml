@@ -16,6 +16,17 @@
           <real>1</real>
         </array>
     </map>
+    <key>CameraAngle</key>
+        <map>
+        <key>Comment</key>
+            <string>Camera field of view angle (Radians)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>F32</string>
+        <key>Value</key>
+            <real>1.047197551</real>
+        </map>
     <key>CameraOffsetBuild</key>
         <map>
         <key>Comment</key>
