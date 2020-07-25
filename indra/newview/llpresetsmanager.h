@@ -96,7 +96,10 @@ public:
   private:
 	LOG_CLASS(LLPresetsManager);
 
-	void getControlNames(std::vector<std::string>& names);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	void getControlNames(const std::string& subdirectory, std::vector<std::string>& names);
+// [/SL:KB]
+//	void getControlNames(std::vector<std::string>& names);
 	static void settingChanged();
 
 	boost::signals2::connection	mCameraChangedSignal;

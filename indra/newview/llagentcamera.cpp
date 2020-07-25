@@ -267,10 +267,7 @@ void LLAgentCamera::setAvatarObject(LLVOAvatarSelf* avatar)
 	}
 	if (!mPointAt)
 	{
-// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
-		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT, LLHUDEffectPointAt::getSendPointAt());
-// [/SL:KB]
-//		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
+		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
 	}
 	
 	if (!mLookAt.isNull())
@@ -2440,6 +2437,9 @@ void LLAgentCamera::changeCameraToThirdPerson(BOOL animate)
 	gViewerWindow->getWindow()->resetBusyCount();
 
 	mCameraZoomFraction = INITIAL_ZOOM_FRACTION;
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	LLViewerCamera::instance().setDefaultFOV(gSavedSettings.getF32("CameraAngle"));
+// [/SL:KB]
 
 	if (isAgentAvatarValid())
 	{
@@ -3022,10 +3022,7 @@ BOOL LLAgentCamera::setPointAt(EPointAtType target_type, LLViewerObject *object,
 	}
 	if (!mPointAt || mPointAt->isDead())
 	{
-// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
-		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT, LLHUDEffectPointAt::getSendPointAt());
-// [/SL:KB]
-//		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
+		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
 		mPointAt->setSourceObject(gAgentAvatarp);
 	}
 	return mPointAt->setPointAt(target_type, object, position);

@@ -99,6 +99,10 @@ public:
 
 	/*virtual*/ void	setMinValue(const LLSD& min_value)  { setMinValue((F32)min_value.asReal()); }
 	/*virtual*/ void	setMaxValue(const LLSD& max_value)  { setMaxValue((F32)max_value.asReal()); }
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	            void	setDefaultValue(const LLSD& default_value) { mSlider->setDefaultValue(default_value.asReal()); }
+	            void	setDefaultValue(F32 default_value)         { mSlider->setDefaultValue(default_value); }
+// [/SL:KB]
 	/*virtual*/ void	setMinValue(F32 min_value)  { mSlider->setMinValue(min_value); updateText(); }
 	/*virtual*/ void	setMaxValue(F32 max_value)  { mSlider->setMaxValue(max_value); updateText(); }
 	/*virtual*/ void	setIncrement(F32 increment) { mSlider->setIncrement(increment);}

@@ -42,6 +42,9 @@ static LLDefaultChildRegistry::Register<LLSlider> r1("slider_bar");
 
 LLSlider::Params::Params()
 :	orientation ("orientation", std::string ("horizontal")),
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	divet_color("divet_color"),
+// [/SL:KB]
 	thumb_outline_color("thumb_outline_color"),
 	thumb_center_color("thumb_center_color"),
 	thumb_image("thumb_image"),
@@ -49,6 +52,12 @@ LLSlider::Params::Params()
 	thumb_image_disabled("thumb_image_disabled"),
 	track_image_horizontal("track_image_horizontal"),
 	track_image_vertical("track_image_vertical"),
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	divet_image("divet_image"),
+	default_value("default_value", F32_MAX),
+	show_default_value("show_default_value", true),
+	default_value_dead_zone("default_value_dead_zone", 10),
+// [/SL:KB]
 	track_highlight_horizontal_image("track_highlight_horizontal_image"),
 	track_highlight_vertical_image("track_highlight_vertical_image"),
 	mouse_down_callback("mouse_down_callback"),
@@ -59,6 +68,9 @@ LLSlider::LLSlider(const LLSlider::Params& p)
 :	LLF32UICtrl(p),
 	mMouseOffset( 0 ),
 	mOrientation ((p.orientation() == "horizontal") ? HORIZONTAL : VERTICAL),
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	mDivetColor(p.divet_color()),
+// [/SL:KB]
 	mThumbOutlineColor(p.thumb_outline_color()),
 	mThumbCenterColor(p.thumb_center_color()),
 	mThumbImage(p.thumb_image),
@@ -66,13 +78,28 @@ LLSlider::LLSlider(const LLSlider::Params& p)
 	mThumbImageDisabled(p.thumb_image_disabled),
 	mTrackImageHorizontal(p.track_image_horizontal),
 	mTrackImageVertical(p.track_image_vertical),
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	mDivetImage(p.divet_image),
+	mShowDefaultValue(p.show_default_value),
+	mDefaultValue(p.default_value),
+	mDefaultValueDeadZone(p.default_value_dead_zone),
+// [/SL:KB]
 	mTrackHighlightHorizontalImage(p.track_highlight_horizontal_image),
 	mTrackHighlightVerticalImage(p.track_highlight_vertical_image),
 	mMouseDownSignal(NULL),
 	mMouseUpSignal(NULL)
 {
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	mThumbImageLoadedConnection = mThumbImage->addLoadedCallback([this]() {
+		updateThumbRect();
+		updateDivetRect();
+	});
+// [/SL:KB]
     mViewModel->setValue(p.initial_value);
 	updateThumbRect();
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	updateDivetRect();
+// [/SL:KB]
 	mDragStartThumbRect = mThumbRect;
 	setControlName(p.control_name, NULL);
 	setValue(getValueF32());
@@ -103,6 +130,14 @@ void LLSlider::setValue(F32 value, BOOL from_event)
 	value -= fmod(value, mIncrement);
 	value += mMinValue;
 
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	// Only make the default value sticky when moving the slider with the mouse
+	if ( (mShowDefaultValue) && (mDefaultValue != F32_MAX) && (hasMouseCapture()) && (llabs(mDefaultValue - value) < mIncrement) )
+	{
+		value = mDefaultValue;
+	}
+// [/SL:KB]
+
 	if (!from_event && getValueF32() != value)
 	{
 		setControlValue(value);
@@ -112,24 +147,54 @@ void LLSlider::setValue(F32 value, BOOL from_event)
 	updateThumbRect();
 }
 
-void LLSlider::updateThumbRect()
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+// override
+void LLSlider::setControlVariable(LLControlVariable* control)
 {
-	const S32 DEFAULT_THUMB_SIZE = 16;
-	F32 t = (getValueF32() - mMinValue) / (mMaxValue - mMinValue);
+	LLF32UICtrl::setControlVariable(control);
 
-	S32 thumb_width = mThumbImage ? mThumbImage->getWidth() : DEFAULT_THUMB_SIZE;
-	S32 thumb_height = mThumbImage ? mThumbImage->getHeight() : DEFAULT_THUMB_SIZE;
+	if (mShowDefaultValue)
+	{
+		setDefaultValue((mControlVariable) ? mControlVariable->getDefault().asReal() : F32_MAX);
+	}
+}
 
+void LLSlider::setDefaultValue(F32 default_value)
+{
+	if (mShowDefaultValue)
+	{
+		mDefaultValue = ( (default_value >= mMinValue) && (default_value <= mMaxValue) ) ? default_value: F32_MAX;
+		updateDivetRect();
+	}
+}
+
+void LLSlider::setShowDefaultValue(bool default_value)
+{
+	mShowDefaultValue = default_value;
+	if (mShowDefaultValue)
+	{
+		if (mControlVariable)
+			setDefaultValue(mControlVariable->getDefault().asReal());
+		else
+			updateDivetRect();
+	}
+}
+
+LLRect LLSlider::calcThumbRect(F32 value, S32 thumb_width, S32 thumb_height) const
+{
+	F32 t = (value - mMinValue) / (mMaxValue - mMinValue);
+
+	LLRect thumb_rect;
 	if ( mOrientation == HORIZONTAL )
 	{
 		S32 left_edge = (thumb_width / 2);
 		S32 right_edge = getRect().getWidth() - (thumb_width / 2);
 
 		S32 x = left_edge + S32( t * (right_edge - left_edge) );
-		mThumbRect.mLeft = x - (thumb_width / 2);
-		mThumbRect.mRight = mThumbRect.mLeft + thumb_width;
-		mThumbRect.mBottom = getLocalRect().getCenterY() - (thumb_height / 2);
-		mThumbRect.mTop = mThumbRect.mBottom + thumb_height;
+		thumb_rect.mLeft = x - (thumb_width / 2);
+		thumb_rect.mRight = thumb_rect.mLeft + thumb_width;
+		thumb_rect.mBottom = getLocalRect().getCenterY() - (thumb_height / 2);
+		thumb_rect.mTop = thumb_rect.mBottom + thumb_height;
 	}
 	else
 	{
@@ -137,13 +202,79 @@ void LLSlider::updateThumbRect()
 		S32 bottom_edge = getRect().getHeight() - (thumb_height / 2);
 
 		S32 y = top_edge + S32( t * (bottom_edge - top_edge) );
-		mThumbRect.mLeft = getLocalRect().getCenterX() - (thumb_width / 2);
-		mThumbRect.mRight = mThumbRect.mLeft + thumb_width;
-		mThumbRect.mBottom = y  - (thumb_height / 2);
-		mThumbRect.mTop = mThumbRect.mBottom + thumb_height;
+		thumb_rect.mLeft = getLocalRect().getCenterX() - (thumb_width / 2);
+		thumb_rect.mRight = thumb_rect.mLeft + thumb_width;
+		thumb_rect.mBottom = y  - (thumb_height / 2);
+		thumb_rect.mTop = thumb_rect.mBottom + thumb_height;
 	}
+
+	return thumb_rect;
+}
+// [/SL:KB]
+
+void LLSlider::updateThumbRect()
+{
+	const S32 DEFAULT_THUMB_SIZE = 16;
+//	F32 t = (getValueF32() - mMinValue) / (mMaxValue - mMinValue);
+
+	S32 thumb_width = mThumbImage ? mThumbImage->getWidth() : DEFAULT_THUMB_SIZE;
+	S32 thumb_height = mThumbImage ? mThumbImage->getHeight() : DEFAULT_THUMB_SIZE;
+
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	mThumbRect = calcThumbRect(getValueF32(), thumb_width, thumb_height);
+// [/SL:KB]
+//	if ( mOrientation == HORIZONTAL )
+//	{
+//		S32 left_edge = (thumb_width / 2);
+//		S32 right_edge = getRect().getWidth() - (thumb_width / 2);
+//
+//		S32 x = left_edge + S32( t * (right_edge - left_edge) );
+//		mThumbRect.mLeft = x - (thumb_width / 2);
+//		mThumbRect.mRight = mThumbRect.mLeft + thumb_width;
+//		mThumbRect.mBottom = getLocalRect().getCenterY() - (thumb_height / 2);
+//		mThumbRect.mTop = mThumbRect.mBottom + thumb_height;
+//	}
+//	else
+//	{
+//		S32 top_edge = (thumb_height / 2);
+//		S32 bottom_edge = getRect().getHeight() - (thumb_height / 2);
+//
+//		S32 y = top_edge + S32( t * (bottom_edge - top_edge) );
+//		mThumbRect.mLeft = getLocalRect().getCenterX() - (thumb_width / 2);
+//		mThumbRect.mRight = mThumbRect.mLeft + thumb_width;
+//		mThumbRect.mBottom = y  - (thumb_height / 2);
+//		mThumbRect.mTop = mThumbRect.mBottom + thumb_height;
+//	}
 }
 
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+void LLSlider::updateDivetRect()
+{
+	if ( (mShowDefaultValue) && (mDefaultValue == F32_MAX) )
+	{
+		return;
+	}
+
+	const S32 divet_width = (mOrientation == HORIZONTAL) ? 2 : 14;
+	const S32 divet_height = (mOrientation == HORIZONTAL) ? 14 : 2;
+
+	mDivetRect = calcThumbRect(mDefaultValue, divet_width, divet_height);
+	if (mDefaultValue == mMinValue)
+	{
+		if (mOrientation == HORIZONTAL)
+			mDivetRect.translate(mThumbImage->getWidth() / 2, 0);
+		else
+			mDivetRect.translate(0, mThumbImage->getHeight() / 2);
+	}
+	else if (mDefaultValue == mMaxValue)
+	{
+		if (mOrientation == HORIZONTAL)
+			mDivetRect.translate(-mThumbImage->getWidth() / 2, 0);
+		else
+			mDivetRect.translate(0, -mThumbImage->getHeight() / 2);
+	}
+}
+// [/SL:KB]
 
 void LLSlider::setValueAndCommit(F32 value)
 {
@@ -163,6 +294,13 @@ BOOL LLSlider::handleHover(S32 x, S32 y, MASK mask)
 	{
 		if ( mOrientation == HORIZONTAL )
 		{
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+			if ( (mShowDefaultValue) && (llabs(mDivetRect.getCenterX() - x) < mDefaultValueDeadZone) && (getValue().asReal() == mDefaultValue) )
+			{
+				return true;
+			}
+// [/SL:KB]
+
 			S32 thumb_half_width = mThumbImage->getWidth()/2;
 			S32 left_edge = thumb_half_width;
 			S32 right_edge = getRect().getWidth() - (thumb_half_width);
@@ -175,6 +313,13 @@ BOOL LLSlider::handleHover(S32 x, S32 y, MASK mask)
 		}
 		else // mOrientation == VERTICAL
 		{
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+			if ( (mShowDefaultValue) && (llabs(mDivetRect.getCenterY() - y) < mDefaultValueDeadZone) && (getValue().asReal() == mDefaultValue) )
+			{
+				return true;
+			}
+// [/SL:KB]
+
 			S32 thumb_half_height = mThumbImage->getHeight()/2;
 			S32 top_edge = thumb_half_height;
 			S32 bottom_edge = getRect().getHeight() - (thumb_half_height);
@@ -292,8 +437,8 @@ void LLSlider::draw()
 {
 	F32 alpha = getDrawContext().mAlpha;
 
-	// since thumb image might still be decoding, need thumb to accomodate image size
-	updateThumbRect();
+//	// since thumb image might still be decoding, need thumb to accomodate image size
+//	updateThumbRect();
 
 	// Draw background and thumb.
 
@@ -328,6 +473,13 @@ void LLSlider::draw()
 					   0);
 		highlight_rect.set(track_rect.mLeft, track_rect.mTop, track_rect.mRight, track_rect.mBottom);
 	}
+
+// [SL:KB] - Control-SliderDefaultValue | Checked: Catznip-6.4
+	if (mDefaultValue != F32_MAX)
+	{
+		mDivetImage->draw(mDivetRect, mDivetColor % alpha);
+	}
+// [/SL:KB]
 
 	LLColor4 color = isInEnabledChain() ? LLColor4::white % alpha : LLColor4::white % (0.6f * alpha);
 	trackImage->draw(track_rect, color);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- height="240"
+ height="265"
  layout="topleft"
  name="camera_presets"
  help_topic="floaterviewadvanced"
@@ -123,7 +123,7 @@
      height="16"
      layout="topleft"
      left="10"
-     top_pad="10"
+     top_pad="7"
      width="100">
       Focus offset:
     </text>
@@ -171,7 +171,7 @@
      layout="topleft"
      left="10"
      name="edit_offset_text"
-     top_pad="10"
+     top_pad="7"
      width="140"
      >
       Camera offset scale:
@@ -180,7 +180,7 @@
      control_name="CameraOffsetScale"
      follows="top|left|right"
      height="16"
-     top_pad="3"
+     top_pad="0"
      increment="0.1"
      min_val="-3"
      max_val="5"
@@ -203,6 +203,47 @@
        function="CommitSettings" />
     </spinner>
 
+    <text
+     follows="top|left|right"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="edit_fov_text"
+     top_pad="7"
+     width="140"
+     >
+      Field of View:
+    </text>
+    <slider
+     control_name="CameraAngle"
+     decimal_digits="2"
+     follows="top|left|right"
+     height="16"
+     top_pad="0"
+     increment="0.025"
+     min_val="0.17"
+     max_val="2.97"
+     show_text="false"
+     layout="topleft"
+     left="3"
+     name="edit_fov_slider"
+     width="196"
+     />
+    <spinner
+     control_name="CameraAngle"
+     decimal_digits="2"
+     follows="top|left|right"
+     height="20"
+     increment="0.025"
+     left_pad="5"
+     name="edit_fov_spin"
+     min_val="0.17"
+     max_val="2.97"
+     width="58">
+      <spinner.commit_callback
+       function="CommitSettings" />
+    </spinner>
+
     <flyout_button
      follows="left|bottom"
      height="23"
@@ -210,7 +251,7 @@
      layout="topleft"
      left="10"
      name="save_btn"
-     top_pad="8"
+     top_pad="5"
      width="87">
       <item
        label="Save"
