@@ -2718,9 +2718,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>0f70815a710dc1cea9b5f7bc76abba71</string>
+              <string>3b4436f7c2cafcf57a3fe48104ff6b67</string>
               <key>url</key>
-              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.61-windows.tar.bz2</string>
+              <string>http://viewer.catznip.com/downloads/packages/openjpeg-2.3.1.0-windows-64.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
@@ -2730,16 +2730,16 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>ffb991590aaada15c3f268323ab2e508</string>
+              <string>8aeac2c875767098818ddc73903e36fb</string>
               <key>url</key>
-              <string>https://downloads.catznip.com/packages/openjpeg-2.3.0.61-windows64.tar.bz2</string>
+              <string>http://viewer.catznip.com/downloads/packages/openjpeg-2.3.1.0-windows64-64.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
           </map>
         </map>
         <key>version</key>
-        <string>2.3.0.57</string>
+        <string>2.3.1.64</string>
       </map>
       <key>openssl</key>
       <map>
@@ -3727,7 +3727,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
         <key>windows</key>
         <map>
           <key>build_directory</key>
-          <string>build-vc${AUTOBUILD_VSVER|150}-$AUTOBUILD_ADDRSIZE</string>
+          <string>build-vc${AUTOBUILD_VSVER}-$AUTOBUILD_ADDRSIZE</string>
           <key>configurations</key>
           <map>
             <key>RelWithDebInfo</key>

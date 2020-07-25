@@ -340,6 +340,10 @@ public:
 	static LLVector2& getScaleFactor() { return LLRender2D::getInstance()->mGLScaleFactor; }
 	static void setScaleFactor(const LLVector2& scale_factor) { LLRender2D::getInstance()->setScaleFactor(scale_factor); }
 	static void setLineWidth(F32 width) { LLRender2D::getInstance()->setLineWidth(width); }
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	static LLPointer<LLTexture> getFetchedTexture(const std::string& strUrl, S32 nWidth, S32 nHeight)
+		{ return LLRender2D::getInstance()->getFetchedTexture(strUrl, nWidth, nHeight); }
+// [/SL:KB]
 	static LLPointer<LLUIImage> getUIImageByID(const LLUUID& image_id, S32 priority = 0)
 		{ return LLRender2D::getInstance()->getUIImageByID(image_id, priority); }
 	static LLPointer<LLUIImage> getUIImage(const std::string& name, S32 priority = 0)
