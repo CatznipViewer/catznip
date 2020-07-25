@@ -61,7 +61,7 @@ enum ECameraPreset
 	/** Current view when a preset is saved */
 	CAMERA_PRESET_CUSTOM,
 
-// [RLVa:KB] - Checked: RLVa-2.0.0
+// [RLVa:KB] - @setcam_eyeoffset and @setcam_focusoffset
 	/* Used by RLVa */
 	CAMERA_RLV_SETCAM_VIEW,
 // [/RLVa:KB]
