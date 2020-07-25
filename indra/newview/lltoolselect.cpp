@@ -231,6 +231,9 @@ LLObjectSelectionHandle LLToolSelect::handleObjectSelection(const LLPickInfo& pi
 		}
 
 		if (!gAgentCamera.getFocusOnAvatar() &&										// if camera not glued to avatar
+// [SL:KB] - Patch: Build-RotateAtSelection | Checked: Catznip-6.4
+			gSavedSettings.getBOOL("RotateAtSelection") &&
+// [/SL:KB]
 			LLVOAvatar::findAvatarFromAttachment(object) != gAgentAvatarp &&	// and it's not one of your attachments
 			object != gAgentAvatarp)									// and it's not you
 		{
