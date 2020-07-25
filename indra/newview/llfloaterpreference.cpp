@@ -131,7 +131,6 @@
 // [/SL:KB]
 // [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a)
 #include "rlvactions.h"
-#include "rlvhandler.h"
 // [/RLVa:KB]
 
 #include "lllogininstance.h"        // to check if logged in yet
@@ -1535,7 +1534,11 @@ void LLFloaterPreference::refreshEnabledState()
 	}
 	else
 	{
-		ctrl_wind_light->setEnabled(TRUE);
+// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a
+		// "Atmospheric Shaders" can't be disabled - but can be enabled - under @setenv=n
+		ctrl_wind_light->setEnabled( (RlvActions::canChangeEnvironment()) || (!gSavedSettings.getBOOL("WindLightUseAtmosShaders")));
+// [/RLVa:KB]
+//		ctrl_wind_light->setEnabled(TRUE);
 	}
 
 	//Deferred/SSAO/Shadows
@@ -1565,7 +1568,7 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	LLTextBox* reflections_text = getChild<LLTextBox>("ReflectionsText");
 
 // [RLVa:KB] - Checked: 2013-05-11 (RLVa-1.4.9)
-	if (rlv_handler_t::isEnabled())
+	if (RlvActions::isRlvEnabled())
 	{
 		getChild<LLUICtrl>("do_not_disturb_response")->setEnabled(!RlvActions::hasBehaviour(RLV_BHVR_SENDIM));
 	}
@@ -1617,12 +1620,11 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
     LLCheckBoxCtrl* ctrl_wind_light = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
     LLSliderCtrl* sky = getChild<LLSliderCtrl>("SkyMeshDetail");
     LLTextBox* sky_text = getChild<LLTextBox>("SkyMeshDetailText");
-    ctrl_wind_light->setEnabled(TRUE);
-// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a//    // "Atmospheric Shaders" can't be disabled - but can be enabled - under @setenv=n
-//    bool fCtrlWindLightEnable = fCtrlShaderEnable && shaders;
-//    ctrl_wind_light->setEnabled(
-//        fCtrlWindLightEnable && ((!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV)) || (!gSavedSettings.getBOOL("WindLightUseAtmosShaders"))) );
+// [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a) | Modified: RLVa-0.2.0a
+	// "Atmospheric Shaders" can't be disabled - but can be enabled - under @setenv=n
+	ctrl_wind_light->setEnabled( (RlvActions::canChangeEnvironment()) || (!gSavedSettings.getBOOL("WindLightUseAtmosShaders")));
 // [/RLVa:KB]
+//    ctrl_wind_light->setEnabled(TRUE);
     sky->setEnabled(TRUE);
     sky_text->setEnabled(TRUE);
 
