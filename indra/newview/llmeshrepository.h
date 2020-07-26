@@ -341,7 +341,10 @@ public:
 	bool skinInfoReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
 	bool decompositionReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
 	bool physicsShapeReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
-	LLSD& getMeshHeader(const LLUUID& mesh_id);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	const LLSD getMeshHeader(const LLUUID& mesh_id) const;
+// [/SL:KB]
+//	LLSD& getMeshHeader(const LLUUID& mesh_id);
 
 	void notifyLoadedMeshes();
 	S32 getActualMeshLOD(const LLVolumeParams& mesh_params, S32 lod);
@@ -561,10 +564,14 @@ public:
     // Estimated triangle count of the largest LOD
     F32 getEstTrianglesMax(LLUUID mesh_id);
     F32 getEstTrianglesStreamingCost(LLUUID mesh_id);
-	F32 getStreamingCostLegacy(LLUUID mesh_id, F32 radius, S32* bytes = NULL, S32* visible_bytes = NULL, S32 detail = -1, F32 *unscaled_value = NULL);
-	static F32 getStreamingCostLegacy(LLSD& header, F32 radius, S32* bytes = NULL, S32* visible_bytes = NULL, S32 detail = -1, F32 *unscaled_value = NULL);
-    bool getCostData(LLUUID mesh_id, LLMeshCostData& data);
-    bool getCostData(LLSD& header, LLMeshCostData& data);
+//	F32 getStreamingCostLegacy(LLUUID mesh_id, F32 radius, S32* bytes = NULL, S32* visible_bytes = NULL, S32 detail = -1, F32 *unscaled_value = NULL);
+//	static F32 getStreamingCostLegacy(LLSD& header, F32 radius, S32* bytes = NULL, S32* visible_bytes = NULL, S32 detail = -1, F32 *unscaled_value = NULL);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+    bool getCostData(const LLUUID& mesh_id, LLMeshCostData& data) const;
+    bool getCostData(const LLSD& header, LLMeshCostData& data) const;
+// [/SL:KB]
+//    bool getCostData(LLUUID mesh_id, LLMeshCostData& data);
+//    bool getCostData(LLSD& header, LLMeshCostData& data);
 
 	LLMeshRepository();
 
@@ -582,7 +589,10 @@ public:
 	void notifyDecompositionReceived(LLModel::Decomposition* info);
 
 	S32 getActualMeshLOD(const LLVolumeParams& mesh_params, S32 lod);
-	static S32 getActualMeshLOD(LLSD& header, S32 lod);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	static S32 getActualMeshLOD(const LLSD& header, S32 lod);
+// [/SL:KB]
+//	static S32 getActualMeshLOD(LLSD& header, S32 lod);
 	const LLMeshSkinInfo* getSkinInfo(const LLUUID& mesh_id, const LLVOVolume* requesting_obj);
 	LLModel::Decomposition* getDecomposition(const LLUUID& mesh_id);
 	void fetchPhysicsShape(const LLUUID& mesh_id);
@@ -595,7 +605,10 @@ public:
 	bool meshRezEnabled();
 	
 
-	LLSD& getMeshHeader(const LLUUID& mesh_id);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	const LLSD getMeshHeader(const LLUUID& mesh_id) const;
+// [/SL:KB]
+//	LLSD& getMeshHeader(const LLUUID& mesh_id);
 
 	void uploadModel(std::vector<LLModelInstance>& data, LLVector3& scale, bool upload_textures,
                      bool upload_skin, bool upload_joints, bool lock_scale_if_joint_position,
@@ -603,7 +616,10 @@ public:
 					 LLHandle<LLWholeModelFeeObserver> fee_observer= (LLHandle<LLWholeModelFeeObserver>()), 
                      LLHandle<LLWholeModelUploadObserver> upload_observer = (LLHandle<LLWholeModelUploadObserver>()));
 
-	S32 getMeshSize(const LLUUID& mesh_id, S32 lod);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	S32 getMeshSize(const LLUUID& mesh_id, S32 lod) const;
+// [/SL:KB]
+//	S32 getMeshSize(const LLUUID& mesh_id, S32 lod);
 
 	// Quiescent timer management, main thread only.
 	static void metricsStart();
@@ -645,7 +661,7 @@ public:
 	
 	U32 mMeshThreadCount;
 
-	void cacheOutgoingMesh(LLMeshUploadData& data, LLSD& header);
+//	void cacheOutgoingMesh(LLMeshUploadData& data, LLSD& header);
 	
 	LLMeshRepoThread* mThread;
 	std::vector<LLMeshUploadThread*> mUploads;
