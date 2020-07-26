@@ -201,7 +201,10 @@ void LLFloaterAuction::onClickSnapshot(void* data)
 		tga->encode(raw);
 		LLVFile::writeFile(tga->getData(), tga->getDataSize(), gVFS, self->mImageID, LLAssetType::AT_IMAGE_TGA);
 		
-		raw->biasedScaleToPowerOfTwo(LLViewerTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+		raw->biasedScaleToPowerOfTwo(LLViewerTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//		raw->biasedScaleToPowerOfTwo(LLViewerTexture::MAX_IMAGE_SIZE_DEFAULT);
 
 		LL_INFOS() << "Writing J2C..." << LL_ENDL;
 

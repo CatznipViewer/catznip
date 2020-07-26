@@ -284,7 +284,10 @@ bool LLLocalBitmap::decodeBitmap(LLPointer<LLImageRaw> rawimg)
 			LLPointer<LLImageBMP> bmp_image = new LLImageBMP;
 			if (bmp_image->load(mFilename) && bmp_image->decode(rawimg, 0.0f))
 			{
-				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
 				decode_successful = true;
 			}
 			break;
@@ -296,7 +299,10 @@ bool LLLocalBitmap::decodeBitmap(LLPointer<LLImageRaw> rawimg)
 			if ((tga_image->load(mFilename) && tga_image->decode(rawimg))
 			&& ((tga_image->getComponents() == 3) || (tga_image->getComponents() == 4)))
 			{
-				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
 				decode_successful = true;
 			}
 			break;
@@ -307,7 +313,10 @@ bool LLLocalBitmap::decodeBitmap(LLPointer<LLImageRaw> rawimg)
 			LLPointer<LLImageJPEG> jpeg_image = new LLImageJPEG;
 			if (jpeg_image->load(mFilename) && jpeg_image->decode(rawimg, 0.0f))
 			{
-				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Inspect-ImageLinkPreview | Checked: Catznip-5.4
+				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
 				decode_successful = true;
 			}
 			break;
@@ -318,7 +327,10 @@ bool LLLocalBitmap::decodeBitmap(LLPointer<LLImageRaw> rawimg)
 			LLPointer<LLImagePNG> png_image = new LLImagePNG;
 			if (png_image->load(mFilename) && png_image->decode(rawimg, 0.0f))
 			{
-				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT, LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
+// [/SL:KB]
+//				rawimg->biasedScaleToPowerOfTwo(LLViewerFetchedTexture::MAX_IMAGE_SIZE_DEFAULT);
 				decode_successful = true;
 			}
 			break;

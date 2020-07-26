@@ -161,6 +161,10 @@ public:
 	// <= 0 priority means that there's no need for more data.
 	static F32 calc_download_priority(F32 virtual_size, F32 visible_area, S32 bytes_sent);
 
+// [SL:KB] - Patch: Viewer-Textures | Checked: Catznip-5.4
+	static EImageCodec getCodec(const std::string& strExtension, const U8* pData, unsigned int szData);
+	static EImageCodec getCodecFromData(const U8* pData, unsigned int szData);
+// [/SL:KB]
 	static EImageCodec getCodecFromExtension(const std::string& exten);
 
 	//static LLTrace::MemStatHandle sMemStat;
@@ -208,9 +212,13 @@ public:
     static S32 biasedDimToPowerOfTwo(S32 curr_dim, S32 max_dim = MAX_IMAGE_SIZE);
     static S32 expandDimToPowerOfTwo(S32 curr_dim, S32 max_dim = MAX_IMAGE_SIZE);
     static S32 contractDimToPowerOfTwo(S32 curr_dim, S32 min_dim = MIN_IMAGE_SIZE);
-	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	void expandToPowerOfTwo(S32 max_width, S32 max_height, bool scale_image = true);
+	void biasedScaleToPowerOfTwo(S32 max_width, S32 max_height);
+// [/SL:KB]
+//	void expandToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
 	void contractToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE, bool scale_image = true);
-	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
+//	void biasedScaleToPowerOfTwo(S32 max_dim = MAX_IMAGE_SIZE);
 	bool scale(S32 new_width, S32 new_height, bool scale_image = true);
     LLPointer<LLImageRaw> scaled(S32 new_width, S32 new_height);
 	

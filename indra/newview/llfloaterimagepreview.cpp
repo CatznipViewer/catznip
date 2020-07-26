@@ -372,7 +372,10 @@ bool LLFloaterImagePreview::loadImage(const std::string& src_filename)
 		return false;
 	}
 	
-	raw_image->biasedScaleToPowerOfTwo(1024);
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	raw_image->biasedScaleToPowerOfTwo(1024, 1024);
+// [/SL:KB]
+//	raw_image->biasedScaleToPowerOfTwo(1024);
 	mRawImagep = raw_image;
 	
 	return true;

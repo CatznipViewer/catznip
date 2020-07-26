@@ -1789,7 +1789,14 @@ bool LLTextureFetchWorker::doWork(S32 param)
 			{
 				// For now, create formatted image based on extension
 				std::string extension = gDirUtilp->getExtension(mUrl);
-				mFormattedImage = LLImageFormatted::createFromType(LLImageBase::getCodecFromExtension(extension));
+// [SL:KB] - Patch: Viewer-Textures | Checked: Catznip-5.4
+				// Read the first 8 bytes
+				llassert(cur_size == 0);
+				U8 fileHeader[8] = { 0 };
+				mHttpBufferArray->read(src_offset, fileHeader, 8);
+				mFormattedImage = LLImageFormatted::createFromType(LLImageBase::getCodec(extension, fileHeader, 8));
+// [/SL:KB]
+//				mFormattedImage = LLImageFormatted::createFromType(LLImageBase::getCodecFromExtension(extension));
 				if (mFormattedImage.isNull())
 				{
 					mFormattedImage = new LLImageJ2C; // default

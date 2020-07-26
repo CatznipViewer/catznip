@@ -237,6 +237,9 @@ class LLUIImageList : public LLImageProviderInterface, public LLSingleton<LLUIIm
 	LLSINGLETON_EMPTY_CTOR(LLUIImageList);
 public:
 	// LLImageProviderInterface
+// [SL:KB]
+	LLPointer<LLTexture> getFetchedTexture(const std::string& strUrl, S32 width, S32 height) override;
+// [/SL:KB]
 	/*virtual*/ LLPointer<LLUIImage> getUIImageByID(const LLUUID& id, S32 priority);
 	/*virtual*/ LLPointer<LLUIImage> getUIImage(const std::string& name, S32 priority);
 	void cleanUp();
