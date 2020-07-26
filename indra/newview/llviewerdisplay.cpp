@@ -1669,7 +1669,10 @@ void render_disconnected_background()
 		}
 
 		
-		raw->expandToPowerOfTwo();
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+		raw->expandToPowerOfTwo(MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
+// [/SL:KB]
+//		raw->expandToPowerOfTwo();
 		gDisconnectedImagep = LLViewerTextureManager::getLocalTexture(raw.get(), FALSE );
 		gStartTexture = gDisconnectedImagep;
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);

@@ -269,7 +269,10 @@ enum FTType
 	FTT_SERVER_BAKE, // texture produced by appearance service and fetched from there.
 	FTT_HOST_BAKE, // old-style baked texture uploaded by viewer and fetched from avatar's host.
 	FTT_MAP_TILE, // tiles are fetched from map server directly.
-	FTT_LOCAL_FILE // fetch directly from a local file.
+	FTT_LOCAL_FILE, // fetch directly from a local file.
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	FTT_FETCHED_FILE, // fetch from the "wild" web
+// [/SL:KB]
 };
 
 const std::string& fttype_to_string(const FTType& fttype);

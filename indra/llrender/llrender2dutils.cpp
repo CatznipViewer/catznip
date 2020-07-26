@@ -1627,6 +1627,20 @@ void LLRender2D::setLineWidth(F32 width)
 	glLineWidth(width * lerp(mGLScaleFactor.mV[VX], mGLScaleFactor.mV[VY], 0.5f));
 }
 
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+LLPointer<LLTexture> LLRender2D::getFetchedTexture(const std::string& strUrl, S32 nWidth, S32 nHeight)
+{
+	if (mImageProvider)
+	{
+		return mImageProvider->getFetchedTexture(strUrl, nWidth, nHeight);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+// [/SL:KB]
+
 LLPointer<LLUIImage> LLRender2D::getUIImageByID(const LLUUID& image_id, S32 priority)
 {
 	if (mImageProvider)
