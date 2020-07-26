@@ -135,6 +135,9 @@ public:
 	void setLineWidth(F32 width);
 	void setScaleFactor(const LLVector2& scale_factor);
 
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	LLPointer<LLTexture> getFetchedTexture(const std::string& strUrl, S32 nWidth, S32 nHeight);
+// [/SL:KB]
 	LLPointer<LLUIImage> getUIImageByID(const LLUUID& image_id, S32 priority = 0);
 	LLPointer<LLUIImage> getUIImage(const std::string& name, S32 priority = 0);
 
@@ -156,6 +159,9 @@ protected:
 	LLImageProviderInterface() {};
 	virtual ~LLImageProviderInterface();
 public:
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	virtual LLPointer<LLTexture> getFetchedTexture(const std::string& strUrl, S32 nWidth, S32 nHeight) = 0;
+// [/SL:KB]
 	virtual LLPointer<LLUIImage> getUIImage(const std::string& name, S32 priority) = 0;
 	virtual LLPointer<LLUIImage> getUIImageByID(const LLUUID& id, S32 priority) = 0;
 	virtual void cleanUp() = 0;

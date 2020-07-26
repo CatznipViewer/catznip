@@ -2181,6 +2181,12 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
 		{
 			//make a duplicate to keep the original raw image untouched.
 
+// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
+#ifndef CATZNIP_RELEASE
+			// The LL exception handler just looks like it's blocking the actual crash point so revert to the original code on non-release builds
+            raw = raw->duplicate();
+#elif
+// [/SL:KB]
             try
             {
 #if LL_WINDOWS
@@ -2193,7 +2199,10 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
             catch (...)
             {
                 removeFromCache(image_id);
-                LL_ERRS() << "Failed to cache image: " << image_id
+//                LL_ERRS() << "Failed to cache image: " << image_id
+// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
+                LL_WARNS() << "Failed to cache image: " << image_id
+// [/SL:KB]
                     << " local id: " << id
                     << " Exception: " << boost::current_exception_diagnostic_information()
                     << " Image new width: " << w
@@ -2204,6 +2213,9 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
 
                 return false;
             }
+// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
+#endif // CATZNIP_RELEASE
+// [/SL:KB]
 
 			if (raw->isBufferInvalid())
 			{

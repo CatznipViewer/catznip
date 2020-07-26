@@ -1181,8 +1181,11 @@ void LLMeshRepoThread::lockAndLoadMeshLOD(const LLVolumeParams& mesh_params, S32
 void LLMeshRepoThread::loadMeshLOD(const LLVolumeParams& mesh_params, S32 lod)
 { //could be called from any thread
 	LLMutexLock lock(mMutex);
-	mesh_header_map::iterator iter = mMeshHeader.find(mesh_params.getSculptID());
-	if (iter != mMeshHeader.end())
+//	mesh_header_map::iterator iter = mMeshHeader.find(mesh_params.getSculptID());
+//	if (iter != mMeshHeader.end())
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	if (mMeshHeader.find(mesh_params.getSculptID()) != mMeshHeader.end())
+// [/SL:KB]
 	{ //if we have the header, request LOD byte range
 		LODRequest req(mesh_params, lod);
 		{
@@ -1319,11 +1322,20 @@ bool LLMeshRepoThread::fetchMeshSkinInfo(const LLUUID& mesh_id)
 
 	mHeaderMutex->lock();
 
-	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	{ //we have no header info for this mesh, do nothing
+//		mHeaderMutex->unlock();
+//		return false;
+//	}
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	mesh_header_map::const_iterator it = mMeshHeader.find(mesh_id);
+	if (it == mMeshHeader.end())
 	{ //we have no header info for this mesh, do nothing
 		mHeaderMutex->unlock();
 		return false;
 	}
+	const LLSD& header = it->second;
+// [/SL:KB]
 
 	++LLMeshRepository::sMeshRequestCount;
 	bool ret = true;
@@ -1331,9 +1343,14 @@ bool LLMeshRepoThread::fetchMeshSkinInfo(const LLUUID& mesh_id)
 	
 	if (header_size > 0)
 	{
-		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
-		S32 offset = header_size + mMeshHeader[mesh_id]["skin"]["offset"].asInteger();
-		S32 size = mMeshHeader[mesh_id]["skin"]["size"].asInteger();
+//		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
+//		S32 offset = header_size + mMeshHeader[mesh_id]["skin"]["offset"].asInteger();
+//		S32 size = mMeshHeader[mesh_id]["skin"]["size"].asInteger();
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		S32 version = header["version"].asInteger();
+		S32 offset = header_size + header["skin"]["offset"].asInteger();
+		S32 size = header["skin"]["size"].asInteger();
+// [/SL:KB]
 
 		mHeaderMutex->unlock();
 
@@ -1415,11 +1432,20 @@ bool LLMeshRepoThread::fetchMeshDecomposition(const LLUUID& mesh_id)
 
 	mHeaderMutex->lock();
 
-	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	{ //we have no header info for this mesh, do nothing
+//		mHeaderMutex->unlock();
+//		return false;
+//	}
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	mesh_header_map::const_iterator it = mMeshHeader.find(mesh_id);
+	if (it == mMeshHeader.end())
 	{ //we have no header info for this mesh, do nothing
 		mHeaderMutex->unlock();
 		return false;
 	}
+	const LLSD& header = it->second;
+// [/SL:KB]
 
 	++LLMeshRepository::sMeshRequestCount;
 	U32 header_size = mMeshHeaderSize[mesh_id];
@@ -1427,9 +1453,14 @@ bool LLMeshRepoThread::fetchMeshDecomposition(const LLUUID& mesh_id)
 	
 	if (header_size > 0)
 	{
-		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
-		S32 offset = header_size + mMeshHeader[mesh_id]["physics_convex"]["offset"].asInteger();
-		S32 size = mMeshHeader[mesh_id]["physics_convex"]["size"].asInteger();
+//		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
+//		S32 offset = header_size + mMeshHeader[mesh_id]["physics_convex"]["offset"].asInteger();
+//		S32 size = mMeshHeader[mesh_id]["physics_convex"]["size"].asInteger();
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		S32 version = header["version"].asInteger();
+		S32 offset = header_size + header["physics_convex"]["offset"].asInteger();
+		S32 size = header["physics_convex"]["size"].asInteger();
+// [/SL:KB]
 
 		mHeaderMutex->unlock();
 
@@ -1512,11 +1543,20 @@ bool LLMeshRepoThread::fetchMeshPhysicsShape(const LLUUID& mesh_id)
 
 	mHeaderMutex->lock();
 
-	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	if (mMeshHeader.find(mesh_id) == mMeshHeader.end())
+//	{ //we have no header info for this mesh, do nothing
+//		mHeaderMutex->unlock();
+//		return false;
+//	}
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	mesh_header_map::const_iterator it = mMeshHeader.find(mesh_id);
+	if (it == mMeshHeader.end())
 	{ //we have no header info for this mesh, do nothing
 		mHeaderMutex->unlock();
 		return false;
 	}
+	const LLSD& header = it->second;
+// [/SL:KB]
 
 	++LLMeshRepository::sMeshRequestCount;
 	U32 header_size = mMeshHeaderSize[mesh_id];
@@ -1524,9 +1564,14 @@ bool LLMeshRepoThread::fetchMeshPhysicsShape(const LLUUID& mesh_id)
 
 	if (header_size > 0)
 	{
-		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
-		S32 offset = header_size + mMeshHeader[mesh_id]["physics_mesh"]["offset"].asInteger();
-		S32 size = mMeshHeader[mesh_id]["physics_mesh"]["size"].asInteger();
+//		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
+//		S32 offset = header_size + mMeshHeader[mesh_id]["physics_mesh"]["offset"].asInteger();
+//		S32 size = mMeshHeader[mesh_id]["physics_mesh"]["size"].asInteger();
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		S32 version = header["version"].asInteger();
+		S32 offset = header_size + header["physics_mesh"]["offset"].asInteger();
+		S32 size = header["physics_mesh"]["size"].asInteger();
+// [/SL:KB]
 
 		mHeaderMutex->unlock();
 
@@ -1705,12 +1750,28 @@ bool LLMeshRepoThread::fetchMeshLOD(const LLVolumeParams& mesh_params, S32 lod, 
 	LLUUID mesh_id = mesh_params.getSculptID();
 	
 	U32 header_size = mMeshHeaderSize[mesh_id];
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+	mesh_header_map::const_iterator it = mMeshHeader.find(mesh_id);
+	if (it == mMeshHeader.end())
+	{
+#ifdef CATZNIP_BETA
+		LL_ERRS() << "LLMeshRepoThread::fetchMeshLOD" << LL_ENDL;
+#endif // CATZNIP_BETA
+		return false;
+	}
+	const LLSD& header = it->second;
+// [/SL:KB]
 
 	if (header_size > 0)
 	{
-		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
-		S32 offset = header_size + mMeshHeader[mesh_id][header_lod[lod]]["offset"].asInteger();
-		S32 size = mMeshHeader[mesh_id][header_lod[lod]]["size"].asInteger();
+//		S32 version = mMeshHeader[mesh_id]["version"].asInteger();
+//		S32 offset = header_size + mMeshHeader[mesh_id][header_lod[lod]]["offset"].asInteger();
+//		S32 size = mMeshHeader[mesh_id][header_lod[lod]]["size"].asInteger();
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		S32 version = header["version"].asInteger();
+		S32 offset = header_size + header[header_lod[lod]]["offset"].asInteger();
+		S32 size = header[header_lod[lod]]["size"].asInteger();
+// [/SL:KB]
 		mHeaderMutex->unlock();
 				
 		if (version <= MAX_MESH_VERSION && offset >= 0 && size > 0)
@@ -1841,6 +1902,13 @@ bool LLMeshRepoThread::headerReceived(const LLVolumeParams& mesh_params, U8* dat
 		{
 			header_size += stream.tellg();
 		}
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		else
+		{
+			LL_INFOS(LOG_MESH) << "No LOD was found in header for  " << mesh_id << LL_ENDL;
+			header["404"] = 1;
+		}
+// [/SL:KB]
 	}
 	else
 	{
@@ -2913,7 +2981,10 @@ S32 LLMeshRepoThread::getActualMeshLOD(const LLVolumeParams& mesh_params, S32 lo
 
 	if (iter != mMeshHeader.end())
 	{
-		LLSD& header = iter->second;
+//		LLSD& header = iter->second;
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		const LLSD& header = iter->second;
+// [/SL:KB]
 
 		return LLMeshRepository::getActualMeshLOD(header, lod);
 	}
@@ -2922,7 +2993,10 @@ S32 LLMeshRepoThread::getActualMeshLOD(const LLVolumeParams& mesh_params, S32 lo
 }
 
 //static
-S32 LLMeshRepository::getActualMeshLOD(LLSD& header, S32 lod)
+//S32 LLMeshRepository::getActualMeshLOD(LLSD& header, S32 lod)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+S32 LLMeshRepository::getActualMeshLOD(const LLSD& header, S32 lod)
+// [/SL:KB]
 {
 	lod = llclamp(lod, 0, 3);
 
@@ -2961,31 +3035,32 @@ S32 LLMeshRepository::getActualMeshLOD(LLSD& header, S32 lod)
 		}
 	}
 
-	//header exists and no good lod found, treat as 404
-	header["404"] = 1;
+//	//header exists and no good lod found, treat as 404
+// [SL:KB] - This was moved up into LLMeshRepoThread::headerReceived()
+//	header["404"] = 1;
 	return -1;
 }
 
-void LLMeshRepository::cacheOutgoingMesh(LLMeshUploadData& data, LLSD& header)
-{
-	mThread->mMeshHeader[data.mUUID] = header;
-
-	// we cache the mesh for default parameters
-	LLVolumeParams volume_params;
-	volume_params.setType(LL_PCODE_PROFILE_SQUARE, LL_PCODE_PATH_LINE);
-	volume_params.setSculptID(data.mUUID, LL_SCULPT_TYPE_MESH);
-
-	for (U32 i = 0; i < 4; i++)
-	{
-		if (data.mModel[i].notNull())
-		{
-			LLPointer<LLVolume> volume = new LLVolume(volume_params, LLVolumeLODGroup::getVolumeScaleFromDetail(i));
-			volume->copyVolumeFaces(data.mModel[i]);
-			volume->setMeshAssetLoaded(TRUE);
-		}
-	}
-
-}
+//void LLMeshRepository::cacheOutgoingMesh(LLMeshUploadData& data, LLSD& header)
+//{
+//	mThread->mMeshHeader[data.mUUID] = header;
+//
+//	// we cache the mesh for default parameters
+//	LLVolumeParams volume_params;
+//	volume_params.setType(LL_PCODE_PROFILE_SQUARE, LL_PCODE_PATH_LINE);
+//	volume_params.setSculptID(data.mUUID, LL_SCULPT_TYPE_MESH);
+//
+//	for (U32 i = 0; i < 4; i++)
+//	{
+//		if (data.mModel[i].notNull())
+//		{
+//			LLPointer<LLVolume> volume = new LLVolume(volume_params, LLVolumeLODGroup::getVolumeScaleFromDetail(i));
+//			volume->copyVolumeFaces(data.mModel[i]);
+//			volume->setMeshAssetLoaded(TRUE);
+//		}
+//	}
+//
+//}
 
 // Handle failed or successful requests for mesh assets.
 //
@@ -4112,24 +4187,38 @@ bool LLMeshRepository::hasPhysicsShape(const LLUUID& mesh_id)
 	return false;
 }
 
-LLSD& LLMeshRepository::getMeshHeader(const LLUUID& mesh_id)
+//LLSD& LLMeshRepository::getMeshHeader(const LLUUID& mesh_id)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+const LLSD LLMeshRepository::getMeshHeader(const LLUUID& mesh_id) const
+// [/SL:KB]
 {
 	LL_RECORD_BLOCK_TIME(FTM_MESH_FETCH);
 
 	return mThread->getMeshHeader(mesh_id);
 }
 
-LLSD& LLMeshRepoThread::getMeshHeader(const LLUUID& mesh_id)
+//LLSD LLMeshRepoThread::getMeshHeader(const LLUUID& mesh_id)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+const LLSD LLMeshRepoThread::getMeshHeader(const LLUUID& mesh_id) const
+// [/SL:KB]
 {
 	static LLSD dummy_ret;
 	if (mesh_id.notNull())
 	{
 		LLMutexLock lock(mHeaderMutex);
-		mesh_header_map::iterator iter = mMeshHeader.find(mesh_id);
-		if (iter != mMeshHeader.end() && mMeshHeaderSize[mesh_id] > 0)
+//		mesh_header_map::iterator iter = mMeshHeader.find(mesh_id);
+//		if (iter != mMeshHeader.end() && mMeshHeaderSize[mesh_id] > 0)
+//		{
+//			return iter->second;
+//		}
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		mesh_header_map::const_iterator iter_header = mMeshHeader.find(mesh_id);
+		std::map<LLUUID, U32>::const_iterator iter_size = mMeshHeaderSize.find(mesh_id);
+		if (iter_header != mMeshHeader.end() && iter_size != mMeshHeaderSize.end() && iter_size->second > 0)
 		{
-			return iter->second;
+			return iter_header->second;
 		}
+// [/SL:KB]
 	}
 
 	return dummy_ret;
@@ -4147,15 +4236,24 @@ void LLMeshRepository::uploadModel(std::vector<LLModelInstance>& data, LLVector3
 	mUploadWaitList.push_back(thread);
 }
 
-S32 LLMeshRepository::getMeshSize(const LLUUID& mesh_id, S32 lod)
+//S32 LLMeshRepository::getMeshSize(const LLUUID& mesh_id, S32 lod)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+S32 LLMeshRepository::getMeshSize(const LLUUID& mesh_id, S32 lod) const
+// [/SL:KB]
 {
 	if (mThread && mesh_id.notNull() && LLPrimitive::NO_LOD != lod)
 	{
 		LLMutexLock lock(mThread->mHeaderMutex);
-		LLMeshRepoThread::mesh_header_map::iterator iter = mThread->mMeshHeader.find(mesh_id);
+//		LLMeshRepoThread::mesh_header_map::iterator iter = mThread->mMeshHeader.find(mesh_id);
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+		LLMeshRepoThread::mesh_header_map::const_iterator iter = mThread->mMeshHeader.find(mesh_id);
+// [/SL:KB]
 		if (iter != mThread->mMeshHeader.end() && mThread->mMeshHeaderSize[mesh_id] > 0)
 		{
-			LLSD& header = iter->second;
+//			LLSD& header = iter->second;
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+			const LLSD& header = iter->second;
+// [/SL:KB]
 
 			if (header.has("404"))
 			{
@@ -4252,158 +4350,158 @@ F32 LLMeshRepository::getEstTrianglesStreamingCost(LLUUID mesh_id)
 }
 
 // FIXME replace with calc based on LLMeshCostData
-F32 LLMeshRepository::getStreamingCostLegacy(LLUUID mesh_id, F32 radius, S32* bytes, S32* bytes_visible, S32 lod, F32 *unscaled_value)
-{
-	F32 result = 0.f;
-    if (mThread && mesh_id.notNull())
-    {
-        LLMutexLock lock(mThread->mHeaderMutex);
-        LLMeshRepoThread::mesh_header_map::iterator iter = mThread->mMeshHeader.find(mesh_id);
-        if (iter != mThread->mMeshHeader.end() && mThread->mMeshHeaderSize[mesh_id] > 0)
-        {
-            result  = getStreamingCostLegacy(iter->second, radius, bytes, bytes_visible, lod, unscaled_value);
-        }
-    }
-    if (result > 0.f)
-    {
-        LLMeshCostData data;
-        if (getCostData(mesh_id, data))
-        {
-            F32 ref_streaming_cost = data.getRadiusBasedStreamingCost(radius);
-            F32 ref_weighted_tris = data.getRadiusWeightedTris(radius);
-            if (!is_approx_equal(ref_streaming_cost,result))
-            {
-                LL_WARNS() << mesh_id << "streaming mismatch " << result << " " << ref_streaming_cost << LL_ENDL;
-            }
-            if (unscaled_value && !is_approx_equal(ref_weighted_tris,*unscaled_value))
-            {
-                LL_WARNS() << mesh_id << "weighted_tris mismatch " << *unscaled_value << " " << ref_weighted_tris << LL_ENDL;
-            }
-            if (bytes && (*bytes != data.getSizeTotal()))
-            {
-                LL_WARNS() << mesh_id << "bytes mismatch " << *bytes << " " << data.getSizeTotal() << LL_ENDL;
-            }
-            if (bytes_visible && (lod >=0) && (lod < 4) && (*bytes_visible != data.getSizeByLOD(lod)))
-            {
-                LL_WARNS() << mesh_id << "bytes_visible mismatch " << *bytes_visible << " " << data.getSizeByLOD(lod) << LL_ENDL;
-            }
-        }
-        else
-        {
-            LL_WARNS() << "getCostData failed!!!" << LL_ENDL;
-        }
-    }
-    return result;
-}
+//F32 LLMeshRepository::getStreamingCostLegacy(LLUUID mesh_id, F32 radius, S32* bytes, S32* bytes_visible, S32 lod, F32 *unscaled_value)
+//{
+//	F32 result = 0.f;
+//    if (mThread && mesh_id.notNull())
+//    {
+//        LLMutexLock lock(mThread->mHeaderMutex);
+//        LLMeshRepoThread::mesh_header_map::iterator iter = mThread->mMeshHeader.find(mesh_id);
+//        if (iter != mThread->mMeshHeader.end() && mThread->mMeshHeaderSize[mesh_id] > 0)
+//        {
+//            result  = getStreamingCostLegacy(iter->second, radius, bytes, bytes_visible, lod, unscaled_value);
+//        }
+//    }
+//    if (result > 0.f)
+//    {
+//        LLMeshCostData data;
+//        if (getCostData(mesh_id, data))
+//        {
+//            F32 ref_streaming_cost = data.getRadiusBasedStreamingCost(radius);
+//            F32 ref_weighted_tris = data.getRadiusWeightedTris(radius);
+//            if (!is_approx_equal(ref_streaming_cost,result))
+//            {
+//                LL_WARNS() << mesh_id << "streaming mismatch " << result << " " << ref_streaming_cost << LL_ENDL;
+//            }
+//            if (unscaled_value && !is_approx_equal(ref_weighted_tris,*unscaled_value))
+//            {
+//                LL_WARNS() << mesh_id << "weighted_tris mismatch " << *unscaled_value << " " << ref_weighted_tris << LL_ENDL;
+//            }
+//            if (bytes && (*bytes != data.getSizeTotal()))
+//            {
+//                LL_WARNS() << mesh_id << "bytes mismatch " << *bytes << " " << data.getSizeTotal() << LL_ENDL;
+//            }
+//            if (bytes_visible && (lod >=0) && (lod < 4) && (*bytes_visible != data.getSizeByLOD(lod)))
+//            {
+//                LL_WARNS() << mesh_id << "bytes_visible mismatch " << *bytes_visible << " " << data.getSizeByLOD(lod) << LL_ENDL;
+//            }
+//        }
+//        else
+//        {
+//            LL_WARNS() << "getCostData failed!!!" << LL_ENDL;
+//        }
+//    }
+//    return result;
+//}
 
 // FIXME replace with calc based on LLMeshCostData
 //static
-F32 LLMeshRepository::getStreamingCostLegacy(LLSD& header, F32 radius, S32* bytes, S32* bytes_visible, S32 lod, F32 *unscaled_value)
-{
-	if (header.has("404")
-		|| !header.has("lowest_lod")
-		|| (header.has("version") && header["version"].asInteger() > MAX_MESH_VERSION))
-	{
-		return 0.f;
-	}
-
-	F32 max_distance = 512.f;
-
-	F32 dlowest = llmin(radius/0.03f, max_distance);
-	F32 dlow = llmin(radius/0.06f, max_distance);
-	F32 dmid = llmin(radius/0.24f, max_distance);
-	
-	static LLCachedControl<U32> metadata_discount_ch(gSavedSettings, "MeshMetaDataDiscount", 384);  //discount 128 bytes to cover the cost of LLSD tags and compression domain overhead
-	static LLCachedControl<U32> minimum_size_ch(gSavedSettings, "MeshMinimumByteSize", 16); //make sure nothing is "free"
-	static LLCachedControl<U32> bytes_per_triangle_ch(gSavedSettings, "MeshBytesPerTriangle", 16);
-
-	F32 metadata_discount = (F32)metadata_discount_ch;
-	F32 minimum_size = (F32)minimum_size_ch;
-	F32 bytes_per_triangle = (F32)bytes_per_triangle_ch;
-
-	S32 bytes_lowest = header["lowest_lod"]["size"].asInteger();
-	S32 bytes_low = header["low_lod"]["size"].asInteger();
-	S32 bytes_mid = header["medium_lod"]["size"].asInteger();
-	S32 bytes_high = header["high_lod"]["size"].asInteger();
-
-	if (bytes_high == 0)
-	{
-		return 0.f;
-	}
-
-	if (bytes_mid == 0)
-	{
-		bytes_mid = bytes_high;
-	}
-
-	if (bytes_low == 0)
-	{
-		bytes_low = bytes_mid;
-	}
-
-	if (bytes_lowest == 0)
-	{
-		bytes_lowest = bytes_low;
-	}
-
-	F32 triangles_lowest = llmax((F32) bytes_lowest-metadata_discount, minimum_size)/bytes_per_triangle;
-	F32 triangles_low = llmax((F32) bytes_low-metadata_discount, minimum_size)/bytes_per_triangle;
-	F32 triangles_mid = llmax((F32) bytes_mid-metadata_discount, minimum_size)/bytes_per_triangle;
-	F32 triangles_high = llmax((F32) bytes_high-metadata_discount, minimum_size)/bytes_per_triangle;
-
-	if (bytes)
-	{
-		*bytes = 0;
-		*bytes += header["lowest_lod"]["size"].asInteger();
-		*bytes += header["low_lod"]["size"].asInteger();
-		*bytes += header["medium_lod"]["size"].asInteger();
-		*bytes += header["high_lod"]["size"].asInteger();
-	}
-
-	if (bytes_visible)
-	{
-		lod = LLMeshRepository::getActualMeshLOD(header, lod);
-		if (lod >= 0 && lod <= 3)
-		{
-			*bytes_visible = header[header_lod[lod]]["size"].asInteger();
-		}
-	}
-
-	F32 max_area = 102944.f; //area of circle that encompasses region (see MAINT-6559)
-	F32 min_area = 1.f;
-
-	F32 high_area = llmin(F_PI*dmid*dmid, max_area);
-	F32 mid_area = llmin(F_PI*dlow*dlow, max_area);
-	F32 low_area = llmin(F_PI*dlowest*dlowest, max_area);
-	F32 lowest_area = max_area;
-
-	lowest_area -= low_area;
-	low_area -= mid_area;
-	mid_area -= high_area;
-
-	high_area = llclamp(high_area, min_area, max_area);
-	mid_area = llclamp(mid_area, min_area, max_area);
-	low_area = llclamp(low_area, min_area, max_area);
-	lowest_area = llclamp(lowest_area, min_area, max_area);
-
-	F32 total_area = high_area + mid_area + low_area + lowest_area;
-	high_area /= total_area;
-	mid_area /= total_area;
-	low_area /= total_area;
-	lowest_area /= total_area;
-
-	F32 weighted_avg = triangles_high*high_area +
-					   triangles_mid*mid_area +
-					   triangles_low*low_area +
-					   triangles_lowest*lowest_area;
-
-	if (unscaled_value)
-	{
-		*unscaled_value = weighted_avg;
-	}
-
-	return weighted_avg/gSavedSettings.getU32("MeshTriangleBudget")*15000.f;
-}
+//F32 LLMeshRepository::getStreamingCostLegacy(LLSD& header, F32 radius, S32* bytes, S32* bytes_visible, S32 lod, F32 *unscaled_value)
+//{
+//	if (header.has("404")
+//		|| !header.has("lowest_lod")
+//		|| (header.has("version") && header["version"].asInteger() > MAX_MESH_VERSION))
+//	{
+//		return 0.f;
+//	}
+//
+//	F32 max_distance = 512.f;
+//
+//	F32 dlowest = llmin(radius/0.03f, max_distance);
+//	F32 dlow = llmin(radius/0.06f, max_distance);
+//	F32 dmid = llmin(radius/0.24f, max_distance);
+//	
+//	static LLCachedControl<U32> metadata_discount_ch(gSavedSettings, "MeshMetaDataDiscount", 384);  //discount 128 bytes to cover the cost of LLSD tags and compression domain overhead
+//	static LLCachedControl<U32> minimum_size_ch(gSavedSettings, "MeshMinimumByteSize", 16); //make sure nothing is "free"
+//	static LLCachedControl<U32> bytes_per_triangle_ch(gSavedSettings, "MeshBytesPerTriangle", 16);
+//
+//	F32 metadata_discount = (F32)metadata_discount_ch;
+//	F32 minimum_size = (F32)minimum_size_ch;
+//	F32 bytes_per_triangle = (F32)bytes_per_triangle_ch;
+//
+//	S32 bytes_lowest = header["lowest_lod"]["size"].asInteger();
+//	S32 bytes_low = header["low_lod"]["size"].asInteger();
+//	S32 bytes_mid = header["medium_lod"]["size"].asInteger();
+//	S32 bytes_high = header["high_lod"]["size"].asInteger();
+//
+//	if (bytes_high == 0)
+//	{
+//		return 0.f;
+//	}
+//
+//	if (bytes_mid == 0)
+//	{
+//		bytes_mid = bytes_high;
+//	}
+//
+//	if (bytes_low == 0)
+//	{
+//		bytes_low = bytes_mid;
+//	}
+//
+//	if (bytes_lowest == 0)
+//	{
+//		bytes_lowest = bytes_low;
+//	}
+//
+//	F32 triangles_lowest = llmax((F32) bytes_lowest-metadata_discount, minimum_size)/bytes_per_triangle;
+//	F32 triangles_low = llmax((F32) bytes_low-metadata_discount, minimum_size)/bytes_per_triangle;
+//	F32 triangles_mid = llmax((F32) bytes_mid-metadata_discount, minimum_size)/bytes_per_triangle;
+//	F32 triangles_high = llmax((F32) bytes_high-metadata_discount, minimum_size)/bytes_per_triangle;
+//
+//	if (bytes)
+//	{
+//		*bytes = 0;
+//		*bytes += header["lowest_lod"]["size"].asInteger();
+//		*bytes += header["low_lod"]["size"].asInteger();
+//		*bytes += header["medium_lod"]["size"].asInteger();
+//		*bytes += header["high_lod"]["size"].asInteger();
+//	}
+//
+//	if (bytes_visible)
+//	{
+//		lod = LLMeshRepository::getActualMeshLOD(header, lod);
+//		if (lod >= 0 && lod <= 3)
+//		{
+//			*bytes_visible = header[header_lod[lod]]["size"].asInteger();
+//		}
+//	}
+//
+//	F32 max_area = 102944.f; //area of circle that encompasses region (see MAINT-6559)
+//	F32 min_area = 1.f;
+//
+//	F32 high_area = llmin(F_PI*dmid*dmid, max_area);
+//	F32 mid_area = llmin(F_PI*dlow*dlow, max_area);
+//	F32 low_area = llmin(F_PI*dlowest*dlowest, max_area);
+//	F32 lowest_area = max_area;
+//
+//	lowest_area -= low_area;
+//	low_area -= mid_area;
+//	mid_area -= high_area;
+//
+//	high_area = llclamp(high_area, min_area, max_area);
+//	mid_area = llclamp(mid_area, min_area, max_area);
+//	low_area = llclamp(low_area, min_area, max_area);
+//	lowest_area = llclamp(lowest_area, min_area, max_area);
+//
+//	F32 total_area = high_area + mid_area + low_area + lowest_area;
+//	high_area /= total_area;
+//	mid_area /= total_area;
+//	low_area /= total_area;
+//	lowest_area /= total_area;
+//
+//	F32 weighted_avg = triangles_high*high_area +
+//					   triangles_mid*mid_area +
+//					   triangles_low*low_area +
+//					   triangles_lowest*lowest_area;
+//
+//	if (unscaled_value)
+//	{
+//		*unscaled_value = weighted_avg;
+//	}
+//
+//	return weighted_avg/gSavedSettings.getU32("MeshTriangleBudget")*15000.f;
+//}
 
 LLMeshCostData::LLMeshCostData()
 {
@@ -4566,7 +4664,10 @@ F32 LLMeshCostData::getTriangleBasedStreamingCost()
     return result;
 }
 
-bool LLMeshRepository::getCostData(LLUUID mesh_id, LLMeshCostData& data)
+//bool LLMeshRepository::getCostData(LLUUID mesh_id, LLMeshCostData& data)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+bool LLMeshRepository::getCostData(const LLUUID& mesh_id, LLMeshCostData& data) const
+// [/SL:KB]
 {
     data = LLMeshCostData();
     
@@ -4576,7 +4677,10 @@ bool LLMeshRepository::getCostData(LLUUID mesh_id, LLMeshCostData& data)
         LLMeshRepoThread::mesh_header_map::iterator iter = mThread->mMeshHeader.find(mesh_id);
         if (iter != mThread->mMeshHeader.end() && mThread->mMeshHeaderSize[mesh_id] > 0)
         {
-            LLSD& header = iter->second;
+//            LLSD& header = iter->second;
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+			const LLSD& header = iter->second;
+// [/SL:KB]
 
             bool header_invalid = (header.has("404")
                                    || !header.has("lowest_lod")
@@ -4592,7 +4696,10 @@ bool LLMeshRepository::getCostData(LLUUID mesh_id, LLMeshCostData& data)
     return false;
 }
 
-bool LLMeshRepository::getCostData(LLSD& header, LLMeshCostData& data)
+//bool LLMeshRepository::getCostData(LLSD& header, LLMeshCostData& data)
+// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
+bool LLMeshRepository::getCostData(const LLSD& header, LLMeshCostData& data) const
+// [/SL:KB]
 {
     data = LLMeshCostData();
 
