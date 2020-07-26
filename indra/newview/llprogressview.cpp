@@ -435,7 +435,10 @@ void LLProgressView::loadLogo(const std::string &path,
         return;
     }
     // HACK: getLocalTexture allows only power of two dimentions
-    raw->expandToPowerOfTwo();
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+	raw->expandToPowerOfTwo(MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
+// [/SL:KB]
+//    raw->expandToPowerOfTwo();
 
     TextureData data;
     data.mTexturep = LLViewerTextureManager::getLocalTexture(raw.get(), FALSE);
@@ -568,7 +571,10 @@ void LLProgressView::initStartTexture(S32 location_id, bool is_in_production)
         else
         {
             // HACK: getLocalTexture allows only power of two dimentions
-            raw->expandToPowerOfTwo();
+// [SL:KB] - Patch: Viewer-FetchedTexture | Checked: Catznip-5.2
+			raw->expandToPowerOfTwo(MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
+// [/SL:KB]
+//			raw->expandToPowerOfTwo();
             gStartTexture = LLViewerTextureManager::getLocalTexture(raw.get(), FALSE);
         }
     }
