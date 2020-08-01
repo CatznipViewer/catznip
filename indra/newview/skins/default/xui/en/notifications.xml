@@ -4016,6 +4016,8 @@ Finished download of raw terrain file to:
 [DOWNLOAD_PATH].
   </notification>
 
+  <!-- RequiredUpdate does not display release notes URL because we don't get
+       that from login.cgi's login failure message. -->
   <notification
    icon="alertmodal.tga"
    name="RequiredUpdate"
@@ -4210,6 +4212,7 @@ Please try again later.
    name="PauseForUpdate"
    type="alertmodal">
 Version [VERSION] is required for login.
+Release notes: [URL]
 Click OK to download and install.
     <tag>confirm</tag>
     <usetemplate
@@ -4222,6 +4225,7 @@ Click OK to download and install.
    name="OptionalUpdateReady"
    type="alertmodal">
 Version [VERSION] has been downloaded and is ready to install.
+Release notes: [URL]
 Click OK to install.
     <tag>confirm</tag>
     <usetemplate
@@ -4234,6 +4238,7 @@ Click OK to install.
    name="PromptOptionalUpdate"
    type="alertmodal">
 Version [VERSION] has been downloaded and is ready to install.
+Release notes: [URL]
 Proceed?
     <tag>confirm</tag>
     <usetemplate

@@ -29,7 +29,11 @@
 
 #include "stdtypes.h"
 #include "llwin32headerslean.h"
+
+#pragma warning (push)
+#pragma warning (disable:4091) // a microsoft header has warnings. Very nice.
 #include <dbghelp.h>
+#pragma warning (pop)
 
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
 class LLWinDebug
