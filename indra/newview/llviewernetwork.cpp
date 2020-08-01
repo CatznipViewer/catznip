@@ -566,7 +566,7 @@ std::string LLGridManager::getLoginPage()
 {
 	std::string login_page = mGridList[mGrid][GRID_LOGIN_PAGE_VALUE].asString();
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-2.8
-	login_page.append(LLVersionInfo::getChannel());
+	login_page.append(LLVersionInfo::instance().getChannel());
 // [/SL:KB]
 	LL_DEBUGS("GridManager")<<"returning "<<login_page<<LL_ENDL;
 	return login_page;

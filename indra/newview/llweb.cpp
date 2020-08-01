@@ -232,14 +232,14 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 										  const LLSD &default_subs)
 {
 	LLSD substitution = default_subs;
-	substitution["VERSION"] = LLVersionInfo::getVersion();
-	substitution["VERSION_MAJOR"] = LLVersionInfo::getMajor();
-	substitution["VERSION_MINOR"] = LLVersionInfo::getMinor();
-	substitution["VERSION_PATCH"] = LLVersionInfo::getPatch();
-	substitution["VERSION_BUILD"] = LLVersionInfo::getBuild();
-	substitution["CHANNEL"] = LLVersionInfo::getChannel();
+	substitution["VERSION"] = LLVersionInfo::instance().getVersion();
+	substitution["VERSION_MAJOR"] = LLVersionInfo::instance().getMajor();
+	substitution["VERSION_MINOR"] = LLVersionInfo::instance().getMinor();
+	substitution["VERSION_PATCH"] = LLVersionInfo::instance().getPatch();
+	substitution["VERSION_BUILD"] = LLVersionInfo::instance().getBuild();
+	substitution["CHANNEL"] = LLVersionInfo::instance().getChannel();
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
-	substitution["PLATFORM"] = LLVersionInfo::getBuildPlatform();
+	substitution["PLATFORM"] = LLVersionInfo::instance().getBuildPlatform();
 // [/SL:KB]
 	substitution["GRID"] = LLGridManager::getInstance()->getGridId();
 	substitution["GRID_LOWERCASE"] = utf8str_tolower(LLGridManager::getInstance()->getGridId());
