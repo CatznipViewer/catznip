@@ -33,7 +33,7 @@
 class LLSD;
 
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-typedef enum class EShowUsername
+enum class EShowUsername
 {
 	SHOW_ALWAYS = 0,		// Always show the username, i.e. "Kitty Barnett (kitty.barnett)"
 	SHOW_MISMATCH = 1,		// Only show the username on mismatch, i.e. "Kitty Barnett (random.resident)"
