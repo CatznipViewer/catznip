@@ -49,7 +49,6 @@ typedef crypto_threadid_st CRYPTO_THREADID;
 //const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
 //const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
 
-
 class LLCrashLogger : public LLApp
 {
 public:

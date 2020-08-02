@@ -818,7 +818,7 @@ void fast_exit(int rc)
 bool LLAppViewer::init()
 {
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-17 (Catznip-3.7)
-	setupErrorHandling(mSecondInstance, LLVersionInfo::RELEASE_VIEWER != LLVersionInfo::getViewerMaturity());
+	setupErrorHandling(mSecondInstance, LLVersionInfo::RELEASE_VIEWER != LLVersionInfo::instance().getViewerMaturity());
 // [/SL:KB]
 //	setupErrorHandling(mSecondInstance);
 
@@ -3402,7 +3402,7 @@ namespace
 		 *   UpdateCheckError
 		 */
 
-		if (data["channel"].asString() != LLVersionInfo::getChannel())
+		if (data["channel"].asString() != LLVersionInfo::instance().getChannel())
 		{
 			strNotificationName.append("OtherChannel");
 		}
@@ -3544,8 +3544,8 @@ namespace
 void LLAppViewer::initUpdater()
 {
 	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::requestQuit, this));
-	mUpdater->initialize(LLVersionInfo::getChannel(),
-						 LLVersionInfo::getVersion(),
+	mUpdater->initialize(LLVersionInfo::instance().getChannel(),
+						 LLVersionInfo::instance().getVersion(),
 #if ADDRESS_SIZE == 64
 						 llformat("%s64", gPlatform),
 #else
@@ -3608,7 +3608,7 @@ bool LLAppViewer::initWindow()
 	if (watchdog_enabled_setting == -1)
 	{
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2014-05-18 (Catznip-3.7)
-		use_watchdog = LLVersionInfo::RELEASE_VIEWER != LLVersionInfo::getViewerMaturity();
+		use_watchdog = LLVersionInfo::RELEASE_VIEWER != LLVersionInfo::instance().getViewerMaturity();
 // [/SL:KB]
 //		use_watchdog = !LLFeatureManager::getInstance()->isFeatureAvailable("WatchdogDisabled");
 	}
@@ -4094,8 +4094,8 @@ void LLAppViewer::writeSystemInfo()
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::instance().getChannel();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
-	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
-	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::instance().getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::instance().getBuildPlatform();
 // [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::instance().getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::instance().getMinor();
@@ -6324,8 +6324,8 @@ void LLAppViewer::handleLoginComplete()
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::instance().getChannel();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
-	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
-	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::instance().getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::instance().getBuildPlatform();
 // [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::instance().getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::instance().getMinor();

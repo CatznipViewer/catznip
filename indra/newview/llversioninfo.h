@@ -92,7 +92,7 @@ public:
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 	/// Return the platform the viewer was built for
-	static const std::string& getBuildPlatform();
+	const std::string& getBuildPlatform();
 // [/SL:KB]
 
     typedef enum
