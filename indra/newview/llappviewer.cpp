@@ -2846,7 +2846,7 @@ bool LLAppViewer::initConfiguration()
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznîp-3.3
 	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
-	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
+	if (LLVersionInfo::instance().getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
 	{
 		// setings.xml
 		{
@@ -3167,7 +3167,7 @@ bool LLAppViewer::initConfiguration()
 	//
 	gWindowTitle = LLTrans::getString("APP_NAME");
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-5.0
-	gWindowTitle.append(" ").append(LLVersionInfo::getReleaseVersion());
+	gWindowTitle.append(" ").append(LLVersionInfo::instance().getReleaseVersion());
 // [/SL:KB]
 #if LL_DEBUG
 	gWindowTitle += std::string(" [DEBUG]");
@@ -3734,7 +3734,7 @@ LLSD LLAppViewer::getViewerInfo() const
 	auto& versionInfo(LLVersionInfo::instance());
 	info["VIEWER_VERSION"] = LLSDArray(versionInfo.getMajor())(versionInfo.getMinor())(versionInfo.getPatch())(versionInfo.getBuild());
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+	info["VIEWER_VERSION_STR"] = LLVersionInfo::instance().getReleaseVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 // [/SL:KB]

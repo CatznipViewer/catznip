@@ -239,7 +239,7 @@ std::string LLWeb::expandURLSubstitutions(const std::string &url,
 	substitution["VERSION_BUILD"] = LLVersionInfo::instance().getBuild();
 	substitution["CHANNEL"] = LLVersionInfo::instance().getChannel();
 // [SL:KB] - Patch: Viewer-Data | Checked: Catznip-5.2
-	substitution["PLATFORM"] = LLVersionInfo::getBuildPlatform();
+	substitution["PLATFORM"] = LLVersionInfo::instance().getBuildPlatform();
 // [/SL:KB]
 	substitution["GRID"] = LLGridManager::getInstance()->getGridId();
 	substitution["GRID_LOWERCASE"] = utf8str_tolower(LLGridManager::getInstance()->getGridId());

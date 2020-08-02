@@ -106,28 +106,22 @@ std::string LLVersionInfo::getVersion()
 }
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
-const std::string &LLVersionInfo::getReleaseVersion()
+std::string LLVersionInfo::getReleaseVersion()
 {
-	static std::string version("");
-
-	if (version.empty())
+	// Cache the version string
+	std::ostringstream stream;
+	if (RELEASE_VIEWER == instance().getViewerMaturity())
 	{
-		// Cache the version string
-		std::ostringstream stream;
-		if (RELEASE_VIEWER == getViewerMaturity())
-		{
-			stream << "R" << LL_VIEWER_VERSION_MAJOR;
-			if (LL_VIEWER_VERSION_MINOR > 0)
-				stream << "." << LL_VIEWER_VERSION_MINOR;
-		}
-		else
-		{
-			stream << "R" << LL_VIEWER_VERSION_MAJOR << "." << LL_VIEWER_VERSION_MINOR << "." << LL_VIEWER_VERSION_PATCH;
-		}
-		version = stream.str();
+		stream << "R" << LL_VIEWER_VERSION_MAJOR;
+		if (LL_VIEWER_VERSION_MINOR > 0)
+			stream << "." << LL_VIEWER_VERSION_MINOR;
+	}
+	else
+	{
+		stream << "R" << LL_VIEWER_VERSION_MAJOR << "." << LL_VIEWER_VERSION_MINOR << "." << LL_VIEWER_VERSION_PATCH;
 	}
 
-	return version;
+	return stream.str();
 }
 // [/SL:KB]
 
