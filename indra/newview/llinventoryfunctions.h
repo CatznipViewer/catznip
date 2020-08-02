@@ -6,7 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -139,6 +139,9 @@ void copy_inventory_category_content(const LLUUID& new_cat_uuid, LLInventoryMode
 void append_path(const LLUUID& id, std::string& path, bool include_root = true, bool prepend_slash = true);
 // [/SL:KB]
 //void append_path(const LLUUID& id, std::string& path);
+// [SL:KB] - Patch: World-WindLightQuickPrefs | Checked: Catznip-6.4
+std::string get_item_path(const LLUUID& item_id, bool include_root = true);
+// [/SL:KB]
 
 typedef boost::function<void(std::string& validation_message, S32 depth, LLError::ELevel log_level)> validation_callback_t;
 
@@ -195,6 +198,27 @@ public:
 protected:
 	LLUUID mAssetID;
 };
+
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+class LLAssetIDsMatches : public LLInventoryCollectFunctor
+{
+	LLAssetIDsMatches(const LLUUID& id) { add(id); }
+public:
+	template <class... TArgs> LLAssetIDsMatches(const LLUUID& id, const TArgs&... idsRest) : LLAssetIDsMatches(idsRest...) { add(id); }
+	LLAssetIDsMatches(const uuid_set_t& asset_ids) : mAssetIDs(asset_ids) {}
+	~LLAssetIDsMatches() override {}
+	bool operator()(LLInventoryCategory* cat, LLInventoryItem* item) override;
+
+	void add(const LLUUID& id) {
+		if (id.notNull())
+		{
+			mAssetIDs.insert(id);
+		}
+	}
+protected:
+	uuid_set_t mAssetIDs;
+};
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLLinkedItemIDMatches

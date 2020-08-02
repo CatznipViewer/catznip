@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2017, Kitty Barnett
+ * Copyright (C) 2010-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -233,7 +233,10 @@ public:
 	void			onTextCommit(const LLSD& data);
 
 	void			updateSelection();
-	virtual void	showList();
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	virtual void	showList(BOOL take_focus = TRUE);
+// [/SL:KB]
+//	virtual void	showList();
 	virtual void	hideList();
 	
 	virtual void	onTextEntry(LLLineEditor* line_editor);

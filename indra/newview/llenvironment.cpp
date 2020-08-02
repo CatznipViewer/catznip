@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -65,6 +66,10 @@
 #include "llviewergenericmessage.h"
 #include "llexperiencelog.h"
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+#include "llinventoryfunctions.h"
+#include "llinventoryobserver.h"
+// [/SL:KB]
 // [RLVa:KB] - Checked: RLVa-2.4 (@setenv)
 #include "rlvactions.h"
 // [/RLVa:KB]
@@ -866,6 +871,27 @@ LLEnvironment::~LLEnvironment()
 {
 }
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+// static
+void LLEnvironment::notifyInventoryChange(const LLUUID& idFirstAsset, const LLUUID& idSecondAsset)
+{
+    // Early bail if we have nothing to update
+    if ( (idFirstAsset.isNull()) && (idSecondAsset.isNull()) )
+        return;
+
+    // *CATZNIP-TODO: there's a decent chance this will stall the viewer on slower computers with large inventories so check thoroughly
+    LLViewerInventoryCategory::cat_array_t cats;
+    LLViewerInventoryItem::item_array_t items;
+    LLAssetIDsMatches f(idFirstAsset, idSecondAsset);
+    gInventory.collectDescendentsIf(LLUUID::null, cats, items, LLInventoryModel::INCLUDE_TRASH, f);
+
+    for (const LLViewerInventoryItem* pItem : items)
+    {
+        gInventory.addChangedMask(LLInventoryObserver::LABEL, pItem->getUUID());
+    }
+}
+// [/SL:KB]
+
 bool LLEnvironment::canEdit() const
 {
     return true;
@@ -906,6 +932,72 @@ LLSettingsWater::ptr_t LLEnvironment::getCurrentWater() const
     }
     return pwater;
 }
+
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+bool LLEnvironment::isCurrentSkyFixed() const
+{
+    if (LLSettingsDay::ptr_t pCurDay = mCurrentEnvironment->getDayCycle())
+        return pCurDay->getCycleTrackConst(mCurrentEnvironment->getSkyTrack()).size() <= 1;
+    return true;
+}
+
+void LLEnvironment::resetCurrentDayOffset()
+{
+    if (mCurrentEnvironment->getEnvironmentSelection() > LLEnvironment::ENV_LOCAL)
+    {
+        mCurrentEnvironment->resetDayOffset();
+    }
+}
+
+void LLEnvironment::setCurrentDayOffset(LLSettingsDay::Seconds seconds)
+{
+    U32 maskFlags = mCurrentEnvironment->getFlags();
+    mCurrentEnvironment->clearFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY | LLEnvironment::DayInstance::NO_ANIMATE_WATER);
+    mCurrentEnvironment->setDayOffset(seconds);
+    mCurrentEnvironment->setFlags(maskFlags);
+}
+
+bool LLEnvironment::getCurrentDayRunning() const
+{
+    return mCurrentEnvironment->getFlags() & LLEnvironment::DayInstance::NO_ANIMATE_SKY;
+}
+
+void LLEnvironment::setCurrentDayRunning(bool is_running)
+{
+    if ( (is_running) && (mCurrentEnvironment->getFlags() & LLEnvironment::DayInstance::NO_ANIMATE_SKY) )
+    {
+        mCurrentEnvironment->clearFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY);
+        mCurrentEnvironment->animate();
+    }
+    else if (!is_running)
+    {
+        mCurrentEnvironment->setFlags(LLEnvironment::DayInstance::NO_ANIMATE_SKY);
+    }
+}
+
+LLSettingsDay::ptr_t LLEnvironment::getLocalDay() const
+{
+    if (DayInstance::ptr_t pEnvironment = getEnvironmentInstance(ENV_LOCAL))
+        return pEnvironment->getDayCycle();
+    return LLSettingsDay::ptr_t();
+}
+
+LLSettingsSky::ptr_t LLEnvironment::getLocalSky() const
+{
+    DayInstance::ptr_t pEnvironment = getEnvironmentInstance(ENV_LOCAL);
+    if ( (pEnvironment) && (!pEnvironment->getDayCycle()) )
+        return pEnvironment->getSky();
+    return LLSettingsSky::ptr_t();
+}
+
+LLSettingsWater::ptr_t LLEnvironment::getLocalWater() const
+{
+    DayInstance::ptr_t pEnvironment = getEnvironmentInstance(ENV_LOCAL);
+    if ( (pEnvironment) && (!pEnvironment->getDayCycle()) )
+        return pEnvironment->getWater();
+    return LLSettingsWater::ptr_t();
+}
+// [/SL:KB]
 
 void LayerConfigToDensityLayer(const LLSD& layerConfig, DensityLayer& layerOut)
 {
@@ -1082,6 +1174,15 @@ bool LLEnvironment::hasEnvironment(LLEnvironment::EnvSelection_t env)
     return true;
 }
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+LLEnvironment::DayInstance::ptr_t LLEnvironment::getEnvironmentInstance(LLEnvironment::EnvSelection_t env) const
+{
+    if ( (env < ENV_EDIT) || (env >= ENV_DEFAULT) || (!mEnvironments[env]) )
+        return LLEnvironment::DayInstance::ptr_t();
+    return mEnvironments[env];
+}
+// [/SL:KB]
+
 LLEnvironment::DayInstance::ptr_t LLEnvironment::getEnvironmentInstance(LLEnvironment::EnvSelection_t env, bool create /*= false*/)
 {
     DayInstance::ptr_t environment = mEnvironments[env];
@@ -1136,11 +1237,17 @@ void LLEnvironment::setEnvironment(LLEnvironment::EnvSelection_t env, LLEnvironm
 
     if (fixed.first)
     {
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        environment->clearDay();
+// [/SL:KB]
         environment->setSky(fixed.first);
         environment->setFlags(DayInstance::NO_ANIMATE_SKY);
     }
     else if (!environment->getSky())
     {
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        environment->clearDay();
+// [/SL:KB]
         environment->setSky(mCurrentEnvironment->getSky());
         environment->setFlags(DayInstance::NO_ANIMATE_SKY);
     }
@@ -1248,6 +1355,19 @@ void LLEnvironment::clearEnvironment(LLEnvironment::EnvSelection_t env)
         LL_WARNS("ENVIRONMENT") << "Attempt to change invalid environment selection." << LL_ENDL;
         return;
     }
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if (LLEnvironment::ENV_LOCAL == env)
+    {
+        if (DayInstance::ptr_t pLocalEnv = getEnvironmentInstance(env, false))
+        {
+            LLUUID idDayOrSky = (pLocalEnv->getDayCycle()) ? pLocalEnv->getDayCycle()->getBaseAssetId()
+                                                           : (pLocalEnv->getSky()) ? pLocalEnv->getSky()->getBaseAssetId() : LLUUID::null;
+            LLUUID idWater = (pLocalEnv->getWater()) ? pLocalEnv->getWater()->getBaseAssetId() : LLUUID::null;
+            LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
+        }
+    }
+// [/SL:KB]
 
     mEnvironments[env].reset();
 
@@ -1384,10 +1504,16 @@ void LLEnvironment::updateEnvironment(LLSettingsBase::Seconds transition, bool f
 	        trans->animate();
 	
 	        mCurrentEnvironment = trans;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            mSignalEnvUpdated();
+// [/SL:KB]
         }
         else
         {
             mCurrentEnvironment = pinstance;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            mSignalEnvUpdated();
+// [/SL:KB]
         }
     }
 }
@@ -2473,6 +2599,9 @@ LLEnvironment::DayInstance::ptr_t LLEnvironment::DayInstance::clone() const
     environment->mWater = mWater;
     environment->mDayLength = mDayLength;
     environment->mDayOffset = mDayOffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    environment->mDayOffsetOriginal = mDayOffsetOriginal;
+// [/SL:KB]
     environment->mBlenderSky = mBlenderSky;
     environment->mBlenderWater = mBlenderWater;
     environment->mInitialized = mInitialized;
@@ -2490,10 +2619,16 @@ bool LLEnvironment::DayInstance::applyTimeDelta(const LLSettingsBase::Seconds& d
     if (!mInitialized)
         initialize();
 
-    if (mBlenderSky)
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    if ( (mBlenderSky) && (!(mAnimateFlags & NO_ANIMATE_SKY)) )
         changed |= mBlenderSky->applyTimeDelta(delta);
-    if (mBlenderWater)
+    if ( (mBlenderWater) && (!(mAnimateFlags & NO_ANIMATE_WATER)) )
         changed |= mBlenderWater->applyTimeDelta(delta);
+// [/SL:KB]
+//    if (mBlenderSky)
+//        changed |= mBlenderSky->applyTimeDelta(delta);
+//    if (mBlenderWater)
+//        changed |= mBlenderWater->applyTimeDelta(delta);
     return changed;
 }
 
@@ -2503,9 +2638,18 @@ void LLEnvironment::DayInstance::setDay(const LLSettingsDay::ptr_t &pday, LLSett
 
     mAnimateFlags = 0;
 
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (mDayCycle != pday) )
+    {
+        LLEnvironment::notifyInventoryChange((mDayCycle) ? mDayCycle->getBaseAssetId() : LLUUID::null, pday->getBaseAssetId());
+    }
+// [/SL:KB]
     mDayCycle = pday;
     mDayLength = daylength;
     mDayOffset = dayoffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    mDayOffsetOriginal = dayoffset;
+// [/SL:KB]
 
     mBlenderSky.reset();
     mBlenderWater.reset();
@@ -2523,6 +2667,12 @@ void LLEnvironment::DayInstance::setSky(const LLSettingsSky::ptr_t &psky)
 
     bool different_sky = mSky != psky;
     
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (different_sky) )
+    {
+        LLEnvironment::notifyInventoryChange((mSky) ? mSky->getBaseAssetId() : LLUUID::null, psky->getBaseAssetId());
+    }
+// [/SL:KB]
     mSky = psky;
     mSky->mReplaced |= different_sky;
     mSky->update();
@@ -2541,6 +2691,13 @@ void LLEnvironment::DayInstance::setWater(const LLSettingsWater::ptr_t &pwater)
     mInitialized = false;
 
     bool different_water = mWater != pwater;
+
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (different_water) )
+    {
+        LLEnvironment::notifyInventoryChange((mWater) ? mWater->getBaseAssetId() : LLUUID::null, pwater->getBaseAssetId());
+    }
+// [/SL:KB]
     mWater = pwater;
     mWater->mReplaced |= different_water;
     mWater->update();
@@ -2559,15 +2716,41 @@ void LLEnvironment::DayInstance::initialize()
 
 void LLEnvironment::DayInstance::clear()
 {
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    if (LLEnvironment::ENV_LOCAL == mEnv)
+    {
+        LLUUID idDayOrSky = (mDayCycle) ? mDayCycle->getAssetId() : ((mSky) ? mSky->getAssetId() : LLUUID::null);
+        LLUUID idWater = (mWater) ? mWater->getAssetId() : LLUUID::null;
+        LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
+    }
+// [/SL:KB]
     mDayCycle.reset();
     mSky.reset();
     mWater.reset();
     mDayLength = LLSettingsDay::DEFAULT_DAYLENGTH;
     mDayOffset = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    mDayOffsetOriginal = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [/SL:KB]
     mBlenderSky.reset();
     mBlenderWater.reset();
     mSkyTrack = 1;
 }
+
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+void LLEnvironment::DayInstance::clearDay()
+{
+    if ( (LLEnvironment::ENV_LOCAL == mEnv) && (mDayCycle) )
+    {
+        LLEnvironment::notifyInventoryChange(mDayCycle->getBaseAssetId());
+    }
+
+    mDayCycle.reset();
+    mDayLength = LLSettingsDay::DEFAULT_DAYLENGTH;
+    mDayOffset = LLSettingsDay::DEFAULT_DAYOFFSET;
+    mDayOffsetOriginal = LLSettingsDay::DEFAULT_DAYOFFSET;
+}
+// [/SL:KB]
 
 void LLEnvironment::DayInstance::setSkyTrack(S32 trackno)
 {
@@ -2677,10 +2860,21 @@ void LLEnvironment::DayTransition::animate()
         [this](LLSettingsBlender::ptr_t blender) { 
             mBlenderWater.reset();
 
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
             if (!mBlenderSky && !mBlenderWater)
+            {
                 LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+                LLEnvironment::instance().mSignalEnvUpdated();
+            }
             else
+            {
                 setWater(mNextInstance->getWater());
+            }
+// [/SL:KB]
+//            if (!mBlenderSky && !mBlenderWater)
+//                LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+//            else
+//                setWater(mNextInstance->getWater());
     });
 
     mSky = mStartSky->buildClone();
@@ -2689,10 +2883,21 @@ void LLEnvironment::DayTransition::animate()
         [this](LLSettingsBlender::ptr_t blender) {
         mBlenderSky.reset();
 
-        if (!mBlenderSky && !mBlenderWater)
-            LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
-        else
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+            if (!mBlenderSky && !mBlenderWater)
+            {
+                LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+                LLEnvironment::instance().mSignalEnvUpdated();
+            }
+            else
+            {
             setSky(mNextInstance->getSky());
+            }
+// [/SL:KB]
+//        if (!mBlenderSky && !mBlenderWater)
+//            LLEnvironment::instance().mCurrentEnvironment = mNextInstance;
+//        else
+//            setSky(mNextInstance->getSky());
     });
 }
 

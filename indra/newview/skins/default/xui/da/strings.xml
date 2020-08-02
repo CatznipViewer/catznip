@@ -1201,6 +1201,7 @@ Prøv venligst om lidt igen.
 	<string name="no_modify" value=" (ikke redigere)"/>
 	<string name="no_copy" value=" (ikke kopiere)"/>
 	<string name="worn" value=" (båret)"/>
+	<string name="active" value=" (aktiv)" />
 	<string name="link" value=" (link)"/>
 	<string name="broken_link" value=" (brudt link)"/>
 	<string name="LoadingContents">

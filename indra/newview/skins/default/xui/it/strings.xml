@@ -1667,6 +1667,7 @@ Se continui a ricevere questo messaggio, contatta l&apos;assistenza Second Life 
 	<string name="no_modify" value="(nessuna modifica)"/>
 	<string name="no_copy" value="(nessuna copia)"/>
 	<string name="worn" value="(indossato)"/>
+	<string name="active" value=" (attivo)" />
 	<string name="link" value="(link)"/>
 	<string name="broken_link" value="(broken_link)&quot;"/>
 	<string name="LoadingContents">

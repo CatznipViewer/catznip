@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2016-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -615,7 +616,10 @@ void* LLComboBox::getCurrentUserdata()
 }
 
 
-void LLComboBox::showList()
+//void LLComboBox::showList()
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+void LLComboBox::showList(BOOL take_focus)
+// [/SL:KB]
 {
 	// Make sure we don't go off top of screen.
 	LLCoordWindow window_size;
@@ -696,7 +700,13 @@ void LLComboBox::showList()
 	// NB: this call will trigger the focuslost callback which will hide the list, so do it first
 	// before finally showing the list
 
-	mList->setFocus(TRUE);
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	if (take_focus)
+	{
+		mList->setFocus(TRUE);
+	}
+// [/SL:KB]
+//	mList->setFocus(TRUE);
 
 	// Show the list and push the button down
 	mButton->setToggleState(TRUE);

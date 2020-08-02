@@ -1677,6 +1677,7 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich unter http://suppo
 	<string name="no_modify" value=" (kein Bearbeiten)"/>
 	<string name="no_copy" value=" (kein Kopieren)"/>
 	<string name="worn" value=" (getragen)"/>
+	<string name="active" value=" (aktiviert)" />
 	<string name="link" value=" (Link)"/>
 	<string name="broken_link" value=" (unvollständiger_Link)"/>
 	<string name="LoadingContents">

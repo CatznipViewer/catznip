@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2011&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -306,6 +307,9 @@ void LLFloaterEditExtDayCycle::onOpen(const LLSD& key)
     }
     else
     {
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        mIsLibrary = false;
+// [/SL:KB]
         mCanSave = true;
         mCanCopy = true;
         mCanMod = true;
@@ -394,7 +398,10 @@ void LLFloaterEditExtDayCycle::onOpen(const LLSD& key)
     if (mEditContext == CONTEXT_INVENTORY)
     {
         mFlyoutControl->setShownBtnEnabled(true);
-        mFlyoutControl->setSelectedItem(ACTION_SAVE);
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        mFlyoutControl->setSelectedItem( (!mIsLibrary) ? ACTION_SAVE : ACTION_SAVEAS);
+// [/SL:KB]
+//        mFlyoutControl->setSelectedItem(ACTION_SAVE);
     }
     else if ((mEditContext == CONTEXT_REGION) || (mEditContext == CONTEXT_PARCEL))
     {
@@ -477,7 +484,10 @@ void LLFloaterEditExtDayCycle::refresh()
     mFlyoutControl->setMenuItemVisible(ACTION_APPLY_REGION, show_apply);
 
     mFlyoutControl->setMenuItemEnabled(ACTION_COMMIT, show_commit && !mCommitSignal.empty());
-    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull() && mCanSave);
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull() && mCanSave && !mIsLibrary);
+// [/SL:KB]
+//    mFlyoutControl->setMenuItemEnabled(ACTION_SAVE, is_inventory_avail && mCanMod && !mInventoryId.isNull() && mCanSave);
     mFlyoutControl->setMenuItemEnabled(ACTION_SAVEAS, is_inventory_avail && mCanCopy && mCanSave);
     mFlyoutControl->setMenuItemEnabled(ACTION_APPLY_LOCAL, true);
     mFlyoutControl->setMenuItemEnabled(ACTION_APPLY_PARCEL, canApplyParcel() && show_apply);
@@ -1441,6 +1451,9 @@ void LLFloaterEditExtDayCycle::loadInventoryItem(const LLUUID  &inventoryId, boo
     {
         mInventoryItem = nullptr;
         mInventoryId.setNull();
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        mIsLibrary = false;
+// [/SL:KB]
         mCanSave = true;
         mCanCopy = true;
         mCanMod = true;
@@ -1475,9 +1488,15 @@ void LLFloaterEditExtDayCycle::loadInventoryItem(const LLUUID  &inventoryId, boo
         return;
     }
 
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mIsLibrary = gInventory.isObjectDescendentOf(mInventoryId, gInventory.getLibraryRootFolderID());
+// [/SL:KB]
     mCanSave = true;
     mCanCopy = mInventoryItem->getPermissions().allowCopyBy(gAgent.getID());
-    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID());
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID()) || mIsLibrary;
+// [/SL:KB]
+//    mCanMod = mInventoryItem->getPermissions().allowModifyBy(gAgent.getID());
     mCanTrans = can_trans && mInventoryItem->getPermissions().allowOperationBy(PERM_TRANSFER, gAgent.getID());
 
     mExpectingAssetId = mInventoryItem->getAssetUUID();
@@ -1506,6 +1525,9 @@ void LLFloaterEditExtDayCycle::onAssetLoaded(LLUUID asset_id, LLSettingsBase::pt
 
     if (settings->getFlag(LLSettingsBase::FLAG_NOSAVE))
     {
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+        mIsLibrary = false;
+// [/SL:KB]
         mCanSave = false;
         mCanCopy = false;
         mCanMod = false;

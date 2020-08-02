@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +44,9 @@ public:
 		Optional<std::string>   orientation;
 		Optional<S32>			label_width;
 		Optional<S32>			text_width;
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+		Optional<std::string>   text_suffix;
+// [/SL:KB]
 		Optional<bool>			show_text;
 		Optional<bool>			can_edit_text;
 		Optional<bool>			is_volume_slider;
@@ -61,6 +65,9 @@ public:
 
 		Params()
 		:	text_width("text_width"),
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+			text_suffix("text_suffix"),
+// [/SL:KB]
 			label_width("label_width"),
 			show_text("show_text"),
 			can_edit_text("can_edit_text"),
@@ -160,6 +167,9 @@ private:
 	const LLFontGL*	mLabelFont;
 	BOOL			mShowText;
 	BOOL			mCanEditText;
+// [SL:KB] - Patch: Control-SliderCtrlTextSuffix | Checked: Catznip-6.4
+	std::string		mTextSuffix;
+// [/SL:KB]
 	
 	S32				mPrecision;
 	LLTextBox*		mLabelBox;

@@ -1627,6 +1627,7 @@ Se você continuar a receber essa mensagem, entre em contato com o suporte do Se
 	<string name="no_modify" value="(não modificável)"/>
 	<string name="no_copy" value="(não copiável)"/>
 	<string name="worn" value="(vestido)"/>
+	<string name="active" value=" (ativado)" />
 	<string name="link" value="(link)"/>
 	<string name="broken_link" value="(link_quebrado)&quot;"/>
 	<string name="LoadingContents">

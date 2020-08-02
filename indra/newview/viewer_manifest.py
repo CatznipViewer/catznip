@@ -168,7 +168,7 @@ class ViewerManifest(LLManifest):
 
             # skins
             with self.prefix(src_dst="skins"):
-                    self.path("skins.xml")
+                    #self.path("skins.xml")
                     # include the entire textures directory recursively
                     with self.prefix(src_dst="*/textures"):
                             self.path("*/*.jpg")

@@ -6,6 +6,7 @@
 * $LicenseInfo:2011&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2017, Linden Research, Inc.
+* Copyright (C) 2020, Kitty Barnett
 *
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -55,6 +56,9 @@ const std::string LLSettingsBase::SETTING_NAME("name");
 const std::string LLSettingsBase::SETTING_HASH("hash");
 const std::string LLSettingsBase::SETTING_TYPE("type");
 const std::string LLSettingsBase::SETTING_ASSETID("asset_id");
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+const std::string LLSettingsBase::SETTING_BASE_ASSETID("base_asset_id");
+// [/SL:KB]
 const std::string LLSettingsBase::SETTING_FLAGS("flags");
 
 const U32 LLSettingsBase::FLAG_NOCOPY(0x01 << 0);

@@ -382,7 +382,6 @@ private:
 	bool				mViewsInitialized; // Views have been generated
 };
 
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
 /************************************************************************/
 /* Asset Pre-Filtered Inventory Panel related class                     */
 /* Exchanges filter's flexibility for speed of generation and           */
@@ -419,6 +418,5 @@ protected:
 private:
     LLAssetType::EType mAssetType;
 };
-// [/SL:KB]
 
 #endif // LL_LLINVENTORYPANEL_H

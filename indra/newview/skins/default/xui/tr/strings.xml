@@ -1674,6 +1674,7 @@ Bu mesaj size gelmeye devam ederse lütfen http://support.secondlife.com adresin
 	<string name="no_modify" value="(değiştirme yok)"/>
 	<string name="no_copy" value="(kopya yok)"/>
 	<string name="worn" value="(giyilmiş)"/>
+	<string name="active" value=" (etkin)" />
 	<string name="link" value="(bağlantı)"/>
 	<string name="broken_link" value="(broken_link)"/>
 	<string name="LoadingContents">

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -151,6 +152,11 @@ void handle_give_money_dialog();
 bool enable_pay_object();
 bool enable_buy_object();
 bool handle_go_to();
+
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+/// WINDLIGHT helpers
+void defocus_env_floaters();
+// [/SL:KB]
 
 // Export to XML or Collada
 void handle_export_selected( void * );

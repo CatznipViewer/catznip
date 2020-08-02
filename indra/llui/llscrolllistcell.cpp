@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2007&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -178,6 +179,9 @@ U32 LLScrollListText::sCount = 0;
 LLScrollListText::LLScrollListText(const LLScrollListCell::Params& p)
 :	LLScrollListCell(p),
 	mText(p.value().asString()),
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	mLeftPad(p.pad_left),
+// [/SL:KB]
 	mFont(p.font),
 	mColor(p.color),
 	mUseColor(p.color.isProvided()),
@@ -335,7 +339,10 @@ void LLScrollListText::draw(const LLColor4& color, const LLColor4& highlight_col
 		{
 		case LLFontGL::LEFT:
 // [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
-			left += mFont->getWidth(mText.getString(), 0, mHighlightOffset);
+			left += mLeftPad + mFont->getWidth(mText.getString(), 0, mHighlightOffset);
+//// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+//			left = mLeftPad + mFont->getWidth(mText.getString(), 0, mHighlightOffset);
+//// [/SL:KB]
 // [/SL:KB]
 //			left = mFont->getWidth(mText.getString(), 0, mHighlightOffset);
 			break;
@@ -377,7 +384,10 @@ void LLScrollListText::draw(const LLColor4& color, const LLColor4& highlight_col
 	{
 	case LLFontGL::LEFT:
 // [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
-		start_x += 0.f;
+		start_x += mLeftPad;
+//// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+//		start_x = mLeftPad;
+//// [/SL:KB]
 // [/SL:KB]
 //		start_x = 0.f;
 		break;

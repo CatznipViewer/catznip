@@ -842,6 +842,7 @@ void LLSidepanelInventory::updateVerbs()
 //	mWearBtn->setEnabled(FALSE);
 //	mPlayBtn->setVisible(FALSE);
 //	mPlayBtn->setEnabled(FALSE);
+//	mPlayBtn->setToolTip(std::string(""));
 // 	mTeleportBtn->setVisible(FALSE);
 // 	mTeleportBtn->setEnabled(FALSE);
 // 	mShopBtn->setVisible(TRUE);
@@ -851,7 +852,6 @@ void LLSidepanelInventory::updateVerbs()
 //	const LLInventoryItem *item = getSelectedItem();
 //	if (!item)
 //		return;
-//
 //	bool is_single_selection = getSelectedCount() == 1;
 //
 //	mInfoBtn->setEnabled(is_single_selection);

@@ -1437,6 +1437,7 @@ Spróbuj zalogować się ponownie za minutę.
 	<string name="no_modify" value=" (bez modyfikowania)"/>
 	<string name="no_copy" value=" (bez kopiowania)"/>
 	<string name="worn" value=" (założone)"/>
+	<string name="active" value=" (aktywny)" />
 	<string name="broken_link" value=" (zepsuty_link)"/>
 	<string name="LoadingContents">
 		Ładowanie zawartości...

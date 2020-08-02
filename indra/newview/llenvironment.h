@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2011, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -111,6 +112,10 @@ public:
     typedef std::function<void(S32, EnvironmentInfo::ptr_t)>        environment_apply_fn;
     typedef boost::signals2::signal<void(EnvSelection_t, S32)>      env_changed_signal_t;
     typedef env_changed_signal_t::slot_type                         env_changed_fn;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    typedef boost::signals2::signal<void(void)>                     env_updated_signal_t;
+    typedef env_updated_signal_t::slot_type                         env_updated_fn;
+// [/SL:KB]
     typedef std::array<F32, 4>                                      altitude_list_t;
     typedef std::vector<F32>                                        altitudes_vect_t;
 
@@ -126,6 +131,22 @@ public:
     LLSettingsDay::ptr_t        getCurrentDay() const { return mCurrentEnvironment->getDayCycle(); }
     LLSettingsSky::ptr_t        getCurrentSky() const;
     LLSettingsWater::ptr_t      getCurrentWater() const;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    LLSettingsDay::Seconds      getCurrentDayLength() const { return mCurrentEnvironment->getDayLength(); }
+    LLSettingsDay::Seconds      getCurrentDayOffset() const { return mCurrentEnvironment->getDayOffset(); }
+    EnvSelection_t              getCurrentSelection() const { return mCurrentEnvironment->getEnvironmentSelection(); }
+    bool                        isCurrentSkyFixed() const;
+    void                        resetCurrentDayOffset();
+    void                        setCurrentDayOffset(LLSettingsDay::Seconds seconds);
+    bool                        getCurrentDayRunning() const;
+    void                        setCurrentDayRunning(bool is_running);
+// [/SL:KB]
+
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    LLSettingsDay::ptr_t        getLocalDay() const;
+    LLSettingsSky::ptr_t        getLocalSky() const;
+    LLSettingsWater::ptr_t      getLocalWater() const;
+// [/SL:KB]
 
     static void                 getAtmosphericModelSettings(AtmosphericModelSettings& settingsOut, const LLSettingsSky::ptr_t &psky);
 
@@ -208,6 +229,9 @@ public:
 
     //-------------------------------------------
     connection_t                setEnvironmentChanged(env_changed_fn cb)    { return mSignalEnvChanged.connect(cb); }
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    connection_t                setEnvironmentUpdated(env_updated_fn cb)    { return mSignalEnvUpdated.connect(cb); }
+// [/SL:KB]
 
     void                        requestRegion(environment_apply_fn cb = environment_apply_fn());
     void                        updateRegion(const LLUUID &asset_id, std::string display_name, S32 track_num, S32 day_length, S32 day_offset, U32 flags, altitudes_vect_t altitudes = altitudes_vect_t(), environment_apply_fn cb = environment_apply_fn());
@@ -254,6 +278,9 @@ public:
         bool                            isInitialized();
 
         void                            clear();
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        void                            clearDay();
+// [/SL:KB]
 
         void                            setSkyTrack(S32 trackno);
 
@@ -264,6 +291,9 @@ public:
         LLSettingsDay::Seconds          getDayOffset() const    { return mDayOffset; }
         S32                             getSkyTrack() const     { return mSkyTrack; }
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        void                            resetDayOffset() { mDayOffset = mDayOffsetOriginal; animate(); }
+// [/SL:KB]
         void                            setDayOffset(LLSettingsBase::Seconds offset) { mDayOffset = offset; animate(); }
 
         virtual void                    animate();
@@ -291,6 +321,9 @@ public:
 
         LLSettingsDay::Seconds      mDayLength;
         LLSettingsDay::Seconds      mDayOffset;
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        LLSettingsDay::Seconds      mDayOffsetOriginal = LLSettingsDay::DEFAULT_DAYOFFSET;
+// [/SL:KB]
         S32                         mLastTrackAltitude;
 
         LLSettingsBlender::ptr_t    mBlenderSky;
@@ -325,6 +358,10 @@ public:
 protected:
     virtual void                initSingleton() override;
     virtual void                cleanupSingleton() override;
+// [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
+    static void                 notifyInventoryChange(const LLUUID& idFirstAsset, const LLUUID& idSecondAsset = LLUUID::null);
+// [/SL:KB]
+
 
 
 private:
@@ -364,6 +401,9 @@ private:
     LLSettingsBlender::ptr_t    mBlenderWater;
 
     env_changed_signal_t        mSignalEnvChanged;
+// [SL:KB] - Patch: World-WindLightUpdateSignal | Checked: Catznip-6.4
+    env_updated_signal_t        mSignalEnvUpdated;
+// [/SL:KB]
 
     S32                         mCurrentTrack;
     altitude_list_t             mTrackAltitudes;
@@ -373,6 +413,9 @@ private:
     typedef std::map<std::string, LLUUID> experience_overrides_t;
     experience_overrides_t      mExperienceOverrides;
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    DayInstance::ptr_t          getEnvironmentInstance(EnvSelection_t env) const;
+// [/SL:KB]
     DayInstance::ptr_t          getEnvironmentInstance(EnvSelection_t env, bool create = false);
 
     void                        updateCloudScroll();

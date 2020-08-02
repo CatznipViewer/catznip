@@ -1041,7 +1041,7 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 			}
 
 			// Less/more restrictive logic only applies if only one search token differs (unless we're not currently filtering on name)
-			bool is_different = (!mFilterSubStrings.empty()) && (std::abs<int>(mFilterSubStrings.size() - search_tokens.size()) > 1);
+			bool is_different = (!mFilterSubStrings.empty()) && (std::abs((int)mFilterSubStrings.size() - (int)search_tokens.size()) > 1);
 			if (!is_different)
 			{
 				for (int idxToken = 0, cntToken = std::max(mFilterSubStrings.size(), search_tokens.size()); idxToken < cntToken; idxToken++)

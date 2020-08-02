@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -8496,6 +8496,62 @@ LLUIImagePtr LLSettingsBridge::getIcon() const
 //    return LLInventoryIcon::getIcon(LLAssetType::AT_SETTINGS, LLInventoryType::IT_SETTINGS, mSettingsType, FALSE);
 }
 
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+// override
+std::string LLSettingsBridge::getLabelSuffix() const
+{
+	const LLUUID idLocalAssetId = getLocalEnvAssetId(mSettingsType);
+	if (idLocalAssetId.notNull())
+	{
+		LLViewerInventoryItem* pItem = getItem();
+		if ( (pItem) && (pItem->getAssetUUID() == idLocalAssetId) )
+		{
+			return LLItemBridge::getLabelSuffix() + LLTrans::getString("active");
+		}
+	}
+
+	return LLItemBridge::getLabelSuffix();
+}
+
+// override
+LLFontGL::StyleFlags LLSettingsBridge::getLabelStyle() const
+{
+	U8 font = LLFontGL::NORMAL;
+
+	const LLUUID idLocalAssetId = getLocalEnvAssetId(mSettingsType);
+	if (idLocalAssetId.notNull())
+	{
+		LLViewerInventoryItem* pItem = getItem();
+		if ( (pItem) && (pItem->getAssetUUID() == idLocalAssetId) )
+		{
+			font |= LLFontGL::BOLD;
+		}
+	}
+
+	return (LLFontGL::StyleFlags)font;
+}
+
+// static
+LLUUID LLSettingsBridge::getLocalEnvAssetId(LLSettingsType::type_e eSettingsType)
+{
+	LLSettingsBase::ptr_t pSettings;
+	switch (eSettingsType)
+	{
+		case LLSettingsType::ST_DAYCYCLE:
+			pSettings = LLEnvironment::instance().getLocalDay();
+			break;
+		case LLSettingsType::ST_SKY:
+			pSettings = LLEnvironment::instance().getLocalSky();
+			break;
+		case LLSettingsType::ST_WATER:
+			pSettings = LLEnvironment::instance().getLocalWater();
+			break;
+	}
+
+	return (pSettings) ? pSettings->getBaseAssetId() : LLUUID::null;
+}
+// [/SL:KB]
+
 void LLSettingsBridge::performAction(LLInventoryModel* model, std::string action)
 {
     if ("apply_settings_local" == action)
@@ -8545,10 +8601,13 @@ void LLSettingsBridge::openItem()
     LLViewerInventoryItem* item = getItem();
     if (item)
     {
-        if (item->getPermissions().getOwner() != gAgent.getID())
-            LLNotificationsUtil::add("NoEditFromLibrary");
-        else
-            LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
+// [SL:KB] - Patch: World-WindLightLibraryEdit | Checked: Catznip-6.4
+		LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
+// [/SL:KB]
+//        if (item->getPermissions().getOwner() != gAgent.getID())
+//            LLNotificationsUtil::add("NoEditFromLibrary");
+//        else
+//            LLInvFVBridgeAction::doAction(item->getType(), mUUID, getInventoryModel());
     }
 }
 
