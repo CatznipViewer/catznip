@@ -2048,10 +2048,10 @@ void LLFloater::initRectControl()
 void LLFloater::handleShowCollapseButtonChanged(const LLSD& sdValue)
 {
 	sShowCollapseButton = sdValue.asBoolean();
-	for (LLInstanceTracker<LLFloater>::instance_iter itFloater = beginInstances(); itFloater != endInstances(); ++itFloater)
+	for (auto& floater : LLFloater::instance_snapshot())
 	{
-		itFloater->mButtonsEnabled[BUTTON_COLLAPSE] = (itFloater->isCollapsible()) && (!itFloater->mButtonsEnabled[BUTTON_RESTORE]) && (sShowCollapseButton);
-		itFloater->updateTitleButtons();
+		floater.mButtonsEnabled[BUTTON_COLLAPSE] = (floater.isCollapsible()) && (!floater.mButtonsEnabled[BUTTON_RESTORE]) && (sShowCollapseButton);
+		floater.updateTitleButtons();
 	}
 }
 // [/SL:KB]
