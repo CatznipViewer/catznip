@@ -288,7 +288,7 @@ private:
         typename InstanceMap::iterator iter = map.find(mInstanceKey);
 //        if (iter != map.end())
 // [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
-		if ( (iter != map.end()) && (iter->second == static_cast<T*>(this)) )
+		if ( (iter != map.end()) && (iter->second.get() == static_cast<T*>(this)) )
 // [/SL:KB]
         {
             auto ret = iter->second;
