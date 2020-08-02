@@ -2706,14 +2706,13 @@ void LLEnvironment::DayInstance::initialize()
 
 void LLEnvironment::DayInstance::clear()
 {
-// [SL:KB] This code block shouldn't be needed?
 // [SL:KB] - Patch: World-WindLightAssetTracking | Checked: Catznip-6.4
-//    if (LLEnvironment::ENV_LOCAL == mEnv)
-//    {
-//        LLUUID idDayOrSky = (mDayCycle) ? mDayCycle->getAssetId() : ((mSky) ? mSky->getAssetId() : LLUUID::null);
-//        LLUUID idWater = (mWater) ? mWater->getAssetId() : LLUUID::null;
-//        LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
-//    }
+    if (LLEnvironment::ENV_LOCAL == mEnv)
+    {
+        LLUUID idDayOrSky = (mDayCycle) ? mDayCycle->getAssetId() : ((mSky) ? mSky->getAssetId() : LLUUID::null);
+        LLUUID idWater = (mWater) ? mWater->getAssetId() : LLUUID::null;
+        LLEnvironment::notifyInventoryChange(idDayOrSky, idWater);
+    }
 // [/SL:KB]
     mDayCycle.reset();
     mSky.reset();

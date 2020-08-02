@@ -131,6 +131,16 @@
                     right="-15"
                     can_edit_text="true"/>
 
+                    <view_border
+                     top="1"
+                     right="-1"
+                     bottom="-1"
+                     width="1"
+                     follows="top|bottom|right"
+                     bevel_style="none"
+                     border_thickness="1"
+                     mouse_opaque="false"
+                     name="divisor1"/>
         </layout_panel>
         <layout_panel
                 border="false"

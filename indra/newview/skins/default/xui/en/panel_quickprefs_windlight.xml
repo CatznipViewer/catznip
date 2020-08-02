@@ -141,17 +141,6 @@
    top_pad="6"
    />
 
-  <view_border
-   bevel_style="none"
-   follows="top|left|right"
-   height="0"
-   layout="topleft"
-   left="65"
-   name="windlight_border_1"
-   right="-5"
-   top_pad="3"
-   />
-
   <text
    follows="top|left"
    halign="right"
