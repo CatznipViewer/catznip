@@ -1513,7 +1513,7 @@ Go to the [SECOND_LIFE] events web page?
     <tag>confirm</tag>
     <url option="0" name="url">
 
-			http://secondlife.com/events/
+			https://secondlife.com/my/community/events
     </url>
     <usetemplate
      name="okcancelbuttons"
@@ -4059,6 +4059,8 @@ Finished download of raw terrain file to:
 [DOWNLOAD_PATH].
   </notification>
 
+  <!-- RequiredUpdate does not display release notes URL because we don't get
+       that from login.cgi's login failure message. -->
   <notification
    icon="alertmodal.tga"
    name="RequiredUpdate"
@@ -4076,6 +4078,7 @@ Please download from https://secondlife.com/support/downloads/
    name="PauseForUpdate"
    type="alertmodal">
 Version [VERSION] is required for login.
+Release notes: [URL]
 Click OK to download and install.
     <tag>confirm</tag>
     <usetemplate
@@ -4088,6 +4091,7 @@ Click OK to download and install.
    name="OptionalUpdateReady"
    type="alertmodal">
 Version [VERSION] has been downloaded and is ready to install.
+Release notes: [URL]
 Click OK to install.
     <tag>confirm</tag>
     <usetemplate
@@ -4100,6 +4104,7 @@ Click OK to install.
    name="PromptOptionalUpdate"
    type="alertmodal">
 Version [VERSION] has been downloaded and is ready to install.
+Release notes: [URL]
 Proceed?
     <tag>confirm</tag>
     <usetemplate
@@ -8614,6 +8619,18 @@ Error saving preset [NAME].
     name="DefaultPresetNotSaved"
     type="notifytip">
 Can not overwrite default preset.
+  </notification>
+
+  <notification
+    icon="alertmodal.tga"
+    name="PresetAlreadyExists"
+    type="alertmodal">
+&apos;[NAME]&apos; is in use. You may replace
+this preset or choose another name.
+    <tag>fail</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
   </notification>
 
   <notification
