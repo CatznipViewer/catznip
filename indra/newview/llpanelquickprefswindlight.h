@@ -36,6 +36,7 @@ class LLViewerInventoryItem;
 
 class LLQuickPrefsWindlightPanel : public LLQuickPrefsPanel
 {
+	friend class LLQuickPrefsWindInventoryObserver;
 	struct EnvironmentSetting
 	{
 		EnvironmentSetting(const LLViewerInventoryItem* pItem, bool fIsLibrary);
@@ -47,6 +48,7 @@ class LLQuickPrefsWindlightPanel : public LLQuickPrefsPanel
 		LLUUID                 m_AssetId;
 		bool                   m_IsLibrary = false;
 	};
+	typedef std::vector<EnvironmentSetting> env_setting_vec_t;
 
 	LOG_CLASS(LLQuickPrefsWindlightPanel);
 public:
@@ -67,14 +69,17 @@ public:
 protected:
 	void refreshControls(bool fRefreshPresets);
 	void refreshEnvironments();
-	void populateSettingsList(LLComboBox* pComboBox, std::vector<EnvironmentSetting>& settingList);
 	void switchToLocalEnv();
 	void syncControls();
+	static void populateSettingsList(LLComboBox* pComboBox, std::vector<EnvironmentSetting>& settingList);
+	static void sortSettingsList(env_setting_vec_t& settingList);
+
 
 	/*
 	 * Event handlers
 	 */
 protected:
+	void onAddEnvironment(const LLUUID& idItem);
 	void onDayOffsetChanged();
 	void onDayFreezeToggle();
 	void onEditEnvSetting(LLComboBox* pComboBox);
@@ -91,14 +96,17 @@ protected:
 	 * Member variables
 	 */
 protected:
-	std::vector<EnvironmentSetting> m_DayCycles;
-	std::string                     m_strDayCycleFilter;
-	std::vector<EnvironmentSetting> m_Skies;
-	std::string                     m_strSkyFilter;
-	std::vector<EnvironmentSetting> m_Waters;
-	std::string                     m_strWaterFilter;
-	boost::signals2::scoped_connection    m_EnvironmentChangeConn;
-	boost::signals2::scoped_connection    m_EnvironmentUpdateConn;
+	LLInventoryObserver* m_pSettingsObserver = nullptr;
+	bool                 m_fNeedsRefresh = false;
+	LLTimer              m_RefreshTimer;
+	env_setting_vec_t    m_DayCycles;
+	std::string          m_strDayCycleFilter;
+	env_setting_vec_t    m_Skies;
+	std::string          m_strSkyFilter;
+	env_setting_vec_t    m_Waters;
+	std::string          m_strWaterFilter;
+	boost::signals2::scoped_connection m_EnvironmentChangeConn;
+	boost::signals2::scoped_connection m_EnvironmentUpdateConn;
 
 	LLComboBox*     m_pDayCyclePresetCombo = nullptr;
 	LLButton*       m_pDayCyclePrevButton = nullptr;

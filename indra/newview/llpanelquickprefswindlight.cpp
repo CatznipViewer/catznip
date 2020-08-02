@@ -29,6 +29,42 @@
 
 #include <boost/algorithm/string.hpp>
 
+// Defined in llsettingssky.cpp
+LLQuaternion convert_azimuth_and_altitude_to_quat(F32 azimuth, F32 altitude);
+
+// ====================================================================================
+// LLQuickPrefsWindInventoryObserver class
+//
+
+class LLQuickPrefsWindInventoryObserver : public LLInventoryObserver
+{
+public:
+	LLQuickPrefsWindInventoryObserver(LLHandle<LLQuickPrefsWindlightPanel> hQuickPrefsPanel)
+		: m_hQuickPrefsPanel(hQuickPrefsPanel)
+		, LLInventoryObserver()
+	{
+	}
+
+	void changed(U32 mask) override
+	{
+		LLQuickPrefsWindlightPanel* pPanel = m_hQuickPrefsPanel.get();
+		if ( (pPanel) && (mask & LLInventoryObserver::ADD) )
+		{
+			const auto& idItemIDs = gInventory.getAddedIDs();
+			for (const auto& idItem : idItemIDs)
+			{
+				const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
+				if (LLAssetType::AT_SETTINGS != pItem->getActualType())
+					continue;
+				pPanel->onAddEnvironment(idItem);
+			}
+		}
+	}
+
+protected:
+	LLHandle<LLQuickPrefsWindlightPanel> m_hQuickPrefsPanel;
+};
+
 // ====================================================================================
 // LLQuickPrefsWindlightPanel class
 //
@@ -52,6 +88,12 @@ LLQuickPrefsWindlightPanel::LLQuickPrefsWindlightPanel()
 
 LLQuickPrefsWindlightPanel::~LLQuickPrefsWindlightPanel()
 {
+	if (m_pSettingsObserver)
+	{
+		gInventory.removeObserver(m_pSettingsObserver);
+		delete m_pSettingsObserver;
+		m_pSettingsObserver = nullptr;
+	}
 }
 
 // override
@@ -114,6 +156,11 @@ BOOL LLQuickPrefsWindlightPanel::postBuild()
 void LLQuickPrefsWindlightPanel::draw()
 {
 	LLQuickPrefsPanel::draw();
+	if (m_fNeedsRefresh && m_RefreshTimer.hasExpired())
+	{
+		refreshControls(true);
+		m_fNeedsRefresh = false;
+	}
 	syncControls();
 }
 
@@ -122,7 +169,43 @@ void LLQuickPrefsWindlightPanel::onVisibilityChange(BOOL fVisible)
 {
 	if (fVisible)
 	{
+		if (!m_pSettingsObserver)
+		{
+			refreshEnvironments();
+
+			m_pSettingsObserver = new LLQuickPrefsWindInventoryObserver(getDerivedHandle<LLQuickPrefsWindlightPanel>());
+			gInventory.addObserver(m_pSettingsObserver);
+		}
 		refreshControls(true);
+	}
+}
+
+void LLQuickPrefsWindlightPanel::onAddEnvironment(const LLUUID& idItem)
+{
+	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
+
+	env_setting_vec_t* pSettings = nullptr;
+	switch (pItem->getSettingsType())
+	{
+		case LLSettingsType::ST_DAYCYCLE:
+			pSettings = &m_DayCycles;
+			break;
+		case LLSettingsType::ST_SKY:
+			pSettings = &m_Skies;
+			break;
+		case LLSettingsType::ST_WATER:
+			pSettings = &m_Waters;
+			break;
+		default:
+			return;
+	}
+
+	// Unlike refreshEnvironments we have to check for dupes
+	if (pSettings->end() == std::find_if(pSettings->begin(), pSettings->end(), [idItem](const EnvironmentSetting& envSetting) {  return idItem == envSetting.m_InventoryId; }))
+	{
+		pSettings->push_back(EnvironmentSetting(pItem, gInventory.isObjectDescendentOf(idItem, gInventory.getLibraryRootFolderID())));
+		m_fNeedsRefresh = true;
+		m_RefreshTimer.setTimerExpirySec(0.5);
 	}
 }
 
@@ -256,7 +339,6 @@ void LLQuickPrefsWindlightPanel::refreshControls(bool fRefreshPresets)
 
 	if (fRefreshPresets)
 	{
-		refreshEnvironments();
 		populateSettingsList(m_pDayCyclePresetCombo, m_DayCycles);
 		populateSettingsList(m_pSkyPresetCombo, m_Skies);
 		populateSettingsList(m_pWaterPresetCombo, m_Waters);
@@ -309,7 +391,6 @@ void LLQuickPrefsWindlightPanel::refreshControls(bool fRefreshPresets)
 	updatePresetCombo(m_pWaterPresetCombo, m_Waters, pEnvMgr->getLocalWater(), (fUseSharedEnv ? getSharedLabel(curEnv) : s_DayCycleLabel), m_pWaterPrevButton, m_pWaterNextButton, m_pWaterEditButton);
 }
 
-// *TODO: inventory observer + partially fetched
 void LLQuickPrefsWindlightPanel::refreshEnvironments()
 {
 	auto processSettingsItems = [this](const LLInventoryModel::item_array_t& items, bool isLibrary)
@@ -330,18 +411,6 @@ void LLQuickPrefsWindlightPanel::refreshEnvironments()
 			}
 		}
 	};
-	auto sortSettingsItems = [](std::vector<EnvironmentSetting>& settingList)
-	{
-		std::sort(settingList.begin(), settingList.end(), [](const EnvironmentSetting& lhs, const EnvironmentSetting& rhs)
-		{
-			if (lhs.m_IsLibrary != rhs.m_IsLibrary)
-				return !lhs.m_IsLibrary;
-			int cmp = lhs.m_Path.compare(rhs.m_Path);
-			if (cmp == 0)
-				return lhs.m_Name < rhs.m_Name;
-			return cmp < 0;
-		});
-	};
 
 	m_DayCycles.erase(std::remove_if(m_DayCycles.begin(), m_DayCycles.end(), [](const EnvironmentSetting& envSetting) { return !envSetting.m_IsLibrary; }), m_DayCycles.end());
 	m_Skies.erase(std::remove_if(m_Skies.begin(), m_Skies.end(), [](const EnvironmentSetting& envSetting) { return !envSetting.m_IsLibrary; }), m_Skies.end());
@@ -359,12 +428,23 @@ void LLQuickPrefsWindlightPanel::refreshEnvironments()
 	gInventory.collectDescendentsIf(gInventory.getRootFolderID(), cats, items, LLInventoryModel::EXCLUDE_TRASH, f);
 	processSettingsItems(items, false);
 	items.clear();
-
-	sortSettingsItems(m_DayCycles);
-	sortSettingsItems(m_Skies);
-	sortSettingsItems(m_Waters);
 }
 
+// static
+void LLQuickPrefsWindlightPanel::sortSettingsList(env_setting_vec_t& settingList)
+{
+	std::sort(settingList.begin(), settingList.end(), [](const LLQuickPrefsWindlightPanel::EnvironmentSetting& lhs, const LLQuickPrefsWindlightPanel::EnvironmentSetting& rhs)
+	{
+		if (lhs.m_IsLibrary != rhs.m_IsLibrary)
+			return !lhs.m_IsLibrary;
+		int cmp = lhs.m_Path.compare(rhs.m_Path);
+		if (cmp == 0)
+			return lhs.m_Name < rhs.m_Name;
+		return cmp < 0;
+	});
+}
+
+// static
 void LLQuickPrefsWindlightPanel::populateSettingsList(LLComboBox* pComboBox, std::vector<EnvironmentSetting>& settingList)
 {
 	LLSD sdFolderElement;
@@ -378,6 +458,7 @@ void LLQuickPrefsWindlightPanel::populateSettingsList(LLComboBox* pComboBox, std
 	pComboBox->clearRows();
 
 	std::string strCurPath;
+	sortSettingsList(settingList);
 	for (const EnvironmentSetting& env : settingList)
 	{
 		if (strCurPath != env.m_Path)
