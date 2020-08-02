@@ -5,449 +5,421 @@
  layout="topleft"
  name="panel_quickprefs_windlight"
  width="300">
-	<string name="WINDLIGHT_REGION">(Region default)</string>
-	<string name="WINDLIGHT_DAYCYCLE">(Day cycle)</string>
-	<string name="WINDLIGHT_FIXEDSKY">(Fixed sky)</string>
+  <string name="WINDLIGHT_SHARED">(Shared environment)</string>
+  <string name="WINDLIGHT_DAYCYCLE">(None: Day cycle)</string>
+  <string name="WINDLIGHT_FIXEDSKY">(None: Fixed sky)</string>
+  <string name="WINDLIGHT_PARCEL">(Shared: Parcel)</string>
+  <string name="WINDLIGHT_REGION">(Shared: Region)</string>
+  <string name="WINDLIGHT_CUSTOM">(Custom)</string>
 
-	<check_box
-	 height="16"
-	 label="Use region settings"
-	 layout="topleft"
-	 left="10"
-	 name="windlight_regiondefault_check"
-	 top_pad="2"
-	 width="130" />
+  <button
+   follows="top|right"
+   height="21"
+   label="Use Shared Environment"
+   layout="topleft"
+   left="17"
+   name="windlight_usesharedenv_btn"
+   top_pad="2"
+   width="150"
+   />
+  <button
+   follows="top|right"
+   height="21"
+   label="Personal Lighting..."
+   layout="topleft"
+   left_pad="10"
+   name="windlight_personaledit_btn"
+   top_delta="0"
+   width="115"
+   />
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 name="windlight_daycycle_text"
-	 top_pad="6"
-	 width="65">
-		Day cycle :
-	</text>
-	<combo_box
-	 follows="top|left|right"
-	 height="23"
-	 name="windlight_daycycle_combo"
-	 layout="topleft"
-	 left_pad="5"
-	 top_delta="-4"
-	 width="150">
-		<combo_box.item
-		 label="-Select a preset-"
-		 name="item0"/>
-	</combo_box>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Left"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_daycycle_prevbtn"
-	 right="-45"
-	 tool_tip="Change to the previous day cycle"
-	 top_delta="1"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Right"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_daycycle_nextbtn"
-	 right="-25"
-	 tool_tip="Change to the next day cycle"
-	 top_delta="0"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Edit_Wrench"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_daycycle_editbtn"
-	 right="-5"
-	 tool_tip="Edit the current day cycle"
-	 top_delta="0"
-	 width="20">
-	</button>
+  <view_border
+   bevel_style="none"
+   height="0"
+   layout="topleft"
+   left="15"
+   name="windlight_border_0"
+   top_pad="7"
+   right="-5"
+   />
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 length="1"
-	 name="windlight_fixedsky_text"
-	 top_pad="8"
-	 type="string"
-	 width="65">
-		Fixed sky :
-	</text>
-	<combo_box
-	 follows="top|left|right"
-	 height="23"
-	 layout="topleft"
-	 left_pad="5"
-	 name="windlight_fixedsky_combo"
-	 top_delta="-4"
-	 width="150">
-		<combo_box.item
-		 label="-Select a preset-"
-		 name="item0"/>
-	</combo_box>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Left"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_fixedsky_prevbtn"
-	 right="-45"
-	 tool_tip="Change to the previous sky preset"
-	 top_delta="1"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Right"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_fixedsky_nextbtn"
-	 right="-25"
-	 tool_tip="Change to the next sky preset"
-	 top_delta="0"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Edit_Wrench"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_fixedsky_editbtn"
-	 right="-5"
-	 tool_tip="Edit the current sky preset"
-	 top_delta="0"
-	 width="20">
-	</button>
+  <text
+   follows="top|left"
+   halign="right"
+   height="15"
+   layout="topleft"
+   left="15"
+   name="windlight_daycycle_text"
+   top_pad="10"
+   width="40">
+    Day :
+  </text>
+  <combo_box
+   follows="top|left|right"
+   height="23"
+   name="windlight_daycycle_combo"
+   layout="topleft"
+   left_pad="10"
+   top_delta="-4"
+   width="170">
+    <combo_box.item
+     label="-Select a preset-"
+     name="item0"/>
+  </combo_box>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Left"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_daycycle_prevbtn"
+   right="-45"
+   tool_tip="Change to the previous day cycle"
+   top_delta="1"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Right"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_daycycle_nextbtn"
+   right="-25"
+   tool_tip="Change to the next day cycle"
+   top_delta="0"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Edit_Wrench"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_daycycle_editbtn"
+   right="-5"
+   tool_tip="Edit the current day cycle"
+   top_delta="0"
+   width="20">
+  </button>
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 name="windlight_water_text"
-	 top_pad="8"
-	 width="65">
-		Water :
-	</text>
-	<combo_box
-	 follows="top|left|right"
-	 height="23"
-	 layout="topleft"
-	 left_pad="5"
-	 name="windlight_water_combo"
-	 top_delta="-4"
-	 width="150">
-		<combo_box.item
-		 label="-Select a preset-"
-		 name="item0"/>
-	</combo_box>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Left"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_water_prevbtn"
-	 right="-45"
-	 tool_tip="Change to the previous water preset"
-	 top_delta="1"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Arrow_Right"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_water_nextbtn"
-	 right="-25"
-	 tool_tip="Change to the next water preset"
-	 top_delta="0"
-	 width="18">
-	</button>
-	<button
-	 follows="top|right"
-	 height="21"
-	 image_overlay="Edit_Wrench"
-	 hover_glow_amount="0.15"
-	 layout="topleft"
-	 name="windlight_water_editbtn"
-	 right="-5"
-	 tool_tip="Edit the current water preset"
-	 top_delta="0"
-	 width="20">
-	</button>
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="65"
+   name="windlight_dayoffset_text"
+   text_readonly_color="LabelDisabledColor"
+   top_pad="5"
+   width="50">
+      Position :
+  </text>
+  <slider
+   decimal_digits="1"
+   follows="top|left"
+   height="10"
+   increment="0.5"
+   initial_value="0.0"
+   layout="topleft"
+   left_pad="5"
+   min_val="0"
+   max_val="99.9"
+   name="windlight_dayoffset_slider"
+   right="-5"
+   text_suffix="%"
+   text_width="37"
+   top_delta="3"
+   />
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 name="windlight_scenegamma_text"
-	 text_readonly_color="LabelDisabledColor"
-	 top_pad="7"
-	 width="90">
-	    Scene Gamma :
-	</text>
-	<slider
-	 decimal_digits="2"
-	 follows="top|left"
-	 height="10"
-	 increment="0.01"
-	 initial_value="2.0"
-	 layout="topleft"
-	 left_pad="5"
-	 max_val="10"
-	 name="windlight_scenegamma_slider"
-	 right="-5"
-	 text_width="27"
-	 top_delta="3" />
+  <check_box
+   height="16"
+   label="Freeze time"
+   layout="topleft"
+   left="65"
+   name="windlight_freezetime_check"
+   right="-5"
+   top_pad="6"
+   />
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 name="windlight_eastangle_text"
-	 text_readonly_color="LabelDisabledColor"
-	 top_pad="8"
-	 width="90">
-	    East Angle :
-	</text>
-	<slider
-	 decimal_digits="2"
-	 follows="top|left"
-	 height="10"
-	 increment="0.01"
-	 initial_value="0.0"
-	 layout="topleft"
-	 left_pad="5"
-	 name="windlight_eastangle_slider"
-	 right="-5"
-	 text_width="27"
-	 top_delta="3" />
+  <text
+   follows="top|left"
+   halign="right"
+   height="15"
+   layout="topleft"
+   left="15"
+   length="1"
+   name="windlight_fixedsky_text"
+   top_pad="10"
+   type="string"
+   width="40">
+    Sky :
+  </text>
+  <combo_box
+   follows="top|left|right"
+   height="23"
+   layout="topleft"
+   left_pad="10"
+   name="windlight_fixedsky_combo"
+   top_delta="-4"
+   width="170">
+    <combo_box.item
+     label="-Select a preset-"
+     name="item0"/>
+  </combo_box>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Left"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_fixedsky_prevbtn"
+   right="-45"
+   tool_tip="Change to the previous sky preset"
+   top_delta="1"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Right"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_fixedsky_nextbtn"
+   right="-25"
+   tool_tip="Change to the next sky preset"
+   top_delta="0"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Edit_Wrench"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_fixedsky_editbtn"
+   right="-5"
+   tool_tip="Edit the current sky preset"
+   top_delta="0"
+   width="20">
+  </button>
 
-	<text
-	 follows="top|left"
-	 height="15"
-	 layout="topleft"
-	 left="15"
-	 name="windlight_sunmoon_text"
-	 top_pad="8"
-	 width="125">
-		Sun/moon Position :
-	</text>
-	<check_box
-	 height="16"
-	 label="Freeze time"
-	 layout="topleft"
-	 left_pad="8"
-	 name="windlight_sunmoon_freeze_check"
-	 top_delta="0"
-	 width="130" />
-	<slider
-	 decimal_digits="0"
-	 follows="top|left|right"
-	 height="10"
-	 increment="0.0833333"
-	 initial_value="0"
-	 layout="topleft"
-	 left="15"
-	 max_val="24"
-	 name="windlight_sunmoon_position"
-	 show_text="false"
-	 top_pad="5"
-	 width="260" />
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 font="SansSerif"
-	 height="14"
-	 layout="topleft"
-	 left_delta="2"
-	 name="WL12amHash"
-	 top_pad="6"
-	 width="6">
-		|
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 font="SansSerif"
-	 height="14"
-	 layout="topleft"
-	 left_pad="57"
-	 name="WL6amHash"
-	 top_delta="0"
-	 width="6">
-		|
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 font="SansSerif"
-	 height="14"
-	 layout="topleft"
-	 left_pad="57"
-	 name="WL12pmHash2"
-	 top_delta="0"
-	 width="6">
-		|
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 font="SansSerif"
-	 height="14"
-	 layout="topleft"
-	 left_pad="57"
-	 name="WL6pmHash"
-	 top_delta="0"
-	 width="6">
-		|
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 font="SansSerif"
-	 height="14"
-	 layout="topleft"
-	 left_pad="57"
-	 name="WL12amHash2"
-	 top_delta="0"
-	 width="6">
-	 |
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 height="16"
-	 layout="topleft"
-	 left_delta="-260"
-	 name="WL12am"
-	 top_pad="10"
-	 width="55">
-	 12am
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 height="16"
-	 layout="topleft"
-	 left_pad="10"
-	 name="WL6am"
-	 top_delta="0"
-	 width="55">
-		6am
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 height="16"
-	 layout="topleft"
-	 left_pad="5"
-	 name="WL12pmHash"
-	 top_delta="0"
-	 width="55">
-		12pm
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 height="16"
-	 layout="topleft"
-	 left_pad="8"
-	 name="WL6pm"
-	 top_delta="0"
-	 width="55">
-		6pm
-	</text>
-	<text
-	 type="string"
-	 length="1"
-	 border_visible="true"
-	 follows="left|top|right"
-	 height="16"
-	 layout="topleft"
-	 left_pad="5"
-	 name="WL12am2"
-	 top_delta="0"
-	 width="40">
-		12am
-	</text>
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="65"
+   name="windlight_skygamma_text"
+   top_pad="7"
+   width="50">
+      Gamma :
+  </text>
+  <slider
+   decimal_digits="2"
+   follows="top|left|right"
+   height="10"
+   increment="0.01"
+   initial_value="2.0"
+   layout="topleft"
+   left_pad="5"
+   min_value="-1"
+   max_val="10"
+   name="windlight_skygamma_slider"
+   right="-5"
+   text_width="32"
+   top_delta="3"
+   />
 
-	<view_border
-	 bevel_style="none"
-	 height="0"
-	 layout="topleft"
-	 left="5"
-	 name="complexity_border_2"
-	 top_pad="5"
-	 right="-5"/>
-	 
-	<check_box
-	 control_name="EnvironmentPersistAcrossLogin"
-	 height="16"
-	 label="Reapply current Windlight at logon"
-	 layout="topleft"
-	 left="10"
-	 name="windlight_prefs_persist"
-	 top_pad="8"
-	 width="130" />
-	<check_box
-	 control_name="EnvironmentInterpolatePresetChanges"
-	 height="16"
-	 label="Interpolate preset changes"
-	 layout="topleft"
-	 left="10"
-	 name="windlight_prefs_interpolate"
-	 top_pad="4"
-	 width="130" />
-	<button
-	 follows="top|right"
-	 height="21"
-	 label="Reset WindLight"
-	 layout="topleft"
-	 left="30"
-	 name="windlight_reset_btn"
-	 top_pad="2"
-	 width="110" />
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="65"
+   name="windlight_celestialbody_text"
+   top_pad="7"
+   width="50">
+      Adjust :
+  </text>
+  <radio_group
+   follows="top|left"
+   height="20"
+   layout="topleft"
+   left_pad="3"
+   name="windlight_celestialbody_group"
+   right="-5"
+   top_pad="-13"
+   value="0">
+     <radio_item
+      label="Sun"
+      left="0"
+      name="windlight_celestialbody_sun"
+      layout="topleft"
+      value="0"
+      width="85"
+      />
+     <radio_item
+      label="Moon"
+      left_pad="0"
+      layout="topleft"
+      name="windlight_celestialbody_moon"
+      value="1"
+      width="75"
+      />
+  </radio_group>
+
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="65"
+   name="windlight_azimuth_text"
+   top_pad="-3"
+   width="50">
+      Azimuth :
+  </text>
+  <slider
+   decimal_digits="1"
+   follows="top|left|right"
+   height="10"
+   increment="0.5"
+   initial_value="0.0"
+   layout="topleft"
+   left_pad="5"
+   min_val="0"
+   max_val="360"
+   name="windlight_azimuth_slider"
+   right="-5"
+   text_suffix="°"
+   text_width="32"
+   top_delta="3"
+   />
+
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="65"
+   name="windlight_elevation_text"
+   top_pad="7"
+   width="50">
+      Elevation :
+  </text>
+  <slider
+   decimal_digits="1"
+   follows="top|left|right"
+   height="10"
+   increment="0.5"
+   initial_value="0.0"
+   layout="topleft"
+   left_pad="5"
+   min_val="-90"
+   max_val="90"
+   name="windlight_elevation_slider"
+   right="-5"
+   text_suffix="°"
+   text_width="32"
+   top_delta="3"
+   />
+
+  <view_border
+   bevel_style="none"
+   follows="top|left|right"
+   height="0"
+   layout="topleft"
+   left="65"
+   name="windlight_border_2"
+   top_pad="7"
+   right="-5"
+   />
+
+  <text
+   follows="top|left"
+   height="15"
+   layout="topleft"
+   left="15"
+   name="windlight_water_text"
+   top_pad="10"
+   width="40">
+    Water :
+  </text>
+  <combo_box
+   follows="top|left|right"
+   height="23"
+   layout="topleft"
+   left_pad="10"
+   name="windlight_water_combo"
+   top_delta="-4"
+   width="170">
+    <combo_box.item
+     label="-Select a preset-"
+     name="item0"
+     />
+  </combo_box>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Left"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_water_prevbtn"
+   right="-45"
+   tool_tip="Change to the previous water preset"
+   top_delta="1"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Arrow_Right"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_water_nextbtn"
+   right="-25"
+   tool_tip="Change to the next water preset"
+   top_delta="0"
+   width="18">
+  </button>
+  <button
+   follows="top|right"
+   height="21"
+   image_overlay="Edit_Wrench"
+   hover_glow_amount="0.15"
+   layout="topleft"
+   name="windlight_water_editbtn"
+   right="-5"
+   tool_tip="Edit the current water preset"
+   top_delta="0"
+   width="20">
+  </button>
+
+  <view_border
+   bevel_style="none"
+   height="0"
+   layout="topleft"
+   left="15"
+   name="windlight_border_3"
+   top_pad="7"
+   right="-5"
+   />
+
+  <check_box
+   control_name="EnvironmentPersistAcrossLogin"
+   height="16"
+   label="Reapply current Windlight at logon"
+   layout="topleft"
+   left="10"
+   name="windlight_prefs_persist"
+   top_pad="8"
+   width="130"
+   />
+  <check_box
+   control_name="EnvironmentInterpolatePresetChanges"
+   height="16"
+   label="Interpolate preset changes"
+   layout="topleft"
+   left="10"
+   name="windlight_prefs_interpolate"
+   top_pad="2"
+   width="130"
+   />
 
 </panel>

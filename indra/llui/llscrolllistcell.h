@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2007&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -74,6 +75,10 @@ public:
 		Optional<LLSD>				value;
 		Optional<std::string>		tool_tip;
 
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+		Optional<S32>				pad_left;
+// [/SL:KB]
+
 		Optional<const LLFontGL*>	font;
 		Optional<LLColor4>			font_color;
 		Optional<LLFontGL::HAlign>	font_halign;
@@ -91,6 +96,9 @@ public:
 // [/SL:KB]
 			value("value"),
 			tool_tip("tool_tip", ""),
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+			pad_left("pad_left", 0),
+// [/SL:KB]
 			font("font", LLFontGL::getFontSansSerifSmall()),
 			font_color("font_color", LLColor4::black),
 			color("color", LLColor4::white),
@@ -207,6 +215,9 @@ public:
 	void			setIcon(const std::string& strImage);
 // [/SL:KB]
 private:
+// [SL:KB] - Patch: Control-ComboBox | Checked: Catznip-6.4
+	S32				mLeftPad = 0;
+// [/SL:KB]
 	LLUIString		mText;
 	S32				mTextWidth;
 	const LLFontGL*	mFont;

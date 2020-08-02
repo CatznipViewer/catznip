@@ -1670,6 +1670,7 @@ http://secondlife.com/support 求助解決問題。
 	<string name="no_modify" value="（禁止修改）"/>
 	<string name="no_copy" value="（禁止複製）"/>
 	<string name="worn" value="（已穿）"/>
+	<string name="active" value=" (使用中)" />
 	<string name="link" value="（聯結）"/>
 	<string name="broken_link" value="（損壞的聯結）"/>
 	<string name="LoadingContents">

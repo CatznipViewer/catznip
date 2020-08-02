@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -97,6 +97,9 @@
 #include "rlvlocks.h"
 // [/RLVa:KB]
 
+// [SL:KB] - Patch: World-WindLightQuickPrefs | Checked: Catznip-6.4
+#include <numeric>
+// [/SL:KB]
 #include <boost/foreach.hpp>
 
 // [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
@@ -274,6 +277,29 @@ void append_path(const LLUUID& id, std::string& path, bool include_root /*=true*
 // [/SL/KB]
 //	path.append(temp);
 }
+
+// [SL:KB] - Patch: World-WindLightQuickPrefs | Checked: Catznip-6.4
+std::string get_item_path(const LLUUID& item_id, bool include_root)
+{
+	std::string forward_slash("/");
+
+    std::list<const LLInventoryObject*> pathParts;
+    const LLInventoryObject* pCurObj = gInventory.getObject(item_id);
+    while (pCurObj)
+    {
+        if (pCurObj = gInventory.getObject(pCurObj->getParentUUID()))
+            pathParts.push_front(pCurObj);
+    }
+
+    if (!include_root)
+        pathParts.pop_front();
+    return std::accumulate(pathParts.begin(), pathParts.end(), std::string(), [forward_slash](const std::string& strPath, const LLInventoryObject* pObj)
+        {
+            return strPath.empty() ? pObj->getName() : strPath + forward_slash + pObj->getName();
+        });
+}
+// [/SL:KB]
+
 
 void update_marketplace_folder_hierarchy(const LLUUID cat_id)
 {
@@ -2532,6 +2558,16 @@ bool LLAssetIDMatches::operator()(LLInventoryCategory* cat, LLInventoryItem* ite
 {
 	return (item && item->getAssetUUID() == mAssetID);
 }
+
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+///----------------------------------------------------------------------------
+/// LLAssetIDsMatches
+///----------------------------------------------------------------------------
+bool LLAssetIDsMatches::operator()(LLInventoryCategory* cat, LLInventoryItem* item)
+{
+	return (item) && (mAssetIDs.end() != mAssetIDs.find(item->getAssetUUID()));
+}
+// [/SL:KB]
 
 ///----------------------------------------------------------------------------
 /// LLLinkedItemIDMatches 

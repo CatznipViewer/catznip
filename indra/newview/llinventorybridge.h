@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2020, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -688,6 +688,10 @@ public:
         const LLUUID& uuid,
         LLSettingsType::type_e settings_type);
     virtual LLUIImagePtr getIcon() const;
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+	        std::string getLabelSuffix() const override;
+			LLFontGL::StyleFlags getLabelStyle() const override;
+// [/SL:KB]
     virtual void	performAction(LLInventoryModel* model, std::string action);
     virtual void	openItem();
     virtual BOOL	isMultiPreviewAllowed() { return FALSE; }
@@ -699,6 +703,9 @@ public:
 protected:
     bool            canUpdateRegion() const;
     bool            canUpdateParcel() const;
+// [SL:KB] - Patch: World-WindLightInvSuffix | Checked: Catznip-6.4
+	static LLUUID	getLocalEnvAssetId(LLSettingsType::type_e eSettingsType);
+// [/SL:KB]
 
     LLSettingsType::type_e mSettingsType;
 

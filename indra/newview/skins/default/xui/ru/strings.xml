@@ -1674,6 +1674,7 @@ support@secondlife.com.
 	<string name="no_modify" value="(не изменяется)"/>
 	<string name="no_copy" value="(не копируется)"/>
 	<string name="worn" value="(носится)"/>
+	<string name="active" value=" (активно)" />
 	<string name="link" value="(ссылка)"/>
 	<string name="broken_link" value="(broken_link)"/>
 	<string name="LoadingContents">

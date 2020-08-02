@@ -1675,6 +1675,7 @@ support@secondlife.com にお問い合わせください。
 	<string name="no_modify" value=" （編集不可）"/>
 	<string name="no_copy" value=" （コピー不可）"/>
 	<string name="worn" value=" （着用中）"/>
+	<string name="active" value=" (アクティブ)" />
 	<string name="link" value=" （リンク）"/>
 	<string name="broken_link" value=" （壊れたリンク）"/>
 	<string name="LoadingContents">

@@ -1659,6 +1659,7 @@ Si sigues recibiendo el mismo mensaje, solicita ayuda al personal de asistencia 
 	<string name="no_modify" value="(no modificable)"/>
 	<string name="no_copy" value="(no copiable)"/>
 	<string name="worn" value="(puesto)"/>
+	<string name="active" value=" (activo)" />
 	<string name="link" value="(enlace)"/>
 	<string name="broken_link" value="(enlace roto)&quot;"/>
 	<string name="LoadingContents">

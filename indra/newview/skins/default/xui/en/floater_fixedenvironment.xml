@@ -6,7 +6,7 @@
         can_close="true"
         can_dock="false"
         bevel_style="in"
-        height="550"
+        height="410"
         layout="topleft"
         name="Fixed Environment"
         save_rect="true"
@@ -14,24 +14,24 @@
         save_visibility="false"
         help_topic="fixed_environment"
         single_instance="true" 
-        width="750">
+        width="515">
     <string name="edit_sky">Edit Sky:</string>
     <string name="edit_water">Edit Water:</string>
     <layout_stack name="floater_stack"
             left="5"
             top="5"
             right="-5"
-            bottom="-5"
+            bottom="-1"
             follows="left|top|right|bottom"
             orientation="vertical">
         <layout_panel name="info_panel"
                 auto_resize="false"
                 user_resize="false"
-                min_height="60">
+                min_height="25">
             <text
                     follows="left|top"
-                    top_delta="30"
-                    left_delta="10"
+                    top="5"
+                    left="7"
                     width="35"
                     height="20"
                     font="SansSerif">
@@ -39,33 +39,33 @@
             </text>
             <line_editor
                     follows="left|top"
-                    top_delta="-2"
+                    top_delta="-4"
                     left_delta="45"
                     width="250"
                     name="settings_name"
                     prevalidate_callback="ascii"
                     max_length_chars="63"
-                    height="20"/>
+                    height="23"/>
             <button
                     height="23"
                     label="Load"
                     follows="left|top"
                     left_delta="260"
                     font="SansSerif"
-                    top_delta="-2"
+                    top_delta="0"
                     name="btn_load"
                     tool_tip="Load a settings from inventory" 
-                    width="96" />
+                    width="75" />
             <button
                     height="23"
                     label="Import"
-                    follows="right|top"
-                    right="-10"
+                    follows="left|top"
+                    left_pad="10"
                     font="SansSerif"
                     top_delta="0"
                     name="btn_import"
                     tool_tip="Import legacy settings from disk." 
-                    width="96" />
+                    width="75" />
         </layout_panel>
         <layout_panel name="tab_area"
                 auto_resize="true"
@@ -77,7 +77,10 @@
                     follows="all"
                     halign="left"
                     layout="topleft"
-                    left="0"
+                    left="5"
+                    right="-5"
+                    top="1"
+                    bottom="-2"
                     name="tab_settings"
                     tab_position="top"
                     tab_width="120"
@@ -89,7 +92,7 @@
                 follows="left|top|right|bottom"
                 auto_resize="false"
                 user_resize="false"
-                height="40"
+                height="28"
                 visible="true">
             <layout_stack
                     follows="bottom|left|right"
@@ -100,7 +103,7 @@
                     left="0"
                     orientation="horizontal"
                     top="0"
-                    width="313">
+                    width="203">
                 <layout_panel
                         follows="bottom|left|right"
                         height="23"
@@ -109,16 +112,16 @@
                         mouse_opaque="false"
                         name="save_btn_lp"
                         auto_resize="true"
-                        width="156">
+                        width="116">
                     <button
                             follows="bottom|left|right"
                             height="23"
                             label="Save"
-                            left="1"
+                            left="7"
                             layout="topleft"
                             name="btn_commit"
                             top="0"
-                            width="155" />
+                            width="105" />
                     <button
                             follows="bottom|right"
                             height="23"
@@ -143,7 +146,7 @@
                         mouse_opaque="false"
                         name="revert_btn_lp"
                         auto_resize="true"
-                        width="147">
+                        width="87">
                     <button
                             follows="bottom|right"
                             height="23"
@@ -153,7 +156,7 @@
                             name="btn_cancel"
                             top="0"
                             tool_tip="Revert to last saved version"
-                            width="147" />
+                            width="87" />
                 </layout_panel>
             </layout_stack>
         </layout_panel>

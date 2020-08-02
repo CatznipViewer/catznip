@@ -523,6 +523,7 @@ set(viewer_SOURCE_FILES
     llpanelprofileview.cpp
     llpanelquickprefsappearance.cpp
     llpanelquickprefssettings.cpp
+    llpanelquickprefswindlight.cpp
     llpanelsnapshot.cpp
     llpanelsnapshotinventory.cpp
     llpanelsnapshotlocal.cpp
@@ -1196,6 +1197,7 @@ set(viewer_HEADER_FILES
     llpanelprofileview.h
     llpanelquickprefsappearance.h
     llpanelquickprefssettings.h
+    llpanelquickprefswindlight.h
     llpanelsnapshot.h
     llpanelteleporthistory.h
     llpaneltiptoast.h
