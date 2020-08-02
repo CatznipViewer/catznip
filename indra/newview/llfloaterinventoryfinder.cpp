@@ -104,6 +104,7 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	m_pFilterTypeCtrls[LLInventoryType::IT_OBJECT] = findChild<LLCheckBoxCtrl>("check_object");
 	m_pFilterTypeCtrls[LLInventoryType::IT_ATTACHMENT] = findChild<LLCheckBoxCtrl>("check_object");
 	m_pFilterTypeCtrls[LLInventoryType::IT_LSL] = findChild<LLCheckBoxCtrl>("check_script");
+	m_pFilterTypeCtrls[LLInventoryType::IT_SETTINGS] = findChild<LLCheckBoxCtrl>("check_settings");
 	m_pFilterTypeCtrls[LLInventoryType::IT_SNAPSHOT] = findChild<LLCheckBoxCtrl>("check_snapshot");
 	m_pFilterTypeCtrls[LLInventoryType::IT_SOUND] = findChild<LLCheckBoxCtrl>("check_sound");
 	m_pFilterTypeCtrls[LLInventoryType::IT_TEXTURE] = findChild<LLCheckBoxCtrl>("check_texture");
