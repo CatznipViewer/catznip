@@ -91,7 +91,7 @@ add_subdirectory(${VIEWER_PREFIX}doxygen EXCLUDE_FROM_ALL)
 # sets the 'startup project' for debugging from visual studio.
 set_property(
     DIRECTORY ${VIEWER_PREFIX}
-    PROPERTY VS_STARTUP_PROJECT secondlife-bin
+    PROPERTY VS_STARTUP_PROJECT catznip-bin
     )
 
 if (LL_TESTS)
