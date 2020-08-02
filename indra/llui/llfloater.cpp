@@ -3340,7 +3340,7 @@ void LLFloaterView::syncFloaterTabOrder()
 		const LLView* pTopPopup = LLUI::instance().getTopPopup();
 		if ( (!pTopPopup) || (modal_dialog != pTopPopup->getParentByType<LLModalDialog>()) )
 		{
-			LLUI::getInstance()->addPopup(modal_dialog);
+			LLUI::instance().addPopup(modal_dialog);
 		}
 // [/SL:KB]
 //		LLUI::getInstance()->addPopup(modal_dialog);
