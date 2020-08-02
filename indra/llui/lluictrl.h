@@ -173,7 +173,10 @@ public:
 	virtual class LLCtrlScrollInterface* getScrollInterface();
 
 	bool setControlValue(const LLSD& value);
-	void setControlVariable(LLControlVariable* control);
+//	void setControlVariable(LLControlVariable* control);
+// [SL:KB] - Patch: Control-Base | Checked: Catznip-5.2
+	virtual void setControlVariable(LLControlVariable* control);
+// [/SL:KB]
 	virtual void setControlName(const std::string& control, LLView *context = NULL);
 	
 	LLControlVariable* getControlVariable() { return mControlVariable; } 

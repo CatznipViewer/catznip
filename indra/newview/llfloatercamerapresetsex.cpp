@@ -28,6 +28,7 @@
 #include "llsliderctrl.h"
 #include "llspinctrl.h"
 #include "lltrans.h"
+#include "llviewercamera.h"
 #include "llviewercontrol.h"
 
 // ============================================================================
@@ -180,6 +181,8 @@ BOOL LLFloaterCameraPresetsEx::postBuild()
 	m_pFocusOffsetZCtrl = findChild<LLSpinCtrl>("edit_focusoffset_z");
 	m_pFocusScaleSliderCtrl = findChild<LLSliderCtrl>("edit_offset_slider");
 	m_pFocusScaleSpinCtrl = findChild<LLSpinCtrl>("edit_offset_spin");
+	m_pCamFovSliderCtrl = findChild<LLSliderCtrl>("edit_fov_slider");
+	m_pCamFovSpinCtrl = findChild<LLSpinCtrl>("edit_fov_spin");
 	m_pSaveBtn = findChild<LLFlyoutButton>("save_btn");
 	m_pSaveBtn->setCommitCallback(std::bind(&LLFloaterCameraPresetsEx::onPresetSave, this));
 	m_pSyncCameraCtrl = findChild<LLCheckBoxCtrl>("camera_sync_check");
@@ -238,6 +241,12 @@ void LLFloaterCameraPresetsEx::refreshEditControls()
 	m_pFocusOffsetYCtrl->setEnabled(!fSyncCamera);
 	m_pFocusOffsetZCtrl->setValue(vecFocusOffset[VZ]);
 	m_pFocusOffsetZCtrl->setEnabled(!fSyncCamera);
+
+	const LLViewerCamera* pCamera = LLViewerCamera::getInstance();
+	m_pCamFovSliderCtrl->setMinValue(pCamera->getMinView());
+	m_pCamFovSliderCtrl->setMaxValue(pCamera->getMaxView());
+	m_pCamFovSpinCtrl->setMinValue(pCamera->getMinView());
+	m_pCamFovSpinCtrl->setMaxValue(pCamera->getMaxView());
 
 	m_pSaveBtn->getListControl()->getItem("save")->setEnabled(pPresetItem != nullptr);
 	m_pSaveBtn->selectByValue( (pPresetItem) ? "save" : "save_as");

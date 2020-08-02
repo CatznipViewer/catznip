@@ -176,6 +176,9 @@
                 function="Zoom.plus" />
            </button>
            <slider_bar
+              default_value="0.69"
+              default_value_dead_zone="7"
+              divet_color="Gray2"
               height="50"
               layout="topleft"
               name="zoom_slider"
@@ -245,16 +248,17 @@
                 function="View.minus" />
            </button>
            <slider_bar
-              commit_callback.function="View.value_changed"
-              control_name="CameraAngle"
+              commit_callback.function="View.slider"
+              default_value_dead_zone="7"
+              divet_color="Gray2"
               height="50"
-              increment="0.05"
+              increment="0.025"
               layout="topleft"
               max_val="2.97"
               min_val="0.17"
               name="view_slider"
               orientation="vertical"
-              tool_tip="Zoom camera toward focus"
+              tool_tip="Camera field of view angle"
               top="26"
               width="18">
            </slider_bar>

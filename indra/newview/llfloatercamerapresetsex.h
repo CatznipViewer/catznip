@@ -88,6 +88,8 @@ protected:
 	LLSpinCtrl* m_pFocusOffsetZCtrl = nullptr;
 	LLSliderCtrl* m_pFocusScaleSliderCtrl = nullptr;
 	LLSpinCtrl* m_pFocusScaleSpinCtrl = nullptr;
+	LLSliderCtrl* m_pCamFovSliderCtrl = nullptr;
+	LLSpinCtrl* m_pCamFovSpinCtrl = nullptr;
 	LLButton* m_pNewBtn = nullptr;
 	LLFlyoutButton* m_pSaveBtn = nullptr;
 	LLCheckBoxCtrl* m_pSyncCameraCtrl = nullptr;

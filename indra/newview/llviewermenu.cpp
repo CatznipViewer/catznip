@@ -9144,13 +9144,16 @@ void initialize_menus()
 		{
 			F32 new_fov_rad = mMult ? LLViewerCamera::getInstance()->getDefaultFOV() * mVal : mVal;
 			LLViewerCamera::getInstance()->setDefaultFOV(new_fov_rad);
-			gSavedSettings.setF32("CameraAngle", LLViewerCamera::getInstance()->getView()); // setView may have clamped it.
+//			gSavedSettings.setF32("CameraAngle", LLViewerCamera::getInstance()->getView()); // setView may have clamped it.
 			return true;
 		}
 	private:
 		F32 mVal;
 		bool mMult;
 	};
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	auto fnViewZoomDefault = []() { LLViewerCamera::instance().setDefaultFOV(gSavedSettings.getF32("CameraAngle")); };
+// [/SL:KB]
 	
 	LLUICtrl::EnableCallbackRegistry::Registrar& enable = LLUICtrl::EnableCallbackRegistry::currentRegistrar();
 	LLUICtrl::CommitCallbackRegistry::Registrar& commit = LLUICtrl::CommitCallbackRegistry::currentRegistrar();
@@ -9199,7 +9202,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLViewShowHUDAttachments(), "View.ShowHUDAttachments");
 	view_listener_t::addMenu(new LLZoomer(1.2f), "View.ZoomOut");
 	view_listener_t::addMenu(new LLZoomer(1/1.2f), "View.ZoomIn");
-	view_listener_t::addMenu(new LLZoomer(DEFAULT_FIELD_OF_VIEW, false), "View.ZoomDefault");
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	commit.add("View.ZoomDefault", std::bind(fnViewZoomDefault));
+// [/SL:KB]
+//	view_listener_t::addMenu(new LLZoomer(DEFAULT_FIELD_OF_VIEW, false), "View.ZoomDefault");
 	view_listener_t::addMenu(new LLViewDefaultUISize(), "View.DefaultUISize");
 	view_listener_t::addMenu(new LLViewToggleUI(), "View.ToggleUI");
 

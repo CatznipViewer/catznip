@@ -106,7 +106,10 @@ void LLPresetsManager::startWatching(const std::string& subdirectory)
 	if (PRESETS_CAMERA == subdirectory)
 	{
 		std::vector<std::string> name_list;
-		getControlNames(name_list);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+		getControlNames(PRESETS_CAMERA, name_list);
+// [/SL:KB]
+//		getControlNames(name_list);
 
 		for (std::vector<std::string>::iterator it = name_list.begin(); it != name_list.end(); ++it)
 		{
@@ -248,11 +251,14 @@ void LLPresetsManager::settingChanged()
 	}
 }
 
-void LLPresetsManager::getControlNames(std::vector<std::string>& names)
+//void LLPresetsManager::getControlNames(std::vector<std::string>& names)
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+void LLPresetsManager::getControlNames(const std::string& subdirectory, std::vector<std::string>& names)
+// [/SL:KB]
 {
 	const std::vector<std::string> camera_controls = boost::assign::list_of
 		// From panel_preferences_move.xml
-//		("CameraAngle")
+		("CameraAngle")
 		("CameraOffsetScale")
 //		("EditCameraMovement")
 //		("AppearanceCameraMovement")
@@ -263,7 +269,16 @@ void LLPresetsManager::getControlNames(std::vector<std::string>& names)
 		("FocusOffsetRearView")
 		("AvatarSitRotation")
         ;
-    names = camera_controls;
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+	if (subdirectory == PRESETS_CAMERA)
+	{
+		names = camera_controls;
+	}
+	else if (subdirectory == PRESETS_GRAPHIC)
+	{
+	}
+// [/SL:KB]
+//    names = camera_controls;
 }
 
 bool LLPresetsManager::savePreset(const std::string& subdirectory, std::string name, bool createDefault)
@@ -308,7 +323,10 @@ bool LLPresetsManager::savePreset(const std::string& subdirectory, std::string n
 	else if (IS_CAMERA)
 	{
 		name_list.clear();
-		getControlNames(name_list);
+// [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
+		getControlNames(PRESETS_CAMERA, name_list);
+// [/SL:KB]
+//		getControlNames(name_list);
 //		name_list.push_back("PresetCameraActive");
 	}
 	else
@@ -466,7 +484,7 @@ void LLPresetsManager::loadPreset(const std::string& subdirectory, std::string n
 //	if(gSavedSettings.loadFromFile(full_path, false, true) > 0)
 // [SL:KB] - Patch: World-Camera | Checked: Catznip-6.4
 	std::vector<std::string> name_list;
-	getControlNames(name_list);
+	getControlNames(subdirectory, name_list);
 
 	if(gSavedSettings.loadFromFile(full_path, false, true, &name_list) > 0)
 // [/SL:KB]
