@@ -29,6 +29,10 @@
 
 #include <boost/algorithm/string.hpp>
 
+ // Defined in rlvenvironment.cpp
+F32 rlvGetAzimuthFromDirectionVector(const LLVector3& vecDir, bool fStrict);
+F32 rlvGetElevationFromDirectionVector(const LLVector3& vecDir, bool fStrict);
+
 // Defined in llsettingssky.cpp
 LLQuaternion convert_azimuth_and_altitude_to_quat(F32 azimuth, F32 altitude);
 
@@ -270,7 +274,7 @@ void LLQuickPrefsWindlightPanel::onSkyAzimuthChanged()
 	{
 		bool isSun = (m_pSkyCelestialBodyGroup->getValue().asInteger() == 0);
 		const LLVector3 dirCelestialBody = LLVector3::x_axis * (isSun ? pCurSky->getSunRotation() : pCurSky->getMoonRotation());
-		const LLQuaternion rotCelestialBody = convert_azimuth_and_altitude_to_quat(m_pSkyAzimuthSlider->getValueF32() * DEG_TO_RAD, rlvGetElevationFromDirectionVector(dirCelestialBody));
+		const LLQuaternion rotCelestialBody = convert_azimuth_and_altitude_to_quat(m_pSkyAzimuthSlider->getValueF32() * DEG_TO_RAD, rlvGetElevationFromDirectionVector(dirCelestialBody, true));
 		if (isSun)
 			pCurSky->setSunRotation(rotCelestialBody);
 		else
@@ -286,7 +290,7 @@ void LLQuickPrefsWindlightPanel::onSkyElevationChanged()
 	{
 		bool isSun = (m_pSkyCelestialBodyGroup->getValue().asInteger() == 0);
 		const LLVector3 dirCelestialBody = LLVector3::x_axis * ((m_pSkyCelestialBodyGroup->getValue().asInteger() == 0) ? pCurSky->getSunRotation() : pCurSky->getMoonRotation());
-		const LLQuaternion rotCelestialBody = convert_azimuth_and_altitude_to_quat(rlvGetAzimuthFromDirectionVector(dirCelestialBody), m_pSkyElevationSlider->getValueF32() * DEG_TO_RAD);
+		const LLQuaternion rotCelestialBody = convert_azimuth_and_altitude_to_quat(rlvGetAzimuthFromDirectionVector(dirCelestialBody, true), m_pSkyElevationSlider->getValueF32() * DEG_TO_RAD);
 		if (isSun)
 			pCurSky->setSunRotation(rotCelestialBody);
 		else
@@ -505,8 +509,8 @@ void LLQuickPrefsWindlightPanel::syncControls()
 	}
 
 	const LLVector3 dirCelestialBody = LLVector3::x_axis * ((m_pSkyCelestialBodyGroup->getValue().asInteger() == 0) ? pCurSky->getSunRotation() : pCurSky->getMoonRotation());
-	m_pSkyAzimuthSlider->setValue(rlvGetAzimuthFromDirectionVector(dirCelestialBody) * RAD_TO_DEG);
-	m_pSkyElevationSlider->setValue(rlvGetElevationFromDirectionVector(dirCelestialBody) * RAD_TO_DEG);
+	m_pSkyAzimuthSlider->setValue(rlvGetAzimuthFromDirectionVector(dirCelestialBody, true) * RAD_TO_DEG);
+	m_pSkyElevationSlider->setValue(rlvGetElevationFromDirectionVector(dirCelestialBody, true) * RAD_TO_DEG);
 	m_pSkyGammaSlider->setValue(pCurSky->getGamma());
 }
 

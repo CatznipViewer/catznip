@@ -121,10 +121,11 @@ namespace
  *   sunmoonpos before eastangle       => correct   for -0.25 <= sunmoonpos <= 0.25
  *                                        incorrect for  0.75  > sunmoonpos  > 0.25
  */
-F32 rlvGetAzimuthFromDirectionVector(const LLVector3& vecDir)
+
+F32 rlvGetAzimuthFromDirectionVector(const LLVector3& vecDir, bool fStrict = false)
 {
 	if (is_zero(vecDir.mV[VY]))
-		return 0.f;
+		return (!fStrict) ? 0.f : ((vecDir.mV[VX] >= 0.f) ? 0.f : F_PI);
 	else if (is_zero(vecDir.mV[VX]))
 		return F_PI_BY_TWO;
 
@@ -132,10 +133,12 @@ F32 rlvGetAzimuthFromDirectionVector(const LLVector3& vecDir)
 	return (radAzimuth >= 0.f) ? radAzimuth : radAzimuth + F_TWO_PI;
 }
 
-F32 rlvGetElevationFromDirectionVector(const LLVector3& vecDir)
+F32 rlvGetElevationFromDirectionVector(const LLVector3& vecDir, bool fStrict = false)
 {
 	if (is_zero(vecDir.mV[VZ]))
 		return 0.f;
+	if (fStrict)
+		return asinf(vecDir.mV[VZ]);
 
 	F32 radElevation;
 	if ( (is_zero(vecDir.mV[VX])) && (!is_zero(vecDir.mV[VY])) )
