@@ -32,6 +32,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "$ENV{LL_BUILD_DEBUG}")
 # Portable compilation flags.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DADDRESS_SIZE=${ADDRESS_SIZE}")
 
+# Configure asan
+set(ASAN OFF CACHE BOOL "Enable use of asan in builds")
+
 # Add a Catznip specific define to enable/disable patch branch stubs/code sections
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCATZNIP")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DCATZNIP_DEBUG")
@@ -68,6 +71,10 @@ if (WINDOWS)
   # http://www.ogre3d.org/forums/viewtopic.php?f=2&t=60015
   # http://www.cmake.org/pipermail/cmake/2009-September/032143.html
   string(REPLACE "/Zm1000" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
+  if(ASAN)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
+  endif(ASAN)
 
   # Without PreferredToolArchitecture=x64, as of 2020-06-26 the 32-bit
   # compiler on our TeamCity build hosts has started running out of virtual
