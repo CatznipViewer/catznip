@@ -685,10 +685,9 @@ BOOL LLPanelStandStopFlying::postBuild()
 	mStopFlyingButton->setCommitCallback(boost::bind(&LLPanelStandStopFlying::onStopFlyingButtonClick, this));
 	mStopFlyingButton->setVisible(FALSE);
 
-
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
-//    // LL's fix doesn't seem to be needed for us so comment it out for now
-//    gViewerWindow->setOnWorldViewRectUpdated(boost::bind(&LLPanelStandStopFlying::notifyParent, this, LLSD().with("action", "layout")));
+//	// LL's fix doesn't seem to be needed for us so comment it out for now
+//	gViewerWindow->setOnWorldViewRectUpdated(boost::bind(&LLPanelStandStopFlying::notifyParent, this, LLSD().with("action", "layout")));
 // [/SL:KB]
 //	gViewerWindow->setOnWorldViewRectUpdated(boost::bind(&LLPanelStandStopFlying::updatePosition, this));
 	
