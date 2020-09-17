@@ -55,6 +55,7 @@
         function="CheckControl"
         parameter="ShowMarketplaceButton" />
     </menu_item_check>
+    <!--
     <menu_item_check
      label="Show Network Statistics"
      layout="topleft"
@@ -66,4 +67,5 @@
         function="CheckControl"
         parameter="ShowNetStats" />
     </menu_item_check>
+    -->
 </menu>
