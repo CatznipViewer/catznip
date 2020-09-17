@@ -4606,7 +4606,6 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 				continue;
 			}
 // [/SL:KB]
-
 			avatarp->mSignaledAnimations[animation_id] = anim_sequence_id;
 
 			// *HACK: Disabling flying mode if it has been enabled shortly before the agent
