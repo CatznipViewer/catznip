@@ -297,7 +297,7 @@
      layout="topleft"
      name="netstats_panel"
      user_resize="false"
-     visible="true"
+     visible="false"
      width="16" />
   </layout_stack>
 </panel>
