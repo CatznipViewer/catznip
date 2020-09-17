@@ -3608,12 +3608,20 @@ LLSD LLAppViewer::getViewerInfo() const
         info["BUILD_CONFIG"] = build_config;
     }
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-6.5
 	// return a URL to the release notes for this viewer, such as:
-	// https://releasenotes.secondlife.com/viewer/2.1.0.123456.html
-	std::string url = LLTrans::getString("RELEASE_NOTES_BASE_URL");
-	if (! LLStringUtil::endsWith(url, "/"))
-		url += "/";
-	url += LLURI::escape(LLVersionInfo::getVersion()) + ".html";
+	// https://wiki.catznip.com/index.php?title=Catznip_R12_Release_Notes
+	std::string url_version = LLVersionInfo::getReleaseVersion(true);
+	std::replace(url_version.begin(), url_version.end(), '.', '_');
+
+	const std::string url = LLTrans::getString("RELEASE_NOTES_BASE_URL", LLSD().with("VERSION", url_version));
+// [/SL:KB]
+//	// return a URL to the release notes for this viewer, such as:
+//	// https://releasenotes.secondlife.com/viewer/2.1.0.123456.html
+//	std::string url = LLTrans::getString("RELEASE_NOTES_BASE_URL");
+//	if (! LLStringUtil::endsWith(url, "/"))
+//		url += "/";
+//	url += LLURI::escape(LLVersionInfo::getVersion()) + ".html";
 
 	info["VIEWER_RELEASE_NOTES_URL"] = url;
 
