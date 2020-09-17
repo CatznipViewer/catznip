@@ -384,21 +384,21 @@ void LLStatusBar::refresh()
 
 	// Disable media toggle if there's no media, parcel media, and no parcel audio
 	// (or if media is disabled)
-	bool button_enabled = (s_fStreamingMusic || s_fStreamingMedia) && 
+	bool button_enabled = (s_fStreamingMusic || s_fStreamingMedia) &&
 		(media_inst->hasInWorldMedia() || media_inst->hasParcelMedia() || media_inst->hasParcelAudio());
 	mMediaToggle->setEnabled(button_enabled);
 	// Note the "sense" of the toggle is opposite whether media is playing or not
-	bool any_media_playing = (button_enabled) && 
+	bool any_media_playing = (button_enabled) &&
 		(media_inst->isAnyMediaPlaying() || media_inst->isParcelMediaPlaying() || media_inst->isParcelAudioPlaying());
 	mMediaToggle->setValue(!any_media_playing);
 // [/SL:KB]
 //	// Disable media toggle if there's no media, parcel media, and no parcel audio
 //	// (or if media is disabled)
-//	bool button_enabled = (gSavedSettings.getBOOL("AudioStreamingMusic")||gSavedSettings.getBOOL("AudioStreamingMedia")) && 
+//	bool button_enabled = (gSavedSettings.getBOOL("AudioStreamingMusic")||gSavedSettings.getBOOL("AudioStreamingMedia")) &&
 //						  (media_inst->hasInWorldMedia() || media_inst->hasParcelMedia() || media_inst->hasParcelAudio());
 //	mMediaToggle->setEnabled(button_enabled);
 //	// Note the "sense" of the toggle is opposite whether media is playing or not
-//	bool any_media_playing = (media_inst->isAnyMediaShowing() || 
+//	bool any_media_playing = (media_inst->isAnyMediaShowing() ||
 //							  media_inst->isParcelMediaPlaying() ||
 //							  media_inst->isParcelAudioPlaying());
 //	mMediaToggle->setValue(!any_media_playing);
