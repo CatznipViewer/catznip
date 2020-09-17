@@ -219,9 +219,9 @@ BOOL LLStatusBar::postBuild()
 	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleMarketplaceButton, this, _2));
 	onToggleMarketplaceButton(pControl->getValue());
 
-	pControl = gSavedSettings.getControl("ShowNetStats");
-	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleNetStats, this, _2));
-	onToggleNetStats(pControl->getValue());
+	//pControl = gSavedSettings.getControl("ShowNetStats");
+	//pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleNetStats, this, _2));
+	//onToggleNetStats(pControl->getValue());
 // [/SL:KB]
 
 // [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
