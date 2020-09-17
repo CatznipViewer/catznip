@@ -58,7 +58,7 @@ public:
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-3.2
 	/// return the release viewer version as a string like "R7" or "R7.1"
-	static const std::string &getReleaseVersion();
+	static const std::string getReleaseVersion(bool fForRelease = false);
 // [/SL:KB]
 
 	/// return the viewer version as a string like "2.0.0"

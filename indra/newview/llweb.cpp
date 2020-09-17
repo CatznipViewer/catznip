@@ -146,7 +146,7 @@ void LLWeb::openURLExternal(const LLSD& sdData)
 	bool async = (sdData.has("async")) ? sdData["async"].asBoolean() : true;
 
 	// Act like the proxy window was closed, since we won't be able to track targeted windows in the external browser.
-	LLViewerMedia::getInstance()->proxyWindowClosed(uuid.asString());
+	LLViewerMedia::instance().proxyWindowClosed(uuid.asString());
 
 	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
 	{
