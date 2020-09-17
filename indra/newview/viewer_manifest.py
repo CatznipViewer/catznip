@@ -446,6 +446,9 @@ class WindowsManifest(ViewerManifest):
     # VMP will concatenate that with the address_size.
     build_data_json_platform = 'win'
 
+    def final_nomanifest_exe(self):
+        return self.app_name_oneword()+"_NoManifest.exe"
+
     def final_exe(self):
         return self.app_name_oneword()+".exe"
 
@@ -515,6 +518,7 @@ class WindowsManifest(ViewerManifest):
         if self.is_packaging_viewer():
             # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
             self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            self.path(src='%s/catznip-bin-nomanifest.exe' % self.args['configuration'], dst=self.final_nomanifest_exe())
         
             # [SL:KB]
             with self.prefix(src=self.icon_path()):
@@ -777,6 +781,7 @@ class WindowsManifest(ViewerManifest):
             'version_registry' : '%s(%s)' %
             ('.'.join(self.args['version']), self.address_size),
             'final_exe' : self.final_exe(),
+            'final_nomanifest_exe' : self.final_nomanifest_exe(),
             'flags':'',
             'app_name':self.app_name(),
             'app_name_oneword':self.app_name_oneword()
@@ -792,6 +797,7 @@ class WindowsManifest(ViewerManifest):
         !define PRODUCT_SHORT "Catznip"
         !define PRODUCT_LONG "Catznip viewer"
         !define INSTEXE  "%(final_exe)s"
+        !define INSTEXE_NOMANIFEST  "%(final_nomanifest_exe)s"
         !define PUBLISHER "<TODO>"
         !define URL_ABOUT "http://catznip.com/"
         !define URL_DOWNLOAD "https://get.catznip.com"
