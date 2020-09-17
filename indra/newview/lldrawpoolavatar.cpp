@@ -2292,7 +2292,10 @@ void LLDrawPoolAvatar::renderRigged(LLVOAvatar* avatar, U32 type, bool glow)
 				}
 			}
 
-			if (face->mTextureMatrix && vobj->mTexAnimMode)
+//			if (face->mTextureMatrix && vobj->mTexAnimMode)
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.4
+			if (face->mTextureMatrix && vobj->mTexAnimMode && gGL.getCurrentTexUnitIndex() <= 1)
+// [/SL:KB]
 			{
                 U32 tex_index = gGL.getCurrentTexUnitIndex();
 
