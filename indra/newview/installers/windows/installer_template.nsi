@@ -144,6 +144,7 @@ DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Var INSTNAME
 Var INSTEXE
+Var INSTEXE_NOMANIFEST
 Var VIEWER_EXE
 Var INSTSHORTCUT
 Var COMMANDLINE         # Command line passed to this installer, set in .onInit
@@ -151,6 +152,8 @@ Var SHORTCUT_LANG_PARAM # "--set InstallLanguage de", Passes language to viewer
 Var SKIP_DIALOGS        # Set from command line in  .onInit. autoinstall GUI and the defaults.
 Var SKIP_AUTORUN		# Skip automatic launch of the viewer after install
 ;Var DO_UNINSTALL_V2     # If non-null, path to a previous Viewer 2 installation that will be uninstalled.
+Var VIDEO_CARD
+Var LEGACY_INTEL
 
 # Function definitions should go before file includes, because calls to
 # DLLs like LangDLL trigger an implicit file include, so if that call is at
@@ -163,6 +166,10 @@ Var SKIP_AUTORUN		# Skip automatic launch of the viewer after install
 !include WinVer.nsh			# For OS and SP detection
 !include 'LogicLib.nsh'     # for value comparison
 !include "x64.nsh"			# for 64bit detection
+
+!include "StrFunc.nsh"
+${StrCase}                  # Cause NSIS is weird like this....
+${StrLoc}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Pre-directory page callback
@@ -182,6 +189,16 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function .onInit
 !insertmacro MULTIUSER_INIT
+
+HwInfo::GetVideoCardName
+${StrCase} $VIDEO_CARD $0 "L"
+${If} ${AtLeastWin10}
+  ${StrLoc} $0 "$VIDEO_CARD" "intel" ">"
+  ${If} $0 == "0"
+    StrCpy $LEGACY_INTEL "1"
+	StrCpy $SKIP_AUTORUN "true"
+  ${EndIf}
+${EndIf}
 
 %%ENGAGEREGISTRY%%
 
@@ -337,6 +354,7 @@ Section ""
 # Start with some default values.
 StrCpy $INSTNAME "${INSTNAME}"
 StrCpy $INSTEXE "${INSTEXE}"
+StrCpy $INSTEXE_NOMANIFEST "${INSTEXE_NOMANIFEST}"
 StrCpy $VIEWER_EXE "${VIEWER_EXE}"
 StrCpy $INSTSHORTCUT "${SHORTCUT}"
 
@@ -365,7 +383,10 @@ CreateDirectory	"$SMPROGRAMS\$INSTSHORTCUT"
 SetOutPath "$INSTDIR"
 CreateShortCut	"$SMPROGRAMS\$INSTSHORTCUT\$INSTSHORTCUT.lnk" \
 				"$INSTDIR\$INSTEXE" "$SHORTCUT_LANG_PARAM"
-
+${If} $LEGACY_INTEL == "1"
+  CreateShortCut "$SMPROGRAMS\$INSTSHORTCUT\$INSTSHORTCUT (Legacy Intel).lnk" \
+				"$INSTDIR\$INSTEXE_NOMANIFEST" "$SHORTCUT_LANG_PARAM"
+${EndIf}
 
 WriteINIStr		"$SMPROGRAMS\$INSTSHORTCUT\SL Create Account.url" \
 				"InternetShortcut" "URL" \
@@ -385,6 +406,12 @@ CreateShortCut "$DESKTOP\$INSTSHORTCUT.lnk" \
         "$INSTDIR\$INSTEXE" "$SHORTCUT_LANG_PARAM"
 CreateShortCut "$INSTDIR\$INSTSHORTCUT.lnk" \
         "$INSTDIR\$INSTEXE" "$SHORTCUT_LANG_PARAM"
+${If} $LEGACY_INTEL == "1"
+  CreateShortCut "$DESKTOP\$INSTSHORTCUT (Legacy Intel).lnk" \
+		"$INSTDIR\$INSTEXE_NOMANIFEST" "$SHORTCUT_LANG_PARAM"
+  CreateShortCut "$INSTDIR\$INSTSHORTCUT (Legacy Intel).lnk" \
+        "$INSTDIR\$INSTEXE_NOMANIFEST" "$SHORTCUT_LANG_PARAM"
+${EndIf}
 CreateShortCut "$INSTDIR\Uninstall $INSTSHORTCUT.lnk" \
 				'"$INSTDIR\uninst.exe"' ''
 
@@ -407,6 +434,9 @@ WriteRegStr SHELL_CONTEXT "${MSUNINSTALL_KEY}" "DisplayIcon" '"$INSTDIR\$VIEWER_
 
 # BUG-2707 Disable SEHOP for installed viewer.
 WriteRegDWORD SHELL_CONTEXT "${MSNTCURRVER_KEY}\Image File Execution Options\$VIEWER_EXE" "DisableExceptionChainValidation" 1
+${If} $LEGACY_INTEL == "1"
+  WriteRegDWORD SHELL_CONTEXT "${MSNTCURRVER_KEY}\Image File Execution Options\$INSTEXE_NOMANIFEST" "DisableExceptionChainValidation" 1
+${EndIf}
 
 # Write URL registry info
 WriteRegStr HKEY_CLASSES_ROOT "${URLNAME}" "(default)" "URL:Second Life"
@@ -608,7 +638,7 @@ Function RemoveProgFilesOnInst
 
 # Remove old Catznip.exe to invalidate any old shortcuts to it that may be in non-standard locations. See MAINT-3575
 Delete "$INSTDIR\$INSTEXE"
-Delete "$INSTDIR\$VIEWER_EXE"
+Delete "$INSTDIR\$INSTEXE_NOMANIFEST"
 
 # Remove old shader files first so fallbacks will work. See DEV-5663
 RMDir /r "$INSTDIR\app_settings\shaders"
