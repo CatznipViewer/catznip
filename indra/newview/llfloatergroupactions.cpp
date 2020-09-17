@@ -133,7 +133,7 @@ void LLFloaterGroupCreateNotice::onMessageChanged()
 {
 	float nMaxByteLength = m_pMessageCtrl->getMaxTextLength();
 	float nCharLength = m_pMessageCtrl->getLength();
-	float nByteLength = m_pMessageCtrl->getViewModel()->getValue().size();
+	float nByteLength = m_pMessageCtrl->getViewModel()->getValue().size() + m_pSubjectCtrl->getText().size();
 
 	LLStringUtil::format_map_t args;
 	args["[COUNT]"] = llformat("%.0f", nCharLength);
