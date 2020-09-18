@@ -35,6 +35,9 @@
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-04-09 (Catznip-3.6)
 #include <boost/regex.hpp>
 // [/SL:KB]
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-6.5
+#include "lltrans.h"
+// [/SL:KB]
 
 #if ! defined(LL_VIEWER_CHANNEL)       \
  || ! defined(LL_VIEWER_VERSION_MAJOR) \
@@ -56,12 +59,12 @@ LLVersionInfo::LLVersionInfo():
 	// macro expands to the string name of the channel, but without quotes. We
 	// need to turn it into a quoted string. LL_TO_STRING() does that.
 	mWorkingChannelName(LL_TO_STRING(LL_VIEWER_CHANNEL)),
-	build_configuration(LLBUILD_CONFIG), // set in indra/cmake/BuildVersion.cmake
-	// instantiate an LLEventMailDrop with canonical name to listen for news
-	// from SLVersionChecker
-	mPump{new LLEventMailDrop("relnotes")},
-	// immediately listen on mPump, store arriving URL into mReleaseNotes
-	mStore{new LLStoreListener<std::string>(*mPump, mReleaseNotes)}
+	build_configuration(LLBUILD_CONFIG) // set in indra/cmake/BuildVersion.cmake
+//	// instantiate an LLEventMailDrop with canonical name to listen for news
+//	// from SLVersionChecker
+//	mPump{new LLEventMailDrop("relnotes")},
+//	// immediately listen on mPump, store arriving URL into mReleaseNotes
+//	mStore{new LLStoreListener<std::string>(*mPump, mReleaseNotes)}
 {
 }
 
@@ -194,10 +197,20 @@ std::string LLVersionInfo::getBuildConfig()
     return build_configuration;
 }
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-6.5
 std::string LLVersionInfo::getReleaseNotes()
 {
-    return mReleaseNotes;
+	const std::string strUrlVersion = (LL_VIEWER_VERSION_MINOR == 0)
+		? llformat("R%d", LL_VIEWER_VERSION_MAJOR)
+		: llformat("R%d_%d", LL_VIEWER_VERSION_MAJOR, LL_VIEWER_VERSION_MINOR);
+	return LLTrans::getString("RELEASE_NOTES_BASE_URL", LLSD().with("VERSION", strUrlVersion));
 }
+// [/SL:KB]
+//std::string LLVersionInfo::getReleaseNotes()
+//{
+//    return mReleaseNotes;
+//}
+
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 const char* getBuildPlatformString()

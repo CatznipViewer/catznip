@@ -4605,7 +4605,6 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 				continue;
 			}
 // [/SL:KB]
-
 			avatarp->mSignaledAnimations[animation_id] = anim_sequence_id;
 
 			// *HACK: Disabling flying mode if it has been enabled shortly before the agent
@@ -5674,7 +5673,14 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 			std::string snap_filename = gDirUtilp->getLindenUserDir();
 			snap_filename += gDirUtilp->getDirDelimiter();
 			snap_filename += LLStartUp::getScreenHomeFilename();
-			gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE, LLSnapshotModel::SNAPSHOT_TYPE_COLOR, LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
+            gViewerWindow->saveSnapshot(snap_filename,
+                                        gViewerWindow->getWindowWidthRaw(),
+                                        gViewerWindow->getWindowHeightRaw(),
+                                        FALSE, //UI
+                                        gSavedSettings.getBOOL("RenderHUDInSnapshot"),
+                                        FALSE,
+                                        LLSnapshotModel::SNAPSHOT_TYPE_COLOR,
+                                        LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
 		}
 		
 		if (notificationID == "RegionRestartMinutes" ||
@@ -5778,7 +5784,14 @@ static void process_special_alert_messages(const std::string & message)
 		std::string snap_filename = gDirUtilp->getLindenUserDir();
 		snap_filename += gDirUtilp->getDirDelimiter();
 		snap_filename += LLStartUp::getScreenHomeFilename();
-		gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE, LLSnapshotModel::SNAPSHOT_TYPE_COLOR, LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
+		gViewerWindow->saveSnapshot(snap_filename,
+                                    gViewerWindow->getWindowWidthRaw(),
+                                    gViewerWindow->getWindowHeightRaw(),
+                                    FALSE,
+                                    gSavedSettings.getBOOL("RenderHUDInSnapshot"),
+                                    FALSE,
+                                    LLSnapshotModel::SNAPSHOT_TYPE_COLOR,
+                                    LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
 	}
 }
 

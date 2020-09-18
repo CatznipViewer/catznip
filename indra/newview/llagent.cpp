@@ -899,6 +899,17 @@ bool LLAgent::enableFlying()
 	return !sitting;
 }
 
+// static
+bool LLAgent::isSitting()
+{
+    BOOL sitting = FALSE;
+    if (isAgentAvatarValid())
+    {
+        sitting = gAgentAvatarp->isSitting();
+    }
+    return sitting;
+}
+
 void LLAgent::standUp()
 {
 //	setControlFlags(AGENT_CONTROL_STAND_UP);
@@ -2039,6 +2050,13 @@ BOOL LLAgent::needsRenderHead()
 //-----------------------------------------------------------------------------
 void LLAgent::startTyping()
 {
+// [RLVa:KB] - @redirchat
+	if (!RlvActions::canSendTypingStart())
+	{
+		return;
+	}
+// [/RLVa:KB]
+
 	mTypingTimer.reset();
 
 	if (getRenderState() & AGENT_STATE_TYPING)
