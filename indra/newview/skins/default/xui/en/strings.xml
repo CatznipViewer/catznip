@@ -330,7 +330,7 @@ can be attached to notecards.
 
 	<string name="ReleaseNotes">Release Notes</string>
 	<!-- Always mark translate="false" for strings that are nothing but URLs, as they don't need translation. -->
-	<string name="RELEASE_NOTES_BASE_URL" translate="false">http://viewer.catznip.com/releasenotes/</string>
+	<string name="RELEASE_NOTES_BASE_URL" translate="false">https://wiki.catznip.com/index.php?title=Catznip_[VERSION]_Release_Notes</string>
 
 	<!-- Indicates something is being loaded. Maybe should be merged with RetrievingData -->
 	<string name="LoadingData">Loading...</string>
