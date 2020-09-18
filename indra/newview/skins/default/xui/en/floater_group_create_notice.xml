@@ -112,7 +112,6 @@
          length="1"
          follows="all"
          height="90"
-         label="Type your message here."
          layout="topleft"
          left_pad="0"
          max_length="510"
