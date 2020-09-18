@@ -108,23 +108,23 @@
         </text>
         <text_editor
          type="string"
+         label="Type your message here."
          length="1"
          follows="all"
          height="90"
          layout="topleft"
          left_pad="0"
-         max_length="950"
+         max_length="510"
          name="message_editor"
          right="-5"
          top_delta="-2"
          word_wrap="true">
-            Type your message here.
         </text_editor>
         <text
          type="string"
          length="1"
          top_pad="5"
-         follows="top|left"
+         follows="bottom|left"
          layout="topleft"
          left_delta="0"
          name="message_count_label"

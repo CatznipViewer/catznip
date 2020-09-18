@@ -222,7 +222,7 @@ LLFontDescriptor LLFontDescriptor::normalize(const std::string& name, const std:
 //	if (removeSubString(new_name,"Italic"))
 //		new_style |= LLFontGL::ITALIC;
 //
-//	return LLFontDescriptor(new_name,new_size,new_style,getFileNames());
+//	return LLFontDescriptor(new_name,new_size,new_style,getFileNames(),getFontCollectionsList());
 //}
 
 LLFontRegistry::LLFontRegistry(bool create_gl_textures)

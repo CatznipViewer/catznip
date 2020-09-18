@@ -10807,9 +10807,9 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-//				const LLViewerObject* attached_object = (*attachment_iter);
+//                const LLViewerObject* attached_object = attachment_iter->get();
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
-				LLViewerObject* attached_object = (*attachment_iter);
+				LLViewerObject* attached_object = attachment_iter->get();
 // [/SL:KB]
                 accountRenderComplexityForObject(attached_object, max_attachment_complexity,
                                                  textures, cost, hud_complexity_list);
