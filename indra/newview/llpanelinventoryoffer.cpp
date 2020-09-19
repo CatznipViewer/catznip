@@ -544,70 +544,49 @@ LLAcceptInFolderTaskOffer::LLAcceptInFolderTaskOffer(const std::string& strDescr
 //virtual
 void LLAcceptInFolderTaskOffer::changed(U32 mask)
 {
-	if (mask & LLInventoryObserver::ADD)
-	{
-		LLMessageSystem* pMsg = gMessageSystem;
-		if ( (pMsg->getMessageName()) && (0 == strcmp(pMsg->getMessageName(), _PREHASH_BulkUpdateInventory)) )
+	if ( (mask & LLInventoryObserver::ADD) && (gInventory.getTransactionId().notNull()) && (m_idTransaction == gInventory.getTransactionId()))
+	{	// BulkUpdateInventory
+
+		// Ugh, when we used the messaging system we had all the folders first and then the items... with mAddedItemIDs we have improvise
+		// so we just loop twice first calling getCategory(..), then getItem(...)
+		const auto& idItems = gInventory.getAddedIDs();
+		for (const LLUUID& idItem : idItems)
 		{
-			LLUUID idTransaction;
-
-			pMsg->getUUIDFast(_PREHASH_AgentData, _PREHASH_TransactionID, idTransaction);
-			if (m_idTransaction == idTransaction)
+			if (LLInventoryCategory* pCategory = gInventory.getCategory(idItem))
 			{
-				LLUUID idInvObject;
-
-				for (S32 idxBlock = 0, cntBlock = pMsg->getNumberOfBlocksFast(_PREHASH_FolderData); idxBlock < cntBlock; idxBlock++)
-				{
-					pMsg->getUUIDFast(_PREHASH_FolderData, _PREHASH_FolderID, idInvObject, idxBlock);
-					if ( (idInvObject.notNull()) && (std::find(m_Folders.begin(), m_Folders.end(), idInvObject) == m_Folders.end()) )
-						m_Folders.push_back(idInvObject);
-				}
-
-				for (S32 idxBlock = 0, cntBlock = pMsg->getNumberOfBlocksFast(_PREHASH_ItemData); idxBlock < cntBlock; idxBlock++)
-				{
-					// We don't care about items we're already tracking the parent folder of
-					pMsg->getUUIDFast(_PREHASH_ItemData, _PREHASH_FolderID, idInvObject, idxBlock);
-					if ( (idInvObject.notNull()) && (std::find(m_Folders.begin(), m_Folders.end(), idInvObject) != m_Folders.end()) )
-						continue;
-
-					pMsg->getUUIDFast(_PREHASH_ItemData, _PREHASH_ItemID, idInvObject, idxBlock);
-					if ( (idInvObject.notNull()) && (std::find(m_Items.begin(), m_Items.end(), idInvObject) == m_Items.end()) )
-						m_Items.push_back(idInvObject);
-				}
-
-				done();
+				if (std::find(m_Folders.begin(), m_Folders.end(), pCategory->getUUID()) == m_Folders.end())
+					m_Folders.push_back(pCategory->getUUID());
 			}
 		}
-		else if ( (pMsg->getMessageName()) && (0 == strcmp(pMsg->getMessageName(), _PREHASH_UpdateCreateInventoryItem)) )
+		for (const LLUUID& idItem : idItems)
 		{
-			LLUUID idInvObject;
-			pMsg->getUUIDFast(_PREHASH_InventoryData, _PREHASH_ItemID, idInvObject);
-			if (idInvObject.notNull())
+			if (LLInventoryItem* pItem = gInventory.getItem(idItem))
 			{
-				if (LLInventoryItem* pItem = gInventory.getItem(idInvObject))
-				{
-					if (boost::starts_with(m_strDescription, llformat("'%s'", pItem->getName().c_str())))
-					{
-						m_Items.push_back(idInvObject);
+				// We don't care about items we're already tracking the parent folder of
+				if (std::find(m_Folders.begin(), m_Folders.end(), pItem->getParentUUID()) != m_Folders.end())
+					continue;
 
-						done();
-					}
+				if (std::find(m_Items.begin(), m_Items.end(), pItem->getUUID()) == m_Items.end())
+					m_Items.push_back(pItem->getUUID());
+			}
+		}
+		done();
+	}
+	else if (mask & (LLInventoryObserver::ADD | LLInventoryObserver::UPDATE_CREATE))
+	{	// UpdateCreateInventoryItem
+
+		const auto& idItems = gInventory.getAddedIDs();
+		for (const LLUUID& idItem : idItems)
+		{
+			if (LLInventoryItem* pItem = gInventory.getItem(idItem))
+			{
+				if (boost::starts_with(m_strDescription, llformat("'%s'", pItem->getName().c_str())))
+				{
+					m_Items.push_back(idItem);
+					done();
+					break;
 				}
 			}
-
-			//LLUUID idTransaction;
-			//
-			//pMsg->getUUIDFast(_PREHASH_AgentData, _PREHASH_TransactionID, idTransaction);
-			//if (m_idTransaction == idTransaction)
-			//{
-			//	LLUUID idInvObject;
-			//
-			//	pMsg->getUUIDFast(_PREHASH_InventoryData, _PREHASH_ItemID, idInvObject);
-			//	if (idInvObject.notNull())
-			//		m_Items.push_back(idInvObject);
-			//
-			//	done();
-			//}
 		}
 	}
 }
