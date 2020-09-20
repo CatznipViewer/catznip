@@ -1907,7 +1907,7 @@ if (WINDOWS)
       #${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
       ${SHARED_LIB_STAGING_DIR}/Release/openjp2.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjp2.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/openjp2d.dll
+      #${SHARED_LIB_STAGING_DIR}/Debug/openjp2d.dll
       ${SHARED_LIB_STAGING_DIR}/Release/nghttp2.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/nghttp2.dll
       ${SHARED_LIB_STAGING_DIR}/Release/msvcp140.dll
