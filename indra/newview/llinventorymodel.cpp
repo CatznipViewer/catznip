@@ -1722,7 +1722,7 @@ void LLInventoryModel::notifyObservers(const LLUUID& transaction_id)
 
 	mIsNotifyObservers = TRUE;
 // [SL:KB] - Patch: UI-Notifications | Checked: Catznip-6.5
-    mTransactionId = transaction_id;
+	mTransactionId = transaction_id;
 // [/SL:KB]
 	for (observer_list_t::iterator iter = mObservers.begin();
 		 iter != mObservers.end(); )
@@ -1738,7 +1738,7 @@ void LLInventoryModel::notifyObservers(const LLUUID& transaction_id)
 	mChangedItemIDs.clear();
 	mAddedItemIDs.clear();
 // [SL:KB] - Patch: UI-Notifications | Checked: Catznip-6.5
-    mTransactionId.setNull();
+	mTransactionId.setNull();
 // [/SL:KB]
 	mIsNotifyObservers = FALSE;
 }
