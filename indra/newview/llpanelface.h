@@ -269,13 +269,16 @@ private:
 
 	// Update material parameters by applying 'edit_func' to selected TEs
 	//
-	template<
-		typename DataType,
-		typename SetValueType,
-		void (LLMaterial::*MaterialEditFunc)(SetValueType data) >
-	static void edit(LLPanelFace* p, DataType data, int te = -1, const LLUUID &only_for_object_id = LLUUID())
-	{
-		LLMaterialEditFunctor< DataType, SetValueType, MaterialEditFunc > edit(data);
+//	template<
+//		typename DataType,
+//		typename SetValueType,
+//		void (LLMaterial::*MaterialEditFunc)(SetValueType data) >
+//	static void edit(LLPanelFace* p, DataType data, int te = -1, const LLUUID &only_for_object_id = LLUUID())
+//	{
+//		LLMaterialEditFunctor< DataType, SetValueType, MaterialEditFunc > edit(data);
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.5
+		template<typename DataType, typename SetValueType, void (LLMaterial::*MaterialEditFunc)(SetValueType data)>
+// [/SL:KB]
 		struct LLSelectedTEEditMaterial : public LLSelectedTEMaterialFunctor
 		{
 			LLSelectedTEEditMaterial(LLPanelFace* panel, LLMaterialEditFunctor< DataType, SetValueType, MaterialEditFunc >* editp, const LLUUID &only_for_object_id) : _panel(panel), _edit(editp), _only_for_object_id(only_for_object_id) {}
@@ -348,7 +351,19 @@ private:
 			LLMaterialEditFunctor< DataType, SetValueType, MaterialEditFunc >*	_edit;
 			LLPanelFace *_panel;
 			const LLUUID & _only_for_object_id;
-		} editor(p, &edit, only_for_object_id);
+//		} editor(p, &edit, only_for_object_id);
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.5
+		};
+
+	template<
+		typename DataType,
+		typename SetValueType,
+		void (LLMaterial::*MaterialEditFunc)(SetValueType data) >
+	static void edit(LLPanelFace* p, DataType data, int te = -1, const LLUUID &only_for_object_id = LLUUID())
+	{
+		LLMaterialEditFunctor<DataType, SetValueType, MaterialEditFunc> edit(data);
+		LLSelectedTEEditMaterial<DataType, SetValueType, MaterialEditFunc> editor(p, &edit, only_for_object_id);
+// [/SL:KB]
 		LLSelectMgr::getInstance()->selectionSetMaterialParams(&editor, te);
 	}
 
