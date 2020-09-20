@@ -807,7 +807,7 @@ void LLFloaterFixedEnvironmentWater::onOpen(const LLSD& key)
 void LLFloaterFixedEnvironmentWater::doImportFromDisk()
 {   // Load a a legacy Windlight XML from disk.
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.4
-    LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterFixedEnvironmentWater::loadWaterSettingFromFile, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterFixedEnvironmentWater::loadWaterSettingFromFile, this, _1));
 // [/SL:KB]
 //    (new LLFilePickerReplyThread(boost::bind(&LLFloaterFixedEnvironmentWater::loadWaterSettingFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
 }
@@ -899,7 +899,7 @@ void LLFloaterFixedEnvironmentSky::onClose(bool app_quitting)
 void LLFloaterFixedEnvironmentSky::doImportFromDisk()
 {   // Load a a legacy Windlight XML from disk.
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.4
-    LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterFixedEnvironmentSky::loadSkySettingFromFile, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterFixedEnvironmentSky::loadSkySettingFromFile, this, _1));
 // [/SL:KB]
 //    (new LLFilePickerReplyThread(boost::bind(&LLFloaterFixedEnvironmentSky::loadSkySettingFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
 }

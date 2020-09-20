@@ -1863,9 +1863,9 @@ void LLFloaterEditExtDayCycle::onInventoryUpdated(LLUUID asset_id, LLUUID invent
 void LLFloaterEditExtDayCycle::doImportFromDisk()
 {   // Load a a legacy Windlight XML from disk.
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-6.4
-    LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterEditExtDayCycle::loadSettingFromFile, this, _1));
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, boost::bind(&LLFloaterEditExtDayCycle::loadSettingFromFile, this, _1));
 // [/SL:KB]
-//    (new LLFilePickerReplyThread(boost::bind(&LLFloaterEditExtDayCycle::loadSettingFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
+//	(new LLFilePickerReplyThread(boost::bind(&LLFloaterEditExtDayCycle::loadSettingFromFile, this, _1), LLFilePicker::FFLOAD_XML, false))->getFile();
 }
 
 //void LLFloaterEditExtDayCycle::loadSettingFromFile(const std::vector<std::string>& filenames)
