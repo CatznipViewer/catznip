@@ -338,12 +338,12 @@ private:
 	bool				mViewsInitialized; // Views have been generated
 };
 
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
 /************************************************************************/
 /* Asset Pre-Filtered Inventory Panel related class                     */
 /* Exchanges filter's flexibility for speed of generation and           */
 /* improved performance                                                 */
 /************************************************************************/
+
 class LLAssetFilteredInventoryPanel : public LLInventoryPanel
 {
 public:
@@ -363,10 +363,10 @@ public:
     ~LLAssetFilteredInventoryPanel() {}
 
     /*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
-                                       EDragAndDropType cargo_type,
-                                       void* cargo_data,
-                                       EAcceptance* accept,
-                                       std::string& tooltip_msg) override;
+        EDragAndDropType cargo_type,
+        void* cargo_data,
+        EAcceptance* accept,
+        std::string& tooltip_msg) override;
 
 protected:
     /*virtual*/ LLFolderViewItem*	buildNewViews(const LLUUID& id) override;
@@ -375,6 +375,5 @@ protected:
 private:
     LLAssetType::EType mAssetType;
 };
-// [/SL:KB]
 
 #endif // LL_LLINVENTORYPANEL_H

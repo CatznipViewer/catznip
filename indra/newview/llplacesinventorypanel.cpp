@@ -43,12 +43,8 @@ static LLDefaultChildRegistry::Register<LLPlacesInventoryPanel> r("places_invent
 static const LLPlacesInventoryBridgeBuilder PLACES_INVENTORY_BUILDER;
 
 LLPlacesInventoryPanel::LLPlacesInventoryPanel(const Params& p) : 
-//    LLInventoryPanel(p),
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
     LLAssetFilteredInventoryPanel(p),
-// [/SL:KB]
 	mSavedFolderState(NULL)
-
 {
 	mInvFVBridgeBuilder = &PLACES_INVENTORY_BUILDER;
 	mSavedFolderState = new LLSaveFolderState();
