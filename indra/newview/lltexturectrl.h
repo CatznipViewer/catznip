@@ -47,6 +47,9 @@
 #include "llwindow.h"
 
 class LLComboBox;
+// [SL:KB] - Patch: Build-TextureRadio | Checked: Catznip-6.5
+class LLRadioGroup;
+// [/SL:KB]
 class LLFloaterTexturePicker;
 class LLInventoryItem;
 class LLViewerFetchedTexture;
@@ -380,7 +383,10 @@ protected:
 	LLSaveFolderState	mSavedFolderState;
 	BOOL				mSelectedItemPinned;
 
-	LLComboBox*			mModeSelector;
+//	LLComboBox*			mModeSelector;
+// [SL:KB] - Patch: Build-TextureRadio | Checked: Catznip-6.5
+    LLRadioGroup*       mModeSelector = nullptr;
+// [/SL:KB]
 	LLScrollListCtrl*	mLocalScrollCtrl;
 
 private:
