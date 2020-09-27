@@ -36,7 +36,6 @@
 #include "llstring.h"
 #include "lluictrl.h"
 #include "llpermissionsflags.h"
-#include "llradiogroup.h"
 #include "lltextbox.h" // for params
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 #include "lltoolpipette.h"
@@ -47,7 +46,7 @@
 #include "llviewertexture.h"
 #include "llwindow.h"
 
-class LLButton;
+class LLComboBox;
 class LLFloaterTexturePicker;
 class LLInventoryItem;
 class LLViewerFetchedTexture;
@@ -381,7 +380,7 @@ protected:
 	LLSaveFolderState	mSavedFolderState;
 	BOOL				mSelectedItemPinned;
 
-	LLRadioGroup*		mModeSelector;
+	LLComboBox*			mModeSelector;
 	LLScrollListCtrl*	mLocalScrollCtrl;
 
 private:
