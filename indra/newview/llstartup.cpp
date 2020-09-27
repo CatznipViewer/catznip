@@ -108,7 +108,6 @@
 //#include "llfirstuse.h"
 #include "llfloaterhud.h"
 #include "llfloaterland.h"
-#include "llfloaterpreference.h"
 #include "llfloatertopobjects.h"
 #include "llfloaterworldmap.h"
 #include "llgesturemgr.h"
@@ -815,6 +814,7 @@ bool idle_startup()
 		show_debug_menus();
 
 		// Hide the splash screen
+		LL_DEBUGS("AppInit") << "Hide the splash screen and show window" << LL_ENDL;
 		LLSplashScreen::hide();
 		// Push our window frontmost
 		gViewerWindow->getWindow()->show();
@@ -822,9 +822,12 @@ bool idle_startup()
 		// DEV-16927.  The following code removes errant keystrokes that happen while the window is being 
 		// first made visible.
 #ifdef _WIN32
+        LL_DEBUGS("AppInit") << "Processing PeekMessage" << LL_ENDL;
 		MSG msg;
 		while( PeekMessage( &msg, /*All hWnds owned by this thread */ NULL, WM_KEYFIRST, WM_KEYLAST, PM_REMOVE ) )
-		{ }
+        {
+        }
+        LL_DEBUGS("AppInit") << "PeekMessage processed" << LL_ENDL;
 #endif
         display_startup();
         timeout.reset();
@@ -917,9 +920,9 @@ bool idle_startup()
 		}
 
 		// Set PerAccountSettingsFile to the default value.
-		gSavedSettings.setString("PerAccountSettingsFile",
-			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
-				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
+		std::string settings_per_account = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount"));
+		gSavedSettings.setString("PerAccountSettingsFile", settings_per_account);
+		gDebugInfo["PerAccountSettingsFilename"] = settings_per_account;
 
 		// Note: can't store warnings files per account because some come up before login
 		
@@ -1105,6 +1108,8 @@ bool idle_startup()
 				// Its either downloading or declined.
 				// If optional was skipped this case shouldn't 
 				// be reached.
+
+				LL_INFOS("LLStartup") << "Forcing a quit due to update." << LL_ENDL;
 				LLLoginInstance::getInstance()->disconnect();
 				LLAppViewer::instance()->forceQuit();
 			}
@@ -1125,7 +1130,24 @@ bool idle_startup()
 					{
 						// This was a certificate error, so grab the certificate
 						// and throw up the appropriate dialog.
-						LLPointer<LLCertificate> certificate = gSecAPIHandler->getCertificate(response["certificate"]);
+                        LLPointer<LLCertificate> certificate;
+                        try
+                        {
+                            certificate = gSecAPIHandler->getCertificate(response["certificate"]);
+                        }
+                        catch (LLCertException &cert_exception)
+                        {
+                            LL_WARNS("LLStartup", "SECAPI") << "Caught " << cert_exception.what() << " certificate expception on getCertificate("<< response["certificate"] << ")" << LL_ENDL;
+                            LLSD args;
+                            args["REASON"] = LLTrans::getString(cert_exception.what());
+
+                            LLNotificationsUtil::add("GeneralCertificateErrorShort", args, response,
+                                general_cert_done);
+
+                            reset_login();
+                            gSavedSettings.setBOOL("AutoLogin", FALSE);
+                            show_connect_box = true;
+                        }
 						if(certificate)
 						{
 							LLSD args = transform_cert_args(certificate);
@@ -2304,29 +2326,13 @@ void login_callback(S32 option, void *userdata)
 void show_release_notes_if_required()
 {
     static bool release_notes_shown = false;
-    // We happen to know that instantiating LLVersionInfo implicitly
-    // instantiates the LLEventMailDrop named "relnotes", which we (might) use
-    // below. If viewer release notes stop working, might be because that
-    // LLEventMailDrop got moved out of LLVersionInfo and hasn't yet been
-    // instantiated.
     if (!release_notes_shown && (LLVersionInfo::instance().getChannelAndVersion() != gLastRunVersion)
         && LLVersionInfo::instance().getViewerMaturity() != LLVersionInfo::TEST_VIEWER // don't show Release Notes for the test builds
         && gSavedSettings.getBOOL("UpdaterShowReleaseNotes")
         && !gSavedSettings.getBOOL("FirstLoginThisInstall"))
     {
-        // Instantiate a "relnotes" listener which assumes any arriving event
-        // is the release notes URL string. Since "relnotes" is an
-        // LLEventMailDrop, this listener will be invoked whether or not the
-        // URL has already been posted. If so, it will fire immediately;
-        // otherwise it will fire whenever the URL is (later) posted. Either
-        // way, it will display the release notes as soon as the URL becomes
-        // available.
-        LLEventPumps::instance().obtain("relnotes").listen(
-            "showrelnotes",
-            [](const LLSD& url){
-                LLWeb::loadURLInternal(url.asString());
-                return false;
-            });
+        LLSD info(LLAppViewer::instance()->getViewerInfo());
+        LLWeb::loadURLInternal(info["VIEWER_RELEASE_NOTES_URL"]);
         release_notes_shown = true;
     }
 }
