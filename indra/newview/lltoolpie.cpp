@@ -1464,7 +1464,7 @@ LLTool* LLToolPie::getOverrideTool(MASK mask)
 {
 	if (gSavedSettings.getBOOL("EnableGrab"))
 	{
-		if (mask == MASK_CONTROL)
+		if (mask == DEFAULT_GRAB_MASK)
 		{
 			return LLToolGrab::getInstance();
 		}
