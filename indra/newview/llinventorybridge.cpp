@@ -1809,7 +1809,7 @@ void LLItemBridge::restoreToWorld()
 
 		msg->nextBlockFast(_PREHASH_InventoryData);
 		itemp->packMessage(msg);
-		msg->sendReliable(gAgent.getRegion()->getHost());
+		msg->sendReliable(gAgent.getRegionHost());
 
 		//remove local inventory copy, sim will deal with permissions and removing the item
 		//from the actual inventory if its a no-copy etc
@@ -4101,12 +4101,6 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
                     items.push_back(std::string("New Body Parts"));
                     items.push_back(std::string("New Settings"));
                     items.push_back(std::string("upload_def"));
-
-                    if (!LLEnvironment::instance().isInventoryEnabled())
-                    {
-                        disabled_items.push_back("New Settings");
-                    }
-
                 }
 			}
 			getClipboardEntries(false, items, disabled_items, flags);

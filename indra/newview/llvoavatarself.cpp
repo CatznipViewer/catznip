@@ -1250,7 +1250,7 @@ BOOL LLVOAvatarSelf::detachAttachmentIntoInventory(const LLUUID &item_id)
 		gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
 		gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 		gMessageSystem->addUUIDFast(_PREHASH_ItemID, item_id);
-		gMessageSystem->sendReliable(gAgent.getRegion()->getHost());
+		gMessageSystem->sendReliable(gAgent.getRegionHost());
 		
 		// This object might have been selected, so let the selection manager know it's gone now
 		LLViewerObject *found_obj = gObjectList.findObject(item_id);
@@ -2667,11 +2667,6 @@ void LLVOAvatarSelf::onCustomizeStart(bool disable_camera_switch)
 		{
 			gAgentCamera.changeCameraToCustomizeAvatar();
 		}
-
-#if 0
-		gAgentAvatarp->clearVisualParamWeights();
-		gAgentAvatarp->idleUpdateAppearanceAnimation();
-#endif
 		
 		gAgentAvatarp->invalidateAll(); // mark all bakes as dirty, request updates
 		gAgentAvatarp->updateMeshTextures(); // make sure correct textures are applied to the avatar mesh.

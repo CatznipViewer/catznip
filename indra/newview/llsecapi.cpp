@@ -64,7 +64,7 @@ void initializeSecHandler()
 		{
 			handler->init();
 		}
-		catch (LLProtectedDataException e)
+		catch (LLProtectedDataException& e)
 		{
 			exception_msg = e.what();
 		}
@@ -153,4 +153,11 @@ void LLCredential::authenticatorType(std::string &idType)
 		idType = std::string();
 		
 	}
+}
+
+LLCertException::LLCertException(const LLSD& cert_data, const std::string& msg)
+  : LLException(msg),
+    mCertData(cert_data)
+{
+    LL_WARNS("SECAPI") << "Certificate Error: " << msg << LL_ENDL;
 }

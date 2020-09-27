@@ -42,7 +42,8 @@ LLFloaterLoadPrefPreset::LLFloaterLoadPrefPreset(const LLSD &key)
 
 // virtual
 BOOL LLFloaterLoadPrefPreset::postBuild()
-{	LLFloaterPreference* preferences = LLFloaterReg::getTypedInstance<LLFloaterPreference>("preferences");
+{
+	LLFloaterPreference* preferences = LLFloaterReg::getTypedInstance<LLFloaterPreference>("preferences");
 	if (preferences)
 	{
 		preferences->addDependentFloater(this);
@@ -65,6 +66,11 @@ void LLFloaterLoadPrefPreset::onOpen(const LLSD& key)
 
 	EDefaultOptions option = DEFAULT_TOP;
 	LLPresetsManager::getInstance()->setPresetNamesInComboBox(mSubdirectory, combo, option);
+	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
+	if (!preset_graphic_active.empty())
+	{
+		combo->setSimple(preset_graphic_active);
+	}
 }
 
 void LLFloaterLoadPrefPreset::onPresetsListChange()
@@ -73,6 +79,11 @@ void LLFloaterLoadPrefPreset::onPresetsListChange()
 
 	EDefaultOptions option = DEFAULT_TOP;
 	LLPresetsManager::getInstance()->setPresetNamesInComboBox(mSubdirectory, combo, option);
+	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
+	if (!preset_graphic_active.empty())
+	{
+		combo->setSimple(preset_graphic_active);
+	}
 }
 
 void LLFloaterLoadPrefPreset::onBtnCancel()

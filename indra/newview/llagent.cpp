@@ -830,6 +830,17 @@ bool LLAgent::enableFlying()
 	return !sitting;
 }
 
+// static
+bool LLAgent::isSitting()
+{
+    BOOL sitting = FALSE;
+    if (isAgentAvatarValid())
+    {
+        sitting = gAgentAvatarp->isSitting();
+    }
+    return sitting;
+}
+
 void LLAgent::standUp()
 {
 	setControlFlags(AGENT_CONTROL_STAND_UP);
@@ -856,9 +867,7 @@ void LLAgent::setRegion(LLViewerRegion *regionp)
 	if (mRegionp != regionp)
 	{
 
-		std::string ip = regionp->getHost().getString();
-		LL_INFOS("AgentLocation") << "Moving agent into region: " << regionp->getName()
-				<< " located at " << ip << LL_ENDL;
+		LL_INFOS("AgentLocation") << "Moving agent into region: " << regionp->getName() << LL_ENDL;
 		if (mRegionp)
 		{
 			// We've changed regions, we're now going to change our agent coordinate frame.
@@ -2036,6 +2045,14 @@ U8 LLAgent::getRenderState()
 //-----------------------------------------------------------------------------
 void LLAgent::endAnimationUpdateUI()
 {
+	if (LLApp::isExiting()
+		|| !gViewerWindow
+		|| !gMenuBarView
+		|| !gToolBarView
+		|| !gStatusBar)
+	{
+		return;
+	}
 	if (gAgentCamera.getCameraMode() == gAgentCamera.getLastCameraMode())
 	{
 		// We're already done endAnimationUpdateUI for this transition.
