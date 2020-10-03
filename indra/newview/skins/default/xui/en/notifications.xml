@@ -1513,7 +1513,7 @@ Go to the [SECOND_LIFE] events web page?
     <tag>confirm</tag>
     <url option="0" name="url">
 
-			http://secondlife.com/events/
+			https://secondlife.com/my/community/events
     </url>
     <usetemplate
      name="okcancelbuttons"
@@ -7204,12 +7204,14 @@ You can only claim public land in the Region you&apos;re in.
   </notification>
 
   <notification
-   icon="notify.tga"
+   icon="alertmodal.tga"
    name="RegionTPAccessBlocked"
-   persist="false"
-   type="notify">
+   type="alertmodal">
    <tag>fail</tag>
     The region you're trying to visit contains content exceeding your current preferences.  You can change your preferences using Me &gt; Preferences &gt; General.
+   <usetemplate
+      name="okbutton"
+      yestext="OK"/>
   </notification>
 
   <notification
@@ -8531,6 +8533,18 @@ Error saving preset [NAME].
     name="DefaultPresetNotSaved"
     type="notifytip">
 Can not overwrite default preset.
+  </notification>
+
+  <notification
+    icon="alertmodal.tga"
+    name="PresetAlreadyExists"
+    type="alertmodal">
+&apos;[NAME]&apos; is in use. You may replace
+this preset or choose another name.
+    <tag>fail</tag>
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
   </notification>
 
   <notification

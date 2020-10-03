@@ -15,10 +15,9 @@ include(BuildPackagesInfo)
 include(BuildVersion)
 include(CMakeCopyIfDifferent)
 include(DBusGlib)
-include(DirectX)
 include(DragDrop)
 include(EXPAT)
-include(FMODEX)
+include(FMODSTUDIO)
 include(GLOD)
 include(Hunspell)
 include(JsonCpp)
@@ -63,9 +62,9 @@ if (NOT HAVOK_TPV)
    add_subdirectory(${LLPHYSICSEXTENSIONS_SRC_DIR} llphysicsextensions)
 endif (NOT HAVOK_TPV)
 
-if(FMODEX)
-  include_directories(${FMODEX_INCLUDE_DIR})
-endif(FMODEX)
+if(FMODSTUDIO)
+  include_directories(${FMODSTUDIO_INCLUDE_DIR})
+endif(FMODSTUDIO)
 
 include_directories(
     ${DBUSGLIB_INCLUDE_DIRS}
@@ -228,6 +227,7 @@ set(viewer_SOURCE_FILES
     llfloaterbuycurrencyhtml.cpp
     llfloaterbuyland.cpp
     llfloatercamera.cpp
+    llfloatercamerapresets.cpp
     llfloaterchatvoicevolume.cpp
     llfloatercolorpicker.cpp
     llfloaterconversationlog.cpp
@@ -290,12 +290,14 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
+    llfloaterpreferenceviewadvanced.cpp
     llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterregiondebugconsole.cpp
     llfloaterregioninfo.cpp
     llfloaterreporter.cpp
     llfloaterregionrestarting.cpp
+    llfloatersavecamerapreset.cpp
     llfloatersaveprefpreset.cpp
     llfloatersceneloadstats.cpp
     llfloaterscriptdebug.cpp
@@ -483,6 +485,7 @@ set(viewer_SOURCE_FILES
     llpanelplaceprofile.cpp
     llpanelplaces.cpp
     llpanelplacestab.cpp
+    llpanelpresetscamerapulldown.cpp
     llpanelpresetspulldown.cpp
     llpanelprimmediacontrols.cpp
     llpanelprofile.cpp
@@ -496,6 +499,7 @@ set(viewer_SOURCE_FILES
     llpaneltiptoast.cpp
     llpanelvoiceeffect.cpp
     llpaneltopinfobar.cpp
+    llpanelpulldown.cpp
     llpanelvoicedevicesettings.cpp
     llpanelvolume.cpp
     llpanelvolumepulldown.cpp
@@ -855,6 +859,7 @@ set(viewer_HEADER_FILES
     llfloaterbuycurrency.h
     llfloaterbuycurrencyhtml.h
     llfloaterbuyland.h
+    llfloatercamerapresets.h
     llfloatercamera.h
     llfloaterchatvoicevolume.h
     llfloatercolorpicker.h
@@ -921,12 +926,14 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
+    llfloaterpreferenceviewadvanced.h
     llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterregiondebugconsole.h
     llfloaterregioninfo.h
     llfloaterreporter.h
     llfloaterregionrestarting.h
+    llfloatersavecamerapreset.h
     llfloatersaveprefpreset.h
     llfloatersceneloadstats.h
     llfloaterscriptdebug.h
@@ -1104,12 +1111,14 @@ set(viewer_HEADER_FILES
     llpanelplaceprofile.h
     llpanelplaces.h
     llpanelplacestab.h
+    llpanelpresetscamerapulldown.h
     llpanelpresetspulldown.h
     llpanelprimmediacontrols.h
     llpanelprofile.h
     llpanelsnapshot.h
     llpanelteleporthistory.h
     llpaneltiptoast.h
+    llpanelpulldown.h
     llpanelvoicedevicesettings.h
     llpanelvoiceeffect.h
     llpaneltopinfobar.h
@@ -1579,20 +1588,12 @@ if (WINDOWS)
         list(APPEND viewer_SOURCE_FILES ${viewer_RESOURCE_FILES})
     endif (NOT USESYSTEMLIBS)
 
-    find_library(DINPUT_LIBRARY dinput8 ${DIRECTX_LIBRARY_DIR})
-    find_library(DXGUID_LIBRARY dxguid ${DIRECTX_LIBRARY_DIR})
-    mark_as_advanced(
-        DINPUT_LIBRARY
-        DXGUID_LIBRARY
-        )
-
 # see EXP-1765 - theory is opengl32.lib needs to be included before gdi32.lib (windows libs)
     set(viewer_LIBRARIES
         opengl32
         ${WINDOWS_LIBRARIES}
         comdlg32
-        ${DINPUT_LIBRARY}
-        ${DXGUID_LIBRARY}
+        dxguid
         kernel32
         odbc32
         odbccp32
@@ -1718,12 +1719,13 @@ if (OPENAL)
   set(LLSTARTUP_COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS} -DLL_OPENAL")
 endif (OPENAL)
 
-if (FMODEX)
-  set(LLSTARTUP_COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS} -DLL_FMODEX")
-  set(FMODWRAPPER_LIBRARY ${FMODEX_LIBRARY})
-endif (FMODEX)
+if (FMODSTUDIO)
+  set(LLSTARTUP_COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS} -DLL_FMODSTUDIO")
+  set(FMODWRAPPER_LIBRARY ${FMODSTUDIO_LIBRARY})
+endif (FMODSTUDIO)
 
 set_source_files_properties(llstartup.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
+set_source_files_properties(llprogressview.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
 
 list(APPEND viewer_SOURCE_FILES ${viewer_HEADER_FILES})
 
@@ -1778,51 +1780,54 @@ if (WINDOWS)
     # be met. I'm looking forward to a source-code split-up project next year that will address this kind of thing.
     # In the meantime, if you have any ideas on how to easily maintain one list, either here or in viewer_manifest.py
     # and have the build deps get tracked *please* tell me about it.
+    # nat: https://cmake.org/cmake/help/v3.14/command/file.html
+    # "For example, the code
+    # file(STRINGS myfile.txt myfile)
+    # stores a list in the variable myfile in which each item is a line from the input file."
+    # And of course it's straightforward to read a text file in Python.
 
     set(COPY_INPUT_DEPENDENCIES
       # The following commented dependencies are determined at variably at build time. Can't do this here.
       ${CMAKE_SOURCE_DIR}/../etc/message.xml
       ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/llcommon.dll
+      #${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/llcommon.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapr-1.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libaprutil-1.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapriconv-1.dll
       ${SHARED_LIB_STAGING_DIR}/Release/glod.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/glod.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/glod.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/libcollada14dom22.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
+      #${SHARED_LIB_STAGING_DIR}/Debug/glod.dll
+      #${SHARED_LIB_STAGING_DIR}/Release/libcollada14dom22.dll
+      #${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
+      #${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/nghttp2.dll
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/nghttp2.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/msvcp140.dll
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/msvcp140.dll
       ${SHARED_LIB_STAGING_DIR}/Release/openjpeg.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjpeg.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/openjpegd.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/msvcr100.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/msvcp100.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/msvcr100.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/msvcp100.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/msvcr100d.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/msvcp100d.dll
+      #${SHARED_LIB_STAGING_DIR}/Debug/openjpegd.dll
       ${SHARED_LIB_STAGING_DIR}/Release/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ca-bundle.crt
+      #${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
+      ${LIBS_PREBUILT_DIR}/bin/release/SLVoice.exe
+      #${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
+      #${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
+      ${LIBS_PREBUILT_DIR}/ca-bundle.crt
       ${GOOGLE_PERF_TOOLS_SOURCE}
       ${CMAKE_CURRENT_SOURCE_DIR}/licenses-win32.txt
-      ${CMAKE_CURRENT_SOURCE_DIR}/featuretable.txt
-      ${CMAKE_CURRENT_SOURCE_DIR}/featuretable_xp.txt
+      #${CMAKE_CURRENT_SOURCE_DIR}/featuretable.txt
+      #${CMAKE_CURRENT_SOURCE_DIR}/featuretable_xp.txt
       ${ARCH_PREBUILT_DIRS_RELEASE}/libeay32.dll
       ${ARCH_PREBUILT_DIRS_RELEASE}/ssleay32.dll
-      ${ARCH_PREBUILT_DIRS_DEBUG}/libeay32.dll
-      ${ARCH_PREBUILT_DIRS_DEBUG}/ssleay32.dll
+      #${ARCH_PREBUILT_DIRS_DEBUG}/libeay32.dll
+      #${ARCH_PREBUILT_DIRS_DEBUG}/ssleay32.dll
       ${viewer_APPSETTINGS_FILES}
       SLPlugin
       media_plugin_cef
       media_plugin_libvlc
       media_plugin_example
-      winmm_shim
+      #winmm_shim
       windows-crash-logger
       )
 
@@ -1838,13 +1843,13 @@ if (WINDOWS)
             )
     endif (ADDRESS_SIZE EQUAL 64)
 
-    if (FMODEX)
+    if (FMODSTUDIO)
       list(APPEND COPY_INPUT_DEPENDENCIES
-           ${SHARED_LIB_STAGING_DIR}/Release/fmodex.dll
-           ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/fmodex.dll
-           ${SHARED_LIB_STAGING_DIR}/Debug/fmodexL.dll
+           ${SHARED_LIB_STAGING_DIR}/Release/fmod.dll
+           ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/fmod.dll
+           #${SHARED_LIB_STAGING_DIR}/Debug/fmodL.dll
           )
-    endif (FMODEX)
+    endif (FMODSTUDIO)
 
     add_custom_command(
       OUTPUT  ${CMAKE_CFG_INTDIR}/copy_touched.bat
@@ -1855,6 +1860,7 @@ if (WINDOWS)
         --arch=${ARCH}
         --artwork=${ARTWORK_DIR}
         "--bugsplat=${BUGSPLAT_DB}"
+        "--fmodstudio=${FMODSTUDIO}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
@@ -1883,21 +1889,6 @@ if (WINDOWS)
       SLPlugin
       windows-crash-logger
     )
-
-    # sets the 'working directory' for debugging from visual studio.
-    if (NOT UNATTENDED)
-        add_custom_command(
-            TARGET ${VIEWER_BINARY_NAME} POST_BUILD
-            COMMAND ${CMAKE_SOURCE_DIR}/tools/vstool/vstool.exe
-            ARGS
-              --solution
-              ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.sln
-              --workingdir
-              ${VIEWER_BINARY_NAME}
-              "${CMAKE_CURRENT_SOURCE_DIR}"
-            COMMENT "Setting the ${VIEWER_BINARY_NAME} working directory for debugging."
-            )
-    endif (NOT UNATTENDED)
 
     # sets the 'working directory' for debugging from visual studio.
     # Condition for version can be moved to requirements once build agents will be updated (see TOOL-3865)
@@ -1931,6 +1922,7 @@ if (WINDOWS)
           --arch=${ARCH}
           --artwork=${ARTWORK_DIR}
           "--bugsplat=${BUGSPLAT_DB}"
+          "--fmodstudio=${FMODSTUDIO}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
@@ -1998,6 +1990,7 @@ endif (WINDOWS)
 # modern version.
 
 target_link_libraries(${VIEWER_BINARY_NAME}
+    ${LEGACY_STDIO_LIBS}
     ${PNG_PRELOAD_ARCHIVES}
     ${ZLIB_PRELOAD_ARCHIVES}
     ${URIPARSER_PRELOAD_ARCHIVES}
@@ -2024,7 +2017,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${viewer_LIBRARIES}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${BOOST_REGEX_LIBRARY}
-    ${BOOST_COROUTINE_LIBRARY}
+    ${BOOST_FIBER_LIBRARY}
     ${BOOST_CONTEXT_LIBRARY}
     ${DBUSGLIB_LIBRARIES}
     ${OPENGL_LIBRARIES}
@@ -2076,6 +2069,7 @@ if (LINUX)
         --arch=${ARCH}
         --artwork=${ARTWORK_DIR}
         "--bugsplat=${BUGSPLAT_DB}"
+        "--fmodstudio=${FMODSTUDIO}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
@@ -2102,6 +2096,7 @@ if (LINUX)
       --arch=${ARCH}
       --artwork=${ARTWORK_DIR}
       "--bugsplat=${BUGSPLAT_DB}"
+      "--fmodstudio=${FMODSTUDIO}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       "--channel=${VIEWER_CHANNEL}"
@@ -2178,6 +2173,7 @@ if (DARWIN)
       --arch=${ARCH}
       --artwork=${ARTWORK_DIR}
       "--bugsplat=${BUGSPLAT_DB}"
+      "--fmodstudio=${FMODSTUDIO}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
@@ -2212,6 +2208,7 @@ if (DARWIN)
           --arch=${ARCH}
           --artwork=${ARTWORK_DIR}
           "--bugsplat=${BUGSPLAT_DB}"
+          "--fmodstudio=${FMODSTUDIO}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
@@ -2454,6 +2451,7 @@ if (LL_TESTS)
   set_source_files_properties(
     lllogininstance.cpp
     PROPERTIES
+    LL_TEST_ADDITIONAL_SOURCE_FILES llversioninfo.cpp
     LL_TEST_ADDITIONAL_LIBRARIES "${BOOST_SYSTEM_LIBRARY}"
   )
 
@@ -2503,7 +2501,7 @@ if (LL_TESTS)
     ${OPENSSL_LIBRARIES}
     ${CRYPTO_LIBRARIES}
     ${LIBRT_LIBRARY}
-    ${BOOST_COROUTINE_LIBRARY}
+    ${BOOST_FIBER_LIBRARY}
     ${BOOST_CONTEXT_LIBRARY}
   )
 
