@@ -138,7 +138,7 @@ void make_ui_sound(const LLUUID& sound_id)
 {
 	if (sound_id.notNull())
 	{
-		LLUI::getInstance()->mAudioCallback(sound_id);
+		LLUI::instance().mAudioCallback(sound_id);
 	}
 }
 // [/SL:KB]
