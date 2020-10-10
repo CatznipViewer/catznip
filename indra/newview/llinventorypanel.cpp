@@ -1181,9 +1181,9 @@ BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
 		if (pVMItem)
 		{
 			// Copy/pasted from LLView::handleToolTip()
-			F32 nTimeout = LLToolTipMgr::instance().toolTipVisible() 
-					? LLUI::instance().mSettingGroups["config"]->getF32("ToolTipFastDelay")
-					: LLUI::instance().mSettingGroups["config"]->getF32("ToolTipDelay");
+			F32 nTimeout = LLToolTipMgr::instance().toolTipVisible()
+					? LLUI::getInstance()->mSettingGroups["config"]->getF32("ToolTipFastDelay")
+					: LLUI::getInstance()->mSettingGroups["config"]->getF32("ToolTipDelay");
 			LLToolTipMgr::instance().show(LLToolTip::Params()
 					.message(pHoverItem->getToolTip())
 					.sticky_rect(pHoverItem->calcScreenRect())
