@@ -148,7 +148,7 @@ public:
 	{
 		// support secondlife:///app/appearance/show, but for now we just
 		// make all secondlife:///app/appearance SLapps behave this way
-		if (!LLUI::sSettingGroups["config"]->getBOOL("EnableAppearance"))
+		if (!LLUI::getInstance()->mSettingGroups["config"]->getBOOL("EnableAppearance"))
 		{
 			LLNotificationsUtil::add("NoAppearance", LLSD(), LLSD(), std::string("SwitchToStandardSkinAndQuit"));
 			return true;
@@ -1713,6 +1713,24 @@ void LLAppearanceMgr::slamCategoryLinks(const LLUUID& src_id, const LLUUID& dst_
 	LLInventoryModel::item_array_t* items;
 	LLSD contents = LLSD::emptyArray();
 	gInventory.getDirectDescendentsOf(src_id, cats, items);
+	if (!cats || !items)
+	{
+		// NULL means the call failed -- cats/items map doesn't exist (note: this does NOT mean
+		// that the cat just doesn't have any items or subfolders).
+		LLViewerInventoryCategory* category = gInventory.getCategory(src_id);
+		if (category)
+		{
+			LL_WARNS() << "Category '" << category->getName() << "' descendents corrupted, linking content failed." << LL_ENDL;
+		}
+		else
+		{
+			LL_WARNS() << "Category could not be retrieved, linking content failed." << LL_ENDL;
+		}
+		llassert(cats != NULL && items != NULL);
+
+		return;
+	}
+
 	LL_INFOS() << "copying " << items->size() << " items" << LL_ENDL;
 	for (LLInventoryModel::item_array_t::const_iterator iter = items->begin();
 		 iter != items->end();
@@ -1865,7 +1883,6 @@ bool LLAppearanceMgr::getCanRemoveOutfit(const LLUUID& outfit_cat_id)
 	LLFindNonRemovableObjects filter_non_removable;
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
-	LLInventoryModel::item_array_t::const_iterator it;
 	gInventory.collectDescendentsIf(outfit_cat_id, cats, items, false, filter_non_removable);
 	if (!cats.empty() || !items.empty())
 	{
@@ -2912,7 +2929,7 @@ void LLAppearanceMgr::removeAllAttachmentsFromAvatar()
 			 attachment_iter != attachment->mAttachedObjects.end();
 			 ++attachment_iter)
 		{
-			LLViewerObject *attached_object = (*attachment_iter);
+			LLViewerObject *attached_object = attachment_iter->get();
 			if (attached_object)
 			{
 				objects_to_remove.push_back(attached_object);

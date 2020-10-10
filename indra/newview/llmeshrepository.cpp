@@ -41,7 +41,6 @@
 #include "lldeadmantimer.h"
 #include "llfloatermodelpreview.h"
 #include "llfloaterperms.h"
-#include "lleconomy.h"
 #include "llimagej2c.h"
 #include "llhost.h"
 #include "llmath.h"
@@ -1889,7 +1888,7 @@ EMeshProcessingResult LLMeshRepoThread::lodReceived(const LLVolumeParams& mesh_p
 		std::string mesh_string((char*)data, data_size);
 		stream.str(mesh_string);
 	}
-	catch (std::bad_alloc)
+	catch (std::bad_alloc&)
 	{
 		// out of memory, we won't be able to process this mesh
 		return MESH_OUT_OF_MEMORY;
@@ -2277,6 +2276,7 @@ void LLMeshUploadThread::wholeModelToLLSD(LLSD& dest, bool include_textures)
 			instance_entry["material"] = LL_MCODE_WOOD;
 			instance_entry["physics_shape_type"] = data.mModel[LLModel::LOD_PHYSICS].notNull() ? (U8)(LLViewerObject::PHYSICS_SHAPE_PRIM) : (U8)(LLViewerObject::PHYSICS_SHAPE_CONVEX_HULL);
 			instance_entry["mesh"] = mesh_index[data.mBaseModel];
+			instance_entry["mesh_name"] = instance.mLabel;
 
 			instance_entry["face_list"] = LLSD::emptyArray();
 
@@ -2771,7 +2771,7 @@ void LLMeshUploadThread::onCompleted(LLCore::HttpHandle handle, LLCore::HttpResp
 
 			if (observer)
 			{
-				observer->setModelPhysicsFeeErrorStatus(status.toULong(), reason);
+				observer->setModelPhysicsFeeErrorStatus(status.toULong(), reason, body["error"]);
 			}
 		}
 		else
@@ -2804,7 +2804,7 @@ void LLMeshUploadThread::onCompleted(LLCore::HttpHandle handle, LLCore::HttpResp
 
 				if (observer)
 				{
-					observer->setModelPhysicsFeeErrorStatus(status.toULong(), reason);
+					observer->setModelPhysicsFeeErrorStatus(status.toULong(), reason, body["error"]);
 				}
 			}
 		}

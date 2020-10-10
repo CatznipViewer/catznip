@@ -973,7 +973,7 @@ bool LLPipeline::allocateScreenBuffer(U32 resX, U32 resY, U32 samples)
 			mDeferredLight.release();
 		}
 
-		F32 scale = RenderShadowResolutionScale;
+		F32 scale = llmax(0.f, RenderShadowResolutionScale);
 
 		if (shadow_detail > 0)
 		{ //allocate 4 sun shadow maps
@@ -4062,7 +4062,6 @@ void LLPipeline::postSort(LLCamera& camera)
 
 void render_hud_elements()
 {
-	LL_RECORD_BLOCK_TIME(FTM_RENDER_UI);
 	gPipeline.disableLights();		
 	
 	LLGLDisable fog(GL_FOG);
@@ -8685,15 +8684,24 @@ void LLPipeline::renderDeferredLighting()
 						}
 					}
 
-					const LLViewerObject *vobj = drawablep->getVObj();
-					if(vobj && vobj->getAvatar()
-						&& (vobj->getAvatar()->isTooComplex() || vobj->getAvatar()->isInMuteList()))
-					{
-						continue;
-					}
+                    const LLViewerObject *vobj = drawablep->getVObj();
+                    if (vobj)
+                    {
+                        LLVOAvatar *av = vobj->getAvatar();
+                        if (av && (av->isTooComplex() || av->isInMuteList()))
+                        {
+                            continue;
+                        }
+                    }
+
+                    const LLVector3 position = drawablep->getPositionAgent();
+                    if (dist_vec(position, LLViewerCamera::getInstance()->getOrigin()) > RenderFarClip + volume->getLightRadius())
+                    {
+                        continue;
+                    }
 
 					LLVector4a center;
-					center.load3(drawablep->getPositionAgent().mV);
+					center.load3(position.mV);
 					const F32* c = center.getF32ptr();
 					F32 s = volume->getLightRadius()*1.5f;
 
@@ -11435,7 +11443,7 @@ void LLPipeline::generateImpostor(LLVOAvatar* avatar)
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				if (LLViewerObject* attached_object = (*attachment_iter))
+				if (LLViewerObject* attached_object = attachment_iter->get())
 				{
 					markVisible(attached_object->mDrawable->getSpatialBridge(), *viewer_camera);
 				}

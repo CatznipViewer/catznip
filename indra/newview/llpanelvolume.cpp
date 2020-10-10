@@ -31,7 +31,6 @@
 
 // linden library includes
 #include "llclickaction.h"
-#include "lleconomy.h"
 #include "llerror.h"
 #include "llfontgl.h"
 #include "llflexibleobject.h"
@@ -82,8 +81,11 @@
 
 #include <boost/bind.hpp>
 
-// "Features" Tab
 
+const F32 DEFAULT_GRAVITY_MULTIPLIER = 1.f;
+const F32 DEFAULT_DENSITY = 1000.f;
+
+// "Features" Tab
 BOOL	LLPanelVolume::postBuild()
 {
 	// Flexible Objects Parameters
@@ -383,6 +385,29 @@ void LLPanelVolume::getState( )
         }
     }
     getChildView("Animated Mesh Checkbox Ctrl")->setEnabled(enabled_animated_object_box);
+	
+	//refresh any bakes
+	if (root_volobjp)
+	{
+		root_volobjp->refreshBakeTexture();
+
+		LLViewerObject::const_child_list_t& child_list = root_volobjp->getChildren();
+		for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
+			iter != child_list.end(); ++iter)
+		{
+			LLViewerObject* objectp = *iter;
+			if (objectp)
+			{
+				objectp->refreshBakeTexture();
+			}
+		}
+
+		if (gAgentAvatarp)
+		{
+			gAgentAvatarp->updateMeshVisibility();
+		}
+	}
+	
 
 	// Flexible properties
 	BOOL is_flexible = volobjp && volobjp->isFlexible();
@@ -807,7 +832,7 @@ void LLPanelVolume::onLightSelectTexture(const LLSD& data)
 // static
 void LLPanelVolume::onCommitMaterial( LLUICtrl* ctrl, void* userdata )
 {
-	//LLPanelObject* self = (LLPanelObject*) userdata;
+	LLPanelVolume* self = (LLPanelVolume*)userdata;
 	LLComboBox* box = (LLComboBox*) ctrl;
 
 	if (box)
@@ -818,6 +843,19 @@ void LLPanelVolume::onCommitMaterial( LLUICtrl* ctrl, void* userdata )
 		if (material_name != LEGACY_FULLBRIGHT_DESC)
 		{
 			U8 material_code = LLMaterialTable::basic.getMCode(material_name);
+			if (self)
+			{
+				LLViewerObject* objectp = self->mObject;
+				if (objectp)
+				{
+					objectp->setPhysicsGravity(DEFAULT_GRAVITY_MULTIPLIER);
+					objectp->setPhysicsFriction(LLMaterialTable::basic.getFriction(material_code));
+					//currently density is always set to 1000 serverside regardless of chosen material,
+					//actual material density should be used here, if this behavior change
+					objectp->setPhysicsDensity(DEFAULT_DENSITY);
+					objectp->setPhysicsRestitution(LLMaterialTable::basic.getRestitution(material_code));
+				}
+			}
 			LLSelectMgr::getInstance()->selectionSetMaterial(material_code);
 		}
 	}
@@ -953,6 +991,28 @@ void LLPanelVolume::onCommitAnimatedMeshCheckbox(LLUICtrl *, void*)
     {
         volobjp->setExtendedMeshFlags(new_flags);
     }
+
+	//refresh any bakes
+	if (volobjp)
+	{
+		volobjp->refreshBakeTexture();
+
+		LLViewerObject::const_child_list_t& child_list = volobjp->getChildren();
+		for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
+			iter != child_list.end(); ++iter)
+		{
+			LLViewerObject* objectp = *iter;
+			if (objectp)
+			{
+				objectp->refreshBakeTexture();
+			}
+		}
+
+		if (gAgentAvatarp)
+		{
+			gAgentAvatarp->updateMeshVisibility();
+		}
+	}
 }
 
 void LLPanelVolume::onCommitIsFlexible(LLUICtrl *, void*)

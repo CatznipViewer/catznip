@@ -63,8 +63,8 @@
 const S32 PREVIEW_BORDER_WIDTH = 2;
 const S32 PREVIEW_RESIZE_HANDLE_SIZE = S32(RESIZE_HANDLE_WIDTH * OO_SQRT2) + PREVIEW_BORDER_WIDTH;
 const S32 PREVIEW_HPAD = PREVIEW_RESIZE_HANDLE_SIZE;
-const S32 PREVIEW_VPAD = -24;	// yuk, hard coded
-const S32 PREF_BUTTON_HEIGHT = 16 + 7 + 16;
+const S32 PREVIEW_VPAD = -24 + 35;	// yuk, hard coded
+const S32 PREF_BUTTON_HEIGHT = 16 + 7 + 16 + 35;
 const S32 PREVIEW_TEXTURE_HEIGHT = 320;
 
 //-----------------------------------------------------------------------------
@@ -503,7 +503,7 @@ BOOL LLFloaterImagePreview::handleHover(S32 x, S32 y, MASK mask)
 			mSculptedPreview->refresh();
 		}
 
-		LLUI::setMousePositionLocal(this, mLastMouseX, mLastMouseY);
+		LLUI::getInstance()->setMousePositionLocal(this, mLastMouseX, mLastMouseY);
 	}
 
 	if (!mPreviewRect.pointInRect(x, y) || !mAvatarPreview || !mSculptedPreview)

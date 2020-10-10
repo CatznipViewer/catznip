@@ -512,7 +512,7 @@ LLViewerFetchedTexture* LLViewerTextureList::getImage(const LLUUID &image_id,
 		if (boost_priority != LLViewerTexture::BOOST_ALM && imagep->getBoostLevel() == LLViewerTexture::BOOST_ALM)
 		{
 			// Workaround: we need BOOST_ALM texture for something, 'rise' to NONE
-			imagep->setDecodePriority(LLViewerTexture::BOOST_NONE);
+			imagep->setBoostLevel(LLViewerTexture::BOOST_NONE);
 		}
 
 		LLViewerFetchedTexture *texture = imagep.get();
@@ -1385,8 +1385,6 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 		{
 			max_texmem = (S32Megabytes)128;
 		}
-
-		LL_WARNS() << "VRAM amount not detected, defaulting to " << max_texmem << " MB" << LL_ENDL;
 	}
 
 	S32Megabytes system_ram = gSysMemory.getPhysicalMemoryKB(); // In MB
@@ -1426,6 +1424,11 @@ void LLViewerTextureList::updateMaxResidentTexMem(S32Megabytes mem)
 	{
 		gSavedSettings.setS32("TextureMemory", mem.value());
 		return; //listener will re-enter this function
+	}
+
+	if (gGLManager.mVRAM == 0)
+	{
+		LL_WARNS() << "VRAM amount not detected, defaulting to " << mem << " MB" << LL_ENDL;
 	}
 
 	// TODO: set available resident texture mem based on use by other subsystems

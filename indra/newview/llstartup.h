@@ -41,10 +41,6 @@ bool idle_startup();
 void release_start_screen();
 bool login_alert_done(const LLSD& notification, const LLSD& response);
 
-// constants, variables,  & enumerations
-extern std::string SCREEN_HOME_FILENAME;
-extern std::string SCREEN_LAST_FILENAME;
-
 // start location constants
 enum EStartLocation
 {
@@ -84,7 +80,6 @@ typedef enum {
 
 // exported symbols
 extern bool gAgentMovementCompleted;
-extern S32  gMaxAgentGroups;
 extern LLPointer<LLViewerTexture> gStartTexture;
 
 class LLStartUp
@@ -95,6 +90,8 @@ public:
 	static void setStartupState( EStartupState state );
 	static EStartupState getStartupState() { return gStartupState; };
 	static std::string getStartupStateString() { return startupStateToString(gStartupState); };
+	static std::string getScreenLastFilename(); // screenshot taken on exit
+	static std::string getScreenHomeFilename(); // screenshot taken on setting Home
 
 	static void multimediaInit();
 		// Initialize LLViewerMedia multimedia engine.
@@ -117,6 +114,7 @@ public:
 	static void saveInitialOutfit();
 
 	static std::string& getInitialOutfitName();
+	static std::string getUserId();
 	
 	static bool dispatchURL();
 		// if we have a SLURL or sim string ("Ahern/123/45") that started

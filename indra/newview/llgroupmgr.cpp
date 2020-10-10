@@ -44,9 +44,8 @@
 #include "roles_constants.h"
 #include "lltransactiontypes.h"
 #include "llstatusbar.h"
-#include "lleconomy.h"
 #include "llviewerwindow.h"
-#include "llpanelgroup.h"
+#include "llpanelgroupcreate.h"
 #include "llgroupactions.h"
 #include "llnotificationsutil.h"
 #include "lluictrlfactory.h"
@@ -1452,7 +1451,7 @@ void LLGroupMgr::processCreateGroupReply(LLMessageSystem* msg, void ** data)
 
 		gAgent.mGroups.push_back(gd);
 
-		LLPanelGroup::refreshCreatedGroup(group_id);
+		LLPanelGroupCreate::refreshCreatedGroup(group_id);
 		//FIXME
 		//LLFloaterGroupInfo::closeCreateGroup();
 		//LLFloaterGroupInfo::showFromUUID(group_id,"roles_tab");
@@ -2137,6 +2136,7 @@ void LLGroupMgr::sendCapGroupMembersRequest(const LLUUID& group_id)
     static U32 lastGroupMemberRequestFrame = 0;
 
 	// Have we requested the information already this frame?
+    // Todo: make this per group, we can invite to one group and simultaneously be checking another one
     if ((lastGroupMemberRequestFrame == gFrameCount) || (mMemberRequestInFlight))
 		return;
 	
@@ -2165,6 +2165,9 @@ void LLGroupMgr::sendCapGroupMembersRequest(const LLUUID& group_id)
 		sendGroupMembersRequest(group_id);
 		return;
 	}
+
+    LLGroupMgrGroupData* group_datap = createGroupData(group_id); //make sure group exists
+    group_datap->mMemberRequestID.generate(); // mark as pending
 
     lastGroupMemberRequestFrame = gFrameCount;
 

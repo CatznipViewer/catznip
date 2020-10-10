@@ -10,6 +10,8 @@
       <file>simhei.ttf</file>
       <file>ArialUni.ttf</file>
       <file>msyh.ttc</file>
+      <file load_collection="true">Cambria.ttc</file>
+      <file>malgun.ttf</file>
     </os>
     <os name="Mac">
       <file>ヒラギノ角ゴシック W3.ttc</file>  
@@ -19,8 +21,10 @@
       <file>AppleGothic.dfont</file>
       <file>AppleGothic.ttf</file>
       <file>AppleSDGothicNeo-Regular.otf</file>
+      <file>AppleSDGothicNeo.ttc</file>
       <file>华文细黑.ttf</file>
       <file>PingFang.ttc</file>
+      <file>STIXGeneral.otf</file>
     </os>
   </font>
 

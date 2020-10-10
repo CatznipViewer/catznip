@@ -44,7 +44,6 @@
 #include "lldrawable.h"
 #include "llrender.h"
 #include "llface.h"
-#include "lleconomy.h"
 #include "llfocusmgr.h"
 #include "llfloaterperms.h"
 #include "lliconctrl.h"
@@ -325,6 +324,8 @@ BOOL LLFloaterModelPreview::postBuild()
 	childSetCommitCallback("import_scale", onImportScaleCommit, this);
 	childSetCommitCallback("pelvis_offset", onPelvisOffsetCommit, this);
 
+	getChild<LLLineEditor>("description_form")->setKeystrokeCallback(boost::bind(&LLFloaterModelPreview::onDescriptionKeystroke, this, _1), NULL);
+
 	getChild<LLCheckBoxCtrl>("show_edges")->setCommitCallback(boost::bind(&LLFloaterModelPreview::onViewOptionChecked, this, _1));
 	getChild<LLCheckBoxCtrl>("show_physics")->setCommitCallback(boost::bind(&LLFloaterModelPreview::onViewOptionChecked, this, _1));
 	getChild<LLCheckBoxCtrl>("show_textures")->setCommitCallback(boost::bind(&LLFloaterModelPreview::onViewOptionChecked, this, _1));
@@ -431,7 +432,7 @@ void LLFloaterModelPreview::initModelPreview()
 	mModelPreview = new LLModelPreview(512, 512, this );
 	mModelPreview->setPreviewTarget(16.f);
 	mModelPreview->setDetailsCallback(boost::bind(&LLFloaterModelPreview::setDetails, this, _1, _2, _3, _4, _5));
-	mModelPreview->setModelUpdatedCallback(boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this, _1));
+	mModelPreview->setModelUpdatedCallback(boost::bind(&LLFloaterModelPreview::modelUpdated, this, _1));
 }
 
 void LLFloaterModelPreview::onViewOptionChecked(LLUICtrl* ctrl)
@@ -508,7 +509,8 @@ void LLFloaterModelPreview::onClickCalculateBtn()
 		mModelPreview->getPreviewAvatar()->showAttachmentOverrides();
     }
 
-	mUploadModelUrl.clear();
+    mUploadModelUrl.clear();
+    mModelPhysicsFee.clear();
 
 	gMeshRepo.uploadModel(mModelPreview->mUploadData, mModelPreview->mPreviewScale,
                           childGetValue("upload_textures").asBoolean(), 
@@ -518,6 +520,16 @@ void LLFloaterModelPreview::onClickCalculateBtn()
 
 	toggleCalculateButton(false);
 	mUploadBtn->setEnabled(false);
+}
+
+void LLFloaterModelPreview::onDescriptionKeystroke(LLUICtrl* ctrl)
+{
+	// Workaround for SL-4186, server doesn't allow name changes after 'calculate' stage
+	LLLineEditor* input = static_cast<LLLineEditor*>(ctrl);
+	if (input->isDirty()) // dirty will be reset after commit
+	{
+		toggleCalculateButton(true);
+	}
 }
 
 //static
@@ -794,7 +806,7 @@ BOOL LLFloaterModelPreview::handleHover	(S32 x, S32 y, MASK mask)
 
 		mModelPreview->refresh();
 
-		LLUI::setMousePositionLocal(this, mLastMouseX, mLastMouseY);
+		LLUI::getInstance()->setMousePositionLocal(this, mLastMouseX, mLastMouseY);
 	}
 
 	if (!mPreviewRect.pointInRect(x, y) || !mModelPreview)
@@ -3002,6 +3014,15 @@ void LLModelPreview::updateStatusMessages()
 	{
 		mFMP->childDisable("ok_btn");
 	}
+
+    if (mModelNoErrors && mLodsWithParsingError.empty())
+    {
+        mFMP->childEnable("calculate_btn");
+    }
+    else
+    {
+        mFMP->childDisable("calculate_btn");
+    }
 	
 	//add up physics triangles etc
 	S32 phys_tris = 0;
@@ -4418,6 +4439,12 @@ void LLFloaterModelPreview::toggleCalculateButton()
 	toggleCalculateButton(true);
 }
 
+void LLFloaterModelPreview::modelUpdated(bool calculate_visible)
+{
+    mModelPhysicsFee.clear();
+    toggleCalculateButton(calculate_visible);
+}
+
 void LLFloaterModelPreview::toggleCalculateButton(bool visible)
 {
 	mCalculateBtn->setVisible(visible);
@@ -4443,7 +4470,10 @@ void LLFloaterModelPreview::toggleCalculateButton(bool visible)
 		childSetTextArg("download_weight", "[ST]", tbd);
 		childSetTextArg("server_weight", "[SIM]", tbd);
 		childSetTextArg("physics_weight", "[PH]", tbd);
-		childSetTextArg("upload_fee", "[FEE]", tbd);
+		if (!mModelPhysicsFee.isMap() || mModelPhysicsFee.emptyMap())
+		{
+			childSetTextArg("upload_fee", "[FEE]", tbd);
+		}
 		childSetTextArg("price_breakdown", "[STREAMING]", tbd);
 		childSetTextArg("price_breakdown", "[PHYSICS]", tbd);
 		childSetTextArg("price_breakdown", "[INSTANCES]", tbd);
@@ -4503,10 +4533,21 @@ void LLFloaterModelPreview::handleModelPhysicsFeeReceived()
 	mUploadBtn->setEnabled(isModelUploadAllowed());
 }
 
-void LLFloaterModelPreview::setModelPhysicsFeeErrorStatus(S32 status, const std::string& reason)
+void LLFloaterModelPreview::setModelPhysicsFeeErrorStatus(S32 status, const std::string& reason, const LLSD& result)
 {
 	LL_WARNS() << "LLFloaterModelPreview::setModelPhysicsFeeErrorStatus(" << status << " : " << reason << ")" << LL_ENDL;
 	doOnIdleOneTime(boost::bind(&LLFloaterModelPreview::toggleCalculateButton, this, true));
+
+    if (result.has("upload_price"))
+    {
+        mModelPhysicsFee = result;
+        childSetTextArg("upload_fee", "[FEE]", llformat("%d", result["upload_price"].asInteger()));
+        childSetVisible("upload_fee", true);
+    }
+    else
+    {
+        mModelPhysicsFee.clear();
+    }
 }
 
 /*virtual*/ 

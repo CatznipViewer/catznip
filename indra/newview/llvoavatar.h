@@ -348,7 +348,7 @@ public:
 	BOOL			isFullyTextured() const;
 	BOOL			hasGray() const; 
 	S32				getRezzedStatus() const; // 0 = cloud, 1 = gray, 2 = textured, 3 = textured and fully downloaded.
-	void			updateRezzedStatusTimers();
+	void			updateRezzedStatusTimers(S32 status);
 
 	S32				mLastRezzedStatus;
 
@@ -617,6 +617,7 @@ public:
 public:
 	/*virtual*/ LLTexLayerSet*	createTexLayerSet(); // Return LLViewerTexLayerSet
 	void			releaseComponentTextures(); // ! BACKWARDS COMPATIBILITY !
+
 protected:
 	static void		onBakedTextureMasksLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata);
 	static void		onInitialBakedTextureLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata);
@@ -628,6 +629,8 @@ protected:
 
 	LLLoadedCallbackEntry::source_callback_list_t mCallbackTextureList ; 
 	BOOL mLoadedCallbacksPaused;
+	S32 mLoadedCallbackTextures; // count of 'loaded' baked textures, filled from mCallbackTextureList
+	LLFrameTimer mLastTexCallbackAddedTime;
 	std::set<LLUUID>	mTextureIDs;
 	//--------------------------------------------------------------------
 	// Local Textures
@@ -701,6 +704,9 @@ public:
 	void 			updateSexDependentLayerSets();
 	virtual void	dirtyMesh(); // Dirty the avatar mesh
 	void 			updateMeshData();
+	void			updateMeshVisibility();
+	LLViewerTexture*		getBakedTexture(const U8 te);
+
 protected:
 	void 			releaseMeshData();
 	virtual void restoreMeshData();

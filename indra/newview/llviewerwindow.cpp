@@ -122,7 +122,7 @@
 #include "llhudmanager.h"
 #include "llhudobject.h"
 #include "llhudview.h"
-#include "llimagebmp.h"
+#include "llimage.h"
 #include "llimagej2c.h"
 #include "llimageworker.h"
 #include "llkeyboard.h"
@@ -938,6 +938,12 @@ BOOL LLViewerWindow::handleAnyMouseClick(LLWindow *window,  LLCoordGL pos, MASK 
 			mLeftMouseDown = down;
 			buttonname = "Left Double Click";
 			break;
+		case LLMouseHandler::CLICK_BUTTON4:
+			buttonname = "Button 4";
+			break;
+		case LLMouseHandler::CLICK_BUTTON5:
+			buttonname = "Button 5";
+			break;
 		}
 		
 		LLView::sMouseHandlerMessage.clear();
@@ -960,7 +966,7 @@ BOOL LLViewerWindow::handleAnyMouseClick(LLWindow *window,  LLCoordGL pos, MASK 
 			mWindow->releaseMouse();
 
 		// Indicate mouse was active
-		LLUI::resetMouseIdleTimer();
+		LLUI::getInstance()->resetMouseIdleTimer();
 
 		// Don't let the user move the mouse out of the window until mouse up.
 		if( LLToolMgr::getInstance()->getCurrentTool()->clipMouseWhenDown() )
@@ -1115,7 +1121,7 @@ BOOL LLViewerWindow::handleRightMouseUp(LLWindow *window,  LLCoordGL pos, MASK m
 BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = TRUE;
-	LLVoiceClient::getInstance()->middleMouseState(true);
+	LLVoiceClient::getInstance()->updateMouseState(LLMouseHandler::CLICK_MIDDLE, true);
  	handleAnyMouseClick(window,pos,mask,LLMouseHandler::CLICK_MIDDLE,down);
   
   	// Always handled as far as the OS is concerned.
@@ -1267,15 +1273,45 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 	
 	return result;
 }
-  
+
 BOOL LLViewerWindow::handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;
-	LLVoiceClient::getInstance()->middleMouseState(false);
+	LLVoiceClient::getInstance()->updateMouseState(LLMouseHandler::CLICK_MIDDLE, false);
  	handleAnyMouseClick(window,pos,mask,LLMouseHandler::CLICK_MIDDLE,down);
   
   	// Always handled as far as the OS is concerned.
 	return TRUE;
+}
+
+BOOL LLViewerWindow::handleOtherMouse(LLWindow *window, LLCoordGL pos, MASK mask, S32 button, bool down)
+{
+    switch (button)
+    {
+    case 4:
+        LLVoiceClient::getInstance()->updateMouseState(LLMouseHandler::CLICK_BUTTON4, down);
+        handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_BUTTON4, down);
+        break;
+    case 5:
+        LLVoiceClient::getInstance()->updateMouseState(LLMouseHandler::CLICK_BUTTON5, down);
+        handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_BUTTON5, down);
+        break;
+    default:
+        break;
+    }
+
+    // Always handled as far as the OS is concerned.
+    return TRUE;
+}
+
+BOOL LLViewerWindow::handleOtherMouseDown(LLWindow *window, LLCoordGL pos, MASK mask, S32 button)
+{
+    return handleOtherMouse(window, pos, mask, button, TRUE);
+}
+
+BOOL LLViewerWindow::handleOtherMouseUp(LLWindow *window, LLCoordGL pos, MASK mask, S32 button)
+{
+    return handleOtherMouse(window, pos, mask, button, FALSE);
 }
 
 // WARNING: this is potentially called multiple times per frame
@@ -1295,7 +1331,7 @@ void LLViewerWindow::handleMouseMove(LLWindow *window,  LLCoordGL pos, MASK mask
 
 	if (mouse_point != mCurrentMousePoint)
 	{
-		LLUI::resetMouseIdleTimer();
+		LLUI::getInstance()->resetMouseIdleTimer();
 	}
 
 	saveLastMouse(mouse_point);
@@ -1551,6 +1587,11 @@ void LLViewerWindow::handleScrollWheel(LLWindow *window,  S32 clicks)
 	handleScrollWheel( clicks );
 }
 
+void LLViewerWindow::handleScrollHWheel(LLWindow *window,  S32 clicks)
+{
+	handleScrollHWheel(clicks);
+}
+
 void LLViewerWindow::handleWindowBlock(LLWindow *window)
 {
 	send_agent_pause();
@@ -1775,7 +1816,7 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 
 	// Get the real window rect the window was created with (since there are various OS-dependent reasons why
 	// the size of a window or fullscreen context may have been adjusted slightly...)
-	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE) * mWindow->getSystemUISize();
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor") * mWindow->getSystemUISize(), MIN_UI_SCALE, MAX_UI_SCALE);
 	
 	mDisplayScale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	mDisplayScale *= ui_scale_factor;
@@ -1795,8 +1836,6 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	// stuff like AGP if we think that it'll crash the viewer.
 	//
 	LL_DEBUGS("Window") << "Loading feature tables." << LL_ENDL;
-
-	LLFeatureManager::getInstance()->init();
 
 	// Initialize OpenGL Renderer
 	if (!LLFeatureManager::getInstance()->isFeatureAvailable("RenderVBOEnable") ||
@@ -1852,7 +1891,7 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	rvp.mouse_opaque(false);
 	rvp.follows.flags(FOLLOWS_NONE);
 	mRootView = LLUICtrlFactory::create<LLRootView>(rvp);
-	LLUI::setRootView(mRootView);
+	LLUI::getInstance()->setRootView(mRootView);
 
 	// Make avatar head look forward at start
 	mCurrentMousePoint.mX = getWindowWidthScaled() / 2;
@@ -1953,6 +1992,11 @@ void LLViewerWindow::initBase()
 	LLPanel* panel_holder = main_view->getChild<LLPanel>("toolbar_view_holder");
 	// Load the toolbar view from file 
 	gToolBarView = LLUICtrlFactory::getInstance()->createFromFile<LLToolBarView>("panel_toolbar_view.xml", panel_holder, LLDefaultChildRegistry::instance());
+	if (!gToolBarView)
+	{
+		LL_ERRS() << "Failed to initialize viewer: Viewer couldn't process file panel_toolbar_view.xml, "
+				<< "if this problem happens again, please validate your installation." << LL_ENDL;
+	}
 	gToolBarView->setShape(panel_holder->getLocalRect());
 	// Hide the toolbars for the moment: we'll make them visible after logging in world (see LLViewerWindow::initWorldUI())
 	gToolBarView->setVisible(FALSE);
@@ -2410,7 +2454,7 @@ void LLViewerWindow::setNormalControlsVisible( BOOL visible )
 		gStatusBar->setEnabled( visible );	
 	}
 	
-	LLNavigationBar* navbarp = LLUI::getRootView()->findChild<LLNavigationBar>("navigation_bar");
+	LLNavigationBar* navbarp = LLUI::getInstance()->getRootView()->findChild<LLNavigationBar>("navigation_bar");
 	if (navbarp)
 	{
 		// when it's time to show navigation bar we need to ensure that the user wants to see it
@@ -2520,7 +2564,7 @@ void LLViewerWindow::draw()
 
 	if (!gSavedSettings.getBOOL("RenderUIBuffer"))
 	{
-		LLUI::sDirtyRect = getWindowRectScaled();
+		LLUI::getInstance()->mDirtyRect = getWindowRectScaled();
 	}
 
 	// HACK for timecode debugging
@@ -2838,7 +2882,8 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 	// If "Pressing letter keys starts local chat" option is selected, we are not in mouselook, 
 	// no view has keyboard focus, this is a printable character key (and no modifier key is 
 	// pressed except shift), then give focus to nearby chat (STORM-560)
-	if ( gSavedSettings.getS32("LetterKeysFocusChatBar") && !gAgentCamera.cameraMouselook() && 
+	if ( LLStartUp::getStartupState() >= STATE_STARTED && 
+		gSavedSettings.getS32("LetterKeysFocusChatBar") && !gAgentCamera.cameraMouselook() && 
 		!keyboard_focus && key < 0x80 && (mask == MASK_NONE || mask == MASK_SHIFT) )
 	{
 		// Initialize nearby chat if it's missing
@@ -2920,7 +2965,7 @@ BOOL LLViewerWindow::handleUnicodeChar(llwchar uni_char, MASK mask)
 
 void LLViewerWindow::handleScrollWheel(S32 clicks)
 {
-	LLUI::resetMouseIdleTimer();
+	LLUI::getInstance()->resetMouseIdleTimer();
 	
 	LLMouseHandler* mouse_captor = gFocusMgr.getMouseCapture();
 	if( mouse_captor )
@@ -2968,6 +3013,49 @@ void LLViewerWindow::handleScrollWheel(S32 clicks)
 	return;
 }
 
+void LLViewerWindow::handleScrollHWheel(S32 clicks)
+{
+    LLUI::getInstance()->resetMouseIdleTimer();
+
+    LLMouseHandler* mouse_captor = gFocusMgr.getMouseCapture();
+    if (mouse_captor)
+    {
+        S32 local_x;
+        S32 local_y;
+        mouse_captor->screenPointToLocal(mCurrentMousePoint.mX, mCurrentMousePoint.mY, &local_x, &local_y);
+        mouse_captor->handleScrollHWheel(local_x, local_y, clicks);
+        if (LLView::sDebugMouseHandling)
+        {
+            LL_INFOS() << "Scroll Horizontal Wheel handled by captor " << mouse_captor->getName() << LL_ENDL;
+        }
+        return;
+    }
+
+    LLUICtrl* top_ctrl = gFocusMgr.getTopCtrl();
+    if (top_ctrl)
+    {
+        S32 local_x;
+        S32 local_y;
+        top_ctrl->screenPointToLocal(mCurrentMousePoint.mX, mCurrentMousePoint.mY, &local_x, &local_y);
+        if (top_ctrl->handleScrollHWheel(local_x, local_y, clicks)) return;
+    }
+
+    if (mRootView->handleScrollHWheel(mCurrentMousePoint.mX, mCurrentMousePoint.mY, clicks))
+    {
+        if (LLView::sDebugMouseHandling)
+        {
+            LL_INFOS() << "Scroll Horizontal Wheel" << LLView::sMouseHandlerMessage << LL_ENDL;
+        }
+        return;
+    }
+    else if (LLView::sDebugMouseHandling)
+    {
+        LL_INFOS() << "Scroll Horizontal Wheel not handled by view" << LL_ENDL;
+    }
+
+    return;
+}
+
 void LLViewerWindow::addPopup(LLView* popup)
 {
 	if (mPopupView)
@@ -2999,7 +3087,7 @@ void LLViewerWindow::moveCursorToCenter()
 		S32 x = getWorldViewWidthScaled() / 2;
 		S32 y = getWorldViewHeightScaled() / 2;
 	
-		LLUI::setMousePositionScreen(x, y);
+		LLUI::getInstance()->setMousePositionScreen(x, y);
 		
 		//on a forced move, all deltas get zeroed out to prevent jumping
 		mCurrentMousePoint.set(x,y);
@@ -3331,7 +3419,8 @@ void LLViewerWindow::updateUI()
 			LLRect screen_sticky_rect = mRootView->getLocalRect();
 			S32 local_x, local_y;
 
-			if (gSavedSettings.getBOOL("DebugShowXUINames"))
+			static LLCachedControl<bool> debug_show_xui_names(gSavedSettings, "DebugShowXUINames", 0);
+			if (debug_show_xui_names)
 			{
 				LLToolTip::Params params;
 
@@ -3819,7 +3908,7 @@ void LLViewerWindow::renderSelections( BOOL for_gl_pick, BOOL pick_parcel_walls,
 
 					BOOL draw_handles = TRUE;
 
-					if (tool == LLToolCompTranslate::getInstance() && !all_selected_objects_move)
+					if (tool == LLToolCompTranslate::getInstance() && !all_selected_objects_move && !LLSelectMgr::getInstance()->isSelfAvatarSelected())
 					{
 						draw_handles = FALSE;
 					}
@@ -4487,32 +4576,46 @@ void LLViewerWindow::movieSize(S32 new_width, S32 new_height)
 	}
 }
 
-BOOL LLViewerWindow::saveSnapshot(const std::string& filepath, S32 image_width, S32 image_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type)
+BOOL LLViewerWindow::saveSnapshot(const std::string& filepath, S32 image_width, S32 image_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type, LLSnapshotModel::ESnapshotFormat format)
 {
-	LL_INFOS() << "Saving snapshot to: " << filepath << LL_ENDL;
+    LL_INFOS() << "Saving snapshot to: " << filepath << LL_ENDL;
 
-	LLPointer<LLImageRaw> raw = new LLImageRaw;
-	BOOL success = rawSnapshot(raw, image_width, image_height, TRUE, FALSE, show_ui, do_rebuild);
+    LLPointer<LLImageRaw> raw = new LLImageRaw;
+    BOOL success = rawSnapshot(raw, image_width, image_height, TRUE, FALSE, show_ui, do_rebuild);
 
-	if (success)
-	{
-		LLPointer<LLImageBMP> bmp_image = new LLImageBMP;
-		success = bmp_image->encode(raw, 0.0f);
-		if( success )
-		{
-			success = bmp_image->save(filepath);
-		}
-		else
-		{
-			LL_WARNS() << "Unable to encode bmp snapshot" << LL_ENDL;
-		}
-	}
-	else
-	{
-		LL_WARNS() << "Unable to capture raw snapshot" << LL_ENDL;
-	}
+    if (success)
+    {
+        U8 image_codec = IMG_CODEC_BMP;
+        switch (format)
+        {
+        case LLSnapshotModel::SNAPSHOT_FORMAT_PNG:
+            image_codec = IMG_CODEC_PNG;
+            break;
+        case LLSnapshotModel::SNAPSHOT_FORMAT_JPEG:
+            image_codec = IMG_CODEC_JPEG;
+            break;
+        default:
+            image_codec = IMG_CODEC_BMP;
+            break;
+        }
 
-	return success;
+        LLPointer<LLImageFormatted> formated_image = LLImageFormatted::createFromType(image_codec);
+        success = formated_image->encode(raw, 0.0f);
+        if (success)
+        {
+            success = formated_image->save(filepath);
+        }
+        else
+        {
+            LL_WARNS() << "Unable to encode snapshot of format " << format << LL_ENDL;
+        }
+    }
+    else
+    {
+        LL_WARNS() << "Unable to capture raw snapshot" << LL_ENDL;
+    }
+
+    return success;
 }
 
 
@@ -4620,7 +4723,8 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 		if ((image_width <= gGLManager.mGLMaxTextureSize && image_height <= gGLManager.mGLMaxTextureSize) && 
 			(image_width > window_width || image_height > window_height) && LLPipeline::sRenderDeferred && !show_ui)
 		{
-			if (scratch_space.allocate(image_width, image_height, GL_RGBA, true, true))
+			U32 color_fmt = type == LLSnapshotModel::SNAPSHOT_TYPE_DEPTH ? GL_DEPTH_COMPONENT : GL_RGBA;
+			if (scratch_space.allocate(image_width, image_height, color_fmt, true, true))
 			{
 				original_width = gPipeline.mDeferredScreen.getWidth();
 				original_height = gPipeline.mDeferredScreen.getHeight();
@@ -4734,6 +4838,7 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 				{
 					// Required for showing the GUI in snapshots and performing bloom composite overlay
 					// Call even if show_ui is FALSE
+					LL_RECORD_BLOCK_TIME(FTM_RENDER_UI);
 					render_ui(scale_factor, subfield);
 					swap();
 				}
@@ -5348,7 +5453,7 @@ F32	LLViewerWindow::getWorldViewAspectRatio() const
 
 void LLViewerWindow::calcDisplayScale()
 {
-	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE) * mWindow->getSystemUISize();
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor") * mWindow->getSystemUISize(), MIN_UI_SCALE, MAX_UI_SCALE);
 	LLVector2 display_scale;
 	display_scale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	display_scale *= ui_scale_factor;

@@ -45,6 +45,7 @@
 // newview includes
 #include "llagent.h"
 #include "llagentaccess.h"
+#include "llagentbenefits.h"
 #include "llagentcamera.h"
 #include "llagentui.h"
 #include "llagentwearables.h"
@@ -54,7 +55,6 @@
 #include "lldaycyclemanager.h"
 #include "lldebugview.h"
 #include "llenvmanager.h"
-#include "llfacebookconnect.h"
 #include "llfilepicker.h"
 #include "llfirstuse.h"
 #include "llfloaterabout.h"
@@ -128,13 +128,13 @@
 #include "lluilistener.h"
 #include "llappearancemgr.h"
 #include "lltrans.h"
-#include "lleconomy.h"
 #include "lltoolgrab.h"
 #include "llwindow.h"
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
 #include "boost/unordered_map.hpp"
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 #include "llcleanup.h"
 
 using namespace LLAvatarAppearanceDefines;
@@ -402,23 +402,20 @@ void set_merchant_SLM_menu()
 
 void check_merchant_status(bool force)
 {
-    if (!gSavedSettings.getBOOL("InventoryOutboxDisplayBoth"))
+    if (force)
     {
-        if (force)
-        {
-            // Reset the SLM status: we actually want to check again, that's the point of calling check_merchant_status()
-            LLMarketplaceData::instance().setSLMStatus(MarketplaceStatusCodes::MARKET_PLACE_NOT_INITIALIZED);
-        }
-        // Hide SLM related menu item
-        gMenuHolder->getChild<LLView>("MarketplaceListings")->setVisible(FALSE);
-        
-        // Also disable the toolbar button for Marketplace Listings
-        LLCommand* command = LLCommandManager::instance().getCommand("marketplacelistings");
-		gToolBarView->enableCommand(command->id(), false);
-        
-        // Launch an SLM test connection to get the merchant status
-        LLMarketplaceData::instance().initializeSLM(boost::bind(&set_merchant_SLM_menu));
+        // Reset the SLM status: we actually want to check again, that's the point of calling check_merchant_status()
+        LLMarketplaceData::instance().setSLMStatus(MarketplaceStatusCodes::MARKET_PLACE_NOT_INITIALIZED);
     }
+    // Hide SLM related menu item
+    gMenuHolder->getChild<LLView>("MarketplaceListings")->setVisible(FALSE);
+
+    // Also disable the toolbar button for Marketplace Listings
+    LLCommand* command = LLCommandManager::instance().getCommand("marketplacelistings");
+    gToolBarView->enableCommand(command->id(), false);
+
+    // Launch an SLM test connection to get the merchant status
+    LLMarketplaceData::instance().initializeSLM(boost::bind(&set_merchant_SLM_menu));
 }
 
 void init_menus()
@@ -509,13 +506,13 @@ void init_menus()
     gViewerWindow->setMenuBackgroundColor(false, 
         LLGridManager::getInstance()->isInProductionGrid());
 
-	// Assume L$10 for now, the server will tell us the real cost at login
 	// *TODO:Also fix cost in llfolderview.cpp for Inventory menus
-	const std::string upload_cost("10");
-	gMenuHolder->childSetLabelArg("Upload Image", "[COST]", upload_cost);
-	gMenuHolder->childSetLabelArg("Upload Sound", "[COST]", upload_cost);
-	gMenuHolder->childSetLabelArg("Upload Animation", "[COST]", upload_cost);
-	gMenuHolder->childSetLabelArg("Bulk Upload", "[COST]", upload_cost);
+	const std::string texture_upload_cost_str = std::to_string(LLAgentBenefitsMgr::current().getTextureUploadCost());
+	const std::string sound_upload_cost_str = std::to_string(LLAgentBenefitsMgr::current().getSoundUploadCost());
+	const std::string animation_upload_cost_str = std::to_string(LLAgentBenefitsMgr::current().getAnimationUploadCost());
+	gMenuHolder->childSetLabelArg("Upload Image", "[COST]", texture_upload_cost_str);
+	gMenuHolder->childSetLabelArg("Upload Sound", "[COST]", sound_upload_cost_str);
+	gMenuHolder->childSetLabelArg("Upload Animation", "[COST]", animation_upload_cost_str);
 	
 	gAttachSubMenu = gMenuBarView->findChildMenuByName("Attach Object", TRUE);
 	gDetachSubMenu = gMenuBarView->findChildMenuByName("Detach Object", TRUE);
@@ -4066,10 +4063,8 @@ void near_sit_down_point(BOOL success, void *)
 	if (success)
 	{
 		gAgent.setFlying(FALSE);
+		gAgent.clearControlFlags(AGENT_CONTROL_STAND_UP); // might have been set by autopilot
 		gAgent.setControlFlags(AGENT_CONTROL_SIT_ON_GROUND);
-
-		// Might be first sit
-		//LLFirstUse::useSit();
 	}
 }
 
@@ -4754,6 +4749,12 @@ void handle_take()
 				category_id.setNull();
 			}
 
+			// check inbox
+			const LLUUID inbox_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX);
+			if (category_id == inbox_id || gInventory.isObjectDescendentOf(category_id, inbox_id))
+			{
+				category_id.setNull();
+			}
 		}
 	}
 	if(category_id.isNull())
@@ -6275,7 +6276,7 @@ void dump_inventory(void*)
 
 void handle_dump_followcam(void*)
 {
-	LLFollowCamMgr::dump();
+	LLFollowCamMgr::getInstance()->dump();
 }
 
 void handle_viewer_enable_message_log(void*)
@@ -6669,10 +6670,10 @@ private:
 
 	static void onNearAttachObject(BOOL success, void *user_data);
 	void confirmReplaceAttachment(S32 option, LLViewerJointAttachment* attachment_point);
-
-	struct CallbackData
+	class CallbackData : public LLSelectionCallbackData
 	{
-		CallbackData(LLViewerJointAttachment* point, bool replace) : mAttachmentPoint(point), mReplace(replace) {}
+	public:
+		CallbackData(LLViewerJointAttachment* point, bool replace) : LLSelectionCallbackData(), mAttachmentPoint(point), mReplace(replace) {}
 
 		LLViewerJointAttachment*	mAttachmentPoint;
 		bool						mReplace;
@@ -6713,8 +6714,8 @@ void LLObjectAttachToAvatar::onNearAttachObject(BOOL success, void *user_data)
 			// interpret 0 as "default location"
 			attachment_id = 0;
 		}
-		LLSelectMgr::getInstance()->sendAttach(attachment_id, cb_data->mReplace);
-	}		
+		LLSelectMgr::getInstance()->sendAttach(cb_data->getSelection(), attachment_id, cb_data->mReplace);
+	}
 	LLObjectAttachToAvatar::setObjectSelection(NULL);
 
 	delete cb_data;
@@ -6837,7 +6838,7 @@ class LLAttachmentDetachFromPoint : public view_listener_t
 				 iter != attachment->mAttachedObjects.end();
 				 iter++)
 			{
-				LLViewerObject *attached_object = (*iter);
+				LLViewerObject *attached_object = iter->get();
 				ids_to_remove.push_back(attached_object->getAttachmentItemID());
 			}
         }
@@ -6863,7 +6864,7 @@ static bool onEnableAttachmentLabel(LLUICtrl* ctrl, const LLSD& data)
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				const LLViewerObject* attached_object = (*attachment_iter);
+				const LLViewerObject* attached_object = attachment_iter->get();
 				if (attached_object)
 				{
 					LLViewerInventoryItem* itemp = gInventory.getItem(attached_object->getAttachmentItemID());
@@ -6976,7 +6977,7 @@ class LLAttachmentEnableDrop : public view_listener_t
 				{
 					// make sure item is in your inventory (it could be a delayed attach message being sent from the sim)
 					// so check to see if the item is in the inventory already
-					item = gInventory.getItem((*attachment_iter)->getAttachmentItemID());
+					item = gInventory.getItem(attachment_iter->get()->getAttachmentItemID());
 					if (!item)
 					{
 						// Item does not exist, make an observer to enable the pie menu 
@@ -7358,7 +7359,7 @@ void handle_dump_attachments(void*)
 			 attachment_iter != attachment->mAttachedObjects.end();
 			 ++attachment_iter)
 		{
-			LLViewerObject *attached_object = (*attachment_iter);
+			LLViewerObject *attached_object = attachment_iter->get();
 			BOOL visible = (attached_object != NULL &&
 							attached_object->mDrawable.notNull() && 
 							!attached_object->mDrawable->isRenderType(0));
@@ -8653,7 +8654,6 @@ class LLWorldPostProcess : public view_listener_t
 
 void handle_flush_name_caches()
 {
-	SUBSYSTEM_CLEANUP(LLAvatarNameCache);
 	if (gCacheName) gCacheName->clear();
 }
 
@@ -8663,18 +8663,31 @@ class LLUploadCostCalculator : public view_listener_t
 
 	bool handleEvent(const LLSD& userdata)
 	{
-		std::string menu_name = userdata.asString();
+		std::vector<std::string> fields;
+		std::string str = userdata.asString(); 
+		boost::split(fields, str, boost::is_any_of(","));
+		if (fields.size()<1)
+		{
+			return false;
+		}
+		std::string menu_name = fields[0];
+		std::string asset_type_str = "texture";
+		if (fields.size()>1)
+		{
+			asset_type_str = fields[1];
+		}
+		LL_DEBUGS("Benefits") << "userdata " << userdata << " menu_name " << menu_name << " asset_type_str " << asset_type_str << LL_ENDL;
+		calculateCost(asset_type_str);
 		gMenuHolder->childSetLabelArg(menu_name, "[COST]", mCostStr);
 
 		return true;
 	}
 
-	void calculateCost();
+	void calculateCost(const std::string& asset_type_str);
 
 public:
 	LLUploadCostCalculator()
 	{
-		calculateCost();
 	}
 };
 
@@ -8700,19 +8713,27 @@ class LLToggleUIHints : public view_listener_t
 	}
 };
 
-void LLUploadCostCalculator::calculateCost()
+void LLUploadCostCalculator::calculateCost(const std::string& asset_type_str)
 {
-	S32 upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
+	S32 upload_cost = -1;
 
-	// getPriceUpload() returns -1 if no data available yet.
-	if(upload_cost >= 0)
+	if (asset_type_str == "texture")
 	{
-		mCostStr = llformat("%d", upload_cost);
+		upload_cost = LLAgentBenefitsMgr::current().getTextureUploadCost();
 	}
-	else
+	else if (asset_type_str == "animation")
 	{
-		mCostStr = llformat("%d", gSavedSettings.getU32("DefaultUploadCost"));
+		upload_cost = LLAgentBenefitsMgr::current().getAnimationUploadCost();
 	}
+	else if (asset_type_str == "sound")
+	{
+		upload_cost = LLAgentBenefitsMgr::current().getSoundUploadCost();
+	}
+	if (upload_cost < 0)
+	{
+		LL_WARNS() << "Unable to find upload cost for asset_type_str " << asset_type_str << LL_ENDL;
+	}
+	mCostStr = std::to_string(upload_cost);
 }
 
 void show_navbar_context_menu(LLView* ctrl, S32 x, S32 y)
@@ -9207,7 +9228,6 @@ void initialize_menus()
 	enable.add("Object.EnableSit", boost::bind(&enable_object_sit, _1));
 
 	view_listener_t::addMenu(new LLObjectEnableReturn(), "Object.EnableReturn");
-	enable.add("Object.EnableDuplicate", boost::bind(&LLSelectMgr::canDuplicate, LLSelectMgr::getInstance()));
 	view_listener_t::addMenu(new LLObjectEnableReportAbuse(), "Object.EnableReportAbuse");
 
 	enable.add("Avatar.EnableMute", boost::bind(&enable_object_mute));

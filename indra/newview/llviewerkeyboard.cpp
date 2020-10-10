@@ -64,7 +64,12 @@ LLViewerKeyboard gViewerKeyboard;
 
 void agent_jump( EKeystate s )
 {
-	if( KEYSTATE_UP == s  ) return;
+	static BOOL first_fly_attempt(TRUE);
+	if (KEYSTATE_UP == s)
+	{
+		first_fly_attempt = TRUE;
+		return;
+	}
 	F32 time = gKeyboard->getCurKeyElapsedTime();
 	S32 frame_count = ll_round(gKeyboard->getCurKeyElapsedFrameCount());
 
@@ -77,7 +82,8 @@ void agent_jump( EKeystate s )
 	}
 	else
 	{
-		gAgent.setFlying(TRUE);
+		gAgent.setFlying(TRUE, first_fly_attempt);
+		first_fly_attempt = FALSE;
 		gAgent.moveUp(1);
 	}
 }
@@ -980,6 +986,11 @@ EKeyboardMode LLViewerKeyboard::getMode()
 // Called from scanKeyboard.
 void LLViewerKeyboard::scanKey(KEY key, BOOL key_down, BOOL key_up, BOOL key_level)
 {
+	if (LLApp::isExiting())
+	{
+		return;
+	}
+
 	S32 mode = getMode();
 	// Consider keyboard scanning as NOT mouse event. JC
 	MASK mask = gKeyboard->currentMask(FALSE);

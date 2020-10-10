@@ -63,7 +63,8 @@ if (WINDOWS)
   # http://www.cmake.org/pipermail/cmake/2009-September/032143.html
   string(REPLACE "/Zm1000" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  # Moved to variables for the convenience of people who are not Kitty
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO 
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zo"
@@ -154,6 +155,8 @@ endif (LINUX)
 
 
 if (DARWIN)
+  # Warnings should be fatal -- thanks, Nicky Perian, for spotting reversed default
+  set(CLANG_DISABLE_FATAL_WARNINGS OFF)
   set(CMAKE_CXX_LINK_FLAGS "-Wl,-headerpad_max_install_names,-search_paths_first")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
   set(DARWIN_extra_cstar_flags "-Wno-unused-local-typedef -Wno-deprecated-declarations")
