@@ -449,8 +449,8 @@ bool LLConversationLog::moveLog(const std::string &originDirectory, const std::s
 void LLConversationLog::initLoggingState()
 {
 // [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
-    if (gSavedPerAccountSettings.controlExists("LogConversations"))
-    {
+	if (gSavedPerAccountSettings.controlExists("LogConversations"))
+	{
 		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("LogConversations").get();
 		keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
 		if (keep_log_ctrlp->getValue().asBoolean())
