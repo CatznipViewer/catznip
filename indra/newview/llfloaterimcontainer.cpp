@@ -1673,7 +1673,6 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uu
 		return true;
 	}
 // [/SL:KB]
-
 	return LLFloaterIMContainerBase::enableContextMenuItem(item, uuids);
 }
 // [/SL:KB]

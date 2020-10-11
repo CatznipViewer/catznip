@@ -3058,7 +3058,7 @@ void LLIMMgr::addMessage(
 
 			//Play sound for new conversations
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-			if (!gAgent.isDoNotDisturb())
+			if (!skip_message && !gAgent.isDoNotDisturb())
 			{
 				LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
 
@@ -3083,7 +3083,7 @@ void LLIMMgr::addMessage(
 					make_ui_sound(LLViewerChat::getUISoundFromChatEvent(eEvent));
 		}
 // [/SL:KB]
-//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
+//			if (!skip_message & !gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
 //			{
 //				make_ui_sound("UISndNewIncomingIMSession");
 //			}
