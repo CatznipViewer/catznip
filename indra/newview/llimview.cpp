@@ -4171,7 +4171,7 @@ public:
 			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends/groups can IM me" or "Only friends can conference me" is checked
 			if ( (!is_group) && 
 				 ( (is_muted) ||
-			       ( (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
+			       ( (gSavedPerAccountSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
 			{
 				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
 				if (!strUrl.empty())
