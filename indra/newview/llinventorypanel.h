@@ -387,6 +387,7 @@ private:
 /* Exchanges filter's flexibility for speed of generation and           */
 /* improved performance                                                 */
 /************************************************************************/
+
 class LLAssetFilteredInventoryPanel : public LLInventoryPanel
 {
 public:
@@ -406,10 +407,10 @@ public:
     ~LLAssetFilteredInventoryPanel() {}
 
     /*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
-                                       EDragAndDropType cargo_type,
-                                       void* cargo_data,
-                                       EAcceptance* accept,
-                                       std::string& tooltip_msg) override;
+        EDragAndDropType cargo_type,
+        void* cargo_data,
+        EAcceptance* accept,
+        std::string& tooltip_msg) override;
 
 protected:
     /*virtual*/ LLFolderViewItem*	buildNewViews(const LLUUID& id) override;

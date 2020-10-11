@@ -445,7 +445,8 @@ void LLSpinCtrl::setAllowEdit(BOOL allow_edit)
 
 void LLSpinCtrl::onTabInto()
 {
-	mEditor->onTabInto(); 
+	mEditor->onTabInto();
+    LLF32UICtrl::onTabInto();
 }
 
 

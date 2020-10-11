@@ -2142,6 +2142,10 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
+//	else if ("close all" == action)
+//	{
+//		LLIMWellWindow::getInstance()->closeAll();
+//	}
 // [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	else if ("block_object" == action)
 	{

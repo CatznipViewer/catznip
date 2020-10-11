@@ -620,6 +620,7 @@ LLIMModel::LLIMModel()
 {
 	addNewMsgCallback(boost::bind(&LLFloaterIMSession::newIMCallback, _1));
 	addNewMsgCallback(boost::bind(&on_new_message, _1));
+	LLCallDialogManager::instance();
 }
 
 LLIMModel::LLIMSession::LLIMSession(const LLUUID& session_id, const std::string& name, const EInstantMessage& type, const LLUUID& other_participant_id, const uuid_vec_t& ids, bool voice, bool has_offline_msg)
@@ -3036,7 +3037,7 @@ void LLIMMgr::addMessage(
 	}
 //	bool skip_message = false;
 //	bool from_linden = LLMuteList::getInstance()->isLinden(from);
-//	if (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") && !from_linden)
+//    if (gSavedPerAccountSettings.getBOOL("VoiceCallsFriendsOnly") && !from_linden)
 //	{
 //		// Evaluate if we need to skip this message when that setting is true (default is false)
 //		skip_message = (LLAvatarTracker::instance().getBuddyInfo(other_participant_id) == NULL);	// Skip non friends...
@@ -3121,7 +3122,7 @@ void LLIMMgr::addMessage(
 					make_ui_sound(LLViewerChat::getUISoundFromChatEvent(eEvent));
 		}
 // [/SL:KB]
-//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
+//			if (!skip_message & !gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
 //			{
 //				make_ui_sound("UISndNewIncomingIMSession");
 //			}
@@ -3546,7 +3547,7 @@ void LLIMMgr::inviteToSession(
 	if (voice_invite)
 	{
 		bool isRejectGroupCall = (gSavedSettings.getBOOL("VoiceCallsRejectGroup") && (notify_box_type == "VoiceInviteGroup"));
-		bool isRejectNonFriendCall = (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == NULL));
+        bool isRejectNonFriendCall = (gSavedPerAccountSettings.getBOOL("VoiceCallsFriendsOnly") && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == NULL));
 		if	(isRejectGroupCall || isRejectNonFriendCall || gAgent.isDoNotDisturb())
 		{
 			if (gAgent.isDoNotDisturb() && !isRejectGroupCall && !isRejectNonFriendCall)
@@ -4209,7 +4210,7 @@ public:
 			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends/groups can IM me" or "Only friends can conference me" is checked
 			if ( (!is_group) && 
 				 ( (is_muted) ||
-			       ( (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
+			       ( (gSavedPerAccountSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
 			{
 				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
 				if (!strUrl.empty())

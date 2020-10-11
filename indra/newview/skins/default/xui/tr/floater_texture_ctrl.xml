@@ -12,11 +12,7 @@
 	<radio_group name="mode_selection">
 		<radio_item label="Envanter" name="inventory" value="0"/>
 		<radio_item label="Yerel" name="local" value="1"/>
-		<radio_item label="Kurut" name="bake" value="2"/>
 	</radio_group>
-	<text name="unknown">
-		Büyüklük: [DIMENSIONS]
-	</text>
 	<button label="Varsayılan" label_selected="Varsayılan" name="Default"/>
 	<button label="Boş" label_selected="Boş" name="Blank"/>
 	<button label="Hiçbiri" label_selected="Hiçbiri" name="None"/>

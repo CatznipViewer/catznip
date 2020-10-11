@@ -13,9 +13,6 @@
 		<radio_item label="Szafa" name="inventory" />
 		<radio_item label="Lokalna" name="local" />
 	</radio_group>
-	<text name="unknown">
-		Rozm.: [DIMENSIONS]
-	</text>
 	<button label="Domyślna" label_selected="Domyślna" name="Default" />
 	<button label="Pusta" label_selected="Pusta" name="Blank" />
 	<button label="Przezrocz." label_selected="Przezrocz." name="None" />

@@ -53,51 +53,13 @@
      follows="left|top"
      height="14"
      layout="topleft"
-     left="5"
-     name="unknown"
-     top_pad="75">
+     left="6"
+     name="size_lbl"
+     top_pad="75"
+     width="163">
         Size: [DIMENSIONS]
     </text>
 
-	<!-- mode selector -->
-	   <radio_group
-     control_name="mode_selection"
-     height="20"
-     layout="topleft"
-     left="0"
-     top_pad="4"
-     name="mode_selection"
-     follows="left|top">
-        <radio_item
-         label="Inventory"
-         name="inventory"
-         top_delta="20" 
-         layout="topleft"
-         height="16" 
-         left="0" 
-         value="0"
-         width="70" />
-        <radio_item
-         label="Local"
-         left_pad="0"
-         layout="topleft"
-         top_delta="0" 
-         height="16" 
-         name="local"
-         value="1"
-         width="50" />
-       <radio_item
-         label="Bake"
-         left_pad="0"
-         layout="topleft"
-         top_delta="0"
-         height="16"
-         name="bake"
-         value="2"
-         width="50" />
-    </radio_group>
-	<!-- -->
-	
 <!--  middle: inventory mode -->
 
     <button
@@ -138,8 +100,8 @@
      image_selected="eye_button_active.tga"
      image_unselected="eye_button_inactive.tga"
      layout="topleft"
-     left_delta="-80"
-     top_delta="-10"
+     left="18"
+     top_delta="-23"
      name="Pipette"
      width="28" />
    <text
@@ -153,6 +115,47 @@
      word_wrap="true"
      visible="false"
      width="87" />
+
+     <!-- mode selector -->
+	   <radio_group
+      control_name="mode_selection"
+      height="19"
+      layout="topleft"
+      left="175"
+      top="20"
+      name="mode_selection"
+      follows="left|top"
+      right="-2">
+        <radio_item
+         label="Inventory"
+         name="inventory"
+         top_delta="20" 
+         layout="topleft"
+         height="16" 
+         left="0" 
+         value="0"
+         width="80" />
+        <radio_item
+         label="Local"
+         left_pad="0"
+         layout="topleft"
+         top_delta="0" 
+         height="16" 
+         name="local"
+         value="1"
+         width="70" />
+       <radio_item
+         label="Bake"
+         left_pad="0"
+         layout="topleft"
+         top_delta="0"
+         height="16"
+         name="bake"
+         value="2"
+         width="80" />
+    </radio_group>
+    <!-- -->
+
     <filter_editor
      follows="left|top|right"
      height="23"
@@ -160,7 +163,7 @@
      layout="topleft"
      left="175"
      name="inventory search editor"
-     top="20"
+     top_pad="0"
      width="231" />
     <asset_filtered_inv_panel
      allow_multi_select="false"
@@ -168,7 +171,7 @@
      bg_alpha_color="DkGray2"
      border="false"
      follows="all"
-     height="247"
+     height="220"
      layout="topleft"
      left_delta="0"
      name="inventory panel"
@@ -224,7 +227,7 @@
     <scroll_list
      name="l_name_list"
      left="170"
-     top="22"
+     top="38"
      width="235"
      height="260"
      follows="left|top|right|bottom"
@@ -240,7 +243,7 @@
 <!-- middle: bake mode -->
   <combo_box
          left="180"
-         top="30"
+         top="41"
 			   height="19"
 			   top_delta="15"
 			   layout="topleft"
@@ -318,8 +321,8 @@ layout="topleft"
      label="OK"
      label_selected="OK"
      layout="topleft"
-     left="95"
-     top="-30"
+     left="176"
+     top="-27"
      name="Select"
      width="100" />
     <button
@@ -341,5 +344,5 @@ layout="topleft"
      left="6"
      name="apply_immediate_check"
      top_delta="0"
-     width="120" />
+     width="150" />
 </floater>

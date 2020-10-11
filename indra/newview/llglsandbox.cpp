@@ -869,10 +869,11 @@ void LLViewerObjectList::renderObjectBeacons()
 		
 			gGL.begin(LLRender::LINES);
 			gGL.color4fv(color.mV);
+//			draw_cross_lines(thisline, 2.0f, 2.0f, 50.f);
 // [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
 			draw_cross_lines(thisline, 2.0f, 2.0f, debug_beacon.mLineHeight);
 // [/SL:KB]
-//			draw_cross_lines(thisline, 2.0f, 2.0f, 50.f);
+
 			draw_line_cube(0.10f, thisline);
 			
 			gGL.end();
@@ -949,7 +950,10 @@ void LLSky::renderSunMoonBeacons(const LLVector3& pos_agent, const LLVector3& di
 	{
 		pos_end.mV[i] = pos_agent.mV[i] + (50 * direction.mV[i]);
 	}
-	glLineWidth(LLPipeline::DebugBeaconLineWidth);
+// [SL:KB] - Patch: Build-Beacons | Checked: Catznip-6.4
+	glLineWidth(LLPipeline::DebugBeaconLineLengthZ);
+// [/SL:KB
+//	glLineWidth(LLPipeline::DebugBeaconLineWidth);
 	gGL.begin(LLRender::LINES);
 	color.mV[3] *= 0.5f;
 	gGL.color4fv(color.mV);

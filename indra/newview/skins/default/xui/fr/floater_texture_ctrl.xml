@@ -12,11 +12,7 @@
 	<radio_group name="mode_selection">
 		<radio_item label="Inventaire" name="inventory" value="0"/>
 		<radio_item label="Local" name="local" value="1"/>
-		<radio_item label="Figer" name="bake" value="2"/>
 	</radio_group>
-	<text name="unknown">
-		Taille : [DIMENSIONS]
-	</text>
 	<button label="Défaut" label_selected="Défaut" name="Default" width="60"/>
 	<button label="Vierge" label_selected="Vierge" name="Blank" width="60"/>
 	<button label="Aucune" label_selected="Aucune" left="68" name="None" width="60"/>

@@ -966,6 +966,21 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 		return !outfit_locked && outfit_dirty;
 	}
 
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
+	uuid_vec_t selected_uuids;
+	getSelectedItemsUUIDs(selected_uuids);
+
+	if (command_name == "touch_attach")
+	{
+		return (1 == selected_uuids.size()) && (enable_attachment_touch(selected_uuids.front()));
+	}
+
+	if (command_name == "edit_item")
+	{
+		return (1 == selected_uuids.size()) && (enable_item_edit(selected_uuids.front()));
+	}
+// [/SL:KB]
+
 	if (command_name == "take_off")
 	{
 		if (mWearablesTab->isExpanded())
@@ -981,21 +996,6 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 			}
 		}
 	}
-
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
-	uuid_vec_t selected_uuids;
-	getSelectedItemsUUIDs(selected_uuids);
-
-	if (command_name == "touch_attach")
-	{
-		return (1 == selected_uuids.size()) && (enable_attachment_touch(selected_uuids.front()));
-	}
-
-	if (command_name == "edit_item")
-	{
-		return (1 == selected_uuids.size()) && (enable_item_edit(selected_uuids.front()));
-	}
-// [/SL:KB]
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-15 (Catznip-3.3)
 	if (command_name == "take_off_folder")

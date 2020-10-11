@@ -32,25 +32,16 @@
 class LLLandmarksPanel;
 class LLFolderView;
 
-//class LLPlacesInventoryPanel : public LLInventoryPanel
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
 class LLPlacesInventoryPanel : public LLAssetFilteredInventoryPanel
-// [/SL:KB]
 {
 public:
 	struct Params 
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
 		:	public LLInitParam::Block<Params, LLAssetFilteredInventoryPanel::Params>
-// [/SL:KB]
-//        :    public LLInitParam::Block<Params, LLInventoryPanel::Params>
 	{
 		Params()
-//        {}
-// [SL:KB] - Patch: Viewer-OptimizationAssetFilteredInventoryPanel | Checked: Catznip-6.4
 		{
            filter_asset_type = "landmark";
        }
-// [/SL:KB]
 	};
 
 	LLPlacesInventoryPanel(const Params& p);

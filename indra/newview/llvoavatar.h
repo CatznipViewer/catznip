@@ -291,8 +291,9 @@ public:
 	static void		invalidateNameTag(const LLUUID& agent_id);
 	// force all name tags to rebuild, useful when display names turned on/off
 	static void		invalidateNameTags();
-	void			addNameTagLine(const std::string& line, const LLColor4& color, S32 style, const LLFontGL* font);
+	void			addNameTagLine(const std::string& line, const LLColor4& color, S32 style, const LLFontGL* font, const bool use_ellipses = false);
 	void 			idleUpdateRenderComplexity();
+	void 			idleUpdateDebugInfo();
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
     void 			accountRenderComplexityForObject(LLViewerObject *attached_object,
                                                      const F32 max_attachment_complexity,

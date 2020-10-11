@@ -4630,13 +4630,8 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 //                    items.push_back(std::string("New Settings"));
 //                    items.push_back(std::string("New Clothes"));
 //                    items.push_back(std::string("New Body Parts"));
+//                    items.push_back(std::string("New Settings"));
                     items.push_back(std::string("upload_def"));
-
-//                    if (!LLEnvironment::instance().isInventoryEnabled())
-//                    {
-//                        disabled_items.push_back("New Settings");
-//                    }
-
                 }
 			}
 			getClipboardEntries(false, items, disabled_items, flags);
