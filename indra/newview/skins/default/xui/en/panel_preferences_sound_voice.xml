@@ -181,7 +181,7 @@
    follows="left|top"
    height="23"
    is_toggle="true"
-   label="Input/Output devices"
+   label="Voice Input/Output devices"
    layout="topleft"
    left="70"
    top_pad="10"
