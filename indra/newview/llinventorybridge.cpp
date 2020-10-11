@@ -4630,6 +4630,7 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 //                    items.push_back(std::string("New Settings"));
 //                    items.push_back(std::string("New Clothes"));
 //                    items.push_back(std::string("New Body Parts"));
+//                    items.push_back(std::string("New Settings"));
                     items.push_back(std::string("upload_def"));
                 }
 			}
