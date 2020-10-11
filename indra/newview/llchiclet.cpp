@@ -1990,6 +1990,10 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
+	else if ("close all" == action)
+	{
+		LLIMWellWindow::getInstance()->closeAll();
+	}
 }
 
 void LLScriptChiclet::createPopupMenu()
