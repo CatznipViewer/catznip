@@ -394,13 +394,13 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
         case LLInventoryType::IT_NONE:
             // If it has no type, pass it, unless it's a link.
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
-		{
-			const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
-			if ( (bridge) && (bridge->isLink()) )
 			{
-				return FALSE;
+				const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
+				if ( (bridge) && (bridge->isLink()) )
+				{
+					return FALSE;
+				}
 			}
-		}
 // [/SL:KB]
 //            if (object && object->getIsLinkType())
 //            {
