@@ -365,7 +365,10 @@ BOOL LLFloaterTexturePicker::postBuild()
 
 	mInventoryPanel = getChild<LLInventoryPanel>("inventory panel");
 
-	mModeSelector = getChild<LLComboBox>("mode_selection");
+//	mModeSelector = getChild<LLComboBox>("mode_selection");
+// [SL:KB] - Patch: Build-TextureRadio | Checked: Catznip-6.5
+    mModeSelector = getChild<LLRadioGroup>("mode_selection");
+// [/SL:KB]
 	mModeSelector->setCommitCallback(onModeSelect, this);
 	mModeSelector->selectByValue(0);
 
@@ -1148,7 +1151,10 @@ void LLFloaterTexturePicker::onFilterEdit(const std::string& search_string )
 
 void LLFloaterTexturePicker::setLocalTextureEnabled(BOOL enabled)
 {
-    mModeSelector->setEnabledByValue(1, enabled);
+// [SL:KB] - Patch: Build-TextureRadio | Checked: Catznip-6.5
+	mModeSelector->setIndexEnabled(1, enabled);
+// [/SL:KB]
+//    mModeSelector->setEnabledByValue(1, enabled);
 }
 
 void LLFloaterTexturePicker::setBakeTextureEnabled(BOOL enabled)
@@ -1156,7 +1162,10 @@ void LLFloaterTexturePicker::setBakeTextureEnabled(BOOL enabled)
 	BOOL changed = (enabled != mBakeTextureEnabled);
 
 	mBakeTextureEnabled = enabled;
-	mModeSelector->setEnabledByValue(2, enabled);
+// [SL:KB] - Patch: Build-TextureRadio | Checked: Catznip-6.5
+    mModeSelector->setIndexEnabled(2, enabled);
+// [/SL:KB]
+//	mModeSelector->setEnabledByValue(2, enabled);
 
 	if (!mBakeTextureEnabled && (mModeSelector->getValue().asInteger() == 2))
 	{

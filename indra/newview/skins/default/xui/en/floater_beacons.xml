@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- height="305"
+ height="310"
  layout="topleft"
  name="beacons"
  help_topic="beacons"
@@ -12,7 +12,7 @@
  width="240">
     <panel
      follows="left|top|right|bottom"
-     height="280"
+     height="305"
      layout="topleft"
      left="10"
      name="beacons_panel"
