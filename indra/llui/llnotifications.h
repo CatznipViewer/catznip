@@ -960,6 +960,7 @@ public:
 	
 private:
 	/*virtual*/ void initSingleton();
+	/*virtual*/ void cleanupSingleton();
 	
 	void loadPersistentNotifications();
 
@@ -1072,6 +1073,7 @@ public:
 	LLPersistentNotificationChannel() 
 		:	LLNotificationChannel("Persistent", "Visible", &notificationFilter)
 	{}
+	virtual ~LLPersistentNotificationChannel() {}
 
 	typedef std::vector<LLNotificationPtr> history_list_t;
 	history_list_t::iterator beginHistory() { sortHistory(); return mHistory.begin(); }

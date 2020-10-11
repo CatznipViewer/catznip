@@ -492,7 +492,7 @@ void LLFloaterIMContainerView::idleUpdate()
             while (current_participant_model != end_participant_model)
             {
                 LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
-                participant_model->setModeratorOptionsVisible(is_moderator && participant_model->getUUID() != gAgentID);
+                participant_model->setModeratorOptionsVisible(is_moderator);
                 participant_model->setGroupBanVisible(can_ban && participant_model->getUUID() != gAgentID);
 
                 current_participant_model++;
@@ -1515,12 +1515,21 @@ bool LLFloaterIMContainerBase::enableContextMenuItem(const std::string& item, uu
     {
 		return is_single_select;
 	}
-	
-	// Beyond that point, if only the user agent is selected, everything is disabled
-	if (is_single_select && (single_id == gAgentID))
-	{
-		return false;
-	}
+
+//    bool is_moderator_option = ("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item);
+//
+//    // Beyond that point, if only the user agent is selected, everything is disabled
+//    if (is_single_select && (single_id == gAgentID))
+//    {
+//        if (is_moderator_option)
+//        {
+//            return enableModerateContextMenuItem(item, true);
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
 
 	// If the user agent is selected with others, everything is disabled
 	for (uuid_vec_t::const_iterator id = uuids.begin(); id != uuids.end(); ++id)
@@ -1602,15 +1611,29 @@ bool LLFloaterIMContainerBase::enableContextMenuItem(const std::string& item, uu
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
 bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uuid_vec_t& uuids)
 {
-    if ("can_ban_member" == item)
+	bool is_moderator_option = ("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item);
+
+    // If only the user agent is selected, everything is disabled
+    if ( (uuids.size() == 1) && (uuids.front() == gAgentID) )
+    {
+        if (is_moderator_option)
+        {
+            return enableModerateContextMenuItem(item, true);
+        }
+        else
+        {
+            return false;
+        }
+    }
+	else if ("can_ban_member" == item)
     {
    		return canBanSelectedMember(uuids.front());
     }
-	else if (("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item))
-	{
-		// *TODO : get that out of here...
-		return enableModerateContextMenuItem(item);
-	}
+    else if (is_moderator_option)
+    {
+        // *TODO : get that out of here...
+        return enableModerateContextMenuItem(item);
+    }
 // [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.6
 	else if ("can_eject_member" == item)
 	{
@@ -2033,7 +2056,7 @@ LLConversationViewParticipant* LLFloaterIMContainerView::createConversationViewP
 	return LLUICtrlFactory::create<LLConversationViewParticipant>(params);
 }
 
-bool LLFloaterIMContainerView::enableModerateContextMenuItem(const std::string& userdata)
+bool LLFloaterIMContainerView::enableModerateContextMenuItem(const std::string& userdata, bool is_self)
 {
 	// only group moderators can perform actions related to this "enable callback"
 	if (!isGroupModerator())
@@ -2053,7 +2076,7 @@ bool LLFloaterIMContainerView::enableModerateContextMenuItem(const std::string& 
 	{
 		return voice_channel;
 	}
-	else if ("can_mute" == userdata)
+	else if (("can_mute" == userdata) && !is_self)
 	{
 		return voice_channel && !isMuted(getCurSelectedViewModelItem()->getUUID());
 	}
@@ -2063,7 +2086,7 @@ bool LLFloaterIMContainerView::enableModerateContextMenuItem(const std::string& 
 	}
 
 	// The last invoke is used to check whether the "can_allow_text_chat" will enabled
-	return LLVoiceClient::getInstance()->isParticipantAvatar(getCurSelectedViewModelItem()->getUUID());
+	return LLVoiceClient::getInstance()->isParticipantAvatar(getCurSelectedViewModelItem()->getUUID()) && !is_self;
 }
 
 bool LLFloaterIMContainerView::isGroupModerator()
