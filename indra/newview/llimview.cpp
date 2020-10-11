@@ -3058,7 +3058,7 @@ void LLIMMgr::addMessage(
 
 			//Play sound for new conversations
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-			if (!skip_message && !gAgent.isDoNotDisturb())
+			if (!gAgent.isDoNotDisturb())
 			{
 				LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
 
