@@ -2185,7 +2185,7 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
 #ifndef CATZNIP_RELEASE
 			// The LL exception handler just looks like it's blocking the actual crash point so revert to the original code on non-release builds
             raw = raw->duplicate();
-#elif
+#else
 // [/SL:KB]
             try
             {
