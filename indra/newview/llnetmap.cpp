@@ -1093,7 +1093,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 					for (; curX <= endX; curX++)
 					{
 						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).asRGBA()
-							: LLColor4U(255, 128, 128, 192).asRGBA();
+						                                                  : LLColor4U(255, 128, 128, 192).asRGBA();
 					}
 				}
 			}
