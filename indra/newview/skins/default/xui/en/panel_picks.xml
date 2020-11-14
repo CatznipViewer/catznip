@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-
  follows="all"
  height="570"
  label="Picks"
@@ -18,13 +17,13 @@
  <text
   type="string"
   follows="all"
-  height="535"
+  height="20"
   layout="topleft"
   left="6"
   name="picks_panel_text"
   wrap="true"
   top="10"
-  width="316"/>
+  right="-6"/>
  <accordion
   fit_parent="true" 
   follows="all"
@@ -34,7 +33,7 @@
   name="accordion"
   top="0"
   single_expansion="true"
-  width="316">
+  right="-1">
     <accordion_tab
      layout="topleft"
      height="235"
@@ -90,7 +89,7 @@
 		  left="10"
 		  orientation="horizontal"
 		  top_pad="0"
-		  width="316">
+		  right="-10">
 		  
 		  <layout_panel
 			  follows="bottom|left"
