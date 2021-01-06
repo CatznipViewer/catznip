@@ -235,7 +235,8 @@ LLVOVolume::LLVOVolume(const LLUUID &id, const LLPCode pcode, LLViewerRegion *re
 	mLastFetchedMediaVersion = -1;
 	memset(&mIndexInTex, 0, sizeof(S32) * LLRender::NUM_VOLUME_TEXTURE_CHANNELS);
 	mMDCImplCount = 0;
-    mLastRiggingInfoLOD = -1;
+	mLastRiggingInfoLOD = -1;
+	mResetDebugText = false;
 }
 
 LLVOVolume::~LLVOVolume()
@@ -261,7 +262,10 @@ void LLVOVolume::markDead()
 {
 	if (!mDead)
 	{
-		LLSculptIDSize::instance().rem(getVolume()->getParams().getSculptID());
+        if (getVolume())
+        {
+            LLSculptIDSize::instance().rem(getVolume()->getParams().getSculptID());
+        }
 
 		if(getMDCImplCount() > 0)
 		{
@@ -1388,6 +1392,15 @@ BOOL LLVOVolume::calcLOD()
         {
             std::string debug_object_text = get_debug_object_lod_text(this);
             setDebugText(debug_object_text);
+            mResetDebugText = true;
+        }
+    }
+    else
+    {
+        if (mResetDebugText)
+        {
+            restoreHudText();
+            mResetDebugText = false;
         }
     }
 
@@ -4582,8 +4595,9 @@ BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a&
 					{
 						U8 mode = mat->getDiffuseAlphaMode();
 
-						if (mode == LLMaterial::DIFFUSE_ALPHA_MODE_EMISSIVE ||
-							mode == LLMaterial::DIFFUSE_ALPHA_MODE_NONE)
+						if (mode == LLMaterial::DIFFUSE_ALPHA_MODE_EMISSIVE
+							|| mode == LLMaterial::DIFFUSE_ALPHA_MODE_NONE
+							|| (mode == LLMaterial::DIFFUSE_ALPHA_MODE_MASK && mat->getAlphaMaskCutoff() == 0))
 						{
 							ignore_alpha = true;
 						}
@@ -4889,6 +4903,14 @@ U32 LLVOVolume::getPartitionType() const
 	{
 		return LLViewerRegion::PARTITION_HUD;
 	}
+	if (isAnimatedObject() && getControlAvatar())
+	{
+		return LLViewerRegion::PARTITION_CONTROL_AV;
+	}
+	if (isAttachment())
+	{
+		return LLViewerRegion::PARTITION_AVATAR;
+	}
 
 	return LLViewerRegion::PARTITION_VOLUME;
 }
@@ -4917,6 +4939,20 @@ LLVolumeGeometryManager()
 	mBufferUsage = GL_DYNAMIC_DRAW_ARB;
 
 	mSlopRatio = 0.25f;
+}
+
+LLAvatarBridge::LLAvatarBridge(LLDrawable* drawablep, LLViewerRegion* regionp)
+	: LLVolumeBridge(drawablep, regionp)
+{
+	mDrawableType = LLPipeline::RENDER_TYPE_AVATAR;
+	mPartitionType = LLViewerRegion::PARTITION_AVATAR;
+}
+
+LLControlAVBridge::LLControlAVBridge(LLDrawable* drawablep, LLViewerRegion* regionp)
+	: LLVolumeBridge(drawablep, regionp)
+{
+	mDrawableType = LLPipeline::RENDER_TYPE_CONTROL_AV;
+	mPartitionType = LLViewerRegion::PARTITION_CONTROL_AV;
 }
 
 bool can_batch_texture(LLFace* facep)
@@ -5097,7 +5133,7 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 	}
 
 
-	if (index < 255 && idx >= 0)
+	if (index < FACE_DO_NOT_BATCH_TEXTURES && idx >= 0)
 	{
 		if (mat || draw_vec[idx]->mMaterial)
 		{ //can't batch textures when materials are present (yet)
@@ -5143,7 +5179,7 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 		draw_vec[idx]->mEnd += facep->getGeomCount();
 		draw_vec[idx]->mVSize = llmax(draw_vec[idx]->mVSize, facep->getVirtualSize());
 
-		if (index < 255 && index >= draw_vec[idx]->mTextureList.size())
+		if (index < FACE_DO_NOT_BATCH_TEXTURES && index >= draw_vec[idx]->mTextureList.size())
 		{
 			draw_vec[idx]->mTextureList.resize(index+1);
 			draw_vec[idx]->mTextureList[index] = tex;
@@ -5230,7 +5266,7 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 			draw_info->mDrawMode = LLRender::TRIANGLE_STRIP;
 		}
 
-		if (index < 255)
+		if (index < FACE_DO_NOT_BATCH_TEXTURES)
 		{ //initialize texture list for texture batching
 			draw_info->mTextureList.resize(index+1);
 			draw_info->mTextureList[index] = tex;
@@ -5263,7 +5299,8 @@ static LLDrawPoolAvatar* get_avatar_drawpool(LLViewerObject* vobj)
 				LLDrawPool* drawpool = face->getPool();
 				if (drawpool)
 				{
-					if (drawpool->getType() == LLDrawPool::POOL_AVATAR)
+					if (drawpool->getType() == LLDrawPool::POOL_AVATAR
+						|| drawpool->getType() == LLDrawPool::POOL_CONTROL_AV)
 					{
 						return (LLDrawPoolAvatar*) drawpool;
 					}
@@ -5542,7 +5579,8 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
 
 						//remove face from old pool if it exists
 						LLDrawPool* old_pool = facep->getPool();
-						if (old_pool && old_pool->getType() == LLDrawPool::POOL_AVATAR)
+						if (old_pool
+							&& (old_pool->getType() == LLDrawPool::POOL_AVATAR || old_pool->getType() == LLDrawPool::POOL_CONTROL_AV))
 						{
 							((LLDrawPoolAvatar*) old_pool)->removeRiggedFace(facep);
 						}
@@ -6362,7 +6400,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
 
 					//face has no texture index
 					facep->mDrawInfo = NULL;
-					facep->setTextureIndex(255);
+					facep->setTextureIndex(FACE_DO_NOT_BATCH_TEXTURES);
 
 					if (geom_count + facep->getGeomCount() > max_vertices)
 					{ //cut batches on geom count too big
@@ -6426,7 +6464,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
 			facep->setGeomIndex(index_offset);
 			facep->setVertexBuffer(buffer);	
 			
-			if (batch_textures && facep->getTextureIndex() == 255)
+			if (batch_textures && facep->getTextureIndex() == FACE_DO_NOT_BATCH_TEXTURES)
 			{
 				LL_ERRS() << "Invalid texture index." << LL_ENDL;
 			}
