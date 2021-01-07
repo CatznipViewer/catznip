@@ -403,6 +403,7 @@ set(viewer_SOURCE_FILES
     llmenuoptionpathfindingrebakenavmesh.cpp
     llmeshrepository.cpp
     llmimetypes.cpp
+    llmodelpreview.cpp
     llmorphview.cpp
     llmoveview.cpp
     llmutelist.cpp
@@ -1039,6 +1040,7 @@ set(viewer_HEADER_FILES
     llmenuoptionpathfindingrebakenavmesh.h
     llmeshrepository.h
     llmimetypes.h
+    llmodelpreview.h
     llmorphview.h
     llmoveview.h
     llmutelist.h
@@ -1628,6 +1630,10 @@ if (WINDOWS)
         # causes those systems to run in a Windows 8 compatibility mode, which works.
         LIST(APPEND viewer_SOURCE_FILES windows.manifest)
     endif (ADDRESS_SIZE EQUAL 64)
+
+    if (OPENAL)
+      LIST(APPEND viewer_LIBRARIES ${OPENAL_LIBRARIES})
+    endif (OPENAL)
 endif (WINDOWS)
 
 # Add the xui files. This is handy for searching for xui elements
@@ -1729,6 +1735,12 @@ if (FMODSTUDIO)
 endif (FMODSTUDIO)
 
 set_source_files_properties(llstartup.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
+
+if (HAVOK OR HAVOK_TPV)
+  set(LLSTARTUP_COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS} -DLL_HAVOK")
+endif (HAVOK OR HAVOK_TPV)
+
+# progress view disables/enables icons based on available packages
 set_source_files_properties(llprogressview.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
 
 list(APPEND viewer_SOURCE_FILES ${viewer_HEADER_FILES})
@@ -1855,6 +1867,13 @@ if (WINDOWS)
           )
     endif (FMODSTUDIO)
 
+    if (OPENAL)
+      list(APPEND COPY_INPUT_DEPENDENCIES
+           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/OpenAL32.dll
+           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/alut.dll
+          )
+    endif (OPENAL)
+
     add_custom_command(
       OUTPUT  ${CMAKE_CFG_INTDIR}/copy_touched.bat
       COMMAND ${PYTHON_EXECUTABLE}
@@ -1865,6 +1884,7 @@ if (WINDOWS)
         --artwork=${ARTWORK_DIR}
         "--bugsplat=${BUGSPLAT_DB}"
         "--fmodstudio=${FMODSTUDIO}"
+        "--openal=${OPENAL}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
@@ -1927,6 +1947,7 @@ if (WINDOWS)
           --artwork=${ARTWORK_DIR}
           "--bugsplat=${BUGSPLAT_DB}"
           "--fmodstudio=${FMODSTUDIO}"
+          "--openal=${OPENAL}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
@@ -2074,6 +2095,7 @@ if (LINUX)
         --artwork=${ARTWORK_DIR}
         "--bugsplat=${BUGSPLAT_DB}"
         "--fmodstudio=${FMODSTUDIO}"
+        "--openal=${OPENAL}"
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
@@ -2101,6 +2123,7 @@ if (LINUX)
       --artwork=${ARTWORK_DIR}
       "--bugsplat=${BUGSPLAT_DB}"
       "--fmodstudio=${FMODSTUDIO}"
+      "--openal=${OPENAL}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       "--channel=${VIEWER_CHANNEL}"
@@ -2138,7 +2161,7 @@ if (DARWIN)
   set(MACOSX_BUNDLE_BUNDLE_NAME "SecondLife")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright © Linden Research, Inc. 2019")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright © Linden Research, Inc. 2020")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "SecondLife.nib")
   set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "LLApplication")
 
@@ -2178,6 +2201,7 @@ if (DARWIN)
       --artwork=${ARTWORK_DIR}
       "--bugsplat=${BUGSPLAT_DB}"
       "--fmodstudio=${FMODSTUDIO}"
+      "--openal=${OPENAL}"
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
@@ -2213,6 +2237,7 @@ if (DARWIN)
           --artwork=${ARTWORK_DIR}
           "--bugsplat=${BUGSPLAT_DB}"
           "--fmodstudio=${FMODSTUDIO}"
+          "--openal=${OPENAL}"
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
