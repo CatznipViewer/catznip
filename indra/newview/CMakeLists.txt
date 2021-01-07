@@ -2264,7 +2264,7 @@ if (DARWIN)
   set(MACOSX_BUNDLE_BUNDLE_NAME "Catznip")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2020, portions by Kitty Barnett, portions by Linden Research, Inc")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (C)2001-2021, portions by Kitty Barnett, portions by Linden Research, Inc")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "Catznip.nib")
   set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "LLApplication")
 

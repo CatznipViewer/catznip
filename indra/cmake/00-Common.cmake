@@ -83,7 +83,7 @@ if (WINDOWS)
   # locally at least, the build output is spammed with 1000s of 'D9002'
   # warnings about this switch being ignored.
   # [SL:KB] - Moved to variables for the convenience of people who are not Kitty
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")  
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
   if( ADDRESS_SIZE EQUAL 32 )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /p:PreferredToolArchitecture=x64")  
   endif()

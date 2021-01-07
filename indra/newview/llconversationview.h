@@ -34,6 +34,7 @@
 #include "lloutputmonitorctrl.h"
 
 class LLTextBox;
+class LLFloater;
 //class LLFloaterIMContainer;
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 class LLFloaterIMContainerView;

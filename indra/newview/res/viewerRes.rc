@@ -155,7 +155,7 @@ BEGIN
             VALUE "FileDescription", "Catznip"
             VALUE "FileVersion", "${VIEWER_VERSION_MAJOR}.${VIEWER_VERSION_MINOR}.${VIEWER_VERSION_PATCH}.${VIEWER_VERSION_REVISION}"
             VALUE "InternalName", "Catznip.exe"
-            VALUE "LegalCopyright", "Copyright (C)2001-2018, portions by Kitty Barnett, portions by Linden Research, Inc"
+            VALUE "LegalCopyright", "Copyright (C)2001-2021, portions by Kitty Barnett, portions by Linden Research, Inc"
             VALUE "OriginalFilename", "catznip-bin.exe"
             VALUE "ProductName", "Catznip"
             VALUE "ProductVersion", "${VIEWER_VERSION_MAJOR}.${VIEWER_VERSION_MINOR}.${VIEWER_VERSION_PATCH}.${VIEWER_VERSION_REVISION}"

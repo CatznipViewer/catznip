@@ -76,6 +76,7 @@
 #include "llwindow.h"
 // [/SL:KB]
 #include "llviewercontrol.h"
+#include "llviewermenu.h"
 #include "llviewerobjectlist.h"
 // [RLVa:KB] - Checked: 2010-04-22 (RLVa-1.2.0f)
 #include "rlvactions.h"

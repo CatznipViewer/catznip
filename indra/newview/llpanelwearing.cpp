@@ -352,12 +352,9 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
-		registrar.add("Gear.TouchAttach", boost::bind(&LLWearingGearMenu::onTouchAttach, this));
-		registrar.add("Gear.EditItem", boost::bind(&LLWearingGearMenu::onEditItem, this));
+		registrar.add("Gear.TouchAttach", boost::bind(&LLWearingGearMenu::handleMultiple, this, handle_attachment_touch));
+		registrar.add("Gear.EditItem", boost::bind(&LLWearingGearMenu::handleMultiple, this, handle_item_edit));
 		registrar.add("Gear.EditOutfit", boost::bind(&edit_outfit));
-// [/SL:KB]
-//		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
 //		registrar.add("Gear.TakeOff", boost::bind(&LLPanelWearing::onRemoveItem, mPanelWearing));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-09 (Catznip-3.3)
 		registrar.add("Gear.TakeOff", boost::bind(&LLPanelWearing::onTakeOffClicked, mPanelWearing));
@@ -375,25 +372,16 @@ public:
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 private:
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
-	void onTouchAttach()
+	void handleMultiple(std::function<void(const LLUUID& id)> functor)
 	{
-		uuid_vec_t selected_uuids;
-		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
+		uuid_vec_t selected_item_ids;
+		mPanelWearing->getSelectedItemsUUIDs(selected_item_ids);
 
-		if (selected_uuids.size() > 0)
-			handle_attachment_touch(selected_uuids.front());
+		for (const LLUUID& item_id : selected_item_ids)
+		{
+			functor(item_id);
+		}
 	}
-
-	void onEditItem()
-	{
-		uuid_vec_t selected_uuids;
-		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
-
-		if (selected_uuids.size() > 0)
-			handle_item_edit(selected_uuids.front());
-	}
-// [/SL:KB]
 
 	LLToggleableMenu*		mMenu;
 	LLPanelWearing* 		mPanelWearing;
@@ -493,7 +481,9 @@ protected:
 	{
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 
-//		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
+		registrar.add("Wearing.TouchAttach", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
+		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
+		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
 		registrar.add("Wearing.ShowOriginal", boost::bind(show_item_original, mUUIDs.front(), EShowItemOptions::TAKE_FOCUS_YES, nullptr));
 // [/SL:KB]
@@ -503,9 +493,6 @@ protected:
 		registrar.add("Wearing.Detach", 
 					  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), mUUIDs));
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3)
-		registrar.add("Wearing.TouchAttach", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
-		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
-		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 		registrar.add("Wearing.TakeOffDetach", boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), mUUIDs));
 // [/SL:KB]
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
@@ -593,12 +580,12 @@ protected:
 		}
 
 		// Enable/disable some menu items depending on the selection.
+		bool show_touch = !bp_selected && !clothes_selected && attachments_selected;
+		bool show_edit = bp_selected || clothes_selected || attachments_selected;
 // [RLVa:KB] - Checked: 2012-07-28 (RLVa-1.4.7)
 		bool rlv_blocked = (mUUIDs.size() == rlv_locked_count);
 // [/RLVa:KB]
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
-		bool show_touch = !bp_selected && !clothes_selected && attachments_selected;
-		bool show_edit = bp_selected || clothes_selected || attachments_selected;
 		bool show_detach = !clothes_selected && attachments_selected;
 		bool show_take_off = clothes_selected && !attachments_selected;
 		bool show_take_off_or_detach = clothes_selected && attachments_selected;
@@ -606,7 +593,7 @@ protected:
 		menu->setItemVisible("touch_attach",       show_touch);
 		menu->setItemEnabled("touch_attach",       1 == mUUIDs.size() && enable_attachment_touch(mUUIDs.front()));
 		menu->setItemVisible("edit_item",          show_edit);
-		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && enable_item_edit(mUUIDs.front()));
+		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && get_is_item_editable(mUUIDs.front()));
 		menu->setItemVisible("detach",             show_detach);
 //		menu->setItemEnabled("detach",             !bp_selected);
 		menu->setItemVisible("take_off",           show_take_off);
@@ -622,7 +609,6 @@ protected:
 		menu->setItemEnabled("find_original", 1 == mUUIDs.size());
 		menu->setItemEnabled("properties", 1 == mUUIDs.size());
 // [/SL:KB]
-		menu->setItemVisible("edit_item", FALSE);
 // [RLVa:KB] - Checked: 2012-07-28 (RLVa-1.4.7)
 		menu->setItemEnabled("take_off",           !rlv_blocked);
 		menu->setItemEnabled("detach",             !rlv_blocked);
@@ -963,21 +949,6 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 		return !outfit_locked && outfit_dirty;
 	}
 
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
-	uuid_vec_t selected_uuids;
-	getSelectedItemsUUIDs(selected_uuids);
-
-	if (command_name == "touch_attach")
-	{
-		return (1 == selected_uuids.size()) && (enable_attachment_touch(selected_uuids.front()));
-	}
-
-	if (command_name == "edit_item")
-	{
-		return (1 == selected_uuids.size()) && (enable_item_edit(selected_uuids.front()));
-	}
-// [/SL:KB]
-
 	if (command_name == "take_off")
 	{
 		if (mWearablesTab->isExpanded())
@@ -994,12 +965,20 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 		}
 	}
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-15 (Catznip-3.3)
-	if (command_name == "take_off_folder")
-	{
-		uuid_vec_t selected_uuids;
-		getSelectedItemsUUIDs(selected_uuids);
+	uuid_vec_t selected_uuids;
+	getSelectedItemsUUIDs(selected_uuids);
 
+	if (command_name == "touch_attach")
+	{
+		return (1 == selected_uuids.size()) && (enable_attachment_touch(selected_uuids.front()));
+	}
+	else if (command_name == "edit_item")
+	{
+		return (1 == selected_uuids.size()) && (get_is_item_editable(selected_uuids.front()));
+	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-15 (Catznip-3.3)
+	else if (command_name == "take_off_folder")
+	{
 		for (uuid_vec_t::const_iterator itItem = selected_uuids.begin(); itItem != selected_uuids.end(); ++itItem)
 		{
 			const LLViewerInventoryItem* pItem = gInventory.getItem(*itItem);

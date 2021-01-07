@@ -396,7 +396,6 @@ protected:
     virtual parammapping_t getParameterMap() const { return parammapping_t(); }
 
     LLSD        mSettings;
-    bool        mIsValid;
 
     LLSD        cloneSettings() const;
 
