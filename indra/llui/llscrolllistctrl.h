@@ -101,6 +101,7 @@ public:
 		// behavioral flags
 		Optional<bool>	multi_select,
 						commit_on_keyboard_movement,
+						commit_on_selection_change,
 // [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
 						select_on_focus,
 // [/SL:KB]

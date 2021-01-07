@@ -17,5 +17,6 @@
      name="Preview Tabs"
      tab_position="bottom"
      top="0"
-     width="450" />
+     width="450"
+     enable_tabs_flashing="true"/>
 </multi_floater>
