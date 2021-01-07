@@ -284,6 +284,7 @@ LLViewerObject::LLViewerObject(const LLUUID &id, const LLPCode pcode, LLViewerRe
 	mOnActiveList(FALSE),
 	mOnMap(FALSE),
 	mStatic(FALSE),
+	mSeatCount(0),
 	mNumFaces(0),
 	mRotTime(0.f),
 	mAngularVelocityRot(),
@@ -900,7 +901,12 @@ void LLViewerObject::addChild(LLViewerObject *childp)
 	if(childp->setParent(this))
 	{
 		mChildList.push_back(childp);
-        childp->afterReparent();
+		childp->afterReparent();
+
+		if (childp->isAvatar())
+		{
+			mSeatCount++;
+		}
 	}
 }
 
@@ -928,6 +934,11 @@ void LLViewerObject::removeChild(LLViewerObject *childp)
 			if(childp->getParent() == this)
 			{
 				childp->setParent(NULL);			
+			}
+
+			if (childp->isAvatar())
+			{
+				mSeatCount--;
 			}
 			break;
 		}
@@ -986,21 +997,10 @@ BOOL LLViewerObject::isChild(LLViewerObject *childp) const
 	return FALSE;
 }
 
-
 // returns TRUE if at least one avatar is sitting on this object
 BOOL LLViewerObject::isSeat() const
 {
-	for (child_list_t::const_iterator iter = mChildList.begin();
-		 iter != mChildList.end(); iter++)
-	{
-		LLViewerObject* child = *iter;
-		if (child->isAvatar())
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-
+	return mSeatCount > 0;
 }
 
 BOOL LLViewerObject::setDrawableParent(LLDrawable* parentp)
@@ -4805,9 +4805,7 @@ LLViewerTexture* LLViewerObject::getBakedTextureForMagicId(const LLUUID& id)
 	}
 
 	LLVOAvatar* avatar = getAvatar();
-	if (avatar && !isHUDAttachment()
-		&& isMesh()
-		&& getVolume() && getVolume()->getParams().getSculptID().notNull()) // checking for the rigged mesh by params instead of using isRiggedMesh() to avoid false negatives when skin info isn't ready
+	if (avatar && !isHUDAttachment())
 	{
 		LLAvatarAppearanceDefines::EBakedTextureIndex texIndex = LLAvatarAppearanceDefines::LLAvatarAppearanceDictionary::assetIdToBakedTextureIndex(id);
 		LLViewerTexture* bakedTexture = avatar->getBakedTexture(texIndex);
