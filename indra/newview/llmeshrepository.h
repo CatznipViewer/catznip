@@ -343,10 +343,7 @@ public:
 	bool skinInfoReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
 	bool decompositionReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
 	EMeshProcessingResult physicsShapeReceived(const LLUUID& mesh_id, U8* data, S32 data_size);
-// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
-	const LLSD getMeshHeader(const LLUUID& mesh_id) const;
-// [/SL:KB]
-//	LLSD& getMeshHeader(const LLUUID& mesh_id);
+	bool hasPhysicsShapeInHeader(const LLUUID& mesh_id);
 
 	void notifyLoadedMeshes();
 	S32 getActualMeshLOD(const LLVolumeParams& mesh_params, S32 lod);
@@ -605,12 +602,6 @@ public:
 	
 	bool meshUploadEnabled();
 	bool meshRezEnabled();
-	
-
-// [SL:KB] - Patch: Viewer-MeshCostCrash | Checked: Catznip-6.4
-	const LLSD getMeshHeader(const LLUUID& mesh_id) const;
-// [/SL:KB]
-//	LLSD& getMeshHeader(const LLUUID& mesh_id);
 
 	void uploadModel(std::vector<LLModelInstance>& data, LLVector3& scale, bool upload_textures,
                      bool upload_skin, bool upload_joints, bool lock_scale_if_joint_position,

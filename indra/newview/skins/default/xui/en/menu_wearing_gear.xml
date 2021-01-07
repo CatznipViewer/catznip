@@ -16,7 +16,7 @@
     <menu_item_call
      label="Edit"
      layout="topleft"
-     name="edit">
+     name="edit_item">
         <on_click
          function="Gear.EditItem" />
         <on_enable
@@ -37,7 +37,7 @@
     <menu_item_call
      label="Edit Outfit"
      layout="topleft"
-     name="edit">
+     name="edit_outfit">
         <on_click
          function="Gear.EditOutfit" />
     </menu_item_call>

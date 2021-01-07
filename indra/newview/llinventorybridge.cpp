@@ -7262,7 +7262,6 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	{
 		LLAppearanceMgr::instance().wearItemOnAvatar(mUUID, true, false); // Don't replace if adding.
 	}
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 	else if ("touch" == action)
 	{
 		handle_attachment_touch(mUUID);
@@ -7271,7 +7270,6 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	{
 		handle_attachment_edit(mUUID);
 	}
-// [/SL:KB]
 	else if (isRemoveAction(action))
 	{
 		LLAppearanceMgr::instance().removeItemFromAvatar(mUUID);
@@ -7600,15 +7598,16 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			// Show "Detach" for a selection where some of the selected items are worn
 			if (flags & WORN_SELECTION_MASK)
 			{
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 				items.push_back(std::string("Attachment Touch"));
-				if ( ((flags & FIRST_SELECTED_ITEM) == 0) || (!enable_attachment_touch(mUUID)) )
+				if ( ((flags & FIRST_SELECTED_ITEM) == 0) || !enable_attachment_touch(mUUID) )
+				{
 					disabled_items.push_back(std::string("Attachment Touch"));
-
+				}
 				items.push_back(std::string("Wearable Edit"));
-				if ( ((flags & FIRST_SELECTED_ITEM) == 0) || (!enable_item_edit(mUUID)) )
+				if ( ((flags & FIRST_SELECTED_ITEM) == 0) || !get_is_item_editable(mUUID) )
+				{
 					disabled_items.push_back(std::string("Wearable Edit"));
-// [/SL:KB]
+				}
 
 				// Show "Take Off / Detach" instead of "Detach From Yourself" if the selection contains a mix of wearables and attachments
 				if (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))

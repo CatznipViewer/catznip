@@ -45,6 +45,9 @@
 	 name="Gray2"
 	 value="0.25 0.25 0.25 1" />
 	<color
+	 name="DkGray0"
+	 value="0.27 0.27 0.27 1" />
+	<color
 	 name="DkGray"
 	 value="0.125 0.125 0.125 1" />
 	<color

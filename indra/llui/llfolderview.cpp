@@ -399,16 +399,9 @@ static LLTrace::BlockTimerStatHandle FTM_FILTER("Filter Folder View");
 void LLFolderView::filter( LLFolderViewFilter& filter )
 {
 	LL_RECORD_BLOCK_TIME(FTM_FILTER);
-
-// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
-	static LLCachedControl<S32> s_fMaxVisible(*LLUI::instance().mSettingGroups["config"], "FilterItemsMaxTimePerFrameVisible", 10);
-	static LLCachedControl<S32> s_fMaxUnvisible(*LLUI::instance().mSettingGroups["config"], "FilterItemsMaxTimePerFrameUnvisible", 1);
-// [/SL:KB]
-
-// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
-    filter.resetTime(llclamp(mParentPanel.get()->getVisible() ? s_fMaxVisible() : s_fMaxUnvisible(), 1, 100));
-// [/SL:KB]
-//    filter.resetTime(llclamp(LLUI::getInstance()->mSettingGroups["config"]->getS32(mParentPanel.get()->getVisible() ? "FilterItemsMaxTimePerFrameVisible" : "FilterItemsMaxTimePerFrameUnvisible"), 1, 100));
+    static LLCachedControl<S32> filter_visible(*LLUI::getInstance()->mSettingGroups["config"], "FilterItemsMaxTimePerFrameVisible", 10);
+    static LLCachedControl<S32> filter_hidden(*LLUI::getInstance()->mSettingGroups["config"], "FilterItemsMaxTimePerFrameUnvisible", 1);
+    filter.resetTime(llclamp(mParentPanel.get()->getVisible() ? filter_visible() : filter_hidden(), 1, 100));
 
     // Note: we filter the model, not the view
 	getViewModelItem()->filter(filter);

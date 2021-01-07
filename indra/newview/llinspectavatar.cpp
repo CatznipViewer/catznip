@@ -58,6 +58,7 @@
 #include "llnotificationsutil.h"
 #include "llpanelblockedlist.h"
 #include "lltoggleablemenu.h"
+#include "llviewermenu.h"
 #include "llviewerobjectlist.h"
 // [/SL:KB]
 

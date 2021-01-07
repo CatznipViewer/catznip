@@ -41,9 +41,7 @@
 #include "llgesturemgr.h"
 #include "lltransutil.h"
 #include "llviewerattachmenu.h"
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-2.1)
 #include "llviewermenu.h"
-// [/SL:KB]
 #include "llvoavatarself.h"
 // [RLVa:KB] - Checked: 2011-05-22 (RLVa-1.3.1a)
 #include "rlvactions.h"
@@ -1029,10 +1027,7 @@ LLContextMenu* LLWearableItemsList::ContextMenuBase::createMenu()
 	// Register handlers common for all wearable types.
 	registrar.add("Wearable.Wear", boost::bind(wear_multiple, ids, true));
 	registrar.add("Wearable.Add", boost::bind(wear_multiple, ids, false));
-//	registrar.add("Wearable.Edit", boost::bind(handleMultiple, LLAgentWearables::editWearable, ids));
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-2.1)
 	registrar.add("Wearable.Edit", boost::bind(handle_item_edit, selected_id));
-// [/SL:KB]
 	registrar.add("Wearable.CreateNew", boost::bind(createNewWearable, selected_id));
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: Catznip-5.4
 	registrar.add("Wearable.ShowOriginal", boost::bind(show_item_original, selected_id, EShowItemOptions::TAKE_FOCUS_YES, nullptr));
@@ -1065,9 +1060,7 @@ LLContextMenu* LLWearableItemsList::ContextMenuBase::createMenu()
 	// Register handlers for attachments.
 	registrar.add("Attachment.Detach", 
 				  boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), ids));
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 	registrar.add("Attachment.Touch", boost::bind(handle_attachment_touch, selected_id));
-// [/SL:KB]
 	registrar.add("Attachment.Profile", boost::bind(show_item_profile, selected_id));
 	registrar.add("Object.Attach", boost::bind(LLViewerAttachMenu::attachObjects, ids, _2));
 
@@ -1100,6 +1093,7 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 	U32 n_already_worn = 0;			// number of items worn of same type as selected items
 	U32 n_links = 0;				// number of links among the selected items
 	U32 n_editable = 0;				// number of editable items among the selected ones
+	U32 n_touchable = 0;            // number of touchable items among the selected ones
 
 	bool can_be_worn = true;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
@@ -1133,14 +1127,16 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 		const LLWearableType::EType wearable_type = item->getWearableType();
 		const bool is_link = item->getIsLinkType();
 		const bool is_worn = get_is_item_worn(id);
-//		const bool is_editable = gAgentWearables.isWearableModifiable(id);
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-2.1)
-		const bool is_editable = enable_item_edit(id);
-// [/SL:KB]
+		const bool is_editable = get_is_item_editable(id);
+		const bool is_touchable = enable_attachment_touch(id);
 		const bool is_already_worn = gAgentWearables.selfHasWearable(wearable_type);
 		if (is_worn)
 		{
 			++n_worn;
+		}
+		if (is_touchable)
+		{
+			++n_touchable;
 		}
 		if (is_editable)
 		{
@@ -1213,8 +1209,10 @@ void LLWearableItemsList::ContextMenuBase::updateItemsVisibility(LLContextMenu* 
 //	setMenuItemEnabled(menu, "wear_add",			LLAppearanceMgr::instance().canAddWearables(ids));
 //	setMenuItemVisible(menu, "wear_replace",		n_worn == 0 && n_already_worn != 0 && can_be_worn);
 	//visible only when one item selected and this item is worn
-	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART) && n_worn == n_items && n_worn == 1);
-	setMenuItemEnabled(menu, "edit",				n_editable == 1 && n_worn == 1 && n_items == 1);
+	setMenuItemVisible(menu, "touch",				!standalone && mask == MASK_ATTACHMENT && n_worn == n_items);
+	setMenuItemEnabled(menu, "touch",				n_touchable && n_worn == 1 && n_items == 1);
+	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART|MASK_ATTACHMENT) && n_worn == n_items);
+	setMenuItemEnabled(menu, "edit",				n_editable && n_worn == 1 && n_items == 1);
 	setMenuItemVisible(menu, "create_new",			mask & (MASK_CLOTHING|MASK_BODYPART) && n_items == 1);
 	setMenuItemEnabled(menu, "create_new",			LLAppearanceMgr::instance().canAddWearables(ids));
 	setMenuItemVisible(menu, "show_original",		!standalone);

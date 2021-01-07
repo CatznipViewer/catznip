@@ -1586,13 +1586,16 @@ void LLVOAvatar::renderCollisionVolumes()
 	}
 }
 
-void LLVOAvatar::renderBones()
+void LLVOAvatar::renderBones(const std::string &selected_joint)
 {
     LLGLEnable blend(GL_BLEND);
 
 	avatar_joint_list_t::iterator iter = mSkeleton.begin();
-	avatar_joint_list_t::iterator end  = mSkeleton.end();
+    avatar_joint_list_t::iterator end = mSkeleton.end();
 
+    // For selected joints
+    static LLVector3 SELECTED_COLOR_OCCLUDED(1.0f, 1.0f, 0.0f);
+    static LLVector3 SELECTED_COLOR_VISIBLE(0.5f, 0.5f, 0.5f);
     // For bones with position overrides defined
     static LLVector3 OVERRIDE_COLOR_OCCLUDED(1.0f, 0.0f, 0.0f);
     static LLVector3 OVERRIDE_COLOR_VISIBLE(0.5f, 0.5f, 0.5f);
@@ -1619,7 +1622,18 @@ void LLVOAvatar::renderBones()
 
         LLVector3 pos;
         LLUUID mesh_id;
-        if (jointp->hasAttachmentPosOverride(pos,mesh_id))
+        F32 sphere_scale = SPHERE_SCALEF;
+
+        // We are in render, so it is preferable to implement selection
+        // in a different way, but since this is for debug/preview, this
+        // is low priority
+        if (jointp->getName() == selected_joint)
+        {
+            sphere_scale *= 16;
+            occ_color = SELECTED_COLOR_OCCLUDED;
+            visible_color = SELECTED_COLOR_VISIBLE;
+        }
+        else if (jointp->hasAttachmentPosOverride(pos,mesh_id))
         {
             occ_color = OVERRIDE_COLOR_OCCLUDED;
             visible_color = OVERRIDE_COLOR_VISIBLE;
@@ -1640,7 +1654,6 @@ void LLVOAvatar::renderBones()
         LLVector3 begin_pos(0,0,0);
         LLVector3 end_pos(jointp->getEnd());
 
-        F32 sphere_scale = SPHERE_SCALEF;
         
 		gGL.pushMatrix();
 		gGL.multMatrix( &jointp->getXform()->getWorldMatrix().mMatrix[0][0] );
@@ -2465,7 +2478,7 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
 		return;
 	}	
 
-	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR))
+	if (!(gPipeline.hasRenderType(mIsControlAvatar ? LLPipeline::RENDER_TYPE_CONTROL_AV : LLPipeline::RENDER_TYPE_AVATAR))
 		&& !(gSavedSettings.getBOOL("DisableAllRenderTypes")) && !isSelf())
 	{
 		return;
@@ -2595,8 +2608,8 @@ void LLVOAvatar::idleUpdate(LLAgent &agent, const F64 &time)
     if ((LLFrameTimer::getFrameCount() + mID.mData[0]) % compl_upd_freq == 0)
     {
         LL_RECORD_BLOCK_TIME(FTM_AVATAR_UPDATE_COMPLEXITY);
-        idleUpdateRenderComplexity();
-    }
+	idleUpdateRenderComplexity();
+}
     idleUpdateDebugInfo();
 }
 
@@ -4696,8 +4709,8 @@ BOOL LLVOAvatar::updateCharacter(LLAgent &agent)
 
     if (visible)
     {
-        // System avatar mesh vertices need to be reskinned.
-        mNeedsSkin = TRUE;
+	// System avatar mesh vertices need to be reskinned.
+	mNeedsSkin = TRUE;
     }
 
 	return visible;
@@ -7185,13 +7198,13 @@ LLDrawable *LLVOAvatar::createDrawable(LLPipeline *pipeline)
 	pipeline->allocDrawable(this);
 	mDrawable->setLit(FALSE);
 
-	LLDrawPoolAvatar *poolp = (LLDrawPoolAvatar*) gPipeline.getPool(LLDrawPool::POOL_AVATAR);
+	LLDrawPoolAvatar *poolp = (LLDrawPoolAvatar*)gPipeline.getPool(mIsControlAvatar ? LLDrawPool::POOL_CONTROL_AV : LLDrawPool::POOL_AVATAR);
 
 	// Only a single face (one per avatar)
 	//this face will be splitted into several if its vertex buffer is too long.
 	mDrawable->setState(LLDrawable::ACTIVE);
 	mDrawable->addFace(poolp, NULL);
-	mDrawable->setRenderType(LLPipeline::RENDER_TYPE_AVATAR);
+	mDrawable->setRenderType(mIsControlAvatar ? LLPipeline::RENDER_TYPE_CONTROL_AV : LLPipeline::RENDER_TYPE_AVATAR);
 	
 	mNumInitFaces = mDrawable->getNumFaces() ;
 
@@ -7216,7 +7229,7 @@ static LLTrace::BlockTimerStatHandle FTM_UPDATE_AVATAR("Update Avatar");
 BOOL LLVOAvatar::updateGeometry(LLDrawable *drawable)
 {
 	LL_RECORD_BLOCK_TIME(FTM_UPDATE_AVATAR);
- 	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)))
+	if (!(gPipeline.hasRenderType(mIsControlAvatar ? LLPipeline::RENDER_TYPE_CONTROL_AV : LLPipeline::RENDER_TYPE_AVATAR)))
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
 //	if ( (!gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_AVATAR)) || (ERenderAvatarAs::INVISIBLE == getRenderAvatarAs()) )
 // [/SL:KB]
@@ -10424,7 +10437,7 @@ void LLVOAvatar::onActiveOverrideMeshesChanged()
 U32 LLVOAvatar::getPartitionType() const
 { 
 	// Avatars merely exist as drawables in the bridge partition
-	return LLViewerRegion::PARTITION_BRIDGE;
+	return mIsControlAvatar ? LLViewerRegion::PARTITION_CONTROL_AV : LLViewerRegion::PARTITION_AVATAR;
 }
 
 //static

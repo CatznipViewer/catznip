@@ -133,6 +133,7 @@ LLScrollListCtrl::Params::Params()
 	sort_ascending("sort_ascending", true),
 	mouse_wheel_opaque("mouse_wheel_opaque", false),
 	commit_on_keyboard_movement("commit_on_keyboard_movement", true),
+	commit_on_selection_change("commit_on_selection_change", false),
 // [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
 	select_on_focus("select_on_focus", true),
 // [/SL:KB]
@@ -166,7 +167,7 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mMaxSelectable(0),
 	mAllowKeyboardMovement(true),
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
-	mCommitOnSelectionChange(false),
+	mCommitOnSelectionChange(p.commit_on_selection_change),
 // [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.3
 	mCommitOnDelete(false),
 // [/SL:KB]

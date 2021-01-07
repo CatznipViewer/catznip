@@ -133,7 +133,6 @@ private:
 // [/SL:KB]
 	LLButton*					mTeleportBtn;
 	LLButton*					mShowOnMapBtn;
-	LLButton*					mEditBtn;
 	LLButton*					mSaveBtn;
 	LLButton*					mCancelBtn;
 	LLButton*					mCloseBtn;
