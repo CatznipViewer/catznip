@@ -218,9 +218,9 @@ public:
 	// =========
 public:
 	/*
-	 * Returns true if the user can make changes to their WindLight environment 
+	 * Returns true if the user can make changes to their WindLight environment
 	 */
-	static bool canChangeEnvironment();
+	static bool canChangeEnvironment(const LLUUID& idRlvObject = LLUUID::null);
 
 
 	// =================
@@ -299,6 +299,20 @@ public:
 	 * Returns true if the user can touch the specified object (with an optional offset relative to its center)
 	 */
 	static bool canTouch(const LLViewerObject* pObj, const LLVector3& posOffset = LLVector3::zero);
+
+	// ===============
+	// World (General)
+	// ===============
+public:
+	/*
+	 * Returns true if the user can highlight transparent faces
+	 */
+	static bool canHighlightTransparent();
+
+	/*
+	 * Returns true if the user can switch to wireframe rendering
+	 */
+	static bool canViewWireframe();
 
 	// ================
 	// Helper functions
