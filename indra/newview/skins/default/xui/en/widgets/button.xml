@@ -27,7 +27,7 @@
         handle_right_mouse="true"
         use_draw_context_alpha="true"
         held_down_delay.seconds="0.5"
-        button_flash_count="8"
+        button_flash_count="4"
         button_flash_rate="1.25"
         display_pressed_state="true"
         >

@@ -24,6 +24,7 @@
 
     <tab_container
      bottom="-1"
+     enable_tabs_flashing="true"
      follows="all"
      halign="left"
      layout="topleft"
@@ -35,6 +36,7 @@
      tab_max_width = "134"
      tab_position="bottom"
      tab_width="64"
+     tabs_flashing_color="BeaconColor"
      top="0"
      use_custom_icon_ctrl="true"
      use_ellipses="true">
