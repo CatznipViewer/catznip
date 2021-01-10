@@ -366,9 +366,11 @@ bool RlvActions::isLocalTp(const LLVector3d& posGlobal)
 // WindLight
 //
 
-bool RlvActions::canChangeEnvironment()
+bool RlvActions::canChangeEnvironment(const LLUUID& idRlvObject)
 {
-	return !gRlvHandler.hasBehaviour(RLV_BHVR_SETENV);
+	// User can (partially) change their environment settings if:
+	//   - not specifically restricted from changing their environment (by any object other than the one specified)
+	return (idRlvObject.isNull()) ? !gRlvHandler.hasBehaviour(RLV_BHVR_SETENV) : !gRlvHandler.hasBehaviourExcept(RLV_BHVR_SETENV, idRlvObject);
 }
 
 // ============================================================================
@@ -580,6 +582,28 @@ bool RlvActions::canStand(const LLUUID& idRlvObjExcept)
 bool RlvActions::canShowLocation()
 {
 	return !gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC);
+}
+
+// ============================================================================
+// World (General)
+//
+
+bool RlvActions::canHighlightTransparent()
+{
+	// User cannot highlight transparent faces if:
+	//   - prevented from editing (exceptions are not taken into account)
+	//   - specifically prevented from highlight transparent faces
+	return !gRlvHandler.hasBehaviour(RLV_BHVR_EDIT) && !gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC);
+}
+
+bool RlvActions::canViewWireframe()
+{
+	// User can use wireframe rendering if:
+	//   - no HUD attachment is (remove) locked
+	//   - not specifically prevented from using wireframe mode
+	return
+		!gRlvAttachmentLocks.hasLockedHUD() &&					// Trivial function so no overhead when RLV is not enabled
+		!gRlvHandler.hasBehaviour(RLV_BHVR_VIEWWIREFRAME);
 }
 
 // ============================================================================

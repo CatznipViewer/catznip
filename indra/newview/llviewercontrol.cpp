@@ -471,8 +471,22 @@ static bool handleRenderLocalLightsChanged(const LLSD& newvalue)
 	return true;
 }
 
+// [RLVa:KB] - @setsphere
+static bool handleWindLightAtmosShadersChanged(const LLSD& newvalue)
+{
+	LLRenderTarget::sUseFBO = newvalue.asBoolean() && LLPipeline::sUseDepthTexture;
+	handleSetShaderChanged(LLSD());
+	return true;
+}
+// [/RLVa:KB]
+
 static bool handleRenderDeferredChanged(const LLSD& newvalue)
 {
+//	LLRenderTarget::sUseFBO = newvalue.asBoolean();
+// [RLVa:KB] - @setsphere
+	LLRenderTarget::sUseFBO	= newvalue.asBoolean() || (gSavedSettings.getBOOL("WindLightUseAtmosShaders") && LLPipeline::sUseDepthTexture);
+// [/RLVa:KB]
+
 // [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
 	// Force RenderGlow to TRUE for deferred rendering if it's currently disabled
 	if ( (newvalue.asBoolean()) && (!gSavedSettings.getBOOL("RenderGlow")) )
@@ -481,7 +495,6 @@ static bool handleRenderDeferredChanged(const LLSD& newvalue)
 	}
 // [/SL:TD]
 
-	LLRenderTarget::sUseFBO = newvalue.asBoolean();
 	if (gPipeline.isInit())
 	{
 		LLPipeline::refreshCachedSettings();
@@ -503,7 +516,10 @@ static bool handleRenderDeferredChanged(const LLSD& newvalue)
 //
 static bool handleRenderBumpChanged(const LLSD& newval)
 {
-	LLRenderTarget::sUseFBO = newval.asBoolean();
+//	LLRenderTarget::sUseFBO = newval.asBoolean();
+// [RLVa:KB] - @setsphere
+	LLRenderTarget::sUseFBO	= newval.asBoolean() || (gSavedSettings.getBOOL("WindLightUseAtmosShaders") && LLPipeline::sUseDepthTexture);
+// [/RLVa:KB]
 	if (gPipeline.isInit())
 	{
 		gPipeline.updateRenderBump();
@@ -810,7 +826,10 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderGlow")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderGlowResolutionPow")->getSignal()->connect(boost::bind(&handleReleaseGLBufferChanged, _2));
 	gSavedSettings.getControl("RenderAvatarCloth")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
-	gSavedSettings.getControl("WindLightUseAtmosShaders")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
+//	gSavedSettings.getControl("WindLightUseAtmosShaders")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
+// [RLVa:KB] - @setsphere
+	gSavedSettings.getControl("WindLightUseAtmosShaders")->getSignal()->connect(boost::bind(&handleWindLightAtmosShadersChanged, _2));
+// [/RLVa:KB]
 	gSavedSettings.getControl("RenderGammaFull")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderVolumeLODFactor")->getSignal()->connect(boost::bind(&handleVolumeLODChanged, _2));
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-5.4
