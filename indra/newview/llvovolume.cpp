@@ -3548,28 +3548,28 @@ const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const 
 	{
 		joint_count = mSkinningMatJointCount;
 
-#ifndef LL_RELEASE_FOR_DOWNLOAD
-		// Returning cached result - sanity check that it matches the currently cached value
-		if (!skin)
-		{
-			skin = getSkinInfo();
-			if (!skin)
-			{
-				joint_count = 0;
-				return nullptr;
-			}
-		}
-		U32 refJointCount = LLSkinningUtil::getMeshJointCount(skin);
-		llassert(refJointCount == mSkinningMatJointCount);
-
-		LLMatrix4a refMatrix[LL_MAX_JOINTS_PER_MESH_OBJECT];
-		LLSkinningUtil::initSkinningMatrixPalette(refMatrix, refJointCount, skin, avatar);
-		for (int idxJoint = 0; idxJoint < refJointCount; idxJoint++)
-		{
-			llassert(refMatrix[idxJoint] == mSkinningMatCache[idxJoint]);
-		}
-		cntCached++;
-#endif // LL_RELEASE_FOR_DOWNLOAD
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
+//		// Returning cached result - sanity check that it matches the currently cached value
+//		if (!skin)
+//		{
+//			skin = getSkinInfo();
+//			if (!skin)
+//			{
+//				joint_count = 0;
+//				return nullptr;
+//			}
+//		}
+//		U32 refJointCount = LLSkinningUtil::getMeshJointCount(skin);
+//		llassert(refJointCount == mSkinningMatJointCount);
+//
+//		LLMatrix4a refMatrix[LL_MAX_JOINTS_PER_MESH_OBJECT];
+//		LLSkinningUtil::initSkinningMatrixPalette(refMatrix, refJointCount, skin, avatar);
+//		for (int idxJoint = 0; idxJoint < refJointCount; idxJoint++)
+//		{
+//			llassert(refMatrix[idxJoint] == mSkinningMatCache[idxJoint]);
+//		}
+//		cntCached++;
+//#endif // LL_RELEASE_FOR_DOWNLOAD
 
 		return mSkinningMatCache;
 	}
