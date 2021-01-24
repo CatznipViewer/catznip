@@ -3591,7 +3591,7 @@ const LLMatrix4a* LLVOVolume::initSkinningMatrixPalette(U32& joint_count, const 
 		mSkinningMatCache = (LLMatrix4a*)ll_aligned_malloc_16(sizeof(LLMatrix4a) * joint_count);
 	}
 
-	LLSkinningUtil::initSkinningMatrixPalette(mSkinningMatCache, mSkinningMatJointCount, skin, avatar);
+	LLSkinningUtil::initSkinningMatrixPalette(mSkinningMatCache, joint_count, skin, avatar);
 	mSkinningMatJointCount = joint_count;
 	// *TODO: doesn't catch all occurrences
 	mLastSkinningMatCacheFrame = (!(mLODChanged || mSculptChanged || avatar->getIsCloud() || (avatar->isSelf() && avatar->isEditingAppearance()))) ? curFrameCount : 0;
