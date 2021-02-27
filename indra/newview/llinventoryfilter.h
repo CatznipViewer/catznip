@@ -395,7 +395,7 @@ private:
 	enum class EFilterStringMatchType { All, Any, RegEx };
 	EFilterStringMatchType  mFilterSubStringMatchType = EFilterStringMatchType::All;
 	std::vector<std::string> mFilterSubStrings;
-	boost::regex			mFilterSubStringRegEx = boost::regex();
+	boost::regex			mFilterSubStringRegEx;
 	bool                    mFilterSubStringValid = true;
 // [/SL:KB]
 	std::string				mFilterSubStringOrig;
