@@ -252,6 +252,9 @@ public:
 //	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
 	const std::string& 	getFilterSubStringOrig() const { return mFilterSubStringOrig; } 
 	bool 				hasFilterString() const;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-6.4
+	bool                isValidFilterString() const    { return mFilterSubStringValid; }
+// [/SL:KB]
 
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	void 				setFilterDescriptionSubString(const std::string& string);
@@ -392,7 +395,8 @@ private:
 	enum class EFilterStringMatchType { All, Any, RegEx };
 	EFilterStringMatchType  mFilterSubStringMatchType = EFilterStringMatchType::All;
 	std::vector<std::string> mFilterSubStrings;
-	boost::regex			mFilterSubStringRegEx;
+	boost::regex			mFilterSubStringRegEx = boost::regex();
+	bool                    mFilterSubStringValid = true;
 // [/SL:KB]
 	std::string				mFilterSubStringOrig;
 //	std::string				mUsername;

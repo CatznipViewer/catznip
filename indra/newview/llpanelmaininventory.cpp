@@ -919,7 +919,10 @@ void LLPanelMainInventory::setFilterSubStringFromFilter()
 {
 	if (mFilterEditor)
 	{
+		static LLColor4 s_DefaultColour = mFilterEditor->getTextColor();
+
 		mFilterEditor->setText(mActivePanel->getFilter().getFilterSubStringOrig());
+		mFilterEditor->setTextColor( (mActivePanel->getFilter().isValidFilterString()) ? s_DefaultColour : LLColor4::red );
 	}
 }
 // [/SL:KB]

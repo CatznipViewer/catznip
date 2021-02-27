@@ -969,6 +969,7 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 		// NOTE: bug/edge case fixing turned this into a big mess - refactor once it's functionally done
 		bool less_restrictive = false, more_restrictive = false;
 
+		mFilterSubStringValid = false;
 		if (EFilterStringMatchType::RegEx != match_type_new)
 		{
 			std::vector<std::string> search_tokens;
@@ -1035,12 +1036,18 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 			mFilterSubStringMatchType = match_type_new;
 			mFilterSubStrings = std::move(search_tokens);
 			mFilterSubStringRegEx = boost::regex();
+			mFilterSubStringValid = true;
 		}
 		else
 		{
 			mFilterSubStringMatchType = EFilterStringMatchType::RegEx;
 			mFilterSubStrings.assign(1, string.substr(4));
-			mFilterSubStringRegEx = boost::regex(mFilterSubStrings[0], boost::regex::perl | boost::regex::icase);
+			try
+			{
+				mFilterSubStringRegEx = boost::regex(mFilterSubStrings[0], boost::regex::perl | boost::regex::icase);
+				mFilterSubStringValid = true;
+			}
+			catch (boost::regex_error) {}
 
 			// Regular expressions always have to start fresh unfortunately
 			less_restrictive = more_restrictive = false;
