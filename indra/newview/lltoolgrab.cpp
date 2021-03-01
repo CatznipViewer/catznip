@@ -1128,7 +1128,13 @@ LLVector3d LLToolGrabBase::getGrabPointGlobal()
 
 void send_ObjectGrab_message(LLViewerObject* object, const LLPickInfo & pick, const LLVector3 &grab_offset)
 {
-	if (!object) return;
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.4
+	if (!object || !object->getRegion())
+	{
+		return;
+	}
+// [/SL:KB]
+//	if (!object) return;
 
 	LLMessageSystem	*msg = gMessageSystem;
 
@@ -1165,7 +1171,13 @@ void send_ObjectGrab_message(LLViewerObject* object, const LLPickInfo & pick, co
 
 void send_ObjectDeGrab_message(LLViewerObject* object, const LLPickInfo & pick)
 {
-	if (!object) return;
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.4
+	if (!object || !object->getRegion())
+	{
+		return;
+	}
+// [/SL:KB]
+//	if (!object) return;
 
 	LLMessageSystem	*msg = gMessageSystem;
 
