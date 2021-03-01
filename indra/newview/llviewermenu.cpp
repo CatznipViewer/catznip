@@ -2709,7 +2709,14 @@ class LLObjectEnableReportAbuse : public view_listener_t
 void handle_object_touch()
 {
 	LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
-	if (!object) return;
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-6.4
+	if (!object || !object->getRegion())
+	{
+		make_ui_sound("UISndInvalidOp");
+		return;
+	}
+// [/SL:KB]
+//	if (!object) return;
 
 	LLPickInfo pick = LLToolPie::getInstance()->getPick();
 
