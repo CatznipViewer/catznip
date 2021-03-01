@@ -54,7 +54,7 @@ public:
 			for (const auto& idItem : idItemIDs)
 			{
 				const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
-				if (LLAssetType::AT_SETTINGS != pItem->getActualType())
+				if (!pItem || LLAssetType::AT_SETTINGS != pItem->getActualType())
 					continue;
 				pPanel->onAddEnvironment(idItem);
 			}
