@@ -82,6 +82,10 @@ if(WINDOWS)
         set(release_files ${release_files} fmod.dll)
     endif (FMODSTUDIO)
 
+    if (OPENAL)
+        list(APPEND release_files openal32.dll alut.dll)
+    endif (OPENAL)
+
     #*******************************
     # Copy MS C runtime dlls, required for packaging.
     if (MSVC80)
@@ -160,7 +164,7 @@ elseif(DARWIN)
         libndofdev.dylib
         libnghttp2.dylib
         libnghttp2.14.dylib
-        libnghttp2.14.14.0.dylib
+        libnghttp2.14.19.0.dylib
        )
 
     if (FMODSTUDIO)
