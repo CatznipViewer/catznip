@@ -243,7 +243,7 @@ bool LLInventoryFilter::checkAgainstName(const std::string& item_name, filter_st
 		case EFilterStringMatchType::RegEx:
 			{
 				boost::match_results<std::string::const_iterator> match_results;
-				if (!boost::regex_search(item_name.begin(), item_name.end(), match_results, mFilterSubStringRegEx))
+				if (mFilterSubStringRegEx.empty() || !boost::regex_search(item_name.begin(), item_name.end(), match_results, mFilterSubStringRegEx))
 					return false;
 				if (match_offsets_p)
 					match_offsets_p->push_back(std::make_pair(match_results.position(), match_results.position() + match_results.length()));
@@ -1066,10 +1066,12 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 		// Compare old and new search terms
 		//
 		// NOTE: bug/edge case fixing turned this into a big mess - refactor once it's functionally done
-		bool less_restrictive = false, more_restrictive = false;
+		EFilterModified eFilterModified = FILTER_NONE;
 
 		if (EFilterStringMatchType::RegEx != match_type_new)
 		{
+			bool less_restrictive = false, more_restrictive = false;
+
 			std::vector<std::string> search_tokens;
 			if (!filter_sub_string_new.empty())
 			{
@@ -1134,31 +1136,55 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 			mFilterSubStringMatchType = match_type_new;
 			mFilterSubStrings = std::move(search_tokens);
 			mFilterSubStringRegEx = boost::regex();
+			mFilterSubStringValid = true;
+
+			if (less_restrictive)
+				eFilterModified = FILTER_LESS_RESTRICTIVE;
+			else if (more_restrictive)
+				eFilterModified = FILTER_MORE_RESTRICTIVE;
+			else
+				eFilterModified = FILTER_RESTART;
 		}
 		else
 		{
 			mFilterSubStringMatchType = EFilterStringMatchType::RegEx;
 			mFilterSubStrings.assign(1, string.substr(4));
-			mFilterSubStringRegEx = boost::regex(mFilterSubStrings[0], boost::regex::perl | boost::regex::icase);
+			try
+			{
+				mFilterSubStringRegEx = boost::regex(mFilterSubStrings[0], boost::regex::perl | boost::regex::icase);
+				mFilterSubStringValid = true;
 
-			// Regular expressions always have to start fresh unfortunately
-			less_restrictive = more_restrictive = false;
+				// Regular expressions always have to start fresh unfortunately
+				eFilterModified = FILTER_RESTART;
+			}
+			catch (boost::regex_error)
+			{
+				mFilterSubStringValid = false;
+
+				// Don't re-evalute when our regex turns invalid (previous filter remains)
+				eFilterModified = FILTER_NONE;
+			}
+		}
+
+		if (eFilterModified != FILTER_NONE)
+		{
+			setModified(eFilterModified);
 		}
 // [/SL:KB]
-
+//
 //		mFilterSubString = filter_sub_string_new;
-		if (less_restrictive)
-		{
-			setModified(FILTER_LESS_RESTRICTIVE);
-		}
-		else if (more_restrictive)
-		{
-			setModified(FILTER_MORE_RESTRICTIVE);
-		}
-		else
-		{
-			setModified(FILTER_RESTART);
-		}
+//		if (less_restrictive)
+//		{
+//			setModified(FILTER_LESS_RESTRICTIVE);
+//		}
+//		else if (more_restrictive)
+//		{
+//			setModified(FILTER_MORE_RESTRICTIVE);
+//		}
+//		else
+//		{
+//			setModified(FILTER_RESTART);
+//		}
 
 		// Cancel out filter links once the search string is modified
 		if (mFilterOps.mFilterLinks == FILTERLINK_ONLY_LINKS)
