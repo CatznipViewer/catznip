@@ -70,6 +70,7 @@
 #include "llwindow.h"
 // [/SL:KB]
 #include "llviewercontrol.h"
+#include "llviewermenu.h"
 #include "llviewerobjectlist.h"
 
 static LLDefaultChildRegistry::Register<LLChatHistory> r("chat_history");
