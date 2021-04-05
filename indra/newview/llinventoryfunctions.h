@@ -60,6 +60,10 @@ BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id);
 
+// Performs the appropiate edit action (if one exists) for this item
+bool get_is_item_editable(const LLUUID& inv_item_id);
+void handle_item_edit(const LLUUID& inv_item_id);
+
 BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id);
