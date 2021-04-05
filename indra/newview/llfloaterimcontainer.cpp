@@ -58,8 +58,12 @@
 #include "llcallbacklist.h"
 #include "llworld.h"
 #include "llsdserialize.h"
+#include "llviewermenu.h" // is_agent_mappable
 #include "llviewerobjectlist.h"
 #include "boost/foreach.hpp"
+
+
+const S32 EVENTS_PER_IDLE_LOOP = 100;
 
 //
 // LLFloaterIMContainerView
@@ -73,7 +77,8 @@ LLFloaterIMContainerView::LLFloaterIMContainerView(const LLSD& seed, const Param
 	mConversationsRoot(NULL),
 	mConversationsEventStream("ConversationsEvents"),
 	mInitialized(false),
-	mIsFirstLaunch(true)
+	mIsFirstLaunch(true),
+	mConversationEventQueue()
 {
     mEnableCallbackRegistrar.add("IMFloaterContainer.Check", boost::bind(&LLFloaterIMContainerView::isActionChecked, this, _2));
 	mCommitCallbackRegistrar.add("IMFloaterContainer.Action", boost::bind(&LLFloaterIMContainerView::onCustomAction,  this, _2));
@@ -461,7 +466,9 @@ void LLFloaterIMContainerView::idle(void* user_data)
 {
 	LLFloaterIMContainerView* self = static_cast<LLFloaterIMContainerView*>(user_data);
 
-    if (!self->getVisible() || self->isMinimized())
+	self->idleProcessEvents();
+
+	if (!self->getVisible() || self->isMinimized())
     {
         return;
     }
@@ -484,19 +491,23 @@ void LLFloaterIMContainerView::idleUpdate()
         const LLConversationItem *current_session = getCurSelectedViewModelItem();
         if (current_session)
         {
-            // Update moderator options visibility
-            LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = current_session->getChildrenBegin();
-            LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = current_session->getChildrenEnd();
-            bool is_moderator = isGroupModerator();
-            bool can_ban = haveAbilityToBan();
-            while (current_participant_model != end_participant_model)
+            if (current_session->getType() == LLConversationItem::CONV_SESSION_GROUP)
             {
-                LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
-                participant_model->setModeratorOptionsVisible(is_moderator);
-                participant_model->setGroupBanVisible(can_ban && participant_model->getUUID() != gAgentID);
+                // Update moderator options visibility
+                LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = current_session->getChildrenBegin();
+                LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = current_session->getChildrenEnd();
+                bool is_moderator = isGroupModerator();
+                bool can_ban = haveAbilityToBan();
+                while (current_participant_model != end_participant_model)
+                {
+                    LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
+                    participant_model->setModeratorOptionsVisible(is_moderator);
+                    participant_model->setGroupBanVisible(can_ban && participant_model->getUUID() != gAgentID);
 
-                current_participant_model++;
+                    current_participant_model++;
+                }
             }
+
             // Update floater's title as required by the currently selected session or use the default title
             LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
             setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
@@ -522,13 +533,28 @@ void LLFloaterIMContainerView::idleUpdate()
     }
 }
 
+void LLFloaterIMContainerView::idleProcessEvents()
+{
+	if (!mConversationEventQueue.empty())
+	{
+		S32 events_to_handle = llmin((S32)mConversationEventQueue.size(), EVENTS_PER_IDLE_LOOP);
+		for (S32 i = 0; i < events_to_handle; i++)
+		{
+			handleConversationModelEvent(mConversationEventQueue.back());
+			mConversationEventQueue.pop_back();
+		}
+	}
+}
+
 bool LLFloaterIMContainerView::onConversationModelEvent(const LLSD& event)
 {
-	// For debug only
-	//std::ostringstream llsd_value;
-	//llsd_value << LLSDOStreamer<LLSDNotationFormatter>(event) << std::endl;
-	//LL_INFOS() << "LLFloaterIMContainer::onConversationModelEvent, event = " << llsd_value.str() << LL_ENDL;
-	// end debug
+	mConversationEventQueue.push_front(event);
+	return true;
+}
+
+
+void LLFloaterIMContainerView::handleConversationModelEvent(const LLSD& event)
+{
 	
 	// Note: In conversations, the model is not responsible for creating the view, which is a good thing. This means that
 	// the model could change substantially and the view could echo only a portion of this model (though currently the 
@@ -545,7 +571,7 @@ bool LLFloaterIMContainerView::onConversationModelEvent(const LLSD& event)
 	if (!session_view)
 	{
 		// We skip events that are not associated with a session
-		return false;
+		return;
 	}
 	LLConversationViewParticipant* participant_view = session_view->findParticipant(participant_id);
     LLFloaterIMSessionTab *conversation_floater = (session_id.isNull() ?
@@ -572,9 +598,9 @@ bool LLFloaterIMContainerView::onConversationModelEvent(const LLSD& event)
 	{
 		LLConversationItemSession* session_model = dynamic_cast<LLConversationItemSession*>(mConversationsItems[session_id]);
 		LLConversationItemParticipant* participant_model = (session_model ? session_model->findParticipant(participant_id) : NULL);
+		LLIMModel::LLIMSession * im_sessionp = LLIMModel::getInstance()->findIMSession(session_id);
 		if (!participant_view && session_model && participant_model)
-		{
-			LLIMModel::LLIMSession * im_sessionp = LLIMModel::getInstance()->findIMSession(session_id);
+		{	
 			if (session_id.isNull() || (im_sessionp && !im_sessionp->isP2PSessionType()))
 			{
 				participant_view = createConversationViewParticipant(participant_model);
@@ -585,7 +611,8 @@ bool LLFloaterIMContainerView::onConversationModelEvent(const LLSD& event)
 		// Add a participant view to the conversation floater 
 		if (conversation_floater && participant_model)
 		{
-			conversation_floater->addConversationViewParticipant(participant_model);
+			bool skip_updating = im_sessionp && im_sessionp->isGroupChat();
+			conversation_floater->addConversationViewParticipant(participant_model, !skip_updating);
 		}
 	}
 	else if (type == "update_participant")
@@ -608,12 +635,6 @@ bool LLFloaterIMContainerView::onConversationModelEvent(const LLSD& event)
 	
 	mConversationViewModel.requestSortAll();
 	mConversationsRoot->arrangeAll();
-	if (conversation_floater)
-	{
-		conversation_floater->refreshConversation();
-	}
-	
-	return false;
 }
 
 void LLFloaterIMContainerView::draw()

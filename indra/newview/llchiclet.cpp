@@ -36,6 +36,7 @@
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
 #include "llfloaternotificationstabbed.h"
+#include "llviewermenu.h"
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 #include "llagent.h"
 #include "llavataractions.h"

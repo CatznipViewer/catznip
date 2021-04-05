@@ -235,7 +235,8 @@ LLVOVolume::LLVOVolume(const LLUUID &id, const LLPCode pcode, LLViewerRegion *re
 	mLastFetchedMediaVersion = -1;
 	memset(&mIndexInTex, 0, sizeof(S32) * LLRender::NUM_VOLUME_TEXTURE_CHANNELS);
 	mMDCImplCount = 0;
-    mLastRiggingInfoLOD = -1;
+	mLastRiggingInfoLOD = -1;
+	mResetDebugText = false;
 }
 
 LLVOVolume::~LLVOVolume()
@@ -693,6 +694,11 @@ void LLVOVolume::updateTextureVirtualSize(bool forced)
 {
 	LL_RECORD_BLOCK_TIME(FTM_VOLUME_TEXTURES);
 	// Update the pixel area of all faces
+
+    if (mDrawable.isNull())
+    {
+        return;
+    }
 
 	if(!forced)
 	{
@@ -1391,6 +1397,15 @@ BOOL LLVOVolume::calcLOD()
         {
             std::string debug_object_text = get_debug_object_lod_text(this);
             setDebugText(debug_object_text);
+            mResetDebugText = true;
+        }
+    }
+    else
+    {
+        if (mResetDebugText)
+        {
+            restoreHudText();
+            mResetDebugText = false;
         }
     }
 
@@ -2322,7 +2337,8 @@ bool LLVOVolume::notifyAboutCreatingTexture(LLViewerTexture *texture)
 	//setup new materials
 	for(map_te_material::const_iterator it = new_material.begin(), end = new_material.end(); it != end; ++it)
 	{
-		LLMaterialMgr::getInstance()->put(getID(), it->first, *it->second);
+		// These are placeholder materials, they shouldn't be sent to server
+		LLMaterialMgr::getInstance()->setLocalMaterial(getRegion()->getRegionID(), it->second);
 		LLViewerObject::setTEMaterialParams(it->first, it->second);
 	}
 
@@ -4893,6 +4909,14 @@ U32 LLVOVolume::getPartitionType() const
 	{
 		return LLViewerRegion::PARTITION_HUD;
 	}
+	if (isAnimatedObject() && getControlAvatar())
+	{
+		return LLViewerRegion::PARTITION_CONTROL_AV;
+	}
+	if (isAttachment())
+	{
+		return LLViewerRegion::PARTITION_AVATAR;
+	}
 
 	return LLViewerRegion::PARTITION_VOLUME;
 }
@@ -4921,6 +4945,20 @@ LLVolumeGeometryManager()
 	mBufferUsage = GL_DYNAMIC_DRAW_ARB;
 
 	mSlopRatio = 0.25f;
+}
+
+LLAvatarBridge::LLAvatarBridge(LLDrawable* drawablep, LLViewerRegion* regionp)
+	: LLVolumeBridge(drawablep, regionp)
+{
+	mDrawableType = LLPipeline::RENDER_TYPE_AVATAR;
+	mPartitionType = LLViewerRegion::PARTITION_AVATAR;
+}
+
+LLControlAVBridge::LLControlAVBridge(LLDrawable* drawablep, LLViewerRegion* regionp)
+	: LLVolumeBridge(drawablep, regionp)
+{
+	mDrawableType = LLPipeline::RENDER_TYPE_CONTROL_AV;
+	mPartitionType = LLViewerRegion::PARTITION_CONTROL_AV;
 }
 
 bool can_batch_texture(LLFace* facep)
@@ -5267,7 +5305,8 @@ static LLDrawPoolAvatar* get_avatar_drawpool(LLViewerObject* vobj)
 				LLDrawPool* drawpool = face->getPool();
 				if (drawpool)
 				{
-					if (drawpool->getType() == LLDrawPool::POOL_AVATAR)
+					if (drawpool->getType() == LLDrawPool::POOL_AVATAR
+						|| drawpool->getType() == LLDrawPool::POOL_CONTROL_AV)
 					{
 						return (LLDrawPoolAvatar*) drawpool;
 					}
@@ -5546,7 +5585,8 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
 
 						//remove face from old pool if it exists
 						LLDrawPool* old_pool = facep->getPool();
-						if (old_pool && old_pool->getType() == LLDrawPool::POOL_AVATAR)
+						if (old_pool
+							&& (old_pool->getType() == LLDrawPool::POOL_AVATAR || old_pool->getType() == LLDrawPool::POOL_CONTROL_AV))
 						{
 							((LLDrawPoolAvatar*) old_pool)->removeRiggedFace(facep);
 						}
