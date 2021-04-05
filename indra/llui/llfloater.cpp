@@ -362,12 +362,10 @@ void LLFloater::initFloater(const Params& p)
 		mButtonsEnabled[BUTTON_CLOSE] = TRUE;
 	}
 
-	// Help button: '?'
-	if ( !mHelpTopic.empty() )
-	{
-		mButtonsEnabled[BUTTON_HELP] = TRUE;
-	}
-
+	// Help button: '?' 
+	//SL-14050 Disable all Help question marks
+	mButtonsEnabled[BUTTON_HELP] = FALSE;
+	
 	// Minimize button only for top draggers
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
 	if (!mDragOnLeft)

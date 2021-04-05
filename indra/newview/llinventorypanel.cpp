@@ -168,7 +168,8 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
 	mShowItems(p.show_items),
 // [/SL:KB]
-	mViewsInitialized(false),
+	mBuildViewsOnInit(p.preinitialize_views),
+	mViewsInitialized(VIEWS_UNINITIALIZED),
 	mInvFVBridgeBuilder(NULL),
 	mInventoryViewModel(p.name),
 	mGroupedItemBridge(new LLFolderViewGroupedItemBridge)
@@ -310,14 +311,22 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	mCompletionObserver = new LLInvPanelComplObserver(boost::bind(&LLInventoryPanel::onItemsCompletion, this));
 	mInventory->addObserver(mCompletionObserver);
 
-	// Build view of inventory if we need default full hierarchy and inventory ready, otherwise do in onIdle.
-	// Initializing views takes a while so always do it onIdle if viewer already loaded.
-	if (mInventory->isInventoryUsable() && !mViewsInitialized && LLStartUp::getStartupState() <= STATE_WEARABLES_WAIT)
-	{
-		initializeViews();
-	}
-	
-	gIdleCallbacks.addFunction(onIdle, (void*)this);
+    if (mBuildViewsOnInit)
+    {
+        // Build view of inventory if we need default full hierarchy and inventory is ready, otherwise do in onIdle.
+        // Initializing views takes a while so always do it onIdle if viewer already loaded.
+        if (mInventory->isInventoryUsable()
+            && mViewsInitialized == VIEWS_UNINITIALIZED
+            && LLStartUp::getStartupState() <= STATE_WEARABLES_WAIT)
+        {
+            initializeViews();
+        }
+        else if (mViewsInitialized != VIEWS_INITIALIZING)
+        {
+            mViewsInitialized = VIEWS_INITIALIZING;
+            gIdleCallbacks.addFunction(onIdle, (void*)this);
+        }
+    }
 
 	if (mSortOrderSetting != INHERIT_SORT_ORDER)
 	{
@@ -366,6 +375,17 @@ LLInventoryPanel::~LLInventoryPanel()
     }
     
     clearFolderRoot();
+}
+
+/*virtual*/
+void LLInventoryPanel::onVisibilityChange(BOOL new_visibility)
+{
+    if (new_visibility && mViewsInitialized == VIEWS_UNINITIALIZED)
+    {
+        mViewsInitialized = VIEWS_INITIALIZING;
+        gIdleCallbacks.addFunction(onIdle, (void*)this);
+    }
+    LLPanel::onVisibilityChange(new_visibility);
 }
 
 void LLInventoryPanel::draw()
@@ -767,7 +787,7 @@ void LLInventoryPanel::modelChanged(U32 mask)
 {
 	LL_RECORD_BLOCK_TIME(FTM_REFRESH);
 
-	if (!mViewsInitialized) return;
+	if (mViewsInitialized != VIEWS_INITIALIZED) return;
 	
 	const LLInventoryModel* model = getModel();
 	if (!model) return;
@@ -833,11 +853,11 @@ void LLInventoryPanel::onIdle(void *userdata)
 
 	LLInventoryPanel *self = (LLInventoryPanel*)userdata;
 	// Inventory just initialized, do complete build
-	if (!self->mViewsInitialized)
+	if (self->mViewsInitialized != VIEWS_INITIALIZED)
 	{
 		self->initializeViews();
 	}
-	if (self->mViewsInitialized)
+	if (self->mViewsInitialized == VIEWS_INITIALIZED)
 	{
 		gIdleCallbacks.deleteFunction(onIdle, (void*)self);
 	}
@@ -920,7 +940,7 @@ void LLInventoryPanel::initializeViews()
 
 	gIdleCallbacks.addFunction(idle, this);
 
-	mViewsInitialized = true;
+	mViewsInitialized = VIEWS_INITIALIZED;
 	
 	openStartFolderOrMyInventory();
 	

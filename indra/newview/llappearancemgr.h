@@ -106,7 +106,7 @@ public:
 	bool getCanReplaceCOF(const LLUUID& outfit_cat_id);
 
     // Can we add all referenced items to the avatar?
-    bool canAddWearables(const uuid_vec_t& item_ids);
+    bool canAddWearables(const uuid_vec_t& item_ids) const;
     
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
 	// Determine whether the folder has any worn items in it (NOTE: no recursion)
@@ -316,7 +316,10 @@ private:
 	
 	LLUUID mCOFImageID;
 
-	std::auto_ptr<LLOutfitUnLockTimer> mUnlockOutfitTimer;
+// [SL:KB] - Patch: Viewer-Build | Checked: Catznip-6.6
+	std::unique_ptr<LLOutfitUnLockTimer> mUnlockOutfitTimer;
+// [/SL:KB]
+//	std::auto_ptr<LLOutfitUnLockTimer> mUnlockOutfitTimer;
 
 	// Set of temp attachment UUIDs that should be removed
 	typedef std::set<LLUUID> doomed_temp_attachments_t;

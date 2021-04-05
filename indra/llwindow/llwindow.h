@@ -179,6 +179,9 @@ public:
 	// Get system UI size based on DPI (for 96 DPI UI size should be 1.0)
 	virtual F32 getSystemUISize() { return 1.0; }
 
+    // windows only DirectInput8 for joysticks
+    virtual void* getDirectInput8() { return NULL; };
+    virtual bool getInputDevices(U32 device_type_filter, void * devices_callback, void* userdata) { return false; };
 // [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.3
 	virtual void openFile(const std::string& filename) {}
 // [/SL:KB]

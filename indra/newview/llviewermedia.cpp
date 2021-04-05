@@ -197,7 +197,6 @@ static F32 sGlobalVolume = 1.0f;
 static bool sForceUpdate = false;
 static LLUUID sOnlyAudibleTextureID = LLUUID::null;
 static F64 sLowestLoadableImplInterest = 0.0f;
-static bool sAnyMediaShowing = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 static void add_media_impl(LLViewerMediaImpl* media)
@@ -875,7 +874,7 @@ void LLViewerMedia::updateMedia(void *dummy_arg)
 
 			if (!pimpl->getUsedInUI() && pimpl->hasMedia())
 			{
-				sAnyMediaShowing = true;
+				mAnyMediaShowing = true;
 			}
 
 			if (!pimpl->getUsedInUI() && pimpl->hasMedia() && (pimpl->isMediaPlaying() || !pimpl->isMediaTimeBased()))
