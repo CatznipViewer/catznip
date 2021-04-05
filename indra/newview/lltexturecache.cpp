@@ -52,7 +52,8 @@ const S32 TEXTURE_CACHE_ENTRY_SIZE = FIRST_PACKET_SIZE;//1024;
 const F32 TEXTURE_CACHE_PURGE_AMOUNT = .20f; // % amount to reduce the cache by when it exceeds its limit
 const F32 TEXTURE_CACHE_LRU_SIZE = .10f; // % amount for LRU list (low overhead to regenerate)
 const S32 TEXTURE_FAST_CACHE_ENTRY_OVERHEAD = sizeof(S32) * 4; //w, h, c, level
-const S32 TEXTURE_FAST_CACHE_ENTRY_SIZE = 16 * 16 * 4 + TEXTURE_FAST_CACHE_ENTRY_OVERHEAD;
+const S32 TEXTURE_FAST_CACHE_DATA_SIZE = 16 * 16 * 4;
+const S32 TEXTURE_FAST_CACHE_ENTRY_SIZE = TEXTURE_FAST_CACHE_DATA_SIZE + TEXTURE_FAST_CACHE_ENTRY_OVERHEAD;
 const F32 TEXTURE_LAZY_PURGE_TIME_LIMIT = .004f; // 4ms. Would be better to autoadjust, but there is a major cache rework in progress.
 
 class LLTextureCacheWorker : public LLWorkerClass
@@ -2092,7 +2093,9 @@ LLPointer<LLImageRaw> LLTextureCache::readFromFastCache(const LLUUID& id, S32& d
 		}
 		
 		S32 image_size = head[0] * head[1] * head[2];
-		if(!image_size) //invalid
+        if(image_size <= 0
+           || image_size > TEXTURE_FAST_CACHE_DATA_SIZE
+           || head[3] < 0) //invalid
 		{
 			closeFastCache();
 			return NULL;
@@ -2114,46 +2117,6 @@ LLPointer<LLImageRaw> LLTextureCache::readFromFastCache(const LLUUID& id, S32& d
 	return raw;
 }
 
-#if LL_WINDOWS
-
-static const U32 STATUS_MSC_EXCEPTION = 0xE06D7363; // compiler specific
-
-U32 exception_dupe_filter(U32 code, struct _EXCEPTION_POINTERS *exception_infop)
-{
-    if (code == STATUS_MSC_EXCEPTION)
-    {
-        // C++ exception, go on
-        return EXCEPTION_CONTINUE_SEARCH;
-    }
-    else
-    {
-        // handle it
-        return EXCEPTION_EXECUTE_HANDLER;
-    }
-}
-
-//due to unwinding
-void dupe(LLPointer<LLImageRaw> &raw)
-{
-    raw = raw->duplicate();
-}
-
-void logExceptionDupplicate(LLPointer<LLImageRaw> &raw)
-{
-    __try
-    {
-        dupe(raw);
-    }
-    __except (exception_dupe_filter(GetExceptionCode(), GetExceptionInformation()))
-    {
-        // convert to C++ styled exception
-        char integer_string[32];
-        sprintf(integer_string, "SEH, code: %lu\n", GetExceptionCode());
-        throw std::exception(integer_string);
-    }
-}
-#endif
-
 //return the fast cache location
 bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImageRaw> raw, S32 discardlevel)
 {
@@ -2170,8 +2133,9 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
 	c = raw->getComponents();
 
 	S32 i = 0 ;
-	
-	while(((w >> i) * (h >> i) * c) > TEXTURE_FAST_CACHE_ENTRY_SIZE - TEXTURE_FAST_CACHE_ENTRY_OVERHEAD)
+
+	// Search for a discard level that will fit into fast cache
+	while(((w >> i) * (h >> i) * c) > TEXTURE_FAST_CACHE_DATA_SIZE)
 	{
 		++i ;
 	}
@@ -2183,42 +2147,7 @@ bool LLTextureCache::writeToFastCache(LLUUID image_id, S32 id, LLPointer<LLImage
 		if(w * h *c > 0) //valid
 		{
             // Make a duplicate to keep the original raw image untouched.
-            // Might be good idea to do a copy during writeToCache() call instead of here
-// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
-#ifndef CATZNIP_RELEASE
-			// The LL exception handler just looks like it's blocking the actual crash point so revert to the original code on non-release builds
             raw = raw->duplicate();
-#else
-// [/SL:KB]
-            try
-            {
-#if LL_WINDOWS
-                // Temporary diagnostics for scale/duplicate crash
-                logExceptionDupplicate(raw);
-#else
-                raw = raw->duplicate();
-#endif
-            }
-            catch (...)
-            {
-                removeFromCache(image_id);
-//                LL_ERRS() << "Failed to cache image: " << image_id
-// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
-                LL_WARNS() << "Failed to cache image: " << image_id
-// [/SL:KB]
-                    << " local id: " << id
-                    << " Exception: " << boost::current_exception_diagnostic_information()
-                    << " Image new width: " << w
-                    << " Image new height: " << h
-                    << " Image new components: " << c
-                    << " Image discard difference: " << i
-                    << LL_ENDL;
-
-                return false;
-            }
-// [SL:KB] - Patch: Viewer-FastCacheCrash | Checked: Catznip-6.4
-#endif // CATZNIP_RELEASE
-// [/SL:KB]
 
 			if (raw->isBufferInvalid())
 			{

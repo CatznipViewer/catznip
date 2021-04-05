@@ -75,10 +75,13 @@ private:
 	LLTabContainer*			mAppearanceTabs;
 	std::string 			mFilterSubString;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	std::auto_ptr<LLSaveOutfitComboBtn> mOutfitsSaveComboBtn;
-	std::auto_ptr<LLSaveOutfitComboBtn> mWearingSaveComboBtn;
+	std::unique_ptr<LLSaveOutfitComboBtn> mOutfitsSaveComboBtn;
+	std::unique_ptr<LLSaveOutfitComboBtn> mWearingSaveComboBtn;
 // [/SL:KB]
-//	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
+//// [SL:KB] - Patch: Viewer-Build | Checked: Catznip-6.6
+//	std::unique_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
+//// [/SL:KB]
+////	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// tab panels                                                                   //

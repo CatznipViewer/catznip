@@ -186,7 +186,6 @@ void LLFloaterIMSession::onClickCloseBtn(bool)
 	else
 	{
 		LL_WARNS() << "Empty session with id: " << (mSessionID.asString()) << LL_ENDL;
-		return;
 	}
 
 	LLFloaterIMSessionTab::onClickCloseBtn();

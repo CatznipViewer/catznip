@@ -114,7 +114,8 @@ public:
 // [/SL:KB]
 
 	//called by mute list
-	virtual void onChange();
+    virtual void onChange() {};
+	virtual void onChangeDetailed(const LLMute& mute);
 
 	/**
 	 * Implementation of LLSpeakingIndicator interface.

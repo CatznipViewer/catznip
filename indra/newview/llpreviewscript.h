@@ -148,7 +148,6 @@ public:
 	void 			setItemRemoved(bool script_removed){mScriptRemoved = script_removed;};
 
 private:
-	void		onBtnHelp();
 	void		onBtnDynamicHelp();
 	void		onBtnUndoChanges();
 
