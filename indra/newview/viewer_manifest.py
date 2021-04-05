@@ -260,6 +260,9 @@ class ViewerManifest(LLManifest):
             app_suffix=self.channel_variant()
         return CHANNEL_VENDOR_BASE + ' ' + app_suffix
 
+    def exec_name(self):
+        return "SecondLifeViewer"
+
     def app_name_oneword(self):
         return ''.join(self.app_name().split())
     
@@ -419,10 +422,9 @@ class WindowsManifest(ViewerManifest):
     build_data_json_platform = 'win'
 
     def final_exe(self):
-        return self.app_name_oneword()+".exe"
+        return self.exec_name()+".exe"
 
     def finish_build_data_dict(self, build_data_dict):
-        #MAINT-7294: Windows exe names depend on channel name, so write that in also
         build_data_dict['Executable'] = self.final_exe()
         build_data_dict['AppName']    = self.app_name()
         return build_data_dict
@@ -522,6 +524,11 @@ class WindowsManifest(ViewerManifest):
                     self.path("fmodL.dll")
                 else:
                     self.path("fmod.dll")
+
+            if self.args['openal'] == 'ON':
+                # Get openal dll
+                self.path("OpenAL32.dll")
+                self.path("alut.dll")
 
             # For textures
             self.path("openjpeg.dll")
@@ -1515,7 +1522,6 @@ class Linux_i686_Manifest(LinuxManifest):
                     print "Skipping libfmod.so - not found"
                     pass
 
-
         # Vivox runtimes
         with self.prefix(src=relpkgdir, dst="bin"):
             self.path("SLVoice")
@@ -1545,10 +1551,12 @@ if __name__ == "__main__":
     print('%s \\\n%s' %
           (sys.executable,
            ' '.join((("'%s'" % arg) if ' ' in arg else arg) for arg in sys.argv)))
+    # fmodstudio and openal can be used simultaneously and controled by environment
     extra_arguments = [
         dict(name='bugsplat', description="""BugSplat database to which to post crashes,
              if BugSplat crash reporting is desired""", default=''),
         dict(name='fmodstudio', description="""Indication if fmod studio libraries are needed""", default='OFF'),
+        dict(name='openal', description="""Indication openal libraries are needed""", default='OFF'),
         ]
     try:
         main(extra=extra_arguments)

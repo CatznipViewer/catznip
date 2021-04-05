@@ -34,8 +34,6 @@
 #include "llrefcount.h"
 #include "llinstancetracker.h"
 
-#include "llcontrolgroupreader.h"
-
 #include <vector>
 
 // *NOTE: boost::visit_each<> generates warning 4675 on .net 2003
@@ -247,6 +245,8 @@ public:
 	LLColor4	getColor4(const std::string& name);
 	LLColor3	getColor3(const std::string& name);
 
+	LLSD		asLLSD(bool diffs_only);
+	
 	// generic getter
 	template<typename T> T get(const std::string& name)
 	{

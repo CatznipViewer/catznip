@@ -297,7 +297,7 @@ void update_statistics();
 // [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-08 (Catznip-3.6)
 void update_staticstics_for_send();
 // [/SL:KB]
-void send_stats();
+void send_viewer_stats(bool include_preferences);
 
 extern LLFrameTimer gTextureTimer;
 extern U32Bytes	gTotalTextureData;

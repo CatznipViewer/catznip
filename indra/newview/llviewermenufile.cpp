@@ -449,7 +449,11 @@ const void upload_single_file(const std::string& filename, LLFilePicker::ELoadFi
 		switch (type)
 		{
 			case LLFilePicker::FFLOAD_ANIM:
-				strFloater = (filename.rfind(".anim") != std::string::npos) ? "upload_anim_anim" : "upload_anim_bvh";
+				{
+					std::string filename_lc(filename);
+					LLStringUtil::toLower(filename_lc);
+					strFloater = (filename_lc.rfind(".anim") != std::string::npos) ? "upload_anim_anim" : "upload_anim_bvh";
+				}
 				break;
 			case LLFilePicker::FFLOAD_IMAGE:
 				strFloater = "upload_image";
@@ -476,7 +480,9 @@ const void upload_single_file(const std::string& filename, LLFilePicker::ELoadFi
 //		}
 //		if (type == LLFilePicker::FFLOAD_ANIM)
 //		{
-//			if (filename.rfind(".anim") != std::string::npos)
+//			std::string filename_lc(filename);
+//			LLStringUtil::toLower(filename_lc);
+//			if (filename_lc.rfind(".anim") != std::string::npos)
 //			{
 //				LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
 //			}
@@ -667,7 +673,7 @@ class LLFileUploadModel : public view_listener_t
 		LLFloaterModelPreview* fmp = (LLFloaterModelPreview*) LLFloaterReg::getInstance("upload_model");
 		if (fmp && !fmp->isModelLoading())
 		{
-			fmp->loadModel(3);
+			fmp->loadHighLodModel();
 		}
 		
 		return TRUE;
@@ -801,10 +807,17 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 		S32 width = gViewerWindow->getWindowWidthRaw();
 		S32 height = gViewerWindow->getWindowHeightRaw();
 
-		if (gSavedSettings.getBOOL("HighResSnapshot"))
+		bool render_ui = gSavedSettings.getBOOL("RenderUIInSnapshot");
+		bool render_hud = gSavedSettings.getBOOL("RenderHUDInSnapshot");
+
+		BOOL high_res = gSavedSettings.getBOOL("HighResSnapshot");
+		if (high_res)
 		{
 			width *= 2;
 			height *= 2;
+			// not compatible with UI/HUD
+			render_ui = false;
+			render_hud = false;
 		}
 
 		if (gViewerWindow->rawSnapshot(raw,
@@ -812,8 +825,11 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 									   height,
 									   TRUE,
 									   FALSE,
-									   gSavedSettings.getBOOL("RenderUIInSnapshot"),
-									   FALSE))
+									   render_ui,
+									   render_hud,
+									   FALSE,
+									   LLSnapshotModel::SNAPSHOT_TYPE_COLOR,
+									   high_res ? S32_MAX : MAX_SNAPSHOT_IMAGE_SIZE)) //per side
 		{
 			LLPointer<LLImageFormatted> formatted;
             LLSnapshotModel::ESnapshotFormat fmt = (LLSnapshotModel::ESnapshotFormat) gSavedSettings.getS32("SnapshotFormat");
