@@ -73,6 +73,7 @@
 #include "llviewermedia.h"
 #include "llviewerparcelaskplay.h"
 #include "llviewerparcelmedia.h"
+#include "llviewershadermgr.h"
 #include "llviewermediafocus.h"
 #include "llviewermessage.h"
 #include "llviewerobjectlist.h"
@@ -526,7 +527,8 @@ bool	create_text_segment_icon_from_url_match(LLUrlMatch* match,LLTextBase* base)
 
 	LLIconCtrl* icon;
 
-	if(gAgent.isInGroup(match_id, TRUE))
+	if( match->getMenuName() == "menu_url_group.xml" // See LLUrlEntryGroup constructor
+		|| gAgent.isInGroup(match_id, TRUE)) //This check seems unfiting, urls are either /agent or /group
 	{
 		LLGroupIconCtrl::Params icon_params;
 		icon_params.group_id = match_id;
@@ -604,8 +606,9 @@ static void settings_to_globals()
 static void settings_modify()
 {
 	LLRenderTarget::sUseFBO				= gSavedSettings.getBOOL("RenderDeferred");
+	LLPipeline::sRenderTransparentWater	= gSavedSettings.getBOOL("RenderTransparentWater");
 	LLPipeline::sRenderBump				= gSavedSettings.getBOOL("RenderObjectBump");
-	LLPipeline::sRenderDeferred		= LLPipeline::sRenderBump && gSavedSettings.getBOOL("RenderDeferred");
+	LLPipeline::sRenderDeferred		= LLPipeline::sRenderTransparentWater && LLPipeline::sRenderBump && gSavedSettings.getBOOL("RenderDeferred");
 	LLVOSurfacePatch::sLODFactor		= gSavedSettings.getF32("RenderTerrainLODFactor");
 	LLVOSurfacePatch::sLODFactor *= LLVOSurfacePatch::sLODFactor; //square lod factor to get exponential range of [1,4]
 	gDebugGL = gSavedSettings.getBOOL("RenderDebugGL") || gDebugSession;
@@ -688,8 +691,7 @@ LLAppViewer::LLAppViewer()
 	mPeriodicSlowFrame(LLCachedControl<bool>(gSavedSettings,"Periodic Slow Frame", FALSE)),
 	mFastTimerLogThread(NULL),
 	mSettingsLocationList(NULL),
-	mIsFirstRun(false),
-	mMinMicroSecPerFrame(0.f)
+	mIsFirstRun(false)
 {
 	if(NULL != sInstance)
 	{
@@ -781,7 +783,7 @@ bool LLAppViewer::init()
 
     // initialize the LLSettingsType translation bridge.
     LLTranslationBridge::ptr_t trans = std::make_shared<LLUITranslationBridge>();
-    LLSettingsType::initClass(trans);
+    LLSettingsType::initParamSingleton(trans);
 
 	// initialize SSE options
 	LLVector4a::initClass();
@@ -1024,12 +1026,26 @@ bool LLAppViewer::init()
 	{
 		// can't use an alert here since we're exiting and
 		// all hell breaks lose.
+		LLUIString details = LLNotifications::instance().getGlobalString("UnsupportedGLRequirements");
 		OSMessageBox(
-			LLNotifications::instance().getGlobalString("UnsupportedGLRequirements"),
+			details.getString(),
 			LLStringUtil::null,
 			OSMB_OK);
 		return 0;
 	}
+
+    // If we don't have the right shader requirements.
+    if (!gGLManager.mHasShaderObjects
+        || !gGLManager.mHasVertexShader
+        || !gGLManager.mHasFragmentShader)
+    {
+        LLUIString details = LLNotifications::instance().getGlobalString("UnsupportedShaderRequirements");
+        OSMessageBox(
+            details.getString(),
+            LLStringUtil::null,
+            OSMB_OK);
+        return 0;
+    }
 
 	// Without SSE2 support we will crash almost immediately, warn here.
 	if (!gSysCPU.hasSSE2())
@@ -1131,7 +1147,10 @@ bool LLAppViewer::init()
 	gSimLastTime = gRenderStartTime.getElapsedTimeF32();
 	gSimFrames = (F32)gFrameCount;
 
-	LLViewerJoystick::getInstance()->init(false);
+    if (gSavedSettings.getBOOL("JoystickEnabled"))
+    {
+        LLViewerJoystick::getInstance()->init(false);
+    }
 
 	try {
 		initializeSecHandler();
@@ -1255,10 +1274,6 @@ bool LLAppViewer::init()
 
 	joystick = LLViewerJoystick::getInstance();
 	joystick->setNeedsReset(true);
-	/*----------------------------------------------------------------------*/
-
-	gSavedSettings.getControl("FramePerSecondLimit")->getSignal()->connect(boost::bind(&LLAppViewer::onChangeFrameLimit, this, _2));
-	onChangeFrameLimit(gSavedSettings.getLLSD("FramePerSecondLimit"));
 
 	return true;
 }
@@ -1478,21 +1493,6 @@ bool LLAppViewer::doFrame()
 
 				display();
 
-				static U64 last_call = 0;
-				if (!gTeleportDisplay || gGLManager.mIsIntel) // SL-10625...throttle early, throttle often with Intel
-				{
-					// Frame/draw throttling
-					U64 elapsed_time = LLTimer::getTotalTime() - last_call;
-					if (elapsed_time < mMinMicroSecPerFrame)
-					{
-						LL_RECORD_BLOCK_TIME(FTM_SLEEP);
-						// llclamp for when time function gets funky
-						U64 sleep_time = llclamp(mMinMicroSecPerFrame - elapsed_time, (U64)1, (U64)1e6);
-						micro_sleep(sleep_time, 0);
-					}
-				}
-				last_call = LLTimer::getTotalTime();
-
 				pingMainloopTimeout("Main:Snapshot");
 				LLFloaterSnapshot::update(); // take snapshots
 					LLFloaterOutfitSnapshot::update();
@@ -1517,8 +1517,10 @@ bool LLAppViewer::doFrame()
 			}
 
 			// yield cooperatively when not running as foreground window
-			if (   (gViewerWindow && !gViewerWindow->getWindow()->getVisible())
-					|| !gFocusMgr.getAppHasFocus())
+			// and when not quiting (causes trouble at mac's cleanup stage)
+			if (!LLApp::isExiting()
+				&& ((gViewerWindow && !gViewerWindow->getWindow()->getVisible())
+					|| !gFocusMgr.getAppHasFocus()))
 			{
 				// Sleep if we're not rendering, or the window is minimized.
 				static LLCachedControl<S32> s_bacground_yeild_time(gSavedSettings, "BackgroundYieldTime", 40);
@@ -1848,8 +1850,11 @@ bool LLAppViewer::cleanup()
 	delete gKeyboard;
 	gKeyboard = NULL;
 
-	// Turn off Space Navigator and similar devices
-	LLViewerJoystick::getInstance()->terminate();
+    if (LLViewerJoystick::instanceExists())
+    {
+        // Turn off Space Navigator and similar devices
+        LLViewerJoystick::getInstance()->terminate();
+    }
 
 	LL_INFOS() << "Cleaning up Objects" << LL_ENDL;
 
@@ -2113,8 +2118,6 @@ bool LLAppViewer::cleanup()
 
 	LLError::LLCallStacks::cleanup();
 
-	removeMarkerFiles();
-
 	// It's not at first obvious where, in this long sequence, a generic cleanup
 	// call OUGHT to go. So let's say this: as we migrate cleanup from
 	// explicit hand-placed calls into the generic mechanism, eventually
@@ -2122,13 +2125,11 @@ bool LLAppViewer::cleanup()
 	// still see above are calls that MUST happen before the generic cleanup
 	// kicks in.
 
-	// The logging subsystem depends on an LLSingleton. Any logging after
-	// LLSingletonBase::deleteAll() won't be recorded.
-	LL_INFOS() << "Goodbye!" << LL_ENDL;
-
 	// This calls every remaining LLSingleton's cleanupSingleton() and
 	// deleteSingleton() methods.
 	LLSingletonBase::deleteAll();
+
+    LL_INFOS() << "Goodbye!" << LL_ENDL;
 
 	removeDumpDir();
 
@@ -3105,8 +3106,15 @@ LLSD LLAppViewer::getViewerInfo() const
 
 	// return a URL to the release notes for this viewer, such as:
 	// https://releasenotes.secondlife.com/viewer/2.1.0.123456.html
-	std::string url = versionInfo.getReleaseNotes();
-	info["VIEWER_RELEASE_NOTES_URL"] = url.empty()? LLTrans::getString("RetrievingData") : url;
+	std::string url = versionInfo.getReleaseNotes(); // VVM supplied
+    if (url.empty())
+    {
+        url = LLTrans::getString("RELEASE_NOTES_BASE_URL");
+        if (!LLStringUtil::endsWith(url, "/"))
+            url += "/";
+        url += LLURI::escape(versionInfo.getVersion()) + ".html";
+    }
+	info["VIEWER_RELEASE_NOTES_URL"] = url;
 
 	// Position
 	LLViewerRegion* region = gAgent.getRegion();
@@ -3116,8 +3124,9 @@ LLSD LLAppViewer::getViewerInfo() const
 		info["POSITION"] = ll_sd_from_vector3d(pos);
 		info["POSITION_LOCAL"] = ll_sd_from_vector3(gAgent.getPosAgentFromGlobal(pos));
 		info["REGION"] = gAgent.getRegion()->getName();
-		info["HOSTNAME"] = gAgent.getRegion()->getHost().getHostName();
-		info["HOSTIP"] = gAgent.getRegion()->getHost().getString();
+
+		boost::regex regex("\\.(secondlife|lindenlab)\\..*");
+		info["HOSTNAME"] = boost::regex_replace(gAgent.getRegion()->getHost().getHostName(), regex, "");
 		info["SERVER_VERSION"] = gLastVersionChannel;
 		LLSLURL slurl;
 		LLAgentUI::buildSLURL(slurl);
@@ -3129,8 +3138,8 @@ LLSD LLAppViewer::getViewerInfo() const
 	info["MEMORY_MB"] = LLSD::Integer(gSysMemory.getPhysicalMemoryKB().valueInUnits<LLUnits::Megabytes>());
 	// Moved hack adjustment to Windows memory size into llsys.cpp
 	info["OS_VERSION"] = LLOSInfo::instance().getOSString();
-	info["GRAPHICS_CARD_VENDOR"] = (const char*)(glGetString(GL_VENDOR));
-	info["GRAPHICS_CARD"] = (const char*)(glGetString(GL_RENDERER));
+	info["GRAPHICS_CARD_VENDOR"] = ll_safe_string((const char*)(glGetString(GL_VENDOR)));
+	info["GRAPHICS_CARD"] = ll_safe_string((const char*)(glGetString(GL_RENDERER)));
 
 #if LL_WINDOWS
 	std::string drvinfo = gDXHardware.getDriverVersionWMI();
@@ -3149,7 +3158,7 @@ LLSD LLAppViewer::getViewerInfo() const
 	}
 #endif
 
-	info["OPENGL_VERSION"] = (const char*)(glGetString(GL_VERSION));
+	info["OPENGL_VERSION"] = ll_safe_string((const char*)(glGetString(GL_VERSION)));
 
     // Settings
 
@@ -3985,6 +3994,7 @@ static LLNotificationFunctorRegistration finish_quit_reg("ConfirmQuit", finish_q
 
 void LLAppViewer::userQuit()
 {
+	LL_INFOS() << "User requested quit" << LL_ENDL;
 	if (gDisconnected
 		|| !gViewerWindow
 		|| !gViewerWindow->getProgressView()
@@ -4518,6 +4528,7 @@ void LLAppViewer::saveFinalSnapshot()
 									gViewerWindow->getWindowWidthRaw(),
 									gViewerWindow->getWindowHeightRaw(),
 									FALSE,
+									gSavedSettings.getBOOL("RenderHUDInSnapshot"),
 									TRUE,
 									LLSnapshotModel::SNAPSHOT_TYPE_COLOR,
 									LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
@@ -4844,12 +4855,13 @@ void LLAppViewer::idle()
     {
 		return;
     }
+
+    gViewerWindow->updateUI();
+
 	if (gTeleportDisplay)
     {
 		return;
     }
-
-	gViewerWindow->updateUI();
 
 	///////////////////////////////////////
 	// Agent and camera movement
@@ -5424,19 +5436,6 @@ void LLAppViewer::disconnectViewer()
 	// Pass the connection state to LLUrlEntryParcel not to attempt
 	// parcel info requests while disconnected.
 	LLUrlEntryParcel::setDisconnected(gDisconnected);
-}
-
-bool LLAppViewer::onChangeFrameLimit(LLSD const & evt)
-{
-	if (evt.asInteger() > 0)
-	{
-		mMinMicroSecPerFrame = (U64)(1000000.0f / F32(evt.asInteger()));
-	}
-	else
-	{
-		mMinMicroSecPerFrame = 0;
-	}
-	return false;
 }
 
 void LLAppViewer::forceErrorLLError()
