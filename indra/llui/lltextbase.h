@@ -610,6 +610,11 @@ protected:
 	void							updateScrollFromCursor();
 
 	// text selection
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+	bool							getCanSelect() const { return mCanSelect; }
+	void							setCanSelect(bool can_select) { deselect(); mCanSelect = can_select; }
+	bool							hasSelection() const { return mCanSelect && (mSelectionStart != mSelectionEnd); }
+// [/SL:KB]
 	bool							hasSelection() const { return (mSelectionStart !=mSelectionEnd); }
 	void 							startSelection();
 	void 							endSelection();
@@ -663,6 +668,9 @@ protected:
 	LLFrameTimer				mCursorBlinkTimer;  // timer that controls cursor blinking
 
 	// selection
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+	bool						mCanSelect = true;
+// [/SL:KB]
 	S32							mSelectionStart;
 	S32							mSelectionEnd;
 	LLTimer		                mTripleClickTimer;
