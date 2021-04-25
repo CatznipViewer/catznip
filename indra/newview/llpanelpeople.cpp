@@ -1933,6 +1933,16 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 		return name_format == NF_USERNAME;
 // [/SL:KB]
 
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
+	if ("view_permissions_never" == item)
+		return SP_NEVER == spType;
+	if ("view_permissions_hover" == item)
+		return SP_HOVER == spType;
+	if ("view_permissions_nondefault" == item)
+		return SP_NONDEFAULT == spType;
+// [/SL:KB]
+
 	return false;
 }
 
@@ -1958,16 +1968,6 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return name_format == NF_COMPLETENAME;
 	if ("name_username" == item)
 		return name_format == NF_USERNAME;
-// [/SL:KB]
-
-// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
-	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
-	if ("view_permissions_never" == item)
-		return SP_NEVER == spType;
-	if ("view_permissions_hover" == item)
-		return SP_HOVER == spType;
-	if ("view_permissions_nondefault" == item)
-		return SP_NONDEFAULT == spType;
 // [/SL:KB]
 
 	return false;
