@@ -78,6 +78,7 @@
 #include "llfloaterreporter.h"
 #include "llparcel.h"
 #include "llviewerparcelmgr.h"
+#include "llviewermenu.h"
 #include "llworld.h"
 // [/SL:KB]
 
