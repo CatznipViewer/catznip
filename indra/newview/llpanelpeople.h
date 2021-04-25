@@ -73,7 +73,10 @@ private:
 		E_SORT_BY_MOST_RECENT = 2,
 		E_SORT_BY_DISTANCE = 3,
 		E_SORT_BY_RECENT_SPEAKERS = 4,
-		E_SORT_BY_RECENT_ARRIVAL = 5
+		E_SORT_BY_RECENT_ARRIVAL = 5,
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catnzip-6.5
+        E_SORT_BY_USERNAME = 100,
+// [/SL:KB]
 	} ESortOrder;
 
     void				    removePicker();
@@ -96,6 +99,7 @@ private:
 	void					getCurrentItemIDs(uuid_vec_t& selected_uuids) const;
 	void					showGroupMenu(LLMenuGL* menu);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	EAvatarListNameFormat	getNameFormat(LLAvatarList* list);
 	void					setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save = true);
 // [/SL:KB]
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);

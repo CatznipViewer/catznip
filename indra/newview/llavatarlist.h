@@ -248,6 +248,20 @@ protected:
 	virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 };
 
+// [SL:KB] - Patch: Control-AvatarListUserNameSort | Checked: Catnzip-6.5
+class LLAvatarItemUsernameComparator : public LLAvatarItemComparator
+{
+    LOG_CLASS(LLAvatarItemUsernameComparator);
+
+public:
+    LLAvatarItemUsernameComparator() {};
+    virtual ~LLAvatarItemUsernameComparator() {};
+
+protected:
+    bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const override;
+};
+// [/SL:KB]
+
 class LLAvatarItemAgentOnTopComparator : public LLAvatarItemNameComparator
 {
 	LOG_CLASS(LLAvatarItemAgentOnTopComparator);

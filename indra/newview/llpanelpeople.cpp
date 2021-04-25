@@ -391,6 +391,9 @@ protected:
 	}
 };
 
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+static const LLAvatarItemUsernameComparator USERNAME_COMPARATOR;
+// [/SL:KB]
 static const LLAvatarItemRecentComparator RECENT_COMPARATOR;
 static const LLAvatarItemStatusComparator STATUS_COMPARATOR;
 static LLAvatarItemDistanceComparator DISTANCE_COMPARATOR;
@@ -1276,6 +1279,11 @@ void LLPanelPeople::showGroupMenu(LLMenuGL* menu)
 }
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+EAvatarListNameFormat LLPanelPeople::getNameFormat(LLAvatarList* list)
+{
+	return list->getAvatarNameFormat();
+}
+
 void LLPanelPeople::setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save)
 {
 	list->setAvatarNameFormat(name_format);
@@ -1303,6 +1311,12 @@ void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save
 	case E_SORT_BY_NAME:
 		list->sortByName();
 		break;
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    case E_SORT_BY_USERNAME:
+        list->setComparator(&USERNAME_COMPARATOR);
+        list->sort();
+        break;
+// [/SL:KB]
 	case E_SORT_BY_STATUS:
 		list->setComparator(&STATUS_COMPARATOR);
 		list->sort();
@@ -1637,7 +1651,24 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	if (chosen_item == "sort_name")
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_NAME);
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+		setSortOrder(mOnlineFriendList, E_SORT_BY_NAME);
+// [/SL:KB]
 	}
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    else if (chosen_item == "sort_username")
+    {
+        setSortOrder(mAllFriendList, E_SORT_BY_USERNAME);
+		setSortOrder(mOnlineFriendList, E_SORT_BY_USERNAME);
+
+		// Force showing of usernames if not currently visible
+		if (NF_DISPLAYNAME == getNameFormat(mAllFriendList))
+		{
+			setNameFormat(mAllFriendList, NF_COMPLETENAME);
+			setNameFormat(mOnlineFriendList, NF_COMPLETENAME, false);
+		}
+	}
+// [/SL:KB]
 	else if (chosen_item == "sort_status")
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_STATUS);
@@ -1728,6 +1759,18 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_NAME);
 	}
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    else if (chosen_item == "sort_username")
+    {
+        setSortOrder(mNearbyList, E_SORT_BY_USERNAME);
+
+		// Force showing of usernames if not currently visible
+		if (NF_DISPLAYNAME == getNameFormat(mNearbyList))
+		{
+			setNameFormat(mNearbyList, NF_COMPLETENAME);
+		}
+	}
+// [/SL:KB]
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
 	{
@@ -1796,6 +1839,10 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_RECENT_SPEAKERS;
 	if (item == "sort_name")
 		return sort_order == E_SORT_BY_NAME;
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    if (item == "sort_username")
+        return sort_order == E_SORT_BY_USERNAME;
+// [/SL:KB]
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
 	if (item == "sort_arrival")
@@ -1836,6 +1883,12 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mRecentList, E_SORT_BY_NAME);
 	}
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    else if (chosen_item == "sort_username")
+    {
+        setSortOrder(mRecentList, E_SORT_BY_USERNAME);
+    }
+// [/SL:KB]
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
 	{
@@ -1863,6 +1916,10 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 
 	if (item == "sort_name") 
 		return sort_order == E_SORT_BY_NAME;
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    if (item == "sort_username")
+        return sort_order == E_SORT_BY_USERNAME;
+// [/SL:KB]
 	if (item == "sort_status")
 		return sort_order == E_SORT_BY_STATUS;
 
@@ -1888,6 +1945,10 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_MOST_RECENT;
 	if (item == "sort_name") 
 		return sort_order == E_SORT_BY_NAME;
+// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+    if (item == "sort_username")
+        return sort_order == E_SORT_BY_USERNAME;
+// [/SL:KB]
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
 	U32 name_format = gSavedSettings.getU32("RecentPeopleNameFormat");

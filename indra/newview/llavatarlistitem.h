@@ -150,6 +150,9 @@ public:
 	
 	const LLUUID& getAvatarId() const;
 	std::string getAvatarName() const;
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: Catnzip-6.5
+	const std::string& getAvatarUsername() const { return mAvatarUsername; }
+// [/SL:KB]
 	std::string getAvatarToolTip() const;
 
 	void onInfoBtnClick();
@@ -290,7 +293,11 @@ private:
 	bool mHovered;
 	
 //	bool mShowCompleteName;
-	std::string mGreyOutUsername;
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: Catnzip-6.5
+    bool mShowUsername = true;
+    std::string mAvatarUsername;
+// [/SL:KB]
+//	std::string mGreyOutUsername;
 
 //	void fetchAvatarName();
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
