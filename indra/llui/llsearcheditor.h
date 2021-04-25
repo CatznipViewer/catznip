@@ -71,6 +71,10 @@ public:
 
 	void setText(const LLStringExplicit &new_text) { mSearchEditor->setText(new_text); }
 	const std::string& getText() const		{ return mSearchEditor->getText(); }
+// [SL:KB] - Patch: Control-SearchEditor
+	void setTextColor(const LLColor4& c) { mSearchEditor->setFgColor(c); }
+	const LLColor4& getTextColor() const { return mSearchEditor->getFgColor(); }
+// [/SL:KB]
 
 	// LLUICtrl interface
 	virtual void	setValue(const LLSD& value );
