@@ -2985,7 +2985,10 @@ void LLTextBase::updateRects()
 
 void LLTextBase::startSelection()
 {
-	if( !mIsSelecting )
+//	if( !mIsSelecting )
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+	if( !mIsSelecting && mCanSelect )
+// [/SL:KB]
 	{
 		mIsSelecting = TRUE;
 		mSelectionStart = mCursorPos;
@@ -2995,7 +2998,10 @@ void LLTextBase::startSelection()
 
 void LLTextBase::endSelection()
 {
-	if( mIsSelecting )
+//	if( mIsSelecting )
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+    if( mIsSelecting && mCanSelect )
+// [/SL:KB]
 	{
 		mIsSelecting = FALSE;
 		mSelectionEnd = mCursorPos;
