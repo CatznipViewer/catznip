@@ -682,7 +682,7 @@ protected:
 	void							setCanSelect(bool can_select) { deselect(); mCanSelect = can_select; }
 	bool							hasSelection() const { return mCanSelect && (mSelectionStart != mSelectionEnd); }
 // [/SL:KB]
-	bool							hasSelection() const { return (mSelectionStart !=mSelectionEnd); }
+//	bool							hasSelection() const { return (mSelectionStart !=mSelectionEnd); }
 	void 							startSelection();
 	void 							endSelection();
 
