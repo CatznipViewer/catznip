@@ -61,6 +61,15 @@
          parameter="sort_name"/>
     </menu_item_check>
     <menu_item_check
+     label="Username"
+     name="sort_username">
+        <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="sort_username" />
+        <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="sort_username" />
+    </menu_item_check>    <menu_item_check
        label="Distance"
        name="sort_distance">
       <menu_item_check.on_click

@@ -99,8 +99,8 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 //	mShowPermissions(false),
 //	mShowCompleteName(false),
 	mHovered(false),
-	mAvatarNameCacheConnection(),
-	mGreyOutUsername("")
+	mAvatarNameCacheConnection()
+//	mGreyOutUsername("")
 {
 	if (not_from_ui_factory)
 	{
@@ -669,12 +669,15 @@ void LLAvatarListItem::updateAvatarName(EAvatarListNameFormat name_format)
 void LLAvatarListItem::setNameInternal(const std::string& name, const std::string& highlight)
 {
 //    if(mShowCompleteName && highlight.empty())
+//    {
+//        LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, mGreyOutUsername);
+//    }
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
-	if ( (!mGreyOutUsername.empty()) && (highlight.empty()) )
-// [/SL:KB]
+    if ( (mShowUsername) && (!mAvatarUsername.empty()) && (highlight.empty()) )
     {
-        LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, mGreyOutUsername);
-    }
+		LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, llformat("(%s)", mAvatarUsername.c_str()));
+	}
+// [/SL:KB]
     else
     {
         LLTextUtil::textboxSetHighlightedVal(mAvatarName, mAvatarNameStyle, name, highlight);

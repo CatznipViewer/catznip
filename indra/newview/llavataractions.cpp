@@ -79,6 +79,7 @@
 #include "llparcel.h"
 #include "llviewermenu.h"
 #include "llviewerparcelmgr.h"
+#include "llviewermenu.h"
 #include "llworld.h"
 // [/SL:KB]
 // [RLVa:KB] - Checked: 2011-04-11 (RLVa-1.3.0)
