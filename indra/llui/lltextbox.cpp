@@ -45,8 +45,11 @@ LLTextBox::LLTextBox(const LLTextBox::Params& p)
 :	LLTextBase(p),
 	mClickedCallback(NULL),
 	mShowCursorHand(true)
-{}
-
+{
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+	setCanSelect(false);
+// [/SL:KB]
+}
 LLTextBox::~LLTextBox()
 {}
 
