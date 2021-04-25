@@ -638,8 +638,8 @@ void LLAvatarListItem::setNameInternal(const std::string& name, const std::strin
 //        LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, mGreyOutUsername);
 //    }
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
-    if ( (mShowUsername) && (!mAvatarUsername.empty()) && (highlight.empty()) )
-    {
+	if ( (mShowUsername) && (!mAvatarUsername.empty()) && (highlight.empty()) )
+	{
 		LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, llformat("(%s)", mAvatarUsername.c_str()));
 	}
 // [/SL:KB]

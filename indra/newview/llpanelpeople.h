@@ -75,7 +75,7 @@ private:
 		E_SORT_BY_RECENT_SPEAKERS = 4,
 		E_SORT_BY_RECENT_ARRIVAL = 5,
 // [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catnzip-6.5
-        E_SORT_BY_USERNAME = 100,
+		E_SORT_BY_USERNAME = 100,
 // [/SL:KB]
 	} ESortOrder;
 
