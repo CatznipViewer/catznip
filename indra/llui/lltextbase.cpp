@@ -3369,7 +3369,10 @@ void LLTextBase::updateRects()
 
 void LLTextBase::startSelection()
 {
-	if( !mIsSelecting )
+//	if( !mIsSelecting )
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+	if( !mIsSelecting && mCanSelect )
+// [/SL:KB]
 	{
 		mIsSelecting = TRUE;
 // [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
@@ -3382,7 +3385,10 @@ void LLTextBase::startSelection()
 
 void LLTextBase::endSelection()
 {
-	if( mIsSelecting )
+//	if( mIsSelecting )
+// [SL:KB] - Patch: Control-TextBox | Checked: Catznip-6.5
+    if( mIsSelecting && mCanSelect )
+// [/SL:KB]
 	{
 		mIsSelecting = FALSE;
 // [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)

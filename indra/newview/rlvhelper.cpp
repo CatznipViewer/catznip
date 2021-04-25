@@ -17,9 +17,11 @@
 #include "llviewerprecompiledheaders.h"
 #include "llappearancemgr.h"
 #include "llattachmentsmgr.h"
+#include "llfeaturemanager.h"
 #include "llgesturemgr.h"
 #include "llnotificationsutil.h"
 #include "llviewerobjectlist.h"
+#include "pipeline.h"
 
 #include "rlvcommon.h"
 #include "rlveffects.h"
@@ -146,7 +148,8 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("showloc", RLV_BHVR_SHOWLOC));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("showminimap", RLV_BHVR_SHOWMINIMAP));
 	addEntry(new RlvBehaviourToggleProcessor<RLV_BHVR_SHOWNAMES>("shownames", RlvBehaviourInfo::BHVR_STRICT));
-	addEntry(new RlvBehaviourToggleProcessor<RLV_BHVR_SHOWNAMETAGS>("shownametags", RlvBehaviourInfo::BHVR_STRICT ));
+	addEntry(new RlvBehaviourProcessor<RLV_BHVR_SHOWNAMETAGS>("shownametags", RlvBehaviourInfo::BHVR_STRICT));
+	addModifier(RLV_BHVR_SHOWNAMETAGS, RLV_MODIFIER_SHOWNAMETAGSDIST, new RlvBehaviourModifierHandler<RLV_MODIFIER_SHOWNAMETAGSDIST>("Name Tags - Visible Distance", 0.0f, true, new RlvBehaviourModifierCompMin));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SHOWNEARBY, RLV_OPTION_NONE>("shownearby", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SHOWSELF, RLV_OPTION_NONE, RlvBehaviourShowSelfToggleHandler>("showself", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SHOWSELFHEAD, RLV_OPTION_NONE, RlvBehaviourShowSelfToggleHandler>("showselfhead", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
@@ -412,7 +415,7 @@ const RlvBehaviourInfo* RlvBehaviourDictionary::getBehaviourInfo(ERlvBehaviour e
 {
 	const RlvBehaviourInfo* pBhvrInfo = nullptr;
 	for (auto itBhvrLower = m_Bhvr2InfoMap.lower_bound(eBhvr), itBhvrUpper = m_Bhvr2InfoMap.upper_bound(eBhvr);
-		 std::find_if(itBhvrLower, itBhvrUpper, [eBhvr, eParamType](const rlv_bhvr2info_map_t::value_type& bhvrEntry) { return bhvrEntry.second->getParamTypeMask() == eParamType; }) != itBhvrUpper;
+		 std::find_if(itBhvrLower, itBhvrUpper, [eParamType](const rlv_bhvr2info_map_t::value_type& bhvrEntry) { return bhvrEntry.second->getParamTypeMask() == eParamType; }) != itBhvrUpper;
 		++itBhvrLower)
 	{
 		if (pBhvrInfo)
@@ -451,7 +454,7 @@ ERlvBehaviour RlvBehaviourDictionary::getBehaviourFromString(const std::string& 
 	ERlvLocalBhvrModifier eBhvrModifier;
 	const RlvBehaviourInfo* pBhvrInfo = getBehaviourInfo(strBhvr, eParamType, pfStrict, &eBhvrModifier);
 	// Filter out locally scoped modifier commands since they don't actually have a unique behaviour value of their own
-	return (pBhvrInfo && ERlvLocalBhvrModifier::Unknown != eBhvrModifier) ? pBhvrInfo->getBehaviourType() : RLV_BHVR_UNKNOWN;
+	return (pBhvrInfo && ERlvLocalBhvrModifier::Unknown == eBhvrModifier) ? pBhvrInfo->getBehaviourType() : RLV_BHVR_UNKNOWN;
 }
 
 bool RlvBehaviourDictionary::getCommands(const std::string& strMatch, ERlvParamType eParamType, std::list<std::string>& cmdList) const
@@ -737,8 +740,8 @@ RlvCommand::RlvCommand(const LLUUID& idObj, const std::string& strCommand)
 
 RlvCommand::RlvCommand(const RlvCommand& rlvCmd, ERlvParamType eParamType)
 	: m_fValid(rlvCmd.m_fValid), m_idObj(rlvCmd.m_idObj), m_strBehaviour(rlvCmd.m_strBehaviour), m_pBhvrInfo(rlvCmd.m_pBhvrInfo)
-	, m_eParamType( (RLV_TYPE_UNKNOWN == eParamType) ? rlvCmd.m_eParamType : eParamType),m_fStrict(rlvCmd.m_fStrict), m_strOption(rlvCmd.m_strOption)
-	, m_strParam(rlvCmd.m_strParam), m_fRefCounted(rlvCmd.m_fRefCounted)
+	, m_eParamType( (RLV_TYPE_UNKNOWN == eParamType) ? rlvCmd.m_eParamType : eParamType), m_eBhvrModifier(rlvCmd.m_eBhvrModifier)
+	, m_fStrict(rlvCmd.m_fStrict), m_strOption(rlvCmd.m_strOption), m_strParam(rlvCmd.m_strParam), m_fRefCounted(rlvCmd.m_fRefCounted)
 {
 }
 
@@ -2034,6 +2037,22 @@ std::string rlvGetLastParenthesisedText(const std::string& strText, std::string:
 		return strText.substr(idxIt + 1, idxEnd - idxIt - 1);
 	}
 	return std::string();
+}
+
+// =========================================================================
+// Various helper functions
+//
+
+namespace Rlv
+{
+	void forceAtmosphericShadersIfAvailable()
+	{
+		if ( (LLFeatureManager::getInstance()->isFeatureAvailable("WindLightUseAtmosShaders")) && (!LLPipeline::WindLightUseAtmosShaders) )
+		{
+			// Triggers handleSetShaderChanged() which will do the actual work for us
+			gSavedSettings.setBOOL("WindLightUseAtmosShaders", TRUE);
+		}
+	}
 }
 
 // =========================================================================

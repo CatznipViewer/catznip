@@ -39,7 +39,7 @@ const S32 RLV_VERSION_BUILD_COMPAT = 0;
 // Implementation version
 const S32 RLVa_VERSION_MAJOR = 2;
 const S32 RLVa_VERSION_MINOR = 4;
-const S32 RLVa_VERSION_PATCH = 0;
+const S32 RLVa_VERSION_PATCH = 1;
 const S32 RLVa_IMPL_ID = 13;
 
 // Uncomment before a final release
@@ -274,6 +274,7 @@ enum ERlvBehaviourModifier
 	RLV_MODIFIER_SETCAM_FOVMIN,			// Minimum value for the camera's field of view (angle in radians)
 	RLV_MODIFIER_SETCAM_FOVMAX,			// Maximum value for the camera's field of view (angle in radians)
 	RLV_MODIFIER_SETCAM_TEXTURE,		// Specifies the UUID of the texture used to texture the world view
+	RLV_MODIFIER_SHOWNAMETAGSDIST,		// Distance at which name tags will still be shown
 	RLV_MODIFIER_SITTPDIST,
 	RLV_MODIFIER_TPLOCALDIST,
 
