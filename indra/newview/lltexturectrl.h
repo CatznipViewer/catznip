@@ -253,7 +253,6 @@ private:
 // [/SL:KB]
 	std::string				 	mLoadingPlaceholderString;
 	S32						 	mLabelWidth;
-	BOOL						mBakeTextureEnabled;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
