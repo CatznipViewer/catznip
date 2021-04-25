@@ -855,27 +855,27 @@ bool LLAvatarItemNameComparator::doCompare(const LLAvatarListItem* avatar_item1,
 	return name1 < name2;
 }
 
-// [SL:KB] - Patch: Control-AvatarListUserNameSort | Checked: Catnzip-6.5
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
 bool LLAvatarItemUsernameComparator::doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
 {
-    // RLVa anonymizing might have cleared out the user names and in that case we have to sort by anonyms (=avatar name) instead
+	// RLVa anonymizing might have cleared out the user names and in that case we have to sort by anonyms (=avatar name) instead
 
-    std::string name1 = avatar_item1->getAvatarUsername();
-    if (name1.empty())
-    {
-        name1 = avatar_item1->getAvatarName();
-    }
+	std::string name1 = avatar_item1->getAvatarUsername();
+	if (name1.empty())
+	{
+		name1 = avatar_item1->getAvatarName();
+	}
 
-    std::string name2 = avatar_item2->getAvatarUsername();
-    if (name2.empty())
-    {
-        name2 = avatar_item1->getAvatarName();
-    }
+	std::string name2 = avatar_item2->getAvatarUsername();
+	if (name2.empty())
+	{
+		name2 = avatar_item1->getAvatarName();
+	}
 
-    LLStringUtil::toUpper(name1);
-    LLStringUtil::toUpper(name2);
+	LLStringUtil::toUpper(name1);
+	LLStringUtil::toUpper(name2);
 
-    return name1 < name2;
+	return name1 < name2;
 }
 // [/SL:KB]
 

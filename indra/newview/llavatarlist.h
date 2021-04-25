@@ -266,17 +266,17 @@ protected:
 	virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 };
 
-// [SL:KB] - Patch: Control-AvatarListUserNameSort | Checked: Catnzip-6.5
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
 class LLAvatarItemUsernameComparator : public LLAvatarItemComparator
 {
-    LOG_CLASS(LLAvatarItemUsernameComparator);
+	LOG_CLASS(LLAvatarItemUsernameComparator);
 
 public:
-    LLAvatarItemUsernameComparator() {};
-    virtual ~LLAvatarItemUsernameComparator() {};
+	LLAvatarItemUsernameComparator() {};
+	virtual ~LLAvatarItemUsernameComparator() {};
 
 protected:
-    bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const override;
+	bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const override;
 };
 // [/SL:KB]
 

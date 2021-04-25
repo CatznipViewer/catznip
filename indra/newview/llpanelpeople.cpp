@@ -400,7 +400,7 @@ protected:
 	}
 };
 
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
 static const LLAvatarItemUsernameComparator USERNAME_COMPARATOR;
 // [/SL:KB]
 static const LLAvatarItemRecentComparator RECENT_COMPARATOR;
@@ -1395,11 +1395,11 @@ void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save
 	case E_SORT_BY_NAME:
 		list->sortByName();
 		break;
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    case E_SORT_BY_USERNAME:
-        list->setComparator(&USERNAME_COMPARATOR);
-        list->sort();
-        break;
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	case E_SORT_BY_USERNAME:
+		list->setComparator(&USERNAME_COMPARATOR);
+		list->sort();
+		break;
 // [/SL:KB]
 	case E_SORT_BY_STATUS:
 		list->setComparator(&STATUS_COMPARATOR);
@@ -1760,14 +1760,14 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	if (chosen_item == "sort_name")
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_NAME);
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
 		setSortOrder(mOnlineFriendList, E_SORT_BY_NAME);
 // [/SL:KB]
 	}
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    else if (chosen_item == "sort_username")
-    {
-        setSortOrder(mAllFriendList, E_SORT_BY_USERNAME);
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	else if (chosen_item == "sort_username")
+	{
+		setSortOrder(mAllFriendList, E_SORT_BY_USERNAME);
 		setSortOrder(mOnlineFriendList, E_SORT_BY_USERNAME);
 
 		// Force showing of usernames if not currently visible
@@ -1868,10 +1868,10 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_NAME);
 	}
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    else if (chosen_item == "sort_username")
-    {
-        setSortOrder(mNearbyList, E_SORT_BY_USERNAME);
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	else if (chosen_item == "sort_username")
+	{
+		setSortOrder(mNearbyList, E_SORT_BY_USERNAME);
 
 		// Force showing of usernames if not currently visible
 		if (NF_DISPLAYNAME == getNameFormat(mNearbyList))
@@ -1948,9 +1948,9 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_RECENT_SPEAKERS;
 	if (item == "sort_name")
 		return sort_order == E_SORT_BY_NAME;
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    if (item == "sort_username")
-        return sort_order == E_SORT_BY_USERNAME;
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	if (item == "sort_username")
+		return sort_order == E_SORT_BY_USERNAME;
 // [/SL:KB]
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
@@ -1992,11 +1992,11 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mRecentList, E_SORT_BY_NAME);
 	}
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    else if (chosen_item == "sort_username")
-    {
-        setSortOrder(mRecentList, E_SORT_BY_USERNAME);
-    }
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	else if (chosen_item == "sort_username")
+	{
+		setSortOrder(mRecentList, E_SORT_BY_USERNAME);
+	}
 // [/SL:KB]
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
@@ -2038,42 +2038,15 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 
 	if (item == "sort_name") 
 		return sort_order == E_SORT_BY_NAME;
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    if (item == "sort_username")
-        return sort_order == E_SORT_BY_USERNAME;
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	if (item == "sort_username")
+		return sort_order == E_SORT_BY_USERNAME;
 // [/SL:KB]
 	if (item == "sort_status")
 		return sort_order == E_SORT_BY_STATUS;
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	U32 name_format = gSavedSettings.getU32("FriendsNameFormat");
-	if ("name_displayname" == item)
-		return name_format == NF_DISPLAYNAME;
-	if ("name_fullname" == item)
-		return name_format == NF_COMPLETENAME;
-	if ("name_username" == item)
-		return name_format == NF_USERNAME;
-// [/SL:KB]
-
-	return false;
-}
-
-bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata) 
-{
-	std::string item = userdata.asString();
-	U32 sort_order = gSavedSettings.getU32("RecentPeopleSortOrder");
-
-	if (item == "sort_recent")
-		return sort_order == E_SORT_BY_MOST_RECENT;
-	if (item == "sort_name") 
-		return sort_order == E_SORT_BY_NAME;
-// [SL:KB] Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
-    if (item == "sort_username")
-        return sort_order == E_SORT_BY_USERNAME;
-// [/SL:KB]
-
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-	U32 name_format = gSavedSettings.getU32("RecentPeopleNameFormat");
 	if ("name_displayname" == item)
 		return name_format == NF_DISPLAYNAME;
 	if ("name_fullname" == item)
@@ -2090,6 +2063,33 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return SP_HOVER == spType;
 	if ("view_permissions_nondefault" == item)
 		return SP_NONDEFAULT == spType;
+// [/SL:KB]
+
+	return false;
+}
+
+bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata) 
+{
+	std::string item = userdata.asString();
+	U32 sort_order = gSavedSettings.getU32("RecentPeopleSortOrder");
+
+	if (item == "sort_recent")
+		return sort_order == E_SORT_BY_MOST_RECENT;
+	if (item == "sort_name") 
+		return sort_order == E_SORT_BY_NAME;
+// [SL:KB] - Patch: UI-SidepanelPeopleSort | Checked: Catznip-6.5
+	if (item == "sort_username")
+		return sort_order == E_SORT_BY_USERNAME;
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	U32 name_format = gSavedSettings.getU32("RecentPeopleNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
 // [/SL:KB]
 
 	return false;
