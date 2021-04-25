@@ -17,6 +17,7 @@
      left="1"
      name="floater_feedback_browser"
      right="-1"
+     tab_stop="true"
      top="20"
      />
 </floater>
