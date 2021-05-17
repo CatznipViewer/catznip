@@ -408,6 +408,9 @@ public:
 	void setUsePTT(bool usePTT);
 	void setPTTIsToggle(bool PTTIsToggle);
 	bool getPTTIsToggle();	
+// [SL:KB] - Patch: Settings-Voice | Checked: Catznip-6.5
+	void clearPTTKey();
+// [/SL:KB]
 	void setPTTKey(std::string &key);
 	
 	void updateMicMuteLogic();

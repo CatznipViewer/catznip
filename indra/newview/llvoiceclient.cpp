@@ -200,8 +200,19 @@ const LLVoiceVersionInfo LLVoiceClient::getVersion()
 void LLVoiceClient::updateSettings()
 {
 	setUsePTT(gSavedSettings.getBOOL("PTTCurrentlyEnabled"));
-	std::string keyString = gSavedSettings.getString("PushToTalkButton");
-	setPTTKey(keyString);
+// [SL:KB] - Patch: Settings-Voice | Checked: Catznip-6.5
+	if (gSavedSettings.getBOOL("UsePushToTalkButton"))
+	{
+// [/SL:KB]
+		std::string keyString = gSavedSettings.getString("PushToTalkButton");
+		setPTTKey(keyString);
+// [SL:KB] - Patch: Settings-Voice | Checked: Catznip-6.5
+	}
+	else
+	{
+		clearPTTKey();
+	}
+// [/SL:KB]
 	setPTTIsToggle(gSavedSettings.getBOOL("PushToTalkToggle"));
 	mDisableMic = gSavedSettings.getBOOL("VoiceDisableMic");
 
@@ -636,6 +647,14 @@ bool LLVoiceClient::getPTTIsToggle()
 {
 	return mPTTIsToggle;
 }
+
+// [SL:KB] - Patch: Settings-Voice | Checked: Catznip-6.5
+void LLVoiceClient::clearPTTKey()
+{
+	mPTTMouseButton = 0;
+	mPTTKey = KEY_NONE;
+}
+// [/SL:KB]
 
 void LLVoiceClient::setPTTKey(std::string &key)
 {
