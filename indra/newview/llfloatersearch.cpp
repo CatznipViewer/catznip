@@ -109,6 +109,9 @@ BOOL LLFloaterSearch::postBuild()
 {
 	LLFloaterWebContent::postBuild();
 	mWebBrowser->addObserver(this);
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+	mWebBrowser->navigateTo("about:blank");
+// [/SL:KB]
 
 	return TRUE;
 }
