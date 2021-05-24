@@ -2431,10 +2431,8 @@ void LLViewerWindow::initWorldUI()
 //	}
 
 // [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
-	if (gSavedSettings.getBOOL("PreInitSearch"))
-	{
-		LLFloaterReg::getInstance("search");
-	}
+	// Preload search (actual loading of the search page happens in LLViewerMedia::getOpenIDCookieCoro()
+	LLFloaterReg::getInstance("search");
 // [/SL:KB]
 }
 
