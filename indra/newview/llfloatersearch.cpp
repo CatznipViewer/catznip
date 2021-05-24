@@ -113,24 +113,42 @@ BOOL LLFloaterSearch::postBuild()
 	return TRUE;
 }
 
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+void LLFloaterSearch::search(const LLSD& sdParams)
+{
+	// See LLFloaterSearch::onOpen(...) and LLFloaterWebContent::onOpen(...);
+	Params p;
+	p.trusted_content = true;
+	p.allow_address_entry = false;
+	if (!p.validateBlock())
+	{
+		return;
+	}
+
+	mWebBrowser->setTrustedContent(p.trusted_content);
+	open_media(p);
+	search(p.search);
+}
+// [/SL:KB]
+
 void LLFloaterSearch::onOpen(const LLSD& key)
 {
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.1)
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: Catznip-2.1
 	if ( (key.has("category")) || (mWebBrowser->getCurrentNavUrl().empty()))
 	{
 		// New search triggered - blank the page while loading, instead of temporarily showing stale results
 		mWebBrowser->navigateTo("about:blank");
-// [/SL:KB]
-		Params p(key);
-		p.trusted_content = true;
-		p.allow_address_entry = false;
 
-		LLFloaterWebContent::onOpen(p);
-	mWebBrowser->setFocus(TRUE);
-		search(p.search);
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.1)
+		search(key);
 	}
 // [/SL:KB]
+//	Params p(key);
+//	p.trusted_content = true;
+//	p.allow_address_entry = false;
+//
+//	LLFloaterWebContent::onOpen(p);
+	mWebBrowser->setFocus(TRUE);
+//	search(p.search);
 }
 
 void LLFloaterSearch::onClose(bool app_quitting)
