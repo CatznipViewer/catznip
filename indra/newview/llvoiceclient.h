@@ -414,6 +414,9 @@ public:
 // [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
 	bool isPTTMiddleMouse() const { return mPTTMouseButton == LLMouseHandler::CLICK_MIDDLE; }
 // [/SL:KB]
+// [SL:KB] - Patch: Settings-Voice | Checked: Catznip-6.5
+	void clearPTTKey();
+// [/SL:KB]
 	void setPTTKey(std::string &key);
 	
 	void updateMicMuteLogic();

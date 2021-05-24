@@ -3153,7 +3153,15 @@ void LLVOAvatar::idleUpdateNameTag(const LLVector3& root_pos_last)
 	// First Calculate Alpha
 	// If alpha > 0, create mNameText if necessary, otherwise delete it
 	F32 alpha = 0.f;
-	if (mAppAngle > 5.f)
+//	if (mAppAngle > 5.f)
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-6.5
+	if (mVisibleChat && !mChats.empty())
+	{
+		// If 'bubble chat' is enabled and chat is showing then show the tag with no alpha
+		alpha = 1.f;
+	}
+	else if (mAppAngle > 5.f)
+// [/SL:KB]
 	{
 		const F32 START_FADE_TIME = NAME_SHOW_TIME - FADE_DURATION;
 		if (!visible_chat && sRenderName == RENDER_NAME_FADE && time_visible > START_FADE_TIME)

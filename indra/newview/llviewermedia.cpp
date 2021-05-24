@@ -37,6 +37,9 @@
 #include "lldiriterator.h"
 #include "llevent.h"		// LLSimpleListener
 #include "llfilepicker.h"
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+#include "llfloatersearch.h"
+// [/SL:KB]
 #include "llfloaterwebcontent.h"	// for handling window close requests and geometry change requests in media browser windows.
 #include "llfocusmgr.h"
 #include "llkeyboard.h"
@@ -1247,45 +1250,56 @@ void LLViewerMedia::getOpenIDCookieCoro(std::string url)
     httpOpts->setFollowRedirects(true);
     httpOpts->setWantHeaders(true);
 
-    LLURL hostUrl(url.c_str());
-    std::string hostAuth = hostUrl.getAuthority();
-
-    // *TODO: Expand LLURL to split and extract this information better. 
-    // The structure of a URL is well defined and needing to retrieve parts of it are common.
-    // original comment:
-    // The LLURL can give me the 'authority', which is of the form: [username[:password]@]hostname[:port]
-    // We want just the hostname for the cookie code, but LLURL doesn't seem to have a way to extract that.
-    // We therefore do it here.
-    std::string authority = getInstance()->mOpenIDURL.mAuthority;
-    std::string::size_type hostStart = authority.find('@');
-    if (hostStart == std::string::npos)
-    {   // no username/password
-        hostStart = 0;
-    }
-    else
-    {   // Hostname starts after the @. 
-			// Hostname starts after the @. 
-        // (If the hostname part is empty, this may put host_start at the end of the string.  In that case, it will end up passing through an empty hostname, which is correct.)
-        ++hostStart;
-    }
-    std::string::size_type hostEnd = authority.rfind(':');
-    if ((hostEnd == std::string::npos) || (hostEnd < hostStart))
-    {   // no port
-        hostEnd = authority.size();
-    }
-    
+//    LLURL hostUrl(url.c_str());
+//    std::string hostAuth = hostUrl.getAuthority();
+//
+//    // *TODO: Expand LLURL to split and extract this information better. 
+//    // The structure of a URL is well defined and needing to retrieve parts of it are common.
+//    // original comment:
+//    // The LLURL can give me the 'authority', which is of the form: [username[:password]@]hostname[:port]
+//    // We want just the hostname for the cookie code, but LLURL doesn't seem to have a way to extract that.
+//    // We therefore do it here.
+//    std::string authority = getInstance()->mOpenIDURL.mAuthority;
+//    std::string::size_type hostStart = authority.find('@');
+//    if (hostStart == std::string::npos)
+//    {   // no username/password
+//        hostStart = 0;
+//    }
+//    else
+//    {   // Hostname starts after the @. 
+//			// Hostname starts after the @. 
+//        // (If the hostname part is empty, this may put host_start at the end of the string.  In that case, it will end up passing through an empty hostname, which is correct.)
+//        ++hostStart;
+//    }
+//    std::string::size_type hostEnd = authority.rfind(':');
+//    if ((hostEnd == std::string::npos) || (hostEnd < hostStart))
+//    {   // no port
+//        hostEnd = authority.size();
+//    }
+//    
 	LLViewerMedia* inst = getInstance();
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+#ifdef CATZNIP
 	if (url.length())
 	{
-// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
-		if (LLFloater* pFloater = LLFloaterReg::findInstance("destinations"))
+		if (LLFloaterSearch* pWebSearchFloater = LLFloaterReg::getTypedInstance<LLFloaterSearch>("search_web"))
 		{
-			if (LLMediaCtrl* pMediaCtrl = pFloater->getChild<LLMediaCtrl>("destination_guide_contents"))
-			{
-				inst->setOpenIDCookie(pMediaCtrl);
-			}
+			// May 2021 - when we load a page from *.secondlife.com we'll first be redirected to id.secondlife.com
+			//            which requires us to have the agni_sl_session_id cookie (from login.cgi) set before it'll
+			//            auto-authenticate us.
+			//            In the vanilla viewer LL sets this cookie on the media control in the destinations floater
+			//            but since UI-Misc stops that being auto-initialized during start-up the cookie is never set
+			//            and users won't be auto-logged in into their profile, search or the marketplace.
+			//            Preloading search has the advantage of making search appear more responsive and it guarantees
+			//            us a media browser and subsequent web request just in case the token has a limited lifetime.
+			inst->setOpenIDCookie(pWebSearchFloater->getMediaCtrl());
+			pWebSearchFloater->search(LLSD());
 		}
+	}
+#endif // CATZNIP
 // [/SL:KB]
+//	if (url.length())
+//	{
 //		LLMediaCtrl* media_instance = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
 //		if (media_instance)
 //		{
@@ -1310,7 +1324,7 @@ void LLViewerMedia::getOpenIDCookieCoro(std::string url)
 //				media_instance->getMediaPlugin()->setCookie(cefUrl, cookie_name, cookie_value, cookie_host, cookie_path, httponly, secure);
 //			}
 //		}
-	}
+//	}
 
     // Note: Rider: MAINT-6392 - Some viewer code requires access to the my.sl.com openid cookie for such 
     // actions as posting snapshots to the feed.  This is handled through HTTPCore rather than CEF and so 
