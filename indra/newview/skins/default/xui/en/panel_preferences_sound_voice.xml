@@ -29,7 +29,7 @@
      left="30"
      name="voice_chat_settings"
      width="200"
-     top_pad="20">
+     top_pad="10">
       Voice Chat Settings
     </text>
     <check_box
@@ -48,7 +48,7 @@
      follows="left|top"
      layout="topleft"
 	   left="67"
-	   top_pad="10"
+	   top_pad="5"
      name="Listen from"
      width="112">
         Listen from:
@@ -62,7 +62,7 @@
 		mouse_opaque="false"
 		visible="true"
 		width="18"
-		left="100"
+		left="80"
 		top_pad="8"/>
 	<icon
 		follows="left|top"
@@ -80,7 +80,7 @@
      control_name="VoiceEarLocation"
      follows="left|top"
      layout="topleft"
-     left="125"
+     left="105"
      width="360"
      height="60"
      name="ear_location"
@@ -115,44 +115,94 @@
      top_pad="1"
      width="200" />
    </radio_group>
-  <check_box
-   enabled_control="EnableVoiceChat"
-   control_name="LipSyncEnabled"
-   follows="left|top"
-   height="20"
-   label="Move avatar lips when speaking"
-   layout="topleft"
-   left="67"
-   name="enable_lip_sync"
-   top_pad="5" 
-   width="237"/>
- <check_box
-  follows="top|left"
-  enabled_control="EnableVoiceChat"
-  control_name="PushToTalkToggle"
-  height="20"
-  label="Toggle speak on/off when I press:"
-  layout="topleft"
-  left="67"
-  name="push_to_talk_toggle_check"
-  width="350"
-  tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
-  top_pad="2"/>
+
+    <!-- Voice mode -->
+    <text
+     follows="top|left"
+     layout="topleft"
+     left="67"
+     length="1"
+     name="voice_mode_text"
+     top_pad="10"
+     type="string"
+     width="112"
+     >
+        Voice mode:
+    </text>
+    <radio_group
+     control_name="PushToTalkToggle"
+     enabled_control="EnableVoiceChat"
+     follows="left|top"
+     height="42"
+     layout="topleft"
+     left="105"
+     name="voice_mode_radio"
+     top_delta="13"
+     tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
+     width="360"
+     >
+        <radio_item
+         follows="left|top"
+         height="19"
+         label="Push to talk"
+         layout="topleft"
+         name="voice_mode_ptt"
+         top_pad="1"
+         value="0"
+         width="200"
+         />
+        <radio_item
+         follows="left|top"
+         height="19"
+         label="Toggle talk on/off"
+         layout="topleft"
+         left_delta="0"
+         name="voice_mode_toggle"
+         top_pad="1"
+         value="1"
+         width="200"
+         />
+    </radio_group>
+
+    <!-- Trigger key -->
+    <check_box
+     follows="top|left"
+     enabled_control="EnableVoiceChat"
+     control_name="UsePushToTalkButton"
+     height="20"
+     label="Use shortcut key:"
+     layout="topleft"
+     left="67"
+     name="push_to_talk_toggle_check"
+     width="350"
+     top_pad="2"
+     />
+    <panel
+     enabled_control="EnableVoiceChat"
+     follows="top|left|right"
+     height="25"
+     layout="topleft"
+     left="88"
+     name="push_to_talk_toggle_panel"
+     right="-15"
+     top_pad="0"
+     >
+
   <line_editor
    follows="top|left"
    control_name="PushToTalkButton"
    enabled="false"
-   enabled_control="EnableVoiceChat"
    height="23"
-   left="88"
+   left="0"
    max_length_bytes="200"
    name="modifier_combo"
    label="Push-to-Speak trigger"
+   top="2"
    width="200" />
   <button
    layout="topleft"
    follows="top|left"
-   enabled_control="EnableVoiceChat"
+   enabled_control="UsePushToTalkButton"
    height="23"
    label="Set Key"
    left_pad="5"
@@ -162,7 +212,7 @@
     function="Pref.VoiceSetKey" />
   </button>
   <button
-     enabled_control="EnableVoiceChat"
+     enabled_control="UsePushToTalkButton"
      follows="top|left"
      halign="center"
      height="23"
@@ -176,6 +226,19 @@
     <button.commit_callback
     function="Pref.VoiceSetMiddleMouse" />
   </button>
+    </panel>
+
+  <check_box
+   enabled_control="EnableVoiceChat"
+   control_name="LipSyncEnabled"
+   follows="left|top"
+   height="20"
+   label="Move avatar lips when speaking"
+   layout="topleft"
+   left="67"
+   name="enable_lip_sync"
+   top_pad="2" 
+   width="237"/>
   <button
    control_name="ShowDeviceSettings"
    follows="left|top"
@@ -184,7 +247,7 @@
    label="Voice Input/Output devices"
    layout="topleft"
    left="70"
-   top_pad="10"
+   top_pad="3"
    name="device_settings_btn"
    width="190">
   </button>
