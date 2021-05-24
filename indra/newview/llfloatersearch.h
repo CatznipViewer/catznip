@@ -69,12 +69,19 @@ public:
 
 	/*virtual*/ void onClose(bool app_quitting);
 
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+protected:
+// [/SL:KB]
 	/// perform a search with the specific search term.
 	/// The key should be a map that can contain the following keys:
 	///  - "id": specifies the text phrase to search for
 	///  - "category": one of "all" (default), "people", "places",
 	///    "events", "groups", "wiki", "destinations", "classifieds"
 	void search(const SearchQuery &query);
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+public:
+	void search(const LLSD& sdParams);
+// [/SL:KB]
 
 	/// changing godmode can affect the search results that are
 	/// returned by the search website - use this method to tell the
