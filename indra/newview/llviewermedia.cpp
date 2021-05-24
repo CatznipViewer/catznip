@@ -37,6 +37,9 @@
 #include "lldiriterator.h"
 #include "llevent.h"		// LLSimpleListener
 #include "llfilepicker.h"
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+#include "llfloatersearch.h"
+// [/SL:KB]
 #include "llfloaterwebcontent.h"	// for handling window close requests and geometry change requests in media browser windows.
 #include "llfocusmgr.h"
 #include "llkeyboard.h"
@@ -1267,6 +1270,26 @@ void LLViewerMedia::getOpenIDCookieCoro(std::string url)
     }
     
 	LLViewerMedia* inst = getInstance();
+// [SL:KB] - Patch: UI-Search | Checked: Catznip-6.5
+#ifdef CATZNIP
+	if (url.length())
+	{
+		if (LLFloaterSearch* pWebSearchFloater = LLFloaterReg::getTypedInstance<LLFloaterSearch>("search_web"))
+		{
+			// May 2021 - when we load a page from *.secondlife.com we'll first be redirected to id.secondlife.com
+			//            which requires us to have the agni_sl_session_id cookie (from login.cgi) set before it'll
+			//            auto-authenticate us.
+			//            In the vanilla viewer LL sets this cookie on the media control in the destinations floater
+			//            but since UI-Misc stops that being auto-initialized during start-up the cookie is never set
+			//            and users won't be auto-logged in into their profile, search or the marketplace.
+			//            Preloading search has the advantage of making search appear more responsive and it guarantees
+			//            us a media browser and subsequent web request just in case the token has a limited lifetime.
+			inst->setOpenIDCookie(pWebSearchFloater->getMediaCtrl());
+			pWebSearchFloater->search(LLSD());
+		}
+	}
+#endif // CATZNIP
+// [/SL:KB]
 	if (url.length())
 	{
 		LLMediaCtrl* media_instance = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");

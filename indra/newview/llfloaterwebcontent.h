@@ -84,6 +84,7 @@ public:
 	/* virtual */ void draw();
 
 // [SL:KB] - Patch: Control-FloaterWebContent | Checked: 2012-09-30 (Catznip-3.3)
+	LLMediaCtrl* getMediaCtrl() const { return mWebBrowser; }
 	bool getShowPageTitle() const { return mShowPageTitle; }
 	void setShowPageTitle(bool show_page_title) { mShowPageTitle = show_page_title; }
 // [/SL:KB]
