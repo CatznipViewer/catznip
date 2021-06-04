@@ -1063,7 +1063,7 @@ void LLPipeline::updateRenderDeferred()
                       RenderDeferred &&
                       LLRenderTarget::sUseFBO &&
                       LLPipeline::sRenderBump &&
-                      LLPipeline::sRenderTransparentWater &&
+//                      LLPipeline::sRenderTransparentWater &&
                       RenderAvatarVP &&
                       WindLightUseAtmosShaders &&
                       (bool) LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred");
@@ -9277,7 +9277,7 @@ void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 		return;
 	}
 
-    if (!LLDrawPoolWater::sNeedsReflectionUpdate)
+    if (!LLDrawPoolWater::sNeedsReflectionUpdate || !LLPipeline::sRenderTransparentWater)
     {
 		// Render the part that affects the sky
 		{
