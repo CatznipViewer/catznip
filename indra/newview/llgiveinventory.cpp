@@ -49,6 +49,7 @@
 #include "llvoavatarself.h"
 // [RLVa:KB] - Checked: RLVa-1.2.2
 #include "llavatarnamecache.h"
+#include "llslurl.h"
 #include "rlvactions.h"
 #include "rlvcommon.h"
 #include "rlvui.h"
@@ -200,7 +201,10 @@ bool LLGiveInventory::doGiveInventoryItem(const LLUUID& to_agent,
 	if (item->getPermissions().allowCopyBy(gAgentID))
 	{
 		// just give it away.
-		LLGiveInventory::commitGiveInventoryItem(to_agent, item, im_session_id);
+// [RLVa:KB] - @share
+		res = LLGiveInventory::commitGiveInventoryItem(to_agent, item, im_session_id);
+// [/RLVa:KB]
+//		LLGiveInventory::commitGiveInventoryItem(to_agent, item, im_session_id);
 	}
 	else
 	{
@@ -368,6 +372,14 @@ bool LLGiveInventory::handleCopyProtectedItem(const LLSD& notification, const LL
 	switch(option)
 	{
 	case 0:  // "Yes"
+// [RLVa:KB] - @share
+		if ( (RlvActions::isRlvEnabled()) && (!RlvActions::canGiveInventory(notification["payload"]["agent_id"].asUUID())) )
+		{
+			RlvUtil::notifyBlocked(RlvStringKeys::Blocked::Share, LLSD().with("RECIPIENT", LLSLURL("agent", notification["payload"]["agent_id"], "completename").getSLURLString()));
+			return false;
+		}
+// [/RLVa:KB]
+
 		for (LLSD::array_iterator it = itmes.beginArray(); it != itmes.endArray(); it++)
 		{
 			item = gInventory.getItem((*it).asUUID());
@@ -401,11 +413,24 @@ bool LLGiveInventory::handleCopyProtectedItem(const LLSD& notification, const LL
 }
 
 // static
-void LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
+//void LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
+//												const LLInventoryItem* item,
+//												const LLUUID& im_session_id)
+// [RLVa:KB] - @share
+bool LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
 												const LLInventoryItem* item,
 												const LLUUID& im_session_id)
+// [/RLVa:KB]
 {
-	if (!item) return;
+//	if (!item) return;
+// [RLVa:KB] - @share
+	if (!item) return false;
+	if ( (RlvActions::isRlvEnabled()) && (!RlvActions::canGiveInventory(to_agent)) )
+	{
+		return false;
+	}
+// [/RLVa:KB]
+
 	std::string name;
 	std::string item_name = item->getName();
 	LLAgentUI::buildFullname(name);
@@ -458,6 +483,7 @@ void LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
 // [/SL:KB]
 //		LLRecentPeople::instance().add(to_agent);
 	}
+	return true;
 // [/RLVa:KB]
 }
 
@@ -473,6 +499,14 @@ bool LLGiveInventory::handleCopyProtectedCategory(const LLSD& notification, cons
 		cat = gInventory.getCategory(notification["payload"]["folder_id"].asUUID());
 		if (cat)
 		{
+// [RLVa:KB] - @share
+			if ( (RlvActions::isRlvEnabled()) && (!RlvActions::canGiveInventory(notification["payload"]["agent_id"].asUUID())) )
+			{
+				RlvUtil::notifyBlocked(RlvStringKeys::Blocked::Share, LLSD().with("RECIPIENT", LLSLURL("agent", notification["payload"]["agent_id"], "completename").getSLURLString()));
+				return false;
+			}
+// [/RLVa:KB]
+
 			give_successful = LLGiveInventory::commitGiveInventoryCategory(notification["payload"]["agent_id"].asUUID(),
 				cat);
 			LLViewerInventoryCategory::cat_array_t cats;
@@ -520,6 +554,13 @@ bool LLGiveInventory::commitGiveInventoryCategory(const LLUUID& to_agent,
 	{
 		return false;
 	}
+// [RLVa:KB] - @share
+	if ( (RlvActions::isRlvEnabled()) && (!RlvActions::canGiveInventory(to_agent)) )
+	{
+		return false;
+	}
+// [/RLVa:KB]
+
 	LL_INFOS() << "LLGiveInventory::commitGiveInventoryCategory() - "
 		<< cat->getUUID() << LL_ENDL;
 

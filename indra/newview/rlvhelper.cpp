@@ -102,7 +102,9 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvBehaviourInfo("detachthis_except",		RLV_BHVR_DETACHTHISEXCEPT,		RLV_TYPE_ADDREM, RlvBehaviourInfo::FORCEWEAR_NODE));
 	addEntry(new RlvBehaviourInfo("detachallthis_except",	RLV_BHVR_DETACHTHISEXCEPT,		RLV_TYPE_ADDREM, RlvBehaviourInfo::FORCEWEAR_SUBTREE));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_EDIT, RLV_OPTION_NONE_OR_EXCEPTION>("edit"));
+	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("editattach", RLV_BHVR_EDITATTACH));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_EXCEPTION>("editobj", RLV_BHVR_EDITOBJ));
+	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("editworld", RLV_BHVR_EDITWORLD));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_VIEWTRANSPARENT, RLV_OPTION_NONE>("viewtransparent", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_VIEWWIREFRAME, RLV_OPTION_NONE>("viewwireframe", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("emote", RLV_BHVR_EMOTE));
@@ -138,6 +140,7 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETDEBUG, RLV_OPTION_NONE>("setdebug"));
 //	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETENV, RLV_OPTION_NONE>("setenv"));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("setgroup", RLV_BHVR_SETGROUP));
+	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE_OR_EXCEPTION>("share", RLV_BHVR_SHARE, RlvBehaviourInfo::BHVR_STRICT));
 	addEntry(new RlvBehaviourInfo("sharedunwear",			RLV_BHVR_SHAREDUNWEAR,			RLV_TYPE_ADDREM, RlvBehaviourInfo::BHVR_EXTENDED));
 	addEntry(new RlvBehaviourInfo("sharedwear",				RLV_BHVR_SHAREDWEAR,			RLV_TYPE_ADDREM, RlvBehaviourInfo::BHVR_EXTENDED));
 	addEntry(new RlvBehaviourProcessor<RLV_BHVR_SHOWHOVERTEXT>("showhovertext"));
@@ -165,7 +168,7 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("temprun", RLV_BHVR_TEMPRUN));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("touchall", RLV_BHVR_TOUCHALL));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE_OR_EXCEPTION>("touchattach", RLV_BHVR_TOUCHATTACH));
-	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("touchattachother", RLV_BHVR_TOUCHATTACHOTHER));
+	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE_OR_EXCEPTION>("touchattachother", RLV_BHVR_TOUCHATTACHOTHER));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE>("touchattachself", RLV_BHVR_TOUCHATTACHSELF));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE_OR_MODIFIER>("touchfar", RLV_BHVR_FARTOUCH, RlvBehaviourInfo::BHVR_SYNONYM));
 	addEntry(new RlvBehaviourGenericProcessor<RLV_OPTION_NONE_OR_EXCEPTION>("touchhud", RLV_BHVR_TOUCHHUD, RlvBehaviourInfo::BHVR_EXTENDED));
@@ -221,16 +224,16 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETCAM_UNLOCK, RLV_OPTION_NONE>("camunlock", RlvBehaviourInfo::BHVR_SYNONYM | RlvBehaviourInfo::BHVR_DEPRECATED));
 
 	// Overlay
-	RlvBehaviourInfo* pSetOverlayBhvr = new RlvBehaviourGenericToggleProcessor<RLV_BHVR_SETOVERLAY, RLV_OPTION_NONE_OR_MODIFIER>("setoverlay");
+	RlvBehaviourInfo* pSetOverlayBhvr = new RlvBehaviourProcessor<RLV_BHVR_SETOVERLAY>("setoverlay");
 	pSetOverlayBhvr->addModifier(ERlvLocalBhvrModifier::OverlayAlpha, typeid(float), "alpha", &RlvOverlayEffect::onAlphaValueChanged);
 	pSetOverlayBhvr->addModifier(ERlvLocalBhvrModifier::OverlayTexture, typeid(LLUUID), "texture", &RlvOverlayEffect::onTextureChanged);
 	pSetOverlayBhvr->addModifier(ERlvLocalBhvrModifier::OverlayTint, typeid(LLVector3), "tint", &RlvOverlayEffect::onColorValueChanged);
 	pSetOverlayBhvr->addModifier(ERlvLocalBhvrModifier::OverlayTouch, typeid(LLVector3), "touch", &RlvOverlayEffect::onBlockTouchValueChanged);
 	addEntry(pSetOverlayBhvr);
-	addEntry(new RlvForceProcessor<RLV_BHVR_SETOVERLAY_TWEEN>("setoverlay_tween", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
+	addEntry(new RlvForceProcessor<RLV_BHVR_SETOVERLAY_TWEEN>("setoverlay_tween"));
 
 	// Sphere
-	RlvBehaviourInfo* pSetSphereBhvr = new RlvBehaviourProcessor<RLV_BHVR_SETSPHERE>("setsphere", RlvBehaviourInfo::BHVR_EXPERIMENTAL);
+	RlvBehaviourInfo* pSetSphereBhvr = new RlvBehaviourProcessor<RLV_BHVR_SETSPHERE>("setsphere");
 	pSetSphereBhvr->addModifier(ERlvLocalBhvrModifier::SphereMode, typeid(int), "mode", &RlvSphereEffect::onModeChanged);
 	pSetSphereBhvr->addModifier(ERlvLocalBhvrModifier::SphereOrigin, typeid(int), "origin", &RlvSphereEffect::onOriginChanged);
 	pSetSphereBhvr->addModifier(ERlvLocalBhvrModifier::SphereColor, typeid(LLVector3), "color", &RlvSphereEffect::onColorChanged);
@@ -289,6 +292,7 @@ RlvBehaviourDictionary::RlvBehaviourDictionary()
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETCAM_MODE>("setcam_mode", RlvBehaviourInfo::BHVR_EXPERIMENTAL));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SETGROUP>("setgroup"));
 	addEntry(new RlvForceProcessor<RLV_BHVR_SIT>("sit"));
+	addEntry(new RlvForceProcessor<RLV_BHVR_SITGROUND>("sitground"));
 	addEntry(new RlvForceProcessor<RLV_BHVR_TPTO>("tpto"));
 	addEntry(new RlvBehaviourInfo("unsit",					RLV_BHVR_UNSIT,					RLV_TYPE_FORCE));
 
@@ -1921,6 +1925,22 @@ void RlvBehaviourNotifyHandler::onReattach(const LLViewerJointAttachment* pAttac
 	sendNotification(llformat("reattached %s %s", (fAllowed) ? "legally" : "illegally", pAttachPt->getName().c_str()));
 }
 
+void RlvBehaviourNotifyHandler::onSit(const LLUUID& idObj, bool fAllowed)
+{
+	if (idObj.isNull())
+		sendNotification(llformat("sat ground %s", (fAllowed) ? "legally" : "illegally"));
+	else
+		sendNotification(llformat("sat object %s %s", (fAllowed) ? "legally" : "illegally", idObj.asString().c_str()));
+}
+
+void RlvBehaviourNotifyHandler::onStand(const LLUUID& idObj, bool fAllowed)
+{
+	if (idObj.isNull())
+		sendNotification(llformat("unsat ground %s", (fAllowed) ? "legally" : "illegally"));
+	else
+		sendNotification(llformat("unsat object %s %s", (fAllowed) ? "legally" : "illegally", idObj.asString().c_str()));
+}
+
 // =========================================================================
 // Various helper classes/timers/functors
 //
@@ -2052,6 +2072,27 @@ namespace Rlv
 			// Triggers handleSetShaderChanged() which will do the actual work for us
 			gSavedSettings.setBOOL("WindLightUseAtmosShaders", TRUE);
 		}
+	}
+
+	int getObjectLinkNumber(const LLUUID& idObj)
+	{
+		const LLViewerObject* pObj = gObjectList.findObject(idObj);
+		const LLViewerObject* pRootObj = (pObj) ? pObj->getRootEdit() : nullptr;
+		if ( (!pRootObj) || (pRootObj->getChildren().empty()) )
+			return 0;
+		else if (pRootObj == pObj)
+			return 1;
+		return 2 + std::distance(pRootObj->getChildren().begin(), std::find(pRootObj->getChildren().begin(), pRootObj->getChildren().end(), pObj));
+	}
+
+	const LLUUID& getObjectRootId(const LLUUID& idObj)
+	{
+		if (const LLViewerObject* pObj = gObjectList.findObject(idObj))
+		{
+			pObj = pObj->getRootEdit();
+			return pObj->getID();
+		}
+		return idObj;
 	}
 }
 
