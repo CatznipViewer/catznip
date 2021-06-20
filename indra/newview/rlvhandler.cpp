@@ -887,10 +887,7 @@ void RlvHandler::setCameraOverride(bool fOverride)
 // Checked: 2010-08-29 (RLVa-1.2.1c) | Modified: RLVa-1.2.1c
 void RlvHandler::onSitOrStand(bool fSitting)
 {
-	if (rlv_handler_t::isEnabled())
-	{
-		RlvSettings::updateLoginLastLocation();
-	}
+	RlvSettings::updateLoginLastLocation();
 
 	if ( (hasBehaviour(RLV_BHVR_STANDTP)) && (!fSitting) && (!m_posSitSource.isExactlyZero()) )
 	{
@@ -901,6 +898,30 @@ void RlvHandler::onSitOrStand(bool fSitting)
 		//   -> postponing the teleport until the next idle tick will ensure that everything has all been properly cleaned up
 		doOnIdleOneTime(boost::bind(RlvUtil::forceTp, m_posSitSource));
 		m_posSitSource.setZero();
+	}
+	else if ( (!fSitting) && (m_fPendingGroundSit) )
+	{
+		gAgent.setControlFlags(AGENT_CONTROL_SIT_ON_GROUND);
+		send_agent_update(TRUE, TRUE);
+
+		m_fPendingGroundSit = false;
+		m_idPendingSitActor = m_idPendingUnsitActor;
+	}
+
+	if (isAgentAvatarValid())
+	{
+		const LLViewerObject* pSitObj = static_cast<const LLViewerObject*>(gAgentAvatarp->getParent());
+		const LLUUID& idSitObj = (pSitObj) ? pSitObj->getID() : LLUUID::null;
+		if (fSitting)
+		{
+			RlvBehaviourNotifyHandler::instance().onSit(idSitObj, !gRlvHandler.hasBehaviourExcept(RLV_BHVR_SIT, m_idPendingSitActor));
+			m_idPendingSitActor.setNull();
+		}
+		else
+		{
+			RlvBehaviourNotifyHandler::instance().onStand(idSitObj, !gRlvHandler.hasBehaviourExcept(RLV_BHVR_UNSIT, m_idPendingUnsitActor));
+			m_idPendingUnsitActor.setNull();
+		}
 	}
 }
 
@@ -2735,6 +2756,9 @@ ERlvCmdRet RlvHandler::processForceCommand(const RlvCommand& rlvCmd) const
 				{
 					gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
 					send_agent_update(TRUE, TRUE);	// See behaviour notes on why we have to force an agent update here
+
+					gRlvHandler.m_idPendingSitActor.setNull();
+					gRlvHandler.m_idPendingUnsitActor = gRlvHandler.getCurrentObject();
 				}
 			}
 			break;
@@ -3177,6 +3201,34 @@ ERlvCmdRet RlvForceHandler<RLV_BHVR_SETGROUP>::onCommand(const RlvCommand& rlvCm
 	return (fValid) ? RLV_RET_SUCCESS : RLV_RET_FAILED_OPTION;
 }
 
+// Handles: @sitground=force
+template<> template<>
+ERlvCmdRet RlvForceHandler<RLV_BHVR_SITGROUND>::onCommand(const RlvCommand& rlvCmd)
+{
+	if ( (!RlvActions::canGroundSit(rlvCmd.getObjectID())) || (!isAgentAvatarValid()) )
+		return RLV_RET_FAILED_LOCK;
+
+	if (!gAgentAvatarp->isSitting())
+	{
+		gAgent.setControlFlags(AGENT_CONTROL_SIT_ON_GROUND);
+
+		gRlvHandler.m_fPendingGroundSit = false;
+		gRlvHandler.m_idPendingSitActor = gRlvHandler.getCurrentObject();
+		gRlvHandler.m_idPendingUnsitActor.setNull();
+	}
+	else if (gAgentAvatarp->getParent())
+	{
+		gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
+
+		gRlvHandler.m_fPendingGroundSit = true;
+		gRlvHandler.m_idPendingSitActor.setNull();
+		gRlvHandler.m_idPendingUnsitActor = gRlvHandler.getCurrentObject();
+	}
+	send_agent_update(TRUE, TRUE);
+
+	return RLV_RET_SUCCESS;
+}
+
 // Handles: @sit:<uuid>=force
 template<> template<>
 ERlvCmdRet RlvForceHandler<RLV_BHVR_SIT>::onCommand(const RlvCommand& rlvCmd)
@@ -3188,10 +3240,7 @@ ERlvCmdRet RlvForceHandler<RLV_BHVR_SIT>::onCommand(const RlvCommand& rlvCmd)
 	LLViewerObject* pObj = NULL;
 	if (idTarget.isNull())
 	{
-		if ( (!RlvActions::canGroundSit()) || ((isAgentAvatarValid()) && (gAgentAvatarp->isSitting())) )
-			return RLV_RET_FAILED_LOCK;
-		gAgent.sitDown();
-		send_agent_update(TRUE, TRUE);
+		return RlvForceHandler<RLV_BHVR_SITGROUND>::onCommand(rlvCmd);
 	}
 	else if ( ((pObj = gObjectList.findObject(idTarget)) != NULL) && (LL_PCODE_VOLUME == pObj->getPCode()))
 	{
@@ -3214,6 +3263,9 @@ ERlvCmdRet RlvForceHandler<RLV_BHVR_SIT>::onCommand(const RlvCommand& rlvCmd)
 		gMessageSystem->addUUIDFast(_PREHASH_TargetID, pObj->mID);
 		gMessageSystem->addVector3Fast(_PREHASH_Offset, LLVector3::zero);
 		pObj->getRegion()->sendReliableMessage();
+
+		gRlvHandler.m_idPendingSitActor = gRlvHandler.getCurrentObject();
+		gRlvHandler.m_idPendingUnsitActor.setNull();
 	}
 	else
 	{
