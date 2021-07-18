@@ -991,6 +991,9 @@ class DarwinManifest(ViewerManifest):
                     self.run_command(
                         ['strip', '-S', executable])
 
+            print "Copying updater scripts..."
+            self.path2basename("../viewer_components/updater/scripts/darwin", "*.py")
+
             with self.prefix(dst="Resources"):
                 # defer cross-platform file copies until we're in the
                 # nested Resources directory
@@ -1230,6 +1233,11 @@ class DarwinManifest(ViewerManifest):
                         with self.prefix(src='plugins', dst=""):
                             self.path( "*.dylib" )
                             self.path( "plugins.dat" )
+
+    def copy_finish(self):
+        # Force executable permissions to be set for the updater scripts
+        for script in 'Contents/MacOS/update_install.py',:
+            self.run_command(["chmod", "+x", os.path.join(self.get_dst_prefix(), script)])
 
     def package_finish(self):
         global CHANNEL_VENDOR_BASE
