@@ -2148,8 +2148,18 @@ BOOL LLScrollListCtrl::handleKeyHere(KEY key,MASK mask )
 {
 	BOOL handled = FALSE;
 
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: Catznip-6.5
+	if (mKeyHandler)
+	{
+		handled = mKeyHandler(this, key, mask);
+	}
+// [/SL:KB]
+
 	// not called from parent means we have keyboard focus or a child does
-	if (mCanSelect) 
+//	if (mCanSelect) 
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: Catznip-6.5
+	if (!handled && mCanSelect)
+// [/SL:KB]
 	{
 		if (mask == MASK_NONE)
 		{
