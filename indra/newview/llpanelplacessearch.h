@@ -59,9 +59,13 @@ public:
 	void searchNext();
 
 protected:
+	void onParcelLoaded(const LLUUID& idParcel);
 	void onResultSelect();
-	void onSearchBtn();
+	void onSearchBtn(bool fFocusResults);
+	bool onSearchEditorKeyPress(KEY key, MASK mask);
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
+	void onSearchResultsDoubleClick();
+	bool onSearchResultsKeyPress(KEY key, MASK mask);
 	void onSelectCategory();
 	void onShowOnMapBtn();
 	void onTeleportBtn();
@@ -78,6 +82,7 @@ protected:
 
 	std::string m_strCurQuery;
 	LLUUID      m_idCurQuery;
+	LLUUID      m_idTeleportOnLoad;
 	U32         m_nCurIndex;
 	U32         m_nCurResults;
 
