@@ -61,6 +61,9 @@ class LLLineEditor
 public:
 
 	typedef boost::function<void (LLLineEditor* caller)> keystroke_callback_t;
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-6.5
+	typedef std::function<bool(LLUICtrl* caller, KEY key, MASK mask)> key_handler_t;
+// [/SL:KB]
 	
 	struct MaxLength : public LLInitParam::ChoiceBlock<MaxLength>
 	{
@@ -260,6 +263,9 @@ public:
 	void			onKeystroke();
 	typedef boost::function<void (LLLineEditor* caller, void* user_data)> callback_t;
 	void			setKeystrokeCallback(callback_t callback, void* user_data);
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-6.5
+	void			setKeyHandler(key_handler_t handler);
+// [/SL:KB]
 
 	void			setMaxTextLength(S32 max_text_length);
 	void			setMaxTextChars(S32 max_text_chars);
@@ -355,6 +361,9 @@ protected:
 	BOOL		mKeystrokeOnEsc;
 
 	keystroke_callback_t mKeystrokeCallback;
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-6.5
+	key_handler_t mKeyHandler;
+// [/SL:KB]
 
 	BOOL		mIsSelecting;				// Selection for clipboard operations
 	S32			mSelectionStart;
