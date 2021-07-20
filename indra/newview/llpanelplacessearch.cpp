@@ -71,13 +71,14 @@ BOOL LLPanelPlacesSearch::postBuild()
 	if (pSearchEditor)
 	{
 		pSearchEditor->setCommitOnFocusLost(false);
-		pSearchEditor->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this));
+		pSearchEditor->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this, false));
+		pSearchEditor->setKeyHandler(std::bind(&LLPanelPlacesSearch::onSearchEditorKeyPress, this, std::placeholders::_2, std::placeholders::_3));
 	}
 
 	LLButton* pSearchBtn = findChild<LLButton>("search_start");
 	if (pSearchBtn)
 	{
-		pSearchBtn->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this));
+		pSearchBtn->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this, true));
 	}
 
 	m_pSearchCategory = findChild<LLComboBox>("search_category");
@@ -101,6 +102,8 @@ BOOL LLPanelPlacesSearch::postBuild()
 	m_pResultsList->setCommitOnSelectionChange(true);
 	m_pResultsList->setCommitOnKeyboardMovement(true);
 	m_pResultsList->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onResultSelect, this));
+	m_pResultsList->setKeyHandler(std::bind(&LLPanelPlacesSearch::onSearchResultsKeyPress, this, std::placeholders::_2, std::placeholders::_3));
+	m_pResultsList->setDoubleClickCallback(std::bind(&LLPanelPlacesSearch::onSearchResultsDoubleClick, this));
 
 	m_pResultsCount = findChild<LLTextBox>("search_results_label");
 	m_pResultsCount->setText(LLStringUtil::null);
@@ -110,6 +113,7 @@ BOOL LLPanelPlacesSearch::postBuild()
 	m_pResultsNext->setCommitCallback(boost::bind(&LLPanelPlacesSearch::searchNext, this));
 
 	m_pParcelInfo = findChild<LLPanelParcelInfo>("search_parcel");
+	m_pParcelInfo->setParcelLoadedCallback(std::bind(&LLPanelPlacesSearch::onParcelLoaded, this, std::placeholders::_2));
 
 	LLButton* pTeleportBtn = findChild<LLButton>("teleport_btn");
 	if (pTeleportBtn)
@@ -126,19 +130,43 @@ BOOL LLPanelPlacesSearch::postBuild()
 	return TRUE;
 }
 
+void LLPanelPlacesSearch::onParcelLoaded(const LLUUID& idParcel)
+{
+	if (m_idTeleportOnLoad == idParcel)
+	{
+		onTeleportBtn();
+	}
+	m_idTeleportOnLoad.setNull();
+}
+
 void LLPanelPlacesSearch::onResultSelect()
 {
 	m_pParcelInfo->setParcelFromId(m_pResultsList->getSelectedValue().asUUID());
+	m_idTeleportOnLoad.setNull();
 	updateButtons();
 }
 
-void LLPanelPlacesSearch::onSearchBtn()
+void LLPanelPlacesSearch::onSearchBtn(bool fFocusResults)
 {
 	LLLineEditor* pSearchEditor = findChild<LLLineEditor>("search_query");
 	if (pSearchEditor)
 	{
 		searchStart(pSearchEditor->getText());
+		if (fFocusResults)
+		{
+			m_pResultsList->setFocus(true);
+		}
 	}
+}
+
+bool LLPanelPlacesSearch::onSearchEditorKeyPress(KEY key, MASK mask)
+{
+	if ( (MASK_NONE == mask) && (KEY_UP == key || KEY_DOWN == key) )
+	{
+		m_pResultsList->setFocus(true);
+		return true;
+	}
+	return false;
 }
 
 void LLPanelPlacesSearch::searchClear()
@@ -283,6 +311,28 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 	m_nCurResults += lResults.size();
 	m_pResultsPrevious->setEnabled(m_nCurIndex > 0);
 	m_pResultsNext->setEnabled(m_nCurResults > LLSearchDirectory::NUM_RESULTS_PAGE_PLACES);
+}
+
+void LLPanelPlacesSearch::onSearchResultsDoubleClick()
+{
+	if (!getCurrentParcelPos().isExactlyZero())
+		onTeleportBtn();
+	else
+		m_idTeleportOnLoad = m_pResultsList->getSelectedValue().asUUID();
+}
+
+bool LLPanelPlacesSearch::onSearchResultsKeyPress(KEY key, MASK mask)
+{
+	if (MASK_NONE == mask && KEY_RETURN == key)
+	{
+		if (!getCurrentParcelPos().isExactlyZero())
+			onTeleportBtn();
+		else
+			m_idTeleportOnLoad = m_pResultsList->getSelectedValue().asUUID();
+
+		return true;
+	}
+	return false;
 }
 
 void LLPanelPlacesSearch::onShowOnMapBtn()
