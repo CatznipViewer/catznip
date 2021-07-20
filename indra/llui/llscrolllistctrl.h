@@ -66,6 +66,9 @@ public:
 
 	// *TODO: Add callbacks to Params
 	typedef boost::function<void (void)> callback_t;
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: Catznip-6.5
+	typedef std::function<bool(LLUICtrl* caller, KEY key, MASK mask)> key_handler_t;
+// [/SL:KB]
 
 	template<typename T> struct maximum
 	{
@@ -289,6 +292,9 @@ public:
 	S32  getColumnPadding() const				{ return mColumnPadding; }
 	void setRowPadding(const S32 c)				{ mColumnPadding = c; }
 	S32  getRowPadding() const					{ return mColumnPadding; }
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: Catznip-6.5
+	void setKeyHandler(key_handler_t handler)   { mKeyHandler = handler; }
+// [/SL:KB]
 	void setCommitOnKeyboardMovement(BOOL b)	{ mCommitOnKeyboardMovement = b; }
 	void setCommitOnSelectionChange(BOOL b)		{ mCommitOnSelectionChange = b; }
 	void setAllowKeyboardMovement(BOOL b)		{ mAllowKeyboardMovement = b; }
@@ -453,6 +459,9 @@ private:
 	S32				mHeadingHeight;	// the height of the column header buttons, if visible
 	U32				mMaxSelectable; 
 	LLScrollbar*	mScrollbar;
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: Catznip-6.5
+	key_handler_t	mKeyHandler;
+// [/SL:KB]
 	bool 			mAllowMultipleSelection;
 	bool			mAllowKeyboardMovement;
 	bool			mCommitOnKeyboardMovement;
