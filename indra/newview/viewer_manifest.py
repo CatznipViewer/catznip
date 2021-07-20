@@ -992,6 +992,9 @@ class DarwinManifest(ViewerManifest):
                     self.run_command(
                         ['strip', '-S', executable])
 
+            print "Copying updater scripts..."
+            self.path2basename("../viewer_components/updater/scripts/darwin", "*.py")
+
             with self.prefix(dst="Resources"):
                 # defer cross-platform file copies until we're in the
                 # nested Resources directory
@@ -1233,6 +1236,11 @@ class DarwinManifest(ViewerManifest):
                             self.path( "*.dylib" )
                             self.path( "plugins.dat" )
 
+    def copy_finish(self):
+        # Force executable permissions to be set for the updater scripts
+        for script in 'Contents/MacOS/update_install.py',:
+            self.run_command(["chmod", "+x", os.path.join(self.get_dst_prefix(), script)])
+
     def package_finish(self):
         global CHANNEL_VENDOR_BASE
         # MBW -- If the mounted volume name changes, it breaks the .DS_Store's background image and icon positioning.
@@ -1285,7 +1293,7 @@ class DarwinManifest(ViewerManifest):
                 dmg_template = os.path.join ('installers', 'darwin', 'release-dmg')
 
             for s,d in {self.get_dst_prefix():app_name + ".app",
-                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
+            #            os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
                         os.path.join(dmg_template, "background.jpg"): "background.jpg",
                         os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
                 print "Copying to dmg", s, d
@@ -1314,7 +1322,10 @@ class DarwinManifest(ViewerManifest):
 # [/SL:FS]
 
             # Hide the background image, DS_Store file, and volume icon file (set their "visible" bit)
-            for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
+            #for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
+# [SL:KB]
+            for f in "background.jpg", ".DS_Store":
+# [/SL:KB]
                 pathname = os.path.join(volpath, f)
                 # We've observed mysterious "no such file" failures of the SetFile
                 # command, especially on the first file listed above -- yet

@@ -13,7 +13,7 @@ on run (volumeName)
 
 			set theXOrigin to 400
 			set theYOrigin to 100
-			set theWidth to 500
+			set theWidth to 475
 			set theHeight to 600
 			set iconSize to 100
 
@@ -31,9 +31,9 @@ on run (volumeName)
 				set file_list to every file
 				repeat with i in file_list
 					if the name of i is "Applications" then
-						set the position of i to {365, 85}
+						set the position of i to {365, 400}
 					else if the name of i ends with ".app" then
-						set the position of i to {145, 85}
+						set the position of i to {125, 150}
 					end if
 					-- Change the 7 to change the color: 0 is no label, then red,
 					-- orange, yellow, green, blue, purple, or gray.

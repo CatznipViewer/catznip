@@ -2628,7 +2628,7 @@ void LLCollapseToFolders::doItem(LLFolderViewItem* pItem)
 		{
 			// NOTE: we don't want one item collapsing an entire hierarchy so make a special (convenience) exception
 			int cntPassedFolders = 0;
-			for (auto& itFolder = pParentFolder->getFoldersBegin(), endFolder = pParentFolder->getFoldersEnd(); itFolder != endFolder; ++itFolder)
+			for (auto itFolder = pParentFolder->getFoldersBegin(), endFolder = pParentFolder->getFoldersEnd(); itFolder != endFolder; ++itFolder)
 			{
 				if ((*itFolder)->descendantsPassedFilter())
 					cntPassedFolders++;

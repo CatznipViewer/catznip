@@ -1572,6 +1572,13 @@ BOOL LLLineEditor::handleKeyHere(KEY key, MASK mask )
 	{
 		LLLineEditorRollback rollback( this );
 
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-6.5
+		if (mKeyHandler)
+		{
+			handled = mKeyHandler(this, key, mask);
+		}
+// [/SL:KB]
+
 		if( !handled )
 		{
 			handled = handleSelectionKey( key, mask );
@@ -2397,6 +2404,12 @@ void LLLineEditor::setKeystrokeCallback(callback_t callback, void* user_data)
 	mKeystrokeCallback = boost::bind(callback, _1, user_data);
 }
 
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-6.5
+void LLLineEditor::setKeyHandler(key_handler_t handler)
+{
+	mKeyHandler = handler;
+}
+// [/SL:KB]
 
 BOOL LLLineEditor::setTextArg( const std::string& key, const LLStringExplicit& text )
 {
