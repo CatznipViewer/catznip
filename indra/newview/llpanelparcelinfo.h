@@ -32,6 +32,8 @@ public:
 	LLPanelParcelInfo();
 	/*virtual*/ ~LLPanelParcelInfo();
 
+	typedef std::function<void(LLPanelParcelInfo* pCaller, LLUUID idParcel)> parcel_loaded_callback_t;
+
 	/*
 	 * LLView overrides
 	 */
@@ -62,6 +64,7 @@ public:
 	void                setParcelFromPos(const LLVector3d posGlobal);
 	void                setParcelFromId(const LLUUID& idParcel);
 	void                setParcelFromItem(const LLUUID& idItem);
+	void                setParcelLoadedCallback(parcel_loaded_callback_t callback) { m_ParcelLoadedCallback = callback; }
 protected:
 	void clearControls(const std::string& strGeneral, const std::string& strDescription);
 	void clearPendingRequest();
@@ -86,6 +89,7 @@ protected:
 	LLUUID       m_idCurParcel;
 	LLVector3d   m_posCurGlobal;
 	LLParcelData m_CurParcelData;
+	parcel_loaded_callback_t m_ParcelLoadedCallback;
 
 	// Controls
 	bool           m_fEditMode;

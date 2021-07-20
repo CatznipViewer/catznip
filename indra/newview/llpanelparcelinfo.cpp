@@ -158,6 +158,11 @@ void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 	m_posRegionRequest.setZero();
 						  
 	updateFromParcelData();
+
+	if (m_ParcelLoadedCallback)
+	{
+		m_ParcelLoadedCallback(this, m_idCurParcel);
+	}
 }
 
 void LLPanelParcelInfo::setErrorStatus(S32 nStatus, const std::string& strReason)
