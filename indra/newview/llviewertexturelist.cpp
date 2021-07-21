@@ -1366,8 +1366,8 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 
 		if (get_recommended)
 		{
-			//recommend 1/3rd of total video memory for textures
-			max_texmem /= gSavedSettings.getF32("TextureMemoryRatio");
+			//recommend 1/2nd of total video memory for textures
+			S32Megabytes max_ratioed_texmem = max_texmem * llclamp(gSavedSettings.getF32("TextureMemoryMultiplier"), 0.f, 1.f);
 
 			// Don't allow the ratio'ed amount to drop us below 512Mb
 			if (max_ratioed_texmem < (S32Megabytes)512)
