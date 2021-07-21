@@ -69,6 +69,9 @@ public:
 	virtual BOOL maximize() = 0;
 	virtual void minimize() = 0;
 	virtual void restore() = 0;
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+	virtual bool getScreenResolution(LLCoordScreen& screen_size) = 0;
+// [/SL:KB]
 	BOOL getFullscreen()	{ return mFullscreen; };
 // [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0)
 	virtual BOOL getFullscreenWindow() = 0;

@@ -14025,10 +14025,10 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>TextureMemoryRatio</key>
+    <key>TextureMemoryMultiplier</key>
     <map>
       <key>Comment</key>
-      <string>Specifies the amount of total video memory that will be use for textures by the viewer.)</string>
+      <string>Specifies the amount of total video memory that will be use for textures by the viewer</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>ExcludeFromPreset</key>
@@ -14036,7 +14036,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <integer>3</integer>
+      <real>0.5</real>
     </map>
     <key>TextureNewByteRange</key>
     <map>

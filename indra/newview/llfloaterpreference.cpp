@@ -495,6 +495,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreference::onVertexShaderEnable, this));
 	mCommitCallbackRegistrar.add("Pref.WindowedMod",			boost::bind(&LLFloaterPreference::onCommitWindowedMode, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+	mCommitCallbackRegistrar.add("Pref.UpdateRenderResolutionScale",	boost::bind(&LLFloaterPreference::onChangeRenderResolutionScale,this, _1));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
 	mCommitCallbackRegistrar.add("Pref.applyUIColor",			boost::bind(&LLFloaterPreference::applyUIColor, this ,_1, _2));
 // [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
@@ -1932,6 +1935,23 @@ void LLFloaterPreferenceGraphicsAdvanced::refresh()
 {
 	getChild<LLUICtrl>("fsaa")->setValue((LLSD::Integer)  gSavedSettings.getU32("RenderFSAASamples"));
 
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+	LLCoordScreen screenRes;
+	if (gViewerWindow->getWindow()->getScreenResolution(screenRes))
+	{
+		LLSliderCtrl* pResScaleSlider = getChild<LLSliderCtrl>("RenderResolutionScale");
+		const F32 nMultiplier = gSavedSettings.getF32("RenderResolutionMultiplier");
+		// Make sure the screen resolution is a multiple of our increment
+		const S32 nScreenResY = (int)((screenRes.mY + pResScaleSlider->getIncrement() - 1) / pResScaleSlider->getIncrement()) * pResScaleSlider->getIncrement();
+
+		pResScaleSlider->setMinValue(nScreenResY / 2);
+		pResScaleSlider->setMaxValue(nScreenResY);
+		pResScaleSlider->setValue(nScreenResY * nMultiplier);
+
+		getChild<LLTextBox>("RenderResolutionScaleText")->setText(llformat("%.0fp", (nScreenResY * nMultiplier < screenRes.mY) ? nScreenResY * nMultiplier : screenRes.mY));
+	}
+// [/SL:KB]
+
 	// sliders and their text boxes
 	//	mPostProcess = gSavedSettings.getS32("RenderGlowResolutionPow");
 	// slider text boxes
@@ -1966,6 +1986,17 @@ void LLFloaterPreference::onChangeQuality(const LLSD& data)
 	refreshEnabledGraphics();
 	refresh();
 }
+
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+void LLFloaterPreference::onChangeRenderResolutionScale(LLUICtrl* pCtrl)
+{
+	if (LLSliderCtrl* pResScaleSlider = dynamic_cast<LLSliderCtrl*>(pCtrl))
+	{
+		gSavedSettings.setF32("RenderResolutionMultiplier", pResScaleSlider->getValueF32() / pResScaleSlider->getMaxValue());
+		refresh();
+	}
+}
+// [/SL:KB]
 
 void LLFloaterPreference::onClickSetKey()
 {

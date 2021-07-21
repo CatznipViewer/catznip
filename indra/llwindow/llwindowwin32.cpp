@@ -917,6 +917,21 @@ BOOL LLWindowWin32::maximize()
 	return success;
 }
 
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+bool LLWindowWin32::getScreenResolution(LLCoordScreen& screen_size)
+{
+	HMONITOR hMonitor = MonitorFromWindow(mWindowHandle, MONITOR_DEFAULTTONULL);
+	MONITORINFO infoMonitor = { sizeof(infoMonitor) };
+	if (GetMonitorInfo(hMonitor, &infoMonitor))
+	{
+		screen_size.mX = llabs(infoMonitor.rcMonitor.right - infoMonitor.rcMonitor.left);
+		screen_size.mY = llabs(infoMonitor.rcMonitor.bottom - infoMonitor.rcMonitor.top);
+		return true;
+	}
+	return false;
+}
+// [/SL:KB]
+
 BOOL LLWindowWin32::getFullscreen()
 {
 	return mFullscreen;

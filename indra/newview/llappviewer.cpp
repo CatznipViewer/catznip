@@ -2859,7 +2859,8 @@ bool LLAppViewer::initConfiguration()
 		{
 			const char* pstrSettings[] =
 				{
-					"MeshMaxConcurrentRequests"
+					"MeshMaxConcurrentRequests",
+					"TextureMemory",				// Versions before R12.4 could set this to below 512Mb (and we increased the ratio as well)
 				};
 			for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
 			{
