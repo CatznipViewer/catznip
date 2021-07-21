@@ -68,7 +68,7 @@
    layout="topleft"
    left="60"
    max_val="9984"
-   min_val="64"
+   min_val="2048"
    name="cachesizespinner"
    top_pad="5"
    width="280" />
