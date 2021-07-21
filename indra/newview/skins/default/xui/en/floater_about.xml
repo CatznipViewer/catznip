@@ -45,29 +45,31 @@
        hover_cursor="UI_CURSOR_HAND"
        image_name="social_twitter"
        layout="topleft"
-       left="10"
+       left="20"
        mouse_opaque="true"
        name="twitter_icon"
+       tooltip="[APP_NAME] on Twitter"
        top="130"
        width="32">
         <icon.commit_callback
          function="Advanced.ShowURL"
-         parameter="http://twitter.com/CatznipSL" />
+         parameter="https://twitter.com/CatznipSL" />
       </icon>
       <icon
        commit_on_click="true"
        height="32"
        hover_cursor="UI_CURSOR_HAND"
-       image_name="social_fb"
+       image_name="social_discord"
        layout="topleft"
-       left_pad="5"
+       left_pad="20"
        mouse_opaque="true"
-       name="fb_icon"
+       name="discord_icon"
+       tooltip="[APP_NAME] on Discord"
        top="130"
        width="32">
         <icon.commit_callback
          function="Advanced.ShowURL"
-         parameter="http://facebook.com/Catznip" />
+         parameter="https://discord.gg/rxKQMG7" />
       </icon>
       <button
        follows="bottom|left" 

@@ -4311,9 +4311,9 @@ Open [APP_NAME]'s Twitter page in your browser.
   
    <notification
    icon="alertmodal.tga"
-   name="WebLaunchAFacebook"
+   name="WebLaunchADiscord"
    type="alertmodal">
-Open [APP_NAME]'s Facebook page in your browser.
+Open [APP_NAME]'s Discord server invite.
     <tag>confirm</tag>
     <usetemplate
      ignoretext="Launch my browser to view facebook"
