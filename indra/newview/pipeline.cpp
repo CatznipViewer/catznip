@@ -788,19 +788,24 @@ void LLPipeline::resizeScreenTexture()
 		GLuint resY = gViewerWindow->getWorldViewHeightRaw();
 	
 // [SL:KB] - Patch: Settings-RenderResolutionMultiplier | Checked: Catznip-5.4
+		GLuint scaledResX = resX;
+		GLuint scaledResY = resY;
 		if ( (RenderResolutionDivisor > 1) && (RenderResolutionDivisor < resX) && (RenderResolutionDivisor < resY) )
 		{
-			resX /= RenderResolutionDivisor;
-			resY /= RenderResolutionDivisor;
+			scaledResX /= RenderResolutionDivisor;
+			scaledResY /= RenderResolutionDivisor;
 		}
 		else if (RenderResolutionMultiplier != 1.f)
 		{
-			resX *= RenderResolutionMultiplier;
-			resY *= RenderResolutionMultiplier;
+			scaledResX *= RenderResolutionMultiplier;
+			scaledResY *= RenderResolutionMultiplier;
 		}
 // [/SL:KB]
 	
-		if (gResizeScreenTexture || (resX != mScreen.getWidth()) || (resY != mScreen.getHeight()))
+//		if (gResizeScreenTexture || (resX != mScreen.getWidth()) || (resY != mScreen.getHeight()))
+// [SL:KB] - Patch: Settings-RenderResolutionMultiplier | Checked: Catznip-5.4
+		if (gResizeScreenTexture || (scaledResX != mScreen.getWidth()) || (scaledResY != mScreen.getHeight()))
+// [/SL:KB]
 		{
 			releaseScreenBuffers();
             releaseShadowTargets();
@@ -975,7 +980,10 @@ bool LLPipeline::allocateScreenBuffer(U32 resX, U32 resY, U32 samples)
 			mFXAABuffer.release();
 		}
 		
-		if (shadow_detail > 0 || ssao || RenderDepthOfField || samples > 0)
+//		if (shadow_detail > 0 || ssao || RenderDepthOfField || samples > 0)
+// [RLVa:KB] - @setsphere
+		if (shadow_detail > 0 || ssao || RenderDepthOfField || samples > 0 || RlvActions::hasPostProcess())
+// [/RLVa:KB]
 		{ //only need mDeferredLight for shadows OR ssao OR dof OR fxaa
 			if (!mDeferredLight.allocate(resX, resY, GL_RGBA, FALSE, FALSE, LLTexUnit::TT_RECT_TEXTURE, FALSE)) return false;
 		}

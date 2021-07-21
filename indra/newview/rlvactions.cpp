@@ -18,6 +18,7 @@
 #include "llagent.h"
 #include "llimview.h"
 #include "llviewercamera.h"
+#include "llvisualeffect.h"
 #include "llvoavatarself.h"
 #include "llworld.h"
 
@@ -397,6 +398,11 @@ bool RlvActions::canChangeEnvironment(const LLUUID& idRlvObject)
 	return (idRlvObject.isNull()) ? !gRlvHandler.hasBehaviour(RLV_BHVR_SETENV) : !gRlvHandler.hasBehaviourExcept(RLV_BHVR_SETENV, idRlvObject);
 }
 
+bool RlvActions::hasPostProcess()
+{
+	return LLVfxManager::instance().hasEffect(EVisualEffect::RlvSphere);
+}
+
 // ============================================================================
 // World interaction
 //
@@ -437,7 +443,7 @@ bool RlvActions::canEdit(ERlvCheckType eCheckType)
 				(!rlvHandler.hasBehaviour(RLV_BHVR_EDIT) || rlvHandler.hasException(RLV_BHVR_EDIT)) &&
 				(!rlvHandler.hasBehaviour(RLV_BHVR_EDITATTACH) || rlvHandler.hasBehaviour(RLV_BHVR_EDITWORLD));
 
-		case ERlvCheckType::None:
+		case ERlvCheckType::Nothing:
 			// Either @edit restricted with no exceptions or @editattach and @editworld restricted at the same time
 			return
 				(rlvHandler.hasBehaviour(RLV_BHVR_EDIT) && !rlvHandler.hasException(RLV_BHVR_EDIT)) ||
