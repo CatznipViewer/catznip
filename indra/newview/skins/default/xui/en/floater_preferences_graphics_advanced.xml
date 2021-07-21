@@ -101,6 +101,34 @@
     width="65">
        Low
   </text>
+  <slider
+    decimal_digits="0"
+    follows="left|top"
+    height="16"
+    increment="90"
+    label="Resolution scale:"
+    label_width="185"
+    layout="topleft"
+    left="30"
+    name="RenderResolutionScale"
+    show_text="false"
+    top_delta="16"
+    width="300">
+    <slider.commit_callback
+      function="Pref.UpdateRenderResolutionScale" />
+  </slider>
+  <text
+    type="string"
+    length="1"
+    follows="left|top"
+    height="16"
+    layout="topleft"
+    name="RenderResolutionScaleText"
+    top_delta="0"
+    left_delta="304"
+    width="65">
+       1080p
+  </text>
 
   <text
     type="string"
