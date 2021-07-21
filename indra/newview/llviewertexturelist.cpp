@@ -1369,10 +1369,21 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 
 		if (get_recommended)
 		{
-			//recommend 1/3rd of total video memory for textures
-			max_texmem /= gSavedSettings.getF32("TextureMemoryRatio");
+			//recommend 1/2nd of total video memory for textures
+			S32Megabytes max_ratioed_texmem = max_texmem * llclamp(gSavedSettings.getF32("TextureMemoryMultiplier"), 0.f, 1.f);
+
+			// Don't allow the ratio'ed amount to drop us below 512Mb
+			if (max_ratioed_texmem < (S32Megabytes)512)
+			{
+				max_ratioed_texmem = (max_texmem < (S32Megabytes)512) ? max_texmem : (S32Megabytes)512;
+			}
+			max_texmem = max_ratioed_texmem;
 		}
+#ifndef _WIN64
 		max_texmem = llmin(max_texmem, (S32Megabytes)2048);
+#else
+		max_texmem = llmin(max_texmem, (S32Megabytes)768);
+#endif // _WIN64
 // [/SL:DP]
 //		// Treat any card with < 32 MB (shudder) as having 32 MB
 //		//  - it's going to be swapping constantly regardless
@@ -1394,7 +1405,7 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 		if (!get_recommended)
 		{
 // [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.3
-			max_texmem = (S32Megabytes)2048;
+			max_texmem = (S32Megabytes)512;
 // [/SL:DP]
 //			max_texmem = (S32Megabytes)512;
 		}
@@ -1414,12 +1425,12 @@ S32Megabytes LLViewerTextureList::getMaxVideoRamSetting(bool get_recommended, fl
 		}
 	}
 
-//	S32Megabytes system_ram = gSysMemory.getPhysicalMemoryKB(); // In MB
-//	//LL_INFOS() << "*** DETECTED " << system_ram << " MB of system memory." << LL_ENDL;
-//	if (get_recommended)
-//		max_texmem = llmin(max_texmem, system_ram/2);
-//	else
-//		max_texmem = llmin(max_texmem, system_ram);
+	S32Megabytes system_ram = gSysMemory.getPhysicalMemoryKB(); // In MB
+	//LL_INFOS() << "*** DETECTED " << system_ram << " MB of system memory." << LL_ENDL;
+	if (get_recommended)
+		max_texmem = llmin(max_texmem, system_ram/2);
+	else
+		max_texmem = llmin(max_texmem, system_ram);
 		
     // limit the texture memory to a multiple of the default if we've found some cards to behave poorly otherwise
 	max_texmem = llmin(max_texmem, (S32Megabytes) (mem_multiplier * max_texmem));
