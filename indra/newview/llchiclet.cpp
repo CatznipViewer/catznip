@@ -46,6 +46,7 @@
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
 #include "llfloaternotificationstabbed.h"
+#include "llviewermenu.h"
 // [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 #include "llviewerobjectlist.h"
 // [/SL:KB]

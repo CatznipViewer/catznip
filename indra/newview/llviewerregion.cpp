@@ -102,6 +102,7 @@ const U32 DEFAULT_MAX_REGION_WIDE_PRIM_COUNT = 15000;
 BOOL LLViewerRegion::sVOCacheCullingEnabled = FALSE;
 S32  LLViewerRegion::sLastCameraUpdated = 0;
 S32  LLViewerRegion::sNewObjectCreationThrottle = -1;
+LLViewerRegion::vocache_entry_map_t LLViewerRegion::sRegionCacheCleanup;
 
 typedef std::map<std::string, std::string> CapabilityMap;
 
@@ -290,6 +291,8 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
 
         LL_INFOS("AppInit", "Capabilities") << "Requesting seed from " << url 
                                             << " region name " << regionp->getName()
+                                            << " region id " << regionp->getRegionID()
+                                            << " handle " << regionp->getHandle()
                                             << " (attempt #" << mSeedCapAttempts + 1 << ")" << LL_ENDL;
 		LL_DEBUGS("AppInit", "Capabilities") << "Capabilities requested: " << capabilityNames << LL_ENDL;
 
@@ -349,9 +352,9 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCoro(U64 regionHandle)
         log_capabilities(mCapabilities);
 #endif
 
+        LL_DEBUGS("AppInit", "Capabilities", "Teleport") << "received caps for handle " << regionHandle 
+														 << " region name " << regionp->getName() << LL_ENDL;
         regionp->setCapabilitiesReceived(true);
-        LL_DEBUGS("AppInit", "Capabilities") << "received caps for handle " << regionHandle 
-                                             << " region name " << regionp->getName() << LL_ENDL;
 
         if (STATE_SEED_GRANTED_WAIT == LLStartUp::getStartupState())
         {
@@ -404,7 +407,7 @@ void LLViewerRegionImpl::requestBaseCapabilitiesCompleteCoro(U64 regionHandle)
         LLSD capabilityNames = LLSD::emptyArray();
         buildCapabilityNames(capabilityNames);
 
-        LL_INFOS("AppInit", "Capabilities") << "Requesting second Seed from " << url << LL_ENDL;
+        LL_INFOS("AppInit", "Capabilities") << "Requesting second Seed from " << url << " for region " << regionp->getRegionID() << LL_ENDL;
 
         regionp = NULL;
         result = httpAdapter->postAndSuspend(httpRequest, url, capabilityNames);
@@ -624,6 +627,8 @@ LLViewerRegion::LLViewerRegion(const U64 &handle,
 	mImpl->mObjectPartition.push_back(new LLGrassPartition(this));		//PARTITION_GRASS
 	mImpl->mObjectPartition.push_back(new LLVolumePartition(this));	//PARTITION_VOLUME
 	mImpl->mObjectPartition.push_back(new LLBridgePartition(this));	//PARTITION_BRIDGE
+	mImpl->mObjectPartition.push_back(new LLAvatarPartition(this));	//PARTITION_AVATAR
+	mImpl->mObjectPartition.push_back(new LLControlAVPartition(this));	//PARTITION_CONTROL_AV
 	mImpl->mObjectPartition.push_back(new LLHUDParticlePartition(this));//PARTITION_HUD_PARTICLE
 	mImpl->mObjectPartition.push_back(new LLVOCachePartition(this)); //PARTITION_VO_CACHE
 	mImpl->mObjectPartition.push_back(NULL);					//PARTITION_NONE
@@ -648,6 +653,9 @@ void LLViewerRegion::initStats()
 	mAlive = false;					// can become false if circuit disconnects
 }
 
+static LLTrace::BlockTimerStatHandle FTM_CLEANUP_REGION_OBJECTS("Cleanup Region Objects");
+static LLTrace::BlockTimerStatHandle FTM_SAVE_REGION_CACHE("Save Region Cache");
+
 LLViewerRegion::~LLViewerRegion() 
 {
 	mDead = TRUE;
@@ -662,7 +670,10 @@ LLViewerRegion::~LLViewerRegion()
 	disconnectAllNeighbors();
 	LLViewerPartSim::getInstance()->cleanupRegion(this);
 
-	gObjectList.killObjects(this);
+    {
+        LL_RECORD_BLOCK_TIME(FTM_CLEANUP_REGION_OBJECTS);
+        gObjectList.killObjects(this);
+    }
 
 	delete mImpl->mCompositionp;
 	delete mParcelOverlay;
@@ -673,7 +684,10 @@ LLViewerRegion::~LLViewerRegion()
 #endif	
 	std::for_each(mImpl->mObjectPartition.begin(), mImpl->mObjectPartition.end(), DeletePointer());
 
-	saveObjectCache();
+    {
+        LL_RECORD_BLOCK_TIME(FTM_SAVE_REGION_CACHE);
+        saveObjectCache();
+    }
 
 	delete mImpl;
 	mImpl = NULL;
@@ -742,6 +756,8 @@ void LLViewerRegion::saveObjectCache()
 		mCacheDirty = FALSE;
 	}
 
+	// Map of LLVOCacheEntry takes time to release, store map for cleanup on idle
+	sRegionCacheCleanup.insert(mImpl->mCacheMap.begin(), mImpl->mCacheMap.end());
 	mImpl->mCacheMap.clear();
 }
 
@@ -1503,6 +1519,16 @@ void LLViewerRegion::idleUpdate(F32 max_update_time)
 	return;
 }
 
+// static
+void LLViewerRegion::idleCleanup(F32 max_update_time)
+{
+    LLTimer update_timer;
+    while (!sRegionCacheCleanup.empty() && (max_update_time - update_timer.getElapsedTimeF32() > 0))
+    {
+        sRegionCacheCleanup.erase(sRegionCacheCleanup.begin());
+    }
+}
+
 //update the throttling number for new object creation
 void LLViewerRegion::calcNewObjectCreationThrottle()
 {
@@ -2197,7 +2223,7 @@ void LLViewerRegion::requestSimulatorFeatures()
             LLCoros::instance().launch("LLViewerRegionImpl::requestSimulatorFeatureCoro",
                                        boost::bind(&LLViewerRegionImpl::requestSimulatorFeatureCoro, mImpl, url, getHandle()));
         
-        LL_INFOS("AppInit", "SimulatorFeatures") << "Launching " << coroname << " requesting simulator features from " << url << LL_ENDL;
+        LL_INFOS("AppInit", "SimulatorFeatures") << "Launching " << coroname << " requesting simulator features from " << url << " for region " << getRegionID() << LL_ENDL;
     }
     else
     {
@@ -3004,7 +3030,7 @@ void LLViewerRegion::setSeedCapability(const std::string& url)
 	if (getCapability("Seed") == url)
     {	
 		setCapabilityDebug("Seed", url);
-		LL_WARNS("CrossingCaps") <<  "Received duplicate seed capability, posting to seed " <<
+		LL_WARNS("CrossingCaps") <<  "Received duplicate seed capability for " << getRegionID() << ", posting to seed " <<
 				url	<< LL_ENDL;
 
 		//Instead of just returning we build up a second set of seed caps and compare them 
@@ -3025,7 +3051,7 @@ void LLViewerRegion::setSeedCapability(const std::string& url)
         LLCoros::instance().launch("LLViewerRegionImpl::requestBaseCapabilitiesCoro",
         boost::bind(&LLViewerRegionImpl::requestBaseCapabilitiesCoro, mImpl, getHandle()));
 
-    LL_INFOS("AppInit", "Capabilities") << "Launching " << coroname << " requesting seed capabilities from " << url << LL_ENDL;
+    LL_INFOS("AppInit", "Capabilities") << "Launching " << coroname << " requesting seed capabilities from " << url << " for region " << getRegionID() << LL_ENDL;
 }
 
 S32 LLViewerRegion::getNumSeedCapRetries()
@@ -3335,5 +3361,12 @@ U32 LLViewerRegion::getMaxMaterialsPerTransaction() const
 	return max_entries;
 }
 
-
+std::string LLViewerRegion::getSimHostName()
+{
+	if (mSimulatorFeaturesReceived)
+	{
+		return mSimulatorFeatures.has("HostName") ? mSimulatorFeatures["HostName"].asString() : getHost().getHostName();
+	}
+	return std::string("...");
+}
 
