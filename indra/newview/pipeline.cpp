@@ -1131,7 +1131,7 @@ void LLPipeline::updateRenderDeferred()
                       RenderDeferred &&
                       LLRenderTarget::sUseFBO &&
                       LLPipeline::sRenderBump &&
-                      LLPipeline::sRenderTransparentWater &&
+//                      LLPipeline::sRenderTransparentWater &&
                       RenderAvatarVP &&
                       WindLightUseAtmosShaders &&
                       (bool) LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred");
@@ -9507,7 +9507,44 @@ inline float sgn(float a)
 
 void LLPipeline::generateWaterReflection(LLCamera& camera_in)
 {	
-	if (LLPipeline::sWaterReflections && assertInitialized() && LLDrawPoolWater::sNeedsReflectionUpdate)
+//	if (LLPipeline::sWaterReflections && assertInitialized() && LLDrawPoolWater::sNeedsReflectionUpdate)
+// [SL:KB] - Patch: World-WaterRendering | Checked: Catznip-6.5
+	if (!LLPipeline::sWaterReflections || !assertInitialized() || (!LLDrawPoolWater::sNeedsReflectionUpdate && !LLPipeline::sRenderDeferred))
+	{
+		return;
+	}
+
+    if (!LLDrawPoolWater::sNeedsReflectionUpdate || !LLPipeline::sRenderTransparentWater)
+    {
+		// Render the part that affects the sky
+		{
+			gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
+			glClearColor(0,0,0,0);
+			mWaterRef.bindTarget();
+
+			gGL.setColorMask(true, true);
+			mWaterRef.clear();
+			gGL.setColorMask(true, false);
+			mWaterRef.getViewport(gGLViewport);
+
+			//initial sky pass (no user clip plane)
+			gPipeline.pushRenderTypeMask();
+			gPipeline.andRenderTypeMask(LLPipeline::RENDER_TYPE_SKY,
+			                            LLPipeline::RENDER_TYPE_WL_SKY,
+			                            LLPipeline::RENDER_TYPE_CLOUDS,
+			                            LLPipeline::END_RENDER_TYPES);
+
+			updateCull(camera_in, mSky);
+			stateSort(camera_in, mSky);
+			renderGeom(camera_in, TRUE);
+
+			gPipeline.popRenderTypeMask();
+
+			mWaterRef.flush();
+		}
+    }
+    else
+// [/SL:KB]
 	{
 		bool skip_avatar_update = false;
 		if (!isAgentAvatarValid() || gAgentCamera.getCameraAnimating() || gAgentCamera.getCameraMode() != CAMERA_MODE_MOUSELOOK || !LLVOAvatar::sVisibleInFirstPerson)
