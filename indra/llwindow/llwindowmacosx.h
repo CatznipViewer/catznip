@@ -54,6 +54,9 @@ public:
 	/*virtual*/ BOOL maximize();
 	/*virtual*/ void minimize();
 	/*virtual*/ void restore();
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+                bool getScreenResolution(LLCoordScreen& screen_size) override;
+// [/SL:KB]
 	/*virtual*/ BOOL getFullscreen();
 // [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0)
 	/*virtual*/ BOOL getFullscreenWindow() { return FALSE; }
