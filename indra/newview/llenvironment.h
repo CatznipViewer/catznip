@@ -165,8 +165,13 @@ public:
     void                        setEnvironment(EnvSelection_t env, const LLSettingsSky::ptr_t & fixed, S32 env_version = NO_VERSION) { setEnvironment(env, fixedEnvironment_t(fixed, LLSettingsWater::ptr_t()), env_version); }
     void                        setEnvironment(EnvSelection_t env, const LLSettingsWater::ptr_t & fixed, S32 env_version = NO_VERSION) { setEnvironment(env, fixedEnvironment_t(LLSettingsSky::ptr_t(), fixed), env_version); }
     void                        setEnvironment(EnvSelection_t env, const LLSettingsSky::ptr_t & fixeds, const LLSettingsWater::ptr_t & fixedw, S32 env_version = NO_VERSION) { setEnvironment(env, fixedEnvironment_t(fixeds, fixedw), env_version); }
-    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, LLSettingsDay::Seconds daylength, LLSettingsDay::Seconds dayoffset, S32 env_version = NO_VERSION);
-    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, S32 env_version = NO_VERSION);
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, LLSettingsDay::Seconds daylength, LLSettingsDay::Seconds dayoffset, LLSettingsBase::Seconds transition, S32 env_version = NO_VERSION);
+    void                        setEnvironment(EnvSelection_t env, const LLUUID& assetId, S32 env_version = NO_VERSION) { setEnvironment(env, assetId, TRANSITION_DEFAULT, env_version); }
+    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, LLSettingsBase::Seconds transition, S32 env_version = NO_VERSION);
+// [/SL:KB]
+//    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, LLSettingsDay::Seconds daylength, LLSettingsDay::Seconds dayoffset, S32 env_version = NO_VERSION);
+//    void                        setEnvironment(EnvSelection_t env, const LLUUID &assetId, S32 env_version = NO_VERSION);
 
     void                        setSharedEnvironment();
     void                        clearEnvironment(EnvSelection_t env);
