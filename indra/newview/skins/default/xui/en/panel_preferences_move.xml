@@ -66,7 +66,7 @@
   left="80"
   name="heading2"
   width="270"
-  top_delta="3">
+  top_pad="5">
     Automatic position for:
   </text>
   <check_box
@@ -291,11 +291,12 @@
      function="Pref.ClickActionChange"/>
   </combo_box>
   <button
+   follows="top|left"
    height="23"
    label="Other Devices"
    left="30"
    name="joystick_setup_button"
-   top="30"
+   top_pad="15"
    width="155">
     <button.commit_callback
      function="Floater.Show"
