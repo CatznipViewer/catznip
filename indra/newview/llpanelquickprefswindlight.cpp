@@ -351,7 +351,6 @@ void LLQuickPrefsWindlightPanel::refreshControls(bool fRefreshPresets)
 
 	auto updatePresetCombo = [fUseSharedEnv](LLComboBox* pComboBox, const std::vector<EnvironmentSetting>& settingList, LLSettingsBase::ptr_t pEnvSettings, const std::string& strSharedLabel, LLButton* pPrevButton, LLButton* pNextButton, LLButton* pEditButton)
 		{
-			pComboBox->clear();
 			if ( (!fUseSharedEnv) && (pEnvSettings) )
 			{
 				const LLUUID idLocalAsset = pEnvSettings->getBaseAssetId();
@@ -362,9 +361,13 @@ void LLQuickPrefsWindlightPanel::refreshControls(bool fRefreshPresets)
 					auto itSelSetting = (idSelItem.notNull()) ? std::find_if(settingList.begin(), settingList.end(), [&idSelItem](const EnvironmentSetting& s) { return s.m_InventoryId == idSelItem; })
 															  : settingList.end();
 					if ( (settingList.end() == itSelSetting) || (itSelSetting->m_AssetId != idLocalAsset) )
+					{
 						itSelSetting = std::find_if(settingList.begin(), settingList.end(), [&idLocalAsset](const EnvironmentSetting& s) { return s.m_AssetId == idLocalAsset; });
-					if ( (settingList.end() == itSelSetting) || (!pComboBox->selectByValue(itSelSetting->m_InventoryId)) )
-						pComboBox->setLabel(s_CustomLabel);
+						if ( (settingList.end() == itSelSetting) || (!pComboBox->selectByValue(itSelSetting->m_InventoryId)) )
+						{
+							pComboBox->setLabel(s_CustomLabel);
+						}
+					}
 				}
 				else
 				{
