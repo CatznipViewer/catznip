@@ -102,20 +102,23 @@
        Low
   </text>
   <slider
-    decimal_digits="0"
+    control_name="RenderResolutionMultiplier"
+    decimal_digits="2"
     follows="left|top"
     height="16"
-    increment="90"
+    increment="0.05"
     label="Resolution scale:"
     label_width="185"
     layout="topleft"
     left="30"
+    min_val="0.5"
+    max_val="1.0"
     name="RenderResolutionScale"
     show_text="false"
     top_delta="16"
     width="300">
     <slider.commit_callback
-      function="Pref.UpdateRenderResolutionScale" />
+      function="Pref.UpdateRenderResolutionText" />
   </slider>
   <text
     type="string"
