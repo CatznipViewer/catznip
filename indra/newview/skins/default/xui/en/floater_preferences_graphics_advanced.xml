@@ -137,7 +137,7 @@
     height="16"
     layout="topleft"
     name="AvatarText"
-    top_delta="20"
+    top_delta="17"
     left="10"
     width="128">
      Avatar
@@ -282,7 +282,7 @@
     height="16"
     layout="topleft"
     name="HardwareText"
-    top_delta="20"
+    top_delta="17"
     left="10"
     width="128">
      Hardware
@@ -417,7 +417,7 @@
     layout="topleft"
     left_pad="40"
     name="fsaa"
-    top_delta="0"
+    top_delta="-3"
     width="90">
     <combo_box.item
       label="Disabled"
