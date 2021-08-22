@@ -102,20 +102,23 @@
        Low
   </text>
   <slider
-    decimal_digits="0"
+    control_name="RenderResolutionMultiplier"
+    decimal_digits="2"
     follows="left|top"
     height="16"
-    increment="90"
+    increment="0.05"
     label="Resolution scale:"
     label_width="185"
     layout="topleft"
     left="30"
+    min_val="0.5"
+    max_val="1.0"
     name="RenderResolutionScale"
     show_text="false"
     top_delta="16"
     width="300">
     <slider.commit_callback
-      function="Pref.UpdateRenderResolutionScale" />
+      function="Pref.UpdateRenderResolutionText" />
   </slider>
   <text
     type="string"
@@ -137,7 +140,7 @@
     height="16"
     layout="topleft"
     name="AvatarText"
-    top_delta="20"
+    top_delta="17"
     left="10"
     width="128">
      Avatar
@@ -282,7 +285,7 @@
     height="16"
     layout="topleft"
     name="HardwareText"
-    top_delta="20"
+    top_delta="17"
     left="10"
     width="128">
      Hardware
@@ -417,7 +420,7 @@
     layout="topleft"
     left_pad="40"
     name="fsaa"
-    top_delta="0"
+    top_delta="-3"
     width="90">
     <combo_box.item
       label="Disabled"
