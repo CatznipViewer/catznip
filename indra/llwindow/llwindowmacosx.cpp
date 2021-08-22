@@ -838,6 +838,16 @@ BOOL LLWindowMacOSX::maximize()
 	return mMaximized;
 }
 
+// [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
+bool LLWindowMacOSX::getScreenResolution(LLCoordScreen& screen_size)
+{
+	CGRect mainMonitor = CGDisplayBounds(mDisplay);
+	screen_size.mX = CGRectGetWidth(mainMonitor);
+	screen_size.mY = CGRectGetHeight(mainMonitor);
+	return true;
+}
+// [/SL:KB]
+
 BOOL LLWindowMacOSX::getFullscreen()
 {
 	return mFullscreen;
