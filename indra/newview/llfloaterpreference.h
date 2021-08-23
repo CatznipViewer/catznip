@@ -198,7 +198,7 @@ public:
 	void onChangeMaturity();
 	void onChangeModelFolder();
 // [SL:KB] - Patch: Settings-RenderResolutionScale | Checked: Catznip-6.5
-	void onChangeRenderResolutionScale(LLUICtrl* pCtrl);
+	void onChangeRenderResolutionText(LLUICtrl* pCtrl);
 // [/SL:KB]
 	void onChangeTextureFolder();
 	void onChangeSoundFolder();

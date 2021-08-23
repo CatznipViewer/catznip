@@ -1333,24 +1333,45 @@ void LLEnvironment::setEnvironment(LLEnvironment::EnvSelection_t env, const LLSe
     }
 }
 
-void LLEnvironment::setEnvironment(EnvSelection_t env, const LLUUID &assetId, S32 env_version)
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+void LLEnvironment::setEnvironment(EnvSelection_t env, const LLUUID &assetId, LLSettingsBase::Seconds transition, S32 env_version)
 {
-    setEnvironment(env, assetId, LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET);
+    setEnvironment(env, assetId, LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, transition);
 }
+// [/SL:KB]
+//void LLEnvironment::setEnvironment(EnvSelection_t env, const LLUUID &assetId, S32 env_version)
+//{
+//    setEnvironment(env, assetId, LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET);
+//}
 
 
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
 void LLEnvironment::setEnvironment(EnvSelection_t env,
                                    const LLUUID &assetId,
                                    LLSettingsDay::Seconds daylength,
                                    LLSettingsDay::Seconds dayoffset,
+                                   LLSettingsBase::Seconds transition,
                                    S32 env_version)
 {
     LLSettingsVOBase::getSettingsAsset(assetId,
-        [this, env, daylength, dayoffset, env_version](LLUUID asset_id, LLSettingsBase::ptr_t settings, S32 status, LLExtStat)
+        [this, env, daylength, dayoffset, transition, env_version](LLUUID asset_id, LLSettingsBase::ptr_t settings, S32 status, LLExtStat)
         {
-            onSetEnvAssetLoaded(env, asset_id, settings, daylength, dayoffset, TRANSITION_DEFAULT, status, env_version);
+            onSetEnvAssetLoaded(env, asset_id, settings, daylength, dayoffset, transition, status, env_version);
         });
 }
+// [/SL:KB]
+//void LLEnvironment::setEnvironment(EnvSelection_t env,
+//                                   const LLUUID &assetId,
+//                                   LLSettingsDay::Seconds daylength,
+//                                   LLSettingsDay::Seconds dayoffset,
+//                                   S32 env_version)
+//{
+//    LLSettingsVOBase::getSettingsAsset(assetId,
+//        [this, env, daylength, dayoffset, env_version](LLUUID asset_id, LLSettingsBase::ptr_t settings, S32 status, LLExtStat)
+//        {
+//            onSetEnvAssetLoaded(env, asset_id, settings, daylength, dayoffset, TRANSITION_DEFAULT, status, env_version);
+//        });
+//}
 
 void LLEnvironment::onSetEnvAssetLoaded(EnvSelection_t env,
                                         LLUUID asset_id,
@@ -1822,7 +1843,10 @@ void LLEnvironment::recordEnvironment(S32 parcel_id, LLEnvironment::EnvironmentI
         if (!envinfo->mDayCycle)
         {
             clearEnvironment(ENV_PARCEL);
-            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, envinfo->mEnvVersion);
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, transition, envinfo->mEnvVersion);
+// [/SL:KB]
+//            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, envinfo->mEnvVersion);
             updateEnvironment();
         }
         else if (envinfo->mDayCycle->isTrackEmpty(LLSettingsDay::TRACK_WATER)
@@ -1830,7 +1854,10 @@ void LLEnvironment::recordEnvironment(S32 parcel_id, LLEnvironment::EnvironmentI
         {
             LL_WARNS("ENVIRONMENT") << "Invalid day cycle for region" << LL_ENDL;
             clearEnvironment(ENV_PARCEL);
-            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, envinfo->mEnvVersion);
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, transition, envinfo->mEnvVersion);
+// [/SL:KB]
+//            setEnvironment(ENV_REGION, LLSettingsDay::GetDefaultAssetId(), LLSettingsDay::DEFAULT_DAYLENGTH, LLSettingsDay::DEFAULT_DAYOFFSET, envinfo->mEnvVersion);
             updateEnvironment();
         }
         else
@@ -3077,7 +3104,10 @@ void LLEnvironment::loadSkyWaterFromSettings(const LLSD &env_data, bool &valid, 
     if (env_data.has("sky_id"))
     {
         // causes asset loaded callback and an update
-        setEnvironment(ENV_LOCAL, env_data["sky_id"].asUUID());
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+        setEnvironment(ENV_LOCAL, env_data["sky_id"].asUUID(), LLEnvironment::TRANSITION_INSTANT, LLEnvironment::NO_VERSION);
+// [/SL:KB]
+//        setEnvironment(ENV_LOCAL, env_data["sky_id"].asUUID());
         valid = true;
         assets_present = true;
     }
@@ -3091,7 +3121,10 @@ void LLEnvironment::loadSkyWaterFromSettings(const LLSD &env_data, bool &valid, 
     if (env_data.has("water_id"))
     {
         // causes asset loaded callback and an update
-        setEnvironment(ENV_LOCAL, env_data["water_id"].asUUID());
+// [SL:KB] - Patch: World-WindLight | Checked: Catznip-6.4
+       setEnvironment(ENV_LOCAL, env_data["water_id"].asUUID(), LLEnvironment::TRANSITION_INSTANT, LLEnvironment::NO_VERSION);
+// [/SL:KB]
+//       setEnvironment(ENV_LOCAL, env_data["water_id"].asUUID());
         valid = true;
         assets_present = true;
     }

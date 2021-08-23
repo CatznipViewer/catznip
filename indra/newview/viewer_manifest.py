@@ -994,8 +994,8 @@ class DarwinManifest(ViewerManifest):
                     self.run_command(
                         ['strip', '-S', executable])
 
-            print "Copying updater scripts..."
-            self.path2basename("../viewer_components/updater/scripts/darwin", "*.py")
+                print "Copying updater scripts..."
+                self.path2basename("../viewer_components/updater/scripts/darwin", "*.py")
 
             with self.prefix(dst="Resources"):
                 # defer cross-platform file copies until we're in the
