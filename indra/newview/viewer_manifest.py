@@ -1021,6 +1021,9 @@ class DarwinManifest(ViewerManifest):
 
                 self.path("licenses-mac.txt", dst="licenses.txt")
                 self.path("featuretable_mac.txt")
+# [SL:KB]
+                self.run_command(['ibtool', '--compile', os.path.join(viewer_dir, 'Catznip.nib'), os.path.join(viewer_dir, 'Catznip.xib')])
+# [/SL:KB]
                 self.path("Catznip.nib")
 
                 with self.prefix(src=pkgdir,dst=""):
