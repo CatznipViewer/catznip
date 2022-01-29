@@ -43,7 +43,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   string(REPLACE ":" ";" PATH_LIST "$ENV{PATH}")
   find_program(PYTHON_EXECUTABLE
     NAMES python python25 python24 python23
-    NO_DEFAULT_PATH # Avoid searching non-standard locations first
+    #NO_DEFAULT_PATH # Avoid searching non-standard locations first
     PATHS
     /bin
     /usr/local/bin

@@ -795,6 +795,9 @@ class WindowsManifest(ViewerManifest):
 
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
+# [SL:KB] - Patch: Viewer-Branding
+        substitution_strings['nsis_plugins'] = os.environ['NSIS_PLUGINS']
+# [/SL:KB]
         
         version_vars = """
         !define PRODUCT_SHORT "Catznip"
@@ -810,6 +813,7 @@ class WindowsManifest(ViewerManifest):
         !define VERSION_RELEASE "%(version_release)s"
         !define VERSION_REGISTRY "%(version_registry)s"
         !define VIEWER_EXE "%(final_exe)s"
+        !define NSIS_PLUGINS "%(nsis_plugins)s"
         """ % substitution_strings
         
         if self.channel_type() == 'release':
