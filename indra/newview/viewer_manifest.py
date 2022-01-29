@@ -1302,7 +1302,7 @@ class DarwinManifest(ViewerManifest):
                 dmg_template = os.path.join ('installers', 'darwin', 'release-dmg')
 
             for s,d in {self.get_dst_prefix():app_name + ".app",
-                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
+            #            os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
                         os.path.join(dmg_template, "background.jpg"): "background.jpg",
                         os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
                 print "Copying to dmg", s, d
@@ -1331,7 +1331,10 @@ class DarwinManifest(ViewerManifest):
 # [/SL:FS]
 
             # Hide the background image, DS_Store file, and volume icon file (set their "visible" bit)
-            for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
+            #for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
+# [SL:KB]
+            for f in "background.jpg", ".DS_Store":
+# [/SL:KB]
                 pathname = os.path.join(volpath, f)
                 self.run_command(['SetFile', '-a', 'V', pathname])
 
