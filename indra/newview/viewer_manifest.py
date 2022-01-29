@@ -522,6 +522,7 @@ class WindowsManifest(ViewerManifest):
 
         if self.is_packaging_viewer():
             # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
+            self.run_command([os.path.join(viewer_dir, os.pardir, "tools", "StripManifest.exe"), self.dst_path_of('catznip-bin.exe'), self.dst_path_of('catznip-bin-nomanifest.exe')])
             self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
             self.path(src='%s/catznip-bin-nomanifest.exe' % self.args['configuration'], dst=self.final_nomanifest_exe())
         
