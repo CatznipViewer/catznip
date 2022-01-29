@@ -71,6 +71,7 @@ jobs:
 
     - name: Set environment variables
       run: |
+        echo "AUTOBUILD_BUILD_ID=$(git rev-list --count HEAD)" >> $GITHUB_ENV
         echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
         echo "DEPENDENCIES_SRC_PATH=/dependencies/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
         echo "ARTIFACT_DST_PATH=/artifacts/${GITHUB_REPOSITORY#*/}/" >> $GITHUB_ENV
@@ -118,13 +119,14 @@ jobs:
     - name: Create artifact (Mac)
       if: runner.os == 'macOS'
       run: |
-        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt)-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-darwin-x86_64/newview/*.dmg
+        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt).${AUTOBUILD_BUILD_ID}-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-darwin-x86_64/newview/*.dmg
       shell: bash
 
     - name: Create artifact (Windows)
       if: runner.os == 'Windows'
       run: |
-        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt)-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.exe ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.pdb
+        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt).${AUTOBUILD_BUILD_ID}-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.exe ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.pdb
+      shell: bash
 
     - name: Publish artifact
       uses: ./dep/action-scp
