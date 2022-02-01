@@ -350,6 +350,12 @@ public:
 
 	void update()
 	{
+		if (!gPipeline.hasRenderDebugFeatureMask(LLPipeline::RENDER_DEBUG_FEATURE_UI))
+		{
+			clearText();
+			return;
+		}
+
 		static LLCachedControl<bool> log_texture_traffic(gSavedSettings,"LogTextureNetworkTraffic", false) ;
 
 		std::string wind_vel_text;
@@ -364,6 +370,8 @@ public:
 		static const std::string beacon_scripted_touch = LLTrans::getString("BeaconScriptedTouch");
 		static const std::string beacon_sound = LLTrans::getString("BeaconSound");
 		static const std::string beacon_media = LLTrans::getString("BeaconMedia");
+		static const std::string beacon_sun = LLTrans::getString("BeaconSun");
+		static const std::string beacon_moon = LLTrans::getString("BeaconMoon");
 		static const std::string particle_hiding = LLTrans::getString("ParticleHiding");
 
 		// Draw the statistics in a light gray
@@ -608,7 +616,7 @@ public:
 			addText(xpos, ypos, llformat("%d Unique Textures", LLImageGL::sUniqueCount));
 			ypos += y_inc;
 
-			addText(xpos, ypos, llformat("%d Render Calls", last_frame_recording.getSampleCount(LLPipeline::sStatBatchSize)));
+			addText(xpos, ypos, llformat("%d Render Calls", (U32)last_frame_recording.getSampleCount(LLPipeline::sStatBatchSize)));
             ypos += y_inc;
 
 			addText(xpos, ypos, llformat("%d/%d Objects Active", gObjectList.getNumActiveObjects(), gObjectList.getNumObjects()));
@@ -796,6 +804,20 @@ public:
 				addText(xpos, ypos, "Viewing physical object beacons (green)");
 				ypos += y_inc;
 			}
+		}
+
+		static LLUICachedControl<bool> show_sun_beacon("sunbeacon", false);
+		static LLUICachedControl<bool> show_moon_beacon("moonbeacon", false);
+
+		if (show_sun_beacon)
+		{
+			addText(xpos, ypos, beacon_sun);
+			ypos += y_inc;
+		}
+		if (show_moon_beacon)
+		{
+			addText(xpos, ypos, beacon_moon);
+			ypos += y_inc;
 		}
 
 		if(log_texture_traffic)
@@ -1384,6 +1406,7 @@ BOOL LLViewerWindow::handleCloseRequest(LLWindow *window)
 
 void LLViewerWindow::handleQuit(LLWindow *window)
 {
+	LL_INFOS() << "Window forced quit" << LL_ENDL;
 	LLAppViewer::instance()->forceQuit();
 }
 
@@ -1996,6 +2019,11 @@ void LLViewerWindow::initBase()
 	LLPanel* panel_holder = main_view->getChild<LLPanel>("toolbar_view_holder");
 	// Load the toolbar view from file 
 	gToolBarView = LLUICtrlFactory::getInstance()->createFromFile<LLToolBarView>("panel_toolbar_view.xml", panel_holder, LLDefaultChildRegistry::instance());
+	if (!gToolBarView)
+	{
+		LL_ERRS() << "Failed to initialize viewer: Viewer couldn't process file panel_toolbar_view.xml, "
+				<< "if this problem happens again, please validate your installation." << LL_ENDL;
+	}
 	gToolBarView->setShape(panel_holder->getLocalRect());
 	// Hide the toolbars for the moment: we'll make them visible after logging in world (see LLViewerWindow::initWorldUI())
 	gToolBarView->setVisible(FALSE);
@@ -2299,7 +2327,7 @@ void LLViewerWindow::shutdownGL()
 LLViewerWindow::~LLViewerWindow()
 {
 	LL_INFOS() << "Destroying Window" << LL_ENDL;
-	gDebugWindowProc = TRUE; // event catching, at this point it shouldn't output at all
+	gDebugWindowProc = TRUE; // event catching, disable once we figure out cause for exit crashes
 	destroyWindow();
 
 	delete mDebugText;
@@ -2481,7 +2509,7 @@ void LLViewerWindow::setMenuBackgroundColor(bool god_mode, bool dev_grid)
     }
     else
     {
-        switch (LLVersionInfo::getViewerMaturity())
+        switch (LLVersionInfo::instance().getViewerMaturity())
         {
         case LLVersionInfo::TEST_VIEWER:
             new_bg_color = LLUIColorTable::instance().getColor( "MenuBarTestBgColor" );
@@ -2884,7 +2912,8 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 	// If "Pressing letter keys starts local chat" option is selected, we are not in mouselook, 
 	// no view has keyboard focus, this is a printable character key (and no modifier key is 
 	// pressed except shift), then give focus to nearby chat (STORM-560)
-	if ( gSavedSettings.getS32("LetterKeysFocusChatBar") && !gAgentCamera.cameraMouselook() && 
+	if ( LLStartUp::getStartupState() >= STATE_STARTED && 
+		gSavedSettings.getS32("LetterKeysFocusChatBar") && !gAgentCamera.cameraMouselook() && 
 		!keyboard_focus && key < 0x80 && (mask == MASK_NONE || mask == MASK_SHIFT) )
 	{
 		// Initialize nearby chat if it's missing
@@ -3865,7 +3894,7 @@ void LLViewerWindow::renderSelections( BOOL for_gl_pick, BOOL pick_parcel_walls,
 						F32 scale = vovolume->getLightRadius();
 						gGL.scalef(scale, scale, scale);
 
-						LLColor4 color(vovolume->getLightColor(), .5f);
+						LLColor4 color(vovolume->getLightSRGBColor(), .5f);
 						gGL.color4fv(color.mV);
 					
 						//F32 pixel_area = 100000.f;
@@ -3912,12 +3941,12 @@ void LLViewerWindow::renderSelections( BOOL for_gl_pick, BOOL pick_parcel_walls,
 
 					BOOL draw_handles = TRUE;
 
-					if (tool == LLToolCompTranslate::getInstance() && !all_selected_objects_move && !LLSelectMgr::getInstance()->isSelfAvatarSelected())
+					if (tool == LLToolCompTranslate::getInstance() && !all_selected_objects_move && !LLSelectMgr::getInstance()->isMovableAvatarSelected())
 					{
 						draw_handles = FALSE;
 					}
 
-					if (tool == LLToolCompRotate::getInstance() && !all_selected_objects_move)
+					if (tool == LLToolCompRotate::getInstance() && !all_selected_objects_move && !LLSelectMgr::getInstance()->isMovableAvatarSelected())
 					{
 						draw_handles = FALSE;
 					}
@@ -4756,12 +4785,12 @@ void LLViewerWindow::movieSize(S32 new_width, S32 new_height)
 	}
 }
 
-BOOL LLViewerWindow::saveSnapshot(const std::string& filepath, S32 image_width, S32 image_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type, LLSnapshotModel::ESnapshotFormat format)
+BOOL LLViewerWindow::saveSnapshot(const std::string& filepath, S32 image_width, S32 image_height, BOOL show_ui, BOOL show_hud, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type, LLSnapshotModel::ESnapshotFormat format)
 {
     LL_INFOS() << "Saving snapshot to: " << filepath << LL_ENDL;
 
     LLPointer<LLImageRaw> raw = new LLImageRaw;
-    BOOL success = rawSnapshot(raw, image_width, image_height, TRUE, FALSE, show_ui, do_rebuild);
+    BOOL success = rawSnapshot(raw, image_width, image_height, TRUE, FALSE, show_ui, show_hud, do_rebuild);
 
     if (success)
     {
@@ -4820,16 +4849,16 @@ void LLViewerWindow::playSnapshotAnimAndSound()
 //	gSavedPerAccountSettings.setString("SnapshotBaseDir", std::string());
 //}
 
-BOOL LLViewerWindow::thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type)
+BOOL LLViewerWindow::thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL show_hud, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type)
 {
-	return rawSnapshot(raw, preview_width, preview_height, FALSE, FALSE, show_ui, do_rebuild, type);
+	return rawSnapshot(raw, preview_width, preview_height, FALSE, FALSE, show_ui, show_hud, do_rebuild, type);
 }
 
 // Saves the image from the screen to a raw image
 // Since the required size might be bigger than the available screen, this method rerenders the scene in parts (called subimages) and copy
 // the results over to the final raw image.
 BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_height, 
-	BOOL keep_window_aspect, BOOL is_texture, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type, S32 max_size)
+    BOOL keep_window_aspect, BOOL is_texture, BOOL show_ui, BOOL show_hud, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type, S32 max_size)
 {
 	if (!raw)
 	{
@@ -4863,7 +4892,7 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 		LLPipeline::toggleRenderDebugFeature(LLPipeline::RENDER_DEBUG_FEATURE_UI);
 	}
 
-	BOOL hide_hud = !gSavedSettings.getBOOL("RenderHUDInSnapshot") && LLPipeline::sShowHUDAttachments;
+    BOOL hide_hud = !show_hud && LLPipeline::sShowHUDAttachments;
 	if (hide_hud)
 	{
 		LLPipeline::sShowHUDAttachments = FALSE;
@@ -5018,7 +5047,6 @@ BOOL LLViewerWindow::rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_hei
 				{
 					// Required for showing the GUI in snapshots and performing bloom composite overlay
 					// Call even if show_ui is FALSE
-					LL_RECORD_BLOCK_TIME(FTM_RENDER_UI);
 					render_ui(scale_factor, subfield);
 					swap();
 				}
@@ -5284,6 +5312,14 @@ void LLViewerWindow::revealIntroPanel()
 	}
 }
 
+void LLViewerWindow::initTextures(S32 location_id)
+{
+    if (mProgressView)
+    {
+        mProgressView->initTextures(location_id, LLGridManager::getInstance()->isInProductionGrid());
+    }
+}
+
 void LLViewerWindow::setShowProgress(const BOOL show)
 {
 	if (mProgressView)
@@ -5336,7 +5372,6 @@ void LLViewerWindow::setProgressCancelButtonVisible( BOOL b, const std::string& 
 		mProgressView->setCancelButtonVisible( b, label );
 	}
 }
-
 
 LLProgressView *LLViewerWindow::getProgressView() const
 {

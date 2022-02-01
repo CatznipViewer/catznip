@@ -67,7 +67,7 @@ LLUUID upload_new_resource(
 
 void upload_new_resource(
     LLResourceUploadInfo::ptr_t &uploadInfo,
-    LLAssetStorage::LLStoreAssetCallback callback = NULL,
+    LLAssetStorage::LLStoreAssetCallback callback = LLAssetStorage::LLStoreAssetCallback(),
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	std::list<std::string>* pFileList = NULL);
 // [/SL:KB]
