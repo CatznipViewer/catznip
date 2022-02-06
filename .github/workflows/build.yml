@@ -1,0 +1,138 @@
+name: Build viewer
+
+on:
+  workflow_dispatch:
+    inputs:
+      operating_system:
+        required: true
+        type: choice
+        description: Operating system
+        options:
+        - windows-2019
+        - macos-11
+      address_size:
+        required: true
+        type: choice
+        description: Address size
+        options:
+        - 64
+        - 32
+        default: 64
+      build_config:
+        required: true
+        description: Build configuration
+        default: 'Release'
+      viewer_channel:
+        required: true
+        description: Viewer channel
+        default: 'Catznip Internal'
+
+env:
+  AUTOBUILD_INSTALLABLE_CACHE: ${{github.workspace}}/dep/packages
+  AUTOBUILD_VARIABLES_FILE: ${{github.workspace}}/dep/build-variables/variables
+  NSIS_PLUGINS: ${{github.workspace}}/dep/nsis_plugins
+  AUTOBUILD_VSVER: 160
+  ADDRESS_SIZE: ${{ github.event.inputs.address_size }}
+  BUILD_CONFIG: ${{ github.event.inputs.build_config }}
+  VIEWER_CHANNEL: ${{ github.event.inputs.viewer_channel }}
+
+jobs:
+  build:
+    runs-on: ${{ github.event.inputs.operating_system }}
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check out autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: CatznipViewer/autobuild
+        ref: main
+        path: 'dep/autobuild'
+        token: ${{ secrets.AUTH_PAT }}
+
+    - name: Check out build-variables
+      uses: actions/checkout@v2
+      with:
+        repository: CatznipViewer/build-variables
+        ref: catznip/release
+        path: 'dep/build-variables'
+        token: ${{ secrets.AUTH_PAT }}
+
+    - name: Check out action-scp
+      uses: actions/checkout@v2
+      with:
+        repository: CatznipViewer/action-scp
+        ref: main
+        path: 'dep/action-scp'
+
+    - name: Set environment variables
+      run: |
+        echo "AUTOBUILD_BUILD_ID=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+        echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+        echo "DEPENDENCIES_SRC_PATH=/dependencies/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+        echo "ARTIFACT_DST_PATH=/artifacts/${GITHUB_REPOSITORY#*/}/" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Download private packages
+      uses: ./dep/action-scp
+      with:
+        key: ${{ secrets.SCP_KEY }}
+        source_host: ${{ secrets.SCP_HOST }}
+        source_username: ${{ secrets.SCP_USER }}
+        source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/packages/*
+        destination_file: './dep/packages/'
+
+    - name: Download NSIS plugins
+      if: runner.os == 'Windows'
+      uses: ./dep/action-scp
+      with:
+        key: ${{ secrets.SCP_KEY }}
+        source_host: ${{ secrets.SCP_HOST }}
+        source_username: ${{ secrets.SCP_USER }}
+        source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/nsis_plugins/*
+        destination_file: './dep/nsis_plugins/'
+
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.x'
+        architecture: 'x64'
+
+    - name: Install autobuild
+      run: pip install "dep/autobuild"
+
+    - name: Run autobuild configure (Mac)
+      if: runner.os == 'macOS'
+      run: autobuild configure --verbose --address-size ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} -- -DLL_TESTS=OFF -DPACKAGE=ON -DRELEASE_CRASH_REPORTING=OFF -DFMODSTUDIO=ON -DUSE_KDU=OFF -DHAVOK=OFF -DHAVOK_TPV=OFF -DVIEWER_CHANNEL="${{ env.VIEWER_CHANNEL }}" -DGCC_DISABLE_FATAL_WARNINGS=ON
+
+    - name: Run autobuild configure (Windows)
+      if: runner.os == 'Windows'
+      run: autobuild configure --verbose --address-size ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} -- -DLL_TESTS=OFF -DPACKAGE=ON -DRELEASE_CRASH_REPORTING=ON -DFMODSTUDIO=ON -DUSE_KDU=OFF -DHAVOK=OFF -DHAVOK_TPV=OFF -DVIEWER_CHANNEL="${{ env.VIEWER_CHANNEL }}" -T v142,host=x64
+
+    - name: Run autobuild build
+      run: autobuild build -A ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} --no-configure
+
+    - name: Create artifact (Mac)
+      if: runner.os == 'macOS'
+      run: |
+        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt).${AUTOBUILD_BUILD_ID}-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-darwin-x86_64/newview/*.dmg
+      shell: bash
+
+    - name: Create artifact (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        tar -cvzf ./"${VIEWER_CHANNEL}-$(cat ./indra/newview/VIEWER_VERSION.txt).${AUTOBUILD_BUILD_ID}-${RUNNER_OS}${ADDRESS_SIZE}.tar.gz" ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.exe ./build-vc"$AUTOBUILD_VSVER-$ADDRESS_SIZE"/newview/Release/*.pdb
+      shell: bash
+
+    - name: Publish artifact
+      uses: ./dep/action-scp
+      with:
+        key: ${{ secrets.SCP_KEY }}
+        source_file: ./*.tar.gz
+        destination_host: ${{ secrets.SCP_HOST }}
+        destination_username: ${{ secrets.SCP_USER }}
+        destination_file: ${{ env.ARTIFACT_DST_PATH }}

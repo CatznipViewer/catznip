@@ -312,7 +312,6 @@ void LLWatchdog::run()
 //		}
 //	}
 
-
 	unlockThread();
 }
 
