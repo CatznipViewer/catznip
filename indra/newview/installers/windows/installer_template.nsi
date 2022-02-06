@@ -188,6 +188,10 @@ FunctionEnd
 ;; entry to the language ID selector below
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function .onInit
+${If} ${NSIS_PLUGINS} != ""
+    !addplugindir "${NSIS_PLUGINS}"
+${EndIf}
+
 !insertmacro MULTIUSER_INIT
 
 HwInfo::GetVideoCardName

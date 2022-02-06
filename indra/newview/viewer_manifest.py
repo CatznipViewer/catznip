@@ -522,6 +522,7 @@ class WindowsManifest(ViewerManifest):
 
         if self.is_packaging_viewer():
             # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
+            self.run_command([os.path.join(viewer_dir, os.pardir, "tools", "StripManifest.exe"), self.dst_path_of('catznip-bin.exe'), self.dst_path_of('catznip-bin-nomanifest.exe')])
             self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
             self.path(src='%s/catznip-bin-nomanifest.exe' % self.args['configuration'], dst=self.final_nomanifest_exe())
         
@@ -794,6 +795,9 @@ class WindowsManifest(ViewerManifest):
 
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
+# [SL:KB] - Patch: Viewer-Branding
+        substitution_strings['nsis_plugins'] = os.environ['NSIS_PLUGINS']
+# [/SL:KB]
         
         version_vars = """
         !define PRODUCT_SHORT "Catznip"
@@ -809,6 +813,7 @@ class WindowsManifest(ViewerManifest):
         !define VERSION_RELEASE "%(version_release)s"
         !define VERSION_REGISTRY "%(version_registry)s"
         !define VIEWER_EXE "%(final_exe)s"
+        !define NSIS_PLUGINS "%(nsis_plugins)s"
         """ % substitution_strings
         
         if self.channel_type() == 'release':
@@ -1024,6 +1029,9 @@ class DarwinManifest(ViewerManifest):
 
                 self.path("licenses-mac.txt", dst="licenses.txt")
                 self.path("featuretable_mac.txt")
+# [SL:KB]
+                self.run_command(['ibtool', '--compile', os.path.join(viewer_dir, 'Catznip.nib'), os.path.join(viewer_dir, 'Catznip.xib')])
+# [/SL:KB]
                 self.path("Catznip.nib")
 
                 with self.prefix(src=pkgdir,dst=""):
