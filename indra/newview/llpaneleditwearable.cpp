@@ -1321,7 +1321,7 @@ void LLPanelEditWearable::updateDirty()
 	const LLEditWearableDictionary::WearableEntry* pWearableEntry = LLEditWearableDictionary::getInstance()->getWearable(mWearablePtr->getType());
 	if (curPanel && pWearableEntry)
 	{
-		for (U8 idxSubpart = 0, cntSubpart = pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
+		for (U8 idxSubpart = 0, cntSubpart = (U8)pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
 		{
 			const LLEditWearableDictionary::SubpartEntry* pSubpartEntry = LLEditWearableDictionary::getInstance()->getSubpart(pWearableEntry->mSubparts[idxSubpart]);
 			if (LLScrollingPanelList* pScrollingPanelList = getChild<LLScrollingPanelList>(pSubpartEntry->mParamList))

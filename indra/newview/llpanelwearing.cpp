@@ -382,7 +382,6 @@ private:
 			functor(item_id);
 		}
 	}
-
 	LLToggleableMenu*		mMenu;
 	LLPanelWearing* 		mPanelWearing;
 };
@@ -682,12 +681,15 @@ protected:
 // [/SL:KB]
 //	void updateMenuItemsVisibility(LLContextMenu* menu)
 //	{
+//		menu->setItemVisible("touch_attach", TRUE);
+//		menu->setItemEnabled("touch_attach", 1 == mUUIDs.size());
+//		menu->setItemVisible("edit_item", TRUE);
+//		menu->setItemEnabled("edit_item", 1 == mUUIDs.size());
 //		menu->setItemVisible("take_off", FALSE);
 //		menu->setItemVisible("detach", TRUE);
-//		menu->setItemVisible("edit_outfit_separator", TRUE);
+//		menu->setItemVisible("edit_outfit_separator", FALSE);
 //		menu->setItemVisible("show_original", FALSE);
-//		menu->setItemVisible("edit_item", TRUE);
-//		menu->setItemVisible("edit", FALSE);
+//		menu->setItemVisible("edit_outfit", FALSE);
 //	}
 
 	LLPanelWearing* 		mPanelWearing;
@@ -976,6 +978,7 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 	{
 		return (1 == selected_uuids.size()) && (get_is_item_editable(selected_uuids.front()));
 	}
+
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-15 (Catznip-3.3)
 	else if (command_name == "take_off_folder")
 	{
