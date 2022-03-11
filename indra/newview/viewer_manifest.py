@@ -456,7 +456,7 @@ class WindowsManifest(ViewerManifest):
         return self.app_name_oneword()+"_NoManifest.exe"
 
     def final_exe(self):
-        return self.exec_name()+".exe"
+        return self.app_name_oneword()+".exe"
 
     def finish_build_data_dict(self, build_data_dict):
         build_data_dict['Executable'] = self.final_exe()
@@ -578,6 +578,8 @@ class WindowsManifest(ViewerManifest):
             # See http://msdn.microsoft.com/en-us/library/ms235291(VS.80).aspx
             self.path("msvcp140.dll")
             self.path("vcruntime140.dll")
+            if (self.address_size == 64):
+                self.path("vcruntime140_1.dll")
 
             # SLVoice executable
             with self.prefix(src=os.path.join(pkgdir, 'bin', 'release')):
@@ -652,6 +654,8 @@ class WindowsManifest(ViewerManifest):
                                               'sharedlibs', 'Release')):
                 self.path("msvcp140.dll")
                 self.path("vcruntime140.dll")
+                if (self.address_size == 64):
+                    self.path("vcruntime140_1.dll")
 
             # CEF files common to all configurations
             with self.prefix(src=os.path.join(pkgdir, 'resources')):
@@ -796,7 +800,7 @@ class WindowsManifest(ViewerManifest):
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
 # [SL:KB] - Patch: Viewer-Branding
-        substitution_strings['nsis_plugins'] = os.environ['NSIS_PLUGINS']
+        substitution_strings['nsis_plugins'] = os.getenv('NSIS_PLUGINS')
 # [/SL:KB]
         
         version_vars = """
