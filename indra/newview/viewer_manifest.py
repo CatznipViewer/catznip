@@ -800,7 +800,7 @@ class WindowsManifest(ViewerManifest):
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
 # [SL:KB] - Patch: Viewer-Branding
-        substitution_strings['nsis_plugins'] = os.environ['NSIS_PLUGINS']
+        substitution_strings['nsis_plugins'] = os.getenv('NSIS_PLUGINS')
 # [/SL:KB]
         
         version_vars = """
