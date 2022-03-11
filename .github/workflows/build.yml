@@ -50,6 +50,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Log inputs
+      run: |
+        echo "::notice title=${VIEWER_CHANNEL} R$(cat ./indra/newview/VIEWER_VERSION.txt) (${BUILD_CONFIG})::${{github.event.inputs.operating_system}} (${ADDRESS_SIZE} bit) / ${{github.event.inputs.avx2 == 'true' && 'AVX2' || 'no AVX2' }}"
+      shell: bash
+
     - name: Check out autobuild
       uses: actions/checkout@v2
       with:
