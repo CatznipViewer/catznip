@@ -66,6 +66,14 @@ jobs:
         path: 'dep/build-variables'
         token: ${{ secrets.AUTH_PAT }}
 
+    - name: Check out build-tools
+      uses: actions/checkout@v2
+      with:
+        repository: CatznipViewer/build-tools
+        ref: main
+        path: 'dep/build-tools'
+        token: ${{ secrets.AUTH_PAT }}
+
     - name: Check out action-scp
       uses: actions/checkout@v2
       with:
@@ -99,6 +107,11 @@ jobs:
         source_username: ${{ secrets.SCP_USER }}
         source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/nsis_plugins/*
         destination_file: './dep/nsis_plugins/'
+
+    - name: Apply build time patches
+      run: |
+        ./scripts/build/git-apply.sh ./dep/build-tools/patches
+      shell: bash
 
     - name: Install Python
       uses: actions/setup-python@v2
