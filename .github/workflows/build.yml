@@ -22,6 +22,10 @@ on:
         required: true
         description: Build configuration
         default: 'Release'
+      avx2:
+        required: true
+        type: boolean
+        description: Build with AVX2
       viewer_channel:
         required: true
         description: Viewer channel
@@ -46,6 +50,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Log inputs
+      run: |
+        echo "::notice title=${VIEWER_CHANNEL} R$(cat ./indra/newview/VIEWER_VERSION.txt) (${BUILD_CONFIG})::${{github.event.inputs.operating_system}} (${ADDRESS_SIZE} bit) / ${{github.event.inputs.avx2 == 'true' && 'AVX2' || 'no AVX2' }}"
+      shell: bash
+
     - name: Check out autobuild
       uses: actions/checkout@v2
       with:
@@ -58,8 +67,16 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CatznipViewer/build-variables
-        ref: catznip/release
+        ref: ${{ github.event.inputs.avx2 == 'true' && 'catznip/rtm/final-avx2' || 'catznip/rtm/final' }}
         path: 'dep/build-variables'
+        token: ${{ secrets.AUTH_PAT }}
+
+    - name: Check out build-tools
+      uses: actions/checkout@v2
+      with:
+        repository: CatznipViewer/build-tools
+        ref: main
+        path: 'dep/build-tools'
         token: ${{ secrets.AUTH_PAT }}
 
     - name: Check out action-scp
@@ -95,6 +112,11 @@ jobs:
         source_username: ${{ secrets.SCP_USER }}
         source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/nsis_plugins/*
         destination_file: './dep/nsis_plugins/'
+
+    - name: Apply build time patches
+      run: |
+        ./scripts/build/git-apply.sh ./dep/build-tools/patches
+      shell: bash
 
     - name: Install Python
       uses: actions/setup-python@v2
