@@ -1270,7 +1270,7 @@ void LLPanelEditWearable::showWearableParam(const std::string& strParamName)
 		if (!pWearableEntry)
 			return;
 
-		for (U8 idxSubpart = 0, cntSubpart = pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
+		for (U8 idxSubpart = 0, cntSubpart = (U8)pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
 		{
 			ESubpart eSubPart = pWearableEntry->mSubparts[idxSubpart];
 			const LLEditWearableDictionary::SubpartEntry* pSubpartEntry = LLEditWearableDictionary::getInstance()->getSubpart(eSubPart);
