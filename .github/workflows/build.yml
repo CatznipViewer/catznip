@@ -22,6 +22,10 @@ on:
         required: true
         description: Build configuration
         default: 'Release'
+      avx2:
+        required: true
+        type: boolean
+        description: Build with AVX2
       viewer_channel:
         required: true
         description: Viewer channel
@@ -58,7 +62,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CatznipViewer/build-variables
-        ref: catznip/release
+        ref: ${{ github.event.inputs.avx2 == 'true' && 'catznip/rtm/final-avx2' || 'catznip/rtm/final' }}
         path: 'dep/build-variables'
         token: ${{ secrets.AUTH_PAT }}
 
