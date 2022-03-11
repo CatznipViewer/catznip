@@ -456,7 +456,7 @@ class WindowsManifest(ViewerManifest):
         return self.app_name_oneword()+"_NoManifest.exe"
 
     def final_exe(self):
-        return self.exec_name()+".exe"
+        return self.app_name_oneword()+".exe"
 
     def finish_build_data_dict(self, build_data_dict):
         build_data_dict['Executable'] = self.final_exe()
