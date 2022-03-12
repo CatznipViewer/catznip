@@ -58,6 +58,7 @@
 #include "llevents.h"
 #include "llappviewer.h"
 #include "llsdserialize.h"
+#include "lltrans.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <sstream>
@@ -229,9 +230,28 @@ void LLLoginInstance::constructAuthParams(LLPointer<LLCredential> user_credentia
 	request_params["id0"] = mSerialNumber;
 	request_params["host_id"] = gSavedSettings.getString("HostID");
 	request_params["extended_errors"] = true; // request message_id and message_args
+	request_params["token"] = "";
 
-    // log request_params _before_ adding the credentials   
+    // log request_params _before_ adding the credentials or sensitive MFA hash data
     LL_DEBUGS("LLLogin") << "Login parameters: " << LLSDOStreamer<LLSDNotationFormatter>(request_params) << LL_ENDL;
+
+    std::string mfa_hash = gSavedPerAccountSettings.getString("MFAHash"); //non-persistent to enable testing
+    LLPointer<LLSecAPIHandler> basic_secure_store = getSecHandler(BASIC_SECHANDLER);
+    std::string grid(LLGridManager::getInstance()->getGridId());
+    if (basic_secure_store)
+    {
+        if (mfa_hash.empty())
+        {
+            mfa_hash = basic_secure_store->getProtectedData("mfa_hash", grid).asString();
+        }
+        else
+        {
+            // SL-16888 the mfa_hash is being overridden for testing so save it for consistency for future login requests
+            basic_secure_store->setProtectedData("mfa_hash", grid, mfa_hash);
+        }
+    }
+
+    request_params["mfa_hash"] = mfa_hash;
 
     // Copy the credentials into the request after logging the rest
     LLSD credentials(user_credential->getLoginParams());
@@ -387,6 +407,35 @@ void LLLoginInstance::handleLoginFailure(const LLSD& event)
                 updater,
                 boost::bind(&LLLoginInstance::syncWithUpdater, this, resp, _1, _2));
         }
+    }
+    else if(reason_response == "mfa_challenge")
+    {
+        LL_DEBUGS("LLLogin") << " MFA challenge" << LL_ENDL;
+
+        if (gViewerWindow)
+        {
+            gViewerWindow->setShowProgress(FALSE);
+        }
+
+        LLSD args(llsd::map( "MESSAGE", LLTrans::getString(response["message_id"]) ));
+        LLSD payload;
+        LLNotificationsUtil::add("PromptMFAToken", args, payload, [=](LLSD const & notif, LLSD const & response) {
+            bool continue_clicked = response["continue"].asBoolean();
+            LLSD token = response["token"];
+            LL_DEBUGS("LLLogin") << "PromptMFAToken: response: " << response << " continue_clicked" << continue_clicked << LL_ENDL;
+
+            if (continue_clicked && !token.asString().empty())
+            {
+                LL_INFOS("LLLogin") << "PromptMFAToken: token submitted" << LL_ENDL;
+
+                // Set the request data to true and retry login.
+                mRequestData["params"]["token"] = token;
+                reconnect();
+            } else {
+                LL_INFOS("LLLogin") << "PromptMFAToken: no token, attemptComplete" << LL_ENDL;
+                attemptComplete();
+            }
+        });
     }
     else if(   reason_response == "key"
             || reason_response == "presence"

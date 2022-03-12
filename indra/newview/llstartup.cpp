@@ -138,6 +138,7 @@
 #include "llpreviewscript.h"
 #include "llproxy.h"
 #include "llproductinforequest.h"
+#include "llsecapi.h"
 // [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-06-26 (Catznip-3.3)
 #include "llsearchdirectory.h"
 // [/SL:KB]
@@ -1307,10 +1308,10 @@ bool idle_startup()
 			}
 			else 
 			{
-				if (reason_response != "tos") 
+				if (reason_response != "tos"  && reason_response != "mfa_challenge")
 				{
-					// Don't pop up a notification in the TOS case because
-					// LLFloaterTOS::onCancel() already scolded the user.
+					// Don't pop up a notification in the TOS or MFA cases because
+					// the specialized floater has already scolded the user.
 					std::string error_code;
 					if(response.has("errorcode"))
 					{
@@ -3882,6 +3883,15 @@ bool process_login_success_response()
 	{
 		std::string openid_token = response["openid_token"];
 		LLViewerMedia::getInstance()->openIDSetup(openid_url, openid_token);
+	}
+
+
+	// Only save mfa_hash for future logins if the user wants their info remembered.
+	if(response.has("mfa_hash") && gSavedSettings.getBOOL("RememberUser") && gSavedSettings.getBOOL("RememberPassword"))
+	{
+		LLPointer<LLSecAPIHandler> basic_secure_store = getSecHandler(BASIC_SECHANDLER);
+		std::string grid(LLGridManager::getInstance()->getGridId());
+		basic_secure_store->setProtectedData("mfa_hash", grid, response["mfa_hash"]);
 	}
 
 	bool success = false;
