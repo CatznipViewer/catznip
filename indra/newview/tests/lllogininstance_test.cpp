@@ -180,10 +180,20 @@ std::string LLGridManager::getAppSLURLBase(const std::string& grid_name)
 {
 	return "myappslurl";
 }
+std::string LLGridManager::getGridId(const std::string& grid)
+{
+    return std::string();
+}
+
+LLPointer<LLSecAPIHandler> getSecHandler(const std::string& handler_type)
+{
+    return nullptr;
+}
 
 //-----------------------------------------------------------------------------
 #include "../llviewercontrol.h"
 LLControlGroup gSavedSettings("Global");
+LLControlGroup gSavedPerAccountSettings("PerAccount");
 
 LLControlGroup::LLControlGroup(const std::string& name) :
 	LLInstanceTracker<LLControlGroup, std::string>(name){}
