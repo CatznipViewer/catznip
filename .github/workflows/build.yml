@@ -19,14 +19,14 @@ on:
         - 64
         - 32
         default: 64
-      build_config:
+      release_type:
         required: true
-        description: Build configuration
-        default: 'Release'
-      avx2:
-        required: true
-        type: boolean
-        description: Build with AVX2
+        type: choice
+        description: Release type
+        options:
+        - release
+        - rtm/final
+        - rtm/final-avx2
       viewer_channel:
         required: true
         description: Viewer channel
@@ -39,7 +39,7 @@ env:
   AUTOBUILD_VSVER: ${{ github.event.inputs.operating_system == 'windows-2022' && 170 || 160 }}
   TOOLSET_VERSION: ${{ github.event.inputs.operating_system == 'windows-2022' && 'v143' || 'v142' }}
   ADDRESS_SIZE: ${{ github.event.inputs.address_size }}
-  BUILD_CONFIG: ${{ github.event.inputs.build_config }}
+  BUILD_CONFIG: 'Release'
   VIEWER_CHANNEL: ${{ github.event.inputs.viewer_channel }}
 
 jobs:
@@ -51,11 +51,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-
-    - name: Log inputs
-      run: |
-        echo "::notice title=${VIEWER_CHANNEL} R$(cat ./indra/newview/VIEWER_VERSION.txt) (${BUILD_CONFIG})::${{github.event.inputs.operating_system}} (${ADDRESS_SIZE} bit) / ${{github.event.inputs.avx2 == 'true' && 'AVX2' || 'no AVX2' }}"
-      shell: bash
 
     - name: Check out autobuild
       uses: actions/checkout@v2
@@ -69,7 +64,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CatznipViewer/build-variables
-        ref: ${{ github.event.inputs.avx2 == 'true' && 'catznip/rtm/final-avx2' || 'catznip/rtm/final' }}
+        ref: ${{ format('catznip/{0}', github.event.inputs.release_type)  }}
         path: 'dep/build-variables'
         token: ${{ secrets.AUTH_PAT }}
 
@@ -94,6 +89,11 @@ jobs:
         echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
         echo "DEPENDENCIES_SRC_PATH=/dependencies/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
         echo "ARTIFACT_DST_PATH=/artifacts/${GITHUB_REPOSITORY#*/}/" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Log inputs
+      run: |
+        echo "::notice title=${VIEWER_CHANNEL} R$(cat ./indra/newview/VIEWER_VERSION.txt).${AUTOBUILD_BUILD_ID}-${RUNNER_OS}${ADDRESS_SIZE} (${{github.event.inputs.release_type}})::$(date +"%Y-%m-%d %T")"
       shell: bash
 
     - name: Download private packages
