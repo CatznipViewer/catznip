@@ -15254,6 +15254,7 @@
 	      <string>postcard</string>
 	      <string>mini_map</string>
 	      <string>beacons</string>
+		  <string>script_floater</string>
       </array>
     </map>
     <key>LandmarksSortedByDate</key>
