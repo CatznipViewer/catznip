@@ -2570,6 +2570,11 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y, bool drag_commit)
 		for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 		{
 			LLTabTuple* tuple = *iter;
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5)
+			if (!tuple->mVisible)
+				continue;
+// [/SL:KB]
+
 			S32 local_x = x - tuple->mButton->getRect().mLeft;
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
 //			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
