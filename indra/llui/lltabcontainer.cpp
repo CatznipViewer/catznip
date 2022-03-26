@@ -764,12 +764,18 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 {
 	BOOL handled = FALSE;
-	if (key == KEY_LEFT && mask == MASK_ALT)
+//	if (key == KEY_LEFT && mask == MASK_ALT)
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5
+    if ( ((!mIsVertical && key == KEY_LEFT) || (mIsVertical && key == KEY_UP)) && mask == MASK_ALT )
+// [/SL:KB]
 	{
 		selectPrevTab();
 		handled = TRUE;
 	}
-	else if (key == KEY_RIGHT && mask == MASK_ALT)
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5
+    else if ( ((!mIsVertical && key == KEY_RIGHT) || (mIsVertical && key == KEY_DOWN)) && mask == MASK_ALT )
+// [/SL:KB]
+//	else if (key == KEY_RIGHT && mask == MASK_ALT)
 	{
 		selectNextTab();
 		handled = TRUE;
