@@ -3,13 +3,6 @@
  layout="topleft"
  name="COF Body">
     <menu_item_call
-     label="Replace"
-     layout="topleft"
-     name="replace">
-        <on_click
-         function="BodyPart.Replace"/>
-    </menu_item_call>
-    <menu_item_call
      label="Edit"
      layout="topleft"
      name="edit">
@@ -19,6 +12,25 @@
          function="BodyPart.OnEnable"
          parameter="edit" />
     </menu_item_call>
+    <menu_item_call
+     label="Replace"
+     layout="topleft"
+     name="replace">
+        <on_click
+         function="BodyPart.Replace"/>
+    </menu_item_call>
+
+    <menu_item_separator
+      layout="topleft"
+      />
+
+    <menu_item_call
+     label="Find Original"
+     layout="topleft"
+     name="show_original"
+     on_click.function="Item.FindOriginal"
+     on_enable.function="Item.EnableFindOriginal"
+     />
     <menu_item_call
      label="Create New"
      layout="topleft"
