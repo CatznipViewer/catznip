@@ -1170,7 +1170,10 @@ BOOL LLTextEditor::handleSelectionKey(const KEY key, const MASK mask)
 {
 	BOOL handled = FALSE;
 
-	if( mask & MASK_SHIFT )
+//	if( mask & MASK_SHIFT )
+// [SL:KB] - Patch: Control-TextEditor | Checked: Catznip-6.7
+	if ( (mask & MASK_SHIFT) && !(mask & MASK_ALT) )
+// [/SL:KV]
 	{
 		handled = TRUE;
 		

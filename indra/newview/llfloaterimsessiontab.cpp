@@ -40,6 +40,9 @@
 #include "llfloaterreg.h"
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h" // to replace separate IM Floaters with multifloater container
+// [SL:KB] - Patch: Chat-Tabs | Checked: Catznip-6.7
+#include "llfloaterimcontainertab.h"
+// [/SL:KB]
 #include "lllayoutstack.h"
 #include "lltoolbarview.h"
 #include "llfloaterimnearbychat.h"
@@ -1502,6 +1505,22 @@ BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 			}
 		}
 		return handled;
+	}
+	else if (LLFloaterIMContainerBase::CT_TABBED == LLFloaterIMContainerBase::getContainerType())
+	{
+		LLFloaterIMContainerTab* floater_container = dynamic_cast<LLFloaterIMContainerTab*>(LLFloaterIMContainerBase::getInstance());
+
+		bool hasVericalTabs = floater_container->hasVerticalTabs();
+		if ( ((!hasVericalTabs && key == KEY_LEFT) || (hasVericalTabs && key == KEY_UP)) && mask == (MASK_ALT | MASK_SHIFT) )
+		{
+			floater_container->selectPreviousUnreadConversation();
+			return TRUE;
+		}
+		else if ( ((!hasVericalTabs && key == KEY_RIGHT) || (hasVericalTabs && key == KEY_DOWN)) && mask == (MASK_ALT | MASK_SHIFT) )
+		{
+			floater_container->selectNextUnreadConversation();
+			return TRUE;
+		}
 	}
 
 	// The LLTabContainer parent will handle the navigation keys

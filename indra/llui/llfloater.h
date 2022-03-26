@@ -326,7 +326,10 @@ public:
 	LLHandle<LLFloater>	getSnapTarget() const { return mSnappedTo; }
 
 	LLHandle<LLFloater> getHandle() const { return getDerivedHandle<LLFloater>(); }
-	const LLSD& 	getKey() { return mKey; }
+// [SL:KB] - Patch: Control-Floater | Checked: Catznip-6.7
+	const LLSD& 	getKey() const { return mKey; }
+// [/SL:KB]
+//	const LLSD& 	getKey() { return mKey; }
 	virtual bool	matchesKey(const LLSD& key) { return mSingleInstance || KeyCompare::equate(key, mKey); }
 	
 	const std::string& getInstanceName() { return mInstanceName; }

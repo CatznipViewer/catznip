@@ -1475,6 +1475,29 @@ void LLTabContainer::selectNextTab()
 	}
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.7
+void LLTabContainer::selectNextTab(const std::function<bool(const LLPanel*)>& selector)
+{
+	if (!mTabList.size())
+		return;
+
+	bool tab_has_focus = (mCurrentTabIdx >= 0 && mTabList[mCurrentTabIdx]->mButton->hasFocus());
+
+	int idx = (mCurrentTabIdx + 1) % mTabList.size();
+	while (idx != mCurrentTabIdx)
+	{
+		if ( (selector(getPanelByIndex(idx))) && (selectTab(idx)) )
+			break;
+		idx = (idx + 1) % mTabList.size();
+	};
+
+	if (tab_has_focus)
+	{
+		mTabList[idx]->mButton->setFocus(TRUE);
+	}
+}
+// [SL:KB]
+
 void LLTabContainer::selectPrevTab()
 {
 	BOOL tab_has_focus = FALSE;
@@ -1496,6 +1519,29 @@ void LLTabContainer::selectPrevTab()
 		mTabList[idx]->mButton->setFocus(TRUE);
 	}
 }	
+
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.7
+void LLTabContainer::selectPrevTab(const std::function<bool(const LLPanel*)>& selector)
+{
+	if (!mTabList.size())
+		return;
+
+	bool tab_has_focus = (mCurrentTabIdx >= 0 && mTabList[mCurrentTabIdx]->mButton->hasFocus());
+
+	int idx = (mCurrentTabIdx > 0 ? mCurrentTabIdx : mTabList.size()) - 1;
+	while (idx != mCurrentTabIdx)
+	{
+		if ( (selector(getPanelByIndex(idx))) && (selectTab(idx)) )
+			break;
+		idx = (idx > 0 ? idx : mTabList.size()) - 1;
+	}
+
+	if (tab_has_focus)
+	{
+		mTabList[idx]->mButton->setFocus(TRUE);
+	}
+}
+// [SL:KB]
 
 BOOL LLTabContainer::selectTabPanel(LLPanel* child)
 {

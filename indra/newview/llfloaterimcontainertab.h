@@ -39,12 +39,20 @@ public:
 	/*virtual*/ void showConversation(const LLUUID& session_id);
 	/*virtual*/ void toggleConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
+	            void selectPreviousUnreadConversation();
+	            void selectNextUnreadConversation();
 	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
 	/*virtual*/ void setConversationHighlighted(const LLUUID& session_id, bool is_highlighted);
 
 	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const;
 	/*virtual*/ const LLConversationSort& getSortOrder() const;
 	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
+
+	/*
+	 * Helper functions
+	 */
+public:
+	bool hasVerticalTabs() const { return (mTabContainer) ? mTabContainer->isVertical() : false; }
 
 protected:
 	void onTabContainerRightMouseDown(S32 x, S32 y);

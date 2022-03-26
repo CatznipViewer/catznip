@@ -136,6 +136,34 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 	return true;
 }
 
+void LLFloaterIMContainerTab::selectPreviousUnreadConversation()
+{
+	mTabContainer->selectPrevTab([](const LLPanel* pTabPanel) {
+		if (const LLFloaterIMSession* pIMFloater = dynamic_cast<const LLFloaterIMSession*>(pTabPanel))
+		{
+			if (LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(pIMFloater->getKey()))
+			{
+				return pIMSession->mNumUnread > 0;
+			}
+		}
+		return false;
+	});
+}
+
+void LLFloaterIMContainerTab::selectNextUnreadConversation()
+{
+	mTabContainer->selectNextTab([](const LLPanel* pTabPanel) {
+		if (const LLFloaterIMSession* pIMFloater = dynamic_cast<const LLFloaterIMSession*>(pTabPanel))
+		{
+			if (LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(pIMFloater->getKey()))
+			{
+				return pIMSession->mNumUnread > 0;
+			}
+		}
+		return false;
+	});
+}
+
 // Checked: 2013-05-11 (Catznip-3.5)
 void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, bool flashing)
 {
