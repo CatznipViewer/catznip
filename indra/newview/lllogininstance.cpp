@@ -61,6 +61,7 @@
 #include "lltrans.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/regex.hpp>
 #include <sstream>
 
 const S32 LOGIN_MAX_RETRIES = 0; // Viewer should not autmatically retry login
@@ -235,24 +236,6 @@ void LLLoginInstance::constructAuthParams(LLPointer<LLCredential> user_credentia
     // log request_params _before_ adding the credentials or sensitive MFA hash data
     LL_DEBUGS("LLLogin") << "Login parameters: " << LLSDOStreamer<LLSDNotationFormatter>(request_params) << LL_ENDL;
 
-    std::string mfa_hash = gSavedPerAccountSettings.getString("MFAHash"); //non-persistent to enable testing
-    LLPointer<LLSecAPIHandler> basic_secure_store = getSecHandler(BASIC_SECHANDLER);
-    std::string grid(LLGridManager::getInstance()->getGridId());
-    if (basic_secure_store)
-    {
-        if (mfa_hash.empty())
-        {
-            mfa_hash = basic_secure_store->getProtectedData("mfa_hash", grid).asString();
-        }
-        else
-        {
-            // SL-16888 the mfa_hash is being overridden for testing so save it for consistency for future login requests
-            basic_secure_store->setProtectedData("mfa_hash", grid, mfa_hash);
-        }
-    }
-
-    request_params["mfa_hash"] = mfa_hash;
-
     // Copy the credentials into the request after logging the rest
     LLSD credentials(user_credential->getLoginParams());
     for (LLSD::map_const_iterator it = credentials.beginMap();
@@ -262,6 +245,33 @@ void LLLoginInstance::constructAuthParams(LLPointer<LLCredential> user_credentia
     {
         request_params[it->first] = it->second;
     }
+
+    std::string mfa_hash = gSavedSettings.getString("MFAHash"); //non-persistent to enable testing
+    std::string grid(LLGridManager::getInstance()->getGridId());
+    std::string user_id = user_credential->userID();
+    if (gSecAPIHandler)
+    {
+        if (mfa_hash.empty())
+        {
+            // normal execution, mfa_hash was not set from debug setting so load from protected store
+            LLSD data_map = gSecAPIHandler->getProtectedData("mfa_hash", grid);
+            if (data_map.isMap() && data_map.has(user_id))
+            {
+                mfa_hash = data_map[user_id].asString();
+            }
+        }
+        else
+        {
+            // SL-16888 the mfa_hash is being overridden for testing so save it for consistency for future login requests
+            gSecAPIHandler->addToProtectedMap("mfa_hash", grid, user_id, mfa_hash);
+        }
+    }
+    else
+    {
+        LL_WARNS() << "unable to access protected store for mfa_hash" << LL_ENDL;
+    }
+
+    request_params["mfa_hash"] = mfa_hash;
 
 	// Specify desired timeout/retry options
 	LLSD http_params;
@@ -421,10 +431,13 @@ void LLLoginInstance::handleLoginFailure(const LLSD& event)
         LLSD payload;
         LLNotificationsUtil::add("PromptMFAToken", args, payload, [=](LLSD const & notif, LLSD const & response) {
             bool continue_clicked = response["continue"].asBoolean();
-            LLSD token = response["token"];
+            std::string token = response["token"].asString();
             LL_DEBUGS("LLLogin") << "PromptMFAToken: response: " << response << " continue_clicked" << continue_clicked << LL_ENDL;
 
-            if (continue_clicked && !token.asString().empty())
+            // strip out whitespace - SL-17034/BUG-231938
+            token = boost::regex_replace(token, boost::regex("\\s"), "");
+
+            if (continue_clicked && !token.empty())
             {
                 LL_INFOS("LLLogin") << "PromptMFAToken: token submitted" << LL_ENDL;
 
