@@ -439,6 +439,20 @@ BOOL LLToolGrabBase::handleHover(S32 x, S32 y, MASK mask)
 	{
 		gViewerWindow->setCursor(UI_CURSOR_TOOLGRAB);
 		setMouseCapture(FALSE);
+
+// [SL:KB] - Patch: World-Mouselook | Checked: Catznip-6.6
+		LLPickInfo pick = gViewerWindow->pickImmediate(x, y, /*pick_transparent*/false, /*pick_rigged*/false);
+		if (const LLViewerObject* pPickObj = pick.getObject())
+		{
+			const LLViewerObject* pPickRootObj = pPickObj->getRootEdit();
+			if ( (!pPickObj->isAttachment() || pPickObj->getClickAction() != CLICK_ACTION_DISABLED) &&
+			     (pPickObj->flagHandleTouch() || (pPickRootObj && pPickRootObj->flagHandleTouch())) )
+			{
+				gViewerWindow->setCursor(UI_CURSOR_HAND);
+			}
+		}
+// [/SL:KB]
+
 		return TRUE;
 	}
 

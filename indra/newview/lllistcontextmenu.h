@@ -72,6 +72,9 @@ protected:
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
 	static void handlePerFolder(LLListContextMenu::functor_t functor, const uuid_vec_t& item_ids);
+
+	typedef std::function<bool(const LLUUID& id)> enable_functor_t;
+	static bool enableIfOne(enable_functor_t functor, const uuid_vec_t& ids);
 // [/SL:KB]
 
 	uuid_vec_t			mUUIDs;

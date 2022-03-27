@@ -61,6 +61,17 @@ protected:
 		llassert(mCOFWearables);
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-6.5
+	void registerSharedHandlers(LLUICtrl::CommitCallbackRegistry::Registrar& registrar, LLUICtrl::EnableCallbackRegistry::Registrar& enable_registrar)
+	{
+		registrar.add("Item.DetachFolder", std::bind(handleMultiple, handle_item_detach_folder, mUUIDs));
+		enable_registrar.add("Item.EnableDetachFolder", std::bind(enableIfOne, enable_item_detach_folder, mUUIDs));
+
+		registrar.add("Item.FindOriginal", std::bind(handleMultiple, handle_item_find_original, mUUIDs));
+		enable_registrar.add("Item.EnableFindOriginal", std::bind(enableIfOne, enable_item_find_original, mUUIDs));
+	}
+// [/SL:KB]
+
 	void updateCreateWearableLabel(LLMenuGL* menu, const LLUUID& item_id)
 	{
 		LLMenuItemGL* menu_item = menu->getChild<LLMenuItemGL>("create_new");
@@ -147,6 +158,10 @@ protected:
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 		enable_registrar.add("Attachment.OnEnable", boost::bind(&CofAttachmentContextMenu::onEnable, this, _2));
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-6.5
+		registerSharedHandlers(registrar, enable_registrar);
+// [/SL:KB]
+
 		return createFromFile("menu_cof_attachment.xml");
 	}
 
@@ -203,6 +218,10 @@ protected:
 
 		enable_registrar.add("Clothing.OnEnable", boost::bind(&CofClothingContextMenu::onEnable, this, _2));
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-6.5
+		registerSharedHandlers(registrar, enable_registrar);
+// [/SL:KB]
+
 		LLContextMenu* menu = createFromFile("menu_cof_clothing.xml");
 		llassert(menu);
 		if (menu)
@@ -257,6 +276,10 @@ protected:
 		registrar.add("BodyPart.Create", boost::bind(&CofBodyPartContextMenu::createNew, this, selected_id));
 
 		enable_registrar.add("BodyPart.OnEnable", boost::bind(&CofBodyPartContextMenu::onEnable, this, _2));
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-6.5
+		registerSharedHandlers(registrar, enable_registrar);
+// [/SL:KB]
 
 		LLContextMenu* menu = createFromFile("menu_cof_body_part.xml");
 		llassert(menu);
