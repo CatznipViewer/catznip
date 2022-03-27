@@ -235,6 +235,10 @@ public:
 	void		selectLastTab();
 	void		selectNextTab();
 	void		selectPrevTab();
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.7
+	void		selectPrevTab(const std::function<bool(const LLPanel*)>& selector);
+	void		selectNextTab(const std::function<bool(const LLPanel*)>& selector);
+// [SL:KB]
 	BOOL 		selectTabPanel( LLPanel* child );
 	BOOL 		selectTab(S32 which);
 	BOOL 		selectTabByName(const std::string& title);
