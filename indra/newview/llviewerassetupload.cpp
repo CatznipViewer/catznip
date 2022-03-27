@@ -680,7 +680,10 @@ LLSD LLScriptAssetUpload::generatePostBody()
     if (getTaskId().isNull())
     {
         body["item_id"] = getItemId();
-        body["target"] = "lsl2";
+// [SL:KB] - Patch: Build-ScriptSaveAsMono | Checked: Catznip-4.0
+        body["target"] = (getTargetType() == MONO) ? "mono" : "lsl2";
+// [/SL:KB]
+//        body["target"] = "lsl2";
     }
     else
     {

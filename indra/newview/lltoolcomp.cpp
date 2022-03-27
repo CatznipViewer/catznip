@@ -811,7 +811,12 @@ void LLToolCompGun::onMouseCaptureLost()
 
 void	LLToolCompGun::handleSelect()
 {
-	LLToolComposite::handleSelect();
+// [SL:KB] - Patch: World-Mouselook | Checked: Catznip-6.6
+	mCur = (gKeyboard->currentMask(TRUE) & MASK_ALT) ? static_cast<LLTool*>(mGrab) : static_cast<LLTool*>(mGun);
+	mCur->handleSelect();
+	mSelected = TRUE;
+// [/SL:KB]
+//	LLToolComposite::handleSelect();
 	setMouseCapture(TRUE);
 }
 

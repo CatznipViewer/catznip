@@ -938,12 +938,18 @@ BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 	}
 // [/SL:KB]
 	BOOL handled = FALSE;
-	if (key == KEY_LEFT && mask == MASK_ALT)
+//	if (key == KEY_LEFT && mask == MASK_ALT)
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5
+    if ( ((!mIsVertical && key == KEY_LEFT) || (mIsVertical && key == KEY_UP)) && mask == MASK_ALT )
+// [/SL:KB]
 	{
 		selectPrevTab();
 		handled = TRUE;
 	}
-	else if (key == KEY_RIGHT && mask == MASK_ALT)
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5
+    else if ( ((!mIsVertical && key == KEY_RIGHT) || (mIsVertical && key == KEY_DOWN)) && mask == MASK_ALT )
+// [/SL:KB]
+//	else if (key == KEY_RIGHT && mask == MASK_ALT)
 	{
 		selectNextTab();
 		handled = TRUE;
@@ -1744,6 +1750,29 @@ void LLTabContainer::selectNextTab()
 	}
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.7
+void LLTabContainer::selectNextTab(const std::function<bool(const LLPanel*)>& selector)
+{
+	if (!mTabList.size())
+		return;
+
+	bool tab_has_focus = (mCurrentTabIdx >= 0 && mTabList[mCurrentTabIdx]->mButton->hasFocus());
+
+	int idx = (mCurrentTabIdx + 1) % mTabList.size();
+	while (idx != mCurrentTabIdx)
+	{
+		if ( (selector(getPanelByIndex(idx))) && (selectTab(idx)) )
+			break;
+		idx = (idx + 1) % mTabList.size();
+	};
+
+	if (tab_has_focus)
+	{
+		mTabList[idx]->mButton->setFocus(TRUE);
+	}
+}
+// [SL:KB]
+
 void LLTabContainer::selectPrevTab()
 {
 	BOOL tab_has_focus = FALSE;
@@ -1765,6 +1794,29 @@ void LLTabContainer::selectPrevTab()
 		mTabList[idx]->mButton->setFocus(TRUE);
 	}
 }	
+
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.7
+void LLTabContainer::selectPrevTab(const std::function<bool(const LLPanel*)>& selector)
+{
+	if (!mTabList.size())
+		return;
+
+	bool tab_has_focus = (mCurrentTabIdx >= 0 && mTabList[mCurrentTabIdx]->mButton->hasFocus());
+
+	int idx = (mCurrentTabIdx > 0 ? mCurrentTabIdx : mTabList.size()) - 1;
+	while (idx != mCurrentTabIdx)
+	{
+		if ( (selector(getPanelByIndex(idx))) && (selectTab(idx)) )
+			break;
+		idx = (idx > 0 ? idx : mTabList.size()) - 1;
+	}
+
+	if (tab_has_focus)
+	{
+		mTabList[idx]->mButton->setFocus(TRUE);
+	}
+}
+// [SL:KB]
 
 BOOL LLTabContainer::selectTabPanel(LLPanel* child)
 {
@@ -2570,6 +2622,11 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y, bool drag_commit)
 		for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 		{
 			LLTabTuple* tuple = *iter;
+// [SL:KB] - Patch: Control-TabContainer | Checked: Catznip-6.5)
+			if (!tuple->mVisible)
+				continue;
+// [/SL:KB]
+
 			S32 local_x = x - tuple->mButton->getRect().mLeft;
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
 //			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
