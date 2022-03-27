@@ -182,6 +182,18 @@ void LLListContextMenu::handlePerFolder(LLListContextMenu::functor_t functor, co
 		functor(*itFolder);
 	}
 }
+
+// static
+bool LLListContextMenu::enableIfOne(enable_functor_t functor, const uuid_vec_t& ids)
+{
+	uuid_vec_t::const_iterator it;
+	for (const LLUUID& id : ids)
+	{
+		if (functor(id))
+			return true;
+	}
+	return false;
+}
 // [/SL:KB]
 
 // EOF

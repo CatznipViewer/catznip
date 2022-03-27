@@ -3,16 +3,6 @@
  layout="topleft"
  name="COF Clothing">
     <menu_item_call
-     label="Take Off"
-     layout="topleft"
-     name="take_off">
-        <on_click
-         function="Clothing.TakeOff" />
-        <on_enable
-         function="Clothing.OnEnable"
-         parameter="take_off" />
-    </menu_item_call>
-    <menu_item_call
      label="Edit"
      layout="topleft"
      name="edit">
@@ -32,6 +22,35 @@
          function="Clothing.OnEnable"
          parameter="replace" />
     </menu_item_call>
+    <menu_item_call
+     label="Take Off"
+     layout="topleft"
+     name="take_off">
+        <on_click
+         function="Clothing.TakeOff" />
+        <on_enable
+         function="Clothing.OnEnable"
+         parameter="take_off" />
+    </menu_item_call>
+    <menu_item_call
+     label="Take Off Folder"
+     layout="topleft"
+     name="take_off_folder"
+     on_click.function="Item.DetachFolder"
+     on_enable.function="Item.EnableDetachFolder"
+     />
+
+    <menu_item_separator
+      layout="topleft"
+      />
+
+    <menu_item_call
+     label="Find Original"
+     layout="topleft"
+     name="show_original"
+     on_click.function="Item.FindOriginal"
+     on_enable.function="Item.EnableFindOriginal"
+     />
     <menu_item_call
      label="Create New"
      layout="topleft"

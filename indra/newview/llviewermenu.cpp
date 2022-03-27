@@ -7850,6 +7850,14 @@ class LLAttachmentDetach : public view_listener_t
 };
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-16 (Catznip-3.3)
+void handle_item_detach_folder(const LLUUID& idItem)
+{
+	if (const LLViewerInventoryItem* pItem = gInventory.getItem(idItem))
+	{
+		LLAppearanceMgr::instance().removeFolderFromAvatar(pItem->getParentUUID());
+	}
+}
+
 void handle_attachment_detach_folder()
 {
 	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
@@ -7858,13 +7866,15 @@ void handle_attachment_detach_folder()
 		const LLViewerObject* pAttachObj = (*itNode)->getObject();
 		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
 		{
-			const LLViewerInventoryItem* pItem = gInventory.getItem(pAttachObj->getAttachmentItemID());
-			if (pItem)
-			{
-				LLAppearanceMgr::instance().removeFolderFromAvatar(pItem->getParentUUID());
-			}
+			handle_item_detach_folder(pAttachObj->getAttachmentItemID());
 		}
 	}
+}
+
+bool enable_item_detach_folder(const LLUUID& idItem)
+{
+	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(idItem);
+	return (pItem) && (LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(pItem->getParentUUID()));
 }
 
 bool enable_attachment_detach_folder()
@@ -7874,16 +7884,21 @@ bool enable_attachment_detach_folder()
 	for (LLObjectSelection::root_object_iterator itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
 	{
 		const LLViewerObject* pAttachObj = (*itNode)->getObject();
-		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
+		if ( (pAttachObj) && (pAttachObj->isAttachment()) && (enable_item_detach_folder(pAttachObj->getAttachmentItemID())) )
 		{
-			const LLViewerInventoryItem* pItem = gInventory.getItem(pAttachObj->getAttachmentItemID());
-			if ( (pItem) && (LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(pItem->getParentUUID())) )
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
+}
+
+void handle_item_find_original(const LLUUID& idItem)
+{
+#ifndef CATZNIP
+	LLInventoryPanel::openInventoryPanelAndSetSelection(TRUE, idItem, TRUE);
+#else
+	show_item_original(idItem, EShowItemOptions::TAKE_FOCUS_YES, nullptr);
+#endif // CATZNIP
 }
 
 void handle_attachment_find_original()
@@ -7898,6 +7913,11 @@ void handle_attachment_find_original()
 			show_item_original(idAttachItem, EShowItemOptions::TAKE_FOCUS_YES, nullptr);
 		}
 	}
+}
+
+bool enable_item_find_original(const LLUUID& idItem)
+{
+	return nullptr != gInventory.getLinkedItem(idItem);
 }
 
 bool enable_attachment_find_original()
