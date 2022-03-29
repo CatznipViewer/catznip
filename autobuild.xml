@@ -2738,9 +2738,9 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>5abf2d9c0b250821c59cc60cd94fd8af</string>
+              <string>4b5d4644650e587c443b264d12fc68fb</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54840/510064/openjpeg-1.5.1.538970-darwin64-538970.tar.bz2</string>
+              <string>https://downloads.catznip.com/packages/openjpeg-2.3.1.63-darwin64-63.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
