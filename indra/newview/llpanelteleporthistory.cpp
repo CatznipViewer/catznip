@@ -83,6 +83,9 @@ public:
 	void onMouseLeave(S32 x, S32 y, MASK mask);
 	virtual BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
 
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	static void removeItem(S32 index);
+// [:SL:KB]
 	static void showPlaceInfoPanel(S32 index);
 
 	LLHandle<LLTeleportHistoryFlatItem> getItemHandle()	{ mItemHandle.bind(this); return mItemHandle; }
@@ -275,6 +278,13 @@ BOOL LLTeleportHistoryFlatItem::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	return LLPanel::handleRightMouseDown(x, y, mask);
 }
 
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+void LLTeleportHistoryFlatItem::removeItem(S32 index)
+{
+	LLTeleportHistoryStorage::instance().removeItem(index);
+}
+// [/SL:KB]
+
 void LLTeleportHistoryFlatItem::showPlaceInfoPanel(S32 index)
 {
 // [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
@@ -423,6 +433,9 @@ LLContextMenu* LLTeleportHistoryPanel::ContextMenu::createMenu()
 	registrar.add("TeleportHistory.Teleport",	boost::bind(&LLTeleportHistoryPanel::ContextMenu::onTeleport, this));
 	registrar.add("TeleportHistory.MoreInformation",boost::bind(&LLTeleportHistoryPanel::ContextMenu::onInfo, this));
 	registrar.add("TeleportHistory.CopyToClipboard",boost::bind(&LLTeleportHistoryPanel::ContextMenu::onCopyToClipboard, this));
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	registrar.add("TeleportHistory.RemoveItem",boost::bind(&LLTeleportHistoryPanel::ContextMenu::onRemoveItem, this));
+// [/SL:KB]
 
 	// create the context menu from the XUI
 	llassert(LLMenuGL::sMenuContainer != NULL);
@@ -457,6 +470,13 @@ void LLTeleportHistoryPanel::ContextMenu::onCopyToClipboard()
 	LLLandmarkActions::getSLURLfromPosGlobal(globalPos,
 		boost::bind(&LLTeleportHistoryPanel::ContextMenu::gotSLURLCallback, _1));
 }
+
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+void LLTeleportHistoryPanel::ContextMenu::onRemoveItem()
+{
+	LLTeleportHistoryFlatItem::removeItem(mIndex);
+}
+// [/SL:KB]
 
 // Not yet implemented; need to remove buildPanel() from constructor when we switch
 //static LLRegisterPanelClassWrapper<LLTeleportHistoryPanel> t_teleport_history("panel_teleport_history");
@@ -551,6 +571,11 @@ BOOL LLTeleportHistoryPanel::postBuild()
 		mMenuGearButton->setMenu(gear_menu);
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	mTrashBtn = getChild<LLButton>("trash_btn");
+	mTrashBtn->setClickedCallback(boost::bind(&LLTeleportHistoryPanel::onRemoveItem, this));
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -562,6 +587,19 @@ void LLTeleportHistoryPanel::draw()
 
 	LLPanelPlacesTab::draw();
 }
+
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+void LLTeleportHistoryPanel::onRemoveItem()
+{
+	if (mLastSelectedFlatlList)
+	{
+		if (LLTeleportHistoryFlatItem* itemp = dynamic_cast<LLTeleportHistoryFlatItem*> (mLastSelectedFlatlList->getSelectedItem()))
+		{
+			itemp->removeItem(itemp->getIndex());
+		}
+	}
+}
+// [/SL:KB]
 
 // virtual
 void LLTeleportHistoryPanel::onSearchEdit(const std::string& string)
@@ -662,6 +700,9 @@ void LLTeleportHistoryPanel::updateVerbs()
 		mTeleportBtn->setEnabled(false);
 		mShowProfile->setEnabled(false);
 		mShowOnMapBtn->setEnabled(false);
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+		mTrashBtn->setEnabled(false);
+// [/SL:KB]
 		return;
 	}
 
@@ -670,6 +711,9 @@ void LLTeleportHistoryPanel::updateVerbs()
 	mTeleportBtn->setEnabled(NULL != itemp);
 	mShowProfile->setEnabled(NULL != itemp);
 	mShowOnMapBtn->setEnabled(NULL != itemp);
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	mTrashBtn->setEnabled(nullptr != itemp);
+// [/SL:KB]
 }
 
 void LLTeleportHistoryPanel::getNextTab(const LLDate& item_date, S32& tab_idx, LLDate& tab_date)

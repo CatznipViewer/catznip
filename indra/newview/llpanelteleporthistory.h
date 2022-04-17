@@ -55,6 +55,9 @@ public:
 		void onTeleport();
 		void onInfo();
 		void onCopyToClipboard();
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+		void onRemoveItem();
+// [/SL:KB]
 
 		static void gotSLURLCallback(const std::string& slurl);
 
@@ -68,6 +71,9 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
 
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	            void onRemoveItem();
+// [/SL:KB]
 	/*virtual*/ void onSearchEdit(const std::string& string);
 	/*virtual*/ void onShowOnMap();
 	/*virtual*/ void onShowProfile();
@@ -119,6 +125,9 @@ private:
 	LLContextMenu*			mAccordionTabMenu;
 	LLHandle<LLView>		mGearMenuHandle;
 	LLMenuButton*			mMenuGearButton;
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	LLButton*				mTrashBtn = nullptr;
+// [/SL:KB]
 
 	boost::signals2::connection mTeleportHistoryChangedConnection;
 };
