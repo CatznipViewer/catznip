@@ -54,6 +54,9 @@ if(NON_RELEASE_CRASH_REPORTING)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DLL_SEND_CRASH_REPORTS=1")
 endif()  
 
+# Configure AVX2 bundling
+set(BUNDLE_AVX2 OFF CACHE BOOL "Bundle AVX2 build with the installer")
+
 # Don't bother with a MinSizeRel build.
 set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug" CACHE STRING
     "Supported build types." FORCE)
