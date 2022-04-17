@@ -177,7 +177,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="94"
+         width="62"
         />
         <button
          follows="bottom|right"
@@ -212,14 +212,26 @@
         <button
          follows="bottom|right"
          height="25"
-         image_hover_unselected="Toolbar_Right_Over"
+         image_hover_unselected="Toolbar_Middle_Over"
          image_overlay="Web_Profile_Off"
-         image_selected="Toolbar_Right_Selected"
-         image_unselected="Toolbar_Right_Off"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
          layout="topleft"
          left_pad="1"
          name="profile_btn"
          tool_tip="Show place profile"
          width="31" />
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="TrashItem_Off"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         left_pad="1"
+         layout="topleft"
+         name="trash_btn"
+         tool_tip="Remove selected landmark"
+         width="31"/>
     </panel>
 </panel>
