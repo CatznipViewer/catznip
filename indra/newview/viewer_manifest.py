@@ -458,6 +458,14 @@ class WindowsManifest(ViewerManifest):
     def final_exe(self):
         return self.app_name_oneword()+".exe"
 
+    # [SL:KB] - BundleAVX2
+    def final_avx2_nomanifest_exe(self):
+        return self.app_name_oneword()+"_AVX2_NoManifest.exe"
+
+    def final_avx2_exe(self):
+        return self.app_name_oneword()+"_AVX2.exe"
+    # [/SL:KB]
+
     def finish_build_data_dict(self, build_data_dict):
         build_data_dict['Executable'] = self.final_exe()
         build_data_dict['AppName']    = self.app_name()
@@ -525,6 +533,11 @@ class WindowsManifest(ViewerManifest):
             self.run_command([os.path.join(viewer_dir, os.pardir, "tools", "StripManifest.exe"), self.dst_path_of('catznip-bin.exe'), self.dst_path_of('catznip-bin-nomanifest.exe')])
             self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
             self.path(src='%s/catznip-bin-nomanifest.exe' % self.args['configuration'], dst=self.final_nomanifest_exe())
+            # [SL:KB] - BundleAVX2
+            if self.args['bundle_avx2'] == 'ON':
+                self.path(src='%s/catznip-bin-avx2.exe' % self.args['configuration'], dst=self.final_avx2_exe())
+                self.path(src='%s/catznip-bin-avx2-nomanifest.exe' % self.args['configuration'], dst=self.final_avx2_nomanifest_exe())
+            # [/SL:KB]
         
             # [SL:KB]
             with self.prefix(src=self.icon_path()):
@@ -789,6 +802,11 @@ class WindowsManifest(ViewerManifest):
             ('.'.join(self.args['version']), self.address_size),
             'final_exe' : self.final_exe(),
             'final_nomanifest_exe' : self.final_nomanifest_exe(),
+            # [SL:KB] - BundleAVX2
+            'bundle_avx2' : self.args['bundle_avx2'],
+            'final_avx2_exe' : self.final_avx2_exe(),
+            'final_avx2_nomanifest_exe' : self.final_avx2_nomanifest_exe(),
+            # [/SL:KB]
             'flags':'',
             'app_name':self.app_name(),
             'app_name_oneword':self.app_name_oneword()
@@ -809,6 +827,9 @@ class WindowsManifest(ViewerManifest):
         !define INSTEXE  "%(final_exe)s"
         !define INSTEXE_NOMANIFEST  "%(final_nomanifest_exe)s"
         !define PUBLISHER "<TODO>"
+        !define BUNDLE_AVX2  "%(bundle_avx2)s"
+        !define INSTEXE_AVX2  "%(final_avx2_exe)s"
+        !define INSTEXE_AVX2_NOMANIFEST  "%(final_avx2_nomanifest_exe)s"
         !define URL_ABOUT "http://catznip.com/"
         !define URL_DOWNLOAD "https://get.catznip.com"
         !define VERSION "%(version_short)s"
@@ -1658,6 +1679,7 @@ if __name__ == "__main__":
              if BugSplat crash reporting is desired""", default=''),
         dict(name='fmodstudio', description="""Indication if fmod studio libraries are needed""", default='OFF'),
         dict(name='openal', description="""Indication openal libraries are needed""", default='OFF'),
+        dict(name='bundle_avx2', description="""Bundle AVX2 build with the installer""", default='OFF'),
         ]
     try:
         main(extra=extra_arguments)
