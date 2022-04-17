@@ -173,6 +173,11 @@ void LLTeleportHistoryStorage::removeItem(S32 idx)
 		return;
 
 	mItems.erase (mItems.begin() + idx);
+
+// [SL:KB] - Patch: UI-SidepanelPlacesHistory | Checked: Catznip-6.5
+	mHistoryChangedSignal(-1);
+	save();
+// [/SL:KB]
 }
 
 void LLTeleportHistoryStorage::save()
