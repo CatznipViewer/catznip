@@ -39,7 +39,7 @@ on:
 env:
   AUTOBUILD_INSTALLABLE_CACHE: ${{github.workspace}}/dep/packages
   AUTOBUILD_VARIABLES_FILE: ${{github.workspace}}/dep/build-variables/variables
-  NSIS_PLUGINS: ${{github.workspace}}/dep/nsis_plugins
+  NSIS_DEP: ${{github.workspace}}/dep/nsis
   AUTOBUILD_VSVER: 170
   TOOLSET_VERSION: 'v143'
   ADDRESS_SIZE: ${{ github.event.inputs.address_size }}
@@ -116,8 +116,9 @@ jobs:
         key: ${{ secrets.SCP_KEY }}
         source_host: ${{ secrets.SCP_HOST }}
         source_username: ${{ secrets.SCP_USER }}
-        source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/nsis_plugins/*
-        destination_file: './dep/nsis_plugins/'
+        source_file: ${{ env.DEPENDENCIES_SRC_PATH }}/nsis/*
+        destination_file: './dep/nsis/'
+        recursive: true
 
     - name: Apply build time patches
       run: |

@@ -167,7 +167,6 @@ Var SUPPORTS_AVX2
 !include WinVer.nsh			# For OS and SP detection
 !include 'LogicLib.nsh'     # for value comparison
 !include "x64.nsh"			# for 64bit detection
-!include "CPUFeatures.nsh"
 
 !include "StrFunc.nsh"
 ${StrCase}                  # Cause NSIS is weird like this....
@@ -190,9 +189,11 @@ FunctionEnd
 ;; entry to the language ID selector below
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function .onInit
-${If} ${NSIS_PLUGINS} != ""
-    !addplugindir "${NSIS_PLUGINS}"
+${If} ${NSIS_DEP} != ""
+    !addincludedir "${NSIS_DEP}/includes"
+    !addplugindir "${NSIS_DEP}/plugins"
 ${EndIf}
+!include "CPUFeatures.nsh"
 
 !insertmacro MULTIUSER_INIT
 

@@ -818,7 +818,7 @@ class WindowsManifest(ViewerManifest):
         installer_file = self.installer_base_name() + '_Setup.exe'
         substitution_strings['installer_file'] = installer_file
 # [SL:KB] - Patch: Viewer-Branding
-        substitution_strings['nsis_plugins'] = os.getenv('NSIS_PLUGINS')
+        substitution_strings['nsis_dep'] = os.getenv('NSIS_DEP')
 # [/SL:KB]
         
         version_vars = """
@@ -838,7 +838,7 @@ class WindowsManifest(ViewerManifest):
         !define VERSION_RELEASE "%(version_release)s"
         !define VERSION_REGISTRY "%(version_registry)s"
         !define VIEWER_EXE "%(final_exe)s"
-        !define NSIS_PLUGINS "%(nsis_plugins)s"
+        !define NSIS_DEP "%(nsis_dep)s"
         """ % substitution_strings
         
         if self.channel_type() == 'release':
