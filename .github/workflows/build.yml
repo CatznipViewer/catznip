@@ -27,6 +27,10 @@ on:
         - release
         - rtm/final
         - rtm/final-avx2
+      bundle_avx2:
+        required: true
+        type: boolean
+        description: Bundle AVX2 build with the installer
       viewer_channel:
         required: true
         description: Viewer channel
@@ -135,7 +139,7 @@ jobs:
 
     - name: Run autobuild configure (Windows)
       if: runner.os == 'Windows'
-      run: autobuild configure --verbose --address-size ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} -- -DLL_TESTS=OFF -DPACKAGE=ON -DRELEASE_CRASH_REPORTING=ON -DFMODSTUDIO=ON -DUSE_KDU=OFF -DHAVOK=OFF -DHAVOK_TPV=OFF -DVIEWER_CHANNEL="${{ env.VIEWER_CHANNEL }}" -T ${{ env.TOOLSET_VERSION }},host=x64
+      run: autobuild configure --verbose --address-size ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} -- -DLL_TESTS=OFF -DPACKAGE=ON -DRELEASE_CRASH_REPORTING=ON -DFMODSTUDIO=ON -DUSE_KDU=OFF -DHAVOK=OFF -DHAVOK_TPV=OFF -DBUNDLE_AVX2="${{ github.event.inputs.bundle_avx2 == 'true' && 'ON' || 'OFF' }}" -DVIEWER_CHANNEL="${{ env.VIEWER_CHANNEL }}" -T ${{ env.TOOLSET_VERSION }},host=x64
 
     - name: Run autobuild build
       run: autobuild build -A ${{ env.ADDRESS_SIZE }} -c ${{ env.BUILD_CONFIG }} --no-configure
