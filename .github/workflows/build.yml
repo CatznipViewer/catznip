@@ -9,7 +9,7 @@ on:
         description: Operating system
         options:
         - windows-2022
-        - windows-2019
+        - windows
         - macos-11
       address_size:
         required: true
@@ -36,15 +36,15 @@ env:
   AUTOBUILD_INSTALLABLE_CACHE: ${{github.workspace}}/dep/packages
   AUTOBUILD_VARIABLES_FILE: ${{github.workspace}}/dep/build-variables/variables
   NSIS_PLUGINS: ${{github.workspace}}/dep/nsis_plugins
-  AUTOBUILD_VSVER: ${{ github.event.inputs.operating_system == 'windows-2022' && 170 || 160 }}
-  TOOLSET_VERSION: ${{ github.event.inputs.operating_system == 'windows-2022' && 'v143' || 'v142' }}
+  AUTOBUILD_VSVER: 170
+  TOOLSET_VERSION: 'v143'
   ADDRESS_SIZE: ${{ github.event.inputs.address_size }}
   BUILD_CONFIG: 'Release'
   VIEWER_CHANNEL: ${{ github.event.inputs.viewer_channel }}
 
 jobs:
   build:
-    runs-on: ${{ github.event.inputs.operating_system }}
+    runs-on: ${{ contains(github.event.inputs.operating_system, '-') && github.event.inputs.operating_system || 'self-hosted' }}
 
     steps:
     - name: Check out code
