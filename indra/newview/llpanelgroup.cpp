@@ -57,6 +57,9 @@
 #include "lltrans.h"
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 #include "llviewercontrol.h"
+#ifdef CATZNIP
+	#include "rlvactions.h"
+#endif // CATZNIP
 // [/SL:KB]
 
 static LLPanelInjector<LLPanelGroup> t_panel_group("panel_group_info_sidetray");
@@ -203,6 +206,13 @@ BOOL LLPanelGroup::postBuild()
 		mButtonJoin->setCommitCallback(boost::bind(&LLPanelGroup::onBtnJoin,this));
 
 		mJoinText = panel_general->getChild<LLUICtrl>("join_cost_text");
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+		mButtonActivate = panel_general->findChild<LLButton>("btn_activate");
+		mButtonActivate->setVisible(false);
+		mButtonActivate->setEnabled(true);
+		mButtonActivate->setCommitCallback(boost::bind(&LLPanelGroup::onBtnActivate,this));
+// [/SL:KB]
 	}
 
 	LLVoiceClient::getInstance()->addObserver(this);
@@ -288,6 +298,14 @@ void LLPanelGroup::onBtnJoin()
 	LLGroupActions::join(mID);
 }
 
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+void LLPanelGroup::onBtnActivate()
+{
+	LL_DEBUGS() << "Activating group: " << mID << LL_ENDL;
+	LLGroupActions::activate(mID);
+}
+// [/SL:KB]
+
 void LLPanelGroup::changed(LLGroupChange gc)
 {
 	for(std::vector<LLPanelGroupTab* >::iterator it = mTabs.begin();it!=mTabs.end();++it)
@@ -327,6 +345,12 @@ void LLPanelGroup::update(LLGroupChange gc)
 		
 		mButtonJoin->setVisible(join_btn_visible);
 		mJoinText->setVisible(join_btn_visible);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+		mButtonActivate->setVisible(!join_btn_visible && is_member);
+#ifdef CATZNIP
+		mButtonActivate->setEnabled(RlvActions::canChangeActiveGroup());
+#endif // CATZNIP
+// [/SL:KB]
 
 		if(join_btn_visible)
 		{
@@ -405,6 +429,12 @@ void LLPanelGroup::setGroupID(const LLUUID& group_id)
 
 	if(mButtonJoin)
 		mButtonJoin->setVisible(false);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+	if (mButtonActivate)
+	{
+		mButtonActivate->setVisible(false);
+	}
+// [/SL:KB]
 
 
 	if(is_null_group_id)//creating new group
