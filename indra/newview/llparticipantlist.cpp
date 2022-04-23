@@ -576,6 +576,9 @@ void LLParticipantModelList::addAvatarParticipant(const LLUUID& particpant_id)
 	LLAvatarName avatar_name;
 	bool has_name = LLAvatarNameCache::get(particpant_id, &avatar_name);
 	LLConversationItemParticipant* participant =  new LLConversationItemParticipant(!has_name ? LLTrans::getString("AvatarNameWaiting") : avatar_name.getDisplayName() , particpant_id, mRootViewModel);
+// [RLVa:KB] - @shownames
+	participant->setRlvCheckShowNames(getSpeakerManager()->getSessionID().isNull());
+// [/RLVa:KB]
 	participant->fetchAvatarName();
 
 	LLConversationItemSession::addParticipant(participant);
