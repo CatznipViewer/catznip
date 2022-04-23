@@ -563,6 +563,17 @@ void LLParticipantModelList::addAvalineParticipant(const LLUUID& particpant_id)
 	LLConversationItemSession::addParticipant(participant);
 }
 
+void LLParticipantModelList::refreshNames()
+{
+	for (LLFolderViewModelItem* pChildItem : mChildren)
+	{
+		if (LLConversationItemParticipant* pConversationItem = dynamic_cast<LLConversationItemParticipant*>(pChildItem))
+		{
+			pConversationItem->updateName();
+		}
+	}
+}
+
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 // ====================================================================================
 // LLAvatarItemStatusAndNameComparator - Comparator for comparing avatar items by status and then name
@@ -647,6 +658,18 @@ LLParticipantAvatarList::~LLParticipantAvatarList()
 }
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6
+// override
+void LLParticipantAvatarList::refreshNames()
+{
+	if (LLAvatarList* pAvatarList = m_pAvatarList)
+	{
+#ifdef CATZNIP
+		pAvatarList->updateAvatarNames();
+#endif // CATZNIP
+	}
+}
+
+// override
 void LLParticipantAvatarList::update()
 {
 	LLParticipantList::update();

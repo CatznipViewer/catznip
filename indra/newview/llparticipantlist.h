@@ -65,6 +65,11 @@ public:
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6)
 	LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
+
+	/**
+	 * Refreshes the name of each (avatar) participant (used by RLVa)
+	 */
+	virtual void refreshNames() {}
 // [/SL:KB]
 
 	/**
@@ -201,8 +206,9 @@ public:
 	/*virtual*/ ~LLParticipantModelList();
 
 public:
+	void refreshNames() override;
 	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
-	/*virtual*/ void update() { LLParticipantList::update(); }
+	void update() override { LLParticipantList::update(); }
 protected:
 	/*virtual*/ const LLUUID& getSessionID() const                   { return mUUID; }
 
@@ -228,6 +234,9 @@ public:
 	/*
 	 * Base class overrides
 	 */
+public:
+	void refreshNames() override;
+	void update() override;
 protected:
 	void addAvatarParticipant(const LLUUID& particpant_id) override;
 	void addAvalineParticipant(const LLUUID& particpant_id) override;
@@ -236,7 +245,6 @@ protected:
 	bool isParticipant(const LLUUID& particpant_id) override;
 	void removeParticipant(const LLUUID& particpant_id) override;
 	void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) override;
-	void update() override;
 
 	/*
 	 * Member functions
