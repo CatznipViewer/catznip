@@ -658,6 +658,10 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 	: LLParticipantList(data_source)
 	, m_pAvatarList(pAvatarList)
 {
+// [RLVa:KB] - @shownames
+	m_pAvatarList->setRlvCheckShowNames(data_source->getSessionID().isNull());
+// [/RLVa:KB]
+
 	initInitialSpeakers();
 
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
