@@ -606,6 +606,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="SLappAgentRemoveFriend">
 		Eliminación de amigos
 	</string>
+	<string name="SLappGroupActivate">
+		Activar
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Cerrar (⌘W)
 	</string>

@@ -615,6 +615,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="SLappAgentRemoveFriend">
 		Suppression d&apos;un ami
 	</string>
+	<string name="SLappGroupActivate">
+		Activer
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Fermer (⌘W)
 	</string>
