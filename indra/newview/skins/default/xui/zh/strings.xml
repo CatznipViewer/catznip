@@ -611,6 +611,9 @@ http://secondlife.com/viewer-access-faq
 	<string name="SLappAgentRemoveFriend">
 		移除朋友
 	</string>
+	<string name="SLappGroupActivate">
+		啟動
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		關閉（⌘W）
 	</string>

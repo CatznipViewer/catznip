@@ -95,6 +95,9 @@ protected:
 
 	void onBackBtnClick();
 	void onBtnJoin();
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+	void onBtnActivate();
+// [/SL:KB]
 
 	static void onBtnApply(void*);
 	static void onBtnRefresh(void*);
@@ -119,6 +122,9 @@ protected:
 
 	LLButton*		mButtonJoin;
 	LLUICtrl*		mJoinText;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: Catznip-6.7
+	LLButton*       mButtonActivate = nullptr;
+// [/SL:KB]
 };
 
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)

@@ -548,6 +548,9 @@ Spróbuj zalogować się ponownie za minutę.
 	<string name="SLappAgentRemoveFriend">
 		Usunięcie znajomego
 	</string>
+	<string name="SLappGroupActivate">
+		Aktywuj
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Zamknij (&#8984;W)
 	</string>
