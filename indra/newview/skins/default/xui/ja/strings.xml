@@ -614,6 +614,9 @@ support@secondlife.com にお問い合わせください。
 	<string name="SLappAgentRemoveFriend">
 		フレンドの削除
 	</string>
+	<string name="SLappGroupActivate">
+		アクティブ
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		閉じる （⌘W）
 	</string>

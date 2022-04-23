@@ -615,6 +615,9 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	<string name="SLappAgentRemoveFriend">
 		Arkadaşların Çıkarılması
 	</string>
+	<string name="SLappGroupActivate">
+		Etkinleştir
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Kapat (⌘W)
 	</string>

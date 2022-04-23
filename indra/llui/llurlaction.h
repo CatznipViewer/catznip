@@ -96,7 +96,9 @@ public:
 	static std::string getObjectId(std::string url);
 	static void sendIM(std::string url);
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
-	static void startGroupChat(const std::string& url);
+	static void activateGroup(const std::string& url)		{ executeGroupAction(url, "activate"); }
+	static void showGroupNotices(const std::string& url)	{ executeGroupAction(url, "notices"); }
+	static void startGroupChat(const std::string& url)		{ executeGroupAction(url, "im"); }
 	static void offerTeleport(const std::string& url);
 	static void requestTeleport(const std::string& url);
 	static void showItem(const std::string& url);
@@ -116,6 +118,10 @@ public:
 	static void	setExecuteSLURLCallback(execute_url_callback_t cb);
 
 private:
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	static void executeGroupAction(const std::string& url, const std::string& action);
+// [/SL:KB]
+
 	// callbacks for operations we can perform on Urls
 	static url_callback_t sOpenURLCallback;
 	static url_callback_t sOpenURLInternalCallback;

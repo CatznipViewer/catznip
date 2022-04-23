@@ -611,6 +611,9 @@ Prova ad accedere nuovamente tra un minuto.
 	<string name="SLappAgentRemoveFriend">
 		Rimozione amico
 	</string>
+	<string name="SLappGroupActivate">
+		Attiva
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Chiudi (⌘W)
 	</string>

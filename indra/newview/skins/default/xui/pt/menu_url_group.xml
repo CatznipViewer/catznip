@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <context_menu name="Url Popup">
 	<menu_item_call label="Mostrar informações do grupo" name="show_group"/>
+    <menu_item_call label="Anúncios do grupo..." name="show_notices" />
+    <menu_item_call label="Ativar" name="activate_group" />
 	<menu_item_call label="Copiar SLurl para área de transferência" name="url_copy_label"/>
 	<menu_item_call label="Copiar SLurl para área de transferência" name="url_copy"/>
 </context_menu>

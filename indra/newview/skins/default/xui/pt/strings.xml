@@ -571,6 +571,9 @@ Aguarde um minuto antes que tentar logar-se novamente.
 	<string name="SLappAgentRemoveFriend">
 		Remoção de amigo
 	</string>
+	<string name="SLappGroupActivate">
+		Ativar
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Fechar (⌘W)
 	</string>

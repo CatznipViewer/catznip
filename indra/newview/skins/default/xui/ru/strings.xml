@@ -615,6 +615,9 @@ support@secondlife.com.
 	<string name="SLappAgentRemoveFriend">
 		Удаление друга
 	</string>
+	<string name="SLappGroupActivate">
+		Активация
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Закрыть (⌘W)
 	</string>
