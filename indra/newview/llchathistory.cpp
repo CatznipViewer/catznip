@@ -999,6 +999,7 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	mEditor = LLUICtrlFactory::create<LLTextEditor>(editor_params, this);
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
 	mEditor->setCanPreviewItemCallback(boost::bind(&can_preview_item, _1));
+	mEditor->setIsInGroupCallback(LLGroupActions::isInGroup);
 // [/SL/KB]
 	mEditor->setIsFriendCallback(LLAvatarActions::isFriend);
 	mEditor->setIsObjectBlockedCallback(boost::bind(&LLMuteList::isMuted, LLMuteList::getInstance(), _1, _2, 0));

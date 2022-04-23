@@ -330,7 +330,10 @@ public:
 	/*virtual*/ LLStyle::Params getStyle() const;
 	/*virtual*/ LLUUID	getID(const std::string &string) const;
 private:
-	void onGroupNameReceived(const LLUUID& id, const std::string& name, bool is_group);
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
+	void onGroupNameReceived(const LLUUID& id, const std::string& name, const std::string& localized_prefix);
+// [/SL:KB]
+//	void onGroupNameReceived(const LLUUID& id, const std::string& name, bool is_group);
 };
 
 ///

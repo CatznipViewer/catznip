@@ -41,6 +41,7 @@
 #include "llrect.h"
 #include "lltrans.h"
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
+#include "llgroupactions.h"
 #include "llinventoryfunctions.h"
 // [/SL/KB]
 #include "llnotificationsutil.h"
@@ -364,6 +365,7 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
     mTextBox->setValue(mNotification->getMessage());
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-5.4
 	mTextBox->setCanPreviewItemCallback(boost::bind(&can_preview_item, _1));
+	mTextBox->setIsInGroupCallback(LLGroupActions::isInGroup);
 // [/SL/KB]
 	mTextBox->setIsFriendCallback(LLAvatarActions::isFriend);
     mTextBox->setIsObjectBlockedCallback(boost::bind(&LLMuteList::isMuted, LLMuteList::getInstance(), _1, _2, 0));

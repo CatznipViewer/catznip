@@ -272,6 +272,10 @@ LLTextBase::~LLTextBase()
 {
 	mSegments.clear();
 	delete mURLClickSignal;
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	delete mCanPreviewItemSignal;
+	delete mIsInGroupSignal;
+// [/SL:KB]
 	delete mIsFriendSignal;
 	delete mIsObjectBlockedSignal;
 }
@@ -2004,6 +2008,8 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, url));
 	registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, url));
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	registrar.add("Url.ActivateGroup", boost::bind(&LLUrlAction::activateGroup, url));
+	registrar.add("Url.ShowGroupNotices", boost::bind(&LLUrlAction::showGroupNotices, url));
 	registrar.add("Url.GroupChat", boost::bind(&LLUrlAction::startGroupChat, url));
 	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
 	registrar.add("Url.RequestTeleport", boost::bind(&LLUrlAction::requestTeleport, url));
@@ -2041,6 +2047,19 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 				}
 			}
 		}
+
+        if (mIsInGroupSignal)
+        {
+			bool isInGroup = *(*mIsInGroupSignal)(LLUUID(LLUrlAction::getUserID(url)));
+			if (LLMenuItemGL* pShowNoticesItem = menu->getItem("show_notices"))
+			{
+				pShowNoticesItem->setVisible(isInGroup);
+			}
+			if (LLMenuItemGL* pActivateGroupItem = menu->getItem("activate_group"))
+			{
+				pActivateGroupItem->setVisible(isInGroup);
+			}
+        }
 // [/SL:KB]
 
         if (mIsFriendSignal)
@@ -3136,6 +3155,15 @@ boost::signals2::connection LLTextBase::setCanPreviewItemCallback(const can_prev
 		mCanPreviewItemSignal = new can_preview_signal_t();
 	}
 	return mCanPreviewItemSignal->connect(cb);
+}
+
+boost::signals2::connection LLTextBase::setIsInGroupCallback(const is_in_group_signal_t::slot_type& cb)
+{
+	if (!mIsInGroupSignal)
+	{
+		mIsInGroupSignal = new is_friend_signal_t();
+	}
+	return mIsInGroupSignal->connect(cb);
 }
 // [/SL:KB]
 
