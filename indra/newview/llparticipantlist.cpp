@@ -576,6 +576,9 @@ void LLParticipantModelList::addAvatarParticipant(const LLUUID& particpant_id)
 	LLAvatarName avatar_name;
 	bool has_name = LLAvatarNameCache::get(particpant_id, &avatar_name);
 	LLConversationItemParticipant* participant =  new LLConversationItemParticipant(!has_name ? LLTrans::getString("AvatarNameWaiting") : avatar_name.getDisplayName() , particpant_id, mRootViewModel);
+// [RLVa:KB] - @shownames
+	participant->setRlvCheckShowNames(getSpeakerManager()->getSessionID().isNull());
+// [/RLVa:KB]
 	participant->fetchAvatarName();
 
 	LLConversationItemSession::addParticipant(participant);
@@ -587,6 +590,17 @@ void LLParticipantModelList::addAvalineParticipant(const LLUUID& particpant_id)
 	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
 	LLConversationItemParticipant* participant = new LLConversationItemParticipant(display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name, particpant_id, mRootViewModel);
 	LLConversationItemSession::addParticipant(participant);
+}
+
+void LLParticipantModelList::refreshNames()
+{
+	for (LLFolderViewModelItem* pChildItem : mChildren)
+	{
+		if (LLConversationItemParticipant* pConversationItem = dynamic_cast<LLConversationItemParticipant*>(pChildItem))
+		{
+			pConversationItem->updateName();
+		}
+	}
 }
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
@@ -644,6 +658,10 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 	: LLParticipantList(data_source)
 	, m_pAvatarList(pAvatarList)
 {
+// [RLVa:KB] - @shownames
+	m_pAvatarList->setRlvCheckShowNames(data_source->getSessionID().isNull());
+// [/RLVa:KB]
+
 	initInitialSpeakers();
 
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
@@ -675,6 +693,18 @@ LLParticipantAvatarList::~LLParticipantAvatarList()
 }
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6
+// override
+void LLParticipantAvatarList::refreshNames()
+{
+	if (LLAvatarList* pAvatarList = m_pAvatarList)
+	{
+#ifdef CATZNIP
+		pAvatarList->updateAvatarNames();
+#endif // CATZNIP
+	}
+}
+
+// override
 void LLParticipantAvatarList::update()
 {
 	LLParticipantList::update();

@@ -929,13 +929,22 @@ LLUrlEntryGroup::LLUrlEntryGroup()
 
 
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
 void LLUrlEntryGroup::onGroupNameReceived(const LLUUID& id,
 										  const std::string& name,
-										  bool is_group)
+										  const std::string& localized_prefix)
 {
 	// received the group name from the server - tell our observers
-	callObservers(id.asString(), name, mIcon);
+	callObservers(id.asString(), localized_prefix + name, mIcon);
 }
+// [/SL:KB]
+//void LLUrlEntryGroup::onGroupNameReceived(const LLUUID& id,
+//										  const std::string& name,
+//										  bool is_group)
+//{
+//	// received the group name from the server - tell our observers
+//	callObservers(id.asString(), name, mIcon);
+//}
 
 LLUUID	LLUrlEntryGroup::getID(const std::string &string) const
 {
@@ -958,6 +967,16 @@ std::string LLUrlEntryGroup::getLabel(const std::string &url, const LLUrlLabelCa
 		return unescapeUrl(url);
 	}
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
+	std::string localized_prefix;
+	if (LLStringUtil::endsWith(url, "/activate"))
+		localized_prefix = LLTrans::getString("SLappGroupActivate");
+	else if (LLStringUtil::endsWith(url, "/notices"))
+		localized_prefix = LLTrans::getString("SLappGroupNotices");
+	if (!localized_prefix.empty())
+		localized_prefix.append(" ");
+// [/SL:KB]
+
 	LLUUID group_id(group_id_string);
 	std::string group_name;
 	if (group_id.isNull())
@@ -966,13 +985,21 @@ std::string LLUrlEntryGroup::getLabel(const std::string &url, const LLUrlLabelCa
 	}
 	else if (gCacheName->getGroupName(group_id, group_name))
 	{
-		return group_name;
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
+		return localized_prefix + group_name;
+// [/SL:KB]
+//		return group_name;
 	}
 	else
 	{
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
 		gCacheName->getGroup(group_id,
 			boost::bind(&LLUrlEntryGroup::onGroupNameReceived,
-				this, _1, _2, _3));
+				this, _1, _2, localized_prefix));
+// [/SL:KB]
+//		gCacheName->getGroup(group_id,
+//			boost::bind(&LLUrlEntryGroup::onGroupNameReceived,
+//				this, _1, _2, _3));
 		addObserver(group_id_string, url, cb);
 		return LLTrans::getString("LoadingData");
 	}

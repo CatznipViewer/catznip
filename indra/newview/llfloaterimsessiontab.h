@@ -37,6 +37,9 @@
 #include "llconversationmodel.h"
 //#include "llconversationview.h"
 //#include "lltexteditor.h"
+// [RLVa:KB] - @shownames
+#include "rlvhelper.h"
+// [/RLVa:KB]
 
 //class LLPanelChatControlPanel;
 class LLChatEntry;
@@ -57,6 +60,10 @@ class LLToggleableMenu;
 class LLFloaterIMSessionTab
 	: public LLTransientDockableFloater
 {
+// [RLVa:KB] - @shownames
+	friend struct RlvCommandHandler<RLV_TYPE_ADDREM, RLV_BHVR_SHOWNAMES>;
+	friend struct RlvCommandHandler<RLV_TYPE_ADDREM, RLV_BHVR_SHOWNEARBY>;
+// [/RLVa:KB]
 
 public:
 	LOG_CLASS(LLFloaterIMSessionTab);

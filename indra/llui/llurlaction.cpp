@@ -275,12 +275,13 @@ void LLUrlAction::sendIM(std::string url)
 }
 
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
-void LLUrlAction::startGroupChat(const std::string& url)
+// static
+void LLUrlAction::executeGroupAction(const std::string& url, const std::string& action)
 {
 	const std::string strGroupId = getUserID(url);
 	if (LLUUID::validate(strGroupId))
 	{
-		executeSLURL("secondlife:///app/group/" + strGroupId + "/im");
+		executeSLURL(llformat("secondlife:///app/group/%s/%s", strGroupId.c_str(), action.c_str()));
 	}
 }
 

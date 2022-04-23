@@ -395,6 +395,9 @@ Prøv venligst om lidt igen.
 	<string name="SLappAgentRequestFriend">
 		Venneforespørgsel
 	</string>
+	<string name="SLappGroupActivate">
+		Aktivér
+	</string>
 	<string name="BUTTON_CLOSE_DARWIN">
 		Luk (⌘W)
 	</string>
