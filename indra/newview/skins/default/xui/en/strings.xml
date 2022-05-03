@@ -305,7 +305,6 @@ If you feel this is an error, please contact support@secondlife.com</string>
 
 	<!-- label strings for secondlife:///app/group SLapps -->
 	<string name="SLappGroupActivate">Activate </string>
-	<string name="SLappGroupNotices">View Notices of </string>
 
 	<!-- ButtonToolTips, llfloater.cpp -->
 	<string name="BUTTON_CLOSE_DARWIN">Close (&#8984;W)</string>
