@@ -9,14 +9,6 @@
  positioning="centered"
  title="Chat Keyword Alerts"
  width="490">
-  <sound_drop_target
-   bottom="-5"
-   layout="topleft"
-   left="5"
-   name="sound_drop_target"
-   right="-5"
-   top="5" />
-
   <check_box
    control_name="ChatAlerts"
    follows="left|top"
@@ -236,4 +228,14 @@
    left_pad="10"
    top_delta="0"
    width="90" />
+
+  <sound_drop_target
+   bottom="-5"
+   layout="topleft"
+   left="5"
+   mouse_opaque="false"
+   name="sound_drop_target"
+   right="-5"
+   top="5" />
+
 </floater>
