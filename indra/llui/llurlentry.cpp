@@ -892,11 +892,10 @@ std::string LLUrlEntryGroup::getLabel(const std::string &url, const LLUrlLabelCa
 	}
 
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: Catznip-6.7
+	// NOTE: don't localise '/notices' because that SLurl is used for group notifications
 	std::string localized_prefix;
 	if (LLStringUtil::endsWith(url, "/activate"))
 		localized_prefix = LLTrans::getString("SLappGroupActivate");
-	else if (LLStringUtil::endsWith(url, "/notices"))
-		localized_prefix = LLTrans::getString("SLappGroupNotices");
 	if (!localized_prefix.empty())
 		localized_prefix.append(" ");
 // [/SL:KB]
